@@ -26,9 +26,6 @@ calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "pearl_system_test_mapping.yaml")
 spline_rel_path = os.path.join("17_1", "VanSplined_98472_tt70_pearl_offset_16_4.cal.nxs")
 
-# Relative to output folder
-unsplined_rel_dir = os.path.join("17_1", "Test")
-
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
 working_dir = os.path.join(DIRS[0], working_folder_name)
@@ -39,14 +36,10 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
-unsplined_dir = os.path.join(output_dir, unsplined_rel_dir)
-unsplined_path = os.path.join(unsplined_dir, "PRL98472_tt70_{}.nxs")
 
 
 class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
-    calibration_results_splined = None
-    calibration_results_unsplined = None
     existing_config = config['datasearch.directories']
     focus_mode = None
 
@@ -55,8 +48,7 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         setup_mantid_paths()
-        #self.calibration_results_splined, self.calibration_results_unsplined = \
-        _run_vanadium_calibration(focus_mode=self.focus_mode)
+        run_vanadium_calibration(focus_mode=self.focus_mode)
 
     def skipTests(self):
         # Don't actually run this test, as it is a dummy for the focus-mode-specific tests
@@ -67,8 +59,6 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
                             results="PEARL98472_tt70-Results-D-Grp") and
                 _compare_ws(reference_file_name="ISIS_Powder-PEARL00098472_splined.nxs",
                             results="Van_spline_data_tt70"))
-        #return ("PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode))
-                #("Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"))
 
     def cleanup(self):
         try:
@@ -142,7 +132,7 @@ def _gen_required_files():
     return input_files
 
 
-def _run_vanadium_calibration(focus_mode):
+def run_vanadium_calibration(focus_mode):
     vanadium_run = 98507  # Choose arbitrary run in the cycle 17_1
 
     inst_obj = setup_inst_object(tt_mode="tt70", focus_mode=focus_mode)
@@ -179,14 +169,13 @@ def _compare_ws(reference_file_name, results):
 
     if not (mantid.CompareWorkspaces(Workspace1=results, Workspace2=ref_ws)):
         is_valid = False
-        print (results.getName() + " was not equal to: " + ref_ws.getName())
+        print(results.getName() + " was not equal to: " + ref_ws.getName())
 
     return is_valid
 
 
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
-    config['datasearch.directories'] += ";" + unsplined_dir
 
 
 def setup_inst_object(tt_mode, focus_mode):

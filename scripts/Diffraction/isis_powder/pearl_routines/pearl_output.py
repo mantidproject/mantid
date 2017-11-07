@@ -79,7 +79,8 @@ def _focus_mode_groups(output_file_paths, calibrated_spectra):
     to_save = _sum_groups_of_three_ws(calibrated_spectra=calibrated_spectra, output_file_names=output_file_paths)
 
     workspaces_4_to_9_name = output_file_paths["output_name"] + "_mods4-9"
-    workspaces_4_to_9 = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[3:9])
+    workspaces_4_to_9 = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[3:9],
+                                         OutputWorkspace=workspaces_4_to_9_name)
     workspaces_4_to_9 = mantid.Scale(InputWorkspace=workspaces_4_to_9, Factor=0.5,
                                      OutputWorkspace=workspaces_4_to_9_name)
     to_save.append(workspaces_4_to_9)
