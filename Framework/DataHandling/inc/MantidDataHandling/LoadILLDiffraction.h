@@ -64,6 +64,7 @@ private:
   };
 
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   void calculateRelativeRotations(std::vector<double> &instrumentAngles,
@@ -82,6 +83,8 @@ private:
   std::string getInstrumentFilePath(const std::string &) const;
   Kernel::V3D getReferenceComponentPosition(
       const API::MatrixWorkspace_sptr &instrumentWorkspace);
+  bool containsCalibratedData(const std::string &filename) const;
+
   std::vector<double>
   getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                   const std::string &propertyName) const;
@@ -109,7 +112,7 @@ private:
 
   std::string m_instName;               ///< instrument name to load the IDF
   std::set<std::string> m_instNames;    ///< supported instruments
-  std::string m_fileName;               ///< file name to load
+  std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
 
