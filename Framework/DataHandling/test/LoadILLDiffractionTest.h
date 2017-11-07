@@ -88,7 +88,6 @@ public:
     TS_ASSERT_DELTA(outputWS->e(3072)[0], 88.58, 0.01)
 
     const auto &run = outputWS->run();
-
     TS_ASSERT(run.hasProperty("simulated_d20.TotalCount"))
     TS_ASSERT(run.hasProperty("AcquisitionSpy.Time"))
     TS_ASSERT(run.hasProperty("SampleSettings.SampleTemp"))
@@ -186,7 +185,6 @@ public:
 
     const auto omega = outputWS->run().getLogData("Omega.Position");
 
-    const auto omega = run.getLogData("Omega");
     TS_ASSERT_EQUALS(omega->size(), 21)
     const double steps = run.getLogAsSingleValue("ScanSteps");
     const auto scanType = run.getLogData("ScanType");
