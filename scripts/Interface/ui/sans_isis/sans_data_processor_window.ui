@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -339,7 +339,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1861,6 +1861,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="BeamCentre" name="beam_centre"/>
        </widget>
       </item>
      </layout>
@@ -1873,7 +1874,7 @@ QGroupBox::title {
      <x>0</x>
      <y>0</y>
      <width>1211</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -1901,6 +1902,12 @@ QGroupBox::title {
    <class>MaskingTable</class>
    <extends>QWidget</extends>
    <header>ui.sans_isis.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BeamCentre</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.beam_centre</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

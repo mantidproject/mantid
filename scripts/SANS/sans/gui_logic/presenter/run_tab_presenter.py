@@ -20,6 +20,7 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
@@ -91,6 +92,9 @@ class RunTabPresenter(object):
         # Masking table presenter
         self._masking_table_presenter = MaskingTablePresenter(self)
 
+        # Beam centre presenter
+        self._beam_centre_presenter = BeamCentrePresenter(self)
+
     def __del__(self):
         self._delete_dummy_input_workspace()
 
@@ -149,6 +153,9 @@ class RunTabPresenter(object):
             # Set appropriate view for the masking table presenter
             self._masking_table_presenter.set_view(self._view.masking_table)
 
+            # Set the appropriate view for the beam centre presenter
+            self._beam_centre_presenter.set_view(self._view.beam_centre)
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -182,6 +189,7 @@ class RunTabPresenter(object):
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
@@ -219,6 +227,7 @@ class RunTabPresenter(object):
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
@@ -281,6 +290,7 @@ class RunTabPresenter(object):
         # Make sure that the sub-presenters are up to date with this change
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def _add_to_hidden_options(self, row, property_name, property_value):
         """

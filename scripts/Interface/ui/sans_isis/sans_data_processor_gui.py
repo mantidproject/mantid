@@ -141,6 +141,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon = QtGui.QIcon(settings_icon_path)
+        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
