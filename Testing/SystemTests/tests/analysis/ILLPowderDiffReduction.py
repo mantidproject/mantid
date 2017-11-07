@@ -53,7 +53,6 @@ class ILLPowderDiffReductionTest(stresstesting.MantidStressTest):
         SaveFocusedXYE(InputWorkspace='calibrated',Filename=tmp_fullprof_export)
         self.assertTrue(os.path.exists(self._get_tmp_file_name('fullprof-0.dat')))
         self.assertTrue(os.path.exists(self._get_tmp_file_name('fullprof-1.dat')))
-        tmp_gss_export = self._get_tmp_file_name('gss.dat')
 
     def _get_tmp_file_name(self, name):
         return os.path.join(tempfile.gettempdir(),tempfile.gettempprefix() + '_' + name)
