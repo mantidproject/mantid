@@ -84,6 +84,8 @@ public:
 
   ~EventList() override;
 
+  void copyDataFrom(const ISpectrum &other) override;
+
   void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
                            bool GenerateMultipleEvents, int MaxEventsPerBin);
 
@@ -362,6 +364,10 @@ protected:
   void checkIsYAndEWritable() const override;
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(EventList &other) const override;
+  void copyDataInto(Histogram1D &other) const override;
+
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }

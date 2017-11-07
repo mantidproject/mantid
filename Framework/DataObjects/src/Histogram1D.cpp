@@ -31,6 +31,16 @@ Histogram1D &Histogram1D::operator=(const ISpectrum &rhs) {
   return *this;
 }
 
+/// Copy data from a Histogram1D or EventList, via ISpectrum reference.
+void Histogram1D::copyDataFrom(const ISpectrum &other) {
+  other.copyDataInto(*this);
+}
+
+/// Used by copyDataFrom for dynamic dispatch for `other`.
+void Histogram1D::copyDataInto(Histogram1D &other) const {
+  other.m_histogram = m_histogram;
+}
+
 void Histogram1D::clearData() {
   MantidVec &yValues = this->dataY();
   std::fill(yValues.begin(), yValues.end(), 0.0);
