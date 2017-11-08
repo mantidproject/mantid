@@ -172,11 +172,11 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param options :: The options.
  */
 void MoreSorensenMinimizer::solveSubproblem(const DoubleFortranMatrix &J,
-                                         const DoubleFortranVector &f,
-                                         const DoubleFortranMatrix &hf,
-                                         double Delta, DoubleFortranVector &d,
-                                         double &nd,
-                                         const NLLS::nlls_options &options) {
+                                            const DoubleFortranVector &f,
+                                            const DoubleFortranMatrix &hf,
+                                            double Delta, DoubleFortranVector &d,
+                                            double &nd,
+                                            const NLLS::nlls_options &options) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p
