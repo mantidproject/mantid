@@ -711,23 +711,25 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   }
   const double userAngle = getProperty("BraggAngle");
   const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth, m_detectorDistanceValue);
-  if (!posTable) {
-    if (userAngle == EMPTY_DBL()) {
-      const double bragg = (nominalDetectorAngle + offset) / 2;
-      return std::make_pair(nominalDetectorAngle, bragg);
+  m_log.debug() << "Beam offset angle: " << offset << '\n';
+  if (userAngle != EMPTY_DBL()) {
+    if (posTable) {
+      g_log.notice() << "Ignoring BeamPosition, using BraggAngle instead.";
     }
     const double userDetectorAngle = 2 * userAngle - offset;
     return std::make_pair(userDetectorAngle, userAngle);
   }
+  if (!posTable) {
+    const double bragg = (nominalDetectorAngle + offset) / 2;
+    return std::make_pair(nominalDetectorAngle, bragg);
+  }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre, m_pixelWidth, dbPeak.detectorDistance);
-  if (userAngle == EMPTY_DBL()) {
-    const double detectorAngle = nominalDetectorAngle - dbPeak.detectorAngle - 2 * dbOffset + offset;
-    const double bragg = (detectorAngle + offset) / 2;
-    return std::make_pair(detectorAngle, bragg);
-  }
-  const double userDetectorAngle = 2 * userAngle - offset + (dbOffset - offset);
-  return std::make_pair(userDetectorAngle, userAngle);
+  m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
+  const double detectorAngle = nominalDetectorAngle - dbPeak.detectorAngle - dbOffset;
+  m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle << '\n';
+  const double bragg = (detectorAngle + offset) / 2;
+  return std::make_pair(detectorAngle, bragg);
 }
 
 /// Update detector position according to data file
