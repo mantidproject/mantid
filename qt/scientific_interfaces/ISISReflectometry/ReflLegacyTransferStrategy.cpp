@@ -19,49 +19,49 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
    */
 
   // maps descriptions to runs. Multiple runs are joined with '+'
-  std::map<std::string, std::string> runsByDesc;
+  std::map<std::string, std::string> descriptionToRun;
   // maps a description to a group. If descriptions only differ by theta,
   // they'll share a group
-  std::map<std::string, std::string> groupsByDesc;
+  std::map<std::string, std::string> descriptionToGroup;
   // maps descriptions to the value of theta they contain
-  std::map<std::string, std::string> thetaByDesc;
+  std::map<std::string, std::string> descriptionToTheta;
 
   // Iterate over the input and build the maps
   for (auto const& runDescriptionPair : searchResults) {
     const std::string run = runDescriptionPair.first;
-    const std::string desc = runDescriptionPair.second.description;
-    std::string cleanDesc = desc;
+    const std::string description = runDescriptionPair.second.description;
+    std::string cleanDescription = description;
 
     // See if theta is in the description
     static boost::regex regexTheta(
         "(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)");
     boost::smatch matches;
-    if (boost::regex_search(desc, matches, regexTheta)) {
+    if (boost::regex_search(description, matches, regexTheta)) {
       // We have theta. Let's get a clean description
       size_t matchOffset = matches.position("theta");
       const std::string theta = matches["theta"].str();
-      const std::string descPreTheta = desc.substr(0, matchOffset);
+      const std::string descPreTheta = description.substr(0, matchOffset);
       const std::string descPostTheta =
-          desc.substr(matchOffset + theta.length(), std::string::npos);
-      cleanDesc = descPreTheta + "?" + descPostTheta;
-      thetaByDesc[desc] = theta;
+          description.substr(matchOffset + theta.length(), std::string::npos);
+      cleanDescription = descPreTheta + "?" + descPostTheta;
+      descriptionToTheta[description] = theta;
     }
 
     // map the description to the run, making sure to join with a + if one
     // already exists
-    const std::string prevRun = runsByDesc[desc];
+    const std::string prevRun = descriptionToRun[description];
     if (prevRun.empty())
-      runsByDesc[desc] = run;
+      descriptionToRun[description] = run;
     else
-      runsByDesc[desc] = prevRun + "+" + run;
+      descriptionToRun[description] = prevRun + "+" + run;
 
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
-    if (groupsByDesc[cleanDesc].empty())
-      groupsByDesc[cleanDesc] = desc.substr(0, desc.find("th") - 1);
+    if (descriptionToGroup[cleanDescription].empty())
+      descriptionToGroup[cleanDescription] = description.substr(0, description.find("th") - 1);
 
     // Assign this description to the group it belongs to
-    groupsByDesc[desc] = groupsByDesc[cleanDesc];
+    descriptionToGroup[description] = descriptionToGroup[cleanDescription];
 
     progress.report();
   }
@@ -72,12 +72,12 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
   std::vector<std::map<std::string, std::string>>
       errors; // will remain empty for now
   TransferResults results(rows, errors);
-  for (const auto& runDescriptionPair : runsByDesc) {
+  for (const auto& runDescriptionPair : descriptionToRun) {
     // set up our successful run into table-ready format.
     std::map<std::string, std::string> row;
     row[ReflTableSchema::RUNS] = runDescriptionPair.second;
-    row[ReflTableSchema::ANGLE] = thetaByDesc[runDescriptionPair.first];
-    row[ReflTableSchema::GROUP] = groupsByDesc[runDescriptionPair.first];
+    row[ReflTableSchema::ANGLE] = descriptionToTheta[runDescriptionPair.first];
+    row[ReflTableSchema::GROUP] = descriptionToGroup[runDescriptionPair.first];
     // add our successful row
     results.addTransferRow(row);
   }
