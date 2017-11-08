@@ -60,8 +60,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidScientificInterfacesMuon
-  OUTPUT_DIR_BASE
-    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}
   OSX_INSTALL_RPATH

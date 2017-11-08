@@ -31,8 +31,6 @@ add_library( VatesAlgorithms ${SRC_FILES} ${INC_FILES} )
 # target properties
 set_target_properties ( VatesAlgorithms PROPERTIES OUTPUT_NAME MantidVatesAlgorithms
   FOLDER "MantidVates"
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
-  RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 target_link_libraries( VatesAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}

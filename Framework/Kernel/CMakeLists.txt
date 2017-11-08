@@ -559,9 +559,9 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
 endif ()
 
-set ( PLUGINS "./plugins" )
+set ( PLUGINS "." )
+set ( QTPLUGINS "." )
 # %V will be replaced with the major version of Qt at runtime
-set ( QTPLUGINS "./plugins/qt%V" )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./plugins/paraview/qt%V" )
   if ( MSVC )

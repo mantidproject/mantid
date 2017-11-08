@@ -46,8 +46,6 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-  OUTPUT_DIR_BASE
-    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   INSTALL_DIR_BASE
       ${PLUGINS_DIR}
   OSX_INSTALL_RPATH

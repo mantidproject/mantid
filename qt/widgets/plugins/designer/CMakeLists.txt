@@ -37,8 +37,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidQtWidgetsSliceViewer
-  OUTPUT_DIR_BASE
-    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   OUTPUT_SUBDIR
     designer
   EXCLUDE_FROM_ALL

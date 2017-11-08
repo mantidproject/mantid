@@ -13,8 +13,8 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 
   function (set_pvplugin_properties target QT_VERSION vers)
     set_target_properties ( ${target} PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}
-      RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}
+      LIBRARY_OUTPUT_DIRECTORY ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt${vers}
+      RUNTIME_OUTPUT_DIRECTORY ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt${vers}
       FOLDER "MantidVatesParaViewPlugins"
     )
   endfunction()
