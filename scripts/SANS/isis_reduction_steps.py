@@ -3888,7 +3888,6 @@ class UserFile(ReductionStep):
         @param arguments: the arguments of a QResolution line
         @param reducer: a reducer object
         '''
-        arguments = arguments.upper()
         if arguments.find('=') == -1:
             return self._read_q_resolution_line_on_off(arguments, reducer)
 
@@ -3897,7 +3896,7 @@ class UserFile(ReductionStep):
         arguments = [element.strip() for element in arguments]
 
         # Check if it is the moderator file name, if so add it and return
-        if arguments[0].startswith('MODERATOR'):
+        if arguments[0].upper().startswith('MODERATOR'):
             # pylint: disable=bare-except
             try:
                 reducer.to_Q.set_q_resolution_moderator(file_name=arguments[1])

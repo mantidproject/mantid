@@ -25,6 +25,7 @@ output_folder_name = "output"
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "polaris_system_test_mapping.yaml")
 spline_rel_path = os.path.join("17_1", "VanSplined_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
+unsplined_van_rel_path = os.path.join("17_1", "Van_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -36,6 +37,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
 
 
 class CreateVanadiumTest(stresstesting.MantidStressTest):
@@ -110,8 +112,9 @@ def run_vanadium_calibration():
     if not os.path.exists(spline_path):
         raise RuntimeError("Could not find output spline at the following path: " + spline_path)
     splined_ws = mantid.Load(Filename=spline_path)
+    unsplined_ws = mantid.Load(Filename=unsplined_van_path)
 
-    return splined_ws
+    return splined_ws, unsplined_ws
 
 
 def run_focus():
@@ -132,9 +135,12 @@ def run_focus():
 
 
 def calibration_validator(results):
+    splined_ws, unsplined_ws = results
     # Get the name of the grouped workspace list
-    reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
+    splined_reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
+    unsplined_reference_file_name = "ISIS_Powder-POLARIS00098533_unsplined.nxs"
+    return _compare_ws(reference_file_name=splined_reference_file_name, results=splined_ws) and \
+        _compare_ws(reference_file_name=unsplined_reference_file_name, results=unsplined_ws)
 
 
 def focus_validation(results):
@@ -145,7 +151,7 @@ def focus_validation(results):
 def _compare_ws(reference_file_name, results):
     ref_ws = mantid.Load(Filename=reference_file_name)
 
-    is_valid = True if len(results) > 0 else False
+    is_valid = len(results) > 0
 
     for ws, ref in zip(results, ref_ws):
         if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
