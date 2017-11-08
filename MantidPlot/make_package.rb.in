@@ -160,12 +160,11 @@ if( "@MAKE_VATES@" == "ON" )
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
   vatesfiles = ["Contents/MacOS/MantidPlot",
-                "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
-                "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
+                "Contents/MacOS/libMantidQtWidgetsCommonQt4.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
                 "plugins/libMantidVatesAlgorithms.dylib",
-                "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
-  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["pvplugins/pvplugins/*.dylib"]
+                "plugins/qt4/libMantidVatesSimpleGuiViewWidgets.dylib"]
+  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/*.dylib"]
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -197,7 +196,7 @@ if( "@MAKE_VATES@" == "ON" )
     break if issues_found == 0
   end
   #fix libNonOrthogonalSource.dylib
-  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib pvplugins/pvplugins/libNonOrthogonalSource.dylib`
+  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/libNonOrthogonalSource.dylib`
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
@@ -378,12 +377,6 @@ h5py_patterns.each do |pattern|
     end
   end
 end
-
-# ---------------------------------------------
-# Fix imports for Mantid Scientific Interfaces
-# ---------------------------------------------
-`install_name_tool -add_rpath @loader_path/../../../plugins/qtplugins/mantid ./plugins/qtplugins/mantid/libMantidScientificInterfacesEnggDiffraction.dylib`
-# ---------------------------------------------
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|

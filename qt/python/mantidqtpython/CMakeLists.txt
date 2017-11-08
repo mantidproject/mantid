@@ -1,5 +1,6 @@
 ###########################################################################
-# Do the sip generation, for python bindings
+# Do the sip generation for the legacy python bindings.
+# This is a Qt4-only module and serves to support MantidPlot alone.
 ###########################################################################
 
 include_directories ( ${PYTHON_INCLUDE_PATH} )
@@ -109,14 +110,6 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # Other folders that need to be included...
 set ( WIDGETS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../widgets )
-include_directories ( ${WIDGETS_SRC_DIR}/sliceviewer/inc )
-include_directories ( ${WIDGETS_SRC_DIR}/common/inc )
-include_directories ( ${WIDGETS_SRC_DIR}/instrumentview/inc )
-include_directories ( ${WIDGETS_SRC_DIR}/factory/inc )
-include_directories ( ${WIDGETS_SRC_DIR}/spectrumviewer/inc )
-include_directories ( ${WIDGETS_SRC_DIR}/refdetectorview/inc )
-include_directories ( ${WIDGETS_BINARY_DIR}/sliceviewer ) # to find the ui_*.h auto-generated files
-include_directories ( ${WIDGETS_BINARY_DIR}/refdetectorview ) # to find the ui_*.h auto-generated files
 
 # This creates the target library, just for python bindings
 add_library ( mantidqtpython MODULE ${SIP_SRC} )
@@ -152,18 +145,22 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
-            MantidQtWidgetsSliceViewer
-            MantidQtWidgetsFactory
-            MantidQtWidgetsRefDetectorView
-            MantidQtWidgetsInstrumentView
+            MantidQtWidgetsCommonQt4
+            MantidQtWidgetsLegacyQwtQt4
+            MantidQtWidgetsSliceViewerQt4
+            MantidQtWidgetsFactoryQt4
+            MantidQtWidgetsRefDetectorViewQt4
+            MantidQtWidgetsInstrumentViewQt4
+            MantidQtWidgetsSpectrumViewerQt4
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
+            Qt4::QtCore
+            Qt4::QtGui
+            Qt4::QtOpenGL
+            Qwt5
             ${PYTHON_LIBRARIES}
-            )
+)
 
 
 ###########################################################################

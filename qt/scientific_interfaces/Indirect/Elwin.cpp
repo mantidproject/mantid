@@ -2,7 +2,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
 

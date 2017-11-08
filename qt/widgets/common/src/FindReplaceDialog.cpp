@@ -18,7 +18,7 @@
 /**
  * Constructor
  */
-FindReplaceDialog::FindReplaceDialog(ScriptEditor *editor, Qt::WFlags fl)
+FindReplaceDialog::FindReplaceDialog(ScriptEditor *editor, Qt::WindowFlags fl)
     : QDialog(editor, fl), m_editor(editor), m_findInProgress(false) {
   initLayout();
   setSizeGripEnabled(true);
