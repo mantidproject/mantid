@@ -74,6 +74,26 @@ void run_isOnThisPartition_StorageMode_Distributed(
     }
   }
 }
+
+void run_construct_from_parent_StorageMode_Distributed(
+    const Parallel::Communicator &comm) {
+  IndexInfo parent(47, Parallel::StorageMode::Distributed, comm);
+  IndexInfo i(std::vector<GlobalSpectrumIndex>{10, 11, 12, 13, 14, 15, 16},
+              parent);
+  size_t expectedSize = 0;
+  // Rank in `i` is given by rank in parent, so we iterate parent!
+  for (size_t globalIndex = 0; globalIndex < parent.globalSize();
+       ++globalIndex) {
+    if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
+      if (globalIndex >= 10 && globalIndex <= 16) {
+        TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
+                         static_cast<int>(globalIndex) + 1);
+        ++expectedSize;
+      }
+    }
+  }
+  TS_ASSERT_EQUALS(i.size(), expectedSize);
+}
 }
 
 class IndexInfoTest : public CxxTest::TestSuite {
@@ -102,6 +122,46 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
+  }
+
+  void test_construct_from_parent_reorder() {
+    IndexInfo parent({3, 2, 1});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(6);
+    specDefs[0].add(7);
+    specDefs[2].add(8);
+    parent.setSpectrumDefinitions(specDefs);
+
+    IndexInfo i(std::vector<SpectrumNumber>{2, 1, 3}, parent);
+
+    TS_ASSERT_EQUALS(i.size(), 3);
+    TS_ASSERT_EQUALS(i.globalSize(), 3);
+    TS_ASSERT_EQUALS(i.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(i.spectrumNumber(1), 1);
+    TS_ASSERT_EQUALS(i.spectrumNumber(2), 3);
+    TS_ASSERT(i.spectrumDefinitions());
+    TS_ASSERT_EQUALS((*i.spectrumDefinitions())[0], specDefs[1]);
+    TS_ASSERT_EQUALS((*i.spectrumDefinitions())[1], specDefs[2]);
+    TS_ASSERT_EQUALS((*i.spectrumDefinitions())[2], specDefs[0]);
+  }
+
+  void test_construct_from_parent_filter() {
+    IndexInfo parent({3, 2, 1});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(6);
+    specDefs[0].add(7);
+    specDefs[2].add(8);
+    parent.setSpectrumDefinitions(specDefs);
+
+    IndexInfo i(std::vector<SpectrumNumber>{1, 2}, parent);
+
+    TS_ASSERT_EQUALS(i.size(), 2);
+    TS_ASSERT_EQUALS(i.globalSize(), 2);
+    TS_ASSERT_EQUALS(i.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(i.spectrumNumber(1), 2);
+    TS_ASSERT(i.spectrumDefinitions());
+    TS_ASSERT_EQUALS((*i.spectrumDefinitions())[0], specDefs[2]);
+    TS_ASSERT_EQUALS((*i.spectrumDefinitions())[1], specDefs[1]);
   }
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
@@ -215,6 +275,10 @@ public:
     runParallel(run_isOnThisPartition_StorageMode_Distributed);
     // Trivial: Run with one partition.
     run_isOnThisPartition_StorageMode_Distributed(Parallel::Communicator{});
+  }
+
+  void test_construct_from_parent_StorageMode_Distributed() {
+    runParallel(run_construct_from_parent_StorageMode_Distributed);
   }
 
 private:

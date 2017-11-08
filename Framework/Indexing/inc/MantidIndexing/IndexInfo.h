@@ -83,6 +83,8 @@ public:
   IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
             const Parallel::StorageMode storageMode,
             const Parallel::Communicator &communicator);
+  template <class IndexType>
+  IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
 
   IndexInfo(const IndexInfo &other);
   IndexInfo(IndexInfo &&other);
