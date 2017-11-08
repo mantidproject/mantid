@@ -37,4 +37,11 @@ endforeach()
 # Target
 add_custom_target ( mantidqt ALL DEPENDS ${_pyc_files} SOURCES ${PYTHON_SOURCE_FILES} )
 
+set ( PYTHON_TEST_FILES
+  mantidqt/test/import_test.py
+)
+
+# Tests
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} mantidqt ${PYTHON_TEST_FILES} )
+
 # Not installed yet...
