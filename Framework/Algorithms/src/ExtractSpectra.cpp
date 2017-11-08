@@ -247,7 +247,7 @@ template <class T> struct eventFilter {
 
   bool operator()(const T &value) {
     const double tof = value.tof();
-    return (tof <= maxValue && tof >= minValue);
+    return !(tof <= maxValue && tof >= minValue);
   }
 
   double minValue;
@@ -255,11 +255,11 @@ template <class T> struct eventFilter {
 };
 
 template <class T>
-void copyEventsHelper(const std::vector<T> &inputEvents,
-                      std::vector<T> &outputEvents, const double xmin,
-                      const double xmax) {
-  copy_if(inputEvents.begin(), inputEvents.end(),
-          std::back_inserter(outputEvents), eventFilter<T>(xmin, xmax));
+void filterEventsHelper(std::vector<T> &events, const double xmin,
+                        const double xmax) {
+  events.erase(
+      std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)),
+      events.end());
 }
 }
 
@@ -289,94 +289,56 @@ void ExtractSpectra::execEvent() {
         rb_params, XValues_new.mutableRawData()));
   }
 
-  // run inplace branch if appropriate
-  MatrixWorkspace_sptr OutputWorkspace = this->getProperty("OutputWorkspace");
-  bool inPlace = (OutputWorkspace == m_inputWorkspace);
-  if (inPlace)
-    g_log.debug("Cropping EventWorkspace in-place.");
-
-  // Create the output workspace
   eventW->sortAll(TOF_SORT, nullptr);
-  auto outputWorkspace = create<EventWorkspace>(
-      *m_inputWorkspace,
-      Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList),
-      XValues_new);
-  outputWorkspace->sortAll(TOF_SORT, nullptr);
 
   Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());
-  eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
-  // Loop over the required workspace indices, copying in the desired bins
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace, *outputWorkspace))
-  for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*eventW))
+  for (int i = 0; i < static_cast<int>(m_workspaceIndexList.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto i = m_workspaceIndexList[j];
-    const EventList &el = eventW->getSpectrum(i);
-    // The output event list
-    EventList &outEL = outputWorkspace->getSpectrum(j);
+    EventList &el = eventW->getSpectrum(i);
 
     switch (el.getEventType()) {
     case TOF: {
-      std::vector<TofEvent> moreevents;
-      moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      copyEventsHelper(el.getEvents(), moreevents, minX_val, maxX_val);
-      outEL += moreevents;
+      filterEventsHelper(el.getEvents(), minX_val, maxX_val);
       break;
     }
     case WEIGHTED: {
-      std::vector<WeightedEvent> moreevents;
-      moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      copyEventsHelper(el.getWeightedEvents(), moreevents, minX_val, maxX_val);
-      outEL += moreevents;
+      filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
       break;
     }
     case WEIGHTED_NOTIME: {
-      std::vector<WeightedEventNoTime> moreevents;
-      moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      copyEventsHelper(el.getWeightedEventsNoTime(), moreevents, minX_val,
-                       maxX_val);
-      outEL += moreevents;
+      filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
       break;
     }
     }
-    outEL.setSortOrder(el.getSortType());
 
-    bool hasDx = eventW->hasDx(i);
-
-    if (!m_commonBoundaries) {
-      // If the X axis is NOT common, then keep the initial X axis, just clear
-      // the events
-      outEL.setX(el.ptrX());
-      outEL.setSharedDx(el.sharedDx());
-    } else {
-      // X is already set in workspace creation, just set Dx if necessary.
-      if (hasDx) {
-        auto &oldDx = m_inputWorkspace->dx(i);
-        outEL.setPointStandardDeviations(
+    // If the X axis is NOT common, then keep the initial X axis, just clear the
+    // events, otherwise:
+    if (m_commonBoundaries) {
+      const auto oldDx = el.pointStandardDeviations();
+      el.setHistogram(HistogramData::BinEdges(XValues_new));
+      if (oldDx) {
+        el.setPointStandardDeviations(
             oldDx.begin() + m_minX, oldDx.begin() + (m_maxX - m_histogram));
       }
     }
 
     // Propagate bin masking if there is any
-    if (m_inputWorkspace->hasMaskedBins(i)) {
-      const MatrixWorkspace::MaskList &inputMasks =
-          m_inputWorkspace->maskedBins(i);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        const size_t maskIndex = (*it).first;
+    if (eventW->hasMaskedBins(i)) {
+      MatrixWorkspace::MaskList filteredMask;
+      for (const auto &mask : eventW->maskedBins(i)) {
+        const size_t maskIndex = mask.first;
         if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
-          outputWorkspace->flagMasked(j, maskIndex - m_minX, (*it).second);
+          filteredMask[maskIndex - m_minX] = mask.second;
       }
-    }
-    // When cropping in place, you can clear out old memory from the input one!
-    if (inPlace) {
-      eventW->getSpectrum(i).clear();
+      eventW->setMaskedBins(i, filteredMask);
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  setProperty("OutputWorkspace", std::move(outputWorkspace));
+  setProperty("OutputWorkspace", std::move(eventW));
 }
 
 /** Retrieves the optional input properties and checks that they have valid
