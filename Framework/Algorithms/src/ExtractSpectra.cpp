@@ -31,8 +31,6 @@ using Types::Event::TofEvent;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractSpectra)
 
-//----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ExtractSpectra::name() const { return "ExtractSpectra"; }
 
@@ -50,7 +48,6 @@ const std::string ExtractSpectra::summary() const {
          "workspace.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ExtractSpectra::init() {
@@ -94,7 +91,6 @@ void ExtractSpectra::init() {
                   "the latter is being selected.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw std::out_of_range If a property is set to an invalid value for the
  * input workspace
@@ -153,17 +149,7 @@ void ExtractSpectra::execHistogram() {
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
-
-    // Propagate bin masking if there is any
-    if (m_inputWorkspace->hasMaskedBins(i)) {
-      MatrixWorkspace::MaskList filteredMask;
-      for (const auto &mask : m_inputWorkspace->maskedBins(i)) {
-        const size_t maskIndex = mask.first;
-        if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
-          filteredMask[maskIndex - m_minX] = mask.second;
-      }
-      m_inputWorkspace->setMaskedBins(i, filteredMask);
-    }
+    propagateBinMasking(*m_inputWorkspace, i);
     prog.report();
   }
 
@@ -250,23 +236,27 @@ void ExtractSpectra::execEvent() {
                                       oldDx.begin() + (m_maxX - m_histogram));
       }
     }
-
-    // Propagate bin masking if there is any
-    if (eventW->hasMaskedBins(i)) {
-      MatrixWorkspace::MaskList filteredMask;
-      for (const auto &mask : eventW->maskedBins(i)) {
-        const size_t maskIndex = mask.first;
-        if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
-          filteredMask[maskIndex - m_minX] = mask.second;
-      }
-      eventW->setMaskedBins(i, filteredMask);
-    }
+    propagateBinMasking(*eventW, i);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", std::move(eventW));
+}
+
+/// Propagate bin masking if there is any.
+void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace,
+                                         const int i) const {
+  if (workspace.hasMaskedBins(i)) {
+    MatrixWorkspace::MaskList filteredMask;
+    for (const auto &mask : workspace.maskedBins(i)) {
+      const size_t maskIndex = mask.first;
+      if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
+        filteredMask[maskIndex - m_minX] = mask.second;
+    }
+    workspace.setMaskedBins(i, filteredMask);
+  }
 }
 
 /** Retrieves the optional input properties and checks that they have valid

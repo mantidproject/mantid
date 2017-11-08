@@ -46,6 +46,7 @@ private:
   void execHistogram();
   void execEvent();
 
+  void propagateBinMasking(API::MatrixWorkspace &workspace, const int i) const;
   void checkProperties();
   std::size_t getXMin(const size_t wsIndex = 0);
   std::size_t getXMax(const size_t wsIndex = 0);
