@@ -75,7 +75,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
   OUTPUT_DIR_BASE
     ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   OSX_INSTALL_RPATH
-    @loader_path/../../../Contents/MacOS
+    @loader_path/../../Contents/MacOS
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}
 )

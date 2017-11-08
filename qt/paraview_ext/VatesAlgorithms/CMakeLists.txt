@@ -49,7 +49,7 @@ ${POCO_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+  set_target_properties ( VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Libraries")
 endif ()
 
 # Create test file projects

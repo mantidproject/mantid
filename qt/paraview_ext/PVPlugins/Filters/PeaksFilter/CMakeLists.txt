@@ -15,7 +15,7 @@ ${vtkjsoncpp_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidParaViewPeaksFilterSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
+  set_target_properties ( MantidParaViewPeaksFilterSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/Libraries;@loader_path/../../../Contents/MacOS")
 endif ()
 
 install_pvplugin (MantidParaViewPeaksFilterSMPlugin QT_VERSION 4)
