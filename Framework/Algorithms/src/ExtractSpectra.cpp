@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
+#include "MantidAlgorithms/ExtractSpectra2.h"
 
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/NumericAxis.h"
@@ -11,6 +12,7 @@
 #include "MantidIndexing/IndexInfo.h"
 
 #include <algorithm>
+#include <numeric>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries
@@ -102,11 +104,33 @@ void ExtractSpectra::exec() {
   m_histogram = m_inputWorkspace->isHistogramData();
   // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
-
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
 
   // Retrieve and validate the input properties
   this->checkProperties();
+
+  ExtractSpectra2 extract;
+  extract.setChild(true);
+  extract.initialize();
+  std::vector<int> indicesToForward(m_workspaceIndexList.begin(),
+                                    m_workspaceIndexList.end());
+  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  extract.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
+      "InputWorkspace", inputWorkspace, IndexType::WorkspaceIndex,
+      indicesToForward);
+  for (auto prop : extract.getProperties())
+    if (prop->name() == "OutputWorkspace")
+      prop->createTemporaryValue();
+  extract.execute();
+  m_inputWorkspace = extract.getProperty("OutputWorkspace");
+
+  if (isDefault("XMin") && isDefault("XMax")) {
+    setProperty("OutputWorkspace", m_inputWorkspace);
+    return;
+  }
+
+  eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
+  std::iota(m_workspaceIndexList.begin(), m_workspaceIndexList.end(), 0);
 
   if (eventW != nullptr) {
     // Input workspace is an event workspace. Use the other exec method
