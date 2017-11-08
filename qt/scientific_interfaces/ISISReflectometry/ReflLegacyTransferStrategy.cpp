@@ -1,4 +1,5 @@
 #include "ReflLegacyTransferStrategy.h"
+#include "Trim.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ProgressBase.h"
 #include "ReflTableSchema.h"
@@ -58,6 +59,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
     if (descriptionToGroup[cleanDescription].empty())
+      trim(groupName);
       descriptionToGroup[cleanDescription] = groupName;
 
     // Assign this description to the group it belongs to

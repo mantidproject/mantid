@@ -24,6 +24,7 @@ set ( SRC_FILES
     ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
     TransferResults.cpp
+    Trim.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -72,9 +73,10 @@ set ( INC_FILES
     ReflTableSchema.h
     ReflTransferStrategy.h
     TransferResults.h
+    Trim.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     ReflSearchModel.h
     QtReflEventTabView.h
     QtReflEventView.h
@@ -84,7 +86,7 @@ set ( MOC_FILES
     QtReflSettingsView.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
    ReflEventTabWidget.ui
    ReflEventWidget.ui
    ReflMainWindowWidget.ui
