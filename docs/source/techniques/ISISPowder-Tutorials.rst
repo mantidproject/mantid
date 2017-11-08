@@ -45,13 +45,13 @@ Copying instrument example files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Open your Mantid install location, by default this
 will be `C:\\MantidInstall` on Windows and `/opt/Mantid` on Linux.
-Open *scripts*, *diffraction*, *isis_powder*. 
+Open *scripts* - *Diffraction* - *isis_powder*. 
 In these tutorials we will be using Polaris examples and data
 however you may set-up a different instrument. 
 
 Open *polaris_routines* (or *'instName'_routines*), there will
-be a folder called *examples*. Copy the contents (all files and folders)
-within the *examples* folder to a known location.
+be a folder called *Examples*. Copy the contents (all files and folders)
+within the *Examples* folder to a known location.
 
 Importing the instrument
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,16 +84,16 @@ best illustrated with the below example:
    red_duck = Duck(type="Rubber duck")
 
 On lines 1 and 2 we create a new duck object. Each
-object has a name we choose (in this case *blue_duck* and 
-*red_duck*) and a separate state, but the same actions we
+object has a name we choose (in this case ``blue_duck`` and 
+``red_duck``) and a separate state, but the same we
 can perform on each are the same. For example
 
 .. code-block:: python
 
     blue_duck.feed()
 
-We now have fed *blue_duck* so its state will have changed so it is no longer
-hungry. However the *red_duck* has not changed at all so its state
+We now have fed ``blue_duck`` so its state will have changed so it is no longer
+hungry. However the ``red_duck`` has not changed at all so its state
 is still hungry in this example.
 
 Because objects have their own state you can create multiple objects
@@ -126,9 +126,9 @@ For example in the POLARIS example folder these filenames will be:
 
 - Name of 'calibration' folder: **Calibration**
 - Name of cycle mapping file: **polaris_cycle_map_example.YAML**
-  *Note: you may not have file extensions showing, in that case you
-  will see 'polaris_cycle_map_example' and need to insert 
-  **.YAML** after the filename still*
+  -  *Note*: you may not have file extensions showing, in that case you
+      will see 'polaris_cycle_map_example' and need to insert 
+      **.YAML** after the filename
 
 .. _creating_inst_object_isis-powder-diffraction-ref:
 
@@ -200,8 +200,8 @@ We will use this to create a vanadium run on Polaris:
     a_pol_obj = Polaris(...)
     a_pol_obj.create_vanadium(...)
 
-On line 4 we call the create_vanadium method on the Polaris object,
-all instruments will have this method however the parameters they
+On line 4 we call the create_vanadium method on the Polaris object.
+All instruments will have this method however the parameters they
 accept and require are bespoke. Parameters can be
 found for each individual instrument in the reference document:
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`
@@ -349,8 +349,8 @@ instrument reference document:
 To focus the Si sample included in the ISIS data set we 
 require the following parameters:
 
-- *do_absorb_corrections* - This will be covered in a later tutorial
-  it determines whether to perform sample absorption corrections on
+- *do_absorb_corrections* - This will be covered in a later tutorial.
+  It determines whether to perform sample absorption corrections on
   instruments which support this correction. For this tutorial please
   ensure it is set to *False*
 - *do_van_normalisation* - Determines whether to divide the data
@@ -672,7 +672,7 @@ like so:
 This will locate a .s01 file for that run number and focus
 it like a normal run. The output filename will also reflect that
 this is a partial file. For run number 123 and file extension s1 
-the output filename will be *s01'InstrumentName'123.nxs*.
+the output filename will be *s01<InstrumentName>123.nxs*.
 This allows users to easily distinguish between full runs and 
 partial runs in the output folder. (For more details about the 
 output folder see :ref:`output_folder_isis-powder-diffraction-ref`)
@@ -686,11 +686,11 @@ To perform absorption corrections on a sample we must first specify
 the chemical properties of the sample by creating a sample properties
 object. (See :ref:`intro_to_objects-isis-powder-diffraction-ref`.)
 
-*Note: Not all instruments support sample absorption corrections.
+*Note*: Not all instruments support sample absorption corrections.
 Please check the instrument reference: 
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`. If the
 instrument has a *set_sample_details* method it supports sample 
-absorption corrections*
+absorption corrections
 
 .. _create_sampleDetails_isis-powder-diffraction-ref:
 
@@ -841,11 +841,11 @@ Instrument advanced properties
              should not be changed unless you understand what you
              are doing.
 
-*Note: Parameters should not be changed in the advanced configuration
+*Note*: Parameters should not be changed in the advanced configuration
 for a few runs. If you require a set of values to be changed for a range
 of runs (such as the cropping values) please set the value in the scripting
 window or configuration file instead
-(see: :ref:`configuration_files_isis-powder-diffraction-ref`).*
+(see: :ref:`configuration_files_isis-powder-diffraction-ref`).
 
 The advanced configuration file provides optimal defaults for 
 an instrument and applies to all runs unless otherwise specified. If
