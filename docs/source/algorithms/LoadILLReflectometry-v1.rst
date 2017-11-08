@@ -28,18 +28,16 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if :literal:`BraggAngle` is not given.
+* The detector angle in the sample logs. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`BeamPosition` is given.
 
-* An angle calculated from the reflected beam position and a user-specified angle given by the :literal:`BraggAngle` input property.
+* The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`BeamPosition` is given.
 
-The :literal:`BraggAngle` option rotates the detector such that the angle between the direct beam axis and the reflected peak centre is twice :literal:`BraggAngle`.  The reflected peak centre is found by fitting a Gaussian to the data and calculating an offset angle :math:`\Delta` between the detector centre and the peak (see the Direct beam calibration section for details). The detector angle \alpha_{R} is then given by
+* An angle based on a user-specified angle given by the :literal:`BraggAngle` input property. This overrides all other angles.
 
-.. math::
-   \alpha_{R} = 2 \theta_{user} - \Delta
+Direct beam calibration
+#######################
 
-where :math:`\theta_{user}` is :literal:`BraggAngle`
-
-In both cases the rotation angle can be further calibrated using a direct beam measurement. This option is triggered when the :literal:`BeamPosition` property is specified. For the direct beam calibration, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
+Calibration using a direct beam measurement is triggered when the :literal:`BeamPosition` property is specified. In this mode, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
 
 .. code-block:: python
 
@@ -48,22 +46,32 @@ In both cases the rotation angle can be further calibrated using a direct beam m
    LoadILLReflectometry('sample2.nxs', OutputWorkspace='sample2_ws', BeamPosition='beam_position_ws')
    # ...
 
-Direct beam calibration
-#######################
+The detector is rotated around angle :math:`\alpha`, given by
 
-The detector position calibration requires peak position fitting for both the direct and reflected beam data. Basically, the data is integrated using :ref:`algm-Integration`, transposed using :ref:`algm-Transpose` and a :ref:`func-Gaussian` is fitted by :ref:`algm-Fit`. The fitted peak position gives the angle between the centre of the detector and the direct or reflected beam:
+.. math::
+   \alpha = \alpha_{R} - \alpha_{D} - \Delta_{D}
+
+where :math:`\alpha` is the nominal detector angle, :math:`\alpha` the detector angle of the direct beam reference and :math:`\Delta_{D}` the beam position offset (see below) of the reference.
+
+User angle
+##########
+
+The :literal:`BraggAngle` option rotates the detector by an angle :math:`\alpha` such that the angle between the direct beam axis and the reflected peak centre is twice :literal:`BraggAngle`
+
+.. math::
+   \alpha = 2 \theta_{user} - \Delta_{R}
+
+where :math:`\theta_{user}` is :literal:`BraggAngle` and :math:`\Delta_{R}` the beam position offset angle (see below).
+
+Beam position offset
+####################
+
+To calculate the angle between the detector centre and the beam, the reflectometry data is integrated using :ref:`algm-Integration`, transposed using :ref:`algm-Transpose` and finally fitted by a :ref:`func-Gaussian` using :ref:`algm-Fit`. The offset angle :math:`\Delta` can then be calculated by
 
 .. math::
    \Delta = \tan^{-1} \frac{(i_{centre} - i_{fit}) d_{pix}}{l_{2}},
 
 where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and Figaro), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
-
-The calibrated detector angle is then given by
-
-.. math::
-   \alpha = \alpha_{R} - \alpha_{D} - 2 \Delta_{D} + \Delta_{R},
-
-where :math:`\alpha` denotes the detector angles while the subscript :math:`R` refers to the reflected beam and :math:`D` to the direct beam.
 
 Source position
 ---------------

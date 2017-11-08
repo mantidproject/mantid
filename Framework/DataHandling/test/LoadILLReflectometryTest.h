@@ -281,16 +281,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
             dbBeamPosWSName);
     MatrixWorkspace_sptr refOutput;
-    const std::string refBeamPosWSName{
-        "LoadILLReflectometryTest_RefBeamPositionWS"};
     prop.clear();
     prop.emplace_back("BeamPosition", dbBeamPosWSName);
-    prop.emplace_back("OutputBeamPosition", refBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
-    TableWorkspace_sptr refBeamPosWS =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            refBeamPosWSName);
-    const auto dbDetAngle = dbBeamPosWS->cell_cast<double>(0, "DetectorAngle");
+    const auto dbDetAngle = dbOutput->run().getPropertyValueAsType<double>("dan.value");
     const auto dbDetDist =
         dbBeamPosWS->cell_cast<double>(0, "DetectorDistance");
     const auto dbPeakPos =
@@ -301,17 +295,8 @@ public:
     const auto dbOffsetAngle = std::atan2(dbPeakOffset, dbDetDist) * 180 / M_PI;
     const auto refDetAngle =
         refOutput->run().getPropertyValueAsType<double>("dan.value");
-    const auto refDetDist =
-        refOutput->run().getPropertyValueAsType<double>("det.value") / 1000;
-    const auto refPeakPos =
-        refBeamPosWS->cell_cast<double>(0, "PeakCentre");
-    const auto refPixWidth =
-        refOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
-    const auto refPeakOffset = (127.5 - refPeakPos) * refPixWidth;
-    const auto refOffsetAngle =
-        std::atan2(refPeakOffset, refDetDist) * 180 / M_PI;
     const auto newDetAngle =
-        refDetAngle - dbDetAngle - 2 * dbOffsetAngle + refOffsetAngle;
+        refDetAngle - dbDetAngle - dbOffsetAngle;
     const auto &spectrumInfo = refOutput->spectrumInfo();
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI,
                                newDetAngle)
@@ -319,7 +304,7 @@ public:
                                spectrumInfo.twoTheta(127) * 180 / M_PI)
   }
 
-  void testDirectBeamInputWithUserAngle() {
+  void testDirectBeamIgnoredWhenBraggAngleGiven() {
     using namespace Mantid::DataObjects;
     MatrixWorkspace_sptr dbOutput;
     const std::string dbBeamPosWSName{
@@ -328,18 +313,6 @@ public:
     prop.emplace_back("OutputBeamPosition", dbBeamPosWSName);
     getWorkspaceFor(dbOutput, m_d17DirectBeamFile,
                     "LoadILLReflectometryTest_DirectBeamWS", prop);
-    TableWorkspace_sptr dbBeamPosWS =
-        AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            dbBeamPosWSName);
-    const auto dbDetDist =
-        dbOutput->run().getPropertyValueAsType<double>("det.value") / 1000;
-    const auto dbPeakPos =
-        dbBeamPosWS->cell_cast<double>(0, "PeakCentre");
-    const auto dbPixWidth =
-        dbOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
-    const auto dbPeakOffset = (127.5 - dbPeakPos) * dbPixWidth;
-    const auto dbOffsetAngle =
-        std::atan2(dbPeakOffset, dbDetDist) * 180 / M_PI;
     MatrixWorkspace_sptr refOutput;
     const double userAngle{23.23};
     const std::string refBeamPosWSName{
@@ -361,7 +334,7 @@ public:
     const auto refPeakOffset = (127.5 - refPeakPos) * refPixWidth;
     const auto refOffsetAngle =
         std::atan2(refPeakOffset, refDetDist) * 180 / M_PI;
-    const auto userDetectorAngle = 2 * userAngle - (refOffsetAngle + (refOffsetAngle - dbOffsetAngle));
+    const auto userDetectorAngle = 2 * userAngle - refOffsetAngle;
     const auto &spectrumInfo = refOutput->spectrumInfo();
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI,
                                userDetectorAngle)
