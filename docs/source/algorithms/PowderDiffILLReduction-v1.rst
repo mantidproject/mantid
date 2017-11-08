@@ -66,7 +66,7 @@ Usage
 
    config['default.facility'] = 'ILL'
    config['default.instrument'] = 'D20'
-   config.appendDataSearchSubDir('ILL/D20')
+   config.appendDataSearchSubDir('ILL/D20/')
 
 .. testcode:: ExPowderDiffILLReduction
 
