@@ -72,8 +72,8 @@ Usage
 
    red_ws = PowderDiffILLReduction(Run='967087,967088')
    print("Reduced workspace has {0} diffractograms having {1} bins each".format(red_ws.getNumberHistograms(),red_ws.blocksize()))
-   print("The first one corresponds to T={0} K".format(red_ws.getAxis(1).extractValues[0]))
-   print("The first one corresponds to T={0} K".format(red_ws.getAxis(1).extractValues[1]))
+   print("The first one corresponds to T={0} K".format(red_ws.getAxis(1).extractValues()[0]))
+   print("The first one corresponds to T={0} K".format(red_ws.getAxis(1).extractValues()[1]))
 
 Output:
 
