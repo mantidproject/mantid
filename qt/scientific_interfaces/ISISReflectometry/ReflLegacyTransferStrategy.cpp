@@ -58,9 +58,10 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
 
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
-    if (descriptionToGroup[cleanDescription].empty())
+    if (descriptionToGroup[cleanDescription].empty()) {
       trim(groupName);
       descriptionToGroup[cleanDescription] = groupName;
+    }
 
     // Assign this description to the group it belongs to
     descriptionToGroup[description] = descriptionToGroup[cleanDescription];
