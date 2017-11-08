@@ -32,18 +32,16 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     const std::string description = runDescriptionPair.second.description;
     std::string cleanDescription = description;
 
-    // See if theta is in the description
-    static boost::regex regexTheta(
-        "(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)");
+    static boost::regex descriptionFormatRegex(
+        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)(?<postTheta>.*)");
     boost::smatch matches;
     if (boost::regex_search(description, matches, regexTheta)) {
       // We have theta. Let's get a clean description
       size_t matchOffset = matches.position("theta");
-      const std::string theta = matches["theta"].str();
-      const std::string descPreTheta = description.substr(0, matchOffset);
-      const std::string descPostTheta =
-          description.substr(matchOffset + theta.length(), std::string::npos);
-      cleanDescription = descPreTheta + "?" + descPostTheta;
+      const auto theta = matches["theta"].str();
+      const auto preTheta = matches["preTheta"].str();
+      const auto postTheta = matches["postTheta"].str();
+      cleanDescription = preTheta + "?" + postTheta;
       descriptionToTheta[description] = theta;
     }
 
@@ -57,8 +55,10 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
 
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
-    if (descriptionToGroup[cleanDescription].empty())
-      descriptionToGroup[cleanDescription] = description.substr(0, description.find("th") - 1);
+    if (descriptionToGroup[cleanDescription].empty()) {
+      auto group = matches["preTheta"].str();
+      descriptionToGroup[cleanDescription] = group;
+    }
 
     // Assign this description to the group it belongs to
     descriptionToGroup[description] = descriptionToGroup[cleanDescription];
