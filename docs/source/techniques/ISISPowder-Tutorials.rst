@@ -85,7 +85,7 @@ best illustrated with the below example:
 
 On lines 1 and 2 we create a new duck object. Each
 object has a name we choose (in this case ``blue_duck`` and 
-``red_duck``) and a separate state, but the same we
+``red_duck``) and a separate state, but the actions we
 can perform on each are the same. For example
 
 .. code-block:: python
