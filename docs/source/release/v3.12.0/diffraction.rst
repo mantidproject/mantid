@@ -35,4 +35,10 @@ Single Crystal Diffraction
 Imaging
 -------
 
+Features Removed
+----------------
+
+* The "Test the Curve Fit widget" graphical interface has been removed, it was a test harness for developers and was not intended to be exposed during earlier releases.
+
+
 :ref:`Release 3.12.0 <v3.12.0>`

@@ -5,7 +5,6 @@ set ( SRC_FILES
 	DPDFFitOptionsBrowser.cpp
 	DPDFFourierTransform.cpp
 	DPDFInputDataControl.cpp
-	DisplayCurveFitTest.cpp
 	SliceSelector.cpp
 )
 
@@ -19,12 +18,10 @@ set ( INC_FILES
 	DPDFFitOptionsBrowser.h
 	DPDFFourierTransform.h
 	DPDFInputDataControl.h
-	DisplayCurveFitTest.h
 	SliceSelector.h
 )
 
 set ( MOC_FILES 
-    DisplayCurveFitTest.h
     DPDFBackgroundRemover.h
     DPDFDisplayControl.h
     DPDFFitControl.h
@@ -35,7 +32,6 @@ set ( MOC_FILES
 )
 
 set ( UI_FILES 
-    DisplayCurveFitTest.ui
     DPDFBackgroundRemover.ui
     DPDFFitControl.ui
     DPDFFourierTransform.ui
