@@ -198,6 +198,7 @@ set ( INC_FILES
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
 	inc/MantidGeometry/IDetector_fwd.h
+	inc/MantidGeometry/IObject.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
