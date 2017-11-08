@@ -35,6 +35,8 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.connect_signals()
         self._beam_centre_tab_listeners = []
 
+        self.scale = 1000
+
     def connect_signals(self):
         self.run_button.clicked.connect(self.on_run_clicked)
         self.clear_log_button.clicked.connect(self.on_clear_log_clicked)
@@ -65,19 +67,116 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
     def on_update_rows(self):
         self._call_beam_centre_tab_listeners(lambda listener: listener.on_update_rows())
 
+    @property
+    def r_min(self):
+        return self.get_simple_line_edit_field(line_edit="r_min_line_edit", expected_type=float)
+
+    @r_min.setter
+    def r_min(self, value):
+        self.update_simple_line_edit_field(line_edit="r_min_line_edit", value=value)
+
+    @property
+    def r_max(self):
+        return self.get_simple_line_edit_field(line_edit="r_max_line_edit", expected_type=float)
+
+    @r_max.setter
+    def r_max(self, value):
+        self.update_simple_line_edit_field(line_edit="r_max_line_edit", value=value)
+
+    @property
+    def max_iterations(self):
+        return self.get_simple_line_edit_field(line_edit="max_iterations_line_edit", expected_type=int)
+
+    @max_iterations.setter
+    def max_iterations(self, value):
+        self.update_simple_line_edit_field(line_edit="max_iterations_line_edit", value=value)
+
+    @property
+    def tolerance(self):
+        return self.get_simple_line_edit_field(line_edit="tolerance_line_edit", expected_type=float)
+
+    @tolerance.setter
+    def tolerance(self, value):
+        self.update_simple_line_edit_field(line_edit="tolerance_line_edit", value=value)
+
+    @property
+    def left_right(self):
+        return self.left_right_check_box.isChecked()
+
+    @left_right.setter
+    def left_right(self, value):
+        self.left_right_check_box.setChecked(value)
+
+    @property
+    def up_down(self):
+        return self.left_right_check_box.isChecked()
+
+    @up_down.setter
+    def up_down(self, value):
+        self.up_down_check_box.setChecked(value)
+
+    @property
+    def lab_pos_1(self):
+        return self.get_simple_line_edit_field(line_edit="lab_pos_1_line_edit", expected_type=float)/self.scale
+
+    @lab_pos_1.setter
+    def lab_pos_1(self, value):
+        self.update_simple_line_edit_field(line_edit="lab_pos_1_line_edit", value=value*self.scale)
+
+    @property
+    def lab_pos_2(self):
+        return self.get_simple_line_edit_field(line_edit="lab_pos_2_line_edit", expected_type=float)/self.scale
+
+    @lab_pos_2.setter
+    def lab_pos_2(self, value):
+        self.update_simple_line_edit_field(line_edit="lab_pos_2_line_edit", value=value*self.scale)
+
+    @property
+    def hab_pos_1(self):
+        return self.get_simple_line_edit_field(line_edit="hab_pos_1_line_edit", expected_type=float)/self.scale
+
+    @hab_pos_1.setter
+    def hab_pos_1(self, value):
+        self.update_simple_line_edit_field(line_edit="hab_pos_1_line_edit", value=value*self.scale)
+
+    @property
+    def hab_pos_2(self):
+        return self.get_simple_line_edit_field(line_edit="hab_pos_2_line_edit", expected_type=float)/self.scale
+
+    @hab_pos_2.setter
+    def hab_pos_2(self, value):
+        self.update_simple_line_edit_field(line_edit="hab_pos_2_line_edit", value=value*self.scale)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------------------------------------------------------
     def set_centre_positions(self, centre_positions):
-        self.update_simple_line_edit_field('lab_pos1_lineEdit', centre_positions['LAB1'])
-        self.update_simple_line_edit_field('lab_pos2_lineEdit', centre_positions['LAB2'])
-        self.update_simple_line_edit_field('hab_pos1_lineEdit', centre_positions['HAB1'])
-        self.update_simple_line_edit_field('hab_pos2_lineEdit', centre_positions['HAB2'])
+        self.lab_pos_1 = centre_positions['LAB1']
+        self.lab_pos_2 = centre_positions['LAB2']
+        self.hab_pos_1 = centre_positions['HAB1']
+        self.hab_pos_2 = centre_positions['HAB2']
+
+    def set_options(self, options):
+        self.r_min = options.r_min
+        self.r_max = options.r_max
+        self.max_iterations = options.max_iterations
+        self.tolerance = options.tolerance
+        self.left_right = options.left_right
+        self.up_down = options.up_down
+        self.lab_pos_1 = options.lab_pos_1
+        self.lab_pos_2 = options.lab_pos_2
+        self.hab_pos_1 = options.hab_pos_1
+        self.hab_pos_2 = options.hab_pos_2
 
     def update_simple_line_edit_field(self, line_edit, value):
         if value:
             gui_element = getattr(self, line_edit)
             gui_element.setText(str(value))
+
+    def get_simple_line_edit_field(self, expected_type, line_edit):
+        gui_element = getattr(self, line_edit)
+        value_as_string = gui_element.text()
+        return expected_type(value_as_string) if value_as_string else None
 
     def get_current_row(self):
         value = self.select_row_combo_box.currentText()
@@ -102,7 +201,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.run_button.setEnabled(False)
 
     def set_run_button_to_normal(self):
-        self.run_button.setText("Display Mask")
+        self.run_button.setText("Run")
         self.run_button.setEnabled(True)
 
 

@@ -10,13 +10,14 @@ try:
     import mantidplot
 except ImportError:
     pass
-
+import pydevd
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from ui.sans_isis.work_handler import WorkHandler
-
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
+from sans.common.enums import (FindDirectionEnum)
 
 class BeamCentrePresenter(object):
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
@@ -36,9 +37,9 @@ class BeamCentrePresenter(object):
         def on_update_rows(self):
             self._presenter.on_update_rows()
 
-    class DisplayMaskListener(WorkHandler.WorkListener):
+    class CentreFinderListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
-            super(BeamCentrePresenter.DisplayMaskListener, self).__init__()
+            super(BeamCentrePresenter.CentreFinderListener, self).__init__()
             self._presenter = presenter
 
         def on_processing_finished(self, result):
@@ -53,6 +54,7 @@ class BeamCentrePresenter(object):
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
         self._logger = Logger("SANS")
+        self._beam_centre_model = BeamCentreModel()
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
@@ -63,6 +65,22 @@ class BeamCentrePresenter(object):
     def display_centre_information(self, state):
         centre_information = self._get_centre_information(state)
         self._view.set_centre_positions(centre_information)
+
+    def display_options_information(self):
+        self._view.set_options(self._beam_centre_model)
+
+    def update_model_from_view(self):
+        self._beam_centre_model.r_min = self._view.r_min
+        self._beam_centre_model.r_max = self._view.r_max
+        self._beam_centre_model.max_iterations = self._view.max_iterations
+        self._beam_centre_model.tolerance = self._view.tolerance
+        self._beam_centre_model.left_right = self._view.left_right
+        self._beam_centre_model.up_down = self._view.up_down
+        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1
+        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2
+        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1
+        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2
+
 
     def _get_centre_information(self, state):
         centre_information = {}
@@ -105,9 +123,19 @@ class BeamCentrePresenter(object):
     def on_processing_finished_centre_finder(self, result):
         # Enable button
         self._view.set_run_button_to_normal()
+        #pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+        # Update Centre Positions
+        self.update_centre_in_model(result)
+        self.display_options_information()
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
+
+    def update_centre_in_model(self, result):
+        self._beam_centre_model.lab_pos_1 = result['pos1']
+        self._beam_centre_model.lab_pos_2 = result['pos2']
+        self._beam_centre_model.hab_pos_1 = result['pos1']
+        self._beam_centre_model.hab_pos_2 = result['pos2']
 
     def on_processing_error(self, error):
         pass
@@ -125,6 +153,7 @@ class BeamCentrePresenter(object):
 
             # Set the default gui
             self._set_default_gui()
+            self.display_options_information()
 
     def _set_default_gui(self):
         self._view.update_rows([])
@@ -145,14 +174,29 @@ class BeamCentrePresenter(object):
         # Disable the button
         self._view.set_run_button_to_processing()
 
+        #Update model
+        self.update_model_from_view()
+
         # Run the task
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
-        self._work_handler.process(listener, find_beam_centre, state_copy)
+        self._work_handler.process(listener, find_beam_centre, state_copy, self._beam_centre_model)
 
-def find_beam_centre(self, state):
+def find_beam_centre(state, options):
     centre_finder = SANSCentreFinder()
-    centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method=True)
+    find_direction = None
+    if options.up_down and options.left_right:
+        find_direction = FindDirectionEnum.All
+    elif options.up_down:
+        find_direction = FindDirectionEnum.Left_Right
+    elif options.left_right:
+        find_direction = FindDirectionEnum.Up_Down
+
+    centre = centre_finder(state, r_min=options.r_min, r_max=options.r_max, max_iter=options.max_iterations,
+                           x_start=options.lab_pos_1, y_start=options.lab_pos_2, tolerance=options.tolerance,
+                           find_direction=find_direction, reduction_method=True)
+
+    return centre
 
 
 

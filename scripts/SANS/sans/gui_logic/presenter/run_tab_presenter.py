@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-
+import pydevd
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
@@ -632,7 +632,7 @@ class RunTabPresenter(object):
         # If we don't have a state model then return None
         if state_model is None:
             return state_model
-
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         # Run tab view
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
@@ -708,6 +708,12 @@ class RunTabPresenter(object):
         self._set_on_state_model("radius_limit_min", state_model)
         self._set_on_state_model("radius_limit_max", state_model)
 
+        # # Beam Centre
+        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+
         return state_model
 
     def _set_on_state_model_transmission_fit(self, state_model):
@@ -777,6 +783,11 @@ class RunTabPresenter(object):
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
+        if attribute or isinstance(attribute, bool):
+            setattr(state_model, attribute_name, attribute)
+
+    def _set_on_state_model_with_view(self, attribute_name, state_model, view):
+        attribute = getattr(view, attribute_name)
         if attribute or isinstance(attribute, bool):
             setattr(state_model, attribute_name, attribute)
 
