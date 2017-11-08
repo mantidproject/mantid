@@ -104,6 +104,10 @@ void ExtractSpectra::exec() {
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
+
+  // Retrieve and validate the input properties
+  this->checkProperties();
+
   if (eventW != nullptr) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -115,9 +119,6 @@ void ExtractSpectra::exec() {
 
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
-  // Retrieve and validate the input properties
-  this->checkProperties();
-
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       m_inputWorkspace, m_workspaceIndexList.size(), m_maxX - m_minX,
@@ -250,8 +251,6 @@ void ExtractSpectra::execEvent() {
   if (isEmpty(maxX_val))
     maxX_val = eventW->getTofMax();
 
-  // Retrieve and validate the input properties
-  this->checkProperties();
   HistogramData::BinEdges XValues_new(2);
   if (m_commonBoundaries) {
     auto &oldX = m_inputWorkspace->x(m_workspaceIndexList.front());
