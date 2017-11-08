@@ -174,8 +174,8 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
 void MoreSorensenMinimizer::solveSubproblem(const DoubleFortranMatrix &J,
                                             const DoubleFortranVector &f,
                                             const DoubleFortranMatrix &hf,
-                                            double Delta, DoubleFortranVector &d,
-                                            double &nd,
+                                            double Delta,
+                                            DoubleFortranVector &d, double &nd,
                                             const NLLS::nlls_options &options) {
 
   // The code finds
