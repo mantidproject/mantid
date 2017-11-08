@@ -37,7 +37,8 @@ namespace Kernel {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class ArrayOrderedPairsValidator : public TypedValidator<std::vector<TYPE>> {
+class MANTID_KERNEL_DLL ArrayOrderedPairsValidator
+    : public TypedValidator<std::vector<TYPE>> {
 public:
   /// Clone the current state
   IValidator_sptr clone() const override;
