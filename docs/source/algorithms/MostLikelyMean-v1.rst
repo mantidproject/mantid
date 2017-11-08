@@ -24,7 +24,7 @@ Usage
    import numpy
    array = numpy.arange(100)
    mlm = MostLikelyMean(array)
-   print mlm
+   print(mlm)
 
 Output:
 
