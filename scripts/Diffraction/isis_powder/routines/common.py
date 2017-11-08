@@ -179,6 +179,9 @@ def get_first_run_number(run_number_string):
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
     if isinstance(run_numbers, list):
+        if not run_numbers:
+            raise RuntimeError("Attempted to load empty set of workspaces. Please input at least one valid run number")
+        
         run_numbers = run_numbers[0]
 
     return run_numbers
