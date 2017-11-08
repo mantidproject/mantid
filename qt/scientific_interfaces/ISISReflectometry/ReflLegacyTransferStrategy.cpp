@@ -36,16 +36,14 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // See if theta is in the description
     static boost::regex regexTheta(
         "(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)");
-
-    auto matchOffsetElseOnePastEnd = desc.size();
     boost::smatch matches;
     if (boost::regex_search(desc, matches, regexTheta)) {
       // We have theta. Let's get a clean description
-      matchOffsetElseOnePastEnd = matches.position("theta");
+      size_t matchOffset = matches.position("theta");
       const std::string theta = matches["theta"].str();
-      const std::string descPreTheta = desc.substr(0, matchOffsetElseOnePastEnd);
+      const std::string descPreTheta = desc.substr(0, matchOffset);
       const std::string descPostTheta =
-          desc.substr(matchOffsetElseOnePastEnd + theta.length(), std::string::npos);
+          desc.substr(matchOffset + theta.length(), std::string::npos);
       cleanDesc = descPreTheta + "?" + descPostTheta;
       thetaByDesc[desc] = theta;
     }
@@ -61,7 +59,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
     if (groupsByDesc[cleanDesc].empty())
-      groupsByDesc[cleanDesc] = desc.substr(0, matchOffsetElseOnePastEnd - 1);
+      groupsByDesc[cleanDesc] = desc.substr(0, desc.find("th") - 1);
 
     // Assign this description to the group it belongs to
     groupsByDesc[desc] = groupsByDesc[cleanDesc];
