@@ -1,10 +1,12 @@
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 
 #include <QObject>
+#include <QApplication>
 
 #ifdef Q_OS_WIN
 #include <windows.h> // for Sleep
@@ -25,7 +27,14 @@ void qSleep(int ms) {
 
 namespace MantidQt {
 namespace API {
-
+	namespace {
+		using Mantid::Kernel::make_unique;
+		std::unique_ptr<QApplication> createApplication() {
+			int argc = 1;
+			char *argv = "DummyTestingApplication";
+			return make_unique<QApplication>(argc, &argv);
+		}
+	}
 class EXPORT_OPT_MANTIDQT_COMMON FakeFindFilesThread : public FindFilesWorker {
   Q_OBJECT
 public:
@@ -39,6 +48,7 @@ public:
 protected:
   void run() override {
     qSleep(m_milliseconds);
+	QCoreApplication::processEvents();
     emit finished(m_results);
   }
 
@@ -51,7 +61,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
   Q_OBJECT
 public slots:
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(const FindFilesSearchResults &result) {
+  void inspectThreadResult(const FindFilesSearchResults& result) {
     m_results = result;
   }
 
@@ -63,8 +73,10 @@ signals:
 
 public:
   FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
+	  qRegisterMetaType<FindFilesSearchParameters>();
+	  qRegisterMetaType<FindFilesSearchResults>();
     connect(this, SIGNAL(fileFindingFinished()), this,
-            SLOT(setSignalRecieved()), Qt::DirectConnection);
+            SLOT(setSignalRecieved()));
   }
 
   FindFilesSearchResults getResults() { return m_results; };

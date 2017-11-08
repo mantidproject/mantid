@@ -7,6 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <QApplication>
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
@@ -51,7 +52,7 @@ void FindFilesWorker::run() {
 
     const auto result = createFindFilesSearchResult(
         error, filenames, valueForProperty.toStdString());
-    emit finished(result);
+	finishSearching(result);
     return;
   }
 
@@ -110,7 +111,7 @@ void FindFilesWorker::run() {
 
   auto result = createFindFilesSearchResult(error, filenames,
                                             valueForProperty.toStdString());
-  emit finished(result);
+  finishSearching(result);
 }
 
 /**
@@ -155,6 +156,20 @@ FindFilesWorker::getFilesFromAlgorithm() {
   return std::make_pair(filenames, valueForProperty);
 }
 
+/** Finish searching by emitting the results
+ * 
+ * @param result :: the result to return to the main thread.
+ */
+void FindFilesWorker::finishSearching(const FindFilesSearchResults& result) {
+	// Before emitting our search results, we need to check if we have recieved
+	// a signal to disconnect as this search is no longer relevent. By calling
+	// process events here we ensure that if the result is no longer needed the
+	// emitted signal is just ignored.
+	QCoreApplication::processEvents();
+	emit finished(result);
+	QCoreApplication::sendPostedEvents();
+}
+
 /** Create a struct containing the results of the search.
  *
  * This will contain a string with an error (empty string if no error occured),
@@ -166,11 +181,15 @@ FindFilesWorker::getFilesFromAlgorithm() {
  * @return A struct holding the results of this search.
  */
 FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(
-    const std::string &error, const std::vector<std::string> &filenames,
-    const std::string &valueForProperty) {
-  FindFilesSearchResults results;
-  results.error = error;
-  results.filenames = filenames;
-  results.valueForProperty = valueForProperty;
-  return results;
+	const std::string &error, const std::vector<std::string> &filenames,
+	const std::string &valueForProperty) {
+	FindFilesSearchResults results;
+	results.error = error;
+	results.filenames = filenames;
+	results.valueForProperty = valueForProperty;
+	return results;
+}
+
+void FindFilesWorker::disconnectWorker() {
+	this->disconnect();
 }

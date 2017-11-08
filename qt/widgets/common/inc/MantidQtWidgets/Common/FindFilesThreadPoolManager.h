@@ -4,6 +4,8 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
+#include <QObject>
+#include <QSharedPointer>
 #include <QRunnable>
 #include <QString>
 #include <QThreadPool>
@@ -17,7 +19,8 @@ namespace API {
 /**
  * A small helper class to hold the thread pool
  */
-class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager {
+class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager : public QObject {
+	Q_OBJECT
   typedef std::function<FindFilesWorker *(const FindFilesSearchParameters &)>
       ThreadAllocator;
 
@@ -35,16 +38,24 @@ public:
   /// Block execution and wait for all threads to finish processing
   void waitForDone();
 
+signals:
+  // signal emitted to cancel any already running workers
+  void disconnectWorkers();
+
+private slots:
+  // Handle when a search is finished
+  void searchFinished();
+
 private:
-  /// Cancel the currently running thread
+  /// cancel the currently running worker
   void cancelWorker(const QObject *parent);
 
-  /// Handle to the currently executing worker thread
-  FindFilesWorker *m_currentWorker;
   /// Handle to a local QThread pool
   static QThreadPool m_pool;
   /// Handle to the allocator function for creating new worker threads
   ThreadAllocator m_workerAllocator;
+  /// Flag set if a search is currently running
+  bool m_searchIsRunning;
 };
 
 } // namespace API

@@ -7,6 +7,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <QCoreApplication>
+#include <QSharedPointer>
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
@@ -17,8 +19,12 @@ using namespace MantidQt::API;
 
 QThreadPool FindFilesThreadPoolManager::m_pool;
 
-FindFilesThreadPoolManager::FindFilesThreadPoolManager()
-    : m_currentWorker{nullptr} {
+FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
+	qRegisterMetaType<FindFilesSearchParameters>();
+	qRegisterMetaType<FindFilesSearchResults>();
+
+  // Default allocator function. This just creates a new worker
+  // on the heap.
   m_workerAllocator = [](const FindFilesSearchParameters &parameters) {
     return new FindFilesWorker(parameters);
   };
@@ -45,23 +51,31 @@ void FindFilesThreadPoolManager::createWorker(
   if (!parent)
     return;
 
-  m_currentWorker = m_workerAllocator(parameters);
+  auto currentWorker = m_workerAllocator(parameters);
 
-  // Hook up slots for when the thread finishes. By default Qt uses queued
-  // connections when connecting signals/slots between threads. Instead here
-  // we explicitly choose to use a direct connection so the found result is
-  // immediately returned to the GUI thread.
-  parent->connect(m_currentWorker,
-                  SIGNAL(finished(const FindFilesSearchResults &)), parent,
-                  SLOT(inspectThreadResult(const FindFilesSearchResults &)),
-                  Qt::DirectConnection);
-  parent->connect(m_currentWorker,
-                  SIGNAL(finished(const FindFilesSearchResults &)), parent,
-                  SIGNAL(fileFindingFinished()), Qt::DirectConnection);
+  // Hook up slots for when the thread finishes.
+  parent->connect(currentWorker,
+                  SIGNAL(finished(const FindFilesSearchResults&)), parent,
+                  SLOT(inspectThreadResult(const FindFilesSearchResults&)),
+                  Qt::QueuedConnection);
 
+  parent->connect(currentWorker,
+                  SIGNAL(finished(const FindFilesSearchResults&)), parent,
+                  SIGNAL(fileFindingFinished()),
+				  Qt::QueuedConnection);
+  
+  this->connect(currentWorker,
+			  SIGNAL(finished(const FindFilesSearchResults&)), this,
+			  SLOT(searchFinished()),
+			  Qt::QueuedConnection);
+  
+  this->connect(this, SIGNAL(disconnectWorkers()), 
+	  currentWorker, SLOT(disconnectWorker()), Qt::QueuedConnection);
+  
   // pass ownership to the thread pool
-  // we do not need to worry about deleting m_currentWorker
-  m_pool.start(m_currentWorker);
+  // we do not need to worry about deleting currentWorker
+  m_pool.start(currentWorker);
+  m_searchIsRunning = true;
 }
 
 /** Cancel the currently running worker
@@ -72,16 +86,15 @@ void FindFilesThreadPoolManager::createWorker(
  * @param parent :: the parent widget to disconnect signals for.
  */
 void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
-  if (!isSearchRunning())
-    return;
-
-  // Just disconnect any signals from the worker. We leave the worker to
-  // continue running in the background because 1) terminating it directly
-  // is dangerous (we have no idea what it's currently doing from here) and 2)
-  // waiting for it to finish before starting a new thread locks up the GUI
-  // event loop.
-  m_currentWorker->disconnect(parent);
-  m_currentWorker = nullptr;
+	// Just disconnect any signals from the worker. We leave the worker to
+	// continue running in the background because 1) terminating it directly
+	// is dangerous (we have no idea what it's currently doing from here) and 2)
+	// waiting for it to finish before starting a new thread locks up the GUI
+	// event loop.
+  QCoreApplication::processEvents();
+  emit disconnectWorkers();
+  m_searchIsRunning = false;
+  QCoreApplication::sendPostedEvents();
 }
 
 /** Check if a search is currently executing.
@@ -89,16 +102,21 @@ void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
  * @returns true if the current worker object is null
  */
 bool FindFilesThreadPoolManager::isSearchRunning() const {
-  return m_currentWorker != nullptr;
+  return m_searchIsRunning;
 }
 
 /** Wait for all threads in the pool to finish running.
  *
- * Warning: This call will block execution unitl ALL threads in the pool
+ * Warning: This call will block execution until ALL threads in the pool
  * have finished executing. Using this in a GUI thread will cause the GUI
  * to freeze up.
  */
 void FindFilesThreadPoolManager::waitForDone() {
   m_pool.waitForDone();
-  m_currentWorker = nullptr;
+}
+
+/** Mark the search as being finished.
+ */
+void FindFilesThreadPoolManager::searchFinished() {
+	m_searchIsRunning = false;
 }

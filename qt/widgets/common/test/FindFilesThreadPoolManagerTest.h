@@ -1,6 +1,7 @@
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 
+
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
 
@@ -13,6 +14,7 @@ using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FakeFindFilesThread;
+using MantidQt::API::createApplication;
 
 class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:
@@ -25,9 +27,17 @@ public:
     delete suite;
   }
 
+  void setUp() {
+	  m_app = createApplication();
+  }
+
+  void tearDown() {
+	  m_app.reset(nullptr);
+  }
+
   void test_find_single_file() {
     // Arrange
-    FakeMWRunFiles widget;
+    FakeMWRunFiles* widget = new FakeMWRunFiles();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -49,15 +59,16 @@ public:
     poolManager.setAllocator(fakeAllocator);
 
     // Act
-    poolManager.createWorker(&widget, parameters);
+    poolManager.createWorker(widget, parameters);
     // Block and wait for all the threads to process
     poolManager.waitForDone();
+	QApplication::processEvents();
 
     // Assert
-    const auto results = widget.getResults();
+    const auto results = widget->getResults();
 
     TS_ASSERT(!poolManager.isSearchRunning())
-    TS_ASSERT(widget.isFinishedSignalRecieved())
+    TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
@@ -109,6 +120,7 @@ public:
 
     // Block and wait for all the threads to process
     poolManager.waitForDone();
+	QApplication::processEvents();
 
     // Assert
     const auto results = widget.getResults();
@@ -119,6 +131,9 @@ public:
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
   }
+
+  private:
+	  std::unique_ptr<QApplication> m_app;
 };
 
 #endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST */

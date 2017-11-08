@@ -6,9 +6,11 @@
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
 #include <QThreadPool>
+#include <QCoreApplication>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
+using MantidQt::API::createApplication;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
@@ -23,6 +25,14 @@ public:
     return new FindFilesWorkerTest();
   }
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
+
+  void setUp() {
+	  m_app = createApplication();
+  }
+
+  void tearDown() {
+	  m_app.reset(nullptr);
+  }
 
   void test_find_file_with_algorithm() {
     // Arrange
@@ -130,10 +140,10 @@ private:
     widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
                     widget,
                     SLOT(inspectThreadResult(const FindFilesSearchResults &)),
-                    Qt::DirectConnection);
+                    Qt::QueuedConnection);
     widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
                     widget, SIGNAL(fileFindingFinished()),
-                    Qt::DirectConnection);
+                    Qt::QueuedConnection);
     return widget;
   }
 
@@ -141,7 +151,10 @@ private:
     auto threadPool = QThreadPool::globalInstance();
     threadPool->start(worker);
     threadPool->waitForDone();
+	QCoreApplication::processEvents();
   }
+
+  std::unique_ptr<QApplication> m_app;
 };
 
 #endif /* MANTIDQT_API_FINDFILESWORKERTEST */
