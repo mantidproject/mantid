@@ -27,14 +27,15 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
   std::map<std::string, std::string> descriptionToTheta;
 
   // Iterate over the input and build the maps
-  for (auto const& runDescriptionPair : searchResults) {
+  for (auto const &runDescriptionPair : searchResults) {
     const auto run = runDescriptionPair.first;
     const auto description = runDescriptionPair.second.description;
-    const auto cleanDescription = description;
-    const auto groupName = description;
+    auto groupName = description;
+    auto cleanDescription = description;
 
     static boost::regex descriptionFormatRegex(
-        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) theta)(?<postTheta>.*)");
+        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) "
+        "theta)(?<postTheta>.*)");
     boost::smatch matches;
     if (boost::regex_search(description, matches, descriptionFormatRegex)) {
       // We have theta. Let's get a clean description
@@ -71,7 +72,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
   std::vector<std::map<std::string, std::string>>
       errors; // will remain empty for now
   TransferResults results(rows, errors);
-  for (const auto& runDescriptionPair : descriptionToRun) {
+  for (const auto &runDescriptionPair : descriptionToRun) {
     // set up our successful run into table-ready format.
     std::map<std::string, std::string> row;
     row[ReflTableSchema::RUNS] = runDescriptionPair.second;
