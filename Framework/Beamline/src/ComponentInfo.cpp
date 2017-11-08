@@ -472,9 +472,9 @@ bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
 }
 
 /**
- * Get the number of scans for detector index
+ * Get the number of scans for component index
  * @param index : Detector Index
- * @return Number of scans for detector index
+ * @return Number of scans for component index
  */
 size_t ComponentInfo::scanCount(const size_t index) const {
   if (!m_scanCounts) {
