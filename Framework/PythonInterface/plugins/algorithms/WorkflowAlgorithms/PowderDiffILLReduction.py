@@ -183,7 +183,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=theta_ws, Target='SignedTheta', OrderAxis=False)
         theta_axis = mtd[theta_ws].getAxis(1).extractValues()
         DeleteWorkspace(theta_ws)
-        first_positive_theta = np.where(theta_axis > 0)[0][0]
+        first_positive_theta = int(np.where(theta_axis > 0)[0][0])
 
         if self._crop_negative:
             self.log().information('First positive 2theta at workspace index: ' + str(first_positive_theta))
