@@ -187,6 +187,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
  * scans. */
 void DetectorInfo::setScanInterval(
     const size_t index, const std::pair<int64_t, int64_t> &interval) {
+  // Time intervals must be set up before adding time sensitive
+  // positions/rotations hence check below.
   checkNoTimeDependence();
   checkScanInterval(interval);
   if (!m_scanIntervals)
@@ -302,6 +304,7 @@ bool DetectorInfo::hasComponentInfo() const {
 }
 
 double DetectorInfo::l1() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error(
         "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
@@ -310,6 +313,7 @@ double DetectorInfo::l1() const {
 }
 
 Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine sourcePosition");
@@ -318,6 +322,7 @@ Eigen::Vector3d DetectorInfo::sourcePosition() const {
 }
 
 Eigen::Vector3d DetectorInfo::samplePosition() const {
+  // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
                              "cannot determine samplePosition");

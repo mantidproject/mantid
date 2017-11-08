@@ -38,7 +38,8 @@ ComponentInfo::ComponentInfo(
       m_isStructuredBank(std::move(isStructuredBank)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
-      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex),
+      m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
@@ -268,7 +269,6 @@ void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
     m_positions.access()[offsetIndex] += offset;
   }
 
-  // TODO
   m_positions.access()[linearIndex(index)] = newPosition;
 }
 
@@ -401,7 +401,6 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
 
 Eigen::Vector3d ComponentInfo::sourcePosition() const {
-  // TODO, this could be time dependent!
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
@@ -409,7 +408,6 @@ Eigen::Vector3d ComponentInfo::sourcePosition() const {
 }
 
 Eigen::Vector3d ComponentInfo::samplePosition() const {
-  // TODO, this could be time dependent!
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
