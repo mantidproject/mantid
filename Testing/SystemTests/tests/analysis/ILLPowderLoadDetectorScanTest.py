@@ -17,19 +17,10 @@ class ILLPowderLoadDetectorScanTest(stresstesting.MantidStressTest):
         return ["967076.nxs"]
 
     def setUp(self):
-        # cache default instrument and datadirs
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        self.datadirs = config['datasearch.directories']
 
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D20'
         config.appendDataSearchSubDir('ILL/D20/')
-
-    def tearDown(self):
-        config['default.facility'] = self.facility
-        config['default.instrument'] = self.instrument
-        config['datasearch.directories'] = self.datadirs
 
     def d20_detector_scan_test(self):
         # tests the loading for D20 calibration run (detector scan)
@@ -52,4 +43,3 @@ class ILLPowderLoadDetectorScanTest(stresstesting.MantidStressTest):
     def runTest(self):
 
         self.d20_detector_scan_test()
-        self.tearDown()

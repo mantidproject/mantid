@@ -18,7 +18,8 @@ class ILLPowderDiffReductionTest(stresstesting.MantidStressTest):
         self.setUp()
 
     def setUp(self):
-        config.setFacility('ILL')
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D20'
         config.appendDataSearchSubDir('ILL/D20/')
 
     def requiredFiles(self):

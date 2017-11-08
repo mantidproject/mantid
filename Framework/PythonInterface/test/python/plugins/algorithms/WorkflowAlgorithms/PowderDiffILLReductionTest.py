@@ -10,8 +10,9 @@ class PowderDiffILLReductionTest(unittest.TestCase):
     _runs = '967087:967088'
 
     def setUp(self):
-        config.appendDataSearchSubDir('ILL/D20')
-        config.setFacility('ILL')
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D20'
+        config.appendDataSearchSubDir('ILL/D20/')
 
     def tearDown(self):
         mtd.remove('red')
