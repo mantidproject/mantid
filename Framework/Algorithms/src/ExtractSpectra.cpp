@@ -13,7 +13,6 @@
 #include "MantidHistogramData/Slice.h"
 
 #include <algorithm>
-#include <numeric>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries
@@ -26,6 +25,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
@@ -96,14 +96,9 @@ void ExtractSpectra::init() {
  * input workspace
  */
 void ExtractSpectra::exec() {
-  // Get the input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
   m_histogram = m_inputWorkspace->isHistogramData();
-  // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
-  eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
-
-  // Retrieve and validate the input properties
   this->checkProperties();
 
   ExtractSpectra2 extract;
@@ -120,15 +115,12 @@ void ExtractSpectra::exec() {
       prop->createTemporaryValue();
   extract.execute();
   m_inputWorkspace = extract.getProperty("OutputWorkspace");
+  setProperty("OutputWorkspace", m_inputWorkspace);
 
-  if (isDefault("XMin") && isDefault("XMax")) {
-    setProperty("OutputWorkspace", m_inputWorkspace);
+  if (isDefault("XMin") && isDefault("XMax"))
     return;
-  }
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
-  std::iota(m_workspaceIndexList.begin(), m_workspaceIndexList.end(), 0);
-
   if (eventW)
     this->execEvent();
   else
@@ -138,22 +130,17 @@ void ExtractSpectra::exec() {
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
   int size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
-
   Progress prog(this, 0.0, 1.0, size);
-  // Loop over the required workspace indices, copying in the desired bins
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
       m_inputWorkspace->setHistogram(
-          i, HistogramData::slice(m_inputWorkspace->histogram(i), m_minX,
-                                  m_maxX - 1));
+          i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - 1));
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
     propagateBinMasking(*m_inputWorkspace, i);
     prog.report();
   }
-
-  setProperty("OutputWorkspace", m_inputWorkspace);
 }
 
 namespace { // anonymous namespace
@@ -192,11 +179,10 @@ void ExtractSpectra::execEvent() {
   if (isEmpty(maxX_val))
     maxX_val = eventW->getTofMax();
 
-  HistogramData::BinEdges binEdges(2);
+  BinEdges binEdges(2);
   if (m_commonBoundaries) {
     auto &oldX = m_inputWorkspace->x(0);
-    binEdges =
-        HistogramData::BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
+    binEdges = BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
   if (m_maxX - m_minX < 2) {
     // create new output X axis
@@ -241,8 +227,6 @@ void ExtractSpectra::execEvent() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  setProperty("OutputWorkspace", std::move(eventW));
 }
 
 /// Propagate bin masking if there is any.
@@ -278,7 +262,8 @@ void ExtractSpectra::checkProperties() {
     }
     if ((m_minX == m_maxX ||
          (m_inputWorkspace->isHistogramData() && m_maxX == m_minX + 1)) &&
-        m_commonBoundaries && eventW == nullptr) {
+        m_commonBoundaries &&
+        !boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace)) {
       g_log.error("The X range given lies entirely within a single bin");
       throw std::out_of_range(
           "The X range given lies entirely within a single bin");
