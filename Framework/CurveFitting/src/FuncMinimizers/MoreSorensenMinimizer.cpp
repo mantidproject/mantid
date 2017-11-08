@@ -171,7 +171,7 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param nd :: The 2-norm of d.
  *  @param options :: The options.
  */
-void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J,
+void MoreSorensenMinimizer::solveSubproblem(const DoubleFortranMatrix &J,
                                          const DoubleFortranVector &f,
                                          const DoubleFortranMatrix &hf,
                                          double Delta, DoubleFortranVector &d,
@@ -312,7 +312,7 @@ void MoreSorensenMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options) {
-  moreSorensen(J, f, hf, Delta, d, normd, options);
+  solveSubproblem(J, f, hf, Delta, d, normd, options);
 }
 
 } // namespace FuncMinimisers
