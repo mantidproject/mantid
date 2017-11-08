@@ -221,7 +221,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     return;
 
   setNumberOfDetectorGroups(NVectors);
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
+  m_indexInfo =
+      Kernel::make_unique<Indexing::IndexInfo>(NVectors, storageMode());
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -237,7 +238,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
-  Indexing::IndexInfo indices(NVectors);
+  Indexing::IndexInfo indices(NVectors, storageMode());
   // Empty SpectrumDefinitions to indicate no default mapping to detectors.
   indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(NVectors));
   return initialize(indices, histogram);
