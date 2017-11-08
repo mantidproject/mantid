@@ -77,5 +77,10 @@ class PowderDiffILLReductionTest(unittest.TestCase):
         self.assertAlmostEquals(red.readY(0)[1400],0.00055,5)
         self.assertAlmostEquals(red.readY(1)[2100],0.00053,5)
 
+    def test_crop_zero_counting_cells(self):
+        red = PowderDiffILLReduction(Run=self._runs,ZeroCountingCells='Crop')
+        self.assertTrue(red)
+        self.assertEquals(red.blocksize(), 3002)
+
 if __name__ == '__main__':
     unittest.main()

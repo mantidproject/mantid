@@ -4,14 +4,12 @@ from mantid.simpleapi import LoadILLDiffraction
 from mantid import config
 
 
-# This is a unit-test actually, but takes too long for a unit-test,
-# so is formulated as a system test.
 # TODO: Once the nexus saver for a scanned workspace is implemented,
 # replace the assertions with compare workspaces with the reference
-class LoadILLDiffractionTest(stresstesting.MantidStressTest):
+class ILLPowderLoadDetectorScanTest(stresstesting.MantidStressTest):
 
     def __init__(self):
-        super(LoadILLDiffractionTest, self).__init__()
+        super(ILLPowderLoadDetectorScanTest, self).__init__()
         self.setUp()
 
     def requiredFiles(self):
@@ -54,5 +52,4 @@ class LoadILLDiffractionTest(stresstesting.MantidStressTest):
     def runTest(self):
 
         self.d20_detector_scan_test()
-
         self.tearDown()
