@@ -1,8 +1,10 @@
 #pylint: disable=W0633,R0913,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
+import csv
 import os
-try: # python3
+try:
+    # python3
     from urllib.request import urlopen
     from urllib.error import URLError
 except ImportError:
@@ -780,3 +782,55 @@ def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):
         return False
 
     return True
+
+
+def write_pre_process_record(file_name, record_dict):
+    """write the pre-processed record file
+    :param file_name:
+    :param record_dict: dictionary related to record
+    :return:
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    assert isinstance(record_dict, dict), 'One entry of record {0} must be given in a dictionary but not a {1}.' \
+                                          ''.format(record_dict, type(record_dict))
+
+    # write record
+    is_new_file = not os.path.exists(file_name)
+
+    with open(file_name, 'w') as csv_file:
+        field_names = record_dict.keys()
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+
+        # write header
+        if is_new_file:
+            writer.writeheader()
+
+        # write row
+        writer.writerow(record_dict)
+    # END-WITH
+
+    return
+
+
+def read_pre_process_record(file_name):
+    """ Read a pre-processed scan record file
+    :param file_name:
+    :return:
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    if os.path.exists(file_name) is False:
+        raise RuntimeError('Pre-processed scan record file {0} does not exist.'.format(file_name))
+
+    # load file
+    record_list = list()
+    with open(file_name, 'r') as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            record_list.append(row)
+    # END-WITH
+
+    return record_list

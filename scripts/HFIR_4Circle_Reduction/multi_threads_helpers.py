@@ -1,5 +1,6 @@
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
+import os
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
@@ -160,6 +161,11 @@ class IntegratePeaksThread(QThread):
         self._numBgPtRight = num_pt_bg_right
         self._scaleFactor = scale_factor
 
+        # other about preprocessed options
+        self._forceMergeScans = False
+        self._checkPreprocessedScans = True
+        self._preProcessedDir = None
+
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_message)
@@ -193,12 +199,12 @@ class IntegratePeaksThread(QThread):
             if merged is False:
                 merged_ws_name = 'X'
                 try:
-                    # TODO/TODO/ISSUE/NOW - rewrite and processed_dir shall be set from caller
-                    status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
-                                                                                    scan_no=scan_number,
-                                                                                    pt_num_list=pt_number_list,
-                                                                                    rewrite=True,
-                                                                                    preprocessed_dir=None)
+                    status, ret_tup = \
+                        self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
+                                                                      scan_no=scan_number,
+                                                                      pt_num_list=pt_number_list,
+                                                                      rewrite=self._forceMergeScans,
+                                                                      preprocessed_dir=self._preProcessedDir)
 
                     if status:
                         merged_ws_name = str(ret_tup[0])
@@ -343,6 +349,42 @@ class IntegratePeaksThread(QThread):
 
         return
 
+    def set_force_write(self, flag=True):
+        """
+        set whether to force to merge and create a new workspace
+        :param flag:
+        :return:
+        """
+        # check
+        assert isinstance(flag, bool), 'Flag to force merge to a workspace must be a bool but not a {0}.'.format(type(flag))
+
+        self._forceMergeScans = flag
+
+        return
+
+    def set_pre_process_options(self, option_to_use, pre_process_dir):
+        """
+        set the pre-process options
+        :param option_to_use:
+        :param pre_process_dir:
+        :return:
+        """
+        # check
+        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
+                                                ''.format(type(option_to_use))
+
+        self._checkPreprocessedScans = option_to_use
+
+        if self._checkPreprocessedScans:
+            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
+                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
+            if os.path.exists(pre_process_dir) is False:
+                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
+            self._preProcessedDir = pre_process_dir
+        # END-IF
+
+        return
+
 
 class MergePeaksThread(QThread):
     """A thread to integrate peaks
@@ -384,6 +426,11 @@ class MergePeaksThread(QThread):
         if md_file_list is not None:
             self._outputMDFileList = md_file_list[:]
 
+        # other about preprocessed options
+        self._forceMergeScans = True
+        self._checkPreprocessedScans = False
+        self._preProcessedDir = None
+
         # link signals
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
         self.saveMsgSignal.connect(self._mainWindow.update_file_name)
@@ -396,6 +443,43 @@ class MergePeaksThread(QThread):
         :return:
         """
         self.wait()
+
+        return
+
+
+    def set_force_write(self, flag=True):
+        """
+        set whether to force to merge and create a new workspace
+        :param flag:
+        :return:
+        """
+        # check
+        assert isinstance(flag, bool), 'Flag to force merge to a workspace must be a bool but not a {0}.'.format(type(flag))
+
+        self._forceMergeScans = flag
+
+        return
+
+    def set_pre_process_options(self, option_to_use, pre_process_dir):
+        """
+        set the pre-process options
+        :param option_to_use:
+        :param pre_process_dir:
+        :return:
+        """
+        # check
+        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
+                                                ''.format(type(option_to_use))
+
+        self._checkPreprocessedScans = option_to_use
+
+        if self._checkPreprocessedScans:
+            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
+                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
+            if os.path.exists(pre_process_dir) is False:
+                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
+            self._preProcessedDir = pre_process_dir
+        # END-IF
 
         return
 
