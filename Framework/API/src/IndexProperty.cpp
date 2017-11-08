@@ -42,25 +42,15 @@ IndexProperty::operator Indexing::SpectrumIndexSet() const {
 }
 
 Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
-  MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      m_workspaceProp.getWorkspace());
-  if (!wksp)
-    throw std::runtime_error("Invalid workspace type provided to "
-                             "IndexProperty. Must be convertible to "
-                             "MatrixWorkspace.");
-
-  const auto &indexInfo = wksp->indexInfo();
+  const auto &indexInfo = getIndexInfoFromWorkspace();
   auto type = m_indexTypeProp.selectedType();
 
   if (m_value.empty()) {
     return indexInfo.makeIndexSet();
   } else {
-    auto res = std::minmax_element(m_value.cbegin(), m_value.cend());
-    auto min = *res.first;
-    auto max = *res.second;
-
+    auto min = m_value.front();
+    auto max = m_value.back();
     auto isRange = (max - min) == static_cast<int>(m_value.size() - 1);
-
     if (isRange) {
       switch (type) {
       case IndexType::WorkspaceIndex:
@@ -89,8 +79,38 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   return m_indices;
 }
 
+Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
+  const auto &indexInfo = getIndexInfoFromWorkspace();
+  if (m_value.empty())
+    return indexInfo;
+  switch (m_indexTypeProp.selectedType()) {
+  case IndexType::WorkspaceIndex:
+    return {std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
+                                                       m_value.end()),
+            indexInfo};
+  case IndexType::SpectrumNum:
+    return {
+        std::vector<Indexing::SpectrumNumber>(m_value.begin(), m_value.end()),
+        indexInfo};
+  default:
+    throw std::runtime_error(
+        "IndexProperty::getFilteredIndexInfo -- unsupported index type");
+  }
+}
+
 std::string IndexProperty::generatePropertyName(const std::string &name) {
   return name + "IndexSet";
 }
+
+const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
+  auto wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      m_workspaceProp.getWorkspace());
+  if (!wksp)
+    throw std::runtime_error("Invalid workspace type provided to "
+                             "IndexProperty. Must be convertible to "
+                             "MatrixWorkspace.");
+  return wksp->indexInfo();
+}
+
 } // namespace API
 } // namespace Mantid

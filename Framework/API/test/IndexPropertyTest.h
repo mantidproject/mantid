@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -100,6 +101,22 @@ public:
       TS_ASSERT_EQUALS(indexSet[i], input[i] - 1);
   }
 
+  void testIndexOrderOfFullRangePreserved() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    m_wkspProp = ws;
+    IndexTypeProperty itypeProp("IndexType", IndexType::WorkspaceIndex);
+    IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
+    std::vector<int> input{0, 2, 1};
+    indexProp = input;
+
+    auto indexSet = indexProp.getIndices();
+
+    TS_ASSERT_EQUALS(indexSet.size(), 3);
+    TS_ASSERT_EQUALS(indexSet[0], 0);
+    TS_ASSERT_EQUALS(indexSet[1], 2);
+    TS_ASSERT_EQUALS(indexSet[2], 1);
+  }
+
   void testInvalidWhenIndicesOutOfRange() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     m_wkspProp = ws;
@@ -131,6 +148,40 @@ public:
     std::string propName = "InputWorkspace";
     TS_ASSERT_EQUALS(propName + "IndexSet",
                      IndexProperty::generatePropertyName(propName));
+  }
+
+  void testGetFilteredIndexInfo_WorkspaceIndex() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    m_wkspProp = ws;
+    IndexTypeProperty itypeProp("IndexType", IndexType::WorkspaceIndex);
+    IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
+
+    auto indexInfo = indexProp.getFilteredIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+
+    std::vector<int> input{1, 2};
+    indexProp = input;
+    indexInfo = indexProp.getFilteredIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 3);
+  }
+
+  void testGetFilteredIndexInfo_SpectrumNum() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    m_wkspProp = ws;
+    IndexTypeProperty itypeProp("IndexType", IndexType::SpectrumNum);
+    IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
+
+    auto indexInfo = indexProp.getFilteredIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+
+    std::vector<int> input{1, 2};
+    indexProp = input;
+    indexInfo = indexProp.getFilteredIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 2);
   }
 
 private:
