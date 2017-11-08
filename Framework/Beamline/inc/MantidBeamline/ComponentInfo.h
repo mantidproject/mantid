@@ -61,10 +61,11 @@ private:
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   bool m_isSyncScan{true};
-  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{nullptr};
+  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
+      nullptr};
   /// For (component index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
-  void failIfScanning() const;
+  void failIfDetectorInfoScanning() const;
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void initScanCounts();
   void initScanIntervals();
@@ -98,12 +99,18 @@ public:
   }
 
   Eigen::Vector3d position(const size_t componentIndex) const;
+  Eigen::Vector3d position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
+  Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
   Eigen::Vector3d relativePosition(const size_t componentIndex) const;
   Eigen::Quaterniond relativeRotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex,
                    const Eigen::Vector3d &newPosition);
+  void setPosition(const std::pair<size_t, size_t> index,
+                   const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex,
+                   const Eigen::Quaterniond &newRotation);
+  void setRotation(const std::pair<size_t, size_t> index,
                    const Eigen::Quaterniond &newRotation);
 
   size_t parent(const size_t componentIndex) const;

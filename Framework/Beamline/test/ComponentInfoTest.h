@@ -349,16 +349,11 @@ public:
     TS_ASSERT(info.rotation(2).isApprox(originalDetRotations.at(2)));
   }
 
-  void test_write_rotation() {
+  template <typename IndexType>
+  void do_test_write_rotation(ComponentInfo &info, const IndexType rootIndex,
+                              const IndexType detectorIndex) {
     using namespace Eigen;
-    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
-    // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
-    // Arguments to ComponentInfo for geometric aspects
-
-    const size_t rootIndex = 4;
-    const size_t detectorIndex = 1;
     const auto theta = M_PI / 2;      // 90 degree rotation
     Eigen::Vector3d axis = {0, 1, 0}; // rotate around y axis
     const auto center =
@@ -390,16 +385,12 @@ public:
                      theta + std::asin(detOriginalRotation.y()) * 2, 1e-4);
   }
 
-  void test_write_rotation_updates_positions_correctly() {
+  template <typename IndexType>
+  void
+  do_write_rotation_updates_positions_correctly(ComponentInfo &info,
+                                                const IndexType rootIndex,
+                                                const IndexType detectorIndex) {
     using namespace Eigen;
-    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
-
-    // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
-    // Arguments to ComponentInfo for geometric aspects
-
-    const size_t rootIndex = 4;
-    const size_t detectorIndex = 1;
     const auto theta = M_PI / 2;                  // 90 degree rotation
     Eigen::Vector3d axis = {0, 1, 0};             // rotate around y axis
     const auto center = info.position(rootIndex); // rotate around root center.
@@ -442,6 +433,29 @@ public:
     TSM_ASSERT(
         "Rotate detector around origin = root centre. It should reposition!",
         detector2UpdatedPosition.isApprox(Vector3d{1, -1, -1}));
+  }
+
+  void test_write_rotation() {
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    size_t rootIndex = 4;
+    size_t detectorIndex = 1;
+    do_test_write_rotation(info, rootIndex, detectorIndex);
+  }
+
+  void test_write_rotation_updates_positions_correctly() {
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    // Arguments to ComponentInfo for geometric aspects
+
+    const size_t rootIndex = 4;
+    const size_t detectorIndex = 1;
+    do_write_rotation_updates_positions_correctly(info, rootIndex,
+                                                  detectorIndex);
   }
 
   void test_detector_indexes() {
@@ -642,53 +656,107 @@ public:
     TS_ASSERT_EQUALS(compInfo.scaleFactor(0), newFactor);
   }
 
-  void test_scan_count_no_scanning(){
-      ComponentInfo info;
-      TS_ASSERT_EQUALS(info.scanCount(0), 1);
+  void test_scan_count_no_scanning() {
+    ComponentInfo info;
+    TS_ASSERT_EQUALS(info.scanCount(0), 1);
   }
 
-  void test_isScanning(){
+  void test_isScanning() {
     auto infos = makeTreeExample();
     auto &compInfo = std::get<0>(infos);
 
-    TSM_ASSERT("No time indexed points added so should not be scanning", !compInfo.isScanning());
+    TSM_ASSERT("No time indexed points added so should not be scanning",
+               !compInfo.isScanning());
     // Add a scan interval
     compInfo.setScanInterval(std::pair<int64_t, int64_t>{1000, 1001});
-    TSM_ASSERT("No time indexed points added so should still not be scanning", !compInfo.isScanning());
+    TSM_ASSERT("No time indexed points added so should still not be scanning",
+               !compInfo.isScanning());
   }
 
-  void test_set_sync_interval_then_async_interval_throws(){
+  void test_set_sync_interval_then_async_interval_throws() {
     auto infos = makeTreeExample();
     auto &compInfo = std::get<0>(infos);
-      // Using the indexed overload implies a non-sync scan
-      std::pair<int64_t, int64_t> interval{1000, 1001};
-      // Set the scanning up to be synchronous (no index provided)
-      compInfo.setScanInterval(interval);
-      // Now try setting an asynchronous scan point.
-      TS_ASSERT_THROWS(compInfo.setScanInterval(0 /*index used*/, interval), std::runtime_error&);
+    // Using the indexed overload implies a non-sync scan
+    std::pair<int64_t, int64_t> interval{1000, 1001};
+    // Set the scanning up to be synchronous (no index provided)
+    compInfo.setScanInterval(interval);
+    // Now try setting an asynchronous scan point.
+    TS_ASSERT_THROWS(compInfo.setScanInterval(0 /*index used*/, interval),
+                     std::runtime_error &);
   }
 
-  void test_set_async_interval_then_sync_interval_throws(){
-      auto infos = makeTreeExample();
-      auto& compInfo = std::get<0>(infos);
-      // Using the indexed overload implies a non-sync scan
-      std::pair<int64_t, int64_t> interval{1000, 1001};
-      // Set the scanning up to be synchronous (no index provided)
-      compInfo.setScanInterval(0 /*index used*/, interval);
-      // Now try setting an asynchronous scan point.
-      TS_ASSERT_THROWS(compInfo.setScanInterval(interval), std::runtime_error&);
-  }
-
-  void test_set_scan_interval_sync_scan(){
+  void test_set_async_interval_then_sync_interval_throws() {
     auto infos = makeTreeExample();
     auto &compInfo = std::get<0>(infos);
-      auto interval = std::pair<int64_t, int64_t>{10000,10001};
-      compInfo.setScanInterval(interval);
-      auto outInterval = compInfo.scanInterval(std::pair<size_t, size_t>{0,0});
-      TS_ASSERT_EQUALS(interval, outInterval);
+    // Using the indexed overload implies a non-sync scan
+    std::pair<int64_t, int64_t> interval{1000, 1001};
+    // Set the scanning up to be synchronous (no index provided)
+    compInfo.setScanInterval(0 /*index used*/, interval);
+    // Now try setting an asynchronous scan point.
+    TS_ASSERT_THROWS(compInfo.setScanInterval(interval), std::runtime_error &);
   }
 
+  void test_set_scan_interval_sync_scan() {
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+    auto interval = std::pair<int64_t, int64_t>{10000, 10001};
+    compInfo.setScanInterval(interval);
+    auto outInterval1 = compInfo.scanInterval(std::pair<size_t, size_t>{0, 0});
+    auto outInterval2 = compInfo.scanInterval(std::pair<size_t, size_t>{1, 0});
+    TS_ASSERT_EQUALS(interval, outInterval1);
+    TS_ASSERT_EQUALS(interval, outInterval2);
+  }
 
+  void test_set_scan_interval_async_scan() {
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+    auto interval1 = std::pair<int64_t, int64_t>{10000, 10001};
+    auto interval2 = std::pair<int64_t, int64_t>{10001, 10002};
+    compInfo.setScanInterval(0, interval1);
+    compInfo.setScanInterval(1, interval2);
+    TS_ASSERT_EQUALS(interval1, compInfo.scanInterval({0, 0}));
+    TS_ASSERT_EQUALS(interval2, compInfo.scanInterval({1, 0}));
+  }
 
+  void test_setPosition_single_scan() {
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+    auto &detectorInfo = std::get<1>(infos);
+    Eigen::Vector3d newRootPosition{-1, -1, -1};
+    auto oldDetectorPos = compInfo.position({0, 0});
+    auto oldAssemblyPos = compInfo.position({3, 0});
+    Eigen::Vector3d delta =
+        newRootPosition - compInfo.position({compInfo.root(), 0});
+    compInfo.setPosition({compInfo.root(), 0}, newRootPosition);
+    // Check root moved as expected
+    TS_ASSERT_EQUALS(compInfo.position({compInfo.root(), 0}), newRootPosition);
+    // Check assembly moved as expected
+    TS_ASSERT_EQUALS(compInfo.position({3, 0}), oldAssemblyPos + delta);
+    // Check detector moved as expected
+    TS_ASSERT_EQUALS(compInfo.position({0, 0}), oldDetectorPos + delta);
+    // Check detector moved as expected (via DetectorInfo API)
+    TS_ASSERT_EQUALS(detectorInfo->position({0, 0}), oldDetectorPos + delta);
+  }
+
+  void test_setRotation_single_scan() {
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    const std::pair<size_t, size_t> rootIndex{4, 0};
+    const std::pair<size_t, size_t> detectorIndex{1, 0};
+    do_test_write_rotation(info, rootIndex, detectorIndex);
+  }
+
+  void test_setRotation_single_scan_updates_positions_correctly() {
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    const std::pair<size_t, size_t> rootIndex{4, 0};
+    const std::pair<size_t, size_t> detectorIndex{1, 0};
+    do_write_rotation_updates_positions_correctly(info, rootIndex,
+                                                  detectorIndex);
+  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

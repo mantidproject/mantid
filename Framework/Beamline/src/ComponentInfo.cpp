@@ -114,6 +114,7 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
 size_t ComponentInfo::size() const { return m_size; }
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+  checkNoTimeDependence();
   if (isDetector(componentIndex)) {
     return m_detectorInfo->position(componentIndex);
   }
@@ -121,12 +122,36 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   return (*m_positions)[rangesIndex];
 }
 
+Eigen::Vector3d
+ComponentInfo::position(const std::pair<size_t, size_t> &index) const {
+
+  const auto componentIndex = index.first;
+  if (isDetector(componentIndex)) {
+    // Time index info must be same between detector and component infos!
+    return m_detectorInfo->position(index);
+  }
+  const auto rangesIndex = compOffsetIndex(componentIndex);
+  return (*m_positions)[linearIndex({rangesIndex, index.second})];
+}
+
 Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
+  checkNoTimeDependence();
   if (isDetector(componentIndex)) {
     return m_detectorInfo->rotation(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
   return (*m_rotations)[rangesIndex];
+}
+
+Eigen::Quaterniond
+ComponentInfo::rotation(const std::pair<size_t, size_t> &index) const {
+  const auto componentIndex = index.first;
+  if (isDetector(componentIndex)) {
+    // Time index info must be same between detector and component infos!
+    return m_detectorInfo->rotation(index);
+  }
+  const auto rangesIndex = compOffsetIndex(componentIndex);
+  return (*m_rotations)[linearIndex({rangesIndex, index.second})];
 }
 
 /**
@@ -150,6 +175,7 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
  */
 Eigen::Vector3d
 ComponentInfo::relativePosition(const size_t componentIndex) const {
+  checkNoTimeDependence();
   size_t parentIndex = parent(componentIndex);
   if (parentIndex == componentIndex) {
     return position(componentIndex);
@@ -169,6 +195,7 @@ ComponentInfo::relativePosition(const size_t componentIndex) const {
  */
 Eigen::Quaterniond
 ComponentInfo::relativeRotation(const size_t componentIndex) const {
+  checkNoTimeDependence();
   size_t parentIndex = parent(componentIndex);
   if (parentIndex == componentIndex) {
     return rotation(componentIndex);
@@ -190,6 +217,7 @@ void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
   // This method is performance critical for some client code. Optimizations are
   // explained below.
+  checkNoTimeDependence();
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
@@ -200,8 +228,9 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   // Optimization: Split loop over detectors and other components.
   const auto range = detectorRangeInSubtree(componentIndex);
   if (!range.empty())
-    failIfScanning();
-  // Optimization: After failIfScanning() we know that the time index is always
+    failIfDetectorInfoScanning();
+  // Optimization: After failIfDetectorInfoScanning() we know that the time
+  // index is always
   // 0 so we use faster access with index pair instead of only detector index.
   for (const auto &index : range) {
     m_detectorInfo->setPosition({index, 0},
@@ -212,6 +241,35 @@ void ComponentInfo::setPosition(const size_t componentIndex,
     size_t offsetIndex = compOffsetIndex(index);
     m_positions.access()[offsetIndex] += offset;
   }
+}
+
+void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
+                                const Eigen::Vector3d &newPosition) {
+
+  auto componentIndex = index.first;
+  auto timeIndex = index.second;
+  if (isDetector(componentIndex)) {
+    return m_detectorInfo->setPosition(index, newPosition);
+  }
+  const Eigen::Vector3d offset = newPosition - position(index);
+
+  // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
+  // memory allocations.
+  // Optimization: Split loop over detectors and other components.
+  const auto range = detectorRangeInSubtree(componentIndex);
+  for (const auto &subIndex : range) {
+    m_detectorInfo->setPosition(
+        {subIndex, timeIndex},
+        m_detectorInfo->position({subIndex, timeIndex}) + offset);
+  }
+
+  for (const auto &index : componentRangeInSubtree(componentIndex)) {
+    size_t offsetIndex = compOffsetIndex(index);
+    m_positions.access()[offsetIndex] += offset;
+  }
+
+  // TODO
+  m_positions.access()[linearIndex(index)] = newPosition;
 }
 
 /**
@@ -229,6 +287,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &newRotation) {
   // This method is performance critical for some client code. Optimizations are
   // as in setRotation.
+  checkNoTimeDependence();
   if (isDetector(componentIndex))
     return m_detectorInfo->setRotation(componentIndex, newRotation);
 
@@ -240,7 +299,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
 
   const auto range = detectorRangeInSubtree(componentIndex);
   if (!range.empty())
-    failIfScanning();
+    failIfDetectorInfoScanning();
   for (const auto &index : range) {
     auto newPos =
         transform * (m_detectorInfo->position({index, 0}) - compPos) + compPos;
@@ -258,7 +317,43 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   }
 }
 
-void ComponentInfo::failIfScanning() const {
+void ComponentInfo::setRotation(const std::pair<size_t, size_t> index,
+                                const Eigen::Quaterniond &newRotation) {
+  const auto componentIndex = index.first;
+  const auto timeIndex = index.second;
+  if (isDetector(componentIndex))
+    return m_detectorInfo->setRotation(index, newRotation);
+
+  const Eigen::Vector3d compPos = position(index);
+  const Eigen::Quaterniond currentRotInv = rotation(index).inverse();
+  const Eigen::Quaterniond rotDelta =
+      (newRotation * currentRotInv).normalized();
+  auto transform = Eigen::Matrix3d(rotDelta);
+
+  const auto range = detectorRangeInSubtree(componentIndex);
+  for (const auto &subDetIndex : range) {
+    auto newPos =
+        transform *
+            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
+        compPos;
+    auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
+    m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
+    m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
+  }
+
+  for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
+    auto newPos =
+        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
+    auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
+    const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
+    m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
+        newPos;
+    m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] =
+        newRot.normalized();
+  }
+}
+
+void ComponentInfo::failIfDetectorInfoScanning() const {
   if (m_detectorInfo->isScanning()) {
     throw std::runtime_error(
         "Cannot move or rotate parent component containing "
@@ -267,18 +362,18 @@ void ComponentInfo::failIfScanning() const {
   }
 }
 
-size_t ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const
-{
-    // The most common case are beamlines with static components. In that case the
-    // time index is always 0 and we avoid expensive map lookups. Linear indices
-    // are ordered such that the first block contains everything for time index 0
-    // so even in the time dependent case no translation is necessary.
-    if (index.second == 0)
-      return index.first;
-    // Calculate the linear index without a lookup
-    if (m_isSyncScan)
-      return index.first + size() * index.second;
-    return (*m_indexMap)[index.first][index.second];
+size_t
+ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
+  // The most common case are beamlines with static components. In that case the
+  // time index is always 0 and we avoid expensive map lookups. Linear indices
+  // are ordered such that the first block contains everything for time index 0
+  // so even in the time dependent case no translation is necessary.
+  if (index.second == 0)
+    return index.first;
+  // Calculate the linear index without a lookup
+  if (m_isSyncScan)
+    return index.first + size() * index.second;
+  return (*m_indexMap)[index.first][index.second];
 }
 
 size_t ComponentInfo::parent(const size_t componentIndex) const {
@@ -306,6 +401,7 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
 
 Eigen::Vector3d ComponentInfo::sourcePosition() const {
+  // TODO, this could be time dependent!
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
@@ -313,6 +409,7 @@ Eigen::Vector3d ComponentInfo::sourcePosition() const {
 }
 
 Eigen::Vector3d ComponentInfo::samplePosition() const {
+  // TODO, this could be time dependent!
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
@@ -379,92 +476,89 @@ bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
  * @param index : Detector Index
  * @return Number of scans for detector index
  */
-size_t ComponentInfo::scanCount(const size_t index) const
-{
-   if(!m_scanCounts){
-       return 1;
-   }
-   if(m_isSyncScan){
-       return (*m_scanCounts)[0];
-   }
-   return (*m_scanCounts)[index];
+size_t ComponentInfo::scanCount(const size_t index) const {
+  if (!m_scanCounts) {
+    return 1;
+  }
+  if (m_isSyncScan) {
+    return (*m_scanCounts)[0];
+  }
+  return (*m_scanCounts)[index];
 }
 
-size_t ComponentInfo::scanSize() const
-{
-    const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
-    if (!m_positions)
-      return 0 + detectorScanSize;
-    return m_positions->size() + detectorScanSize;
+size_t ComponentInfo::scanSize() const {
+  const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
+  if (!m_positions)
+    return 0 + detectorScanSize;
+  return m_positions->size() + detectorScanSize;
 }
 
-bool ComponentInfo::isScanning() const
-{
-    if (m_detectorInfo && m_detectorInfo->isScanning()) {
-        return true;
-    }
-    else if (!m_positions)
-      return false;
-    return m_componentRanges->size() != m_positions->size();
+bool ComponentInfo::isScanning() const {
+  if (m_detectorInfo && m_detectorInfo->isScanning()) {
+    return true;
+  } else if (!m_positions)
+    return false;
+  return m_componentRanges->size() != m_positions->size();
 }
 
 /// Throws if this has time-dependent data.
 void ComponentInfo::checkNoTimeDependence() const {
   if (isScanning())
-    throw std::runtime_error("ComponentInfo accessed without time index but the "
-                             "beamline has time-dependent (moving) components.");
+    throw std::runtime_error(
+        "ComponentInfo accessed without time index but the "
+        "beamline has time-dependent (moving) components.");
 }
 
-std::pair<int64_t, int64_t> ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const
-{
-    if (!m_scanIntervals)
-      return {0, 0};
-    if (m_isSyncScan)
-      return (*m_scanIntervals)[index.second];
-    return (*m_scanIntervals)[linearIndex(index)];
+std::pair<int64_t, int64_t>
+ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
+  if (!m_scanIntervals)
+    return {0, 0};
+  if (m_isSyncScan)
+    return (*m_scanIntervals)[index.second];
+  return (*m_scanIntervals)[linearIndex(index)];
 }
 
 /**
  * Set the scan interval using nanosecond offsets from 00:00:00 01/01/1990 epoch
- * @param index : linear index taking into account both detectors and scans per detector
+ * @param index : linear index taking into account both detectors and scans per
+ * detector
  * @param interval : Time interval for scan point
  */
-void ComponentInfo::setScanInterval(const size_t index, const std::pair<int64_t, int64_t> &interval)
-{
-    // Enforces setting scan intervals BEFORE time indexed positions and rotations
-    checkNoTimeDependence();
-    //checkScanInterval(interval);
-    if (m_scanIntervals && m_isSyncScan)
-      throw std::runtime_error("ComponentInfo has been initialized with a "
-                               "synchonous scan, cannot set scan interval for "
-                               "individual component.");
-    if (!m_scanIntervals) {
-      m_isSyncScan = false;
-      initScanIntervals();
-    }
-    m_scanIntervals.access()[index] = interval;
-
+void ComponentInfo::setScanInterval(
+    const size_t index, const std::pair<int64_t, int64_t> &interval) {
+  // Enforces setting scan intervals BEFORE time indexed positions and rotations
+  checkNoTimeDependence();
+  // checkScanInterval(interval);
+  if (m_scanIntervals && m_isSyncScan)
+    throw std::runtime_error("ComponentInfo has been initialized with a "
+                             "synchonous scan, cannot set scan interval for "
+                             "individual component.");
+  if (!m_scanIntervals) {
+    m_isSyncScan = false;
+    initScanIntervals();
+  }
+  m_scanIntervals.access()[index] = interval;
 }
 
-void ComponentInfo::setScanInterval(const std::pair<int64_t, int64_t> &interval)
-{
-    // Enforces setting scan intervals BEFORE time indexed positions and rotations
-    checkNoTimeDependence();
-    //checkScanInterval(interval);
-    if (m_scanIntervals && !m_isSyncScan) {
-      throw std::runtime_error(
-          "DetectorInfo has been initialized with a "
-          "asynchonous scan, cannot set synchronous scan interval.");
-    }
-    if (!m_scanIntervals) {
-        m_isSyncScan = true;
-        initScanIntervals();
-    }
-    m_scanIntervals.access()[0] = interval;
+void ComponentInfo::setScanInterval(
+    const std::pair<int64_t, int64_t> &interval) {
+  // Enforces setting scan intervals BEFORE time indexed positions and rotations
+  checkNoTimeDependence();
+  // checkScanInterval(interval);
+  if (m_scanIntervals && !m_isSyncScan) {
+    throw std::runtime_error(
+        "ComponentInfo has been initialized with a "
+        "asynchonous scan, cannot set synchronous scan interval.");
+  }
+  if (!m_scanIntervals) {
+    m_isSyncScan = true;
+    initScanIntervals();
+  }
+  m_scanIntervals.access()[0] = interval;
 }
 
 void ComponentInfo::initScanCounts() {
-  //checkNoTimeDependence();
+  checkNoTimeDependence();
   if (m_isSyncScan)
     m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
   else
@@ -472,25 +566,17 @@ void ComponentInfo::initScanCounts() {
 }
 
 void ComponentInfo::initScanIntervals() {
-  //checkNoTimeDependence();
-  if(m_isSyncScan){
-      m_scanIntervals =
-          Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-              1, std::pair<int64_t, int64_t>{0, 1});
-  }
-  else {
-    m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-      size(), std::pair<int64_t, int64_t>{0, 1});
+  checkNoTimeDependence();
+  if (m_isSyncScan) {
+    m_scanIntervals =
+        Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+            1, std::pair<int64_t, int64_t>{0, 1});
+  } else {
+    m_scanIntervals =
+        Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+            size(), std::pair<int64_t, int64_t>{0, 1});
   }
 }
-
-
-/*
-void ComponentInfo::setScanInterval(const std::pair<int64_t, int64_t> &interval)
-{
-
-}
-*/
 
 } // namespace Beamline
 } // namespace Mantid
