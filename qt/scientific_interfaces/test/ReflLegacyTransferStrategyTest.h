@@ -121,7 +121,7 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1235";
     expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
@@ -170,12 +170,12 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1231+1232";
     expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1233";
     expectedRow[ReflTableSchema::ANGLE] = "2.17";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1234";
