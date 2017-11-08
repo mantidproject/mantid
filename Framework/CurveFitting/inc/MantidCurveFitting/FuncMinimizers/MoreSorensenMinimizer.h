@@ -47,7 +47,8 @@ private:
                      DoubleFortranVector &d, double &normd,
                      const NLLS::nlls_options &options) override;
 
-  void solveSubproblem(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+  void solveSubproblem(const DoubleFortranMatrix &J,
+                       const DoubleFortranVector &f,
                        const DoubleFortranMatrix &hf, double Delta,
                        DoubleFortranVector &d, double &nd,
                        const NLLS::nlls_options &options);
