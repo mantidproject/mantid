@@ -48,9 +48,9 @@ private:
                      const NLLS::nlls_options &options) override;
 
   void solveSubproblem(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                    const DoubleFortranMatrix &hf, double Delta,
-                    DoubleFortranVector &d, double &nd,
-                    const NLLS::nlls_options &options);
+                       const DoubleFortranMatrix &hf, double Delta,
+                       DoubleFortranVector &d, double &nd,
+                       const NLLS::nlls_options &options);
 
   bool getPdShift(double &sigma, DoubleFortranVector &d,
                   const NLLS::nlls_options &options);
