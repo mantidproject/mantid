@@ -262,12 +262,7 @@ public:
   void test_invalid_x_range_event() {
     Parameters params("event");
     params.setInvalidXRange();
-    auto ws = runAlgorithm(params, true);
-    // this is a bit unexpected but at least no crash
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
-    TS_ASSERT_EQUALS(ws->blocksize(), 1);
-    TS_ASSERT_EQUALS(ws->x(0)[0], 2);
-    TS_ASSERT_EQUALS(ws->x(0)[1], 1);
+    auto ws = runAlgorithm(params, false);
   }
 
   void test_invalid_index_range_event() {
