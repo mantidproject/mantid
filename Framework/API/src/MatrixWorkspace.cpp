@@ -1084,6 +1084,16 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   return it->second;
 }
 
+/** Set the list of masked bins for given workspaceIndex. Not thread safe.
+ *
+ * No data is masked and previous masking for any bin for this workspace index
+ * is overridden, so this should only be used for copying flags into a new
+ * workspace, not for performing masking operations. */
+void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
+                                    const MaskList &maskedBins) {
+  m_masks[workspaceIndex] = maskedBins;
+}
+
 /** Sets the internal monitor workspace to the provided workspace.
  *  This method is intended for use by data-loading algorithms.
  *  Note that no checking is performed as to whether this workspace actually
