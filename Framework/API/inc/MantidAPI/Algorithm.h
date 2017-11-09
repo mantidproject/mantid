@@ -10,13 +10,11 @@
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
-#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <MantidIndexing/SpectrumIndexSet.h>
 
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
@@ -37,6 +35,9 @@ class Value;
 }
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumIndexSet;
+}
 namespace Parallel {
 class Communicator;
 }
