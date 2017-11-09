@@ -48,7 +48,8 @@ void run_create_partitioned_parent(const Parallel::Communicator &comm) {
   IndexInfo indices(47, Parallel::StorageMode::Distributed, comm);
   indices.setSpectrumDefinitions(
       std::vector<SpectrumDefinition>(indices.size()));
-  const auto parent = create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
+  const auto parent =
+      create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
   const auto ws = create<MatrixWorkspace>(*parent);
   const auto &i = ws->indexInfo();
   TS_ASSERT_EQUALS(i.globalSize(), 47);
@@ -479,9 +480,7 @@ public:
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
 
-  void test_create_partitioned() {
-    runParallel(run_create_partitioned);
-  }
+  void test_create_partitioned() { runParallel(run_create_partitioned); }
 
   void test_create_partitioned_parent() {
     runParallel(run_create_partitioned_parent);
