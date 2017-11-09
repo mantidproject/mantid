@@ -11,6 +11,15 @@ absorption_correction_params = {
 
 # Default cropping values are 5% off each end
 
+window_10_50_params = {
+    "vanadium_tof_cropping": (1e4, 5e4),
+    "focused_cropping_values": [
+        (1.08e4, 5e4),     # Bank 1
+        (1.03e4, 4.99e4),  # Bank 2
+        (1e4,    5e4),     # Bank 3
+    ]
+}
+
 window_10_110_params = {
     "vanadium_tof_cropping": (1e4, 1.2e5),
     "focused_cropping_values": [
@@ -38,6 +47,16 @@ window_100_200_params = {
     ]
 }
 
+
+window_180_280_params = {
+    "vanadium_tof_cropping": (1.8e5, 2.8e5),
+    "focused_cropping_values": [
+        (1.86e5, 2.8e5),    # Bank 1
+        (1.8e5,  2.8e5),    # Bank 2
+        (1.84e5, 2.795e5),  # Bank 3
+    ]
+}
+
 file_names = {
     "grouping_file_name": "hrpd_new_072_01_corr.cal"
 }
@@ -62,10 +81,14 @@ def get_all_adv_variables(tof_window=HRPD_TOF_WINDOWS.window_10_110):
 
 
 def get_tof_window_dict(tof_window):
+    if tof_window == HRPD_TOF_WINDOWS.window_10_50:
+        return window_10_50_params
     if tof_window == HRPD_TOF_WINDOWS.window_10_110:
         return window_10_110_params
     if tof_window == HRPD_TOF_WINDOWS.window_30_130:
         return window_30_130_params
     if tof_window == HRPD_TOF_WINDOWS.window_100_200:
         return window_100_200_params
+    if tof_window == HRPD_TOF_WINDOWS.window_180_280:
+        return window_180_280_params
     raise RuntimeError("Invalid time-of-flight window: {}".format(tof_window))
