@@ -1150,7 +1150,7 @@ public:
     TS_ASSERT(!h.sharedDx());
   }
 
-  void test_that_can_iterate_hsitogram() {
+  void test_that_can_iterate_histogram() {
     Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
     double total = 0;
     for (const auto &item : hist) {
@@ -1194,7 +1194,7 @@ public:
   void test_iterate() {
     double total = 0;
     for (size_t i = 0; i < nHists / 10; ++i) {
-      for (auto &item : hists[i]) {
+      for (const auto &item : hists[i]) {
         total += item.counts();
       }
     }

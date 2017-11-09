@@ -4,6 +4,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Points.h"
+
 #include <utility>
 
 namespace Mantid {
@@ -52,27 +53,48 @@ class Histogram;
 class MANTID_HISTOGRAMDATA_DLL HistogramItem {
 
 public:
-  HistogramItem(const Histogram &histogram, const size_t index);
+   double counts() const;
+   double countVariance() const;
+   double countStandardDeviation() const;
+   double frequency() const;
+   double frequencyVariance() const;
+   double frequencyStandardDeviation() const;
+   double width() const;
+   double center() const;
+   
+   void incrementIndex();
+   void advance(int64_t delta);
 
-  double counts() const;
-  double countVariance() const;
-  double countStandardDeviation() const;
-  double frequency() const;
-  double frequencyVariance() const;
-  double frequencyStandardDeviation() const;
-  double center() const;
-  double width() const;
-  const BinEdges binEdges() const;
-  const Points point() const;
+   inline void decrementIndex() {
+      if (m_index > 0) {
+        --m_index;
+      }
+   }
+
+   inline size_t getIndex() const {
+       return m_index;
+   }
+
+   inline void setIndex(const size_t index) {
+       m_index = index;
+   }
 
 private:
+  friend class HistogramIterator;
+  /// Private constructor, can only be created by HistogramIterator
+  HistogramItem(const Histogram &histogram, const size_t index);
+  /// Get a refernce to the histogram
   const Histogram &histogramRef() const;
-  // Deleted copy & assignment operators as a HistogramItem is not copyable
-  HistogramItem(const HistogramItem &) = delete;
+  /// Check if is points or bins
+  bool xModeIsPoints() const;
+  /// Check if is counts or frequencies
+  bool yModeIsCounts() const;
+
+  // Deleted assignment operator as a HistogramItem is not copyable
   HistogramItem operator=(const HistogramItem &) = delete;
 
   const Histogram &m_histogram;
-  const size_t m_index;
+  size_t m_index;
 };
 
 } // namespace HistogramData
