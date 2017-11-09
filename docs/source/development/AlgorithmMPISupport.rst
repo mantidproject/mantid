@@ -456,6 +456,9 @@ Algorithm         Supported modes Comments
 ================= =============== ========
 CompressEvents    all
 CreateWorkspace   all
+CropWorkspace     all             see ExtractSpectra regarding X cropping
+ExtractSpectra2   all             currently not available via algorithm factory or Python
+ExtractSpectra    all             not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
 FilterBadPulses   all
 FilterByLogValue  all
 LoadEventNexus    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
@@ -467,6 +470,8 @@ Rebin             all             min and max bin boundaries must be given expli
 RemovePromptPulse all
 SortEvents        all
 ================= =============== ========
+
+Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
 
 .. rubric:: Footnotes
 
