@@ -282,16 +282,14 @@ void ExtractSpectra::checkProperties() {
     if (m_workspaceIndexList.empty()) {
       int minSpec_i = getProperty("StartWorkspaceIndex");
       size_t minSpec = static_cast<size_t>(minSpec_i);
-      const size_t numberOfSpectra = m_inputWorkspace->getNumberHistograms();
+      const size_t numberOfSpectra = m_inputWorkspace->indexInfo().globalSize();
       int maxSpec_i = getProperty("EndWorkspaceIndex");
       size_t maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
       m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
-      for (size_t i = static_cast<size_t>(minSpec);
-           i <= static_cast<size_t>(maxSpec); ++i) {
+      for (size_t i = minSpec; i <= maxSpec; ++i)
         m_workspaceIndexList.push_back(i);
-      }
     }
   }
 }

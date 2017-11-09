@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_EXTRACTSPECTRA_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -33,7 +33,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractSpectra : public API::Algorithm {
+class DLLExport ExtractSpectra : public API::TriviallyParallelAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
