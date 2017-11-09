@@ -60,7 +60,7 @@ inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 //!   control derived type with component defaults
 //!  - - - - - - - - - - - - - - - - - - - - - - -
-struct dtrs_control_type {
+struct control_type {
   //!  maximum degree of Taylor approximant allowed
   int taylor_max_degree = 3;
 
@@ -86,7 +86,7 @@ struct dtrs_control_type {
 //!  - - - - - - - - - - - - - - - - - - - - - - - -
 //!   history derived type with component defaults
 //!  - - - - - - - - - - - - - - - - - - - - - - - -
-struct dtrs_history_type {
+struct history_type {
   //
   //!  value of lambda
   double lambda = 0.0;
@@ -98,7 +98,7 @@ struct dtrs_history_type {
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 //!   inform derived type with component defaults
 //!  - - - - - - - - - - - - - - - - - - - - - - -
-struct dtrs_inform_type {
+struct inform_type {
   //
 
   //!  the number of (||x||_M,lambda) pairs in the history
@@ -121,7 +121,7 @@ struct dtrs_inform_type {
   bool hard_case = false;
 
   //!  history information
-  std::vector<dtrs_history_type> history;
+  std::vector<history_type> history;
 };
 
 /** Get the largest of the four values.
@@ -432,7 +432,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
  *  @param pi_beta :: (0) value of ||x||^beta,
  *                    (i) ith derivative of ||x||^beta, i = 1, max_order
  */
-void dtrsPiDerivs(int max_order, double beta,
+void PiBetaDerivs(int max_order, double beta,
                   const DoubleFortranVector &x_norm2,
                   DoubleFortranVector &pi_beta) {
   double hbeta = HALF * beta;
@@ -454,7 +454,7 @@ void dtrsPiDerivs(int max_order, double beta,
  *
  *  @param control :: A structure containing control information.
  */
-void dtrsInitialize(dtrs_control_type &control) {
+void intitializeControl(control_type &control) {
   control.stop_normal = pow(EPSILON_MCH, 0.75);
   control.stop_absolute_normal = pow(EPSILON_MCH, 0.75);
 }
@@ -475,9 +475,9 @@ void dtrsInitialize(dtrs_control_type &control) {
  *  @param control :: A structure containing control information.
  *  @param inform :: A structure containing information.
  */
-void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
+void solveSubproblemMain(int n, double radius, double f, const DoubleFortranVector &c,
                    const DoubleFortranVector &h, DoubleFortranVector &x,
-                   const dtrs_control_type &control, dtrs_inform_type &inform) {
+                   const control_type &control, inform_type &inform) {
 
   //  set initial values
 
@@ -657,7 +657,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     //  record, for the future, values of lambda which give small ||x||
     if (inform.len_history < HISTORY_MAX) {
-      dtrs_history_type history_item;
+      history_type history_item;
       history_item.lambda = lambda;
       history_item.x_norm = inform.x_norm;
       inform.history.push_back(history_item);
@@ -688,7 +688,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     //  compute pi_beta = ||x||^beta and its first derivative when beta = - 1
     double beta = -ONE;
-    dtrsPiDerivs(1, beta, x_norm2, pi_beta);
+    PiBetaDerivs(1, beta, x_norm2, pi_beta);
 
     //  compute the Newton correction (for beta = - 1)
 
@@ -719,7 +719,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       //  compute pi_beta = ||x||^beta and its derivatives when beta = 2
 
       beta = TWO;
-      dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
+      PiBetaDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = 2)
 
@@ -748,7 +748,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       //  compute pi_beta = ||x||^beta and its derivatives when beta = - 0.4
 
       beta = -POINT4;
-      dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
+      PiBetaDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = - 0.4)
 
@@ -807,9 +807,9 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
  *  @param control :: A structure containing control information.
  *  @param inform :: A structure containing information.
  */
-void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
+void solveSubproblem(int n, double radius, double f, const DoubleFortranVector &c,
                const DoubleFortranVector &h, DoubleFortranVector &x,
-               const dtrs_control_type &control, dtrs_inform_type &inform) {
+               const control_type &control, inform_type &inform) {
   //  scale the problem to solve instead
   //      minimize    q_s(x_s) = 1/2 <x_s, H_s x_s> + <c_s, x_s> + f_s
   //      subject to    ||x_s||_2 <= radius_s  or ||x_s||_2 = radius_s
@@ -871,7 +871,7 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 
   //  solve the scaled problem
 
-  dtrsSolveMain(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale,
+  solveSubproblemMain(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale,
                 inform);
 
   //  unscale the solution, function value, multiplier and related values
@@ -906,14 +906,14 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
  *  @param normd :: The 2-norm of d.
  *  @param options :: The options.
  */
-void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
+void DTRSMinimizer::solveStep(const DoubleFortranMatrix &J,
                               const DoubleFortranVector &f,
                               const DoubleFortranMatrix &hf, double Delta,
                               DoubleFortranVector &d, double &normd,
                               const NLLS::nlls_options &options) {
 
-  dtrs_control_type dtrs_options;
-  dtrs_inform_type dtrs_inform;
+  control_type controlOptions;
+  inform_type inform;
 
   //  The code finds
   //   d = arg min_p   w^T p + 0.5 * p^T D p
@@ -956,8 +956,8 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
   // we need to get the transformed vector v
   NLLS::multJt(m_ev, m_v, m_v_trans);
 
-  // we've now got the vectors we need, pass to dtrsSolve
-  dtrsInitialize(dtrs_options);
+  // we've now got the vectors we need, pass to solveSubproblem
+  intitializeControl(controlOptions);
 
   auto n = J.len2();
   if (m_v_trans.len() != n) {
@@ -973,8 +973,8 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
     }
   }
 
-  dtrsSolve(n, Delta, ZERO, m_v_trans, m_ew, m_d_trans, dtrs_options,
-            dtrs_inform);
+  solveSubproblem(n, Delta, ZERO, m_v_trans, m_ew, m_d_trans, controlOptions,
+            inform);
 
   // and return the un-transformed vector
   NLLS::multJ(m_ev, m_d_trans, d);
@@ -987,7 +987,7 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
     }
   }
 
-} // solveDtrs
+} // solveStep
 
 /** Implements the abstarct method of TrustRegionMinimizer.
  */
@@ -997,7 +997,7 @@ void DTRSMinimizer::calculateStep(const DoubleFortranMatrix &J,
                                   const DoubleFortranVector &, double Delta,
                                   DoubleFortranVector &d, double &normd,
                                   const NLLS::nlls_options &options) {
-  solveDtrs(J, f, hf, Delta, d, normd, options);
+  solveStep(J, f, hf, Delta, d, normd, options);
 }
 
 } // namespace FuncMinimisers

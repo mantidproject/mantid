@@ -44,7 +44,7 @@ private:
                      DoubleFortranVector &d, double &normd,
                      const NLLS::nlls_options &options) override;
 
-  void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+  void solveStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                  const DoubleFortranMatrix &hf, double Delta,
                  DoubleFortranVector &d, double &normd,
                  const NLLS::nlls_options &options);
