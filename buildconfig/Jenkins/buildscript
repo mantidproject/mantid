@@ -181,7 +181,9 @@ fi
 if [[ "$BUILDPKG" == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
-  if [[ ${ON_MACOS} != true ]]; then
+  if [[ "${ON_MACOS}" == true ]]; then
+    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+  else
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
       echo "Performing release build" # do nothing
