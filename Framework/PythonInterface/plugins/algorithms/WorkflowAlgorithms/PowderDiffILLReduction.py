@@ -14,7 +14,6 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _calibration_file = None
     _roc_file = None
     _normalise_option = None
-    _region_of_interest = []
     _observable = None
     _sort_x_axis = None
     _unit = None
@@ -22,8 +21,9 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _progress = None
     _crop_negative = None
     _zero_counting_option = None
+    _rebin_params = None
+    _region_of_interest = []
     _zero_cells = []
-    _rebin_width = 0
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -42,6 +42,10 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+        rebin = self.getProperty('RebinParams').value
+        sort = self.getProperty('SortObservableAxis').value
+        if rebin and not sort:
+            issues['SortObservableAxis'] = 'Axis must be sorted if Rebin is requested.'
         return issues
 
     def PyInit(self):
@@ -78,8 +82,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the scanning observable axis.')
 
-        self.declareProperty(name='RebinToWidth', defaultValue=0,
-                             doc='Bin width to rebin the observable axis. Default is to not rebin.')
+        self.declareProperty(FloatArrayProperty('RebinParams', values=[]),
+                             doc='Rebin params for the observable axis. Default is to not rebin.')
 
         self.declareProperty(name='CropNegative2Theta', defaultValue=True,
                              doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
@@ -168,16 +172,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target=target)
 
-        if self._rebin_width != 0:
-            ConvertToHistogram(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
-            x_axis = mtd[joined_ws].getAxis(0).extractValues()
-            bin_widths = np.diff(x_axis)
-            for spectrum in range(mtd[joined_ws].getNumberHistograms()):
-                mtd[joined_ws].setY(spectrum, mtd[joined_ws].readY(spectrum) * bin_widths)
-                mtd[joined_ws].setE(spectrum, mtd[joined_ws].readE(spectrum) * bin_widths)
-            Rebin(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Params=self._rebin_width)
-            Scale(InputWorkspace=joined_ws, Factor=1 / self._rebin_width)
-            ConvertToPointData(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
+        if self._rebin_params:
+            Rebin(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Params=self._rebin_params)
 
         Transpose(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
@@ -231,7 +227,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._unit = self.getPropertyValue('Unit')
         self._crop_negative = self.getProperty('CropNegative2Theta').value
         self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
-        self._rebin_width = self.getProperty('RebinToWidth').value
+        self._rebin_params = self.getPropertyValue('RebinParams')
         if self._normalise_option == 'ROI':
             self._region_of_interest = self.getProperty('ROI').value
 
