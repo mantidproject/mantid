@@ -99,50 +99,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
     def PyExec(self):
 
-        runs = self.getPropertyValue('Run')
-        self._out_name = self.getPropertyValue('OutputWorkspace')
-        self._observable = self.getPropertyValue('Observable')
-        self._sort_x_axis = self.getProperty('SortObservableAxis').value
-        self._normalise_option = self.getPropertyValue('NormaliseTo')
-        self._calibration_file = self.getPropertyValue('CalibrationFile')
-        self._roc_file = self.getPropertyValue('ROCCorrectionFile')
-        self._unit = self.getPropertyValue('Unit')
-        self._crop_negative = self.getProperty('CropNegative2Theta').value
-        self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
-        self._rebin_width = self.getProperty('RebinToWidth').value
-        if self._normalise_option == 'ROI':
-            self._region_of_interest = self.getProperty('ROI').value
-
-        to_group = []
+        self._configure()
         temp_ws = self._hide('temp')
         joined_ws = self._hide('joined')
         mon_ws = self._hide('mon')
-
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',')+runs.count('+')+1)
-
-        for runs_list in runs.split(','):
-            runs_sum = runs_list.split('+')
-            if len(runs_sum) == 1:
-                runnumber = os.path.basename(runs_sum[0]).split('.')[0]
-                run = self._hide_run(runnumber)
-                LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run)
-                self._progress.report('Loaded run #' + runnumber)
-                to_group.append(run)
-            else:
-                for i, run in enumerate(runs_sum):
-                    runnumber = os.path.basename(run).split('.')[0]
-                    if i == 0:
-                        first = self._hide_run(runnumber + '_multiple')
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=first)
-                        self._progress.report('Loaded run #' + runnumber)
-                        to_group.append(first)
-                    else:
-                        run = self._hide_run(runnumber)
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=run)
-                        self._progress.report('Loaded run #' + runnumber)
-                        MergeRuns(InputWorkspaces=[first, run], OutputWorkspace=first)
-                        DeleteWorkspace(Workspace=run)
-
+        to_group = self._load()
         GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=temp_ws)
 
         if self._normalise_option == 'Time':
@@ -153,7 +114,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         try:
             ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
-        except RuntimeError as e:
+        except RuntimeError:
             raise ValueError('Invalid scanning observable')
 
         DeleteWorkspace(temp_ws)
@@ -192,7 +153,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             self.log().information('First positive 2theta at workspace index: ' + str(first_positive_theta))
             CropWorkspace(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, StartWorkspaceIndex=first_positive_theta)
 
-        self._find_zero_counting_cells(joined_ws)
+        self._find_zero_cells(joined_ws)
 
         if self._zero_counting_option == 'Crop':
             self._crop_zero_cells(joined_ws, self._zero_cells)
@@ -222,7 +183,59 @@ class PowderDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
-    def _find_zero_counting_cells(self, ws):
+    def _load(self):
+        """
+            Loads the list of runs
+            If sum is requested, MergeRuns is called
+            @return : the list of the loaded ws names
+        """
+        runs = self.getPropertyValue('Run')
+        to_group = []
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + runs.count('+') + 1)
+
+        for runs_list in runs.split(','):
+            runs_sum = runs_list.split('+')
+            if len(runs_sum) == 1:
+                runnumber = os.path.basename(runs_sum[0]).split('.')[0]
+                run = self._hide_run(runnumber)
+                LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run)
+                self._progress.report('Loaded run #' + runnumber)
+                to_group.append(run)
+            else:
+                for i, run in enumerate(runs_sum):
+                    runnumber = os.path.basename(run).split('.')[0]
+                    if i == 0:
+                        first = self._hide_run(runnumber + '_multiple')
+                        LoadILLDiffraction(Filename=run, OutputWorkspace=first)
+                        self._progress.report('Loaded run #' + runnumber)
+                        to_group.append(first)
+                    else:
+                        run = self._hide_run(runnumber)
+                        LoadILLDiffraction(Filename=run, OutputWorkspace=run)
+                        self._progress.report('Loaded run #' + runnumber)
+                        MergeRuns(InputWorkspaces=[first, run], OutputWorkspace=first)
+                        DeleteWorkspace(Workspace=run)
+
+        return to_group
+
+    def _configure(self):
+        """
+            Configures the input properties
+        """
+        self._out_name = self.getPropertyValue('OutputWorkspace')
+        self._observable = self.getPropertyValue('Observable')
+        self._sort_x_axis = self.getProperty('SortObservableAxis').value
+        self._normalise_option = self.getPropertyValue('NormaliseTo')
+        self._calibration_file = self.getPropertyValue('CalibrationFile')
+        self._roc_file = self.getPropertyValue('ROCCorrectionFile')
+        self._unit = self.getPropertyValue('Unit')
+        self._crop_negative = self.getProperty('CropNegative2Theta').value
+        self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
+        self._rebin_width = self.getProperty('RebinToWidth').value
+        if self._normalise_option == 'ROI':
+            self._region_of_interest = self.getProperty('ROI').value
+
+    def _find_zero_cells(self, ws):
         """
             Finds the cells counting zeros
             @param ws: the input workspace
