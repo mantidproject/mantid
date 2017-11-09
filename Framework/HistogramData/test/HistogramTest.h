@@ -1128,9 +1128,8 @@ public:
 
   HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
     BinEdges edges(histSize, LinearGenerator(0, 2));
-    Counts counts(histSize - 1, LinearGenerator(0, 2));
     for (size_t i = 0; i < nHists; i++)
-      hists.push_back(Histogram(edges, counts));
+      hists.push_back(Histogram(edges));
   }
 
   void test_copy_X() {
@@ -1148,15 +1147,6 @@ public:
     auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
     for (auto &i : hists)
       i.setSharedX(x);
-  }
-
-  void test_iterate() {
-    double total = 0;
-    for (size_t i = 0; i < nHists / 10; ++i) {
-      for (const auto &item : hists[i]) {
-        total += item.counts();
-      }
-    }
   }
 
 private:
