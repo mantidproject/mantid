@@ -16,7 +16,7 @@ namespace Mantid {
 
 namespace API {
 using namespace Mantid::Kernel;
-using Geometry::Object;
+using Geometry::CSGObject;
 using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
@@ -101,13 +101,13 @@ void Sample::setName(const std::string &name) { m_name = name; }
  * its own coordinate system with its centre at [0,0,0]
  * @return A reference to the object describing the shape
  */
-const Object &Sample::getShape() const { return m_shape; }
+const CSGObject &Sample::getShape() const { return m_shape; }
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
  * @param shape :: The object describing the shape
  */
-void Sample::setShape(const Object &shape) { m_shape = shape; }
+void Sample::setShape(const CSGObject &shape) { m_shape = shape; }
 
 /** Return the material.
  * @return A reference to the material the sample is composed of

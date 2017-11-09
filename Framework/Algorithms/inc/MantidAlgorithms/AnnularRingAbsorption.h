@@ -12,7 +12,7 @@ class Material;
 class V3D;
 }
 namespace Geometry {
-class Object;
+class CSGObject;
 }
 
 namespace Algorithms {

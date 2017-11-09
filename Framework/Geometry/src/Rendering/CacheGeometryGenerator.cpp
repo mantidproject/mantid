@@ -16,7 +16,7 @@ namespace Geometry {
  * Constructor
  * @param obj :: input object
  */
-CacheGeometryGenerator::CacheGeometryGenerator(Object *obj) : Obj(obj) {
+CacheGeometryGenerator::CacheGeometryGenerator(CSGObject *obj) : Obj(obj) {
   mNoOfVertices = 0;
   mNoOfTriangles = 0;
   mFaces = nullptr;

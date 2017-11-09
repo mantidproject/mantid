@@ -420,7 +420,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   ShapeFactory factory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape =
+  boost::shared_ptr<Mantid::Geometry::CSGObject> shape =
       factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
@@ -572,7 +572,7 @@ void StructuredDetector::initDraw() const {
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> StructuredDetector::shape() const {
+const boost::shared_ptr<const CSGObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];

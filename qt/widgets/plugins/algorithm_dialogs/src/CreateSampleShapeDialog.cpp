@@ -200,11 +200,11 @@ void CreateSampleShapeDialog::update3DView() {
   //     (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
 
   Mantid::Geometry::ShapeFactory sFactory;
-  boost::shared_ptr<Mantid::Geometry::Object> shape_sptr =
+  boost::shared_ptr<Mantid::Geometry::CSGObject> shape_sptr =
       sFactory.createShape(shapexml);
   // std::cerr << "\n--------- XML String -----------\n" << shapexml <<
   // "\n---------------------\n";
-  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::Object>())
+  if (shape_sptr == boost::shared_ptr<Mantid::Geometry::CSGObject>())
     return;
   try {
     shape_sptr->initDraw();

@@ -9,7 +9,7 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
-class Object;
+class CSGObject;
 class SampleEnvironment;
 }
 namespace Kernel {
@@ -62,7 +62,7 @@ public:
                              double lambdaAfter) const;
 
 private:
-  const Geometry::Object &m_sample;
+  const Geometry::CSGObject &m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;

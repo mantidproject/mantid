@@ -114,7 +114,7 @@ private:
                            Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start,
-                       const Geometry::Object *shape) const;
+                       const Geometry::CSGObject *shape) const;
   /// Computes the detector efficiency for a given paramater
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
@@ -138,7 +138,7 @@ private:
 
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>>
+  std::map<const Geometry::CSGObject *, std::pair<double, Kernel::V3D>>
       m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;

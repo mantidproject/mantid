@@ -49,7 +49,7 @@ void updateTreeValues(Poco::XML::Element *root,
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml) : Object(xml) {}
+Container::Container(std::string xml) : CSGObject(xml) {}
 
 /**
  * @return True if the can contains a defintion of the sample shape
@@ -87,7 +87,7 @@ Container::createSampleShape(const Container::ShapeArgs &args) const {
     updateTreeValues(root, args);
 
   ShapeFactory factory;
-  return factory.createShape<Object>(root);
+  return factory.createShape<CSGObject>(root);
 }
 
 /**

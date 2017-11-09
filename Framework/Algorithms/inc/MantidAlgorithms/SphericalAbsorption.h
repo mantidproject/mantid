@@ -19,7 +19,7 @@ class V3D;
 }
 
 namespace Geometry {
-class Object;
+class CSGObject;
 }
 
 namespace Algorithms {
@@ -99,7 +99,7 @@ public:
 
 protected:
   API::MatrixWorkspace_sptr m_inputWS;    ///< A pointer to the input workspace
-  const Geometry::Object *m_sampleObject; ///< Local cache of sample object.
+  const Geometry::CSGObject *m_sampleObject; ///< Local cache of sample object.
   Kernel::V3D m_beamDirection;            ///< The direction of the beam.
   std::vector<double> m_L1s,              ///< Cached L1 distances
       m_elementVolumes;                   ///< Cached element volumes

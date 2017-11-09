@@ -244,7 +244,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
                         static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
                         sigma_s, sigma_atten);
 
-    Object shape = m_inputWS->sample().getShape(); // copy
+    CSGObject shape = m_inputWS->sample().getShape(); // copy
     shape.setMaterial(Material("SetInAbsorptionCorrection", neutron, rho));
     m_inputWS->mutableSample().setShape(shape);
   }
@@ -296,7 +296,7 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       throw std::invalid_argument(mess);
     }
   } else {
-    boost::shared_ptr<Object> shape = ShapeFactory().createShape(xmlstring);
+    boost::shared_ptr<CSGObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(*shape);
     m_sampleObject = &sample.getShape();
 

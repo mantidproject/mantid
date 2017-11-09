@@ -304,12 +304,12 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
                                                 double &detRadius,
                                                 V3D &detAxis) {
-  boost::shared_ptr<const Object> shape_sptr = det.shape();
+  boost::shared_ptr<const CSGObject> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }
 
-  std::map<const Geometry::Object *,
+  std::map<const Geometry::CSGObject *,
            std::pair<double, Kernel::V3D>>::const_iterator it =
       m_shapeCache.find(shape_sptr.get());
   if (it == m_shapeCache.end()) {
@@ -369,7 +369,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
  * @returns The distance to the surface in meters
  */
 double DetectorEfficiencyCor::distToSurface(const V3D &start,
-                                            const Object *shape) const {
+                                            const CSGObject *shape) const {
   // get a vector from the point that was passed to the origin
   V3D direction = V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector

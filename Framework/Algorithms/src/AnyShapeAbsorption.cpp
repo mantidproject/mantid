@@ -43,7 +43,7 @@ std::string AnyShapeAbsorption::sampleXML() {
 void AnyShapeAbsorption::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
-  Object integrationVolume = *m_sampleObject;
+  CSGObject integrationVolume = *m_sampleObject;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = constructGaugeVolume();
   }
@@ -120,12 +120,12 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
                    YSliceThickness * ZSliceThickness;
 }
 
-Geometry::Object AnyShapeAbsorption::constructGaugeVolume() {
+Geometry::CSGObject AnyShapeAbsorption::constructGaugeVolume() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 
   // Retrieve and create the gauge volume shape
-  boost::shared_ptr<const Geometry::Object> volume = ShapeFactory().createShape(
+  boost::shared_ptr<const Geometry::CSGObject> volume = ShapeFactory().createShape(
       m_inputWS->run().getProperty("GaugeVolume")->value());
   // Although DefineGaugeVolume algorithm will have checked validity of XML, do
   // so again here

@@ -35,7 +35,7 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL Container final : public Object {
+class MANTID_GEOMETRY_DLL Container final : public CSGObject {
 public:
   typedef std::unordered_map<std::string, double> ShapeArgs;
 

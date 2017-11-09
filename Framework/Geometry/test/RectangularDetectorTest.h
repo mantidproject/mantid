@@ -86,7 +86,7 @@ public:
   }
 
   void testFullConstructor() {
-    boost::shared_ptr<Geometry::Object> cuboidShape =
+    boost::shared_ptr<Geometry::CSGObject> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);
 
     RectangularDetector *det = new RectangularDetector("MyRectangle");
@@ -202,7 +202,7 @@ public:
    * resizes it.
    */
   void testResizingParameter() {
-    boost::shared_ptr<Geometry::Object> cuboidShape =
+    boost::shared_ptr<Geometry::CSGObject> cuboidShape =
         ComponentCreationHelper::createCuboid(0.5);
 
     RectangularDetector *det = new RectangularDetector("MyRectangle");

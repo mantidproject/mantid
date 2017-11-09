@@ -26,7 +26,7 @@ class ICompAssembly;
 class IComponent;
 class Instrument;
 class ObjComponent;
-class Object;
+class CSGObject;
 class ShapeFactory;
 
 /** Creates an instrument data from a XML instrument description file
@@ -359,7 +359,7 @@ private:
    */
   std::map<std::string, bool> isTypeAssembly;
   /// map which maps the type name to a shared pointer to a geometric shape
-  std::map<std::string, boost::shared_ptr<Geometry::Object>> mapTypeNameToShape;
+  std::map<std::string, boost::shared_ptr<Geometry::CSGObject>> mapTypeNameToShape;
   /// Container to hold all detectors and monitors added to the instrument. Used
   /// for 'facing' these to component specified under \<defaults\>. NOTE: Seems
   /// unused, ever.

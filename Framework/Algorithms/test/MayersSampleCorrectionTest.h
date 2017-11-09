@@ -107,7 +107,7 @@ private:
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
@@ -156,7 +156,7 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {
     using ComponentCreationHelper::createTestInstrumentCylindrical;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::V3D;
     using WorkspaceCreationHelper::create2DWorkspaceBinned;
 

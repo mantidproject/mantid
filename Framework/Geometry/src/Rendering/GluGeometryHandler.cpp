@@ -16,12 +16,12 @@ GluGeometryHandler::GluGeometryHandler(IObjComponent *comp)
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
       height(0.0), type(GeometryType::NOSHAPE) {}
 
-GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
+GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<CSGObject> obj)
     : GeometryHandler(std::move(obj)),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
       height(0.0), type(GeometryType::NOSHAPE) {}
 
-GluGeometryHandler::GluGeometryHandler(Object *obj)
+GluGeometryHandler::GluGeometryHandler(CSGObject *obj)
     : GeometryHandler(obj),
       Renderer(Kernel::make_unique<GluGeometryRenderer>()), radius(0.0),
       height(0.0), type(GeometryType::NOSHAPE) {}
@@ -43,11 +43,11 @@ GeometryHandler *GluGeometryHandler::createInstance(IObjComponent *comp) {
 }
 
 GeometryHandler *
-GluGeometryHandler::createInstance(boost::shared_ptr<Object> obj) {
+GluGeometryHandler::createInstance(boost::shared_ptr<CSGObject> obj) {
   return new GluGeometryHandler(obj);
 }
 
-GeometryHandler *GluGeometryHandler::createInstance(Object *obj) {
+GeometryHandler *GluGeometryHandler::createInstance(CSGObject *obj) {
   return new GluGeometryHandler(obj);
 }
 

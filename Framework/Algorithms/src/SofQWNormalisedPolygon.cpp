@@ -287,7 +287,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
      * The angular width is computed using the l2 distance from the sample
      */
     Kernel::V3D pos;
-    boost::shared_ptr<const Object>
+    boost::shared_ptr<const CSGObject>
         shape; // Defined in its own reference frame with centre at 0,0,0
     Kernel::Quat rot;
 

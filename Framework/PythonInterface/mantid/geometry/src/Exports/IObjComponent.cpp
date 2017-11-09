@@ -18,8 +18,8 @@ namespace {
  * @param self A reference to the calling object to emulate method on Python
  * object
  */
-boost::shared_ptr<Mantid::Geometry::Object> getShape(IObjComponent &self) {
-  return boost::const_pointer_cast<Mantid::Geometry::Object>(self.shape());
+boost::shared_ptr<Mantid::Geometry::CSGObject> getShape(IObjComponent &self) {
+  return boost::const_pointer_cast<Mantid::Geometry::CSGObject>(self.shape());
 }
 }
 

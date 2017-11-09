@@ -173,7 +173,7 @@ void CachedExperimentInfo::initCaches(
 
   // Sample volume
   const API::Sample &sampleDescription = m_exptInfo.sample();
-  const Geometry::Object &shape = sampleDescription.getShape();
+  const Geometry::CSGObject &shape = sampleDescription.getShape();
   m_sampleWidths = shape.getBoundingBox().width();
 
   // Detector volume

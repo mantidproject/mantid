@@ -1385,7 +1385,7 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
 
 @returns the newly created hexahedral shape object
 */
-boost::shared_ptr<Object>
+boost::shared_ptr<CSGObject>
 ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
                                     double xrb, double ylb, double ylf,
                                     double yrf, double yrb) {
@@ -1404,7 +1404,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
   int l_id = 1;
   auto algebra = parseHexahedronFromStruct(hex, prim, l_id);
 
-  auto shape = boost::make_shared<Object>();
+  auto shape = boost::make_shared<CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(prim);
 
@@ -1423,7 +1423,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 
 /// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
-                                         boost::shared_ptr<Object> Obj) {
+                                         boost::shared_ptr<CSGObject> Obj) {
 
   auto geomHandler = boost::make_shared<GluGeometryHandler>(Obj);
   Obj->setGeometryHandler(geomHandler);
@@ -1481,12 +1481,12 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
 
 ///@cond
 // Template instantations
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
+template MANTID_GEOMETRY_DLL boost::shared_ptr<CSGObject>
 ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
 ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
 
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
+template MANTID_GEOMETRY_DLL boost::shared_ptr<CSGObject>
 ShapeFactory::createShape(Poco::XML::Element *pElem);
 template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
 ShapeFactory::createShape(Poco::XML::Element *pElem);

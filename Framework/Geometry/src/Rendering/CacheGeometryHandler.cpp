@@ -17,13 +17,13 @@ CacheGeometryHandler::CacheGeometryHandler(IObjComponent *comp)
   Renderer = new CacheGeometryRenderer();
 }
 
-CacheGeometryHandler::CacheGeometryHandler(boost::shared_ptr<Object> obj)
+CacheGeometryHandler::CacheGeometryHandler(boost::shared_ptr<CSGObject> obj)
     : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj.get());
   Renderer = new CacheGeometryRenderer();
 }
 
-CacheGeometryHandler::CacheGeometryHandler(Object *obj) : GeometryHandler(obj) {
+CacheGeometryHandler::CacheGeometryHandler(CSGObject *obj) : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj);
   Renderer = new CacheGeometryRenderer();
 }
@@ -50,11 +50,11 @@ GeometryHandler *CacheGeometryHandler::createInstance(IObjComponent *comp) {
 }
 
 GeometryHandler *
-CacheGeometryHandler::createInstance(boost::shared_ptr<Object> obj) {
+CacheGeometryHandler::createInstance(boost::shared_ptr<CSGObject> obj) {
   return new CacheGeometryHandler(obj);
 }
 
-GeometryHandler *CacheGeometryHandler::createInstance(Object *obj) {
+GeometryHandler *CacheGeometryHandler::createInstance(CSGObject *obj) {
   return new CacheGeometryHandler(obj);
 }
 

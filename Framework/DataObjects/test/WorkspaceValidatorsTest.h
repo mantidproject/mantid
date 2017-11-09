@@ -219,7 +219,7 @@ public:
   }
 
   void testSampleValidator() {
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::Material;
     using Mantid::PhysicalConstants::NeutronAtom;
     // These should be separate tests when they are refactored out
@@ -243,7 +243,7 @@ public:
       TS_ASSERT_EQUALS(
           sampleVal->isValid(ws),
           "The sample is missing the following properties: material");
-      auto noShape = boost::make_shared<Object>();
+      auto noShape = boost::make_shared<CSGObject>();
       noShape->setMaterial(Material("V", NeutronAtom(), 0.072));
       ws->mutableSample().setShape(*noShape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");

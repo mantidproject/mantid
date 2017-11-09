@@ -34,13 +34,13 @@ public:
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     TS_ASSERT_THROWS_NOTHING(sample.setShape(*shape_sptr))
-    const Object &sampleShape = sample.getShape();
+    const CSGObject &sampleShape = sample.getShape();
     TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
   void test_Setting_Default_Shape_Is_Accepted() {
     Sample sample;
-    Object object;
+    CSGObject object;
     TS_ASSERT_EQUALS(object.hasValidShape(), false);
     TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
   }
@@ -56,7 +56,7 @@ public:
     const std::string envName("TestKit");
     SampleEnvironment *kit =
         new SampleEnvironment(envName, boost::make_shared<const Container>(""));
-    kit->add(boost::make_shared<const Object>());
+    kit->add(boost::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
@@ -259,7 +259,7 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    Object shape;
+    CSGObject shape;
     shape.setMaterial(vanBlock);
     sample.setShape(shape);
 

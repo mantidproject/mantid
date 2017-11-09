@@ -21,7 +21,7 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel |
                           QGL::SampleBuffers),
                 parent),
-      m_display_object(boost::shared_ptr<Mantid::Geometry::Object>()),
+      m_display_object(boost::shared_ptr<Mantid::Geometry::CSGObject>()),
       m_x_rot(0.0), m_y_rot(0.0), m_z_rot(0.0), m_scale_factor(1.0) {
   setAutoFillBackground(false);
   m_bb_widths[0] = 0.0;
@@ -43,7 +43,7 @@ MantidGLWidget::~MantidGLWidget() { makeCurrent(); }
  * @param object :: A pointer to the Mantid::Geometry::Object
  */
 void MantidGLWidget::setDisplayObject(
-    boost::shared_ptr<Mantid::Geometry::Object> object) {
+    boost::shared_ptr<Mantid::Geometry::CSGObject> object) {
   m_display_object = object;
   m_x_rot = 0.0;
   m_y_rot = 0.0;
@@ -144,7 +144,7 @@ void MantidGLWidget::initializeGL() {
  */
 void MantidGLWidget::paintGL() {
   // Nothing to draw
-  if (m_display_object == boost::shared_ptr<Mantid::Geometry::Object>())
+  if (m_display_object == boost::shared_ptr<Mantid::Geometry::CSGObject>())
     return;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

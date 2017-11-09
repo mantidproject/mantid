@@ -403,7 +403,7 @@ Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   // A sphere
   std::string ObjSphere = "-41";
-  Geometry::Object_sptr retVal = boost::make_shared<Geometry::Object>();
+  Geometry::Object_sptr retVal = boost::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

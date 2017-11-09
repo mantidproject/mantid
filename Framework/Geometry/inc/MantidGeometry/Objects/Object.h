@@ -60,18 +60,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL Object {
+class MANTID_GEOMETRY_DLL CSGObject {
 public:
   /// Default constructor
-  Object();
+  CSGObject();
   /// Constructor providing shape xml.
-  Object(const std::string &shapeXML);
+  CSGObject(const std::string &shapeXML);
   /// Copy constructor
-  Object(const Object &);
+  CSGObject(const CSGObject &);
   /// Assignment operator
-  Object &operator=(const Object &);
+  CSGObject &operator=(const CSGObject &);
   /// Destructor
-  virtual ~Object();
+  virtual ~CSGObject();
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
@@ -99,7 +99,7 @@ public:
   int substituteSurf(const int SurfN, const int NsurfN,
                      const boost::shared_ptr<Surface> &SPtr);
   void makeComplement();
-  void convertComplement(const std::map<int, Object> &);
+  void convertComplement(const std::map<int, CSGObject> &);
 
   virtual void print() const;
   void printTree() const;
@@ -117,7 +117,7 @@ public:
   std::vector<const Surface *> &getSurfacePtr() { return SurList; }
 
   std::string cellCompStr() const;
-  std::string cellStr(const std::map<int, Object> &) const;
+  std::string cellStr(const std::map<int, CSGObject> &) const;
 
   std::string str() const;
   void write(std::ostream &) const; ///< MCNPX output
@@ -264,9 +264,9 @@ protected:
 };
 
 /// Typdef for a shared pointer
-typedef boost::shared_ptr<Object> Object_sptr;
+typedef boost::shared_ptr<CSGObject> Object_sptr;
 /// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const Object> Object_const_sptr;
+typedef boost::shared_ptr<const CSGObject> Object_const_sptr;
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid

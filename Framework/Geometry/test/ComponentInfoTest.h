@@ -44,7 +44,7 @@ makeComponentIDMap(const boost::shared_ptr<
   return idMap;
 }
 
-boost::shared_ptr<Object> createCappedCylinder() {
+boost::shared_ptr<CSGObject> createCappedCylinder() {
   std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
   std::string C32 = "px 1.2";
   std::string C33 = "px -3.2";
@@ -66,7 +66,7 @@ boost::shared_ptr<Object> createCappedCylinder() {
   // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
   std::string ObjCapCylinder = "-31 -32 33";
 
-  auto retVal = boost::make_shared<Object>();
+  auto retVal = boost::make_shared<CSGObject>();
   retVal->setObject(21, ObjCapCylinder);
   retVal->populate(CylSurMap);
 
@@ -158,9 +158,9 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
-    shapes->push_back(boost::make_shared<const Geometry::Object>());
-    shapes->push_back(boost::make_shared<const Geometry::Object>());
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
+    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -177,7 +177,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo a(std::move(internalInfo), componentIds,
@@ -203,7 +203,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
@@ -211,7 +211,7 @@ public:
 
     TS_ASSERT(compInfo.hasShape(0));
     // Nullify the shape of the component
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::CSGObject>(nullptr);
     TS_ASSERT(!compInfo.hasShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
@@ -231,7 +231,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
     shapes->push_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -247,7 +247,7 @@ public:
     observer = V3D{0, 0, 0};
     TS_ASSERT_DELTA(info.solidAngle(0, observer), 4 * M_PI, satol);
     // Nullify  the shape and retest solid angle
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::CSGObject>(nullptr);
     TS_ASSERT_THROWS(info.solidAngle(0, observer),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -266,7 +266,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -289,7 +289,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::CSGObject>>>();
     shapes->push_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
@@ -304,7 +304,7 @@ public:
                (Kernel::V3D{position[0] + radius, position[1] + radius,
                             position[2] + radius})).norm() < 1e-9);
     // Nullify shape and retest BoundingBox
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::CSGObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }

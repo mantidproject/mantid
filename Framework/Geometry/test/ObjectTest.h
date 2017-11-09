@@ -61,7 +61,7 @@ class ObjectTest : public CxxTest::TestSuite {
 
 public:
   void testDefaultObjectHasEmptyMaterial() {
-    Object obj;
+    CSGObject obj;
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
                      obj.material().numberDensity(), 1e-12);
@@ -69,7 +69,7 @@ public:
 
   void testObjectSetMaterialReplacesExisting() {
     using Mantid::Kernel::Material;
-    Object obj;
+    CSGObject obj;
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
                      obj.material().numberDensity(), 1e-12);
@@ -90,7 +90,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
-    Object copy(*original);
+    CSGObject copy(*original);
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
@@ -116,7 +116,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
-    Object lhs;      // initialize
+    CSGObject lhs;      // initialize
     lhs = *original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
@@ -330,7 +330,7 @@ public:
     // A sphere
     std::string ObjSphere = "-41";
 
-    Object_sptr geom_obj = Object_sptr(new Object);
+    Object_sptr geom_obj = Object_sptr(new CSGObject);
     geom_obj->setObject(41, ObjSphere);
     geom_obj->populate(SphSurMap);
 
@@ -431,12 +431,12 @@ public:
     std::string ObjB = "80001 -80002 60003 -60004 60005 -60006";
 
     createSurfaces(ObjA);
-    Object object1 = Object();
+    CSGObject object1 = CSGObject();
     object1.setObject(3, ObjA);
     object1.populate(SMap);
 
     createSurfaces(ObjB);
-    Object object2 = Object();
+    CSGObject object2 = CSGObject();
     object2.setObject(4, ObjB);
     object2.populate(SMap);
 
@@ -462,12 +462,12 @@ public:
     std::string ObjB = "60002 -80002 60003 -60004 60005 -60006";
 
     createSurfaces(ObjA);
-    Object object1 = Object();
+    CSGObject object1 = CSGObject();
     object1.setObject(3, ObjA);
     object1.populate(SMap);
 
     createSurfaces(ObjB);
-    Object object2 = Object();
+    CSGObject object2 = CSGObject();
     object2.setObject(4, ObjB);
     object2.populate(SMap);
 
@@ -494,12 +494,12 @@ public:
     std::string ObjB = "-71";
 
     createSurfaces(ObjA);
-    Object object1 = Object();
+    CSGObject object1 = CSGObject();
     object1.setObject(3, ObjA);
     object1.populate(SMap);
 
     createSurfaces(ObjB);
-    Object object2 = Object();
+    CSGObject object2 = CSGObject();
     object2.setObject(4, ObjB);
     object2.populate(SMap);
 
@@ -527,12 +527,12 @@ public:
     std::string ObjB = "(-72 : -73)";
 
     createSurfaces(ObjA);
-    Object object1 = Object();
+    CSGObject object1 = CSGObject();
     object1.setObject(3, ObjA);
     object1.populate(SMap);
 
     createSurfaces(ObjB);
-    Object object2 = Object();
+    CSGObject object2 = CSGObject();
     object2.setObject(4, ObjB);
     object2.populate(SMap);
 
@@ -560,12 +560,12 @@ public:
     std::string ObjB = "(-72 : -73)";
 
     createSurfaces(ObjA);
-    Object object1 = Object();
+    CSGObject object1 = CSGObject();
     object1.setObject(3, ObjA);
     object1.populate(SMap);
 
     createSurfaces(ObjB);
-    Object object2 = Object();
+    CSGObject object2 = CSGObject();
     object2.setObject(4, ObjB);
     object2.populate(SMap);
 
@@ -952,7 +952,7 @@ public:
   }
 
   void testVolumeThrowsWhenBoundingBoxIsInvalid() {
-    Object shape("This text gives an invalid Object.");
+    CSGObject shape("This text gives an invalid Object.");
     TS_ASSERT_THROWS(shape.volume(), std::runtime_error);
   }
 
@@ -1168,7 +1168,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new Object);
+    Object_sptr retVal = Object_sptr(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1203,7 +1203,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new Object);
+    Object_sptr retVal = Object_sptr(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1303,7 +1303,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new Object);
+    Object_sptr retVal = Object_sptr(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1344,7 +1344,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new Object);
+    Object_sptr retVal = Object_sptr(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1424,7 +1424,7 @@ private:
 
     std::string ObjHex = "-1 2 3 -4 -5 6";
 
-    Object_sptr retVal = Object_sptr(new Object);
+    Object_sptr retVal = Object_sptr(new CSGObject);
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.

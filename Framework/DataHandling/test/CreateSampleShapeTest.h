@@ -100,7 +100,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "TestWorkspace"));
 
-    const Mantid::Geometry::Object &sample = ws->sample().getShape();
+    const Mantid::Geometry::CSGObject &sample = ws->sample().getShape();
     Mantid::Kernel::V3D point(x, y, z);
 
     if (inside) {

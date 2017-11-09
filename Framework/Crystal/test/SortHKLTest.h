@@ -49,7 +49,7 @@ public:
     double amu = 0.011;
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
-    Object sampleShape;
+    CSGObject sampleShape;
     sampleShape.setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
     ws->mutableSample().setShape(sampleShape);
 

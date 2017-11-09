@@ -157,7 +157,7 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
     if (nodeName == CONTAINERS_TAG) {
       parseAndAddContainers(spec, childElement);
     } else if (nodeName == COMPONENT_TAG) {
-      spec->addComponent(parseComponent<Object>(childElement));
+      spec->addComponent(parseComponent<CSGObject>(childElement));
     }
     node = nodeIter.nextNode();
   }
@@ -237,7 +237,7 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
 // Concrete instantions
 //------------------------------------------------------------------------------
 ///@cond
-template boost::shared_ptr<Object>
+template boost::shared_ptr<CSGObject>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
 template boost::shared_ptr<Container>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;

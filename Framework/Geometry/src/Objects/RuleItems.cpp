@@ -983,7 +983,7 @@ void CompObj::setObjN(const int Ky)
   objN = Ky;
 }
 
-void CompObj::setObj(Object *val)
+void CompObj::setObj(CSGObject *val)
 /**
   Sets the object
   @param val :: Object value

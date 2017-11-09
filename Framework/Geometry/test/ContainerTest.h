@@ -100,7 +100,7 @@ private:
         "<height val =\"0.05\" />"
         "</cylinder></type>");
   }
-  double getSphereRadius(const Mantid::Geometry::Object &shape) {
+  double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
     using Mantid::Geometry::SurfPoint;
     using Mantid::Geometry::Sphere;
     auto topRule = shape.topRule();

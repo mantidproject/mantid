@@ -121,7 +121,7 @@ private:
 
     // convert into a Geometry object
     bool addTypeTag = true;
-    boost::shared_ptr<Object> shape =
+    boost::shared_ptr<CSGObject> shape =
         ShapeFactory().createShape(xmlShape, addTypeTag);
 
     boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();

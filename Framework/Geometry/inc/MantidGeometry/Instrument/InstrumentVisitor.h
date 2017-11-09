@@ -24,7 +24,7 @@ class IComponent;
 class IDetector;
 class IObjComponent;
 class Instrument;
-class Object;
+class CSGObject;
 class ParameterMap;
 class RectangularDetector;
 
@@ -124,11 +124,11 @@ private:
   int64_t m_sampleIndex = -1;
 
   /// Null shared (empty shape)
-  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
+  boost::shared_ptr<const Mantid::Geometry::CSGObject> m_nullShape;
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::CSGObject>>> m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;

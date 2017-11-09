@@ -58,7 +58,7 @@ public:
   Mantid::detid_t detID;  ///< Detector ID
   Mantid::Kernel::V3D position;  ///< Detector position
   Mantid::Kernel::Quat rotation; ///< Detector orientation
-  boost::shared_ptr<const Mantid::Geometry::Object>
+  boost::shared_ptr<const Mantid::Geometry::CSGObject>
       shape;                       ///< Shape of the detector
   Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
 };

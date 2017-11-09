@@ -16,7 +16,7 @@ class V3D;
 namespace Geometry {
 class BoundingBox;
 class IComponent;
-class Object;
+class CSGObject;
 }
 
 namespace Beamline {
@@ -61,7 +61,7 @@ private:
       m_compIDToIndex;
 
   /// Shapes for each component
-  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::CSGObject>>>
       m_shapes;
 
   BoundingBox componentBoundingBox(const size_t index,
@@ -74,7 +74,7 @@ public:
           componentIds,
       boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
                                                  size_t>> componentIdToIndexMap,
-      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::CSGObject>>>
           shapes);
   ComponentInfo(const ComponentInfo &other);
   ~ComponentInfo();
@@ -108,7 +108,7 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
   bool hasShape(const size_t componentIndex) const;
-  const Geometry::Object &shape(const size_t componentIndex) const;
+  const Geometry::CSGObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,

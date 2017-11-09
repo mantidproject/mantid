@@ -14,7 +14,7 @@ class GeometryHandler;
 class CacheGeometryRenderer;
 class CacheGeometryGenerator;
 class IObjComponent;
-class Object;
+class CSGObject;
 
 /**
    \class CacheGeometryHandler
@@ -57,13 +57,13 @@ private:
 
 public:
   CacheGeometryHandler(IObjComponent *comp);           ///< Constructor
-  CacheGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
-  CacheGeometryHandler(Object *obj);                   ///< Constructor
+  CacheGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
+  CacheGeometryHandler(CSGObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler> clone() const override;
   ~CacheGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
-  GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
-  GeometryHandler *createInstance(Object *obj) override;
+  GeometryHandler *createInstance(boost::shared_ptr<CSGObject> obj) override;
+  GeometryHandler *createInstance(CSGObject *obj) override;
 
   void Triangulate() override;
   void Render() override;

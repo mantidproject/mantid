@@ -139,7 +139,7 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const CSGObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 

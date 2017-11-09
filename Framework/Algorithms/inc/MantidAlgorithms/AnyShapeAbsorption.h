@@ -106,7 +106,7 @@ private:
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
-  Geometry::Object constructGaugeVolume();
+  Geometry::CSGObject constructGaugeVolume();
 
   double m_cubeSide; ///< The length of the side of an element cube in m
 };

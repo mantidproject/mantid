@@ -4,24 +4,24 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Geometry::Object;
+using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::BoundingBox;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(Object)
+GET_POINTER_SPECIALIZATION(CSGObject)
 
 void export_Object() {
-  register_ptr_to_python<boost::shared_ptr<Object>>();
+  register_ptr_to_python<boost::shared_ptr<CSGObject>>();
 
-  class_<Object, boost::noncopyable>("Object", no_init)
+  class_<CSGObject, boost::noncopyable>("Object", no_init)
       .def("getBoundingBox",
-           (const BoundingBox &(Object::*)() const) & Object::getBoundingBox,
+           (const BoundingBox &(CSGObject::*)() const) & CSGObject::getBoundingBox,
            arg("self"), return_value_policy<copy_const_reference>(),
            "Return the axis-aligned bounding box for this shape")
 
-      .def("getShapeXML", &Object::getShapeXML, arg("self"),
+      .def("getShapeXML", &CSGObject::getShapeXML, arg("self"),
            "Returns the XML that was used to create this shape.")
 
-      .def("volume", &Object::volume, arg("self"),
+      .def("volume", &CSGObject::volume, arg("self"),
            "Returns the volume of this shape.");
 }
