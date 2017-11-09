@@ -221,8 +221,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     return;
 
   setNumberOfDetectorGroups(NVectors);
-  m_indexInfo =
-      Kernel::make_unique<Indexing::IndexInfo>(NVectors, storageMode());
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -238,7 +237,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
-  Indexing::IndexInfo indices(NVectors, storageMode());
+  Indexing::IndexInfo indices(NVectors);
   // Empty SpectrumDefinitions to indicate no default mapping to detectors.
   indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(NVectors));
   return initialize(indices, histogram);
@@ -1912,7 +1911,7 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
-  if (storageMode() == Parallel::StorageMode::Distributed &&
+  if (m_isInitialized && storageMode() == Parallel::StorageMode::Distributed &&
       m_indexInfo->communicator().size() > 1)
     throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
                            "ISpectrum::setSpectrumNo is not possible in MPI "

@@ -114,8 +114,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
 
   // Same number of histograms = copy over the spectra data
   if (parent.getNumberHistograms() == child.getNumberHistograms()) {
+    child.m_isInitialized = false;
     for (size_t i = 0; i < parent.getNumberHistograms(); ++i)
       child.getSpectrum(i).copyInfoFrom(parent.getSpectrum(i));
+    child.m_isInitialized = true;
     // We use this variant without ISpectrum update to avoid costly rebuilds
     // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
     // for spectrum definitions, so it is important to call this *afterwards*,
