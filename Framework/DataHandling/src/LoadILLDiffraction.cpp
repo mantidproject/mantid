@@ -348,8 +348,9 @@ void LoadILLDiffraction::calculateRelativeRotations(
 
   if (m_instName == "D20") {
     // this is the magical formula to treat the offset of the 2theta0 decoder.
-    firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE -
-                              D20_PIXEL_SIZE / (m_resolutionMode * 2);
+    firstTubeRotationAngle +=
+        static_cast<double>(D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE) -
+        D20_PIXEL_SIZE / (m_resolutionMode * 2);
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
@@ -697,8 +698,9 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   double twoTheta0Actual = twoTheta0Read;
   if (m_instName == "D20") {
     // this is the magical formula to treat the offset of the 2theta0 decoder.
-    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE -
-                       D20_PIXEL_SIZE / (m_resolutionMode * 2);
+    twoTheta0Actual +=
+        static_cast<double>(D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE) -
+        D20_PIXEL_SIZE / (m_resolutionMode * 2);
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
@@ -736,7 +738,7 @@ void LoadILLDiffraction::setSampleLogs() {
   run.addLogData(
       new PropertyWithValue<std::string>("ScanType", std::move(scanTypeStr)));
   run.addLogData(new PropertyWithValue<double>(
-      "PixelSize", D20_PIXEL_SIZE / m_resolutionMode));
+      "PixelSize", static_cast<double>(D20_PIXEL_SIZE / m_resolutionMode)));
   std::string resModeStr = "Nominal";
   if (m_resolutionMode == 1) {
     resModeStr = "Low";

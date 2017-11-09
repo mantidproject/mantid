@@ -43,7 +43,7 @@ public:
   void setUp() override {
     std::vector<double> input(10000);
     for (size_t i = 0; i < input.size(); ++i) {
-      input[i] = double(sqrt(i));
+      input[i] = double(sqrt(static_cast<double>(i)));
     }
     m_alg.initialize();
     m_alg.setProperty("InputArray", input);
