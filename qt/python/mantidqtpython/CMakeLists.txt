@@ -95,7 +95,7 @@ mtd_add_sip_module (
     Qt4::QtOpenGL
     Qwt5
     ${PYTHON_LIBRARIES}
-  FOLDER MantidQt4
+  FOLDER Qt4
 )
 
 if ( MSVC )
