@@ -543,8 +543,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex).isApprox(
-                   compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex)
+                   .isApprox(compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -628,8 +628,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex).angularDistance(
-            info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex)
+            .angularDistance(info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 
