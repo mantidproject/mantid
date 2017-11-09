@@ -6,6 +6,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramItem.h"
 #include "MantidHistogramData/HistogramIterator.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include <iostream>
 using Mantid::HistogramData::Histogram;
@@ -19,6 +20,7 @@ using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class HistogramIteratorTest : public CxxTest::TestSuite {
 public:
@@ -363,6 +365,33 @@ public:
     // Assert
     TSM_ASSERT("Frequency standard deviations did not match", result);
   }
+};
+
+class HistogramIteratorTestPerformance : public CxxTest::TestSuite {
+public:
+  static HistogramIteratorTestPerformance *createSuite() {
+    return new HistogramIteratorTestPerformance;
+  }
+  static void destroySuite(HistogramIteratorTestPerformance *suite) { delete suite; }
+
+  HistogramIteratorTestPerformance() {
+    BinEdges edges(histSize, LinearGenerator(0, 2));
+    Counts counts(histSize-1, LinearGenerator(0, 2));
+    for (size_t i = 0; i < nHists; i++)
+      hists.push_back(Histogram(edges, counts));
+  }
+
+  void test_iterate_and_access_each_item() {
+    double total = 0;
+    for (auto &hist : hists)
+        for (auto &item : hist)
+            total += item.frequency();
+  }
+
+private:
+  const size_t nHists = 500;
+  const size_t histSize = 10000;
+  std::vector<Histogram> hists;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_ */
