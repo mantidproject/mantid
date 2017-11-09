@@ -188,25 +188,27 @@ Output:
 .. testcode:: LoadBraggAngle
 
    import numpy
-
+   
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 30 degrees:
    ws2 = Load('ILL/D17/317370.nxs', BraggAngle = 5.5)
-
+   
    # The original detector angle can be found in the sample logs:
    angleOrig = ws2.getRun().getProperty("dan.value").value
-
-   # The Sample Log entry stheta will be the user defined angle of 30 degrees:
-   angleBragg = ws2.getRun().getProperty("stheta").value * 180. / numpy.pi
-
-   print("The detector of workspace {} was rotated to {:.1f} degrees.".format(ws2.name(), 2. * angleBragg))
-   print("The nominal angle in the NeXus file was {:.2} degrees.".format(angleOrig))
+   
+   # The reflected beam center is around pixel 202.
+   detId = 202
+   det = ws2.getInstrument().getDetector(detId)
+   angleDet = ws2.detectorTwoTheta(det) / numpy.pi * 180
+   
+   print("The nominal angle in the NeXus file was {:.2} degrees.".format(angleOrig)) 
+   print("Pixel at detector ID {} was rotated to {:.1f} degrees.".format(detId, angleDet))
 
 Output:
 
 .. testoutput:: LoadBraggAngle
 
-   The detector of workspace ws2 was rotated to 5.5 degrees.
    The nominal angle in the NeXus file was 3.2 degrees.
+   Pixel at detector ID 202 was rotated to 11.0 degrees.
 
 .. testcleanup:: LoadBraggAngle
 
@@ -241,8 +243,8 @@ Output:
 .. testoutput:: LoadDirectBeam
 
    Fitted direct beam maximum (in workspace indices): 202.18
-   Uncalibrated detector angle: 1.591 degrees.
-   Detector angle after calibration using direct beam: 1.627 degrees.
+   Uncalibrated detector angle: 0.7722 degrees.
+   Detector angle after calibration using direct beam: 0.8023 degrees.
 
 .. testcleanup:: LoadDirectBeam
 
