@@ -16,8 +16,7 @@
 namespace MantidQt {
 namespace API {
 
-/**
- * A small helper class to hold the thread pool
+/** A small helper class to hold a handle to a static thread pool.
  */
 class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager : public QObject {
 	Q_OBJECT
@@ -39,7 +38,7 @@ public:
   void waitForDone();
 
 signals:
-  // signal emitted to cancel any already running workers
+  // Signal emitted to cancel any already running workers
   void disconnectWorkers();
 
 private slots:
@@ -47,8 +46,10 @@ private slots:
   void searchFinished();
 
 private:
-  /// cancel the currently running worker
+  /// Cancel the currently running worker
   void cancelWorker(const QObject *parent);
+  /// Connect worker to relevant signals/slots
+  void connectWorker(const QObject* parent, const FindFilesWorker* worker);
 
   /// Handle to a local QThread pool
   static QThreadPool m_pool;

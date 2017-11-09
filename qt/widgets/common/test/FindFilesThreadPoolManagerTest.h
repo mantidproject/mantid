@@ -14,7 +14,6 @@ using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FakeFindFilesThread;
-using MantidQt::API::createApplication;
 
 class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:
@@ -27,15 +26,10 @@ public:
     delete suite;
   }
 
-  void setUp() {
-	  m_app = createApplication();
-  }
-
-  void tearDown() {
-	  m_app.reset(nullptr);
-  }
-
   void test_find_single_file() {
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
     // Arrange
     FakeMWRunFiles* widget = new FakeMWRunFiles();
 
@@ -62,7 +56,7 @@ public:
     poolManager.createWorker(widget, parameters);
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-	QApplication::processEvents();
+    QApplication::processEvents();
 
     // Assert
     const auto results = widget->getResults();
@@ -75,6 +69,9 @@ public:
   }
 
   void test_starting_new_search_cancels_currently_running_search() {
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
     // Arrange
     FakeMWRunFiles widget;
 

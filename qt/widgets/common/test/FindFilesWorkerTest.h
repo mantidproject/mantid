@@ -1,7 +1,6 @@
 #ifndef MANTIDQT_API_FINDFILESWORKERTEST_H_
 #define MANTIDQT_API_FINDFILESWORKERTEST_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
@@ -10,12 +9,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
-using MantidQt::API::createApplication;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
 using MantidQt::API::FakeMWRunFiles;
-using Mantid::Kernel::make_unique;
 
 class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:
@@ -26,16 +23,12 @@ public:
   }
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
 
-  void setUp() {
-	  m_app = createApplication();
-  }
-
-  void tearDown() {
-	  m_app.reset(nullptr);
-  }
-
   void test_find_file_with_algorithm() {
     // Arrange
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
+
     auto parameters = createFileSearch("IRS26173");
     auto worker = new FindFilesWorker(parameters);
     auto widget = createWidget(worker);
@@ -55,6 +48,10 @@ public:
 
   void test_find_run_files() {
     // Arrange
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
+
     auto parameters = createFileSearch("IRS26173");
     parameters.algorithmName = "";
     parameters.algorithmProperty = "";
@@ -77,6 +74,9 @@ public:
 
   void test_fail_to_find_file_that_does_not_exist() {
     // Arrange
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
     auto parameters = createFileSearch("ThisFileDoesNotExist");
     auto worker = new FindFilesWorker(parameters);
     auto widget = createWidget(worker);
@@ -93,6 +93,9 @@ public:
 
   void test_fail_to_find_file_when_search_text_is_empty() {
     // Arrange
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
     auto parameters = createFileSearch("");
     auto worker = new FindFilesWorker(parameters);
     auto widget = createWidget(worker);
@@ -109,6 +112,10 @@ public:
 
   void test_no_error_when_search_text_empty_and_optional() {
     // Arrange
+    int argc = 1;
+    char *argv = "DummyTestingApplication";
+    QApplication app(argc, &argv);
+
     auto parameters = createFileSearch("");
     parameters.isOptional = true;
     auto worker = new FindFilesWorker(parameters);
@@ -151,10 +158,9 @@ private:
     auto threadPool = QThreadPool::globalInstance();
     threadPool->start(worker);
     threadPool->waitForDone();
-	QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
   }
 
-  std::unique_ptr<QApplication> m_app;
 };
 
 #endif /* MANTIDQT_API_FINDFILESWORKERTEST */

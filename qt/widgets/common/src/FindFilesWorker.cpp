@@ -24,7 +24,9 @@ using namespace MantidQt::API;
  * @param parameters :: a struct representing the parameters of the file search
  */
 FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
-    : QRunnable(), m_parameters(parameters) {}
+    : QRunnable(), m_parameters(parameters) {
+  qRegisterMetaType<MantidQt::API::FindFilesSearchResults>("FindFilesSearchResults");
+}
 
 /**
  * Called when the thread is ran via start().  Tries to find the files, and

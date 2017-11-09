@@ -20,9 +20,6 @@ using namespace MantidQt::API;
 QThreadPool FindFilesThreadPoolManager::m_pool;
 
 FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
-	qRegisterMetaType<FindFilesSearchParameters>();
-	qRegisterMetaType<FindFilesSearchResults>();
-
   // Default allocator function. This just creates a new worker
   // on the heap.
   m_workerAllocator = [](const FindFilesSearchParameters &parameters) {
@@ -51,31 +48,39 @@ void FindFilesThreadPoolManager::createWorker(
   if (!parent)
     return;
 
-  auto currentWorker = m_workerAllocator(parameters);
+  auto worker = m_workerAllocator(parameters);
+  connectWorker(parent, worker);
 
-  // Hook up slots for when the thread finishes.
-  parent->connect(currentWorker,
-                  SIGNAL(finished(const FindFilesSearchResults&)), parent,
-                  SLOT(inspectThreadResult(const FindFilesSearchResults&)),
+  // pass ownership to the thread pool
+  // we do not need to worry about deleting worker
+  m_pool.start(worker);
+  m_searchIsRunning = true;
+}
+
+/** Connect a new worker to the listening parent
+ *
+ * This will hook up signals/slots for:
+ *  - Returning the result of the search
+ *  - Indicating when the search is finished
+ *  - When the search is cancelled
+ *
+ *  @param parent :: the listening parent object waiting for search results
+ *  @param worker :: the worker to connect signals/slots for.
+ */
+void FindFilesThreadPoolManager::connectWorker(const QObject* parent, const FindFilesWorker* worker) {
+  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
+                  parent,
+                  SLOT(inspectThreadResult(const FindFilesSearchResults &)),
                   Qt::QueuedConnection);
 
-  parent->connect(currentWorker,
-                  SIGNAL(finished(const FindFilesSearchResults&)), parent,
-                  SIGNAL(fileFindingFinished()),
-				  Qt::QueuedConnection);
-  
-  this->connect(currentWorker,
-			  SIGNAL(finished(const FindFilesSearchResults&)), this,
-			  SLOT(searchFinished()),
-			  Qt::QueuedConnection);
-  
-  this->connect(this, SIGNAL(disconnectWorkers()), 
-	  currentWorker, SLOT(disconnectWorker()), Qt::QueuedConnection);
-  
-  // pass ownership to the thread pool
-  // we do not need to worry about deleting currentWorker
-  m_pool.start(currentWorker);
-  m_searchIsRunning = true;
+  parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
+                  parent, SIGNAL(fileFindingFinished()), Qt::QueuedConnection);
+
+  this->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)), this,
+                SLOT(searchFinished()), Qt::QueuedConnection);
+
+  this->connect(this, SIGNAL(disconnectWorkers()), worker,
+                SLOT(disconnectWorker()), Qt::QueuedConnection);
 }
 
 /** Cancel the currently running worker
@@ -91,7 +96,6 @@ void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
 	// is dangerous (we have no idea what it's currently doing from here) and 2)
 	// waiting for it to finish before starting a new thread locks up the GUI
 	// event loop.
-  QCoreApplication::processEvents();
   emit disconnectWorkers();
   m_searchIsRunning = false;
   QCoreApplication::sendPostedEvents();

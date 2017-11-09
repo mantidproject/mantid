@@ -1,7 +1,6 @@
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 
@@ -27,14 +26,12 @@ void qSleep(int ms) {
 
 namespace MantidQt {
 namespace API {
-	namespace {
-		using Mantid::Kernel::make_unique;
-		std::unique_ptr<QApplication> createApplication() {
-			int argc = 1;
-			char *argv = "DummyTestingApplication";
-			return make_unique<QApplication>(argc, &argv);
-		}
-	}
+
+/** FakeFindFilesThread
+ *
+ * This overrides the run method of a FindFilesWorker to implement
+ * a dummy method that will just sleep for a given number of milliseconds.
+ */
 class EXPORT_OPT_MANTIDQT_COMMON FakeFindFilesThread : public FindFilesWorker {
   Q_OBJECT
 public:
@@ -43,12 +40,13 @@ public:
       const FindFilesSearchResults &results = FindFilesSearchResults(),
       int milliseconds = 100)
       : FindFilesWorker(parameters), m_results(results),
-        m_milliseconds(milliseconds) {}
+        m_milliseconds(milliseconds) {
+        }
 
 protected:
   void run() override {
     qSleep(m_milliseconds);
-	QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
     emit finished(m_results);
   }
 
@@ -57,8 +55,28 @@ private:
   int m_milliseconds;
 };
 
+/** FakeMWRunFiles
+ *
+ * This implements the slots required to listen to a FindFilesWorker
+ * and will simply capture the result produced by the worker.
+ *
+ * It will also capture if the worker notified that the search was
+ * finished.
+ */
 class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
   Q_OBJECT
+
+public:
+  FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
+    connect(this, SIGNAL(fileFindingFinished()), this,
+            SLOT(setSignalRecieved()));
+  }
+
+  /// Get the captured results of a file search
+  FindFilesSearchResults getResults() { return m_results; };
+  /// Get if the finished searching signal was recieved
+  bool isFinishedSignalRecieved() { return m_finishedSignalRecieved; };
+
 public slots:
   /// Slot called when file finding thread has finished.
   void inspectThreadResult(const FindFilesSearchResults& result) {
@@ -69,21 +87,13 @@ public slots:
   void setSignalRecieved() { m_finishedSignalRecieved = true; }
 
 signals:
+  /// Signal emitted to itself when files were found
   void fileFindingFinished();
 
-public:
-  FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
-	  qRegisterMetaType<FindFilesSearchParameters>();
-	  qRegisterMetaType<FindFilesSearchResults>();
-    connect(this, SIGNAL(fileFindingFinished()), this,
-            SLOT(setSignalRecieved()));
-  }
-
-  FindFilesSearchResults getResults() { return m_results; };
-  bool isFinishedSignalRecieved() { return m_finishedSignalRecieved; };
-
 private:
+  /// Results captured from the worker thread.
   FindFilesSearchResults m_results;
+  /// Whether a finished signal was recieved
   bool m_finishedSignalRecieved;
 };
 

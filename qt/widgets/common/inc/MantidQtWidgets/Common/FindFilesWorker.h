@@ -47,10 +47,6 @@ struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchResults {
   std::string valueForProperty;
 };
 
-// Add to Qt's meta type system. This allows these types
-// to be passed between signals & slots
-Q_DECLARE_METATYPE(FindFilesSearchResults)
-Q_DECLARE_METATYPE(FindFilesSearchParameters)
 
 /**
  * A class to allow the asynchronous finding of files.
@@ -69,7 +65,7 @@ signals:
   void finished(const FindFilesSearchResults &);
 
 public slots:
-	void disconnectWorker();
+  void disconnectWorker();
 
 protected:
   /// Override parent class run().
@@ -91,7 +87,12 @@ private:
   FindFilesSearchParameters m_parameters;
 };
 
+
 } // namespace API
 } // namespace MantidQt
+
+// Add to Qt's meta type system. This allows the type
+// to be passed between signals & slots
+Q_DECLARE_METATYPE(MantidQt::API::FindFilesSearchResults)
 
 #endif // MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_
