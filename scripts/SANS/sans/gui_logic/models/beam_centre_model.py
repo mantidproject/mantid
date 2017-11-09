@@ -1,11 +1,14 @@
-
+from sans.common.enums import (SANSInstrument)
 
 class BeamCentreModel(object):
     def __init__(self):
         super(BeamCentreModel, self).__init__()
+        self.reset_to_defaults_for_instrument()
+
+    def reset_to_defaults_for_instrument(self, instrument = None):
         self._max_iterations = 10
         self._r_min = 60
-        self._r_max = 200
+        self._r_max = 280
         self._left_right = True
         self._up_down = True
         self._tolerance = 0.0000125
@@ -13,7 +16,15 @@ class BeamCentreModel(object):
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
         self._hab_pos_1 = ''
+        self.scale_1 = 1000
+        self.scale_2 = 1000
 
+        if instrument == SANSInstrument.LOQ:
+            self.r_max = 200
+
+        if instrument == SANSInstrument.LARMOR:
+            self.scale_1 = 1
+            self.scale_2 = 1
 
     @property
     def max_iterations(self):

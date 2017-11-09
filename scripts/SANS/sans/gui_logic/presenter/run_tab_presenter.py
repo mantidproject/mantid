@@ -182,7 +182,6 @@ class RunTabPresenter(object):
 
             # 4. Populate the model
             self._state_model = StateGuiModel(user_file_items)
-
             # 5. Update the views.
             self._update_view_from_state_model()
 
@@ -524,6 +523,12 @@ class RunTabPresenter(object):
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
 
+        # Beam Centre
+        self._set_on_view_with_view('lab_pos_1', self._beam_centre_presenter._view)
+        self._set_on_view_with_view('lab_pos_2', self._beam_centre_presenter._view)
+        self._set_on_view_with_view('hab_pos_1', self._beam_centre_presenter._view)
+        self._set_on_view_with_view('hab_pos_2', self._beam_centre_presenter._view)
+
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
         fit_type = self._state_model.transmission_sample_fit_type
@@ -620,6 +625,11 @@ class RunTabPresenter(object):
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
+    def _set_on_view_with_view(self, attribute_name, view):
+        attribute = getattr(self._state_model, attribute_name)
+        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+            setattr(view, attribute_name, attribute)
+
     def _get_state_model_with_view_update(self):
         """
         Goes through all sub presenters and update the state model based on the views.
@@ -632,7 +642,6 @@ class RunTabPresenter(object):
         # If we don't have a state model then return None
         if state_model is None:
             return state_model
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         # Run tab view
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
@@ -708,11 +717,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("radius_limit_min", state_model)
         self._set_on_state_model("radius_limit_max", state_model)
 
-        # # Beam Centre
-        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
-        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
-        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
-        # self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+        # Beam Centre
+        self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
+        self._set_on_state_model_with_view("lab_pos_2", state_model, self._beam_centre_presenter._view)
 
         return state_model
 
