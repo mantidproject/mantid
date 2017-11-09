@@ -96,9 +96,8 @@ std::vector<std::pair<int, int>> EnggDiffFittingModel::getRunNumbersAndBanksIDs(
 }
 
 int EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
-	// find out how to check this exists properly
-	const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(ws->run().getLogData("bankid"));
-	if (log) {
+	if (ws->run().hasProperty("bankid")) {
+		const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(ws->run().getLogData("bankid"));
 		return std::atoi(log->value().c_str());
 	}
 
