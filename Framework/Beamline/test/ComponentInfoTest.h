@@ -5,9 +5,9 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include <Eigen/Geometry>
 #include <boost/make_shared.hpp>
 #include <tuple>
-#include <Eigen/Geometry>
 
 using namespace Mantid::Beamline;
 
@@ -150,7 +150,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
 
   return std::make_tuple(componentInfo, detectorInfo);
 }
-}
+} // namespace
 
 class ComponentInfoTest : public CxxTest::TestSuite {
 public:
@@ -202,8 +202,9 @@ public:
   }
 
   void test_throw_if_positions_rotation_inputs_different_sizes() {
-    auto detectorsInSubtree = boost::make_shared<
-        const std::vector<size_t>>(); // No detector indices in this example!
+    auto detectorsInSubtree =
+        boost::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                         // in this example!
 
     auto bankSortedComponentIndices =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
@@ -243,8 +244,9 @@ public:
      * too.
      * All vectors should be the same size.
      */
-    auto detectorsInSubtree = boost::make_shared<
-        const std::vector<size_t>>(); // No detector indices in this example!
+    auto detectorsInSubtree =
+        boost::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                         // in this example!
 
     auto componentsInSubtree =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
@@ -305,11 +307,10 @@ public:
     TS_ASSERT(info.rotation(2).isApprox(detRotations.at(2)));
   }
 
-  void test_write_positions() {
+  template <typename IndexType>
+  void do_write_positions(const IndexType rootIndex) {
 
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
-
-    // Resulting ComponentInfo
     ComponentInfo info = std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
     std::vector<Eigen::Vector3d> originalDetPositions = std::get<1>(allOutputs);
@@ -323,7 +324,6 @@ public:
     // Change the position of the root.
 
     Eigen::Vector3d rootDestination{60, 0, 0};
-    const size_t rootIndex = 4;
 
     const auto rootOriginalPosition = info.position(rootIndex);
     info.setPosition(rootIndex, rootDestination);
@@ -347,6 +347,11 @@ public:
     TS_ASSERT(info.rotation(0).isApprox(originalDetRotations.at(0)));
     TS_ASSERT(info.rotation(1).isApprox(originalDetRotations.at(1)));
     TS_ASSERT(info.rotation(2).isApprox(originalDetRotations.at(2)));
+  }
+
+  void test_write_positions() {
+    const size_t rootIndex = 4;
+    do_write_positions(rootIndex);
   }
 
   template <typename IndexType>
@@ -538,8 +543,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex)
-                   .isApprox(compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex).isApprox(
+                   compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -623,8 +628,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex)
-            .angularDistance(info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex).angularDistance(
+            info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 
@@ -719,23 +724,11 @@ public:
   }
 
   void test_setPosition_single_scan() {
-    auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
-    auto &detectorInfo = std::get<1>(infos);
-    Eigen::Vector3d newRootPosition{-1, -1, -1};
-    auto oldDetectorPos = compInfo.position({0, 0});
-    auto oldAssemblyPos = compInfo.position({3, 0});
-    Eigen::Vector3d delta =
-        newRootPosition - compInfo.position({compInfo.root(), 0});
-    compInfo.setPosition({compInfo.root(), 0}, newRootPosition);
-    // Check root moved as expected
-    TS_ASSERT_EQUALS(compInfo.position({compInfo.root(), 0}), newRootPosition);
-    // Check assembly moved as expected
-    TS_ASSERT_EQUALS(compInfo.position({3, 0}), oldAssemblyPos + delta);
-    // Check detector moved as expected
-    TS_ASSERT_EQUALS(compInfo.position({0, 0}), oldDetectorPos + delta);
-    // Check detector moved as expected (via DetectorInfo API)
-    TS_ASSERT_EQUALS(detectorInfo->position({0, 0}), oldDetectorPos + delta);
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    const std::pair<size_t, size_t> rootIndex = {4, 0};
+    do_write_positions(rootIndex);
   }
 
   void test_setRotation_single_scan() {
