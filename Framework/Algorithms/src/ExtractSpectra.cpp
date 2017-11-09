@@ -103,12 +103,9 @@ void ExtractSpectra::exec() {
 
   auto extract = boost::make_shared<ExtractSpectra2>();
   setupAsChildAlgorithm(extract);
-  std::vector<int> indicesToForward(m_workspaceIndexList.begin(),
-                                    m_workspaceIndexList.end());
-  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   extract->setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-      "InputWorkspace", inputWorkspace, IndexType::WorkspaceIndex,
-      indicesToForward);
+      "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
+      {m_workspaceIndexList.begin(), m_workspaceIndexList.end()});
   extract->execute();
   m_inputWorkspace = extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", m_inputWorkspace);
