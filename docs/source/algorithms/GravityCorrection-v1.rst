@@ -22,15 +22,14 @@ Requirements
 
 The x-axis of the :literal:`InputWorkspace` must be in time-of-flight.
 Furthermore, those initial time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
-In general, the instrument must consist of a collimeter with its slits or two other known locations of the neutron flight path between source and sample position.
-Of course, the instrument must have a source, sample and a detector.
-The detector should be a straight line in the :math:`x-y` plane.
-The source centre must be at position :math:`x` = 0 m, :math:`y` = 0 m.
+In general, the instrument must consist of a source, sample, detector and a collimeter with its slits or two other known locations of the neutron flight path between source and sample position.
+The detector should be a point or a straight line in the :math:`x-y` plane.
 
 Corrected time-of-flight axis
 -----------------------------
 
 All following images visualize a single neutron flight and its correction.
+The instrument will be moved virtually such that the sample centre is at position :math:`x_s` = 0 m, :math:`y_s` = 0 m for all following considerations.
 Thus, it corresponds to a single count in the workspace.
 The following two images shows schematically gravitational effects for a detector positioned normal to the beam direction.
 
@@ -40,7 +39,7 @@ The following two images shows schematically gravitational effects for a detecto
 The orange line indicates the assumed neutron flight path which is present in the :literal:`InputWorkspace`.
 In a first step, it is necessary to take correct final angles due to gravitation into account.
 
-The y-coordinate of one slit, depending on the relection up or down defined by the initial incident angle :math:`\theta_{i, 0}`, is
+The y-coordinate of one slit, depending on the reflection up or down defined by the initial incident angle :math:`\theta_{i, 0}`, is
 
 .. math:: y_{s_1} = sign( \theta_{i, 0} ) x_{s_1} tan \left( \theta_{i, 0} \right).
 
@@ -54,19 +53,15 @@ The neutron must travel via the slits :math:`s_{1}` and :math:`s_{2}` :
 
 .. math:: y_0 = y_{\mbox{s}_1} + k \left( x_{\mbox{s}_1} - x_0 \right)^2.
 
-The final angle :math:`\theta_f` can be computed by using the gradient of the parabola at sample center position:
+The final angle :math:`\theta_f` can be computed by using the gradient of the parabola at sample center position :math:`x_s` = 0 m, :math:`y_s` = 0 m:
 
 .. math:: \theta_f =  atan \left( 2 k \sqrt{\frac{y_0}{k}} \right) = atan \left( -2 k x_{0} \right),
-.. math:: x_{\mbox{sample}} = \mbox{0 m}, y_{\mbox{sample}} = \mbox{0 m}
 
 with :math:`k` being the characteristic inverse length
 
 .. math:: k = \frac{g}{2 v_N^2}.
 
 Then, the neutron flight path can be modified in terms of cancelling effects due to gravitation for a distance between sample and detector.
-
-.. figure:: /images/GravityCorrection2.png
-   :align: center
 
 The neutron velocity is
 
@@ -126,7 +121,30 @@ Usage
 
 Example - GravityCorrection
 
-.. testcode:: GravityCorrectionExample
+.. testcode:: General: workspace with instrument where the x axis is parrallel and in direction to the beam.
+
+        # A workspace with an instrument defined, each pixel has a side length of 4 mm
+        ws = CreateSampleWorkspace(WorkspaceType = 'Histogram',
+                                   NumBanks = 2,
+                                   NumMonitors = 0,
+                                   BankPixelWidth = 10,
+                                   XUnit = 'TOF',
+                                   XMin = 0,
+                                   XMax = 20000,
+                                   BinWidth = 200,
+                                   PixelSpacing = 0.008,
+                                   BankDistanceFromSample = 5,
+                                   SourceDistanceFromSample = 10)
+
+        # Perform correction due to gravitation effects
+        wsCorrected = GravityCorrection(ws, "slit1", "slit2")
+
+Output:
+
+.. testoutput:: General
+    :options: +NORMALIZE_WHITESPACE
+
+.. testcode:: ILL Figaro: workspace with instrument where the z axis is parallel and in direction to the beam.
 
         # Load an ILL Figaro File into a Workspace2D
         ws = LoadILLReflectometry('ILL/Figaro/xxxx.nxs')
@@ -136,7 +154,7 @@ Example - GravityCorrection
 
 Output:
 
-.. testoutput:: GravityCorrectionExample
+.. testoutput:: ILL Figaro
     :options: +NORMALIZE_WHITESPACE
 
 .. categories::

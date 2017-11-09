@@ -6,10 +6,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
+//#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+//#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -17,7 +17,7 @@
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
-using Mantid::DataHandling::LoadEmptyInstrument;
+//using Mantid::DataHandling::LoadEmptyInstrument;
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:

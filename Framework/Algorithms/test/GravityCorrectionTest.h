@@ -3,15 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/GravityCorrection.h"
-
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-
 //#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 
@@ -29,92 +26,130 @@ public:
   void testCategory() { TS_ASSERT_EQUALS(gravCorr.category(), "Reflectometry") }
 
   void testInit() {
-    TS_ASSERT_THROWS_NOTHING(gravCorr.initialize())
-    TS_ASSERT(gravCorr.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(gravCorr.initialize());
+    gravCorr.setRethrows(true);
+    TS_ASSERT(gravCorr.isInitialized());
   }
 
-  // test of the input validation
-  void testInputWorkspaceExists() {}
+  void testInput() {
+    TS_ASSERT_THROWS_NOTHING(gravCorr.initialize());
+    gravCorr.setRethrows(true);
 
-  // OutputWorkspace must have unit TOF
-  void testOutputTOF() {}
+  }
 
-  // OutputWorkspace must have corrected final angles
+  // Counts moved
   void testOutputThetaFinalCorrected() {}
 
-  // OutputWorkspace must have corrected TOF values
+  // TOF values modified
   void testOutputTOFCorrected() {}
 
-  // test if detector can be modeled as a line in x-y plane
+  // Check different detectors (point, line, area, also invalid detectors)
   void testDetectorLineModel() {}
 
-  // test mandatory user input (component name of the two slits)
-  void testSlits() {
-    double startX = 0.005;
-    Mantid::API::MatrixWorkspace_sptr inWS1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-            startX);
-    const std::string outWSName("GravityCorrectionTest");
-    TS_ASSERT_THROWS_NOTHING(gravCorr.initialize());
-    gravCorr.setRethrows(true);
-    TS_ASSERT(gravCorr.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(gravCorr.setProperty("InputWorkspace", inWS1));
+  void testBeamDirectionInvariant() {
+    CompareWorkspaces instrumentNotModified;
+    if (!instrumentNotModified.isInitialized())
+      instrumentNotModified.initialize();
+    this->runGravityCorrection(inWS1, "outWSName1");
     TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setProperty("OutputWorkspace", outWSName));
+        instrumentNotModified.setProperty("Workspace1", "outWSName1"));
+    this->runGravityCorrection(inWS2, "outWSName2");
     TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setPropertyValue("FirstSlitName", "slit1"));
+        instrumentNotModified.setProperty("Workspace2", "outWSName2"));
+    TS_ASSERT_THROWS_NOTHING(instrumentNotModified.setProperty(
+        "CheckInstrument", PROPERTY_VALUE_FALSE));
     TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setPropertyValue("SecondSlitName", "slit2"));
-    TS_ASSERT_THROWS_ANYTHING(gravCorr.execute());
+        instrumentNotModified.setProperty("CheckAxes", PROPERTY_VALUE_TRUE));
+    TS_ASSERT(instrumentNotModified.execute());
+    TS_ASSERT_EQUALS(instrumentNotModified.getPropertyValue("Result"),
+                     PROPERTY_VALUE_TRUE);
   }
 
-  void testInputWorkspace1D() {
+  void testSlitInputInvariant() {
+    // First algorithm run
+    this->runGravityCorrection(inWS1, "out1");
+    // Second algorithm run
+    std::string slit1Name = "slit2";
+    std::string slit2Name = "slit1";
+    this->runGravityCorrection(inWS1, "out2", slit1Name, slit2Name);
+    // Output workspace comparison
+    CompareWorkspaces compare;
+    if (!compare.isInitialized())
+      compare.initialize();
+    TS_ASSERT_THROWS_NOTHING(compare.setPropertyValue("Workspace1", "out1"));
+    compare.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", "out2"));
+    TS_ASSERT(compare.execute());
+    TS_ASSERT(compare.isExecuted());
+    TSM_ASSERT_EQUALS(
+        "Altering the names of the slit inputs changes the OutputWorkspace",
+        compare.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
 
-    double startX = 0.005;
-    Mantid::API::MatrixWorkspace_sptr inWS1 =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-            startX);
+  void testInstrumentUnchanged() {
+    this->runGravityCorrection(inWS1, outWSName);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Can't store workspace in ADS",
+        WorkspaceCreationHelper::storeWS(inWSName, inWS1));
+    //    Mantid::API::AnalysisDataService::Instance().addOrReplace(inWSName,
+    //                                                              inWS1));
+    TS_ASSERT_EQUALS(inWSName, inWS1->getName());
+    CompareWorkspaces instrumentNotModified;
+    if (!instrumentNotModified.isInitialized())
+      instrumentNotModified.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        instrumentNotModified.setProperty("Workspace1", inWS1->getName()));
+    TS_ASSERT_THROWS_NOTHING(
+        instrumentNotModified.setProperty("Workspace2", outWSName));
+    TS_ASSERT_THROWS_NOTHING(instrumentNotModified.setProperty(
+        "CheckInstrument", PROPERTY_VALUE_TRUE));
+    TS_ASSERT_THROWS_NOTHING(
+        instrumentNotModified.setProperty("CheckAxes", PROPERTY_VALUE_FALSE));
+    TS_ASSERT(instrumentNotModified.execute());
+    TS_ASSERT_EQUALS(instrumentNotModified.getPropertyValue("Result"),
+                     PROPERTY_VALUE_TRUE);
+    TS_ASSERT_THROWS_NOTHING(WorkspaceCreationHelper::removeWS(inWSName));
+    // if (Mantid::API::AnalysisDataService::Instance().doesExist(inWSName))
+    //  TS_ASSERT_THROWS_NOTHING(
+    //      Mantid::API::AnalysisDataService::Instance().clear());
+  }
 
-    //Mantid::Geometry::Instrument_sptr instrument = boost::make_shared<Instrument>();
-    auto s1 = new Mantid::Geometry::ObjComponent("slit1");
-    //s1->setPos(s1Pos);
-    //instrument->add(s1);
+  void testInputWorkspace1D() {}
 
-    //auto s2 = new Mantid::Geometry::ObjComponent("slit2");
-    //s2->setPos(s2Pos);
-    //instrument->add(s2);
+  void testInputWorkspace2D() {}
 
-    const std::string outWSName("GravityCorrectionTest");
+  Mantid::API::MatrixWorkspace_sptr runGravityCorrection(
+      Mantid::API::MatrixWorkspace_sptr &inWS, const std::string outName,
+      std::string firstSlitName = "", std::string secondSlitName = "") {
     TS_ASSERT_THROWS_NOTHING(gravCorr.initialize());
-    TS_ASSERT(gravCorr.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(gravCorr.setProperty("InputWorkspace", inWS1));
-    TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setProperty("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setPropertyValue("FirstSlitName", "slit1"));
-    TS_ASSERT_THROWS_NOTHING(
-        gravCorr.setPropertyValue("SecondSlitName", "slit2"));
     gravCorr.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(gravCorr.setProperty("InputWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(gravCorr.setProperty("OutputWorkspace", outName));
+    if (!firstSlitName.empty())
+      TSM_ASSERT_THROWS_NOTHING(
+          "FirstSlitName should be slit2",
+          gravCorr.setProperty("FirstSlitName", firstSlitName));
+    if (!secondSlitName.empty())
+      TSM_ASSERT_THROWS_NOTHING(
+          "SecondSlitName should be slit1",
+          gravCorr.setProperty("SecondSlitName", secondSlitName));
     TS_ASSERT_THROWS_NOTHING(gravCorr.execute());
-
-    // Mantid::DataObjects::Workspace2D_sptr outWS =
-    // Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::Workspace2D_sptr>(outWSName);
-    // TS_ASSERT_EQUALS(outWS->getAxis(0)->title(), "TOF");
-    // Mantid::API::AnalysisDataService::Instance().remove("Input");
-    // Mantid::API::AnalysisDataService::Instance().remove(outWSName);
-  }
-
-  // InputWorkspace of 2D results of an OutputWorkspace of same size, theta, TOF
-  // modified
-  void testInputWorkspace2D() {
-    // const double detSize = 0.122;
-    // Mantid::API::MatrixWorkspace_const_sptr inWS2 =
-    // WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    //   startX, detSize);
+    TS_ASSERT(gravCorr.isExecuted());
+    return gravCorr.getProperty("OutputWorkspace");
   }
 
 private:
   GravityCorrection gravCorr;
+  const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
+  const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
+  const std::string PROPERTY_VALUE_TRUE{"1"};
+  const std::string PROPERTY_VALUE_FALSE{"0"};
+  Mantid::API::MatrixWorkspace_sptr inWS1{
+      WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument()};
+  // change ReferenceFrame -> BeamDirection
+  Mantid::API::MatrixWorkspace_sptr inWS2{
+      WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument()};
+  // need more workspaces
 };
 
 // add PerformanceTest
