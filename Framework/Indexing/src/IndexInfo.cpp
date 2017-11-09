@@ -261,9 +261,10 @@ void IndexInfo::makeSpectrumNumberTranslator(
       std::move(spectrumNumbers), std::move(partitioner), partition);
 }
 
-template IndexInfo::IndexInfo(std::vector<SpectrumNumber>, const IndexInfo &);
-template IndexInfo::IndexInfo(std::vector<GlobalSpectrumIndex>,
-                              const IndexInfo &);
+template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<SpectrumNumber>,
+                                                  const IndexInfo &);
+template MANTID_INDEXING_DLL
+IndexInfo::IndexInfo(std::vector<GlobalSpectrumIndex>, const IndexInfo &);
 
 } // namespace Indexing
 } // namespace Mantid
