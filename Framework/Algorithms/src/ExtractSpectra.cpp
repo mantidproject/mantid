@@ -101,20 +101,16 @@ void ExtractSpectra::exec() {
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
   this->checkProperties();
 
-  ExtractSpectra2 extract;
-  extract.setChild(true);
-  extract.initialize();
+  auto extract = boost::make_shared<ExtractSpectra2>();
+  setupAsChildAlgorithm(extract);
   std::vector<int> indicesToForward(m_workspaceIndexList.begin(),
                                     m_workspaceIndexList.end());
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  extract.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
+  extract->setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
       "InputWorkspace", inputWorkspace, IndexType::WorkspaceIndex,
       indicesToForward);
-  for (auto prop : extract.getProperties())
-    if (prop->name() == "OutputWorkspace")
-      prop->createTemporaryValue();
-  extract.execute();
-  m_inputWorkspace = extract.getProperty("OutputWorkspace");
+  extract->execute();
+  m_inputWorkspace = extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", m_inputWorkspace);
 
   if (isDefault("XMin") && isDefault("XMax"))
