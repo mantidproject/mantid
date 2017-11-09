@@ -287,6 +287,13 @@ void ExtractSpectra::checkProperties() {
       size_t maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
+      if (maxSpec < minSpec) {
+        g_log.error("StartWorkspaceIndex must be less than or equal to "
+                    "EndWorkspaceIndex");
+        throw std::out_of_range(
+            "StartWorkspaceIndex must be less than or equal "
+            "to EndWorkspaceIndex");
+      }
       m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
       for (size_t i = minSpec; i <= maxSpec; ++i)
         m_workspaceIndexList.push_back(i);
