@@ -39,7 +39,6 @@ set ( SRC_FILES
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
-	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
@@ -203,7 +202,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
@@ -363,7 +361,6 @@ set ( TEST_FILES
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h
 	FuncMinimizers/LevenbergMarquardtTest.h
-        FuncMinimizers/MoreSorensenTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
