@@ -206,7 +206,7 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    
+
     if not run_numbers:
         raise RuntimeError("Attempted to load empty set of workspaces. Please input at least one valid run number")
 
