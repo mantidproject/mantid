@@ -4,13 +4,14 @@
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/HistogramItem.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 
 namespace Mantid {
 namespace HistogramData {
+
+class Histogram;
 
 /** HistogramIterator
 
@@ -43,27 +44,34 @@ namespace HistogramData {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramIterator
-    : public boost::iterator_facade<HistogramIterator, HistogramItem,
+    : public boost::iterator_facade<HistogramIterator, const HistogramItem&,
                                     boost::bidirectional_traversal_tag> {
 
 public:
   HistogramIterator(const Histogram &histogram, const size_t index = 0)
-      : m_histogram(histogram), m_index(index),
-        m_currentItem(Kernel::make_unique<HistogramItem>(histogram, index)){};
+      : m_item(histogram, index) {};
 
 private:
   friend class boost::iterator_core_access;
 
-  void increment();
-  bool equal(const HistogramIterator &other) const;
-  HistogramItem &dereference() const;
-  void decrement();
-  void advance(int64_t delta);
-  uint64_t distance_to(const HistogramIterator &other) const;
+  inline void increment() { m_item.incrementIndex(); }
 
-  const Histogram &m_histogram;
-  size_t m_index;
-  std::unique_ptr<HistogramItem> m_currentItem;
+  inline bool equal(const HistogramIterator &other) const {
+    return m_item.getIndex() == other.m_item.getIndex();
+  }
+
+  inline const HistogramItem &dereference() const { return m_item; }
+
+  inline void decrement() { m_item.incrementIndex(); }
+
+  inline void advance(int64_t delta) { m_item.advance(delta); }
+
+  inline uint64_t distance_to(const HistogramIterator &other) const {
+    return static_cast<uint64_t>(other.m_item.getIndex()) -
+           static_cast<uint64_t>(m_item.getIndex());
+  }
+
+  HistogramItem m_item;
 };
 
 } // namespace HistogramData

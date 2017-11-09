@@ -11,96 +11,118 @@ using Mantid::HistogramData::Points;
 HistogramItem::HistogramItem(const Histogram &histogram, const size_t index)
     : m_histogram(histogram), m_index(index) {}
 
+double HistogramItem::center() const { 
+    const auto &x = histogramRef().x();
+    if (xModeIsPoints()) {
+        return x[m_index];
+    } else {
+        return (x[m_index+1] + x[m_index]) / 2.0;
+    }
+}
+
+double HistogramItem::width() const { 
+    const auto &x = histogramRef().x();
+    if (xModeIsPoints()) {
+        auto numPoints = histogramRef().size();
+        double lower = 0;
+        double upper = 0;
+        if(m_index == 0) {
+            // first point
+            upper = 0.5 * (x[m_index + 1] + x[m_index]);
+            lower = x[0] - (upper - x[0]);
+        } else if (m_index == numPoints - 1) {
+            // last point
+            lower = 0.5 * (x[m_index] + x[m_index - 1]);
+            upper = x[numPoints - 1] + (x[numPoints - 1] - lower);
+        } else {
+            // everything inbetween
+            lower = 0.5 * (x[m_index] + x[m_index - 1]);
+            upper = 0.5 * (x[m_index + 1] + x[m_index]);
+        }
+        return upper - lower;
+    } else {
+        return x[m_index + 1] - x[m_index];
+    }
+}
+
+bool HistogramItem::xModeIsPoints() const {
+    return Histogram::XMode::Points == histogramRef().xMode();
+}
+
+bool HistogramItem::yModeIsCounts() const {
+    return Histogram::YMode::Counts == histogramRef().yMode();
+}
+
 double HistogramItem::counts() const {
-  const auto &yMode = histogramRef().yMode();
-  if (yMode == Histogram::YMode::Counts) {
-    return histogramRef().counts()[m_index];
-  } else {
-    const Frequencies frequency{histogramRef().frequencies()[m_index]};
-    return Counts(frequency, binEdges())[0];
-  }
+    const auto &y = histogramRef().y();
+    if (yModeIsCounts()) {
+        return y[m_index];
+    } else {
+        return y[m_index] / width();
+    }
 }
 
 double HistogramItem::countVariance() const {
-  return histogramRef().countVariances()[m_index];
+    const auto &e = histogramRef().e();
+    if (yModeIsCounts()) {
+        return e[m_index] * e[m_index];
+    } else {
+        const auto binWidth = width();
+        return e[m_index] * e[m_index] * binWidth * binWidth;
+    }
 }
 
 double HistogramItem::countStandardDeviation() const {
-  return histogramRef().countStandardDeviations()[m_index];
+    const auto &e = histogramRef().e();
+    if (yModeIsCounts()) {
+        return e[m_index];
+    } else {
+        const auto binWidth = width();
+        return e[m_index] * binWidth;
+    }
 }
 
 double HistogramItem::frequency() const {
-  const auto &yMode = histogramRef().yMode();
-  if (yMode == Histogram::YMode::Frequencies) {
-    return histogramRef().frequencies()[m_index];
-  } else {
-    const Counts counts{histogramRef().counts()[m_index]};
-    return Frequencies(counts, binEdges())[0];
-  }
+    const auto &y = histogramRef().y();
+    if (yModeIsCounts()) {
+        return y[m_index] * width();
+    } else {
+        return y[m_index];
+    }
 }
 
 double HistogramItem::frequencyVariance() const {
-  return histogramRef().frequencyVariances()[m_index];
+    const auto &e = histogramRef().e();
+    if (!yModeIsCounts()) {
+        return e[m_index] * e[m_index];
+    } else {
+        const auto binWidth = width();
+        return (e[m_index] * e[m_index]) / (binWidth * binWidth);
+    }
 }
 
 double HistogramItem::frequencyStandardDeviation() const {
-  return histogramRef().frequencyStandardDeviations()[m_index];
-}
-
-double HistogramItem::center() const { return point()[0]; }
-
-double HistogramItem::width() const {
-  const auto &edges = binEdges();
-  const auto &lower = edges[0];
-  const auto &upper = edges[1];
-  return upper - lower;
-}
-
-const BinEdges HistogramItem::binEdges() const {
-  const auto &xMode = histogramRef().xMode();
-
-  if (xMode == Histogram::XMode::BinEdges) {
-    const auto &edges = histogramRef().binEdges();
-    const auto &lower = edges[m_index];
-    const auto &upper = edges[m_index + 1];
-    return BinEdges{lower, upper};
-  } else {
-    const auto &points = histogramRef().points();
-    // Guess the bin edges from the points
-    if (points.size() == 0) {
-      // We have no points, just return empty bin edges
-      return BinEdges{};
-    } else if (points.size() == 1) {
-      // We have a single point, let BinEdges guess the edges
-      return BinEdges(points);
+    const auto &e = histogramRef().e();
+    if (!yModeIsCounts()) {
+        return e[m_index];
     } else {
-      // We have 2 or more points. Attempt to use up to 4 points
-      // to interpolate the correct bin edges.
-      size_t upperBound = std::min(m_index + 2, points.size());
-      size_t lowerBound = (m_index < 2) ? 0 : m_index - 2;
-
-      std::vector<double> pts;
-      for (size_t i = lowerBound; i < upperBound; i++) {
-        pts.push_back(points[i]);
-      }
-
-      auto index = m_index - lowerBound;
-      BinEdges edges(Points{pts});
-      return BinEdges{edges[index], edges[index + 1]};
+        const auto binWidth = width();
+        return e[m_index] / binWidth;
     }
-  }
-}
-
-const Points HistogramItem::point() const {
-  const auto &xMode = histogramRef().xMode();
-  if (xMode == Histogram::XMode::Points) {
-    return Points{histogramRef().points()[m_index]};
-  } else {
-    const auto &lower = histogramRef().binEdges()[m_index];
-    const auto &upper = histogramRef().binEdges()[m_index + 1];
-    const BinEdges bins{lower, upper};
-    return Points(bins);
-  }
 }
 
 const Histogram &HistogramItem::histogramRef() const { return m_histogram; }
+
+void HistogramItem::advance(int64_t delta) {
+  m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
+                                 static_cast<uint64_t>(m_index) + delta)
+                      : std::min(histogramRef().size(),
+                                 m_index + static_cast<size_t>(delta));
+}
+
+void HistogramItem::incrementIndex() {
+  if (m_index < histogramRef().size()) {
+    ++m_index;
+  }
+}
+
