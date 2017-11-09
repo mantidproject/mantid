@@ -4,8 +4,8 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 
-#include <QObject>
 #include <QApplication>
+#include <QObject>
 
 #ifdef Q_OS_WIN
 #include <windows.h> // for Sleep
@@ -40,8 +40,7 @@ public:
       const FindFilesSearchResults &results = FindFilesSearchResults(),
       int milliseconds = 100)
       : FindFilesWorker(parameters), m_results(results),
-        m_milliseconds(milliseconds) {
-        }
+        m_milliseconds(milliseconds) {}
 
 protected:
   void run() override {
@@ -79,7 +78,7 @@ public:
 
 public slots:
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(const FindFilesSearchResults& result) {
+  void inspectThreadResult(const FindFilesSearchResults &result) {
     m_results = result;
   }
 

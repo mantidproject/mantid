@@ -5,8 +5,8 @@
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
 #include <QObject>
-#include <QSharedPointer>
 #include <QRunnable>
+#include <QSharedPointer>
 #include <QString>
 #include <QThreadPool>
 #include <functional>
@@ -19,7 +19,7 @@ namespace API {
 /** A small helper class to hold a handle to a static thread pool.
  */
 class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager : public QObject {
-	Q_OBJECT
+  Q_OBJECT
   typedef std::function<FindFilesWorker *(const FindFilesSearchParameters &)>
       ThreadAllocator;
 
@@ -49,7 +49,7 @@ private:
   /// Cancel the currently running worker
   void cancelWorker(const QObject *parent);
   /// Connect worker to relevant signals/slots
-  void connectWorker(const QObject* parent, const FindFilesWorker* worker);
+  void connectWorker(const QObject *parent, const FindFilesWorker *worker);
 
   /// Handle to a local QThread pool
   static QThreadPool m_pool;

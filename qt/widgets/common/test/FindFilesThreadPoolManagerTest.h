@@ -1,7 +1,6 @@
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 
-
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
 
@@ -31,7 +30,7 @@ public:
     char *argv = "DummyTestingApplication";
     QApplication app(argc, &argv);
     // Arrange
-    FakeMWRunFiles* widget = new FakeMWRunFiles();
+    FakeMWRunFiles *widget = new FakeMWRunFiles();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -117,7 +116,7 @@ public:
 
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-	QApplication::processEvents();
+    QApplication::processEvents();
 
     // Assert
     const auto results = widget.getResults();
@@ -129,8 +128,8 @@ public:
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
   }
 
-  private:
-	  std::unique_ptr<QApplication> m_app;
+private:
+  std::unique_ptr<QApplication> m_app;
 };
 
 #endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST */

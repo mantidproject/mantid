@@ -7,8 +7,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <QApplication>
 #include <Poco/File.h>
+#include <QApplication>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
@@ -25,7 +25,8 @@ using namespace MantidQt::API;
  */
 FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
     : QRunnable(), m_parameters(parameters) {
-  qRegisterMetaType<MantidQt::API::FindFilesSearchResults>("FindFilesSearchResults");
+  qRegisterMetaType<MantidQt::API::FindFilesSearchResults>(
+      "FindFilesSearchResults");
 }
 
 /**
@@ -54,7 +55,7 @@ void FindFilesWorker::run() {
 
     const auto result = createFindFilesSearchResult(
         error, filenames, valueForProperty.toStdString());
-	finishSearching(result);
+    finishSearching(result);
     return;
   }
 
@@ -159,17 +160,17 @@ FindFilesWorker::getFilesFromAlgorithm() {
 }
 
 /** Finish searching by emitting the results
- * 
+ *
  * @param result :: the result to return to the main thread.
  */
-void FindFilesWorker::finishSearching(const FindFilesSearchResults& result) {
-	// Before emitting our search results, we need to check if we have recieved
-	// a signal to disconnect as this search is no longer relevent. By calling
-	// process events here we ensure that if the result is no longer needed the
-	// emitted signal is just ignored.
-	QCoreApplication::processEvents();
-	emit finished(result);
-	QCoreApplication::sendPostedEvents();
+void FindFilesWorker::finishSearching(const FindFilesSearchResults &result) {
+  // Before emitting our search results, we need to check if we have recieved
+  // a signal to disconnect as this search is no longer relevent. By calling
+  // process events here we ensure that if the result is no longer needed the
+  // emitted signal is just ignored.
+  QCoreApplication::processEvents();
+  emit finished(result);
+  QCoreApplication::sendPostedEvents();
 }
 
 /** Create a struct containing the results of the search.
@@ -183,15 +184,13 @@ void FindFilesWorker::finishSearching(const FindFilesSearchResults& result) {
  * @return A struct holding the results of this search.
  */
 FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(
-	const std::string &error, const std::vector<std::string> &filenames,
-	const std::string &valueForProperty) {
-	FindFilesSearchResults results;
-	results.error = error;
-	results.filenames = filenames;
-	results.valueForProperty = valueForProperty;
-	return results;
+    const std::string &error, const std::vector<std::string> &filenames,
+    const std::string &valueForProperty) {
+  FindFilesSearchResults results;
+  results.error = error;
+  results.filenames = filenames;
+  results.valueForProperty = valueForProperty;
+  return results;
 }
 
-void FindFilesWorker::disconnectWorker() {
-	this->disconnect();
-}
+void FindFilesWorker::disconnectWorker() { this->disconnect(); }

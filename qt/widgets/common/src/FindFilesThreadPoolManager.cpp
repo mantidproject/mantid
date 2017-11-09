@@ -7,9 +7,9 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <Poco/File.h>
 #include <QCoreApplication>
 #include <QSharedPointer>
-#include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
@@ -67,7 +67,8 @@ void FindFilesThreadPoolManager::createWorker(
  *  @param parent :: the listening parent object waiting for search results
  *  @param worker :: the worker to connect signals/slots for.
  */
-void FindFilesThreadPoolManager::connectWorker(const QObject* parent, const FindFilesWorker* worker) {
+void FindFilesThreadPoolManager::connectWorker(const QObject *parent,
+                                               const FindFilesWorker *worker) {
   parent->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
                   parent,
                   SLOT(inspectThreadResult(const FindFilesSearchResults &)),
@@ -91,11 +92,11 @@ void FindFilesThreadPoolManager::connectWorker(const QObject* parent, const Find
  * @param parent :: the parent widget to disconnect signals for.
  */
 void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
-	// Just disconnect any signals from the worker. We leave the worker to
-	// continue running in the background because 1) terminating it directly
-	// is dangerous (we have no idea what it's currently doing from here) and 2)
-	// waiting for it to finish before starting a new thread locks up the GUI
-	// event loop.
+  // Just disconnect any signals from the worker. We leave the worker to
+  // continue running in the background because 1) terminating it directly
+  // is dangerous (we have no idea what it's currently doing from here) and 2)
+  // waiting for it to finish before starting a new thread locks up the GUI
+  // event loop.
   emit disconnectWorkers();
   m_searchIsRunning = false;
   QCoreApplication::sendPostedEvents();
@@ -115,12 +116,8 @@ bool FindFilesThreadPoolManager::isSearchRunning() const {
  * have finished executing. Using this in a GUI thread will cause the GUI
  * to freeze up.
  */
-void FindFilesThreadPoolManager::waitForDone() {
-  m_pool.waitForDone();
-}
+void FindFilesThreadPoolManager::waitForDone() { m_pool.waitForDone(); }
 
 /** Mark the search as being finished.
  */
-void FindFilesThreadPoolManager::searchFinished() {
-	m_searchIsRunning = false;
-}
+void FindFilesThreadPoolManager::searchFinished() { m_searchIsRunning = false; }

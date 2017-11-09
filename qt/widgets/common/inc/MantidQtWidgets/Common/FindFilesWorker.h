@@ -6,9 +6,9 @@
 #include <QObject>
 #include <QRunnable>
 #include <QString>
+#include <qmetatype.h>
 #include <string>
 #include <vector>
-#include <qmetatype.h>
 
 namespace MantidQt {
 namespace API {
@@ -47,7 +47,6 @@ struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchResults {
   std::string valueForProperty;
 };
 
-
 /**
  * A class to allow the asynchronous finding of files.
  */
@@ -73,7 +72,7 @@ protected:
 
 private:
   /// Emit search result if required
-  void finishSearching(const FindFilesSearchResults& result);
+  void finishSearching(const FindFilesSearchResults &result);
 
   /// Use the specified algorithm and property to find files instead of using
   /// the FileFinder.
@@ -86,7 +85,6 @@ private:
   /// Struct to hold the parameters of the search
   FindFilesSearchParameters m_parameters;
 };
-
 
 } // namespace API
 } // namespace MantidQt

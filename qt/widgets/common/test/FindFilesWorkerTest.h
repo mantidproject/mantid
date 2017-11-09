@@ -4,8 +4,8 @@
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
-#include <QThreadPool>
 #include <QCoreApplication>
+#include <QThreadPool>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -160,7 +160,6 @@ private:
     threadPool->waitForDone();
     QCoreApplication::processEvents();
   }
-
 };
 
 #endif /* MANTIDQT_API_FINDFILESWORKERTEST */
