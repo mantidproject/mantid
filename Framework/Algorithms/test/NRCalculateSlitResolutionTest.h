@@ -4,8 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
