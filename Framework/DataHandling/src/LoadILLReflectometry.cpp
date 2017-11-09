@@ -94,8 +94,7 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
  *  @param table a beam position TableWorkspace
  *  @return a DirectBeamMeasurement object corresonding to the table parameter.
  */
-PeakInfo
-parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
+PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
     throw std::runtime_error("BeamPosition table should have a single row.");
   }
@@ -116,7 +115,8 @@ parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
  *  @param detectorDistance detector-sample distance in meters.
  *  @return the offset angle.
  */
-double offsetAngle(const double peakCentre, const double detectorCentre, const double pixelWidth, const double detectorDistance) {
+double offsetAngle(const double peakCentre, const double detectorCentre,
+                   const double pixelWidth, const double detectorDistance) {
   const double offsetWidth = (detectorCentre - peakCentre) * pixelWidth;
   return inDeg(std::atan2(offsetWidth, detectorDistance));
 }
@@ -515,7 +515,8 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       } else if (m_instrumentName == "Figaro") {
         chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
-        if (chop1Phase > 360.0) chop1Phase = 0.0;
+        if (chop1Phase > 360.0)
+          chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
       const double openOffset =
@@ -543,10 +544,10 @@ std::vector<double> LoadILLReflectometry::getXValues() {
                       << ". Check you NeXus file.\n";
       }
       const double chopWindow = 45.0;
-      const double t_TOF2 =
-          m_tofDelay -
-          1.e+6 * 60.0 * (POFF - chopWindow + chop2Phase - chop1Phase + openOffset) /
-              (2.0 * 360 * chop1Speed);
+      const double t_TOF2 = m_tofDelay -
+                            1.e+6 * 60.0 * (POFF - chopWindow + chop2Phase -
+                                            chop1Phase + openOffset) /
+                                (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
       xVals.emplace_back(t_TOF2 - 0.5 * m_channelWidth);
@@ -710,7 +711,8 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
   const double userAngle = getProperty("BraggAngle");
-  const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth, m_detectorDistanceValue);
+  const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth,
+                                    m_detectorDistanceValue);
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
     if (posTable) {
@@ -724,10 +726,13 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     return std::make_pair(nominalDetectorAngle, bragg);
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
-  const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre, m_pixelWidth, dbPeak.detectorDistance);
+  const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
+                                      m_pixelWidth, dbPeak.detectorDistance);
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
-  const double detectorAngle = nominalDetectorAngle - dbPeak.detectorAngle - dbOffset;
-  m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle << '\n';
+  const double detectorAngle =
+      nominalDetectorAngle - dbPeak.detectorAngle - dbOffset;
+  m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
+                << '\n';
   const double bragg = (detectorAngle + offset) / 2;
   return std::make_pair(detectorAngle, bragg);
 }

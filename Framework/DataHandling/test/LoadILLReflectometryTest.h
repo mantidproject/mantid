@@ -28,7 +28,7 @@ private:
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
   static void commonProperties(MatrixWorkspace_sptr output,
-                        const std::string &instrName) {
+                               const std::string &instrName) {
     TS_ASSERT(output->isHistogramData());
     const auto &spectrumInfo = output->spectrumInfo();
     const auto spectrumInfoSize = spectrumInfo.size();
@@ -61,8 +61,10 @@ private:
     return std::vector<std::pair<std::string, std::string>>();
   }
 
-  static void getWorkspaceFor(MatrixWorkspace_sptr &output, const std::string &fileName,
-                       const std::string &outFile, const std::vector<std::pair<std::string, std::string>> &properties) {
+  static void getWorkspaceFor(
+      MatrixWorkspace_sptr &output, const std::string &fileName,
+      const std::string &outFile,
+      const std::vector<std::pair<std::string, std::string>> &properties) {
     bool success = loadSpecific(fileName, outFile, properties);
     if (success) {
       output =
@@ -71,8 +73,9 @@ private:
     }
   }
 
-  static bool loadSpecific(const std::string &fileName, const std::string &outFile,
-                    const std::vector<std::pair<std::string, std::string>> &properties) {
+  static bool loadSpecific(
+      const std::string &fileName, const std::string &outFile,
+      const std::vector<std::pair<std::string, std::string>> &properties) {
     LoadILLReflectometry loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -111,7 +114,9 @@ public:
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
-  void testExecD17() { loadSpecific(m_d17File, m_outWSName, emptyProperties()); }
+  void testExecD17() {
+    loadSpecific(m_d17File, m_outWSName, emptyProperties());
+  }
 
   // D17
 
@@ -130,8 +135,8 @@ public:
         run.getPropertyValueAsType<double>("PSD.time_of_flight_2");
     const auto chopper1Speed = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper1_speed_average");
-    const auto chopper1Phase =
-        run.getPropertyValueAsType<double>("VirtualChopper.chopper1_phase_average");
+    const auto chopper1Phase = run.getPropertyValueAsType<double>(
+        "VirtualChopper.chopper1_phase_average");
     const auto chopper2Phase = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper2_phase_average");
     const auto pOffset =
@@ -223,8 +228,10 @@ public:
     const double peakOffsetAngle = -1.64; // Approximately known value.
     const double detectorAngle = 2 * angle - peakOffsetAngle;
     const auto &spectrumInfo = output->spectrumInfo();
-    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI, detectorAngle)
-    TS_ASSERT_LESS_THAN_EQUALS(detectorAngle, spectrumInfo.twoTheta(127) * 180 / M_PI)
+    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI,
+                               detectorAngle)
+    TS_ASSERT_LESS_THAN_EQUALS(detectorAngle,
+                               spectrumInfo.twoTheta(127) * 180 / M_PI)
     const auto stheta = output->run().getPropertyValueAsType<double>("stheta");
     TS_ASSERT_EQUALS(stheta * 180 / M_PI, angle)
   }
@@ -263,8 +270,7 @@ public:
     TS_ASSERT_EQUALS(detDistances.front(), detDist)
     TS_ASSERT_EQUALS(
         std::count(colNames.cbegin(), colNames.cend(), "PeakCentre"), 1)
-    const auto peakCentres =
-        beamPosWS->getColVector<double>("PeakCentre");
+    const auto peakCentres = beamPosWS->getColVector<double>("PeakCentre");
     TS_ASSERT_DELTA(peakCentres.front(), 202.5, 0.5)
   }
 
@@ -284,19 +290,18 @@ public:
     prop.clear();
     prop.emplace_back("BeamPosition", dbBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
-    const auto dbDetAngle = dbOutput->run().getPropertyValueAsType<double>("dan.value");
+    const auto dbDetAngle =
+        dbOutput->run().getPropertyValueAsType<double>("dan.value");
     const auto dbDetDist =
         dbBeamPosWS->cell_cast<double>(0, "DetectorDistance");
-    const auto dbPeakPos =
-        dbBeamPosWS->cell_cast<double>(0, "PeakCentre");
+    const auto dbPeakPos = dbBeamPosWS->cell_cast<double>(0, "PeakCentre");
     const auto dbPixWidth =
         dbOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
     const auto dbPeakOffset = (127.5 - dbPeakPos) * dbPixWidth;
     const auto dbOffsetAngle = std::atan2(dbPeakOffset, dbDetDist) * 180 / M_PI;
     const auto refDetAngle =
         refOutput->run().getPropertyValueAsType<double>("dan.value");
-    const auto newDetAngle =
-        refDetAngle - dbDetAngle - dbOffsetAngle;
+    const auto newDetAngle = refDetAngle - dbDetAngle - dbOffsetAngle;
     const auto &spectrumInfo = refOutput->spectrumInfo();
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI,
                                newDetAngle)
@@ -316,7 +321,7 @@ public:
     MatrixWorkspace_sptr refOutput;
     const double userAngle{23.23};
     const std::string refBeamPosWSName{
-      "LoadILLReflectometryTest_RefBeamPositionWS"};
+        "LoadILLReflectometryTest_RefBeamPositionWS"};
     prop.clear();
     prop.emplace_back("BeamPosition", dbBeamPosWSName);
     prop.emplace_back("BraggAngle", std::to_string(userAngle));
@@ -327,8 +332,7 @@ public:
             refBeamPosWSName);
     const auto refDetDist =
         refOutput->run().getPropertyValueAsType<double>("det.value") / 1000;
-    const auto refPeakPos =
-        refBeamPosWS->cell_cast<double>(0, "PeakCentre");
+    const auto refPeakPos = refBeamPosWS->cell_cast<double>(0, "PeakCentre");
     const auto refPixWidth =
         refOutput->run().getPropertyValueAsType<double>("PSD.mppx") / 1000;
     const auto refPeakOffset = (127.5 - refPeakPos) * refPixWidth;
