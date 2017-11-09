@@ -62,7 +62,7 @@ private:
 
   inline const HistogramItem &dereference() const { return m_item; }
 
-  inline void decrement() { m_item.incrementIndex(); }
+  inline void decrement() { m_item.decrementIndex(); }
 
   inline void advance(int64_t delta) { m_item.advance(delta); }
 

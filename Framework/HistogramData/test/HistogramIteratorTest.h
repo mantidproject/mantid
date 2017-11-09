@@ -34,16 +34,78 @@ public:
     TS_ASSERT_THROWS_NOTHING(HistogramIterator iter(hist));
   }
 
-  void test_iterate_over_empty_histogram() {
-    Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
-    /* assert(hist.size() == 0); */
+  void test_iterator_begin() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto iter = hist.begin();
+    TS_ASSERT(iter != hist.end());
+    TS_ASSERT_EQUALS(iter->frequency(), 2);
+  }
 
-    double total = 0;
-    /* for (const auto &item : hist) { */
-    /*   total += item.counts(); */
-    /* } */
+  void test_iterator_end() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto iter = hist.end();
+    TS_ASSERT(iter != hist.begin());
+  }
 
-    TS_ASSERT_EQUALS(total, 0);
+  void test_iterator_increment() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto iter = hist.begin();
+    TS_ASSERT(iter != hist.end());
+    TS_ASSERT_EQUALS(iter->frequency(), 2);
+    ++iter;
+    TS_ASSERT(iter != hist.end());
+    TS_ASSERT_EQUALS(iter->frequency(), 3);
+    ++iter;
+    TS_ASSERT(iter != hist.end());
+    TS_ASSERT_EQUALS(iter->frequency(), 4);
+    ++iter;
+    TS_ASSERT(iter == hist.end());
+  }
+
+  void test_iterator_decrement() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto iter = hist.end();
+    --iter;
+    TS_ASSERT_DIFFERS(iter, hist.begin());
+    TS_ASSERT_EQUALS(iter->frequency(), 4);
+    --iter;
+    TS_ASSERT_DIFFERS(iter, hist.begin());
+    TS_ASSERT_EQUALS(iter->frequency(), 3);
+    --iter;
+    TS_ASSERT_EQUALS(iter,  hist.begin());
+    TS_ASSERT_EQUALS(iter->frequency(), 2);
+  }
+
+  void test_iterator_advance() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto iter = hist.begin();
+
+    std::advance(iter, 2);
+    TS_ASSERT_EQUALS(iter->frequency(), 4);
+    // check past end of valid range
+    std::advance(iter, 2);
+    TS_ASSERT_EQUALS(iter, hist.end());
+    std::advance(iter, -3);
+    TS_ASSERT_EQUALS(iter->frequency(), 2);
+    // check before start of valid range
+    std::advance(iter, -2);
+    TS_ASSERT_EQUALS(iter, hist.begin());
+  }
+
+  void test_iterator_distance() {
+    Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
+    auto begin = hist.begin();
+    auto end = hist.end();
+
+    TS_ASSERT_DIFFERS(begin, end);
+    TS_ASSERT_EQUALS(std::distance(begin, end), 3);
+    ++begin;
+    TS_ASSERT_DIFFERS(begin, end);
+    TS_ASSERT_EQUALS(std::distance(begin, end), 2);
+    --begin;
+    std::advance(begin, std::distance(begin, end)/2);
+    TS_ASSERT_DIFFERS(begin, end);
+    TS_ASSERT_EQUALS(std::distance(begin, end), 2);
   }
 
   void test_iterate_over_histogram_counts() {
