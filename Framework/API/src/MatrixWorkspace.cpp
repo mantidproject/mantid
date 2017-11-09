@@ -582,6 +582,11 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
  */
 std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
     const std::vector<detid_t> &detIdList) const {
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
+    throw std::runtime_error("MatrixWorkspace: Using getIndicesFromDetectorIDs "
+                             "in a parallel run is most likely incorrect. "
+                             "Aborting.");
+
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i).getDetectorIDs();
