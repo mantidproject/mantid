@@ -47,7 +47,7 @@ void run_parallel_WorkspaceIndexList(const Parallel::Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-  if (0 % comm.size() == comm.rank()) {
+  if (comm.rank() == 0) {
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
   } else {
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
@@ -63,7 +63,7 @@ void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-  if (0 % comm.size() == comm.rank()) {
+  if (comm.rank() == 0) {
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
   } else {
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
