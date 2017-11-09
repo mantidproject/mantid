@@ -3,7 +3,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <algorithm>
 #include <numeric>
@@ -78,18 +81,35 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filename) {
 	}
 }
 
-int EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
-	int bankID = 1;
-	// attempt to guess bankID - this should be done in code that is currently
-	// in the view
+std::vector<std::pair<int, int>> EnggDiffFittingModel::getRunNumbersAndBanksIDs(){
+	std::vector<std::pair<int, int>> pairs;
 
+	const auto runNumbers = getAllRunNumbers();
+	for (const auto runNumber : runNumbers) {
+		for (size_t i = 0; i < m_wsMap.size(); ++i) {
+			if (m_wsMap[i].find(runNumber) != m_wsMap[i].end()) {
+				pairs.push_back(std::pair<int, int>(runNumber, i + 1));
+			}
+		}
+	}
+	return pairs;
+}
+
+int EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
+	// find out how to check this exists properly
+	const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(ws->run().getLogData("bankid"));
+	if (log) {
+		return std::atoi(log->value().c_str());
+	}
+
+	// couldn't get it from sample logs - try using the old naming convention
 	auto name = ws->getName();
 	std::vector<std::string> chunks;
 	boost::split(chunks, name, boost::is_any_of("_"));
 	bool isNum = isDigit(chunks.back());
 	if (!chunks.empty() && isNum) {
 		try {
-			bankID = std::atoi(chunks.back().c_str());
+			return std::atoi(chunks.back().c_str());
 		}
 		catch (boost::exception &) {
 			// If we get a bad cast or something goes wrong then
@@ -100,7 +120,9 @@ int EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const 
 				"Does the file contain a focused workspace?");
 		}
 	}
-	return bankID;
+	
+	throw std::runtime_error("Could not guess run number from input workspace. "
+		"Are you sure it has been focused correctly?");
 }
 
 const std::string EnggDiffFittingModel::FOCUSED_WS_NAME = "engggui_fitting_focused_ws";

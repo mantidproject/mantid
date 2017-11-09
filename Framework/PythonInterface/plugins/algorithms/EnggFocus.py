@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
+import mantid.simpleapi as mantid
+
 import EnggUtils
 
 
@@ -160,7 +162,18 @@ class EnggFocus(PythonAlgorithm):
         # converting units), so I guess that's what users will expect
         self._convert_to_distribution(input_ws)
 
+        if bank:
+            self._add_bank_number(input_ws, bank)
+
         self.setProperty("OutputWorkspace", input_ws)
+
+    def _add_bank_number(self, ws, bank):
+        alg = self.createChildAlgorithm("AddSampleLog")
+        alg.setProperty("Workspace", ws)
+        alg.setProperty("LogName", "bankid")
+        alg.setProperty("LogText", str(bank))
+        alg.setProperty("LogType", "Number")
+        alg.execute()
 
     def _mask_bins(self, wks, min_bins, max_bins):
         """

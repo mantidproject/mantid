@@ -757,16 +757,15 @@ void EnggDiffFittingPresenter::processLoad() {
 		return;
 	}
 
-	std::vector<std::string> runNumbers;
-	const auto runNumberInts = m_model.getAllRunNumbers();
-	std::transform(runNumberInts.begin(), runNumberInts.end(), std::back_inserter(runNumbers),
-		[](const int num) {return std::to_string(num); });
-
+	const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
+	std::vector<std::string> workspaceIDs;
+	std::transform(runNoBankPairs.begin(), runNoBankPairs.end(), std::back_inserter(workspaceIDs),
+		[](const auto &pair) {return std::to_string(pair.first) + "_" + std::to_string(pair.second); });
 	m_view->enableFittingListWidget(true);
 	m_view->clearFittingListWidget();
-	std::for_each(runNumbers.begin(), runNumbers.end(),
-		[&](const std::string &runNumber) {
-		m_view->addRunNoItem(runNumber);
+	std::for_each(workspaceIDs.begin(), workspaceIDs.end(),
+		[&](const auto &workspaceID) {
+		m_view->addRunNoItem(workspaceID);
 	});
 }
 

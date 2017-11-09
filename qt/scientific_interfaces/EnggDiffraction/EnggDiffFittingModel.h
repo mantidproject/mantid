@@ -19,6 +19,8 @@ public:
 	API::MatrixWorkspace_sptr getWorkspace(const int runNumber, const int bank);
 	std::vector<int> getAllRunNumbers() const;
 	void loadWorkspaces(const std::string &filename);
+	std::vector<std::pair<int, int>> getRunNumbersAndBanksIDs();
+	void addWorkspace(const int runNumber, const int bank, const API::MatrixWorkspace_sptr ws);
 
 private:
 
@@ -26,7 +28,6 @@ private:
 	static const std::string FOCUSED_WS_NAME;
 	std::array<std::unordered_map<int, API::MatrixWorkspace_sptr>, MAX_BANKS> m_wsMap;
 
-	void addWorkspace(const int runNumber, const int bank, const API::MatrixWorkspace_sptr ws);
 	int guessBankID(API::MatrixWorkspace_const_sptr) const;
 
 };
