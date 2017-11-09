@@ -404,14 +404,18 @@ Eigen::Vector3d ComponentInfo::sourcePosition() const {
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
-  return position(static_cast<size_t>(m_sourceIndex));
+  // Getting position with time index to bypass scanning check. Sources are not
+  // scanned.
+  return position({static_cast<size_t>(m_sourceIndex), 0});
 }
 
 Eigen::Vector3d ComponentInfo::samplePosition() const {
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
-  return position(static_cast<size_t>(m_sampleIndex));
+  // Getting position with time index to bypass scanning check. Samples are not
+  // scanned.
+  return position({static_cast<size_t>(m_sampleIndex), 0});
 }
 
 size_t ComponentInfo::source() const {
