@@ -414,134 +414,14 @@ set ( TEST_PY_FILES
   test/MWRunFilesTest.py
 )
 
-<<<<<<< HEAD
-set( TEST_FILES
-   BatchAlgorithmRunnerTest.h
-   FileDialogHandlerTest.h
-   FindFilesThreadPoolManagerTest.h
-   FindFilesWorkerTest.h
-   InterfaceManagerTest.h
-   MantidColorMapTest.h
-   NonOrthogonalTest.h
-   PlotAxisTest.h
-   QwtWorkspaceBinDataTest.h
-   QwtWorkspaceSpectrumDataTest.h
-   SelectionNotificationServiceTest.h
-   SignalRangeTest.h
-   SignalBlockerTest.h
-   AlgorithmHintStrategyTest.h
-   TrackedActionTest.h
-   DataProcessorUI/CommandsTest.h
-   DataProcessorUI/GenerateNotebookTest.h
-   DataProcessorUI/OneLevelTreeManagerTest.h
-   DataProcessorUI/PostprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessMapTest.h
-   DataProcessorUI/ProcessingAlgorithmBaseTest.h
-   DataProcessorUI/ProcessingAlgorithmTest.h
-   DataProcessorUI/TwoLevelTreeManagerTest.h
-   DataProcessorUI/WhiteListTest.h
-   DataProcessorUI/GenericDataProcessorPresenterTest.h
-   ParseKeyValueStringTest.h
-   DataProcessorUI/QOneLevelTreeModelTest.h
-   DataProcessorUI/QTwoLevelTreeModelTest.h
-   ProjectSaveModelTest.h
-   ProjectSavePresenterTest.h
-   WorkspacePresenter/ADSAdapterTest.h
-   WorkspacePresenter/WorkspacePresenterTest.h
-)
-# moc'd files will end up in build directory, so add to include path
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
-# Need to use a string of calls to the qt4_generate_moc macro
-# instead of qt4_wrap_cpp because the latter produces files with
-# a cxx suffix when QtPropertyBrowser requires cpp
-
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qtpropertymanager.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qttreepropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-)
-
-set (
-  QTPROPERTYBROWSER_HEADERS_ONLY_MOC
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-)
-
-set_source_files_properties (
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  PROPERTIES
-    HEADER_FILE_ONLY true
-)
-
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
-
-set (
-  QTPROPERTYBROWSER_HEADERS_MOC
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
-
-set (
-  QTPROPERTYBROWSER_MOC
-  ${QTPROPERTYBROWSER_HEADERS_MOC}
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  ${EXTRA_MOCS}
-=======
 set ( TARGET_LIBRARIES
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
->>>>>>> master
 )
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
@@ -591,6 +471,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
 set( TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h
