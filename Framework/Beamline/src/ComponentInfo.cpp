@@ -371,7 +371,7 @@ ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   if (index.second == 0)
     return index.first;
   // Calculate the linear index without a lookup
-  if (m_isSyncScan){
+  if (m_isSyncScan) {
     const size_t nNonDetectorComponents = m_detectorRanges->size();
     return index.first + nNonDetectorComponents * index.second;
   }
@@ -498,7 +498,7 @@ size_t ComponentInfo::scanSize() const {
 }
 
 bool ComponentInfo::isScanning() const {
-  if (m_detectorInfo && m_detectorInfo->isScanning()) 
+  if (m_detectorInfo && m_detectorInfo->isScanning())
     return true;
   else if (!m_positions)
     return false;
