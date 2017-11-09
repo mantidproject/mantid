@@ -14,14 +14,15 @@ peaks (both in detector position/TOF and Q-space) and create an output
 :ref:`PeaksWorkspace <PeaksWorkspace>` containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in
-use, as well as the UB Matrix and Unit Cell of the sample used. You can
-use the :ref:`algm-CopySample` algorithm (with CopyLattice=1) to
-copy a UB matrix from a PeaksWorkspace to another workspace.
+use, as well as the :ref:`UB matrix <Lattice>` and Unit Cell of the
+sample used. You can use the :ref:`algm-CopySample` algorithm (with
+``CopyLattice=1``) to copy a :ref:`UB matrix <Lattice>` from a
+PeaksWorkspace to another workspace.
 
 The algorithm operates by calculating the scattering direction (given
-the UB matrix) for a particular HKL, and determining whether that hits a
-detector. The Max/MinDSpacing parameters are used to determine what
-HKL's to try.
+the :ref:`UB matrix <Lattice>`) for a particular HKL, and determining
+whether that hits a detector. The Max/MinDSpacing parameters are used
+to determine what HKL's to try.
 
 The parameters of WavelengthMin/WavelengthMax also limit the peaks
 attempted to those that can be detected/produced by your instrument.

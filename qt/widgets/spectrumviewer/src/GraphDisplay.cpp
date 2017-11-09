@@ -4,9 +4,9 @@
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 #include <boost/algorithm/clamp.hpp>
-#include <QtGui>
-#include <QVector>
+#include <QHeaderView>
 #include <QString>
+#include <QVector>
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {

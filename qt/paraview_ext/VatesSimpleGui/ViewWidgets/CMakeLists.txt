@@ -54,12 +54,9 @@ set( SOURCE_FILES
   src/VsiApplyBehaviour.cpp
 )
 
-set( TEST_FILES
-)
-
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
-qt4_wrap_cpp( MOC_SOURCES
+set( MOC_FILES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
@@ -81,7 +78,7 @@ qt4_wrap_cpp( MOC_SOURCES
 
 # These are the ui files to be processed using
 # Qt's ui file processor.
-qt4_wrap_ui( UI_BUILT_SOURCES
+set( UI_FILES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
@@ -96,95 +93,54 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 )
 
 # Add the QtWidgets icons
-qt4_add_resources ( RES_FILES ../../../resources/icons/ViewWidgetsIcons.qrc )
+set ( RES_FILES ../../../resources/icons/ViewWidgetsIcons.qrc )
 
-# Setup the include locations.
-include_directories(
-  inc
-  ${CMAKE_SOURCE_DIR}/qt/widgets/sliceviewer/inc
-  ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer
-  ${CMAKE_SOURCE_DIR}/qt/widgets/factory/inc
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
-  ${CMAKE_SOURCE_DIR}/MantidPlot/src
+mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
+  QT_VERSION 4
+  SRC ${SOURCE_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INCLUDE_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS
+    IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
+  INCLUDE_DIRS
+    inc
+  SYSTEM_INCLUDE_DIRS
+    ${PARAVIEW_INCLUDE_DIRS}
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    pqApplicationComponents
+    pqComponents
+    ${vtkjsoncpp_LIBRARIES}
+    vtkPVServerManagerRendering
+    vtkRenderingFreeType
+    vtksys
+    VatesAPI
+    ${PYTHON_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${CORE_MANTIDLIBS}
+    DataObjects
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
+    VatesSimpleGuiQtWidgets
+    MantidQtWidgetsFactory
+    MantidQtWidgetsSliceViewer
+  INSTALL_DIR_BASE
+    ${PLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Libraries
 )
 
-set( ALL_FILES
-${INCLUDE_FILES}
-${SOURCE_FILES}
-${MOC_SOURCES}
-${UI_BUILT_SOURCES}
-${RES_FILES}
-)
-
-set( TEST_SUITES
-    test/suite_MDEventWorkspace
-    test/suite_MDHistoWorkspace
-)
-
-# For Windows
-add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS )
-# Add the target for this directory
-add_library( VatesSimpleGuiViewWidgets ${ALL_FILES} )
 # Set the name of the generated library
-set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgets )
+set_target_properties( VatesSimpleGuiViewWidgetsQt4 PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgetsQt4 )
 # Add to the 'VatesSimpleGui' group in VS
-set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimpleGui )
-
-include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
-
-target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-pqApplicationComponents
-pqComponents
-${vtkjsoncpp_LIBRARIES}
-vtkPVServerManagerRendering
-vtkRenderingFreeType
-vtksys
-${QT_LIBRARIES}
-VatesSimpleGuiQtWidgets
-MantidQtWidgetsCommon
-VatesAPI
-MantidQtWidgetsSliceViewer
-MantidQtWidgetsFactory
-${PYTHON_LIBRARIES}
-${POCO_LIBRARIES}
-${Boost_LIBRARIES}
-${CORE_MANTIDLIBS}
-DataObjects
-)
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( VatesSimpleGuiViewWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Contents/Libraries")
-endif ()
-
-# Create test file projects
-include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
-
-include_directories( inc ../../../../Framework/TestHelpers/inc ../../../../Framework/DataHandling/inc ../../../../Framework/DataObjects/inc)
-set ( TESTHELPER_SRCS ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-                      ../../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
-cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-
-target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-  VatesSimpleGuiViewWidgets
-  ${vtkjsoncpp_LIBRARIES}
-  DataHandling
-  Kernel
-  HistogramData
-  DataObjects
-  MantidQtWidgetsCommon
-  ${CORE_MANTIDLIBS}
-  ${POCO_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES}
-  ${GTEST_LIBRARIES} )
-
-add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
-# Add to the 'UnitTests' group in VS
-set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
+set_property( TARGET VatesSimpleGuiViewWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGui )
 
 if( SQUISH_FOUND )
   # Need to set the AUT first
@@ -197,8 +153,10 @@ if( SQUISH_FOUND )
     SCRIPTS_DIR=${CMAKE_CURRENT_SOURCE_DIR}/test/mp_scripts
     SQUISH_SCRIPT_DIR=${VSI_GLOBAL_SCRIPTS}:${CMAKE_CURRENT_SOURCE_DIR}/test/common/scripts
   )
+  set( TEST_SUITES
+    test/suite_MDEventWorkspace
+    test/suite_MDHistoWorkspace
+  )
   squish_add_test_suite( ${TEST_SUITES} )
 
 endif()
-
-install( TARGETS VatesSimpleGuiViewWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR} )

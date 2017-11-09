@@ -604,7 +604,7 @@ def _validate_q_value(q, n_data_sets, which_q):
 
     for i in range(n_data_sets - 1):
         try:
-            eq[i] = float(q[i])
+            q[i] = float(q[i])
         except:
             error_msg = "The Q range parameters are invalid: q_{0}={1}".format(which_q, q)
             Logger("data_stitching").error(error_msg)

@@ -5,6 +5,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace Mantid {
@@ -83,19 +84,35 @@ void Chebyshev::setAttribute(const std::string &attName,
                              const API::IFunction::Attribute &att) {
   storeAttributeValue(attName, att);
 
-  if (attName == "n") { // set the polynomial order
+  if (attName == "n") {
+    // set the polynomial order
+
+    auto newN = att.asInt();
+    if (newN < 0) {
+      throw std::invalid_argument(
+          "Chebyshev: polynomial order cannot be negative.");
+    }
+
+    // Save old values
+    std::vector<double> oldValues(std::min(m_n, newN) + 1);
+    for (size_t i = 0; i < oldValues.size(); ++i) {
+      oldValues[i] = getParameter(i);
+    }
+
     if (m_n >= 0) {
       clearAllParameters();
     }
     m_n = att.asInt();
-    if (m_n < 0) {
-      throw std::invalid_argument(
-          "Chebyshev: polynomial order cannot be negative.");
-    }
     for (int i = 0; i <= m_n; ++i) {
       std::string parName = "A" + std::to_string(i);
       declareParameter(parName);
     }
+
+    // Reset old values to new parameters
+    for (size_t i = 0; i < oldValues.size(); ++i) {
+      setParameter(i, oldValues[i]);
+    }
+
   } else if (attName == "StartX") {
     m_StartX = att.asDouble();
   } else if (attName == "EndX") {

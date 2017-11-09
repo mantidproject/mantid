@@ -39,7 +39,7 @@ Finally, the peaks in the output workspace are sorted by H, K and L.
 Usage
 -----
 
-The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a UB-matrix
+The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a :ref:`UB matrix <Lattice>`
 is determined. The peaks are transformed to conform with a conventional cell, which has hexagonal metric
 and rhombohedral centering:
 

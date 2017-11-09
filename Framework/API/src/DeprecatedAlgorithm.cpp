@@ -1,8 +1,7 @@
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 #include <sstream>
 
 namespace Mantid {
@@ -43,7 +42,7 @@ void DeprecatedAlgorithm::deprecatedDate(const std::string &date) {
     // TODO warn people that it wasn't set
     return;
   }
-  if (!Kernel::DateAndTimeHelpers::stringIsISO8601(date)) {
+  if (!Types::Core::DateAndTimeHelpers::stringIsISO8601(date)) {
     // TODO warn people that it wasn't set
     return;
   }

@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
+	src/EstimateDivergence.cpp
 	src/EstimateMuonAsymmetryFromCounts.cpp
 	src/EstimateResolutionDiffraction.cpp
 	src/EventWorkspaceAccess.cpp
@@ -434,6 +435,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
+	inc/MantidAlgorithms/EstimateDivergence.h
 	inc/MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
 	inc/MantidAlgorithms/EventWorkspaceAccess.h
@@ -773,6 +775,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
+	EstimateDivergenceTest.h
 	EstimateMuonAsymmetryFromCountsTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
@@ -979,7 +982,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 add_library ( Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
-						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
+  COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS"
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

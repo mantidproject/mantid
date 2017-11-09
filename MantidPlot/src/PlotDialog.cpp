@@ -49,7 +49,7 @@
 #include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>
