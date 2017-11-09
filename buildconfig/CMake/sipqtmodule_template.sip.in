@@ -15,8 +15,10 @@
   // python can see the init function.
   #pragma GCC visibility push(default)
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wsuggest-override"
   #pragma GCC diagnostic ignored "-Wpedantic"
+  #if __GNUC__ >= 5
+    #pragma GCC diagnostic ignored "-Wsuggest-override"
+  #endif
 #endif
 %End
 
