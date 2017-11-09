@@ -86,11 +86,8 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
           this, SLOT(resetFittingMode()));
 
-  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(editingFinished()), this,
-          SLOT(FittingRunNo()));
-
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
-          SLOT(FittingRunNo()));
+          SLOT(loadClicked()));
 
   connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
 

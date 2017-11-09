@@ -30,6 +30,7 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
 
+// MOVE THIS TO THE MODEL
 const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
     "engggui_fitting_focused_ws";
 
@@ -715,47 +716,9 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
 void EnggDiffFittingPresenter::processStart() {}
 
-
-MatrixWorkspace_sptr EnggDiffFittingPresenter::loadSingleFile(const std::string & filename) {
-	try {
-		MatrixWorkspace_sptr focusedWS;
-
-		Poco::Path selectedfPath(filename);
-
-		if (!filename.empty() && selectedfPath.isFile()) {
-			runLoadAlg(filename, focusedWS);
-			setDifcTzero(focusedWS);
-			convertUnits(g_focusedFittingWSName);
-			throw new std::runtime_error("LOAD SINGLE FILE STILL BEING USED. SORT IT JOE");
-			//plotFocusedFile(false);
-
-			m_view->showStatus(
-				"Focused file loaded! (Click 'Select "
-				"Peak' to activate peak picker tool, hold Shift + Click "
-				"Peak, Click 'Add Peak')");
-			return focusedWS;
-		}
-		else {
-			m_view->userWarning("No File Found",
-				"Please select a focused file to load");
-			m_view->showStatus("Error while plotting the focused workspace");
-		}
-	}
-	catch (std::invalid_argument &ia) {
-		m_view->userWarning(
-			"Failed to load the selected focus file",
-			"The focus file failed to load, please check the logger for more"
-			" information.");
-		g_log.error("Failed to load file. Error message: ");
-		g_log.error(ia.what());
-	}
-	return nullptr;
-}
-
 int EnggDiffFittingPresenter::findBankID(Mantid::API::MatrixWorkspace_sptr ws) const{
+	// MOVE THIS TO THE MODEL
 	size_t bankID = 1;
-	// attempt to guess bankID - this should be done in code that is currently
-	// in the view
 
 	auto name = ws->getName();
 	std::vector<std::string> chunks;
@@ -779,25 +742,21 @@ int EnggDiffFittingPresenter::findBankID(Mantid::API::MatrixWorkspace_sptr ws) c
 }
 
 void EnggDiffFittingPresenter::processLoad() {
-	const std::string filenamesString = m_view->getFittingRunNo();
-	auto loadAlg = Mantid::API::AlgorithmManager::Instance().create("Load");
-	loadAlg->initialize();
-	loadAlg->setPropertyValue("Filename", filenamesString);
-	loadAlg->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-	loadAlg->execute();
+	const std::string filenames = m_view->getFittingRunNo();
+	
+	try {
+		m_model.loadWorkspaces(filenames);
+	}
+	catch (Poco::PathSyntaxException &ex) {
+		m_view->userWarning("Failed to load the selected focus file.",
+		                    "The focus file failed to load. Are you sure the "
+			                "file exists? please check the logger for more" 
+			                " information.");
+		g_log.error("Failed to load file. Error message: ");
+		g_log.error(ex.what());
+		return;
+	}
 
-	AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-	if (filenamesString.find(",") == std::string::npos) { // Only 1 run loaded
-		const auto ws = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-		m_model.addWorkspace(ws->getRunNumber(), findBankID(ws), ws);
-	}
-	else {
-		const auto group_ws = ADS.retrieveWS<WorkspaceGroup>(g_focusedFittingWSName);
-		for (auto iter = group_ws->begin(); iter != group_ws->end(); iter++) {
-			const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(*iter);
-			m_model.addWorkspace(ws->getRunNumber(), findBankID(ws), ws);
-		}
-	}
 	std::vector<std::string> runNumbers;
 	const auto runNumberInts = m_model.getAllRunNumbers();
 	std::transform(runNumberInts.begin(), runNumberInts.end(), std::back_inserter(runNumbers),
