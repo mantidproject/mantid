@@ -74,7 +74,7 @@ public:
     TS_ASSERT_DIFFERS(iter, hist.begin());
     TS_ASSERT_EQUALS(iter->frequency(), 3);
     --iter;
-    TS_ASSERT_EQUALS(iter,  hist.begin());
+    TS_ASSERT_EQUALS(iter, hist.begin());
     TS_ASSERT_EQUALS(iter->frequency(), 2);
   }
 
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_DIFFERS(begin, end);
     TS_ASSERT_EQUALS(std::distance(begin, end), 2);
     --begin;
-    std::advance(begin, std::distance(begin, end)/2);
+    std::advance(begin, std::distance(begin, end) / 2);
     TS_ASSERT_DIFFERS(begin, end);
     TS_ASSERT_EQUALS(std::distance(begin, end), 2);
   }
@@ -221,7 +221,7 @@ public:
     // Assert
     TSM_ASSERT("Bin widths did not match", result);
   }
-      
+
   void test_iterate_over_histogram_width_when_histogram_has_points() {
     // Arrange
     Histogram hist(Points{1, 3, 5}, Counts{2, 3, 4});
@@ -240,7 +240,8 @@ public:
 
   void test_iterate_over_histogram_count_variances_when_histogram_has_counts() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4}, CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
+                   CountVariances{3, 2, 1});
     auto expectedCountVariances = hist.countVariances();
 
     // Act
@@ -254,9 +255,11 @@ public:
     TSM_ASSERT("Count variances did not match", result);
   }
 
-  void test_iterate_over_histogram_count_variances_when_histogram_has_frequencies() {
+  void
+  test_iterate_over_histogram_count_variances_when_histogram_has_frequencies() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4}, FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
+                   FrequencyVariances{3, 2, 1});
     auto expectedCountVariances = hist.countVariances();
 
     // Act
@@ -272,7 +275,8 @@ public:
 
   void test_iterate_over_histogram_count_std_when_histogram_has_counts() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4}, CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
+                   CountVariances{3, 2, 1});
     auto expectedCountStd = hist.countStandardDeviations();
 
     // Act
@@ -288,7 +292,8 @@ public:
 
   void test_iterate_over_histogram_count_std_when_histogram_has_frequencies() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4}, FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
+                   FrequencyVariances{3, 2, 1});
     auto expectedCountStd = hist.countStandardDeviations();
 
     // Act
@@ -302,9 +307,11 @@ public:
     TSM_ASSERT("Count standard deviations did not match", result);
   }
 
-  void test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencys() {
+  void
+  test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencys() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4}, CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
+                   CountVariances{3, 2, 1});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
     // Act
@@ -318,9 +325,11 @@ public:
     TSM_ASSERT("Frequency variances did not match", result);
   }
 
-  void test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencies() {
+  void
+  test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencies() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4}, FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
+                   FrequencyVariances{3, 2, 1});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
     // Act
@@ -334,9 +343,11 @@ public:
     TSM_ASSERT("Frequency variances did not match", result);
   }
 
-  void test_iterate_over_histogram_frequency_std_when_histogram_has_frequencys() {
+  void
+  test_iterate_over_histogram_frequency_std_when_histogram_has_frequencys() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4}, CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
+                   CountVariances{3, 2, 1});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
     // Act
@@ -350,9 +361,11 @@ public:
     TSM_ASSERT("Frequency standard deviations did not match", result);
   }
 
-  void test_iterate_over_histogram_frequency_std_when_histogram_has_frequencies() {
+  void
+  test_iterate_over_histogram_frequency_std_when_histogram_has_frequencies() {
     // Arrange
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4}, FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
+                   FrequencyVariances{3, 2, 1});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
     // Act
@@ -372,11 +385,13 @@ public:
   static HistogramIteratorTestPerformance *createSuite() {
     return new HistogramIteratorTestPerformance;
   }
-  static void destroySuite(HistogramIteratorTestPerformance *suite) { delete suite; }
+  static void destroySuite(HistogramIteratorTestPerformance *suite) {
+    delete suite;
+  }
 
   HistogramIteratorTestPerformance() {
     BinEdges edges(histSize, LinearGenerator(0, 2));
-    Counts counts(histSize-1, LinearGenerator(0, 2));
+    Counts counts(histSize - 1, LinearGenerator(0, 2));
     for (size_t i = 0; i < nHists; i++)
       hists.push_back(Histogram(edges, counts));
   }
@@ -384,8 +399,8 @@ public:
   void test_iterate_and_access_each_item() {
     double total = 0;
     for (auto &hist : hists)
-        for (auto &item : hist)
-            total += item.frequency();
+      for (auto &item : hist)
+        total += item.frequency();
   }
 
 private:

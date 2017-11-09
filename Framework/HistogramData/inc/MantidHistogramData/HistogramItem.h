@@ -53,31 +53,27 @@ class Histogram;
 class MANTID_HISTOGRAMDATA_DLL HistogramItem {
 
 public:
-   double counts() const;
-   double countVariance() const;
-   double countStandardDeviation() const;
-   double frequency() const;
-   double frequencyVariance() const;
-   double frequencyStandardDeviation() const;
-   double width() const;
-   double center() const;
-   
-   void incrementIndex();
-   void advance(int64_t delta);
+  double counts() const;
+  double countVariance() const;
+  double countStandardDeviation() const;
+  double frequency() const;
+  double frequencyVariance() const;
+  double frequencyStandardDeviation() const;
+  double width() const;
+  double center() const;
 
-   inline void decrementIndex() {
-      if (m_index > 0) {
-        --m_index;
-      }
-   }
+  void incrementIndex();
+  void advance(int64_t delta);
 
-   inline size_t getIndex() const {
-       return m_index;
-   }
+  inline void decrementIndex() {
+    if (m_index > 0) {
+      --m_index;
+    }
+  }
 
-   inline void setIndex(const size_t index) {
-       m_index = index;
-   }
+  inline size_t getIndex() const { return m_index; }
+
+  inline void setIndex(const size_t index) { m_index = index; }
 
 private:
   friend class HistogramIterator;
