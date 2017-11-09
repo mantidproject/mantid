@@ -102,9 +102,12 @@ endif ()
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR MantidPlot.app/plugins )
-set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
-set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview )
 
 set(CMAKE_MACOSX_RPATH 1)
 # Assume we are using homebrew for now

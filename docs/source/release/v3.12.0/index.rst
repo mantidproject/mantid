@@ -14,9 +14,7 @@ Mantid 3.12.0 Release Notes
 
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
-We are proud to announce version 3.12.0 of Mantid. This release
-celebrates 10 years of the Mantid project supporting Neutron and Muon
-research.
+We are proud to announce version 3.12.0 of Mantid. 
 
 **TODO: Add paragraph summarizing big changes**
 
@@ -58,6 +56,8 @@ Changes
    LowQ <lowq>
    Muon Analysis <muon>
    Spectroscopy <spectroscopy>
+   Direct Inelastic <direct_inelastic>
+   Indirect Inelastic <indirect_inelastic>
    SANS <sans>
 
 Full Change Listings

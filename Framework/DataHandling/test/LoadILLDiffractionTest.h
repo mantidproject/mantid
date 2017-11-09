@@ -47,6 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -78,13 +79,13 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(3072)[0], 0.)
     TS_ASSERT_EQUALS(outputWS->e(3072)[0], 0.)
 
-    TS_ASSERT(outputWS->run().hasProperty("simulated_d20"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
+    TS_ASSERT(outputWS->run().hasProperty("simulated_d20.TotalCount"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy.Time"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings.SampleTemp"))
 
-    const auto sim = outputWS->run().getLogData("simulated_d20");
-    const auto spy = outputWS->run().getLogData("AcquisitionSpy");
-    const auto sample = outputWS->run().getLogData("SampleSettings");
+    const auto sim = outputWS->run().getLogData("simulated_d20.TotalCount");
+    const auto spy = outputWS->run().getLogData("AcquisitionSpy.Time");
+    const auto sample = outputWS->run().getLogData("SampleSettings.SampleTemp");
 
     TS_ASSERT_EQUALS(sim->size(), 1)
     TS_ASSERT_EQUALS(spy->size(), 1)
@@ -93,6 +94,28 @@ public:
     TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
     TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
+
+    TS_ASSERT_EQUALS(
+        outputWS->run().getProperty("Detector.calibration_file")->value(),
+        "none")
+  }
+
+  void test_D20_no_scan_requesting_calibrated_throws() {
+    // Tests the no-scan case for D20
+    // Temperature ramp is not a motor scan so produces a file per T
+
+    LoadILLDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Some invalid Properties found")
   }
 
   void test_D20_scan() {
@@ -131,13 +154,13 @@ public:
       }
     }
 
-    TS_ASSERT(outputWS->run().hasProperty("Omega"))
-    TS_ASSERT(outputWS->run().hasProperty("Detector"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
-    TS_ASSERT(outputWS->run().hasProperty("MagneticField"))
+    TS_ASSERT(outputWS->run().hasProperty("Omega.Position"))
+    TS_ASSERT(outputWS->run().hasProperty("Detector.TotalCount"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy.Time"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings.SampleTemp"))
+    TS_ASSERT(outputWS->run().hasProperty("MagneticField.field"))
 
-    const auto omega = outputWS->run().getLogData("Omega");
+    const auto omega = outputWS->run().getLogData("Omega.Position");
 
     TS_ASSERT_EQUALS(omega->size(), 21)
 
@@ -183,9 +206,8 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
   }
 
-  void test_D2B_single_file() {
+  void do_test_D2B_single_file(std::string dataType) {
     // Test a D2B detector scan file with 25 detector positions
-    // TODO: assert on values!
 
     const int NUMBER_OF_TUBES = 128;
     const int NUMBER_OF_PIXELS = 128;
@@ -197,6 +219,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "508093.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", dataType))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -278,7 +301,29 @@ public:
             1e-2)
       }
     }
+
+    TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
+
+    if (dataType == "Raw") {
+      TS_ASSERT_DELTA(outputWS->y(25)[0], 0, 1e-12)
+      TS_ASSERT_EQUALS(
+          outputWS->run().getProperty("Detector.calibration_file")->value(),
+          "none")
+    } else {
+      TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
+      TS_ASSERT_EQUALS(
+          outputWS->run().getProperty("Detector.calibration_file")->value(),
+          "d2bcal_23Nov16_c.2d")
+    }
   }
+
+  void test_D2B_single_file() { do_test_D2B_single_file("Auto"); }
+
+  void test_D2B_single_file_calibrated() {
+    do_test_D2B_single_file("Calibrated");
+  }
+
+  void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
