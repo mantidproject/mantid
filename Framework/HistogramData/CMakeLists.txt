@@ -72,7 +72,6 @@ set ( TEST_FILES
 	HistogramBuilderTest.h
 	HistogramDxTest.h
 	HistogramETest.h
-        HistogramItemTest.h
         HistogramIteratorTest.h
 	HistogramMathTest.h
 	HistogramTest.h
