@@ -126,8 +126,8 @@ void ExtractSpectra::execHistogram() {
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
-      m_inputWorkspace->setHistogram(
-          i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - 1));
+      m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i),
+                                              m_minX, m_maxX - m_histogram));
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
