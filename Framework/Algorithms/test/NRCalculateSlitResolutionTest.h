@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyWithValue.h"
