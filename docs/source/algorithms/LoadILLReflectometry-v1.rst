@@ -223,7 +223,7 @@ Output:
    directBeamWS = Load('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
 
    beamPosWS = mtd['beamPositionWS']
-   peakCentre = beamPosWS.cell('FittedPeakCentre', 0)
+   peakCentre = beamPosWS.cell('PeakCentre', 0)
    print('Fitted direct beam maximum (in workspace indices): {:.5}'.format(peakCentre))
 
    reflectedBeamWS = Load('ILL/D17/317370.nxs', BeamPosition=beamPosWS)
