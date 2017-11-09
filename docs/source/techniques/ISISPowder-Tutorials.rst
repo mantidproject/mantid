@@ -45,7 +45,7 @@ Copying instrument example files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Open your Mantid install location, by default this
 will be `C:\\MantidInstall` on Windows and `/opt/Mantid` on Linux.
-Open *scripts* - *Diffraction* - *isis_powder*. 
+Open *scripts* > *Diffraction* > *isis_powder*.
 In these tutorials we will be using Polaris examples and data
 however you may set-up a different instrument. 
 
