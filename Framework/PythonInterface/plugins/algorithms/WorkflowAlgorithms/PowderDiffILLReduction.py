@@ -151,7 +151,10 @@ class PowderDiffILLReduction(PythonAlgorithm):
                 duration = mtd[ws].getRun().getLogData('duration').value
                 Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
 
-        ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
+        try:
+            ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)
+        except RuntimeError as e:
+            raise ValueError('Invalid scanning observable')
 
         DeleteWorkspace(temp_ws)
 
