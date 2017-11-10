@@ -59,7 +59,7 @@ public:
   double frequency() const;
   double frequencyVariance() const;
   double frequencyStandardDeviation() const;
-  double width() const;
+  double binWidth() const;
   double center() const;
 
   void incrementIndex();
