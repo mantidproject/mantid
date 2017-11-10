@@ -127,9 +127,6 @@ public:
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
   }
-
-private:
-  std::unique_ptr<QApplication> m_app;
 };
 
 #endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST */
