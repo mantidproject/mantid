@@ -195,8 +195,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   // absolute paths
   m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
   m_ConfigPaths.emplace("plugins.directory", true);
-  m_ConfigPaths.emplace("pvplugins.directory", true);
-  m_ConfigPaths.emplace("mantidqt.plugins.directory", true);
+  m_ConfigPaths.emplace("pvplugins.directory", false);
+  m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
   m_ConfigPaths.emplace("instrumentDefinition.directory", true);
   m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
   m_ConfigPaths.emplace("groupingFiles.directory", true);
@@ -1992,25 +1992,6 @@ void ConfigServiceImpl::addObserver(
 void ConfigServiceImpl::removeObserver(
     const Poco::AbstractObserver &observer) const {
   m_notificationCenter.removeObserver(observer);
-}
-
-/*
-Checks to see whether the pvplugins.directory variable is set. If it is set,
-assume
-we have built Mantid with ParaView
-@return True if paraview is available or not disabled.
-*/
-bool ConfigServiceImpl::pvPluginsAvailable() const {
-  std::string pvpluginsDir = getString("pvplugins.directory");
-  return !pvpluginsDir.empty();
-}
-
-/**
- * Gets the path to the ParaView plugins
- * @returns A string giving the directory of the ParaView plugins
- */
-const std::string ConfigServiceImpl::getPVPluginsPath() const {
-  return getString("pvplugins.directory");
 }
 
 /*

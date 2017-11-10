@@ -57,7 +57,7 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
 
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
     if( CPACK_SET_DESTDIR )
-      message ( "Adding \"Prefix:\" line to spec file manually when CPACK_SET_DESTDIR is set")
+      message ( STATUS "Adding \"Prefix:\" line to spec file manually when CPACK_SET_DESTDIR is set")
       set( CPACK_RPM_SPEC_MORE_DEFINE "Prefix: ${CPACK_PACKAGING_INSTALL_PREFIX}" )
     endif()
 
