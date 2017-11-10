@@ -1773,7 +1773,8 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     m_view->resetCanvas();
 
     // plots focused workspace
-	throw new std::runtime_error("PLOTTING FIT NOT IMPLEMENTED. SORT IT JOE");
+	throw new std::runtime_error("Plotting fit not yet implemented");
+	// TODO: sort out what to do here
     //plotFocusedFile(m_fittingFinishedOK);
 
     if (m_fittingFinishedOK) {
