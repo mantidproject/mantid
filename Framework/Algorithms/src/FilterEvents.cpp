@@ -1092,7 +1092,9 @@ void FilterEvents::createOutputWorkspaces() {
     }
 
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace

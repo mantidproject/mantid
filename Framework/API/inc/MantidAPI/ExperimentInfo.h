@@ -104,6 +104,8 @@ public:
   const Run &run() const;
   /// Writable version of the run object
   Run &mutableRun();
+  void setSharedRun(Kernel::cow_ptr<Run> run);
+
   /// Access a log for this experiment.
   Kernel::Property *getLog(const std::string &log) const;
   /// Access a single value from a log for this experiment.
@@ -187,10 +189,6 @@ protected:
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
   std::list<boost::shared_ptr<ChopperModel>> m_choppers;
-  /// The information on the sample environment
-  boost::shared_ptr<Sample> m_sample;
-  /// The run information
-  boost::shared_ptr<Run> m_run;
   /// Parameters modifying the base instrument
   boost::shared_ptr<Geometry::ParameterMap> m_parmap;
   /// The base (unparametrized) instrument
@@ -218,6 +216,12 @@ private:
 
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
+
+  /// The information on the sample environment
+  Kernel::cow_ptr<Sample> m_sample;
+  /// The run information
+  Kernel::cow_ptr<Run> m_run;
+
   /// Detector grouping information
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
