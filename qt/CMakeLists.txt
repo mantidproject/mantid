@@ -5,6 +5,7 @@ find_package ( QScintillaQt4 REQUIRED )
 
 # Utilities for defining targets
 include ( QtTargetFunctions )
+include ( PythonTargetFunctions )
 
 add_subdirectory ( widgets )
 add_subdirectory ( python )
