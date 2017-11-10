@@ -283,16 +283,25 @@ public:
       : m_hist(BinEdges(histSize, LinearGenerator(0, 2)),
                Counts(histSize - 1, LinearGenerator(0, 2))) {}
 
-  void test_iterate_and_access_each_item() {
+  void test_convert_counts_to_frequency_for_each_item() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++)
       for (auto &item : m_hist)
         total += item.frequency();
   }
 
+  void test_convert_counts_to_frequency_once_per_histogram() {
+    double total = 0;
+    for (size_t i = 0; i < nHists; i++) {
+      auto frequencies = m_hist.frequencies();
+      for (auto &frequency : frequencies)
+        total += frequency;
+    }
+  }
+
 private:
   const size_t nHists = 500;
-  const size_t histSize = 10000;
+  const size_t histSize = 50000;
   Histogram m_hist;
 };
 
