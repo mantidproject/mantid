@@ -33,15 +33,18 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     const auto description = runDescriptionPair.second.description;
     auto groupName = description;
     auto cleanDescription = description;
-
     static boost::regex descriptionFormatRegex(
-        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+))(?<postTheta>.*)");
+        "(.*)(|th[:=]([0-9.]+))(.*)");
+    constexpr auto preThetaGroup = 0;
+    constexpr auto thetaValueGroup = 2;
+    constexpr auto postThetaGroup = 3;
     boost::smatch matches;
+    
     if (boost::regex_search(description, matches, descriptionFormatRegex)) {
       // We have theta. Let's get a clean description
-      const auto theta = matches["theta"].str();
-      const auto preTheta = matches["preTheta"].str();
-      const auto postTheta = matches["postTheta"].str();
+      const auto theta = matches[thetaValueGroup].str();
+      const auto preTheta = matches[preThetaGroup].str();
+      const auto postTheta = matches[postThetaGroup].str();
       groupName = preTheta;
       cleanDescription = preTheta + "?" + postTheta;
       descriptionToTheta[description] = theta;
