@@ -234,7 +234,6 @@ class RunTabPresenterTest(unittest.TestCase):
         view, _, _ = create_mock_view(user_file_path, batch_file_path)
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
 

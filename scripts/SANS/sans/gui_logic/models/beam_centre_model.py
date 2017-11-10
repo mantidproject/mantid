@@ -1,5 +1,6 @@
 from sans.common.enums import (SANSInstrument)
 
+
 class BeamCentreModel(object):
     def __init__(self):
         super(BeamCentreModel, self).__init__()

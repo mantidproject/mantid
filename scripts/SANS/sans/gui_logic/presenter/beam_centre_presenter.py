@@ -4,14 +4,11 @@ import copy
 
 from mantid.kernel import Logger
 from sans.sans_batch import SANSCentreFinder
-try:
-    import mantidplot
-except ImportError:
-    pass
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.common.enums import (FindDirectionEnum)
+
 
 class BeamCentrePresenter(object):
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
@@ -110,6 +107,7 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
         self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
 
+
 def find_beam_centre(state, options):
     centre_finder = SANSCentreFinder()
     find_direction = None
@@ -124,7 +122,3 @@ def find_beam_centre(state, options):
                            x_start=options.lab_pos_1, y_start=options.lab_pos_2, tolerance=options.tolerance,
                            find_direction=find_direction, reduction_method=True)
     return centre
-
-
-
-

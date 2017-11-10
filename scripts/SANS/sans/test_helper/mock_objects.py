@@ -3,6 +3,7 @@ from __future__ import (absolute_import)
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from ui.sans_isis.masking_table import MaskingTable
+from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode)
 from sans.test_helper.test_director import TestDirector
@@ -25,6 +26,10 @@ def create_mock_masking_table():
     view.get_current_row = mock.MagicMock(return_value=3)
     return view
 
+def create_mock_beam_centre_tab():
+    view = mock.create_autospec(BeamCentre, spec_set=False)
+    view.get_current_row = mock.MagicMock(return_value=3)
+    return view
 
 def get_cell_mock(row, column, convert_to=None):
     _ = convert_to  # noqa
@@ -78,6 +83,10 @@ def create_mock_view(user_file_path, batch_file_path=None):
     # Add the masking table view
     masking_table = create_mock_masking_table()
     view.masking_table = masking_table
+
+    # Add the beam centre view
+    beam_centre = create_mock_beam_centre_tab()
+    view.beam_centre = beam_centre
 
     view.halt_process_flag = mock.MagicMock()
     # ---------------------

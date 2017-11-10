@@ -13,6 +13,7 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+
 class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
     class BeamCentreListener(with_metaclass(ABCMeta, object)):
         """
@@ -168,7 +169,3 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
     @hab_pos_2.setter
     def hab_pos_2(self, value):
         self.update_simple_line_edit_field(line_edit="hab_pos_2_line_edit", value=value)
-
-
-
-
