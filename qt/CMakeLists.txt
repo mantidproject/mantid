@@ -12,3 +12,5 @@ add_subdirectory ( scientific_interfaces )
 if ( MAKE_VATES )
   add_subdirectory ( paraview_ext )
 endif ( MAKE_VATES )
+
+add_subdirectory ( applications )
