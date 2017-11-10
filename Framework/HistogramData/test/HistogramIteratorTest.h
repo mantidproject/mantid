@@ -215,7 +215,7 @@ public:
     auto result =
         std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
                    [](const HistogramItem &item, const double &width) {
-                     return item.width() == width;
+                     return item.binWidth() == width;
                    });
 
     // Assert
@@ -231,7 +231,7 @@ public:
     auto result =
         std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
                    [](const HistogramItem &item, const double &width) {
-                     return item.width() == width;
+                     return item.binWidth() == width;
                    });
 
     // Assert

@@ -20,7 +20,7 @@ double HistogramItem::center() const {
   }
 }
 
-double HistogramItem::width() const {
+double HistogramItem::binWidth() const {
   const auto &x = m_histogram.x();
   if (xModeIsPoints()) {
     auto numPoints = m_histogram.size();
@@ -58,7 +58,7 @@ double HistogramItem::counts() const {
   if (yModeIsCounts()) {
     return y[m_index];
   } else {
-    return y[m_index] / width();
+    return y[m_index] / binWidth();
   }
 }
 
@@ -67,8 +67,8 @@ double HistogramItem::countVariance() const {
   if (yModeIsCounts()) {
     return e[m_index] * e[m_index];
   } else {
-    const auto binWidth = width();
-    return e[m_index] * e[m_index] * binWidth * binWidth;
+    const auto width = binWidth();
+    return e[m_index] * e[m_index] * width * width;
   }
 }
 
@@ -77,15 +77,15 @@ double HistogramItem::countStandardDeviation() const {
   if (yModeIsCounts()) {
     return e[m_index];
   } else {
-    const auto binWidth = width();
-    return e[m_index] * binWidth;
+    const auto width = binWidth();
+    return e[m_index] * width;
   }
 }
 
 double HistogramItem::frequency() const {
   const auto &y = m_histogram.y();
   if (yModeIsCounts()) {
-    return y[m_index] * width();
+    return y[m_index] * binWidth();
   } else {
     return y[m_index];
   }
@@ -96,8 +96,8 @@ double HistogramItem::frequencyVariance() const {
   if (!yModeIsCounts()) {
     return e[m_index] * e[m_index];
   } else {
-    const auto binWidth = width();
-    return (e[m_index] * e[m_index]) / (binWidth * binWidth);
+    const auto width = binWidth();
+    return (e[m_index] * e[m_index]) / (width * width);
   }
 }
 
@@ -106,8 +106,8 @@ double HistogramItem::frequencyStandardDeviation() const {
   if (!yModeIsCounts()) {
     return e[m_index];
   } else {
-    const auto binWidth = width();
-    return e[m_index] / binWidth;
+    const auto width = binWidth();
+    return e[m_index] / width;
   }
 }
 
