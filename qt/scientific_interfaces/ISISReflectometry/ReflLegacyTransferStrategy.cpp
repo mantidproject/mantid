@@ -35,8 +35,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     auto cleanDescription = description;
 
     static boost::regex descriptionFormatRegex(
-        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+)|in (?<theta>[0-9.]+) "
-        "theta)(?<postTheta>.*)");
+        "(?<preTheta>.*)(?|th[:=](?<theta>[0-9.]+))(?<postTheta>.*)");
     boost::smatch matches;
     if (boost::regex_search(description, matches, descriptionFormatRegex)) {
       // We have theta. Let's get a clean description
