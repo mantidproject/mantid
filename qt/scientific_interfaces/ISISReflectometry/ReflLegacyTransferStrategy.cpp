@@ -32,8 +32,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     const auto description = runDescriptionPair.second.description;
     auto groupName = description;
     auto cleanDescription = description;
-    static std::regex descriptionFormatRegex(
-        "(.*)(th[:=]([0-9.]+))(.*)");
+    static std::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
     constexpr auto preThetaGroup = 1;
     constexpr auto thetaValueGroup = 3;
     constexpr auto postThetaGroup = 4;
