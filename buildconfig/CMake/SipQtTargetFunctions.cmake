@@ -25,11 +25,11 @@ function ( mtd_add_sip_module )
     message ( FATAL "Unable to find sipqtmodule_template.sip.in in cmake module path. Cannot continue." )
   endif ()
 
-  set (options )
-  set (oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
+  set ( options )
+  set ( oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
                     SIP_SRC_DIR PYQT_VERSION FOLDER )
-  set (multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS )
-  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS )
+  cmake_parse_arguments ( PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN} )
 
   # Create the module spec file from the list of .sip files
