@@ -34,12 +34,12 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     auto groupName = description;
     auto cleanDescription = description;
     static boost::regex descriptionFormatRegex(
-        "(.*)(|th[:=]([0-9.]+))(.*)");
+        "(.*)(th[:=]([0-9.]+))(.*)");
     constexpr auto preThetaGroup = 0;
     constexpr auto thetaValueGroup = 2;
     constexpr auto postThetaGroup = 3;
     boost::smatch matches;
-    
+
     if (boost::regex_search(description, matches, descriptionFormatRegex)) {
       // We have theta. Let's get a clean description
       const auto theta = matches[thetaValueGroup].str();
