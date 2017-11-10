@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -16,7 +17,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-// using namespace Mantid::DataHandling;
+using Mantid::HistogramData::HistogramX;
 
 class ApplyDetailedBalanceTest : public CxxTest::TestSuite {
 public:
@@ -42,7 +43,7 @@ public:
         alg.setPropertyValue("InputWorkspace", inputWSname));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300."));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -92,7 +93,7 @@ public:
   }
 
   void test_event() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
@@ -118,11 +119,27 @@ public:
     for (size_t i = 0; i < 5; ++i) {
       double en = static_cast<double>(i) + 0.5;
       double w = M_PI * (1 - std::exp(-en * 11.604519 / temp));
-      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight, w, w * 1e-6);
+      TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(i).m_weight, w, w * 1e-6);
     }
     AnalysisDataService::Instance().remove(outputWSname);
 
     AnalysisDataService::Instance().remove(inputWSname);
+  }
+
+  void test_units() {
+    createWorkspace2D(true);
+    Workspace2D_sptr inws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
+    TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(), "DeltaE");
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWSname);
+    alg.setPropertyValue("OutputWorkspace", outputWSname);
+    alg.setPropertyValue("Temperature", "300.0");
+    alg.setPropertyValue("OutputUnits", "Frequency");
+    alg.execute();
+    Workspace2D_sptr outws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
   }
 
 private:
@@ -142,27 +159,24 @@ private:
     ws2D->initialize(nspecs, nbins + 1, nbins);
     ws2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
-    Mantid::MantidVecPtr xv, yv, ev;
+    Mantid::MantidVec xv;
     if (isHistogram) {
-      xv.access().resize(nbins + 1, 0.0);
+      xv.resize(nbins + 1, 0.0);
     } else {
-      xv.access().resize(nbins, 0.0);
+      xv.resize(nbins, 0.0);
     }
-    yv.access().resize(nbins, 0.0);
-    ev.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      xv.access()[i] = static_cast<double>((i - 2. - h) * 5.);
-      yv.access()[i] = 1.0 + i;
-      ev.access()[i] = std::sqrt(1.0 + i);
+      xv[i] = static_cast<double>((i - 2. - h) * 5.);
     }
     if (isHistogram) {
-      xv.access()[nbins] = static_cast<double>((nbins - 2.5) * 5.);
+      xv[nbins] = static_cast<double>((nbins - 2.5) * 5.);
     }
 
+    auto cow_xv = make_cow<HistogramX>(std::move(xv));
     for (int i = 0; i < nspecs; i++) {
-      ws2D->setX(i, xv);
-      ws2D->setData(i, yv, ev);
-      ws2D->getSpectrum(i)->setSpectrumNo(i);
+      ws2D->setX(i, cow_xv);
+      ws2D->dataY(i) = {1, 2, 3, 4, 5};
+      ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

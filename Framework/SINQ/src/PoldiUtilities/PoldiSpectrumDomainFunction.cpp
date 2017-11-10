@@ -1,11 +1,11 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <stdexcept>
 
-#include "MantidAPI/FunctionDomain1D.h"
+#include <stdexcept>
 
 namespace Mantid {
 namespace Poldi {
@@ -191,7 +191,8 @@ void PoldiSpectrumDomainFunction::init() {}
  */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
     const Workspace2D_const_sptr &workspace2D) {
-  m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
+  const auto &xVals = workspace2D->x(0);
+  m_deltaT = xVals[1] - xVals[0];
 
   PoldiInstrumentAdapter_sptr adapter =
       boost::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),

@@ -107,7 +107,7 @@ const std::string
 NotebookBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream properties;
   const std::string name = algHistory->name();
-  std::string prop = "";
+  std::string prop;
 
   auto props = algHistory->getProperties();
   for (auto &propIter : props) {
@@ -165,7 +165,7 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
   // Create a vector of all non workspace property type names
   std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
 
-  std::string prop = "";
+  std::string prop;
   // No need to specify value for default properties
   if (!propHistory->isDefault()) {
     // Do not give values to output properties other than workspace properties
@@ -173,7 +173,7 @@ NotebookBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
              propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
       g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << std::endl;
+                    << " of type " << propHistory->type() << '\n';
       // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();

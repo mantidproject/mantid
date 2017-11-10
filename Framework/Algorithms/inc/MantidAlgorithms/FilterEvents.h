@@ -56,7 +56,6 @@ class DLLExport FilterEvents : public API::Algorithm {
 
 public:
   FilterEvents();
-  ~FilterEvents() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterEvents"; }
@@ -73,6 +72,7 @@ public:
   const std::string category() const override {
     return "Events\\EventFiltering";
   }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods
@@ -83,12 +83,23 @@ private:
   /// Process user input properties
   void processAlgorithmProperties();
 
+  /// process splitters given by a SplittersWorkspace
   void processSplittersWorkspace();
 
-  ///
+  void processTableSplittersWorkspace();
+
+  /// process splitters given by a MatrixWorkspace
   void processMatrixSplitterWorkspace();
 
+  /// create event workspace
+  boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
+  /// create output workspaces if the splitters are given in SplittersWorkspace
   void createOutputWorkspaces();
+  /// create output workspaces in the case of using TableWorlspace for splitters
+  void createOutputWorkspacesTableSplitterCase();
+  /// create output workspaces in the case of using MatrixWorkspace for
+  /// splitters
+  void createOutputWorkspacesMatrixCase();
 
   /// Set up detector calibration parameters
   void setupDetectorTOFCalibration();
@@ -114,45 +125,92 @@ private:
   void filterEventsByVectorSplitters(double progressamount);
 
   /// Examine workspace
-  void examineEventWS();
+  void examineAndSortEventWS();
+
+  /// Convert SplittersWorkspace to vector of time and vector of target
+  /// (itarget)
+  void convertSplittersWorkspaceToVectors();
+
+  void splitTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
+
+  /// get the names of all the time series properties in the input workspace's
+  /// Run object
+  std::vector<std::string> getTimeSeriesLogNames();
+
+  void generateSplitterTSP(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  void generateSplitterTSPalpha(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  /// Add time series property 'Splitter' to each child workspace
+  void mapSplitterTSPtoWorkspaces(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  void copyNoneSplitLogs(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
+
+  template <typename TYPE>
+  void splitTimeSeriesProperty(
+      Kernel::TimeSeriesProperty<TYPE> *tsp,
+      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
+
+  void splitDoubleTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
+
+  void groupOutputWorkspace();
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
+  DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
   API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
   DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
   /// Flag to use matrix splitters or table splitters
-  bool m_useTableSplitters;
+  bool m_useSplittersWorkspace;
+  bool m_useArbTableSplitters;
 
-  std::unordered_set<int> m_workGroupIndexes;
+  std::set<int> m_targetWorkspaceIndexSet;
+  int m_maxTargetIndex;
   Kernel::TimeSplitterType m_splitters;
-  std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
+  std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
 
   std::vector<double> m_detTofOffsets;
   std::vector<double> m_detTofFactors;
 
-  bool m_FilterByPulseTime;
+  bool m_filterByPulseTime;
 
   DataObjects::TableWorkspace_sptr m_informationWS;
   bool m_hasInfoWS;
 
   double m_progress;
 
-  std::vector<std::string> getTimeSeriesLogNames();
-
-  Kernel::TimeSplitterType generateSplitters(int wsindex);
-
-  void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
-                Kernel::TimeSplitterType &splitters);
-
   /// Base of output workspace's name
   std::string m_outputWSNameBase;
+
+  /// TableWorkspace splitters: from target map to vector workspace group-index
+  /// These 2 maps are complimentary to each other
+  std::map<std::string, int> m_targetIndexMap;
+  std::map<int, std::string> m_wsGroupIndexTargetMap;
+
+  /// MatrixWorkspace splitters:
+  std::map<int, uint32_t> m_yIndexMap;
+  std::map<uint32_t, int> m_wsGroupdYMap;
 
   /// Flag to group workspace
   bool m_toGroupWS;
 
   /// Vector for splitting time
+  /// FIXME - shall we convert this to DateAndTime???.  Need to do speed test!
   std::vector<int64_t> m_vecSplitterTime;
   /// Vector for splitting grouip
   std::vector<int> m_vecSplitterGroup;
@@ -175,7 +233,9 @@ private:
   // Flag to have relative time in splitters workspace
   bool m_isSplittersRelativeTime;
   // Starting time for starting time of event filters
-  Kernel::DateAndTime m_filterStartTime;
+  Types::Core::DateAndTime m_filterStartTime;
+  // EventWorkspace (aka. run)'s starting time
+  Types::Core::DateAndTime m_runStartTime;
 };
 
 } // namespace Algorithms

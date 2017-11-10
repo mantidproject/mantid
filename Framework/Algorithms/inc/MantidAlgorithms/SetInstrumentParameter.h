@@ -39,9 +39,6 @@ namespace Algorithms {
 */
 class DLLExport SetInstrumentParameter : public API::Algorithm {
 public:
-  SetInstrumentParameter();
-  ~SetInstrumentParameter() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -50,6 +47,7 @@ public:
 
   int version() const override;
   const std::string category() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;

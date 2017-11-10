@@ -1,9 +1,9 @@
+from __future__ import absolute_import
 import re
 #import sys
 #import getopt
 #import glob
-import string
-from cxxtest_misc import *
+from .cxxtest_misc import abort
 
 # Global variables
 suites = []
@@ -53,7 +53,7 @@ def scanInputFile(fileName):
             prev = ""
     if contNo:
         scanInputLine( fileName, lineNo - contNo, prev + line )
-        
+
     closeSuite()
     file.close()
 
@@ -177,7 +177,7 @@ def addLineToBlock( suite, lineNo, line ):
     '''Append the line to the current CXXTEST_CODE() block'''
     line = fixBlockLine( suite, lineNo, line )
     line = re.sub( r'^.*\{\{', '', line )
-    
+
     e = re.search( r'\}\}', line )
     if e:
         line = line[:e.start()]
@@ -202,14 +202,14 @@ def scanLineForDestroy( suite, lineNo, line ):
     if destroy_re.search( line ):
         addSuiteCreateDestroy( suite, 'destroy', lineNo )
 
-def cstr( str ):
+def cstr( s ):
     '''Convert a string to its C representation'''
-    return '"' + string.replace( str, '\\', '\\\\' ) + '"'
+    return '"' + s.replace( '\\', '\\\\' ) + '"'
 
 
 def addSuiteCreateDestroy( suite, which, line ):
     '''Add createSuite()/destroySuite() to current suite'''
-    if suite.has_key(which):
+    if which in suite:
         abort( '%s:%s: %sSuite() already declared' % ( suite['file'], str(line), which ) )
     suite[which] = line
 
@@ -224,10 +224,10 @@ def closeSuite():
 
 def verifySuite(suite):
     '''Verify current suite is legal'''
-    if suite.has_key('create') and not suite.has_key('destroy'):
+    if 'create' in suite and 'destroy' not in suite:
         abort( '%s:%s: Suite %s has createSuite() but no destroySuite()' %
                (suite['file'], suite['create'], suite['name']) )
-    if suite.has_key('destroy') and not suite.has_key('create'):
+    elif 'destroy' in suite and 'create' not in suite:
         abort( '%s:%s: Suite %s has destroySuite() but no createSuite()' %
                (suite['file'], suite['destroy'], suite['name']) )
 
@@ -241,4 +241,3 @@ def rememberSuite(suite):
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
 # retains certain rights in this software.
 #
-

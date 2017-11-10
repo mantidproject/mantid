@@ -37,6 +37,32 @@ std::string loadFile(const std::string &filename) {
   return retVal;
 }
 
+// ------------------------------------------------------------------------------------------------
+/** Return a string shortened with the center replace by " ... "
+* If the string is already short enough then the original string will be
+*returned.
+* If the max length or input string length is smaller than the ellipsis, the
+*input will be returned.
+*
+* @param input :: input string
+* @param max_length :: The maximum length of the return string (0 = return full
+*string)
+* @return the modified string.
+*/
+std::string shorten(const std::string &input, const size_t max_length) {
+  const std::string ellipsis = " ... ";
+  const size_t ellipsisSize = ellipsis.size();
+  // limit too small or input too small, return input string
+  if ((max_length == 0) || (input.size() < ellipsisSize + 2) ||
+      (input.size() <= max_length))
+    return input;
+
+  const size_t end_length = (max_length - ellipsisSize) / 2;
+  std::string retVal = input.substr(0, end_length) + ellipsis +
+                       input.substr(input.size() - end_length, end_length);
+  return retVal;
+}
+
 //------------------------------------------------------------------------------------------------
 /** Return a string with all matching occurence-strings
  *
@@ -103,7 +129,6 @@ void printHex(std::ostream &OFS, const int n) {
   hex(OFS);
   OFS << n;
   OFS.flags(PrevFlags);
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -276,26 +301,31 @@ std::string removeSpace(const std::string &CLine) {
 
 //------------------------------------------------------------------------------------------------
 /**
+  *  Reads a line from the stream of max length spc.
+  *  Trailing comments are removed. (with # or ! character)
+  *  @param fh :: already open file handle
+  *  @return String read.
+  */
+std::string getLine(std::istream &fh) {
+  std::string line;
+  getLine(fh, line);
+  return line;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
  *  Reads a line from the stream of max length spc.
  *  Trailing comments are removed. (with # or ! character)
  *  @param fh :: already open file handle
- *  @param spc :: max number of characters to read
- *  @return String read.
+ *  @param Line :: string read
  */
-std::string getLine(std::istream &fh, const int spc) {
-  auto ss = new char[spc + 1];
-  std::string Line;
-  if (fh.good()) {
-    fh.getline(ss, spc, '\n');
-    ss[spc] = 0; // incase line failed to read completely
-    Line = ss;
+void getLine(std::istream &fh, std::string &Line) {
+  if (std::getline(fh, Line)) {
     // remove trailing comments
-    std::string::size_type pos = Line.find_first_of("#!");
+    auto pos = Line.find_first_of("#!");
     if (pos != std::string::npos)
       Line.erase(pos);
   }
-  delete[] ss;
-  return Line;
 }
 
 /**
@@ -337,7 +367,6 @@ void stripComment(std::string &A) {
     posA = posC;
   if (posA != std::string::npos)
     A.erase(posA, std::string::npos);
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -394,7 +423,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
     if (!isEmpty(Out)) {
       if (spc)
         OX << std::string(spc, ' ');
-      OX << X.substr(0, posB) << std::endl;
+      OX << X.substr(0, posB) << '\n';
     }
     spc = 8;
     X = Line.substr(pos, MaxLine - spc);
@@ -403,9 +432,8 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
   if (!isEmpty(X)) {
     if (spc)
       OX << std::string(spc, ' ');
-    OX << X << std::endl;
+    OX << X << '\n';
   }
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -414,12 +442,11 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
-std::vector<std::string> StrParts(std::string Ln) {
-  std::vector<std::string> Out;
-  std::string Part;
-  while (section(Ln, Part))
-    Out.push_back(Part);
-  return Out;
+std::vector<std::string> StrParts(const std::string &Ln) {
+  auto tokenizer = Mantid::Kernel::StringTokenizer(
+      Ln, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -769,7 +796,7 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   if (!FX.good())
     return -1;
 
-  FX << "# " << Npts << " " << Epts << std::endl;
+  FX << "# " << Npts << " " << Epts << '\n';
   FX.precision(10);
   FX.setf(std::ios::scientific, std::ios::floatfield);
   auto xPt = X.cbegin();
@@ -779,13 +806,13 @@ int writeFile(const std::string &Fname, const V<T, A> &X, const V<T, A> &Y,
   // Double loop to include/exclude a short error stack
   size_t eCount = 0;
   for (; eCount < Epts; eCount++) {
-    FX << (*xPt) << " " << (*yPt) << " " << (*ePt) << std::endl;
+    FX << (*xPt) << " " << (*yPt) << " " << (*ePt) << '\n';
     ++xPt;
     ++yPt;
     ++ePt;
   }
   for (; eCount < Npts; eCount++) {
-    FX << (*xPt) << " " << (*yPt) << " 0.0" << std::endl;
+    FX << (*xPt) << " " << (*yPt) << " 0.0\n";
     ++xPt;
     ++yPt;
   }
@@ -1025,7 +1052,7 @@ int isMember(const std::vector<std::string> &group,
              const std::string &candidate) {
   int num(-1);
   for (size_t i = 0; i < group.size(); i++) {
-    if (candidate.compare(group[i]) == 0) {
+    if (candidate == group[i]) {
       num = int(i);
       return num;
     }

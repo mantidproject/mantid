@@ -5,10 +5,12 @@
 #include "MantidDataHandling/LoadAscii2.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
 
@@ -18,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramDx;
 
 class LoadAscii2Test : public CxxTest::TestSuite {
 public:
@@ -148,13 +151,13 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX, Z" << std::endl;
+    file << "# X , Y, E, DX, Z\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
              << "," << 1 << "," << 0 << ","
-             << (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << std::endl;
+             << (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -168,11 +171,11 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X" << std::endl;
+    file << "# X\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
-        file << 1.5 * j / 0.9 << std::endl;
+        file << 1.5 * j / 0.9 << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -186,13 +189,13 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -207,16 +210,16 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << std::endl;
+               << "," << 1 << '\n';
         }
       }
     }
@@ -231,18 +234,18 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
           file << "e" << 1.5 * j / 0.9 << ","
                << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << std::endl;
+               << '\n';
         }
       }
     }
@@ -257,17 +260,17 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << "@" << 1.5 * j / 0.9 << ","
                << (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," << 1 << "," << 0
-               << std::endl;
+               << '\n';
         }
       }
     }
@@ -282,18 +285,18 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           // used e to make sure it'd not get mistaken for a scientific index
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
                << "e"
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -308,17 +311,17 @@ public:
     std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
-      file << i << std::endl;
+      file << i << '\n';
       for (int j = 0; j < 4; j++) {
         if (!(i == 3 && j == 2)) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         } else {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
                << "/"
-               << "," << 1 << "," << 0 << std::endl;
+               << "," << 1 << "," << 0 << '\n';
         }
       }
     }
@@ -334,16 +337,16 @@ public:
     m_abspath = getAbsPath();
 
     file << std::scientific;
-    file << "# X , Y, E, DX" << std::endl;
+    file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
       if (i != 3) {
-        file << i << std::endl;
+        file << i << '\n';
       } else {
-        file << std::endl;
+        file << '\n';
       }
       for (int j = 0; j < 4; j++) {
         file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-             << "," << 1 << "," << 0 << std::endl;
+             << "," << 1 << "," << 0 << '\n';
       }
     }
     file.unsetf(std::ios_base::floatfield);
@@ -379,13 +382,13 @@ private:
         file << std::scientific;
       }
       if (header) {
-        file << comment << "X , Y" << std::endl;
+        file << comment << "X , Y\n";
       }
       for (int i = 0; i < 5; i++) {
-        file << i << std::endl;
+        file << i << '\n';
         for (int j = 0; j < 4; j++) {
           file << 1.5 * j / 0.9 << "," << (i + 1) * (2. + 4. * (1.5 * j / 0.9))
-               << std::endl;
+               << '\n';
         }
       }
       file.unsetf(std::ios_base::floatfield);
@@ -395,18 +398,16 @@ private:
           boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
-        std::vector<double> &X = wsToSave->dataX(i);
-        std::vector<double> &Y = wsToSave->dataY(i);
-        std::vector<double> &E = wsToSave->dataE(i);
-        std::vector<double> &DX = wsToSave->dataDx(i);
+        auto &X = wsToSave->mutableX(i);
+        auto &Y = wsToSave->mutableY(i);
+        auto &E = wsToSave->mutableE(i);
         for (int j = 0; j < 4; j++) {
           X[j] = 1.5 * j / 0.9;
           Y[j] = (i + 1) * (2. + 4. * X[j]);
           E[j] = 1.;
-          if (cols == 4) {
-            DX[j] = 1.;
-          }
         }
+        if (cols == 4)
+          wsToSave->setPointStandardDeviations(i, 4, 1.0);
       }
       const std::string name = "SaveAsciiWS";
       AnalysisDataService::Instance().add(name, wsToSave);
@@ -497,48 +498,123 @@ private:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
 
-    TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 2, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 1.666667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(0)[1], 8.666667, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(1)[2], 3.333333, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(1)[2], 30.66667, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(3)[3], 5, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(3)[3], 88, 1e-6);
     if (cols == 3 || cols == 4) {
-      TS_ASSERT_DELTA(outputWS->readE(0)[0], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[0], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(0)[1], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[1], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(1)[2], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(1)[2], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(3)[3], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(3)[3], 1, 1e-6);
     } else {
-      TS_ASSERT_DELTA(outputWS->readE(0)[0], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[0], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(0)[1], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[1], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(1)[2], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(1)[2], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(3)[3], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(3)[3], 0, 1e-6);
     }
     if (cols == 4) {
-      TS_ASSERT_DELTA(outputWS->readDx(0)[0], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(0)[0], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(0)[1], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(0)[1], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(1)[2], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(1)[2], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readDx(3)[3], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->dx(3)[3], 1, 1e-6);
     }
   }
   std::string m_filename;
   std::string m_abspath;
   std::string m_ext;
   size_t m_testno;
+};
+
+class LoadAscii2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    setupFile();
+    loadAlg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("Filename", filename));
+    loadAlg.setPropertyValue("OutputWorkspace", outputName);
+    loadAlg.setPropertyValue("Separator", sep);
+    loadAlg.setPropertyValue("CustomSeparator", custsep);
+    loadAlg.setPropertyValue("CommentIndicator", comment);
+
+    loadAlg.setRethrows(true);
+  }
+
+  void testLoadAscii2Performance() {
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+  }
+
+  void tearDown() override {
+    TS_ASSERT_THROWS_NOTHING(Poco::File(filename).remove());
+    AnalysisDataService::Instance().remove(outputName);
+  }
+
+private:
+  LoadAscii2 loadAlg;
+
+  const std::string outputName = "outWs";
+  std::string filename;
+
+  // Common saving/loading parameters
+  const std::string sep = "CSV";
+  const std::string custsep = "";
+  const std::string comment = "#";
+
+  void setupFile() {
+    constexpr int numVecs = 100;
+    constexpr int xyLen = 100;
+
+    Mantid::DataObjects::Workspace2D_sptr wsToSave =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
+                                                xyLen));
+
+    const std::string name = "SaveAsciiWS";
+    AnalysisDataService::Instance().add(name, wsToSave);
+
+    SaveAscii2 save;
+    save.initialize();
+
+    save.initialize();
+    TS_ASSERT_EQUALS(save.isInitialized(), true);
+
+    const bool scientific = true;
+
+    save.setPropertyValue("Filename", "testFile");
+    save.setPropertyValue("InputWorkspace", name);
+    save.setPropertyValue("CommentIndicator", comment);
+    save.setPropertyValue("ScientificFormat",
+                          boost::lexical_cast<std::string>(scientific));
+    save.setPropertyValue("ColumnHeader",
+                          boost::lexical_cast<std::string>(true));
+    save.setPropertyValue("WriteXError",
+                          boost::lexical_cast<std::string>(false));
+    save.setPropertyValue("Separator", sep);
+    save.setPropertyValue("CustomSeparator", custsep);
+    save.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    AnalysisDataService::Instance().remove(name);
+    filename = save.getPropertyValue("Filename");
+  }
 };
 
 #endif // LOADASCIITEST_H_

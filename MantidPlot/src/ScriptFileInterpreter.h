@@ -31,7 +31,7 @@ class ScriptFileInterpreter : public QWidget {
 
 public:
   /// Construct the object
-  ScriptFileInterpreter(QWidget *parent = NULL,
+  ScriptFileInterpreter(QWidget *parent = nullptr,
                         const QString &settingsGroup = "");
   /// Destroy the object
   ~ScriptFileInterpreter() override;
@@ -155,9 +155,6 @@ private:
   void executeCode(const ScriptCode &code, const Script::ExecutionMode mode);
 
   void toggleComment(bool addComment);
-  // Replaces the currently selected text in the editor
-  inline void replaceSelectedText(const ScriptEditor *editor,
-                                  const QString &text);
 
   QSplitter *m_splitter;
   ScriptEditor *m_editor;
@@ -176,7 +173,7 @@ class NullScriptFileInterpreter : public ScriptFileInterpreter {
 
 public:
   /// Constructor
-  NullScriptFileInterpreter() : ScriptFileInterpreter(NULL) {}
+  NullScriptFileInterpreter() : ScriptFileInterpreter(nullptr) {}
 
   /// Does nothing
   bool shouldClose() override { return false; }
@@ -241,7 +238,8 @@ class ScriptCloseDialog : public QWidget {
   Q_OBJECT
 
 public:
-  ScriptCloseDialog(ScriptFileInterpreter &interpreter, QWidget *parent = NULL);
+  ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                    QWidget *parent = nullptr);
 
   bool shouldScriptClose();
 

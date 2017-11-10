@@ -6,9 +6,20 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+class HistogramX;
+class HistogramE;
+}
+}
 namespace Mantid {
 namespace Algorithms {
 /** Requires an estimate for the initial neutron energy which it uses to
@@ -77,7 +88,8 @@ private:
   double calculateEi(const double initial_guess);
   /// Get the distance from the source of the detector at the workspace index
   /// given
-  double getDistanceFromSource(const size_t ws_index) const;
+  double getDistanceFromSource(const size_t ws_index,
+                               const API::SpectrumInfo &spectrumInfo) const;
   /// Calculate the peak position within the given window
   double calculatePeakPosition(const size_t ws_index, const double t_min,
                                const double t_max);
@@ -98,8 +110,10 @@ private:
                                   const double first, const double width,
                                   const double end);
   /// Integrate the point data
-  void integrate(double &integral_val, double &integral_err, const MantidVec &x,
-                 const MantidVec &s, const MantidVec &e, const double xmin,
+  void integrate(double &integral_val, double &integral_err,
+                 const HistogramData::HistogramX &x,
+                 const HistogramData::HistogramY &s,
+                 const HistogramData::HistogramE &e, const double xmin,
                  const double xmax) const;
   /// Store the incident energy within the sample object
   void storeEi(const double ei) const;

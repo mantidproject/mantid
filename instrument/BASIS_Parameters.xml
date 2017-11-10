@@ -3,73 +3,72 @@
 
 <component-link name = "BASIS">
 
-<parameter name="deltaE-mode" type="string">
+  <parameter name="deltaE-mode" type="string">
     <value val="indirect"/>
-</parameter>
+  </parameter>
 
-
-<!-- Moderator Tzero/LambdaZero Parameters  -->
-<parameter name="Moderator.TimeZero.Gradient">
+  <!-- Moderator Tzero/LambdaZero Parameters  -->
+  <parameter name="Moderator.TimeZero.Gradient">
     <value val="11.967"/>
-</parameter>
-<parameter name="Moderator.TimeZero.Intercept">
+  </parameter>
+  <parameter name="Moderator.TimeZero.Intercept">
     <value val="-5.0"/>
-</parameter>
+  </parameter>
 
-<!-- These properties are necessary for use in the Indirect CTE interface. -->
-
-<parameter name="analysers" type="string">
+  <!-- These properties are necessary for use in the Indirect CTE interface. -->
+  <parameter name="analysers" type="string">
     <value val="silicon,diffraction" />
-</parameter>
-<parameter name="refl-silicon" type="string">
-    <value val="111" />
-</parameter>
+  </parameter>
 
-<parameter name="refl-diffraction" type="string">
-  <value val="diffonly,diffspec" />
-</parameter>
+  <parameter name="refl-diffraction" type="string">
+    <value val="diffonly,diffspec" />
+  </parameter>
 
-<!-- Reduction workflow parameters under this line -->
-<parameter name="Workflow.Monitor.RebinStep" >
-  <!-- This is the step size to optionally rebin the monitor to"-->
-  <value val="10.0" />
-</parameter>
-<parameter name="Workflow.GroupingMethod" type="string">
-  <value val="File" />
-</parameter>
-<parameter name="Workflow.GroupingFile" type="string">
-  <value val="BASIS_Grouping.xml" />
-</parameter>
-<parameter name="Workflow.MaskFile" type="string">
-  <value val="BASIS_Mask.xml" />
-</parameter>
-<parameter name="Workflow.Monitor1-SpectrumNumber" >
-  <value val="0" />
-</parameter>
-<parameter name="Workflow.Monitor1-SpectrumNumber" >
-  <value val="0" />
-</parameter>
-<parameter name="Workflow.Monitor1-Area" >
-  <value val="1.276e-3" />
-</parameter>
-<parameter name="Workflow.Monitor1-Thickness" >
-  <value val="0.025" />
-</parameter>
-<parameter name="Workflow.Monitor1-ScalingFactor">
-  <value val="1e6" />
-</parameter>
-<parameter name="Workflow.UnwrapMonitor" type="string">
+  <parameter name="refl-silicon" type="string">
+    <value val="111,311" />
+  </parameter>
+
+  <!-- Reduction workflow parameters under this line -->
+  <parameter name="Workflow.Monitor.RebinStep" >
+    <!-- This is the step size to optionally rebin the monitor to"-->
+    <value val="10.0" />
+  </parameter>
+  <parameter name="Workflow.GroupingMethod" type="string">
+    <value val="File" />
+  </parameter>
+  <parameter name="Workflow.GroupingFile" type="string">
+    <value val="BASIS_Grouping.xml" />
+  </parameter>
+  <parameter name="Workflow.MaskFile" type="string">
+    <value val="BASIS_Mask.xml" />
+  </parameter>
+  <parameter name="Workflow.Monitor1-SpectrumNumber" >
+    <value val="0" />
+  </parameter>
+  <parameter name="Workflow.Monitor1-SpectrumNumber" >
+    <value val="0" />
+  </parameter>
+  <parameter name="Workflow.Monitor1-Area" >
+    <value val="1.276e-3" />
+  </parameter>
+  <parameter name="Workflow.Monitor1-Thickness" >
+    <value val="0.025" />
+  </parameter>
+  <parameter name="Workflow.Monitor1-ScalingFactor">
+    <value val="1e6" />
+  </parameter>
+  <parameter name="Workflow.UnwrapMonitor" type="string">
     <value val="BaseOnTimeRegime" />
-</parameter>
-<parameter name="Workflow.NamingConvention" type="string">
+  </parameter>
+  <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
-</parameter>
-<parameter name="Workflow.SE-log" type="string">
+  </parameter>
+  <parameter name="Workflow.SE-log" type="string">
     <value val="SensorA" />
-</parameter>
-<parameter name="Workflow.SE-log-value" type="string">
+  </parameter>
+  <parameter name="Workflow.SE-log-value" type="string">
     <value val="average" />
-</parameter>
+  </parameter>
 
 </component-link>
 

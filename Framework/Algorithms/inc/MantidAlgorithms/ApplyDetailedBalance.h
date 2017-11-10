@@ -36,9 +36,6 @@ namespace Algorithms {
 */
 class DLLExport ApplyDetailedBalance : public API::Algorithm {
 public:
-  ApplyDetailedBalance();
-  ~ApplyDetailedBalance() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDetailedBalance"; };
   /// Summary of algorithms purpose

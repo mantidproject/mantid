@@ -18,11 +18,10 @@ MuonGroupCalculator::MuonGroupCalculator(
     const std::vector<int> subtractedPeriods, const int groupIndex)
     : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
       m_groupIndex(groupIndex) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupCalculator::~MuonGroupCalculator() {}
+void MuonGroupCalculator::setStartEnd(const double start, const double end) {
+  m_startX = start;
+  m_endX = end;
+}
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

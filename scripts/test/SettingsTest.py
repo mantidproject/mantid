@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 from mantid.simpleapi import *
@@ -47,14 +48,14 @@ if not skipAllTests():
     class SettingsTest(unittest.TestCase):
 
         def test_avalid_file(self):
-            fileObject = TempFile(contents="<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=".xml")
             configuration = settings.Settings( fileObject.pathToFile() )
             entries = configuration.get_all_entries()
             self.assertEqual(len(entries), 1, "There is only one setting entry") # Quick check
 
         def test_bad_file_extension_throws(self):
             bad_extension = ".txt "
-            fileObject = TempFile(contents="<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=bad_extension)
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=bad_extension)
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
         def test_bad_file_location_throws(self):
@@ -62,19 +63,19 @@ if not skipAllTests():
             self.assertRaises(settings.MissingSettings, settings.Settings, missing_file)
 
         def test_bad_xml_format_throws(self):
-            fileObject = TempFile(contents="<SettingList>invalid xml", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList>invalid xml", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
         def test_sanity_check_missing_attribute_name_throws(self):
-            fileObject = TempFile(contents="<SettingList><Setting>test</Setting></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList><Setting>test</Setting></SettingList>", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
         def test_sanity_check_missing_attribute_value_throws(self):
-            fileObject = TempFile(contents="<SettingList><Setting name='test_setting'></Setting></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'></Setting></SettingList>", extension=".xml")
             self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
 
         def test_get_entries(self):
-            fileObject = TempFile(contents="<SettingList><Setting name='a'>1</Setting><Setting name='b'>2</Setting></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList><Setting name='a'>1</Setting><Setting name='b'>2</Setting></SettingList>", extension=".xml")
             configuration = settings.Settings( fileObject.pathToFile() )
             entries = configuration.get_all_entries()
             self.assertEqual(len(entries), 2)
@@ -82,12 +83,12 @@ if not skipAllTests():
             self.assertEqual(int(entries['b']), 2)
 
         def test_get_filename(self):
-            fileObject = TempFile(contents="<SettingList></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList></SettingList>", extension=".xml")
             configuration = settings.Settings( fileObject.pathToFile() )
             self.assertEqual(configuration.get_contents_file(), fileObject.pathToFile())
 
         def test_get_named_setting(self):
-            fileObject = TempFile(contents="<SettingList><Setting name='a'>1</Setting></SettingList>", extension=".xml")
+            fileObject = TempFile(contents=b"<SettingList><Setting name='a'>1</Setting></SettingList>", extension=".xml")
             configuration = settings.Settings( fileObject.pathToFile() )
             self.assertEqual(configuration.get_named_setting('a'), '1')
             self.assertRaises(KeyError, configuration.get_named_setting, 'b')

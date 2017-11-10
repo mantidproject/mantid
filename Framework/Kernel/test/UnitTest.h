@@ -63,7 +63,7 @@ std::string convert_units_check_range(const Unit &aUnit,
   const size_t nSteps(100);
 
   double step = (range.second - range.first) / nSteps;
-  if (step == std::numeric_limits<double>::infinity()) {
+  if (std::isinf(step)) {
     step = (DBL_MAX / nSteps) * 2;
   }
 
@@ -140,7 +140,7 @@ public:
   void testLabel_label() { TS_ASSERT_EQUALS(label.label().ascii(), ""); }
 
   void testLabel_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&label));
     TS_ASSERT_EQUALS(u->unitID(), "Label");
   }
@@ -217,6 +217,9 @@ public:
     unit = dSpacing().clone();
     TS_ASSERT(dynamic_cast<dSpacing *>(unit));
     delete unit;
+    unit = dSpacingPerpendicular().clone();
+    TS_ASSERT(dynamic_cast<dSpacingPerpendicular *>(unit));
+    delete unit;
     unit = MomentumTransfer().clone();
     TS_ASSERT(dynamic_cast<MomentumTransfer *>(unit));
     delete unit;
@@ -228,6 +231,9 @@ public:
     delete unit;
     unit = DeltaE_inWavenumber().clone();
     TS_ASSERT(dynamic_cast<DeltaE_inWavenumber *>(unit));
+    delete unit;
+    unit = DeltaE_inFrequency().clone();
+    TS_ASSERT(dynamic_cast<DeltaE_inFrequency *>(unit));
     delete unit;
     unit = Momentum().clone();
     TS_ASSERT(dynamic_cast<Momentum *>(unit));
@@ -271,7 +277,7 @@ public:
   }
 
   void testTOF_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&tof));
     TS_ASSERT_EQUALS(u->unitID(), "TOF");
   }
@@ -323,7 +329,7 @@ public:
   }
 
   void testWavelength_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&lambda));
     TS_ASSERT_EQUALS(u->unitID(), "Wavelength");
   }
@@ -398,7 +404,7 @@ public:
   }
 
   void testEnergy_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&energy));
     TS_ASSERT_EQUALS(u->unitID(), "Energy");
   }
@@ -473,7 +479,7 @@ public:
   }
 
   void testEnergy_inWavenumber_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&energyk));
     TS_ASSERT_EQUALS(u->unitID(), "Energy_inWavenumber");
   }
@@ -528,7 +534,7 @@ public:
   }
 
   void testdSpacing_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&d));
     TS_ASSERT_EQUALS(u->unitID(), "dSpacing");
   }
@@ -590,6 +596,66 @@ public:
   }
 
   //----------------------------------------------------------------------
+  // d-SpacingPerpebdicular tests
+  //----------------------------------------------------------------------
+
+  void testdSpacingPerpendicular_unitID() {
+    TS_ASSERT_EQUALS(dp.unitID(), "dSpacingPerpendicular")
+  }
+
+  void testdSpacingPerpendicular_caption() {
+    TS_ASSERT_EQUALS(dp.caption(), "d-SpacingPerpendicular")
+  }
+
+  void testdSpacingPerpendicular_label() {
+    TS_ASSERT_EQUALS(dp.label().ascii(), "Angstrom")
+    TS_ASSERT_EQUALS(dp.label().utf8(), L"\u212b")
+  }
+
+  void testdSpacingPerpendicular_cast() {
+    Unit *u = nullptr;
+    TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dp));
+    TS_ASSERT_EQUALS(u->unitID(), "dSpacingPerpendicular");
+  }
+
+  void testdSpacingPerpendicular_toTOF() {
+    std::vector<double> x(1, 1.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dp.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_DELTA(x[0], 434.5529, 0.0001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacingPerpendicular_fromTOF() {
+    std::vector<double> x(1, 1001.1), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dp.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_DELTA(x[0], 2.045075, 0.000001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacingPerpendicularRange() {
+    std::vector<double> sample, rezult;
+
+    std::string err_mess = convert_units_check_range(dp, sample, rezult);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    for (size_t i = 0; i < sample.size(); i++) {
+      if (std::fabs(sample[i]) < 10 * FLT_EPSILON) {
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            sample[i], rezult[i], 10 * FLT_EPSILON);
+      } else {
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------
   // Momentum Transfer tests
   //----------------------------------------------------------------------
 
@@ -605,7 +671,7 @@ public:
   }
 
   void testQTransfer_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&q));
     TS_ASSERT_EQUALS(u->unitID(), "MomentumTransfer");
   }
@@ -680,7 +746,7 @@ public:
   }
 
   void testQ2_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&q2));
     TS_ASSERT_EQUALS(u->unitID(), "QSquared");
   }
@@ -759,7 +825,7 @@ public:
   }
 
   void testDeltaE_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dE));
     TS_ASSERT_EQUALS(u->unitID(), "DeltaE");
   }
@@ -857,7 +923,7 @@ public:
   }
 
   void testDeltaEk_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dEk));
     TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inWavenumber");
   }
@@ -937,6 +1003,106 @@ public:
   }
 
   //----------------------------------------------------------------------
+  // Energy transfer in frequency tests
+  //----------------------------------------------------------------------
+
+  void testDeltaEf_unitID() {
+    TS_ASSERT_EQUALS(dEf.unitID(), "DeltaE_inFrequency")
+  }
+
+  void testDeltaEf_caption() {
+    TS_ASSERT_EQUALS(dE.caption(), "Energy transfer")
+  }
+
+  void testDeltaEf_label() {
+    TS_ASSERT_EQUALS(dEf.label().ascii(), "GHz")
+    TS_ASSERT_EQUALS(dEf.label().utf8(), L"GHz")
+  }
+
+  void testDeltaEf_cast() {
+    Unit *u = nullptr;
+    TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dEf));
+    TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inFrequency");
+  }
+
+  void testDeltaEf_toTOF() {
+    std::vector<double> x(1, 0.26597881882),
+        y(1, 1.0); // 1.1meV = h*0.26597881882Ghz
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 5071.066, 0.001)
+    TS_ASSERT(yy == y)
+
+    x[0] = 0.26597881882;
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 4376.406, 0.001)
+    TS_ASSERT(yy == y)
+
+    // emode = 0
+    TS_ASSERT_THROWS(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+                     std::invalid_argument)
+  }
+
+  void testDeltaEf_fromTOF() {
+    std::vector<double> x(1, 2001.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], -95.4064, 0.0001)
+    TS_ASSERT(yy == y)
+
+    x[0] = 3001.0;
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 137.7866, 0.0001)
+    TS_ASSERT(yy == y)
+
+    // emode = 0
+    TS_ASSERT_THROWS(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+                     std::invalid_argument)
+  }
+
+  void testDE_fRange() {
+    std::vector<double> sample, rezult;
+    // Direct
+    dEf.initialize(2001.0, 1.0, 1.5, 1, 10., 0.0);
+
+    std::string err_mess =
+        convert_units_check_range(dEf, sample, rezult, DBL_EPSILON);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion t_min: ",
+        sample[0], rezult[0], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion t_max: ",
+        sample[1] / rezult[1], 1., 0.05);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion e_min: ",
+        sample[2], rezult[2], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion e_max: ",
+        sample[3], rezult[3], 10 * FLT_EPSILON);
+
+    // Indirect
+    dEf.initialize(2001.0, 1.0, 1.5, 2, 10., 0.0);
+
+    err_mess = convert_units_check_range(dEf, sample, rezult);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion t_min: ",
+        sample[0], rezult[0], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion t_max: ",
+        sample[1] / rezult[1], 1., 0.05);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion e_min: ",
+        sample[2], rezult[2], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion e_max: ",
+        sample[3], rezult[3], 10 * FLT_EPSILON);
+  }
+
+  //----------------------------------------------------------------------
   // Momentum tests
   //----------------------------------------------------------------------
 
@@ -950,7 +1116,7 @@ public:
   }
 
   void testMomentum_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&k_i));
     TS_ASSERT_EQUALS(u->unitID(), "Momentum");
   }
@@ -1079,7 +1245,7 @@ public:
   }
 
   void testSpinEchoLength_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&delta));
     TS_ASSERT_EQUALS(u->unitID(), "SpinEchoLength");
   }
@@ -1157,7 +1323,7 @@ public:
   }
 
   void testSpinEchoTime_cast() {
-    Unit *u = NULL;
+    Unit *u = nullptr;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&tau));
     TS_ASSERT_EQUALS(u->unitID(), "SpinEchoTime");
   }
@@ -1231,10 +1397,12 @@ private:
   Units::Energy energy;
   Units::Energy_inWavenumber energyk;
   Units::dSpacing d;
+  Units::dSpacingPerpendicular dp;
   Units::MomentumTransfer q;
   Units::QSquared q2;
   Units::DeltaE dE;
   Units::DeltaE_inWavenumber dEk;
+  Units::DeltaE_inFrequency dEf;
   Units::Momentum k_i;
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;

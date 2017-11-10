@@ -5,6 +5,7 @@
 
 #include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -42,8 +43,8 @@ struct TestingFunction {
       return x * x / dx;
     case HistogramNonUniform: {
       double res = 0.0;
-      auto &X = workspace.readX(0);
-      auto &Y = workspace.readY(0);
+      auto &X = workspace.x(0);
+      auto &Y = workspace.y(0);
       auto ix = std::lower_bound(X.begin(), X.end(), x);
       if (ix != X.end()) {
         if (x < *ix) {
@@ -196,8 +197,8 @@ private:
     TS_ASSERT(ws->getAxis(0)->unit() == inWS->getAxis(0)->unit());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
 
-    auto &x = ws->readX(0);
-    auto &y = ws->readY(0);
+    auto &x = ws->x(0);
+    auto &y = ws->y(0);
 
     size_t n = x.size();
     TS_ASSERT_EQUALS(n, y.size());
@@ -210,7 +211,7 @@ private:
     for (size_t i = i0; i < n; ++i) {
       TS_ASSERT_DELTA(y[i] / fun(x[i]), 1.0, tolerance);
       // std::cerr << x[i] << ' ' << fun(x[i])  << ' ' <<  y[i] << ' ' <<
-      // std::endl;
+      // '\n';
     }
 
     // Remove workspace from the data service.
@@ -239,7 +240,7 @@ private:
   }
 
   void do_test_unsorted(const MatrixWorkspace &outWS) {
-    auto &y = outWS.readY(0);
+    auto &y = outWS.y(0);
     double oldValue = 0.0;
     for (size_t i = 0; i < y.size(); ++i) {
       if (y[i] != 0.0 && y[i] != oldValue) {
@@ -356,7 +357,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -376,7 +377,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -395,15 +396,15 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
       }
-      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << std::endl;
+      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << '\n';
     }
-    ws->isDistribution(true);
+    ws->setDistribution(true);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
@@ -416,7 +417,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -436,7 +437,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);

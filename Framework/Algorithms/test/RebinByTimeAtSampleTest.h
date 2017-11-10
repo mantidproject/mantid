@@ -10,6 +10,7 @@
 #include <cmath>
 
 using Mantid::Algorithms::RebinByTimeAtSample;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 
@@ -33,7 +34,7 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
     for (size_t i = 0; i < allSpectraTOF.size(); i++) {
       const double tof = allSpectraTOF[i];
       uint64_t pulseTime(0); // Pulse time is always zero. Same pulse.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 
@@ -245,24 +246,24 @@ public:
 
      */
 
-    TSM_ASSERT_EQUALS("Should not loose spectrum", 3,
+    TSM_ASSERT_EQUALS("Should not lose spectrum", 3,
                       result->getNumberHistograms());
 
-    auto y1 = result->readY(0);
+    const auto &y1 = result->y(0);
     auto y1Sum = std::accumulate(y1.begin(), y1.end(), 0.0);
 
-    auto y2 = result->readY(1);
+    const auto &y2 = result->y(1);
     auto y2Sum = std::accumulate(y2.begin(), y2.end(), 0.0);
 
-    auto y3 = result->readY(2);
+    const auto &y3 = result->y(2);
     auto y3Sum = std::accumulate(y3.begin(), y3.end(), 0.0);
 
     TSM_ASSERT_EQUALS("Spectrum 1 not rebinned to sample time correctly", 1.0,
-                      y1[4]);
+                      y1[2]);
     TSM_ASSERT_EQUALS("Spectrum 2 not rebinned to sample time correctly", 1.0,
-                      y2[2]);
+                      y2[4]);
     TSM_ASSERT_EQUALS("Spectrum 3 not rebinned to sample time correctly", 1.0,
-                      y3[1]);
+                      y3[2]);
 
     TSM_ASSERT_EQUALS("Spectrum 1 should only contain one count", 1.0, y1Sum);
     TSM_ASSERT_EQUALS("Spectrum 2 should only contain one count", 1.0, y2Sum);

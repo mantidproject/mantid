@@ -147,7 +147,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
   // Sanity checks on matrix sizes
   for (size_t i = 0; i < 2; ++i) {
     size_t ncols(0);
-    std::string matrix("");
+    std::string matrix;
     if (i == 0) {
       ncols = equality.numCols();
       matrix = "equality";
@@ -186,7 +186,7 @@ void SLSQPMinimizer::initializeConstraints(const DblMatrix &equality,
       constrMatrix = &inequality;
 
     for (size_t i = 0; i < constrMatrix->numRows(); ++i, ++constrCounter) {
-      const double *matrixRow = (*constrMatrix)[i];
+      const auto matrixRow = (*constrMatrix)[i];
       for (size_t j = 0; j < constrMatrix->numCols(); ++j) {
         m_constraintNorms[j * totalNumConstr + constrCounter] = matrixRow[j];
       }

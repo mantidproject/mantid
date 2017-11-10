@@ -1,9 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidDataHandling/GroupDetectors.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>
 #include <numeric>
@@ -15,12 +16,6 @@ DECLARE_ALGORITHM(GroupDetectors)
 
 using namespace Kernel;
 using namespace API;
-
-/// (Empty) Constructor
-GroupDetectors::GroupDetectors() {}
-
-/// Destructor
-GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init() {
   declareProperty(
@@ -64,7 +59,7 @@ void GroupDetectors::exec() {
   }
 
   // Bin boundaries need to be the same, so check if they actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(WS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*WS)) {
     g_log.error("Can only group if the histograms have common bin boundaries");
     throw std::runtime_error(
         "Can only group if the histograms have common bin boundaries");
@@ -88,43 +83,35 @@ void GroupDetectors::exec() {
     return;
   }
 
-  const size_t vectorSize = WS->blocksize();
-
   const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
-  ISpectrum *firstSpectrum = WS->getSpectrum(firstIndex);
-  MantidVec &firstY = WS->dataY(firstIndex);
-
+  auto &firstSpectrum = WS->getSpectrum(firstIndex);
   setProperty("ResultIndex", firstIndex);
 
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size() - 1));
+
+  auto outputHisto = firstSpectrum.histogram();
+
   for (size_t i = 0; i < indexList.size() - 1; ++i) {
     // The current spectrum
     const size_t currentIndex = indexList[i + 1];
-    ISpectrum *spec = WS->getSpectrum(currentIndex);
+    auto &spec = WS->getSpectrum(currentIndex);
 
     // Add the current detector to belong to the first spectrum
-    firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
+    firstSpectrum.addDetectorIDs(spec.getDetectorIDs());
 
     // Add up all the Y spectra and store the result in the first one
-    auto fEit = firstSpectrum->dataE().begin();
-    auto Yit = spec->dataY().begin();
-    auto Eit = spec->dataE().begin();
-    for (auto fYit = firstY.begin(); fYit != firstY.end();
-         ++fYit, ++fEit, ++Yit, ++Eit) {
-      *fYit += *Yit;
-      // Assume 'normal' (i.e. Gaussian) combination of errors
-      *fEit = sqrt((*fEit) * (*fEit) + (*Eit) * (*Eit));
-    }
+    outputHisto += spec.histogram();
 
     // Now zero the now redundant spectrum and set its spectraNo to indicate
     // this (using -1)
-    spec->dataY().assign(vectorSize, 0.0);
-    spec->dataE().assign(vectorSize, 0.0);
-    spec->setSpectrumNo(-1);
-    spec->clearDetectorIDs();
+    spec.clearData();
+    spec.setSpectrumNo(-1);
+    spec.clearDetectorIDs();
     progress.report();
   }
+
+  firstSpectrum.setHistogram(outputHisto);
 }
 
 } // namespace DataHandling

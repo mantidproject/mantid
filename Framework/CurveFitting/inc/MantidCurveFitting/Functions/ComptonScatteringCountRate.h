@@ -3,7 +3,6 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {
@@ -68,9 +67,9 @@ private:
   void cacheBackground(const API::IFunction1D_sptr &function1D,
                        const size_t paramsOffset);
   /// Set up the constraint matrices
-  void createConstraintMatrices(const std::vector<double> &xValues);
+  void createConstraintMatrices();
   /// Set up positivity constraint matrix
-  void createPositivityCM(const std::vector<double> &xValues);
+  void createPositivityCM();
   /// Set up equality constraint matrix
   void createEqualityCM(const size_t nmasses);
 
@@ -86,8 +85,10 @@ private:
   std::string m_bkgdOrderAttr;
   /// The order of the background
   int m_bkgdPolyN;
-  /// Errors on the data
-  std::vector<double> m_errors;
+  /// The histogram of the matrix workspace being cached for use
+  boost::shared_ptr<HistogramData::Histogram> m_hist;
+  /// The workspace index being worked on
+  size_t wsIndex;
   /// Ratio of data & errors
   std::vector<double> m_dataErrorRatio;
 };

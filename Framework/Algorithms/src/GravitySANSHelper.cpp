@@ -1,35 +1,34 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include <math.h>
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/PhysicalConstants.h"
+
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
 using Kernel::V3D;
 
 /** sets up the object with workspace data and calculates cached values ready to
-* calculate gravitional
-*  effects across a spectrum
-*  @param ws :: the workspace that contains the neutron counts
-*  @param det :: the detector for which the calculations will be for
+* calculate gravitional effects across a spectrum
+*  @param spectrumInfo :: SpectrumInfo of workspace
+*  @param index :: Workspace index of spectrum to do the calculation for
 *  @param extraLength :: extra length for gravity correction
 */
-GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
-                                     Geometry::IDetector_const_sptr det,
+GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo,
+                                     const size_t index,
                                      const double extraLength)
-    : m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
-  m_samplePos = ws->getInstrument()->getSample()->getPos();
-  const V3D sourcePos = ws->getInstrument()->getSource()->getPos();
-  m_beamLine = m_samplePos - sourcePos;
-
-  m_beamLineNorm = 2.0 * (m_samplePos - sourcePos).norm();
+    : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
+  m_samplePos = spectrumInfo.samplePosition();
+  m_beamLine = m_samplePos - spectrumInfo.sourcePosition();
+  m_beamLineNorm = 2.0 * spectrumInfo.l1();
 
   // this is the LineOfSight assuming no drop, the drop is added (and
   // subtracted) later in the code when required
-  m_cachedLineOfSight = m_det->getPos() - m_samplePos;
+  m_cachedLineOfSight = spectrumInfo.position(index) - m_samplePos;
   // the drop is proportional to the wave length squared and using this to do
   // the full calculation only once increases the speed a lot
-  m_dropPerAngstrom2 = gravitationalDrop(ws, m_det, 1e-10, extraLength);
+  m_dropPerAngstrom2 =
+      gravitationalDrop(spectrumInfo.l2(index), 1e-10, extraLength);
 }
 /** Caclulates the sin of the that the neutron left the sample at, before the
 * effect of gravity
@@ -93,14 +92,12 @@ double GravitySANSHelper::calcSinTheta() const {
 *  the fact drop is proportional to wave length squared .This function has no
 * knowledge
 *  of which axis is vertical for a given instrument
-*  @param ws :: workspace
-*  @param det :: the detector that the neutron entered
+*  @param l2 :: distance between sample and detector the neutron entered
 *  @param waveLength :: the neutrons wave length in meters
 *  @param extraLength :: additional length
 *  @return the deviation in meters
 */
-double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
-                                            Geometry::IDetector_const_sptr det,
+double GravitySANSHelper::gravitationalDrop(const double l2,
                                             const double waveLength,
                                             const double extraLength) const {
   using namespace PhysicalConstants;
@@ -108,12 +105,9 @@ double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
   static const double gm2_OVER_2h2 =
       g * NeutronMass * NeutronMass / (2.0 * h * h);
 
-  const V3D samplePos = ws->getInstrument()->getSample()->getPos();
-
   // Perform a path length correction if an Lextra is specified.
   // The correction is Lcorr^2 = (L + Lextra)^2 -(LExtra)^2
-  const auto pathLengthWithExtraLength =
-      det->getPos().distance(samplePos) + extraLength;
+  const auto pathLengthWithExtraLength = l2 + extraLength;
   const auto pathLengthSquared =
       std::pow(pathLengthWithExtraLength, 2) - std::pow(extraLength, 2);
 

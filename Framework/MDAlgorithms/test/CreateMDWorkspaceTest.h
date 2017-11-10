@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
@@ -9,12 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
-
-//#include "MantidAPI/AnalysisDataService.h"
-//#include "MantidAPI/IMDEventWorkspace.h"
-//#include "MantidKernel/System.h"
-//#include "MantidKernel/Timer.h"
-//#include "MantidDataObjects/MDEventFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -178,7 +173,7 @@ public:
     if (Filename != "") {
       std::string s = alg.getPropertyValue("Filename");
       TSM_ASSERT("File for the back-end was created.", Poco::File(s).exists());
-      std::cout << "Closing the file." << std::endl;
+      std::cout << "Closing the file.\n";
 
       ws->clearFileBacked(false);
       if (Poco::File(s).exists())

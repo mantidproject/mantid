@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
 #define MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -34,9 +34,6 @@ namespace DataHandling {
 class DLLExport LoadPDFgetNFile
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  LoadPDFgetNFile();
-  ~LoadPDFgetNFile() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadPDFgetNFile"; }
   /// Summary of algorithms purpose
@@ -86,6 +83,8 @@ private:
 
   /// Set X and Y axis unit and lebel
   void setUnit(DataObjects::Workspace2D_sptr ws);
+
+  void checkSameSize(const std::vector<size_t> &numptsvec, size_t numsets);
 };
 
 } // namespace DataHandling

@@ -4,6 +4,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -15,17 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-ShowPossibleCells::ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-ShowPossibleCells::~ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
@@ -52,7 +42,6 @@ void ShowPossibleCells::init() {
                         "Allow permutations of conventional cells");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ShowPossibleCells::exec() {
@@ -62,7 +51,7 @@ void ShowPossibleCells::exec() {
   }
 
   OrientedLattice o_lattice = ws->sample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
@@ -81,7 +70,7 @@ void ShowPossibleCells::exec() {
   size_t num_cells = list.size();
 
   // now tell the user the number of possible conventional cells:
-  g_log.notice() << "Num Cells : " << num_cells << std::endl;
+  g_log.notice() << "Num Cells : " << num_cells << '\n';
 
   for (size_t i = 0; i < num_cells; i++) {
     DblMatrix newUB = list[i].GetNewUB();

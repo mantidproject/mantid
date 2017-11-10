@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -11,6 +12,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -19,6 +22,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadRaw3Test : public CxxTest::TestSuite {
 public:
@@ -105,13 +109,13 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::Detector> ptrDet103 =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::Detector>(
-            i->getDetector(103));
-    TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103->getPos().X(), 0.4013, 0.01);
-    TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 2.4470, 0.01);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto detIndex = detectorInfo.indexOf(103);
+    const auto &det103 = detectorInfo.detector(detIndex);
+    TS_ASSERT_EQUALS(det103.getID(), 103);
+    TS_ASSERT_EQUALS(det103.getName(), "HET_non_PSDtube");
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.4013, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Z(), 2.4470, 0.01);
 
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check Child Algorithm is running
@@ -132,17 +136,17 @@ public:
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(output2D->getSpectrum(6)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(6).getDetectorIDs().size(),
                      1); // rummap.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra
     // 2084 (workspace index 2083)
-    TS_ASSERT_EQUALS(output2D->getSpectrum(2083)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(2083).getDetectorIDs().size(),
                      10); // map.ndet(2084),10);
 
     // Check the id number of all pixels contributing
     std::set<detid_t> detectorgroup;
-    detectorgroup = output2D->getSpectrum(2083)->getDetectorIDs();
+    detectorgroup = output2D->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
@@ -258,11 +262,11 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 6);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getSpectrumNo(), 5);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(1)->getSpectrumNo(), 6);
-    TS_ASSERT(output2D->getSpectrum(1)->hasDetectorID(4103));
-    TS_ASSERT_EQUALS(output2D->getSpectrum(5)->getSpectrumNo(), 10);
-    TS_ASSERT(output2D->getSpectrum(5)->hasDetectorID(4107));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS(output2D->getSpectrum(1).getSpectrumNo(), 6);
+    TS_ASSERT(output2D->getSpectrum(1).hasDetectorID(4103));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(5).getSpectrumNo(), 10);
+    TS_ASSERT(output2D->getSpectrum(5).hasDetectorID(4107));
     AnalysisDataService::Instance().remove(outWS);
   }
 
@@ -426,11 +430,11 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
-    Mantid::Geometry::IDetector_const_sptr ptrDet = i->getDetector(60);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 60);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(60));
+    TS_ASSERT_EQUALS(detector.getID(), 60);
 
-    Mantid::Geometry::ParameterMap &pmap = output2D->instrumentParameters();
+    const auto &pmap = output2D->constInstrumentParameters();
     TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
@@ -495,8 +499,8 @@ public:
 
     TS_ASSERT_EQUALS(monitoroutput2D->getNumberHistograms(), 4);
 
-    TS_ASSERT(monitoroutput2D->getSpectrum(0)->hasDetectorID(601));
-    TS_ASSERT(monitoroutput2D->getSpectrum(1)->hasDetectorID(602));
+    TS_ASSERT(monitoroutput2D->getSpectrum(0).hasDetectorID(601));
+    TS_ASSERT(monitoroutput2D->getSpectrum(1).hasDetectorID(602));
 
     // Check two X vectors are the same
     TS_ASSERT((output2D->dataX(95)) == (output2D->dataX(1730)));
@@ -537,13 +541,14 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::Detector> ptrDet103 =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::Detector>(
-            i->getDetector(103));
-    TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103->getPos().X(), 0.4013, 0.01);
-    TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 2.4470, 0.01);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto detectorIndex = detectorInfo.indexOf(103);
+    const auto &detector103 = detectorInfo.detector(detectorIndex);
+
+    TS_ASSERT_EQUALS(detector103.getID(), 103);
+    TS_ASSERT_EQUALS(detector103.getName(), "HET_non_PSDtube");
+    TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).X(), 0.4013, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 2.4470, 0.01);
 
     ////----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check Child Algorithm is running
@@ -559,17 +564,17 @@ public:
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(output2D->getSpectrum(6)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(6).getDetectorIDs().size(),
                      1); // rummap.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra
     // 2084 (workspace index 2083)
-    TS_ASSERT_EQUALS(output2D->getSpectrum(2079)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(2079).getDetectorIDs().size(),
                      10); // map.ndet(2084),10);
 
     // Check the id number of all pixels contributing
     std::set<detid_t> detectorgroup;
-    detectorgroup = output2D->getSpectrum(2079)->getDetectorIDs();
+    detectorgroup = output2D->getSpectrum(2079).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
@@ -759,15 +764,14 @@ public:
         ads.retrieveWS<MatrixWorkspace>(outputWSName + "_1");
     TS_ASSERT_EQUALS(1, output1->getNumberHistograms());
 
-    ISpectrum *spectrum2(NULL);
-    TS_ASSERT_THROWS_NOTHING(spectrum2 = output1->getSpectrum(0));
-    if (spectrum2) {
-      TS_ASSERT_EQUALS(2, spectrum2->getSpectrumNo());
+    TS_ASSERT_THROWS_NOTHING(output1->getSpectrum(0));
+    auto &spectrum2 = output1->getSpectrum(0);
+    TS_ASSERT_EQUALS(2, spectrum2.getSpectrumNo());
 
-      const auto &detIDs = spectrum2->getDetectorIDs();
-      TS_ASSERT_EQUALS(1, detIDs.size());
-      TS_ASSERT(spectrum2->hasDetectorID(2));
-    }
+    const auto &detIDs = spectrum2.getDetectorIDs();
+    TS_ASSERT_EQUALS(1, detIDs.size());
+    TS_ASSERT(spectrum2.hasDetectorID(2));
+
     ads.remove(outputWSName);
   }
 
@@ -1153,9 +1157,9 @@ private:
     Property *prop = run.getLogData("current_period");
     PropertyWithValue<int> *current_period_property =
         dynamic_cast<PropertyWithValue<int> *>(prop);
-    TS_ASSERT(current_period_property != NULL);
-    int actual_period;
-    Kernel::toValue<int>(current_period_property->value(), actual_period);
+    TS_ASSERT(current_period_property != nullptr);
+    int actual_period =
+        boost::lexical_cast<int>(current_period_property->value());
     TS_ASSERT_EQUALS(expected_period, actual_period);
     // Check the period n property.
     std::stringstream stream;

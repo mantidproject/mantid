@@ -1,19 +1,16 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/make_shared.hpp>
 
@@ -30,13 +27,9 @@ BinaryOperation::BinaryOperation()
       m_AllowDifferentNumberSpectra(false), m_ClearRHSWorkspace(false),
       m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
-      m_do2D_even_for_SingleColumn_on_rhs(false), m_indicesToMask(),
-      m_progress(nullptr) {}
+      m_do2D_even_for_SingleColumn_on_rhs(false) {}
 
-BinaryOperation::~BinaryOperation() {
-  if (m_progress)
-    delete m_progress;
-}
+BinaryOperation::~BinaryOperation() {}
 
 /** Initialisation method.
  *  Defines input and output workspaces
@@ -76,7 +69,6 @@ void BinaryOperation::init() {
       "will be empty.");
 }
 
-//--------------------------------------------------------------------------------------------
 /** Special handling for 1-WS and 1/WS.
  *
  * @return true if the operation was handled; exec() should then return
@@ -149,7 +141,6 @@ bool BinaryOperation::handleSpecialDivideMinus() {
   return false;
 }
 
-//--------------------------------------------------------------------------------------------
 /** Executes the algorithm. Will call execEvent() if appropriate.
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
@@ -201,7 +192,7 @@ void BinaryOperation::exec() {
     std::ostringstream ostr;
     ostr << "The two workspaces are not compatible for algorithm "
          << this->name();
-    g_log.error() << ostr.str() << std::endl;
+    g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
   }
 
@@ -226,7 +217,7 @@ void BinaryOperation::exec() {
             "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
-      m_out = MatrixWorkspace_sptr(m_lhs->clone().release());
+      m_out = m_lhs->clone();
       // Make sure m_eout still points to the same as m_out;
       m_eout = boost::dynamic_pointer_cast<EventWorkspace>(m_out);
     }
@@ -262,7 +253,8 @@ void BinaryOperation::exec() {
   operateOnRun(m_lhs->run(), m_rhs->run(), m_out->mutableRun());
 
   // Initialise the progress reporting object
-  m_progress = new Progress(this, 0.0, 1.0, m_lhs->getNumberHistograms());
+  m_progress =
+      make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
 
   // There are now 4 possible scenarios, shown schematically here:
   // xxx x   xxx xxx   xxx xxx   xxx x
@@ -281,29 +273,22 @@ void BinaryOperation::exec() {
   // Single column on rhs; if the RHS is an event workspace with one bin, it is
   // treated as a scalar.
   else if ((m_rhs->blocksize() == 1) && !m_do2D_even_for_SingleColumn_on_rhs) {
-    m_indicesToMask.reserve(m_out->getNumberHistograms());
     doSingleColumn();
   } else // The two are both 2D and should be the same size (except if LHS is an
          // event workspace)
   {
-    m_indicesToMask.reserve(m_out->getNumberHistograms());
-
     bool mismatchedSpectra =
         (m_AllowDifferentNumberSpectra &&
          (m_rhs->getNumberHistograms() != m_lhs->getNumberHistograms()));
     do2D(mismatchedSpectra);
   }
 
-  applyMaskingToOutput(m_out);
   setOutputUnits(m_lhs, m_rhs, m_out);
 
   // Assign the result to the output workspace property
   setProperty(outputPropName(), m_out);
-
-  return;
 }
 
-//--------------------------------------------------------------------------------------------
 /**
  * Execute a binary operation on events. Should be overridden.
  * @param lhs :: left-hand event workspace
@@ -318,7 +303,6 @@ void BinaryOperation::execEvent(DataObjects::EventWorkspace_const_sptr lhs,
       "BinaryOperation::execEvent() is not implemented for this operation.");
 }
 
-//--------------------------------------------------------------------------------------------
 /**
  * Return true if the two workspaces are compatible for this operation
  * Virtual: will be overridden as needed.
@@ -358,7 +342,6 @@ bool BinaryOperation::checkCompatibility(
   return true;
 }
 
-//--------------------------------------------------------------------------------------------
 /** Return true if the two workspaces can be treated as event workspaces
  * for the binary operation. If so, execEvent() will be called.
  * (e.g. Plus algorithm will concatenate event lists)
@@ -374,7 +357,6 @@ bool BinaryOperation::checkEventCompatibility(
   return false;
 }
 
-//--------------------------------------------------------------------------------------------
 /** Performs a simple check to see if the sizes of two workspaces are compatible
  * for a binary operation
  *  In order to be size compatible then the larger workspace
@@ -414,7 +396,7 @@ std::string BinaryOperation::checkSizeCompatibility(
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
   // the first spectrum
-  if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     return "X arrays must match when performing this operation on a 2D "
            "workspaces.";
   }
@@ -445,36 +427,32 @@ std::string BinaryOperation::checkSizeCompatibility(
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /**
  * Checks if the spectra at the given index of either input workspace is masked.
  * If so then the output spectra has zeroed data
  * and is also masked.
- * @param lhs :: A pointer to the left-hand operand
- * @param rhs :: A pointer to the right-hand operand
+ * @param lhsSpectrumInfo :: The LHS spectrum info object
+ * @param rhsSpectrumInfo :: The RHS spectrum info object
  * @param index :: The workspace index to check
  * @param out :: A pointer to the output workspace
+ * @param outSpectrumInfo :: The spectrum info object of `out`
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
-bool BinaryOperation::propagateSpectraMask(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs, const int64_t index,
-    API::MatrixWorkspace_sptr out) {
+bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
+                                           const SpectrumInfo &rhsSpectrumInfo,
+                                           const int64_t index,
+                                           MatrixWorkspace &out,
+                                           SpectrumInfo &outSpectrumInfo) {
   bool continueOp(true);
-  IDetector_const_sptr det_lhs, det_rhs;
-  try {
-    det_lhs = lhs->getDetector(index);
-    det_rhs = rhs->getDetector(index);
-  } catch (std::runtime_error &) {
-  } catch (std::domain_error &) {
-    // try statement will throw a domain_error when the axis is not a spectra
-    // axis.
-    return continueOp;
-  }
-  if ((det_lhs && det_lhs->isMasked()) || (det_rhs && det_rhs->isMasked())) {
+
+  if ((lhsSpectrumInfo.hasDetectors(index) &&
+       lhsSpectrumInfo.isMasked(index)) ||
+      (rhsSpectrumInfo.hasDetectors(index) &&
+       rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
-    out->maskWorkspaceIndex(index);
+    out.getSpectrum(index).clearData();
+    PARALLEL_CRITICAL(setMasked) { outSpectrumInfo.setMasked(index, true); }
   }
   return continueOp;
 }
@@ -498,18 +476,18 @@ void BinaryOperation::doSingleValue() {
 
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
-      performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+      performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     // ---- Histogram Output -----
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
@@ -528,7 +506,6 @@ void BinaryOperation::doSingleValue() {
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /** Called when the m_rhs operand is a 2D workspace of single values.
  *  Loops over the workspaces calling the abstract binary operation function
  * with a single number as the m_rhs operand.
@@ -541,17 +518,21 @@ void BinaryOperation::doSingleColumn() {
   // value from each m_rhs 'spectrum'
   // and then calling the virtual function
   const int64_t numHists = m_lhs->getNumberHistograms();
+  auto &outSpectrumInfo = m_out->mutableSpectrumInfo();
+  auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
+  auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       const double rhsY = m_rhs->readY(i)[0];
       const double rhsE = m_rhs->readE(i)[0];
 
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
-      if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
-        performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                               outSpectrumInfo)) {
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -559,14 +540,15 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     // ---- Histogram Output -----
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       const double rhsY = m_rhs->readY(i)[0];
       const double rhsE = m_rhs->readE(i)[0];
 
       m_out->setX(i, m_lhs->refX(i));
-      if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                               outSpectrumInfo)) {
         // Get reference to output vectors here to break any sharing outside the
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
@@ -583,7 +565,6 @@ void BinaryOperation::doSingleColumn() {
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /** Called when the m_rhs operand is a single spectrum.
  *  Loops over the lhs workspace calling the abstract binary operation function.
  */
@@ -600,19 +581,19 @@ void BinaryOperation::doSingleSpectrum() {
       // -------- The rhs is ALSO an EventWorkspace --------
 
       // Pull out the single eventList on the right
-      const EventList &rhs_spectrum = m_erhs->getEventList(0);
+      const EventList &rhs_spectrum = m_erhs->getSpectrum(0);
 
       // Now loop over the spectra of the left hand side calling the virtual
       // function
       const int64_t numHists = m_lhs->getNumberHistograms();
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
         // before.
 
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i), rhs_spectrum);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhs_spectrum);
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -628,13 +609,13 @@ void BinaryOperation::doSingleSpectrum() {
       // function
       const int64_t numHists = m_lhs->getNumberHistograms();
 
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
         // before.
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i), rhsX, rhsY, rhsE);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -654,7 +635,7 @@ void BinaryOperation::doSingleSpectrum() {
     // function
     const int64_t numHists = m_lhs->getNumberHistograms();
 
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
@@ -673,7 +654,6 @@ void BinaryOperation::doSingleSpectrum() {
   }
 }
 
-//--------------------------------------------------------------------------------------------
 /** Called when the two workspaces are the same size.
  *  Loops over the workspaces extracting the appropriate spectra and calling the
  *abstract binary operation function.
@@ -692,6 +672,10 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
   // TODO: Check if this works for event workspaces...
   propagateBinMasks(m_rhs, m_out);
 
+  auto &outSpectrumInfo = m_out->mutableSpectrumInfo();
+  auto &lhsSpectrumInfo = m_lhs->spectrumInfo();
+  auto &rhsSpectrumInfo = m_rhs->spectrumInfo();
+
   if (m_eout) {
     // ----------- The output is an EventWorkspace -------------
 
@@ -699,7 +683,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // ------------ The rhs is ALSO an EventWorkspace ---------------
       // Now loop over the spectra of each one calling the virtual function
       const int64_t numHists = m_lhs->getNumberHistograms();
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         m_progress->report(this->name());
@@ -711,17 +695,18 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                    outSpectrumInfo))
             continue;
         }
         // Reach here? Do the division
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getEventList(i),
-                                    m_erhs->getEventList(rhs_wi));
+        performEventBinaryOperation(m_eout->getSpectrum(i),
+                                    m_erhs->getSpectrum(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
-          const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+          const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
@@ -732,7 +717,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // Now loop over the spectra of each one calling the virtual function
       const int64_t numHists = m_lhs->getNumberHistograms();
 
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         m_progress->report(this->name());
@@ -743,18 +728,19 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                    outSpectrumInfo))
             continue;
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getEventList(i),
+        performEventBinaryOperation(m_eout->getSpectrum(i),
                                     m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
                                     m_rhs->readE(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
-          const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+          const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
         PARALLEL_END_INTERUPT_REGION
       }
@@ -769,7 +755,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
     // Now loop over the spectra of each one calling the virtual function
     const int64_t numHists = m_lhs->getNumberHistograms();
 
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_progress->report(this->name());
@@ -781,7 +767,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
           continue;
       } else {
         // Check for masking except when mismatched sizes
-        if (!propagateSpectraMask(m_lhs, m_rhs, i, m_out))
+        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
+                                  outSpectrumInfo))
           continue;
       }
       // Reach here? Do the division
@@ -797,7 +784,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
 
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
-        const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
+        const_cast<EventList &>(m_erhs->getSpectrum(rhs_wi)).clear();
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -831,39 +818,6 @@ void BinaryOperation::propagateBinMasks(
       }
     }
   }
-}
-
-//---------------------------------------------------------------------------------------------
-/**
- * Apply the requested masking to the output workspace
- * @param out :: The workspace to mask
- */
-void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out) {
-  int64_t nindices = static_cast<int64_t>(m_indicesToMask.size());
-  ParameterMap &pmap = out->instrumentParameters();
-  PARALLEL_FOR1(out)
-  for (int64_t i = 0; i < nindices; ++i) {
-    if (!m_parallelException && !m_cancel) {
-      try {
-        IDetector_const_sptr det_out = out->getDetector(m_indicesToMask[i]);
-        PARALLEL_CRITICAL(BinaryOperation_masking) {
-          pmap.addBool(det_out.get(), "masked", true);
-        }
-      } /* End of try block in PARALLEL_START_INTERUPT_REGION */
-      catch (Kernel::Exception::NotFoundError) { // detector not found, do
-                                                 // nothing, go further
-      } catch (std::runtime_error &ex) {
-        if (!m_parallelException) {
-          m_parallelException = true;
-          g_log.error() << this->name() << ": " << ex.what() << "\n";
-        }
-      } catch (...) {
-        m_parallelException = true;
-      }
-
-    } // End of if block in PARALLEL_START_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 // ------- Default implementations of Event binary operations --------
@@ -923,7 +877,6 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
       "BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
-//---------------------------------------------------------------------------------------------
 /**
  * Get the type of operand from a workspace
  * @param ws :: workspace to check
@@ -948,7 +901,6 @@ BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr ws) {
   return eHistogram;
 }
 
-//---------------------------------------------------------------------------------------------
 /** Check what operation will be needed in order to apply the operation
  * to these two types of workspaces. This function must be overridden
  * and checked against all 9 possible combinations.
@@ -971,7 +923,6 @@ void BinaryOperation::checkRequirements() {
   m_useHistogramForRhsEventWorkspace = false;
 }
 
-//---------------------------------------------------------------------------------------------
 /** Build up an BinaryOperationTable for performing a binary operation
  * e.g. lhs = (lhs + rhs)
  * where the spectra in rhs are to go into lhs.
@@ -1006,8 +957,7 @@ BinaryOperation::buildBinaryOperationTable(
     bool done = false;
 
     // List of detectors on lhs side
-    const std::set<detid_t> &lhsDets =
-        lhs->getSpectrum(lhsWI)->getDetectorIDs();
+    const auto &lhsDets = lhs->getSpectrum(lhsWI).getDetectorIDs();
 
     // ----------------- Matching Workspace Indices and Detector IDs
     // --------------------------------------
@@ -1017,8 +967,7 @@ BinaryOperation::buildBinaryOperationTable(
     if (rhsWI < rhs_nhist) // don't go out of bounds
     {
       // Get the detector IDs at that workspace index.
-      const std::set<detid_t> &rhsDets =
-          rhs->getSpectrum(rhsWI)->getDetectorIDs();
+      const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
       // Checks that lhsDets is a subset of rhsDets
       if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
@@ -1066,8 +1015,7 @@ BinaryOperation::buildBinaryOperationTable(
       //  match the detector ID.
       // NOTE: This can be SUPER SLOW!
       for (rhsWI = 0; rhsWI < static_cast<int64_t>(rhs_nhist); rhsWI++) {
-        const std::set<detid_t> &rhsDets =
-            rhs->getSpectrum(rhsWI)->getDetectorIDs();
+        const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
         // Checks that lhsDets is a subset of rhsDets
         if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),

@@ -5,6 +5,8 @@
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#include <boost/function.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -18,16 +20,6 @@ std::string PeaksIntersection::qLabFrame() { return "Q (lab frame)"; }
 std::string PeaksIntersection::qSampleFrame() { return "Q (sample frame)"; }
 
 std::string PeaksIntersection::hklFrame() { return "HKL"; }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeaksIntersection::PeaksIntersection() : m_peakRadius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeaksIntersection::~PeaksIntersection() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -112,9 +104,9 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   if (frequency > 100) {
     frequency = nPeaks / 100;
   }
-  Progress prog(this, 0, 1, 100);
+  Progress prog(this, 0.0, 1.0, 100);
 
-  PARALLEL_FOR2(ws, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWorkspace))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     IPeak *peak = ws->getPeakPtr(i);

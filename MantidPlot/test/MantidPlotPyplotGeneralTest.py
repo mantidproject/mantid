@@ -5,6 +5,7 @@ Figure, Graph, etc. data), and proper handling (exception) of wrong
 input parameters. Tests plotting of normal arrays and workspaces with the following tools ('tool' kwarg): plot_spectrum, plot_bin, plot_
 
 """
+from __future__ import (absolute_import, division, print_function)
 import mantidplottests
 from mantidplottests import *
 import time
@@ -44,7 +45,7 @@ CreateWorkspace(OutputWorkspace=SecondWorkspaceName2D, DataX=list(sec_X), DataY=
 
 # plot_md needs an MD workspace with a single non-integrated dimension
 MDWWorkspaceName = 'mdw'
-mdSignal = np.sin(range(0,100,1))
+mdSignal = np.sin(list(range(0,100,1)))
 errInput = mdSignal/20.5
 CreateMDHistoWorkspace(Dimensionality="1", Names='x', Units='m', Extents='0,10', NumberOfBins=len(mdSignal), SignalInput=mdSignal, ErrorInput=errInput, OutputWorkspace=MDWWorkspaceName)
 
@@ -126,7 +127,7 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
     def test_lines_get_data(self):
         y = [0.2, 0.5, 0.1, 0.6]
         # note this assumes that plot will make a dummy workspace using 0,1,2... as X
-        x = range(0, len(y), 1)
+        x = list(range(0, len(y), 1))
 
         lines = plot(y)
         self.check_output_lines(lines, 1)
@@ -148,15 +149,9 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
             self.close_win(lines)
 
         # now see what happens with non-md workspaces
-        try:
-            self.assertRaises(ValueError, plot(WorkspaceName2D, tool='plot_md'), "won't see this")
-        except:
-            print "Failed, as it should"
+        self.assertRaises(ValueError, plot, WorkspaceName2D, tool='plot_md')
 
-        try:
-            self.assertRaises(ValueError, plot_md(WorkspaceName2D), "won't see this")
-        except:
-            print "Failed, as it should"
+        self.assertRaises(ValueError, plot_md, WorkspaceName2D)
 
     def test_plot_array_ok(self):
         val = []    # empty data, will be replaced with a dummy (0,0) and generate a 'point' line
@@ -210,9 +205,19 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
         self.check_output_lines(lines, 3)
         self.close_win(lines)
 
+    def test_plot_with_none_marker(self):
+        lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linestyle='--', marker=None)
+        self.check_output_lines(lines, 2)
+        self.close_win(lines)
+
+        lines = plot(WorkspaceName2D, 0, tool='plot_spectrum', color='y', marker='None')
+        self.check_output_lines(lines, 1)
+        self.close_win(lines)
+
     def test_wrong_kwargs(self):
         # funny kwargs should have no big consequences
-        lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v', funny_foo='bar', funny_baz='qux')
+        lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linewidth=3, linestyle='-.',
+                     marker='v', funny_foo='bar', funny_baz='qux')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
@@ -226,10 +231,8 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
         self.close_win(lines)
 
         # this one mixes up positional and kw args
-        try:
-            self.assertRaises(ValueError, plot(WorkspaceName2D, [0,1], WorkspaceName2D, tool='plot_spectrum'), "wont see this")
-        except:
-            print "Failed, as it should"
+        self.assertRaises(ValueError, plot,
+                          WorkspaceName2D, [0,1], WorkspaceName2D, tool='plot_spectrum')
 
     def test_savefig(self):
         # save a minimal figure just to check that the file is written

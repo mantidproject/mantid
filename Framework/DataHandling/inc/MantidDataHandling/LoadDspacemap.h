@@ -18,9 +18,6 @@ namespace DataHandling {
  */
 class DLLExport LoadDspacemap : public API::Algorithm {
 public:
-  LoadDspacemap();
-  ~LoadDspacemap() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadDspacemap"; };
   /// Summary of algorithms purpose

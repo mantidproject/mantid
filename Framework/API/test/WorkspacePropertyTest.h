@@ -8,6 +8,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
+// Property implementations
+#include "MantidKernel/PropertyWithValue.tcc"
+#include "MantidAPI/WorkspaceProperty.tcc"
+
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,6 +54,10 @@ public:
         "workspace5", "", Direction::Input, PropertyMode::Optional);
     wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest", "",
                                             Direction::Output);
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
+        "WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
+        "WorkspacePropertyTest2");
   }
 
   ~WorkspacePropertyTest() override {
@@ -70,6 +78,19 @@ public:
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
     TS_ASSERT_EQUALS(wsp2->value(), "")
     TS_ASSERT_EQUALS(wsp3->value(), "ws3")
+  }
+
+  void testIsValueSerializable() {
+    WorkspaceProperty<Workspace> p("PropertyName", "", Direction::InOut);
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("WorkspaceName");
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("");
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT(!p.isValueSerializable());
   }
 
   void testSetValue() {
@@ -119,11 +140,6 @@ public:
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
     AnalysisDataService::Instance().setIllegalCharacterList("");
 
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
-        "WorkspacePropertyTest");
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
-        "WorkspacePropertyTest2");
-
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(
@@ -172,6 +188,25 @@ public:
     TS_ASSERT_EQUALS(wsp2->getDefault(), "")
   }
 
+  void testIsDefaultWorksOnUnnamedWorkspaces() {
+    std::string defaultWSName{""};
+    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName,
+                                   Direction::InOut);
+    TS_ASSERT(p.isDefault())
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT_EQUALS(p.value(), defaultWSName)
+    defaultWSName = "default";
+    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName,
+                                    Direction::Input);
+    TS_ASSERT(p2.isDefault())
+    p2.setDataItem(ws);
+    TS_ASSERT(!p2.isDefault())
+    TS_ASSERT_EQUALS(p2.value(), "")
+  }
+
   void testAllowedValues() {
     std::vector<std::string> vals;
     TS_ASSERT_THROWS_NOTHING(vals = wsp1->allowedValues())
@@ -183,6 +218,20 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(vals = wsp3->allowedValues())
     TS_ASSERT_EQUALS(vals.size(), 1)
+  }
+
+  void testInvalidAllowedValues() {
+    std::vector<std::string> vals;
+    WorkspaceProperty<TableWorkspaceTester> testTblProperty(
+        "Table Mismatch test", "ws3", Direction::Input);
+    WorkspaceProperty<WorkspaceGroup> testGroupProperty(
+        "Group Mismatch test", "ws1", Direction::Input);
+
+    TS_ASSERT_THROWS_NOTHING(vals = testTblProperty.allowedValues());
+    TS_ASSERT_EQUALS(vals.size(), 0);
+
+    TS_ASSERT_THROWS_NOTHING(vals = testGroupProperty.allowedValues());
+    TS_ASSERT_EQUALS(vals.size(), 0);
   }
 
   void testCreateHistory() {
@@ -317,6 +366,27 @@ public:
     WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
     p1 = ws1;
     TS_ASSERT_EQUALS(p1.value(), "");
+  }
+
+  void test_trimmming() {
+    // trimming on
+    Workspace_sptr ws1 =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("space1", ws1);
+    WorkspaceProperty<Workspace> p1("workspace1", "", Direction::Input);
+    p1.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p1.value(), "space1");
+
+    // turn trimming off
+    Workspace_sptr ws2 =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    AnalysisDataService::Instance().add("  space1\t\n", ws2);
+    WorkspaceProperty<Workspace> p2("workspace1", "", Direction::Input);
+    p2.setAutoTrim(false);
+    p2.setValue("  space1\t\n");
+    TS_ASSERT_EQUALS(p2.value(), "  space1\t\n");
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:

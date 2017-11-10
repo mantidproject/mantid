@@ -74,9 +74,9 @@ void ScopedWorkspace::remove() {
 void ScopedWorkspace::set(Workspace_sptr newWS) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  if (!newWS->name().empty() && ads.doesExist(newWS->name()))
+  if (!newWS->getName().empty() && ads.doesExist(newWS->getName()))
     throw std::invalid_argument(
-        "Workspace is already in the ADS under the name " + newWS->name());
+        "Workspace is already in the ADS under the name " + newWS->getName());
 
   // Remove previous workspace entry
   remove();

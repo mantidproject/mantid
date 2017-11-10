@@ -29,11 +29,6 @@ MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
       m_alpha(alpha), m_firstPairIndex(firstPairIndex),
       m_secondPairIndex(secondPairIndex) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonPairAsymmetryCalculator::~MuonPairAsymmetryCalculator() {}
-
 /**
 * Calculates asymmetry for the given pair of groups, using the alpha value
 * provided.

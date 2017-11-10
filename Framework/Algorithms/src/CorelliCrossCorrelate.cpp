@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -8,7 +10,11 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,21 +23,11 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorelliCrossCorrelate)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CorelliCrossCorrelate::CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CorelliCrossCorrelate::~CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {
@@ -103,7 +99,6 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
   return errors;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CorelliCrossCorrelate::exec() {
@@ -111,7 +106,7 @@ void CorelliCrossCorrelate::exec() {
   outputWS = getProperty("OutputWorkspace");
 
   if (outputWS != inputWS) {
-    outputWS = EventWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
   }
 
   // Read in chopper sequence from IDF.
@@ -141,10 +136,9 @@ void CorelliCrossCorrelate::exec() {
 
   // Calculate the duty cycle and the event weights from the duty cycle.
   double dutyCycle = totalOpen / sequence.back();
-  float weightTransparent = static_cast<float>(1.0 / dutyCycle);
-  float weightAbsorbing = static_cast<float>(-1.0 / (1.0 - dutyCycle));
+  float weightAbsorbing = static_cast<float>(-dutyCycle / (1.0 - dutyCycle));
   g_log.information() << "dutyCycle = " << dutyCycle
-                      << " weightTransparent = " << weightTransparent
+                      << " weightTransparent = 1.0"
                       << " weightAbsorbing = " << weightAbsorbing << "\n";
 
   // Read in the TDC timings for the correlation chopper and apply the timing
@@ -194,20 +188,19 @@ void CorelliCrossCorrelate::exec() {
 
   // Do the cross correlation.
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
-  g_log.notice("Start cross-correlation\n");
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    EventList *evlist = outputWS->getEventListPtr(i);
-    IDetector_const_sptr detector = inputWS->getDetector(i);
+    auto &evlist = outputWS->getSpectrum(i);
 
     // Switch to weighted if needed.
-    if (evlist->getEventType() == TOF)
-      evlist->switchTo(WEIGHTED);
+    if (evlist.getEventType() == TOF)
+      evlist.switchTo(WEIGHTED);
 
-    std::vector<WeightedEvent> &events = evlist->getWeightedEvents();
+    std::vector<WeightedEvent> &events = evlist.getWeightedEvents();
 
     // Skip if empty.
     if (events.empty())
@@ -221,7 +214,7 @@ void CorelliCrossCorrelate::exec() {
 
     // Scale for elastic scattering.
     double distanceSourceToDetector =
-        distanceSourceToSample + detector->getDistance(*sample);
+        distanceSourceToSample + spectrumInfo.l2(i);
     double tofScale = distanceChopperToSource / distanceSourceToDetector;
 
     double E1;
@@ -255,9 +248,6 @@ void CorelliCrossCorrelate::exec() {
       if ((location - sequence.begin()) % 2 == 0) {
         it->m_weight *= weightAbsorbing;
         it->m_errorSquared *= weightAbsorbing * weightAbsorbing;
-      } else {
-        it->m_weight *= weightTransparent;
-        it->m_errorSquared *= weightTransparent * weightTransparent;
       }
     }
 

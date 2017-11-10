@@ -2,7 +2,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <gsl/gsl_multimin.h>
 
@@ -109,7 +109,7 @@ int relstopX(const std::vector<double> &xvOld, const std::vector<double> &xvNew,
 int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew,
              double reltol, double abstol) {
   for (size_t i = 0; i < xvOld.size(); ++i) {
-    if (boost::math::isnan(gsl_vector_get(xvNew, i)))
+    if (std::isnan(gsl_vector_get(xvNew, i)))
       return 1;
     if (!relstop(xvOld[i], gsl_vector_get(xvNew, i), reltol, abstol))
       return 0;
@@ -370,7 +370,7 @@ void AugmentedLagrangianOptimizer::checkConstraints(
   // Sanity checks on matrix sizes
   for (size_t i = 0; i < 2; ++i) {
     size_t ncols(0);
-    std::string matrix("");
+    std::string matrix;
     if (i == 0) {
       ncols = equality.numCols();
       matrix = "equality";

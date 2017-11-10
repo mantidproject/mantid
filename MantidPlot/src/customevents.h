@@ -2,7 +2,7 @@
     File                 : customevents.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, 
+    Copyright            : (C) 2006 by Ion Vasilief,
                            Tilman Hoener zu Siederdissen,
                            Knut Franke
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net,
@@ -12,7 +12,7 @@
     Please use only event types defined here in order to avoid clashes.
     The lowest event ID not used by Qt is QEvent::User. See documentation
     of QEvent for details.
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -40,4 +40,3 @@
 #define SCRIPTING_CHANGE_EVENT QEvent::User
 
 #endif
-

@@ -1,4 +1,5 @@
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import re
 # Need to import mantid before we import SANSUtility
@@ -140,6 +141,23 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                          "The reducer should use the current user file.")
         # Clean up
         self._delete_minimal_user_files(user_files)
+
+
+class TestGeometrySettings(unittest.TestCase):
+    def test_that_can_get_geometry_properties(self):
+        LOQ()
+        reducer = ReductionSingleton()
+        geometry_settings = bm.get_geometry_properties(reducer)
+        self.assertTrue("Geometry" in geometry_settings)
+        self.assertTrue("SampleHeight" in geometry_settings)
+        self.assertTrue("SampleWidth" in geometry_settings)
+        self.assertTrue("SampleThickness" in geometry_settings)
+
+        self.assertTrue(geometry_settings["Geometry"] == "Disc")
+        self.assertTrue(geometry_settings["SampleHeight"] == 1.)
+        self.assertTrue(geometry_settings["SampleWidth"] == 1.)
+        self.assertTrue(geometry_settings["SampleThickness"] == 1.)
+
 
 if __name__ == "__main__":
     unittest.main()

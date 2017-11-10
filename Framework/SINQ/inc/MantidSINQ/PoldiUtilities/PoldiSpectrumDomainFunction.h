@@ -1,19 +1,18 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 
-#include "MantidSINQ/DllConfig.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include <string>
-
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include <string>
 
 namespace Mantid {
 namespace Poldi {
@@ -116,6 +115,8 @@ public:
                                   value * m_factors[m_factorOffset + iY]);
   }
 
+  void zero() override { m_jacobian.zero(); }
+
 protected:
   API::Jacobian &m_jacobian;
   size_t m_offset;
@@ -153,6 +154,9 @@ public:
   double get(size_t iY, size_t iP) override {
     return m_jacobian[safeIndex(iY, iP)];
   }
+
+  /// Implements API::Jacobian::zero
+  void zero() override { m_jacobian.assign(m_jacobian.size(), 0.0); }
 
   /// Provides raw pointer access to the underlying std::vector. Required for
   /// adept-interface.

@@ -8,18 +8,16 @@ setlocal enableextensions enabledelayedexpansion
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 ::
-:: All nodes currently have PARAVIEW_DIR=4.3.b40280, PARAVIEW_NEXT_DIR=5.0.0
-:: and PARAVIEW_MSVC2015_DIR=4.3.b40280-msvc2015
+:: All nodes currently have PARAVIEW_DIR=5.3.0 and PARAVIEW_NEXT_DIR=5.4.0
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
+echo %sha1%
 set VS_VERSION=14
 
-:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
-:: if the previous build was not with the same compiler. Find grep for later
+:: Find the grep tool for later
 for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
 set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
-echo %sha1%
+set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Environment setup
@@ -29,12 +27,6 @@ set VS_VERSION=14
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
-
-:: While we transition between VS 2012 & 2015 we need to be able to clean the build directory
-:: if the previous build was not with the same compiler
-for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
-set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
-set GREP_EXE=%GIT_ROOT_DIR%bin\grep.exe
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -65,6 +57,10 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
     set BUILDPKG=no
   )
 )
+:: Never want package for debug builds
+if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
+  set BUILDPKG=no
+)
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Setup the build directory
@@ -78,23 +74,17 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR=%WORKSPACE%\build
 
-if EXIST %BUILD_DIR%\CMakeCache.txt (
-  call "%GREP_EXE%" CMAKE_LINKER:FILEPATH %BUILD_DIR%\CMakeCache.txt > compiler_version.log
-  call "%GREP_EXE%" %VS_VERSION% compiler_version.log
-  if ERRORLEVEL 1 (
-    set CLEANBUILD=yes
-    echo Previous build used a different compiler. Performing a clean build
-  ) else (
-    echo Previous build used the same compiler. No need to clean
-  )
-)
-
 if "!CLEANBUILD!" == "yes" (
   rmdir /S /Q %BUILD_DIR%
 )
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
+    rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
+    rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
+    rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
+  )
 ) else (
   md %BUILD_DIR%
 )
@@ -131,7 +121,13 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..
+:: Note the exception: Vates disabled in Debug mode for now.
+if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+  set VATES_OPT_VAL=OFF
+) else (
+  set VATES_OPT_VAL=ON
+)
+call cmake.exe -G "%CM_GENERATOR%" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON -DENABLE_FILE_LOGGING=OFF %PACKAGE_DOCS% ..
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -152,6 +148,15 @@ call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Run docs-tests if in the special Debug builds
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+echo Note: not running doc-test target as it currently takes too long
+:: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+::   call cmake.exe --build . --target StandardTestData
+::   call cmake.exe --build . --target docs-test
+:: )
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
 :: Just create the docs to check they work
@@ -166,4 +171,3 @@ if "%BUILDPKG%" == "yes" (
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
-

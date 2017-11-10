@@ -48,10 +48,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport Plus : public CommutativeBinaryOperation {
 public:
-  /// Default constructor
-  Plus() : CommutativeBinaryOperation(){};
-  /// Destructor
-  ~Plus() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Plus"; }
   /// Summary of algorithms purpose

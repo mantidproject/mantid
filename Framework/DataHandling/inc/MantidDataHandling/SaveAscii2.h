@@ -42,8 +42,6 @@ class DLLExport SaveAscii2 : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii2();
-  /// Destructor
-  ~SaveAscii2() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose
@@ -60,18 +58,16 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /**writes a spectra to the file using a workspace ID
-  @param spectraIndex :: an integer relating to a workspace ID
-  @param file :: the file writer object
-  */
-  void writeSpectra(const int &spectraIndex, std::ofstream &file);
-  /**writes a spectra to the file using an iterator
-  @param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to
-  be saved
-  @param file :: the file writer object
-  */
-  void writeSpectra(const std::set<int>::const_iterator &spectraItr,
-                    std::ofstream &file);
+  /// Writes a spectrum to the file using a workspace index
+  void writeSpectrum(const int &wsIndex, std::ofstream &file);
+  std::vector<std::string> stringListToVector(std::string &inputString);
+  void populateQMetaData();
+  void populateSpectrumNumberMetaData();
+  void populateAngleMetaData();
+  void populateAllMetaData();
+  bool
+  findElementInUnorderedStringVector(const std::vector<std::string> &vector,
+                                     const std::string &toFind);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -80,9 +76,10 @@ private:
   std::string m_sep;
   bool m_writeDX;
   bool m_writeID;
-  bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
+  std::vector<std::string> m_metaData;
+  std::map<std::string, std::vector<std::string>> m_metaDataMap;
 };
 } // namespace DataHandling
 } // namespace Mantid

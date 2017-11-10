@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -50,7 +51,7 @@ void Authenticate2::exec() {
   jobManager->authenticate(user, getPropertyValue("Password"));
 
   g_log.information() << "Authenticate as user " << user
-                      << " in the compute resource " << comp << std::endl;
+                      << " in the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

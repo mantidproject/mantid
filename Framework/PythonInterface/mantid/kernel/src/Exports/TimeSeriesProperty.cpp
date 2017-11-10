@@ -1,5 +1,6 @@
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -8,11 +9,17 @@
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;
 using boost::python::arg;
+
+GET_POINTER_SPECIALIZATION(TimeSeriesProperty<std::string>)
+GET_POINTER_SPECIALIZATION(TimeSeriesProperty<int32_t>)
+GET_POINTER_SPECIALIZATION(TimeSeriesProperty<int64_t>)
+GET_POINTER_SPECIALIZATION(TimeSeriesProperty<bool>)
+GET_POINTER_SPECIALIZATION(TimeSeriesProperty<double>)
 
 namespace {
 

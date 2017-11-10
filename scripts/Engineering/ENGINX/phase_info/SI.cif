@@ -1,0 +1,477 @@
+data_SI_publ
+
+_pd_block_id
+  2016-03-31T12:59|SI|skabra|Overall
+
+_audit_creation_method  "from EXP file using GSAS2CIF"
+_audit_creation_date                   2016-03-31T12:59
+_audit_author_name                     skabra
+_audit_update_record
+; 2016-03-31T12:59  Initial CIF as created by GSAS2CIF
+;
+
+#=============================================================================
+# this information describes the project, paper etc. for the CIF             #
+# Acta Cryst. Section C papers and editorial correspondence is generated     #
+# from the information in this section                                       #
+#                                                                            #
+#   (from)   CIF submission form for Rietveld refinements (Acta Cryst. C)    #
+#                                                 Version 14 December 1998   #
+#=============================================================================
+# 1. SUBMISSION DETAILS
+
+_publ_contact_author_name            ?   # Name of author for correspondence
+_publ_contact_author_address             # Address of author for correspondence
+; ?
+;
+_publ_contact_author_email           ?
+_publ_contact_author_fax             ?
+_publ_contact_author_phone           ?
+
+_publ_contact_letter
+; ?
+;
+
+_publ_requested_journal              ?
+_publ_requested_coeditor_name        ?
+_publ_requested_category             ?   # Acta C: one of CI/CM/CO/FI/FM/FO
+
+#==============================================================================
+
+# 2. PROCESSING SUMMARY (IUCr Office Use Only)
+
+_journal_data_validation_number      ?
+
+_journal_date_recd_electronic        ?
+_journal_date_to_coeditor            ?
+_journal_date_from_coeditor          ?
+_journal_date_accepted               ?
+_journal_date_printers_first         ?
+_journal_date_printers_final         ?
+_journal_date_proofs_out             ?
+_journal_date_proofs_in              ?
+_journal_coeditor_name               ?
+_journal_coeditor_code               ?
+_journal_coeditor_notes
+; ?
+;
+_journal_techeditor_code             ?
+_journal_techeditor_notes
+; ?
+;
+_journal_coden_ASTM                  ?
+_journal_name_full                   ?
+_journal_year                        ?
+_journal_volume                      ?
+_journal_issue                       ?
+_journal_page_first                  ?
+_journal_page_last                   ?
+_journal_paper_category              ?
+_journal_suppl_publ_number           ?
+_journal_suppl_publ_pages            ?
+
+#==============================================================================
+
+# 3. TITLE AND AUTHOR LIST
+
+_publ_section_title
+; ?
+;
+_publ_section_title_footnote
+; ?
+;
+
+# The loop structure below should contain the names and addresses of all
+# authors, in the required order of publication. Repeat as necessary.
+
+loop_
+	_publ_author_name
+        _publ_author_footnote
+	_publ_author_address
+ ?                                   #<--'Last name, first name'
+; ?
+;
+; ?
+;
+
+#==============================================================================
+
+# 4. TEXT
+
+_publ_section_synopsis
+;  ?
+;
+_publ_section_abstract
+; ?
+;
+_publ_section_comment
+; ?
+;
+_publ_section_exptl_prep      # Details of the preparation of the sample(s)
+                              # should be given here.
+; ?
+;
+_publ_section_exptl_refinement
+; ?
+;
+_publ_section_references
+; ?
+;
+_publ_section_figure_captions
+; ?
+;
+_publ_section_acknowledgements
+; ?
+;
+
+#=============================================================================
+# 5. OVERALL REFINEMENT & COMPUTING DETAILS
+
+_refine_special_details
+; ?
+;
+_pd_proc_ls_special_details
+; ?
+;
+
+# The following items are used to identify the programs used.
+_computing_molecular_graphics     ?
+_computing_publication_material   ?
+
+_refine_ls_weighting_scheme       ?
+_refine_ls_weighting_details      ?
+_refine_ls_hydrogen_treatment     ?
+_refine_ls_extinction_method      ?
+_refine_ls_extinction_coef        ?
+_refine_ls_number_constraints     ?
+
+_refine_ls_restrained_S_all       ?
+_refine_ls_restrained_S_obs       ?
+
+#==============================================================================
+# 6. SAMPLE PREPARATION DATA
+
+# (In the unusual case where multiple samples are used in a single
+#  Rietveld study, this information should be moved into the phase
+#  blocks)
+
+# The following three fields describe the preparation of the material.
+# The cooling rate is in K/min.  The pressure at which the sample was
+# prepared is in kPa.  The temperature of preparation is in K.
+
+_pd_prep_cool_rate                ?
+_pd_prep_pressure                 ?
+_pd_prep_temperature              ?
+
+_pd_char_colour                   ?       # use ICDD colour descriptions
+data_SI_overall
+
+_refine_ls_shift/su_max                .
+_refine_ls_shift/su_mean               .
+_computing_structure_refinement        GSAS
+_refine_ls_number_parameters           .
+_refine_ls_goodness_of_fit_all         .
+_refine_ls_number_restraints           0
+_refine_ls_matrix_type                 full
+
+# pointers to the phase blocks
+loop_   _pd_phase_block_id
+      2016-03-31T12:59|SI_phase1|skabra||
+# pointers to the diffraction patterns
+loop_   _pd_block_diffractogram_id
+      ?
+
+# Information for phase 1
+data_SI_phase_1
+
+_pd_block_id
+  2016-03-31T12:59|SI_phase1|skabra||
+
+#==============================================================================
+# 7. CHEMICAL, STRUCTURAL AND CRYSTAL DATA
+
+_pd_char_particle_morphology      ?
+
+_chemical_name_systematic
+; ?
+;
+_chemical_name_common             ?
+_chemical_formula_moiety          ?
+_chemical_formula_structural      ?
+_chemical_formula_analytical      ?
+_chemical_melting_point           ?
+_chemical_compound_source         ?       # for minerals and
+                                          # natural products
+_symmetry_space_group_name_Hall   ?
+
+_exptl_crystal_F_000               ?
+_exptl_crystal_density_diffrn      ?
+_exptl_crystal_density_meas        ?
+_exptl_crystal_density_method      ?
+
+_cell_measurement_temperature     ?
+
+_cell_special_details
+; ?
+;
+
+_geom_special_details             ?
+
+# The following item identifies the program(s) used (if appropriate).
+_computing_structure_solution     ?
+
+#==============================================================================
+
+# 8. Phase information from GSAS
+
+_pd_phase_name                         Silicon
+_cell_length_a                         5.43094
+_cell_length_b                         5.43094
+_cell_length_c                         5.43094
+_cell_angle_alpha                      90.0
+_cell_angle_beta                       90.0
+_cell_angle_gamma                      90.0
+_cell_volume                           160.18626
+_symmetry_cell_setting                 cubic
+_symmetry_space_group_name_H-M         "F d 3 m"
+loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
+       1 +x,+y,+z 
+       2 +z,+x,+y 
+       3 +y,+z,+x 
+       4 +x+1/4,+y+1/4,-z 
+       5 -z,+x+1/4,+y+1/4 
+       6 +y+1/4,-z,+x+1/4 
+       7 -z+1/4,+x+1/2,-y+3/4 
+       8 -y+3/4,-z+1/4,+x+1/2 
+       9 +y+1/2,-z+1/4,-x+3/4 
+      10 -x+3/4,+y+1/2,-z+1/4 
+      11 -z+1/4,-x+3/4,+y+1/2 
+      12 +x+1/2,-y+3/4,-z+1/4 
+      13 +y,+x,+z 
+      14 +z,+y,+x 
+      15 +x,+z,+y 
+      16 +y+1/4,+x+1/4,-z 
+      17 -z,+y+1/4,+x+1/4 
+      18 +x+1/4,-z,+y+1/4 
+      19 -z+1/4,+y+1/2,-x+3/4 
+      20 -x+3/4,-z+1/4,+y+1/2 
+      21 +x+1/2,-z+1/4,-y+3/4 
+      22 -y+3/4,+x+1/2,-z+1/4 
+      23 -z+1/4,-y+3/4,+x+1/2 
+      24 +y+1/2,-x+3/4,-z+1/4 
+      -1 -x,-y,-z 
+      -2 -z,-x,-y 
+      -3 -y,-z,-x 
+      -4 -x+3/4,-y+3/4,+z 
+      -5 +z,-x+3/4,-y+3/4 
+      -6 -y+3/4,+z,-x+3/4 
+      -7 +z+3/4,-x+1/2,+y+1/4 
+      -8 +y+1/4,+z+3/4,-x+1/2 
+      -9 -y+1/2,+z+3/4,+x+1/4 
+     -10 +x+1/4,-y+1/2,+z+3/4 
+     -11 +z+3/4,+x+1/4,-y+1/2 
+     -12 -x+1/2,+y+1/4,+z+3/4 
+     -13 -y,-x,-z 
+     -14 -z,-y,-x 
+     -15 -x,-z,-y 
+     -16 -y+3/4,-x+3/4,+z 
+     -17 +z,-y+3/4,-x+3/4 
+     -18 -x+3/4,+z,-y+3/4 
+     -19 +z+3/4,-y+1/2,+x+1/4 
+     -20 +x+1/4,+z+3/4,-y+1/2 
+     -21 -x+1/2,+z+3/4,+y+1/4 
+     -22 +y+1/4,-x+1/2,+z+3/4 
+     -23 +z+3/4,+y+1/4,-x+1/2 
+     -24 -y+1/2,+x+1/4,+z+3/4 
+     101 +x,+y+1/2,+z+1/2 
+     102 +z,+x+1/2,+y+1/2 
+     103 +y,+z+1/2,+x+1/2 
+     104 +x+1/4,+y+3/4,-z+1/2 
+     105 -z,+x+3/4,+y+3/4 
+     106 +y+1/4,-z+1/2,+x+3/4 
+     107 -z+1/4,+x,-y+1/4 
+     108 -y+3/4,-z+3/4,+x 
+     109 +y+1/2,-z+3/4,-x+1/4 
+     110 -x+3/4,+y,-z+3/4 
+     111 -z+1/4,-x+1/4,+y 
+     112 +x+1/2,-y+1/4,-z+3/4 
+     113 +y,+x+1/2,+z+1/2 
+     114 +z,+y+1/2,+x+1/2 
+     115 +x,+z+1/2,+y+1/2 
+     116 +y+1/4,+x+3/4,-z+1/2 
+     117 -z,+y+3/4,+x+3/4 
+     118 +x+1/4,-z+1/2,+y+3/4 
+     119 -z+1/4,+y,-x+1/4 
+     120 -x+3/4,-z+3/4,+y 
+     121 +x+1/2,-z+3/4,-y+1/4 
+     122 -y+3/4,+x,-z+3/4 
+     123 -z+1/4,-y+1/4,+x 
+     124 +y+1/2,-x+1/4,-z+3/4 
+    -101 -x,-y+1/2,-z+1/2 
+    -102 -z,-x+1/2,-y+1/2 
+    -103 -y,-z+1/2,-x+1/2 
+    -104 -x+3/4,-y+1/4,+z+1/2 
+    -105 +z,-x+1/4,-y+1/4 
+    -106 -y+3/4,+z+1/2,-x+1/4 
+    -107 +z+3/4,-x,+y+3/4 
+    -108 +y+1/4,+z+1/4,-x 
+    -109 -y+1/2,+z+1/4,+x+3/4 
+    -110 +x+1/4,-y,+z+1/4 
+    -111 +z+3/4,+x+3/4,-y 
+    -112 -x+1/2,+y+3/4,+z+1/4 
+    -113 -y,-x+1/2,-z+1/2 
+    -114 -z,-y+1/2,-x+1/2 
+    -115 -x,-z+1/2,-y+1/2 
+    -116 -y+3/4,-x+1/4,+z+1/2 
+    -117 +z,-y+1/4,-x+1/4 
+    -118 -x+3/4,+z+1/2,-y+1/4 
+    -119 +z+3/4,-y,+x+3/4 
+    -120 +x+1/4,+z+1/4,-y 
+    -121 -x+1/2,+z+1/4,+y+3/4 
+    -122 +y+1/4,-x,+z+1/4 
+    -123 +z+3/4,+y+3/4,-x 
+    -124 -y+1/2,+x+3/4,+z+1/4 
+     201 +x+1/2,+y,+z+1/2 
+     202 +z+1/2,+x,+y+1/2 
+     203 +y+1/2,+z,+x+1/2 
+     204 +x+3/4,+y+1/4,-z+1/2 
+     205 -z+1/2,+x+1/4,+y+3/4 
+     206 +y+3/4,-z,+x+3/4 
+     207 -z+3/4,+x+1/2,-y+1/4 
+     208 -y+1/4,-z+1/4,+x 
+     209 +y,-z+1/4,-x+1/4 
+     210 -x+1/4,+y+1/2,-z+3/4 
+     211 -z+3/4,-x+3/4,+y 
+     212 +x,-y+3/4,-z+3/4 
+     213 +y+1/2,+x,+z+1/2 
+     214 +z+1/2,+y,+x+1/2 
+     215 +x+1/2,+z,+y+1/2 
+     216 +y+3/4,+x+1/4,-z+1/2 
+     217 -z+1/2,+y+1/4,+x+3/4 
+     218 +x+3/4,-z,+y+3/4 
+     219 -z+3/4,+y+1/2,-x+1/4 
+     220 -x+1/4,-z+1/4,+y 
+     221 +x,-z+1/4,-y+1/4 
+     222 -y+1/4,+x+1/2,-z+3/4 
+     223 -z+3/4,-y+3/4,+x 
+     224 +y,-x+3/4,-z+3/4 
+    -201 -x+1/2,-y,-z+1/2 
+    -202 -z+1/2,-x,-y+1/2 
+    -203 -y+1/2,-z,-x+1/2 
+    -204 -x+1/4,-y+3/4,+z+1/2 
+    -205 +z+1/2,-x+3/4,-y+1/4 
+    -206 -y+1/4,+z,-x+1/4 
+    -207 +z+1/4,-x+1/2,+y+3/4 
+    -208 +y+3/4,+z+3/4,-x 
+    -209 -y,+z+3/4,+x+3/4 
+    -210 +x+3/4,-y+1/2,+z+1/4 
+    -211 +z+1/4,+x+1/4,-y 
+    -212 -x,+y+1/4,+z+1/4 
+    -213 -y+1/2,-x,-z+1/2 
+    -214 -z+1/2,-y,-x+1/2 
+    -215 -x+1/2,-z,-y+1/2 
+    -216 -y+1/4,-x+3/4,+z+1/2 
+    -217 +z+1/2,-y+3/4,-x+1/4 
+    -218 -x+1/4,+z,-y+1/4 
+    -219 +z+1/4,-y+1/2,+x+3/4 
+    -220 +x+3/4,+z+3/4,-y 
+    -221 -x,+z+3/4,+y+3/4 
+    -222 +y+3/4,-x+1/2,+z+1/4 
+    -223 +z+1/4,+y+1/4,-x 
+    -224 -y,+x+1/4,+z+1/4 
+     301 +x+1/2,+y+1/2,+z 
+     302 +z+1/2,+x+1/2,+y 
+     303 +y+1/2,+z+1/2,+x 
+     304 +x+3/4,+y+3/4,-z 
+     305 -z+1/2,+x+3/4,+y+1/4 
+     306 +y+3/4,-z+1/2,+x+1/4 
+     307 -z+3/4,+x,-y+3/4 
+     308 -y+1/4,-z+3/4,+x+1/2 
+     309 +y,-z+3/4,-x+3/4 
+     310 -x+1/4,+y,-z+1/4 
+     311 -z+3/4,-x+1/4,+y+1/2 
+     312 +x,-y+1/4,-z+1/4 
+     313 +y+1/2,+x+1/2,+z 
+     314 +z+1/2,+y+1/2,+x 
+     315 +x+1/2,+z+1/2,+y 
+     316 +y+3/4,+x+3/4,-z 
+     317 -z+1/2,+y+3/4,+x+1/4 
+     318 +x+3/4,-z+1/2,+y+1/4 
+     319 -z+3/4,+y,-x+3/4 
+     320 -x+1/4,-z+3/4,+y+1/2 
+     321 +x,-z+3/4,-y+3/4 
+     322 -y+1/4,+x,-z+1/4 
+     323 -z+3/4,-y+1/4,+x+1/2 
+     324 +y,-x+1/4,-z+1/4 
+    -301 -x+1/2,-y+1/2,-z 
+    -302 -z+1/2,-x+1/2,-y 
+    -303 -y+1/2,-z+1/2,-x 
+    -304 -x+1/4,-y+1/4,+z 
+    -305 +z+1/2,-x+1/4,-y+3/4 
+    -306 -y+1/4,+z+1/2,-x+3/4 
+    -307 +z+1/4,-x,+y+1/4 
+    -308 +y+3/4,+z+1/4,-x+1/2 
+    -309 -y,+z+1/4,+x+1/4 
+    -310 +x+3/4,-y,+z+3/4 
+    -311 +z+1/4,+x+3/4,-y+1/2 
+    -312 -x,+y+3/4,+z+3/4 
+    -313 -y+1/2,-x+1/2,-z 
+    -314 -z+1/2,-y+1/2,-x 
+    -315 -x+1/2,-z+1/2,-y 
+    -316 -y+1/4,-x+1/4,+z 
+    -317 +z+1/2,-y+1/4,-x+3/4 
+    -318 -x+1/4,+z+1/2,-y+3/4 
+    -319 +z+1/4,-y,+x+1/4 
+    -320 +x+3/4,+z+1/4,-y+1/2 
+    -321 -x,+z+1/4,+y+1/4 
+    -322 +y+3/4,-x,+z+3/4 
+    -323 +z+1/4,+y+3/4,-x+1/2 
+    -324 -y,+x+3/4,+z+3/4 
+
+# ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
+
+
+loop_
+      _atom_site_type_symbol
+      _atom_site_label
+      _atom_site_fract_x
+      _atom_site_fract_y
+      _atom_site_fract_z
+      _atom_site_occupancy
+      _atom_site_thermal_displace_type
+      _atom_site_U_iso_or_equiv
+      _atom_site_symmetry_multiplicity
+Si
+SI1     0.125        0.125        0.125        1.0        Uiso   0.025         8
+
+loop_ _atom_type_symbol
+      _atom_type_number_in_cell
+                   Si  8.0        
+ 
+# If you change Z, be sure to change all 3 of the following
+_chemical_formula_sum                  Si
+_chemical_formula_weight               28.09
+_cell_formula_units_Z                  8
+
+# MOLECULAR GEOMETRY
+
+loop_
+      _geom_bond_atom_site_label_1
+      _geom_bond_atom_site_label_2
+      _geom_bond_distance
+      _geom_bond_site_symmetry_1
+      _geom_bond_site_symmetry_2
+      _geom_bond_publ_flag
+   ?   ?   ?   ?   ?   ?
+
+loop_
+      _geom_angle_atom_site_label_1
+      _geom_angle_atom_site_label_2
+      _geom_angle_atom_site_label_3
+      _geom_angle
+      _geom_angle_site_symmetry_1
+      _geom_angle_site_symmetry_2
+      _geom_angle_site_symmetry_3
+      _geom_angle_publ_flag
+   ?   ?   ?   ?   ?   ?   ?   ?
+#--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--#

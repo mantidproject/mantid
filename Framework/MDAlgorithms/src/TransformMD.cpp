@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -17,16 +18,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(TransformMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TransformMD::TransformMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TransformMD::~TransformMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

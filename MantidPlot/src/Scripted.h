@@ -13,15 +13,16 @@
 class ScriptingEnv;
 
 /**
- * A custom event to notify an object that it should update its scripting environment
+ * A custom event to notify an object that it should update its scripting
+ * environment
  */
-class ScriptingChangeEvent : public QEvent
-{
+class ScriptingChangeEvent : public QEvent {
 public:
   explicit ScriptingChangeEvent(ScriptingEnv *e)
       : QEvent(SCRIPTING_CHANGE_EVENT), env(e) {}
   ScriptingEnv *scriptingEnv() const { return env; }
   Type type() const { return SCRIPTING_CHANGE_EVENT; }
+
 private:
   ScriptingEnv *env;
 };
@@ -33,20 +34,18 @@ private:
  * implement slot customEvent(QEvent*) such that it forwards any
  * ScriptingChangeEvents to Scripted::scriptingChangeEvent.
  */
-class Scripted
-{
-  public:
+class Scripted {
+public:
   /// Constructor
-  explicit Scripted(ScriptingEnv* env);
+  explicit Scripted(ScriptingEnv *env);
   /// Destructor
   ~Scripted();
   /// Called when the scripting environment changes
-  void scriptingChangeEvent(ScriptingChangeEvent*);
+  void scriptingChangeEvent(ScriptingChangeEvent *);
   /// Access the current environment
-  ScriptingEnv *scriptingEnv(){return m_scriptEnv;}
-  
-  private:
-  Scripted();
+  ScriptingEnv *scriptingEnv() { return m_scriptEnv; }
+
+private:
   /// A pointer to the current environment
   ScriptingEnv *m_scriptEnv;
 };

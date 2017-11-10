@@ -1,5 +1,6 @@
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -10,6 +11,12 @@ using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::FilteredTimeSeriesProperty;
 using Mantid::PythonInterface::Policies::RemoveConst;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<std::string>)
+GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<int32_t>)
+GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<int64_t>)
+GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<bool>)
+GET_POINTER_SPECIALIZATION(FilteredTimeSeriesProperty<double>)
 
 namespace {
 /// Macro to reduce copy-and-paste

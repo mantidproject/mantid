@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidMDAlgorithms/DivideMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"

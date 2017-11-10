@@ -57,6 +57,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     import numpy
 
     # Funtions x and y defined over the time domain: z(t) = x(t) + i * y(t)
@@ -79,12 +80,14 @@ Usage
 
     # Test the real part with a fitting to the expected Lorentzian
     myFunc = 'name=Lorentzian,Amplitude=0.05,PeakCentre=0,FWHM=6,ties=(PeakCentre=0)'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfr', StartX=-40, EndX=40, CreateOutput=1)
+    fit_output = Fit(Function=myFunc, InputWorkspace='wsfr', StartX=-40, EndX=40, CreateOutput=1)
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
     print("Theoretical FWHM = 1/(pi*tau)=6.367 -- Fitted FWHM value is: %.3f" % paramTable.column(1)[2])
 
     # Test the imaginary part with a fitting to the expected Gaussian
     myFunc = 'name=Gaussian,Height=0.1,PeakCentre=0,Sigma=3.0, ties=(PeakCentre=0)'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfi', StartX=-15, EndX=15, CreateOutput=1)
+    fit_output = Fit(Function=myFunc, InputWorkspace='wsfi', StartX=-15, EndX=15, CreateOutput=1)
+    paramTable = fit_output.OutputParameters
     print("Theoretical Sigma = 1/(2*pi*sigma)=3.183 -- Fitted Sigma value is: %.3f" % paramTable.column(1)[2])
 
 Output:

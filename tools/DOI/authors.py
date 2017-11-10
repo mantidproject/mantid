@@ -1,6 +1,8 @@
 #pylint: disable=invalid-name
-from itertools import chain, ifilterfalse
-import string, os, re
+from itertools import ifilterfalse
+import os
+import re
+import subprocess
 
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
@@ -11,7 +13,7 @@ import string, os, re
 # prefer multiple translations over blacklist entries in case users log back on
 # to machines and start using old aliases again.
 _translations = {
-#    Name in Git.             :  Preffered name for DOI.
+    #Name in Git.             :  Preffered name for DOI.
     'Freddie Akeroyd'         : 'Akeroyd, Freddie',
     'Stuart Ansell'           : 'Ansell, Stuart',
     'Sofia Antony'            : 'Antony, Sofia',
@@ -86,6 +88,7 @@ _translations = {
     'Federico M Pouzols'      : 'Pouzols, Federico M',
     'FedeMPouzols'            : 'Pouzols, Federico M',
     'Federico Montesino Pouzols': 'Pouzols, Federico M',
+    'Fede'                    : 'Pouzols, Federico M',
     'Anton Piccardo-Selg'     : 'Piccardo-Selg, Anton',
     'Lottie Greenwood'        : 'Greenwood, Lottie',
     'Dan Nixon'               : 'Nixon, Dan',
@@ -93,6 +96,7 @@ _translations = {
     'John Hill'               : 'Hill, John',
     'Ian Bush'                : 'Bush, Ian',
     'Steven Hahn'             : 'Hahn, Steven',
+    'Steven E. Hahn'          : 'Hahn, Steven',
     'Joachim Wuttke (o)'      : 'Wuttke, Joachim',
     'DiegoMonserrat'          : 'Monserrat, Diego',
     'Diego Monserrat'         : 'Monserrat, Diego',
@@ -118,9 +122,43 @@ _translations = {
     'Michael Hart'            : 'Hart, Michael',
     'Lamar Moore'             : 'Moore, Lamar',
     'LamarMoore'              : 'Moore, Lamar',
+    'Moore'                   : 'Moore, Lamar',
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
-    'Duc Le'                  : 'Le, Duc'
+    'Duc Le'                  : 'Le, Duc',
+    'David Fairbrother'       : 'Fairbrother, David',
+    'DavidFair'               : 'Fairbrother, David',
+    'Eltayeb Ahmed'           : 'Ahmed, Eltayeb',
+    'Dimitar Tasev'           : 'Tasev, Dimitar',
+    'Dimitar Borislavov Tasev': 'Tasev, Dimitar',
+    'Antti Soininen'          : 'Soininen, Antti',
+    'Antti Soininnen'         : 'Soininen, Antti',
+    'Pranav Bahuguna'         : 'Bahuguna, Pranav',
+    'Louise McCann'           : 'McCann, Louise',
+    'louisemccann'            : 'McCann, Louise',
+    'Gagik Vardanyan'         : 'Vardanyan, Gagik',
+    'Verena Reimund'          : 'Reimund, Verena',
+    'reimundILL'              : 'Reimund, Verena',
+    'Krzysztof Dymkowski'     : 'Dymkowski, Krzysztof',
+    'dymkowsk'                : 'Dymkowski, Krzysztof',
+    'Gemma Guest'             : 'Guest, Gemma',
+    'Anthony Lim'             : 'Lim, Anthony',
+    'AnthonyLim23'            : 'Lim, Anthony',
+    'CipPruteanu'             : 'Ciprian Pruteanu',
+    'Tasev'                   : 'Tasev, Dimitar',
+    'Mayer Alexandra'         : 'Mayer, Alexandra',
+    'simonfernandes'          : 'Fernandes, Simon',
+    'Simon Fernandes'         : 'Fernandes, Simon',
+    'brandonhewer'            : 'Hewer, Brandon',
+    'Brandon Hewer'            : 'Hewer, Brandon',
+    'Thomas Lohnert'          : 'Lohnert, Thomas',
+    'James Tricker'           : 'Tricker, James',
+    'Matthew Bowles'          : 'Bowles, Matthew',
+    'josephframsay'           : 'Ramsay, Joseph F.',
+    'Joseph Ramsay'           : 'Ramsay, Joseph F.',
+    'Adam Washington'         : 'Wahington, Adam',
+    'Edward Brown'            : 'Brown, Edward',
+    'Matthew Andrew'          : 'Andrew, Matthew'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -156,7 +194,6 @@ whitelist = [
     'Granroth, Garrett'
 ]
 
-import subprocess
 
 def run_from_script_dir(func):
     '''Decorator that changes the working directory to the directory of this
@@ -173,17 +210,19 @@ def run_from_script_dir(func):
 
     return change_dir_wrapper
 
+
 @run_from_script_dir
 def _get_all_git_tags():
     '''Returns a list of all the tags in the tree.
     '''
-    return subprocess.check_output(['git', 'tag']).replace('"', '').split('\n')
+    return subprocess.check_output(['git', 'tag', '--sort=version:refname']).replace('"', '').split('\n')
+
 
 def _clean_up_author_list(author_list):
     '''Apply translations and blacklist, and get rid of duplicates.
     '''
     # Double check that all names have no leading or trailing whitespace.
-    result = map(string.strip, author_list)
+    result = map(str.strip, author_list)
 
     # Remove any blacklisted names.
     result = set(ifilterfalse(_blacklist.__contains__, result))
@@ -192,8 +231,8 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' + \
-            '\n'.join(untranslated) + '\n' + \
+            'No translation exists for the following Git author(s): \n' +
+            '\n'.join(untranslated) + '\n' +
             'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
@@ -205,6 +244,7 @@ def _clean_up_author_list(author_list):
 
     # Return the unique list of translated names.
     return sorted(set(result))
+
 
 @run_from_script_dir
 def _authors_from_tag_info(tag_info):
@@ -222,62 +262,70 @@ def _authors_from_tag_info(tag_info):
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     return _clean_up_author_list(authors)
 
-def find_tag(major, minor, patch):
-    '''Return the Git tag, if it actually exists.  Where the patch number is
-    zero, check for "v[major].[minor].[patch]" as well as "v[major].[minor]".
+
+def find_tag(version_str):
+    '''Return the Git tag, if it actually exists, for a given version".
     '''
-    suggested_tags = []
-    if patch == 0:
-        suggested_tags.append('v%d.%d' % (major, minor))
-    suggested_tags.append('v%d.%d.%d' % (major, minor, patch))
+    tag_title = 'v' + version_str
+    if tag_title in _get_all_git_tags():
+        return tag_title
+    else:
+        raise RuntimeError("Cannot find expected git tag '{0}'".format(tag_title))
 
-    for tag in suggested_tags:
-        if tag in _get_all_git_tags():
-            return tag
-
-    raise Exception(
-        "Could not find the following tag(s): " + str(suggested_tags))
 
 def get_previous_tag(tag):
     '''Given an existing git tag, will return the tag that is found before it.
     '''
     all_tags = _get_all_git_tags()
-    if not tag in all_tags:
+    if tag not in all_tags:
         return None
-
     return all_tags[all_tags.index(tag) - 1]
 
-def get_version_string(major, minor, patch):
+
+def get_major_minor_patch(version_str):
+    '''Return the major, minor & patch revision numbers as integers
+    '''
+    version_components = version_str.split('.')
+    if len(version_components) != 3:
+        raise RuntimeError("Invalid format for version string. Expected X.Y.Z")
+    return map(int, version_components)
+
+
+def get_shortened_version_string(version_str):
     '''We use the convention whereby the patch number is ignored if it is zero,
     i.e. "3.0.0" becomes "3.0".
     '''
+    major, minor, patch = get_major_minor_patch(version_str)
     if patch == 0:
-        return '%d.%d' % (major, minor)
+        return '{0}.{1}'.format(major, minor)
     else:
-        return '%d.%d.%d' % (major, minor, patch)
+        return '{0}.{1}.{2}'.format(major, minor, patch)
+
 
 def get_version_from_git_tag(tag):
     '''Given a tag from Git, extract the major, minor and patch version
     numbers.
     '''
-    short_regexp = '^v(\d+).(\d+)$'
-    long_regexp  = '^v(\d+).(\d+).(\d+)$'
+    short_regexp = r'^v(\d+).(\d+)$'
+    long_regexp  = r'^v(\d+).(\d+).(\d+)$'
 
     if re.match(short_regexp, tag):
-        a, b = [int(x) for x in re.findall('\d+', tag)]
+        a, b = [int(x) for x in re.findall(r'\d+', tag)]
         c = 0
     elif re.match(long_regexp, tag):
-        a, b, c = [int(x) for x in re.findall('\d+', tag)]
+        a, b, c = [int(x) for x in re.findall(r'\d+', tag)]
     else:
-        raise Exception(
+        raise RuntimeError(
             "Unable to parse version information from \"" + tag + "\"")
-    return a, b, c
+    return '{0}.{1}.{2}'.format(a, b, c)
+
 
 def authors_up_to_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including
     the given tag.
     '''
     return _authors_from_tag_info(tag)
+
 
 def authors_under_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including

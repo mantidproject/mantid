@@ -96,10 +96,10 @@ void CatalogPublish::exec() {
   } else // The user wants to upload a workspace.
   {
     if (nameInCatalog.empty()) {
-      setProperty("NameInCatalog", workspace->name());
+      setProperty("NameInCatalog", workspace->getName());
       g_log.notice(
           "NameInCatalog has not been set. Using workspace name instead: " +
-          workspace->name() + ".");
+          workspace->getName() + ".");
     }
 
     // Save workspace to a .nxs file in the user's default directory.
@@ -108,7 +108,7 @@ void CatalogPublish::exec() {
     // workspace was saved to).
     filePath = Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               workspace->name() + ".nxs";
+               workspace->getName() + ".nxs";
   }
 
   // Obtain the mode to used base on file extension.
@@ -207,7 +207,7 @@ bool CatalogPublish::isDataFile(const std::string &filePath) {
   std::string extension = Poco::Path(filePath).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  tolower);
-  return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
+  return extension == "raw" || extension == "nxs";
 }
 
 /**
@@ -223,11 +223,11 @@ void CatalogPublish::saveWorkspaceToNexus(
       Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
   saveNexus->initialize();
   // Set the required properties & execute.
-  saveNexus->setProperty("InputWorkspace", workspace->name());
+  saveNexus->setProperty("InputWorkspace", workspace->getName());
   saveNexus->setProperty("FileName",
                          Mantid::Kernel::ConfigService::Instance().getString(
                              "defaultsave.directory") +
-                             workspace->name() + ".nxs");
+                             workspace->getName() + ".nxs");
   saveNexus->execute();
 }
 
@@ -263,7 +263,7 @@ const std::string CatalogPublish::generateWorkspaceHistory(
   auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "GeneratePythonScript");
   wsHistory->initialize();
-  wsHistory->setProperty("InputWorkspace", workspace->name());
+  wsHistory->setProperty("InputWorkspace", workspace->getName());
   wsHistory->execute();
   return wsHistory->getPropertyValue("ScriptText");
 }

@@ -9,25 +9,33 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
-
+#include <boost/regex.hpp>
 #include <fstream>
 #include <sstream>
+#include <string>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadGSS)
+
+namespace { // anonymous namespace
+const boost::regex DET_POS_REG_EXP{"^#.+flight path\\s+([0-9.]+).+"
+                                   "tth\\s+([0-9.]+).+"
+                                   "DIFC\\s+([0-9.]+)"};
+const boost::regex L1_REG_EXP{"^#.+flight path\\s+([0-9.]+)\\s*m"};
+} // end of anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
@@ -91,8 +99,6 @@ void LoadGSS::exec() {
       loadGSASFile(filename, useBankAsSpectrum);
 
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -108,11 +114,14 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<int> detectorIDs;
 
   // Vectors to store data
-  std::vector<std::vector<double>> gsasDataX, gsasDataY, gsasDataE;
+  std::vector<HistogramData::BinEdges> gsasDataX;
+  std::vector<HistogramData::Counts> gsasDataY;
+  std::vector<HistogramData::CountStandardDeviations> gsasDataE;
+
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = nullptr;
+  std::unique_ptr<Progress> prog = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -150,8 +159,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == nullptr) {
-      prog = new Progress(this, 0.0, 1.0, nSpec);
+    if (nSpec != 0 && !prog) {
+      prog = make_unique<Progress>(this, 0.0, 1.0, nSpec);
     }
 
     // Set flag to test SLOG
@@ -169,7 +178,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       if (key2 == "Histograms") {
         // NSpec (Format: 'nspec HISTOGRAM')
-        nSpec = atoi(key1.c_str());
+        nSpec = std::stoi(key1);
         g_log.information() << "Histogram Line:  " << key1
                             << "  nSpec = " << nSpec << "\n";
       } else if (key1 == "Instrument:") {
@@ -182,40 +191,63 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         inputLine >> s1;
         if (s1 == "multiplied") {
           multiplybybinwidth = true;
-          g_log.information() << "Y is multiplied by bin width" << std::endl;
+          g_log.information() << "Y is multiplied by bin width\n";
         } else {
           g_log.warning() << "In line '" << currentLine << "', key word " << s1
                           << " is not allowed!\n";
         }
       } else if (key1 == "Primary") {
         // Primary flight path ...
-        std::string s1, s2;
-        inputLine >> s1 >> s2;
-        primaryflightpath = atof(s2.c_str()); // convertToDouble(s2);
-        g_log.information() << "L1 = " << primaryflightpath << std::endl;
+        boost::smatch result;
+        // Have to force a copy of the input or the stack gets corrupted
+        // on MSVC when inputLine.str() falls out of scope which then
+        // corrupts the value in result
+        const std::string input = inputLine.str();
+        if (boost::regex_search(input, result, L1_REG_EXP) &&
+            result.size() == 2) {
+          primaryflightpath = std::stod(std::string(result[1]));
+
+        } else {
+          std::stringstream msg;
+          msg << "Failed to parse primary flight path from line \""
+              << inputLine.str() << "\"";
+          g_log.warning(msg.str());
+        }
+
+        std::stringstream msg;
+        msg << "L1 = " << primaryflightpath;
+        g_log.information(msg.str());
       } else if (key1 == "Total") {
         // Total flight path .... .... including total flying path, difc and
         // 2theta of 1 bank
-        std::string s1, s2, s3, s4, s5, s6;
-        inputLine >> s1 >> s2 >> s3 >> s4 >> s5 >> s6;
-#if 0
-          double totalpath = convertToDouble(s2);
-          double tth = convertToDouble(s4);
-          double difc = convertToDouble(s6);
-#else
-        double totalpath = atof(s2.c_str());
-        double tth = atof(s4.c_str());
-        double difc = atof(s6.c_str());
-#endif
+
+        double totalpath(0.f);
+        double tth(0.f);
+        double difc(0.f);
+
+        boost::smatch result;
+        const std::string input = inputLine.str();
+        if (boost::regex_search(input, result, DET_POS_REG_EXP) &&
+            result.size() == 4) {
+          totalpath = std::stod(std::string(result[1]));
+          tth = std::stod(std::string(result[2]));
+          difc = std::stod(std::string(result[3]));
+        } else {
+          std::stringstream msg;
+          msg << "Failed to parse position from line \"" << inputLine.str()
+              << "\"";
+          g_log.warning(msg.str());
+        }
 
         totalflightpaths.push_back(totalpath);
         twothetas.push_back(tth);
         difcs.push_back(difc);
 
-        g_log.information() << "Bank " << difcs.size() - 1
-                            << ": Total flight path = " << totalpath
-                            << "  2Theta = " << tth << "  DIFC = " << difc
-                            << "\n";
+        std::stringstream msg;
+        msg << "Bank " << difcs.size() - 1
+            << ": Total flight path = " << totalpath << "  2Theta = " << tth
+            << "  DIFC = " << difc;
+        g_log.information(msg.str());
       } // if keys....
 
     } // ENDIF for Line with #
@@ -223,16 +255,12 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       // Line start with Bank including file format, X0 information and etc.
       isOutOfHead = true;
 
-      // If there is, Save the previous to array and initialze new MantiVec for
+      // If there is, Save the previous to array and initialize new MantiVec for
       // (X, Y, E)
       if (!vecX.empty()) {
-        std::vector<double> storeX = vecX;
-        std::vector<double> storeY = vecY;
-        std::vector<double> storeE = vecE;
-
-        gsasDataX.push_back(storeX);
-        gsasDataY.push_back(storeY);
-        gsasDataE.push_back(storeE);
+        gsasDataX.emplace_back(std::move(vecX));
+        gsasDataY.emplace_back(std::move(vecY));
+        gsasDataE.emplace_back(std::move(vecE));
         vecX.clear();
         vecY.clear();
         vecE.clear();
@@ -260,7 +288,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       inputLine >> specno >> nbin1 >> nbin2 >> filetypestring;
       g_log.debug() << "Bank: " << specno
-                    << "  filetypestring = " << filetypestring << std::endl;
+                    << "  filetypestring = " << filetypestring << '\n';
 
       detectorIDs.push_back(specno);
 
@@ -281,7 +309,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       // Determine x0
       if (filetype == 'r') {
         double x0 = bc1 / 32;
-        g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << std::endl;
+        g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << '\n';
         vecX.push_back(x0);
       } else {
         // Cannot calculate x0, turn on the flag
@@ -338,13 +366,12 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         inputLine >> xValue >> yValue >> eValue;
         if (calslogx0) {
           // calculation of x0 must use the x'[0]
-          g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3
-                        << std::endl;
+          g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3 << '\n';
 
           double x0 = 2 * xValue / (bc3 + 2.0);
           vecX.push_back(x0);
           xPrev = x0;
-          g_log.debug() << "SLOG: x0 = " << x0 << std::endl;
+          g_log.debug() << "SLOG: x0 = " << x0 << '\n';
           calslogx0 = false;
         }
 
@@ -360,20 +387,26 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       }
 
       // store read in data (x, y, e) to vector
-      vecX.push_back(xValue);
-      vecY.push_back(yValue);
-      vecE.push_back(eValue);
+      vecX.push_back(std::move(xValue));
+      vecY.push_back(std::move(yValue));
+      vecE.push_back(std::move(eValue));
     } // Date Line
     else {
-      g_log.warning() << "Line not defined: " << currentLine << std::endl;
+      g_log.warning() << "Line not defined: " << currentLine << '\n';
     }
-  } // ENDWHILE of readling all lines
+  } // ENDWHILE of reading all lines
+
+  // Get the sizes before using std::move
+  int nHist(static_cast<int>(gsasDataX.size()));
+  int xWidth(static_cast<int>(vecX.size()));
+  int yWidth(static_cast<int>(vecY.size()));
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
   if (!vecX.empty()) { // Put final spectra into data
-    gsasDataX.push_back(vecX);
-    gsasDataY.push_back(vecY);
-    gsasDataE.push_back(vecE);
+    gsasDataX.emplace_back(std::move(vecX));
+    gsasDataY.emplace_back(std::move(vecY));
+    gsasDataE.emplace_back(std::move(vecE));
+    ++nHist;
   }
   input.close();
 
@@ -382,9 +415,6 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   //********************************************************************************************
 
   // Create workspace & GSS Files data is always in TOF
-  int nHist(static_cast<int>(gsasDataX.size()));
-  int xWidth(static_cast<int>(vecX.size()));
-  int yWidth(static_cast<int>(vecY.size()));
 
   MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -398,7 +428,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   else
     outputWorkspace->setTitle(slogTitle);
 
-  // put data from MatidVec's into outputWorkspace
+  // put data from constructed histograms into outputWorkspace
   if (detectorIDs.size() != static_cast<size_t>(nHist)) {
     // File error is found
     std::ostringstream mess("");
@@ -409,23 +439,20 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   for (int i = 0; i < nHist; ++i) {
     // Move data across
-    outputWorkspace->dataX(i) = gsasDataX[i];
-    outputWorkspace->dataY(i) = gsasDataY[i];
-    outputWorkspace->dataE(i) = gsasDataE[i];
+    outputWorkspace->setHistogram(
+        i, BinEdges(std::move(gsasDataX[i])), Counts(std::move(gsasDataY[i])),
+        CountStandardDeviations(std::move(gsasDataE[i])));
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
       specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
-      outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
+      outputWorkspace->getSpectrum(i).setSpectrumNo(specno);
     }
   }
 
   // build instrument geometry
   createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
                            detectorIDs, totalflightpaths, twothetas);
-
-  // Clean up
-  delete prog;
 
   return outputWorkspace;
 }
@@ -434,7 +461,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 /** Convert a string containing number and unit to double
   */
 double LoadGSS::convertToDouble(std::string inputstring) {
-  std::string temps = "";
+  std::string temps;
   int isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
@@ -446,7 +473,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
     }
   }
 
-  double rd = atof(temps.c_str());
+  double rd = std::stod(temps);
 
   return rd;
 }
@@ -479,7 +506,6 @@ void LoadGSS::createInstrumentGeometry(
   // Create a new instrument and set its name
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(instrumentname));
-  workspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   Geometry::ObjComponent *samplepos =
@@ -520,20 +546,14 @@ void LoadGSS::createInstrumentGeometry(
     detector->setPos(pos);
 
     // add copy to instrument, spectrum and mark it
-    API::ISpectrum *spec = workspace->getSpectrum(i);
-    if (spec) {
-      spec->clearDetectorIDs();
-      spec->addDetectorID(detectorids[i]);
-      instrument->add(detector);
-      instrument->markAsDetector(detector);
-    } else {
-      g_log.error() << "Workspace " << i << " has no spectrum!" << std::endl;
-      continue;
-    }
+    auto &spec = workspace->getSpectrum(i);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(detectorids[i]);
+    instrument->add(detector);
+    instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
-
-  return;
+  workspace->setInstrument(instrument);
 }
 
 } // namespace

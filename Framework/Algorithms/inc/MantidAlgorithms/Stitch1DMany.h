@@ -1,8 +1,9 @@
 #ifndef MANTID_ALGORITHMS_STITCH1DMANY_H_
 #define MANTID_ALGORITHMS_STITCH1DMANY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,12 +34,6 @@ namespace Algorithms {
  */
 class DLLExport Stitch1DMany : public API::Algorithm {
 public:
-  /// Default constructor
-  Stitch1DMany()
-      : m_numWorkspaces(0), m_manualScaleFactor(1.0), m_scaleRHSWorkspace(true),
-        m_useManualScaleFactor(false){};
-  /// Destructor
-  ~Stitch1DMany() override{};
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version
@@ -51,25 +46,61 @@ public:
   }
   /// Validates algorithm inputs
   std::map<std::string, std::string> validateInputs() override;
+  /// Validates algorithm inputs for group workspaces
+  void validateGroupWorkspacesInputs();
+  /// Validates inputs common to group and non-group workspaces
+  void validateCommonInputs(std::map<std::string, std::string> &errors);
+
+  /// Performs the Stitch1D algorithm at a specific workspace index
+  void doStitch1D(const std::vector<API::MatrixWorkspace_sptr> &toStitch,
+                  const std::vector<double> &startOverlaps,
+                  const std::vector<double> &endOverlaps,
+                  const std::vector<double> &params, const bool scaleRhsWS,
+                  const bool useManualScaleFactors,
+                  const std::vector<double> &manualScaleFactors,
+                  API::Workspace_sptr &outWS, std::string &outName,
+                  std::vector<double> &outScaleFactors);
+
+  /// Performs the Stitch1DMany algorithm at a specific period
+  void doStitch1DMany(std::vector<API::WorkspaceGroup_sptr> inputWSGroups,
+                      const size_t period, const bool storeInADS,
+                      const std::vector<double> &startOverlaps,
+                      const std::vector<double> &endOverlaps,
+                      const std::vector<double> &params, const bool scaleRhsWS,
+                      const bool useManualScaleFactors,
+                      const std::vector<double> &manualScaleFactors,
+                      std::string &outName,
+                      std::vector<double> &outScaleFactors);
 
 private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method.
   void exec() override;
+  /// Override to deal with (multiperiod) workspace groups
+  bool checkGroups() override;
+  bool processGroups() override;
 
   // Data
-  std::vector<Mantid::API::Workspace_sptr> m_inputWorkspaces;
+
+  // A 2D matrix holding workspaces obtained from each workspace list/group
+  std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;
+
+  // List holding each workspace group
+  std::vector<API::WorkspaceGroup_sptr> m_inputWSGroups;
+
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
   std::vector<double> m_scaleFactors;
-  Mantid::API::Workspace_sptr m_outputWorkspace;
+  std::vector<double> m_manualScaleFactors;
+  API::Workspace_sptr m_outputWorkspace;
 
-  size_t m_numWorkspaces;
-  double m_manualScaleFactor;
-  bool m_scaleRHSWorkspace;
-  bool m_useManualScaleFactor;
+  size_t m_numWSPerPeriod = 0;
+  size_t m_numWSPerGroup = 0;
+  bool m_scaleRHSWorkspace = true;
+  bool m_useManualScaleFactors = false;
+  size_t m_scaleFactorFromPeriod = 0;
 };
 
 } // namespace Algorithms

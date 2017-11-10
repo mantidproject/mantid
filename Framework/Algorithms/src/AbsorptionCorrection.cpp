@@ -1,27 +1,29 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using namespace Kernel;
-using namespace Geometry;
 using namespace API;
+using namespace Geometry;
+using HistogramData::interpolateLinearInplace;
+using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
@@ -102,7 +104,7 @@ void AbsorptionCorrection::exec() {
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
-  correctionFactors->isDistribution(
+  correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
@@ -123,16 +125,15 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points" << std::endl;
+          << " wavelength points\n";
   g_log.information(message.str());
   message.str("");
-
-  const bool isHist = m_inputWS->isHistogramData();
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const V3D samplePos = spectrumInfo.samplePosition();
   if (samplePos != V3D(0, 0, 0)) {
     for (auto &elementPosition : m_elementPositions) {
       elementPosition += samplePos;
@@ -141,28 +142,17 @@ void AbsorptionCorrection::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(m_inputWS, correctionFactors)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy over bin boundaries
-    const MantidVec &X = m_inputWS->readX(i);
-    correctionFactors->dataX(i) = X;
+    // Copy over bins
+    correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    if (!spectrumInfo.hasDetectors(i))
       continue;
+
+    const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
@@ -171,7 +161,7 @@ void AbsorptionCorrection::exec() {
     double lambda_f = m_lambdaFixed;
     if (m_emode == 2) {
       try {
-        Parameter_sptr par = pmap.get(det.get(), "Efixed");
+        Parameter_sptr par = pmap.get(&det, "Efixed");
         if (par) {
           Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
           double factor, power;
@@ -184,12 +174,13 @@ void AbsorptionCorrection::exec() {
       }
     }
 
+    const auto lambdas = m_inputWS->points(i);
     // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
+    auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(lambda, L2s);
@@ -208,11 +199,12 @@ void AbsorptionCorrection::exec() {
       }
     }
 
-    if (m_xStep >
-        1) // Interpolate linearly between points separated by m_xStep,
-           // last point required
-    {
-      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
+    // Interpolate linearly between points separated by m_xStep,
+    // last point required
+    if (m_xStep > 1) {
+      auto histnew = correctionFactors->histogram(i);
+      interpolateLinearInplace(histnew, m_xStep);
+      correctionFactors->setHistogram(i, histnew);
     }
 
     prog.report();
@@ -222,7 +214,7 @@ void AbsorptionCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was "
-                      << m_L1s.size() << std::endl;
+                      << m_L1s.size() << '\n';
   setProperty("OutputWorkspace", correctionFactors);
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -316,16 +308,16 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
-void AbsorptionCorrection::calculateDistances(
-    const IDetector_const_sptr &detector, std::vector<double> &L2s) const {
-  V3D detectorPos(detector->getPos());
-  if (detector->nDets() > 1) {
+void AbsorptionCorrection::calculateDistances(const IDetector &detector,
+                                              std::vector<double> &L2s) const {
+  V3D detectorPos(detector.getPos());
+  if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
     detectorPos.spherical(detectorPos.norm(),
-                          detector->getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 /
+                          detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 /
                               M_PI,
-                          detector->getPhi() * 180.0 / M_PI);
+                          detector.getPhi() * 180.0 / M_PI);
   }
 
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
@@ -357,7 +349,7 @@ void AbsorptionCorrection::calculateDistances(
 
       // std::ostringstream message;
       // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << std::endl;
+      // detector->getID() << '\n';
       // message << "This usually means that this detector is defined inside the
       // sample cylinder";
       // g_log.error(message.str());

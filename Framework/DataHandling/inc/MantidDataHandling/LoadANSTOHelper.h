@@ -24,7 +24,7 @@ namespace DataHandling {
 namespace ANSTO {
 
 /// pointer to the vector of events
-typedef std::vector<DataObjects::TofEvent> *EventVector_pt;
+typedef std::vector<Types::Event::TofEvent> *EventVector_pt;
 
 /// helper class to keep track of progress
 class ProgressTracker {
@@ -55,6 +55,7 @@ protected:
   const size_t m_stride;
   // number of frames
   size_t m_frames;
+  size_t m_framesValid;
   // tof correction
   const double m_period;
   const double m_phase;
@@ -65,6 +66,7 @@ protected:
   const double m_timeMaxBoundary;
 
   // methods
+  bool validFrame() const;
   virtual void addEventImpl(size_t id, double tof) = 0;
 
 public:
@@ -121,9 +123,29 @@ public:
                 std::vector<EventVector_pt> &eventVectors);
 };
 
+class EventAssignerFixedWavelength : public EventAssigner {
+protected:
+  // fields
+  double m_wavelength;
+
+  // methods
+  void addEventImpl(size_t id, double tof) override;
+
+public:
+  // construction
+  EventAssignerFixedWavelength(const std::vector<bool> &roi,
+                               const size_t stride, const double wavelength,
+                               const double period, const double phase,
+                               const double tofMinBoundary,
+                               const double tofMaxBoundary,
+                               const double timeMinBoundary,
+                               const double timeMaxBoundary,
+                               std::vector<EventVector_pt> &eventVectors);
+};
+
 class FastReadOnlyFile {
 private:
-#ifdef WIN32
+#ifdef _WIN32
   HANDLE m_handle;
 #else
   FILE *m_handle;

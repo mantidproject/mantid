@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -17,23 +18,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-TransformHKL::TransformHKL() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-TransformHKL::~TransformHKL() {}
-
 const std::string TransformHKL::name() const { return "TransformHKL"; }
 
 int TransformHKL::version() const { return 1; }
 
 const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
@@ -71,7 +61,6 @@ void TransformHKL::init() {
                         "Gets set with the average HKL indexing error.");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TransformHKL::exec() {
@@ -94,7 +83,7 @@ void TransformHKL::exec() {
   std::ostringstream str_stream;
   str_stream << hkl_tran;
   std::string hkl_tran_string = str_stream.str();
-  g_log.notice() << "Applying Tranformation " << hkl_tran_string << std::endl;
+  g_log.notice() << "Applying Tranformation " << hkl_tran_string << '\n';
 
   if (hkl_tran.numRows() != 3 || hkl_tran.numCols() != 3) {
     throw std::runtime_error(
@@ -123,7 +112,7 @@ void TransformHKL::exec() {
   // Transform looks OK so update UB and
   // transform the hkls
   UB = UB * hkl_tran_inverse;
-  g_log.notice() << "Transformed UB = " << UB << std::endl;
+  g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
   std::vector<double> sigabc(6);
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);

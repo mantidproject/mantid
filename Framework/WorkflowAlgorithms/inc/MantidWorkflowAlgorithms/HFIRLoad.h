@@ -45,10 +45,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport HFIRLoad : public API::Algorithm {
 public:
-  /// Constructor
-  HFIRLoad() : API::Algorithm() {}
-  /// Virtual destructor
-  ~HFIRLoad() override {}
   /// Algorithm's name
   const std::string name() const override { return "HFIRLoad"; }
   /// Summary of algorithms purpose

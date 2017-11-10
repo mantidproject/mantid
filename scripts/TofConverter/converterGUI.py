@@ -1,8 +1,10 @@
 #pylint: disable=invalid-name
-from ui_converter import Ui_MainWindow #import line for the UI python class
+from __future__ import (absolute_import, division, print_function)
+from .ui_converter import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
 import TofConverter.convertUnits
+
 
 class MainWindow(QtGui.QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
@@ -12,12 +14,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def thetaEnable (self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.scatteringAngleInput.clear()
 
     def flightPathEnable (self, enabled):
         self.ui.totalFlightPathInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs (self):
@@ -61,10 +63,17 @@ class MainWindow(QtGui.QMainWindow):
         self.Theta = -1.0
         self.output = 0.0
 
+        try:
+            import mantid
+            #register startup
+            mantid.UsageService.registerFeatureUsage("Interface","TofConverter",False)
+        except ImportError:
+            pass
+
     def helpClicked(self):
         # Temporary import while method is in the wrong place
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("TOF_Converter")
+        showCustomInterfaceHelp("TOF Converter")
 
     def convert(self):
         #Always reset these values before conversion.
@@ -88,12 +97,12 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
-        except UnboundLocalError, ule:
+        except UnboundLocalError as ule:
             QtGui.QMessageBox.warning(self, "TofConverter", str(ule))
             return
-        except ArithmeticError, ae:
+        except ArithmeticError as ae:
             QtGui.QMessageBox.warning(self, "TofConverter", str(ae))
             return
-        except RuntimeError, re:
+        except RuntimeError as re:
             QtGui.QMessageBox.warning(self, "TofConverter", str(re))
             return

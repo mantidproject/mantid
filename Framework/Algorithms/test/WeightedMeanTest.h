@@ -2,6 +2,7 @@
 #define WEIGHTEDMEANTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/WeightedMean.h"
 #include "MantidDataHandling/LoadRaw3.h"
 
@@ -62,7 +63,7 @@ public:
     TS_ASSERT_DELTA(result->readE(0)[1176], 104.841321, 0.000001)
     // Now one where first is zero
     TS_ASSERT_EQUALS(result->readY(0)[2], 2.0)
-    TS_ASSERT_EQUALS(result->readE(0)[2], std::sqrt(2.0))
+    TS_ASSERT_EQUALS(result->readE(0)[2], M_SQRT2)
     // And one where second is zero
     TS_ASSERT_EQUALS(result->readY(0)[113], 97.0)
     TS_ASSERT_EQUALS(result->readE(0)[113], std::sqrt(97.0))

@@ -1,5 +1,3 @@
-#include <string>
-
 /*
  If the OS is Windows then LoadLibrary, GetProcAddress and FreeLibrary are used.
  Some casting to HINSTANCE is required.
@@ -15,9 +13,10 @@
 #include <dlfcn.h>
 #endif /* _WIN32 */
 
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/Logger.h"
+
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -133,7 +132,7 @@ void *DllOpen::OpenDllImpl(const std::string &filePath) {
     _snprintf((char *)lpDisplayBuf, n, "failed with error %lu: %s", dw,
               (char *)lpMsgBuf);
     g_log.error() << "Could not open library " << filePath << ": "
-                  << (LPCTSTR)lpDisplayBuf << std::endl;
+                  << (LPCTSTR)lpDisplayBuf << '\n';
 
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);

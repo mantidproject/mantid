@@ -6,11 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <vector>
-#include <functional>
-#include <cmath>
-#include <stdio.h>
-#include <math.h>
-#include <numeric>
 
 namespace Mantid {
 namespace Kernel {

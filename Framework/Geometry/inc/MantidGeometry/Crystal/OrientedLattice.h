@@ -56,7 +56,7 @@ public:
   // Access private variables
   const Kernel::DblMatrix &getU() const;
   const Kernel::DblMatrix &getUB() const;
-  void setU(const Kernel::DblMatrix &newU, const bool force = false);
+  void setU(const Kernel::DblMatrix &newU, const bool force = true);
   void setUB(const Kernel::DblMatrix &newUB);
   // get u and v vectors for Horace/Mslice
   Kernel::V3D getuVector() const;
@@ -88,6 +88,7 @@ private:
   void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }
+  void recalculate() override;
 };
 } // namespace Mantid
 } // namespace Geometry

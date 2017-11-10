@@ -147,6 +147,31 @@ public:
         "curvefitting.peakRadius", m_preSetupPeakRadius);
   }
 
+  void test_has_parameter() {
+    auto composite = boost::make_shared<CompositeFunction>();
+    auto gauss = boost::make_shared<CurveFittingGauss>();
+    auto gauss1 = boost::make_shared<CurveFittingGauss>();
+    auto gauss2 = boost::make_shared<CurveFittingGauss>();
+    auto linear = boost::make_shared<CurveFittingLinear>();
+    auto innerComposite = boost::make_shared<CompositeFunction>();
+
+    composite->addFunction(linear);
+    composite->addFunction(gauss);
+    innerComposite->addFunction(gauss1);
+    innerComposite->addFunction(gauss2);
+    composite->addFunction(innerComposite);
+
+    TS_ASSERT(composite->hasParameter("f0.a"));
+    TS_ASSERT(composite->hasParameter("f0.b"));
+    TS_ASSERT(composite->hasParameter("f1.h"));
+    TS_ASSERT(composite->hasParameter("f1.c"));
+    TS_ASSERT(composite->hasParameter("f2.f0.c"));
+    TS_ASSERT(composite->hasParameter("f2.f1.h"));
+    TS_ASSERT(!composite->hasParameter("h"));
+    TS_ASSERT(!composite->hasParameter("f0.h"));
+    TS_ASSERT(!composite->hasParameter("f2.f3.a"));
+  }
+
   void testFit() {
     boost::shared_ptr<CompositeFunction> mfun =
         boost::make_shared<CompositeFunction>();
@@ -183,7 +208,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(6), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(7), 1.0);
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         TestFunction(), 1, 0.0, 10.0, 0.1);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     WorkspaceCreationHelper::storeWS("mfun", ws);
@@ -403,6 +428,87 @@ public:
     TS_ASSERT_DELTA(mfun->getParameter("f1.c"), 0.1, 0.01);
     TS_ASSERT_DELTA(mfun->getParameter("f1.b"), 4.4, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
+  }
+
+  void test_constraints_str() {
+    auto fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,constraints=(Height>0)");
+    TS_ASSERT_EQUALS(
+        fun->asString(),
+        "name=Gaussian,Height=0,PeakCentre=0,Sigma=0,constraints=(0<Height)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,constraints=(Height>0);name=LinearBackground,"
+        "constraints=(A0<0)");
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=0,PeakCentre=0,"
+                                      "Sigma=0,constraints=(0<Height);name="
+                                      "LinearBackground,A0=0,A1=0,constraints=("
+                                      "A0<0)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian;name=LinearBackground;"
+        "constraints=(f0.Height>0, f1.A0<0)");
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=0,PeakCentre=0,"
+                                      "Sigma=0;name=LinearBackground,A0=0,A1=0;"
+                                      "constraints=(0<f0.Height,f1.A0<0)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,constraints=(Height>0);name=LinearBackground,"
+        "constraints=(A0<0);constraints=(f0.Sigma<0, f1.A1>10)");
+    TS_ASSERT_EQUALS(fun->asString(),
+                     "name=Gaussian,Height=0,PeakCentre=0,Sigma=0,constraints=("
+                     "0<Height);name=LinearBackground,A0=0,A1=0,constraints=("
+                     "A0<0);constraints=(f0.Sigma<0,10<f1.A1)");
+  }
+
+  void test_ties_str() {
+    auto fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,ties=(Height=10)");
+    TS_ASSERT_EQUALS(
+        fun->asString(),
+        "name=Gaussian,Height=10,PeakCentre=0,Sigma=0,ties=(Height=10)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,ties=(Height=10*Sigma)");
+    TS_ASSERT_EQUALS(
+        fun->asString(),
+        "name=Gaussian,Height=0,PeakCentre=0,Sigma=0,ties=(Height=10*Sigma)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,ties=(Height=10);name=LinearBackground,"
+        "ties=(A0=0)");
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=10,PeakCentre=0,"
+                                      "Sigma=0,ties=(Height=10);name="
+                                      "LinearBackground,A0=0,A1=0,ties=(A0=0)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,ties=(Height=10*Sigma);name=LinearBackground,"
+        "ties=(A0=A1)");
+    TS_ASSERT_EQUALS(fun->asString(),
+                     "name=Gaussian,Height=0,PeakCentre=0,Sigma=0,ties=(Height="
+                     "10*Sigma);name=LinearBackground,A0=0,A1=0,ties=(A0=A1)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian;name=LinearBackground;"
+        "ties=(f0.Height=2, f1.A0=f1.A1)");
+    TS_ASSERT_EQUALS(fun->asString(),
+                     "name=Gaussian,Height=2,PeakCentre=0,Sigma=0,ties=(Height="
+                     "2);name=LinearBackground,A0=0,A1=0;ties=(f1.A0=f1.A1)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian;name=LinearBackground;"
+        "ties=(f0.Height=f1.A0=f1.A1)");
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=0,PeakCentre=0,"
+                                      "Sigma=0;name=LinearBackground,A0=0,A1=0;"
+                                      "ties=(f1.A0=f1.A1,f0.Height=f1.A1)");
+
+    fun = FunctionFactory::Instance().createInitialized(
+        "name=Gaussian,ties=(Height=0);name=LinearBackground,"
+        "ties=(A0=A1);ties=(f0.Sigma=f1.A1)");
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=0,PeakCentre=0,"
+                                      "Sigma=0,ties=(Height=0);name="
+                                      "LinearBackground,A0=0,A1=0,ties=(A0=A1);"
+                                      "ties=(f0.Sigma=f1.A1)");
   }
 };
 

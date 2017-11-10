@@ -23,6 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class RemoveLogsTest : public CxxTest::TestSuite {
 public:
@@ -118,7 +119,7 @@ private:
   void createSampleWorkspace() {
     // Create the workspace
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 100);
+        WorkspaceCreationHelper::create2DWorkspace(10, 100);
 
     // Add some log entries to it
     std::vector<DateAndTime> times;

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
 
 
@@ -35,7 +35,7 @@
     <xs:attribute name="val"/>
     <xs:attributeGroup ref="axes"/>
   </xs:complexType>
-  
+
   <!-- Define <location> Type-->
   <xs:complexType name ="locationType">
     <xs:choice maxOccurs="unbounded" minOccurs="0">
@@ -79,9 +79,11 @@
           <xs:attribute name="units"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="description">      
-        <xs:attribute name="is"/>
-      </xs:element>      
+      <xs:element name="description">
+        <xs:complexType>
+          <xs:attribute name="is"/>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="fixed"/>
       <xs:element name="formula">
         <xs:complexType>

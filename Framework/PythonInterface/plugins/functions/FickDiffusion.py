@@ -24,7 +24,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import IFunction1D, FunctionFactory
+
 
 class FickDiffusion(IFunction1D):
 
@@ -43,6 +45,7 @@ class FickDiffusion(IFunction1D):
         for x in xvals:
             jacobian.set(i,0,2.0*x)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(FickDiffusion)

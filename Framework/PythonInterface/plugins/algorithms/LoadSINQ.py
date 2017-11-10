@@ -7,6 +7,7 @@
 #
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
@@ -17,6 +18,7 @@ import os.path
 
 #------------------------- where files live at SINQ
 datapath='/afs/psi.ch/project/sinqdata'
+
 
 class LoadSINQ(PythonAlgorithm):
 
@@ -79,6 +81,7 @@ class LoadSINQ(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)
+
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQ)

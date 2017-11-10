@@ -50,10 +50,6 @@ const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
 class DLLExport EQSANSMonitorTOF : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  EQSANSMonitorTOF() : API::Algorithm() {}
-  /// Virtual destructor
-  ~EQSANSMonitorTOF() override {}
   /// Algorithm's name
   const std::string name() const override { return "EQSANSMonitorTOF"; }
   /// Summary of algorithms purpose

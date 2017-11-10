@@ -1,8 +1,10 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import math
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
 
 class LRPrimaryFraction(PythonAlgorithm):
 

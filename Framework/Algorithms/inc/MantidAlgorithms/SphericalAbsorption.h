@@ -82,8 +82,6 @@ class DLLExport SphericalAbsorption : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SphericalAbsorption();
-  /// Virtual destructor
-  ~SphericalAbsorption() override {}
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";

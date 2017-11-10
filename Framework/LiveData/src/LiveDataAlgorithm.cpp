@@ -1,32 +1,23 @@
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using boost::tokenizer;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LiveDataAlgorithm::LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LiveDataAlgorithm::~LiveDataAlgorithm() {}
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const {
@@ -43,21 +34,35 @@ void LiveDataAlgorithm::initProps() {
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
   for (const auto &instrument : instrInfo) {
-    if (!instrument.liveDataAddress().empty()) {
+    if (instrument.hasLiveListenerInfo()) {
       instruments.push_back(instrument.name());
     }
   }
-#ifndef NDEBUG
-  // Debug builds only: Add all the listeners by hand for development testing
-  // purposes
-  std::vector<std::string> listeners =
-      Mantid::API::LiveListenerFactory::Instance().getKeys();
-  instruments.insert(instruments.end(), listeners.begin(), listeners.end());
-#endif
+
+  // All available listener class names
+  auto listeners = LiveListenerFactory::Instance().getKeys();
+  listeners.push_back(""); // Allow not specifying a listener too
+
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Connection", "",
+                                                              Direction::Input),
+                  "Selects the listener connection entry to use. "
+                  "Default connection will be used if not specified");
+
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
+          "Listener", "", boost::make_shared<StringListValidator>(listeners)),
+      "Name of the listener class to use. "
+      "If specified, overrides class specified by Connection.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Address", "",
+                                                              Direction::Input),
+                  "Address for the listener to connect to. "
+                  "If specified, overrides address specified by Connection.");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>("StartTime", "",
                                                               Direction::Input),
@@ -79,6 +84,12 @@ void LiveDataAlgorithm::initProps() {
 
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingScript", "", Direction::Input),
+                  "A Python script that will be run to process each chunk of "
+                  "data. Only for command line usage, does not appear on the "
+                  "user interface.");
+
+  declareProperty(make_unique<FileProperty>("ProcessingScriptFilename", "",
+                                            FileProperty::OptionalLoad, "py"),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
@@ -119,6 +130,10 @@ void LiveDataAlgorithm::initProps() {
       make_unique<PropertyWithValue<std::string>>("PostProcessingScript", "",
                                                   Direction::Input),
       "A Python script that will be run to process the accumulated data.");
+  declareProperty(
+      make_unique<FileProperty>("PostProcessingScriptFilename", "",
+                                FileProperty::OptionalLoad, "py"),
+      " Python script that will be run to process the accumulated data.");
 
   std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
@@ -166,30 +181,69 @@ void LiveDataAlgorithm::copyPropertyValuesFrom(const LiveDataAlgorithm &other) {
 /// @return true if there is a post-processing step
 bool LiveDataAlgorithm::hasPostProcessing() const {
   return (!this->getPropertyValue("PostProcessingAlgorithm").empty() ||
-          !this->getPropertyValue("PostProcessingScript").empty());
+          !this->getPropertyValue("PostProcessingScript").empty() ||
+          !this->getPropertyValue("PostProcessingScriptFilename").empty());
 }
 
 //----------------------------------------------------------------------------------------------
-/** Return or create the ILiveListener for this algorithm.
+/**
+ * Return or create the ILiveListener for this algorithm.
  *
  * If the ILiveListener has not already been created, it creates it using
  * the properties on the algorithm. It then starts the listener
- * by calling the ILiveListener->start(StartTime) method.
+ * by calling the ILiveListener->start(StartTime) method if start is true.
  *
- * @return ILiveListener_sptr
+ * @param start Whether to start data acquisition right away
+ * @return Shared pointer to interface of this algorithm's LiveListener.
  */
-ILiveListener_sptr LiveDataAlgorithm::getLiveListener() {
+ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   if (m_listener)
     return m_listener;
 
-  // Not stored? Need to create it
-  std::string inst = this->getPropertyValue("Instrument");
-  m_listener = LiveListenerFactory::Instance().create(inst, true, this);
+  // Create a new listener
+  m_listener = createLiveListener(start);
 
   // Start at the given date/time
-  m_listener->start(this->getStartTime());
+  if (start)
+    m_listener->start(this->getStartTime());
 
   return m_listener;
+}
+
+/**
+ * Creates a new instance of a LiveListener based on current values of this
+ * algorithm's properties, respecting Facilities.xml defaults as well as any
+ * provided properties to override them.
+ *
+ * The created LiveListener is not stored or cached as this algorithm's
+ * LiveListener. This is useful for creating temporary instances.
+ *
+ * @param connect Whether the created LiveListener should attempt to connect
+ *                immediately after creation.
+ * @return Shared pointer to interface of created LiveListener instance.
+ */
+ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
+  // Get the LiveListenerInfo from Facilities.xml
+  std::string inst_name = this->getPropertyValue("Instrument");
+  std::string conn_name = this->getPropertyValue("Connection");
+
+  const auto &inst = ConfigService::Instance().getInstrument(inst_name);
+  const auto &conn = inst.liveListenerInfo(conn_name);
+
+  // See if listener and/or address override has been specified
+  std::string listener = this->getPropertyValue("Listener");
+  if (listener.empty())
+    listener = conn.listener();
+
+  std::string address = this->getPropertyValue("Address");
+  if (address.empty())
+    address = conn.address();
+
+  // Construct new LiveListenerInfo with overrides, if given
+  LiveListenerInfo info(listener, address);
+
+  // Create and return
+  return LiveListenerFactory::Instance().create(info, connect, this);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -204,7 +258,7 @@ void LiveDataAlgorithm::setLiveListener(
 
 //----------------------------------------------------------------------------------------------
 /** @return the value of the StartTime property */
-Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
+Mantid::Types::Core::DateAndTime LiveDataAlgorithm::getStartTime() const {
   std::string date = getPropertyValue("StartTime");
   if (date.empty())
     return DateAndTime();
@@ -222,7 +276,7 @@ Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
  *         Returns a NULL pointer if no algorithm was chosen.
  */
 IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
-  std::string prefix = "";
+  std::string prefix;
   if (postProcessing)
     prefix = "Post";
 
@@ -234,7 +288,13 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
   std::string script = this->getPropertyValue(prefix + "ProcessingScript");
   script = Strings::strip(script);
 
+  std::string scriptfile =
+      this->getPropertyValue(prefix + "ProcessingScriptFilename");
+
   if (!algoName.empty()) {
+    g_log.information() << "Creating algorithm from name \'" << algoName
+                        << "\'\n";
+
     // Properties to pass to algo
     std::string props = this->getPropertyValue(prefix + "ProcessingProperties");
 
@@ -247,22 +307,32 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     ignoreProps.insert("OutputWorkspace");
 
     // ...and pass it the properties
-    alg->setPropertiesWithSimpleString(props, ignoreProps);
+    alg->setPropertiesWithString(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())
       g_log.warning() << "Running algorithm " << algoName
                       << " and ignoring the script code in "
-                      << prefix + "ProcessingScript" << std::endl;
+                      << prefix + "ProcessingScript\n";
     return alg;
-  } else if (!script.empty()) {
+  } else if (!script.empty() || !scriptfile.empty()) {
     // Run a snippet of python
     IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
     alg->setLogging(false);
-    alg->setPropertyValue("Code", script);
+    if (scriptfile.empty()) {
+      g_log.information("Creating python algorithm from string");
+      alg->setPropertyValue("Code", script);
+    } else {
+      g_log.information() << "Creating python algorithm from file \'"
+                          << scriptfile << "\'\n";
+      alg->setPropertyValue("Filename", scriptfile);
+    }
+    g_log.information("    stack traces will be off by 5"
+                      " lines because of boiler-plate");
     return alg;
-  } else
+  } else {
     return IAlgorithm_sptr();
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -275,9 +345,7 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   if (m_listener) {
     eventListener = m_listener->buffersEvents();
   } else {
-    eventListener = LiveListenerFactory::Instance()
-                        .create(instrument, false)
-                        ->buffersEvents();
+    eventListener = createLiveListener()->buffersEvents();
   }
   if (!eventListener && getPropertyValue("AccumulationMethod") == "Add") {
     out["AccumulationMethod"] =
@@ -287,6 +355,21 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
 
   if (this->getPropertyValue("OutputWorkspace").empty())
     out["OutputWorkspace"] = "Must specify the OutputWorkspace.";
+
+  // check that only one method was specified for specifying processing
+  int numProc = 0;
+  if (!this->getPropertyValue("ProcessingAlgorithm").empty())
+    numProc += 1;
+  if (!this->getPropertyValue("ProcessingScript").empty())
+    numProc += 1;
+  if (!this->getPropertyValue("ProcessingScriptFilename").empty())
+    numProc += 1;
+  if (numProc > 1) {
+    std::string msg("Only specify one processing method");
+    out["ProcessingAlgorithm"] = msg;
+    out["ProcessingScript"] = msg;
+    out["ProcessingScriptFilename"] = msg;
+  }
 
   // Validate inputs
   if (this->hasPostProcessing()) {
@@ -299,6 +382,21 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
       out["AccumulationWorkspace"] = "The AccumulationWorkspace must be "
                                      "different than the OutputWorkspace, when "
                                      "using PostProcessing.";
+
+    // check that only one method was specified for specifying processing
+    int numPostProc = 0;
+    if (!this->getPropertyValue("PostProcessingAlgorithm").empty())
+      numPostProc += 1;
+    if (!this->getPropertyValue("PostProcessingScript").empty())
+      numPostProc += 1;
+    if (!this->getPropertyValue("PostProcessingScriptFilename").empty())
+      numPostProc += 1;
+    if (numPostProc > 1) {
+      std::string msg("Only specify one post processing method");
+      out["PostProcessingAlgorithm"] = msg;
+      out["PostProcessingScript"] = msg;
+      out["PostProcessingScriptFilename"] = msg;
+    }
   }
 
   // For StartLiveData and MonitorLiveData, make sure another thread is not

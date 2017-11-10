@@ -1,19 +1,12 @@
 #include "MantidKernel/Logger.h"
+
 #include "MantidKernel/ThreadSafeLogStream.h"
 
-#ifdef _MSC_VER
-// Disable a flood of warnings about inheriting from std streams
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
+#include <Poco/Logger.h>
 #include <Poco/NullStream.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
+#include <algorithm>
+#include <exception>
 #include <iostream>
 #include <sstream>
 
@@ -25,8 +18,9 @@ Poco::NullOutputStream NULL_STREAM;
 }
 
 static const std::string PriorityNames_data[] = {
-    "PRIO_FATAL",  "PRIO_CRITICAL",    "PRIO_ERROR", "PRIO_WARNING",
-    "PRIO_NOTICE", "PRIO_INFORMATION", "PRIO_DEBUG", "PRIO_TRACE"};
+    "NOT_USED",         "PRIO_FATAL",   "PRIO_CRITICAL",
+    "PRIO_ERROR",       "PRIO_WARNING", "PRIO_NOTICE",
+    "PRIO_INFORMATION", "PRIO_DEBUG",   "PRIO_TRACE"};
 const std::string *Logger::PriorityNames = PriorityNames_data;
 
 /** Constructor

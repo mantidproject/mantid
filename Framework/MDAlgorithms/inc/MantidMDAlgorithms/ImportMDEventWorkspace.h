@@ -37,9 +37,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ImportMDEventWorkspace : public API::Algorithm {
 public:
-  ImportMDEventWorkspace();
-  ~ImportMDEventWorkspace() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -69,11 +66,11 @@ private:
   /// Possible Event Types
   enum MDEventType { Lean, Full, NotSpecified };
   /// Flag indicating whether full md events for lean events will be generated.
-  bool m_IsFullDataObjects;
+  bool m_IsFullDataObjects = false;
   /// Actual number of dimensions specified
-  size_t m_nDimensions;
+  size_t m_nDimensions = 0;
   /// Actual number of md events provided.
-  size_t m_nDataObjects;
+  size_t m_nDataObjects = 0;
   /// call back to add event data
   template <typename MDE, size_t nd>
   void addEventsData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);

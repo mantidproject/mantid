@@ -11,10 +11,10 @@
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/scoped_array.hpp>
 
-#include <limits.h>
-#include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+#include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace NeXus {
@@ -286,8 +286,7 @@ NexusFileIO::writeNxValue(const std::string &name, const std::string &value,
   if (NXopendata(fileID, name.c_str()) == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(),
-              reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
+    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
   NXputdata(fileID,
@@ -388,22 +387,22 @@ void NexusFileIO::writeNumericTimeLog(
   if (ipos != std::string::npos)
     logName = logName.substr(ipos + 1);
   // extract values from timeseries
-  std::map<Kernel::DateAndTime, T> dV = timeSeries->valueAsMap();
+  std::map<Types::Core::DateAndTime, T> dV = timeSeries->valueAsMap();
   std::vector<double> values;
   std::vector<double> times;
-  Kernel::DateAndTime t0;
+  Types::Core::DateAndTime t0;
   bool first = true;
-  for (typename std::map<Kernel::DateAndTime, T>::const_iterator dv =
+  for (typename std::map<Types::Core::DateAndTime, T>::const_iterator dv =
            dV.begin();
        dv != dV.end(); dv++) {
     T val = dv->second;
-    Kernel::DateAndTime time = dv->first;
+    Types::Core::DateAndTime time = dv->first;
     values.push_back(val);
     if (first) {
       t0 = time; // start time of log
       first = false;
     }
-    times.push_back(Kernel::DateAndTime::secondsFromDuration(time - t0));
+    times.push_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");

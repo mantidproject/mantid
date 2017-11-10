@@ -41,10 +41,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertToDistribution : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ConvertToDistribution() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ConvertToDistribution() override {}
   /// Algorithm's name
   const std::string name() const override { return "ConvertToDistribution"; }
   /// Summary of algorithms purpose

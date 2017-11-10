@@ -1,20 +1,23 @@
 #ifndef INDEX_SX_PEAKS_TEST_H_
 #define INDEX_SX_PEAKS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/IndexSXPeaks.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
+using Mantid::DataHandling::LoadNexusProcessed;
 
 //=====================================================================================
 // Functional tests
@@ -34,10 +37,10 @@ public:
   IndexSXPeaksTest() {
     // Load an existing peaks workspace. This workspace already has HKL values.
     std::string WSName("master_peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
     // Execute and fetch the workspace
     loader.execute();
@@ -55,7 +58,7 @@ public:
               double dTolerance = 0.01) {
 
     // Take a copy of the original peaks workspace.
-    PeaksWorkspace_sptr local(m_masterPeaks->clone().release());
+    PeaksWorkspace_sptr local(m_masterPeaks->clone());
     // Clear the copies hkl values with some invalid values so that we'll know
     // if we fail.
     for (int i = 0; i < nPixels; i++) {
@@ -114,14 +117,14 @@ public:
   }
 
   void test_colinearPeaksThrows() {
-    PeaksWorkspace_sptr temp(m_masterPeaks->clone().release());
+    PeaksWorkspace_sptr temp(m_masterPeaks->clone());
 
     for (int i = 0; i < m_masterPeaks->getNumberPeaks(); i++) {
       IPeak &peak = m_masterPeaks->getPeak(i);
       Mantid::Kernel::V3D v(1, 0, 0);
-      peak.setQSampleFrame(v, boost::optional<double>()); // Overwrite all Q
-                                                          // samples to be
-                                                          // co-linear.
+      peak.setQSampleFrame(v, boost::none); // Overwrite all Q
+                                            // samples to be
+                                            // co-linear.
     }
 
     TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0,

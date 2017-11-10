@@ -136,7 +136,10 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         # Length of 10 with 200 bins = 0.05 width
         self.assertAlmostEqual(liner.getBinWidth(), 0.05, 3)
         # Width was set
-        self.assertAlmostEqual(liner.getPlanarWidth(), 0.88, 3)
+        # TODO: The new behavior for constructor is center+/-(width/2)
+        # but setPlanarWidth and getPlanarWidth still have old behavior.
+        # This will be fixed in a later mantid release.
+        self.assertAlmostEqual(liner.getPlanarWidth(), 0.44, 3)
         # Now turn it off
         svw.toggleLineMode(False)
         self.assertFalse( liner.isVisible(), "LineViewer was hidden")

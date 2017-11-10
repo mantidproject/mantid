@@ -51,7 +51,7 @@ public:
 
   SIP_PYOBJECT windowLabel();
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->windowLabel());
+  sipRes = FROM_CSTRING(sipCpp->windowLabel().toAscii().constData());
 %End
   void setWindowLabel(const QString&);
 
@@ -87,11 +87,11 @@ class Table: MdiSubWindow
 #include <QMessageBox>
 #define CHECK_TABLE_COL(arg)\
     int col;\
-    if (PyInt_Check(arg)) {\
-      col = (int)PyInt_AsLong(arg) - 1;\
+    if (INT_CHECK(arg)) {\
+      col = (int)TO_LONG(arg) - 1;\
 		if (col < 0 || col >= sipCpp->numCols()) {\
 			sipIsErr = 1;\
-			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().ascii());\
+			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().toAscii().constData());\
 		}\
 	 } else {\
       PyObject *tmp = PyObject_Str(arg);\
@@ -99,11 +99,11 @@ class Table: MdiSubWindow
 			sipIsErr = 1;\
 			PyErr_Format(PyExc_TypeError, "Column argument must be either int or string.");\
 		} else {\
-			col = sipCpp->colNames().findIndex(PyString_AsString(tmp));\
+			col = sipCpp->colNames().indexOf(TO_CSTRING(tmp));\
 			if (col < 0) {\
 				sipIsErr = 1;\
-				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", PyString_AsString(tmp),\
-						sipCpp->name().ascii());\
+				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", TO_CSTRING(tmp),\
+						sipCpp->name().toAscii().constData());\
 				Py_DECREF(tmp);\
 			}\
 		}\
@@ -113,7 +113,7 @@ class Table: MdiSubWindow
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 
@@ -130,11 +130,12 @@ public:
 
   SIP_PYOBJECT text(SIP_PYOBJECT, int);
 %MethodCode
+
   sipIsErr = 0;
   CHECK_TABLE_COL(a0);
   CHECK_TABLE_ROW(a1);
   if (sipIsErr == 0) {
-		PyObject *encstr = PyString_FromString(sipCpp->text(row, col).utf8());
+		PyObject *encstr = FROM_CSTRING(sipCpp->text(row, col).toUtf8());
 		if (encstr) {
 			sipRes = PyUnicode_FromEncodedObject(encstr, "utf8", 0);
 			Py_DECREF(encstr);
@@ -181,7 +182,7 @@ public:
 		sipIsErr = 1;\
 		PyErr_SetString(PyExc_ValueError, "Invalid column argument");\
 	} else
-		sipRes = PyString_FromString(sipCpp->colLabel(a0-1));
+		sipRes = FROM_CSTRING(sipCpp->colLabel(a0-1).toAscii().constData());
 %End
   void setColName(SIP_PYOBJECT, const QString&, bool=false);
 %MethodCode
@@ -220,7 +221,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a0,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -292,13 +293,13 @@ class Matrix: MdiSubWindow
 	int col = arg-1;\
    if (col < 0 || col >= sipCpp->numCols()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().toAscii().constData());\
 	}
 #define CHECK_MATRIX_ROW(arg)\
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 public:
@@ -318,7 +319,7 @@ public:
 	CHECK_MATRIX_ROW(a0);
 	CHECK_MATRIX_COL(a1);
 	if (sipIsErr == 0)
-		sipRes = PyString_FromString(sipCpp->text(row, col));
+		sipRes = FROM_CSTRING(sipCpp->text(row, col).toAscii().constData());
 %End
   double cell(int, int);
 %MethodCode
@@ -683,13 +684,13 @@ private:
 	Grid(const Grid&);
 };
 
-namespace MantidQt 
+namespace MantidQt
 {
-%TypeHeaderCode 
-#include "MantidQtAPI/DistributionOptions.h"
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DistributionOptions.h"
 %End
 
-	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
+	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};
 };
 
 class Graph : QWidget /PyName=Layer/
@@ -700,19 +701,16 @@ class Graph : QWidget /PyName=Layer/
 %End
 public:
   enum TicksStyle{NoTicks = 0, Out = 1, InOut = 2, In = 3};
-  enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
-			Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
-			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot};
 
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->pieLegendText());
+  sipRes = FROM_CSTRING(sipCpp->pieLegendText().toAscii().constData());
 %End
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
-  bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
+  bool insertCurve(QString, int, bool=false, GraphOptions::CurveType style = GraphOptions::Unspecified, bool=false);
   void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
 %MethodCode
@@ -721,7 +719,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -914,6 +912,7 @@ public:
   Graph* layer(int num);
   Graph* addLayer(int = 0, int = 0, int = 0, int = 0);
   void insertCurve(MultiLayer* ml, int i);
+  void setCommonAxisScales();
   void setCols(int);
   void setRows(int);
   void setName(const QString&);
@@ -1099,7 +1098,7 @@ class ApplicationWindow: QMainWindow
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1127,9 +1126,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
-  
+
   TiledWindow *newTiledWindow();
-  
+
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->currentFolder()->graph(*a0, false);
@@ -1154,7 +1153,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -1181,7 +1180,7 @@ public:
     for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
       Py_DECREF(str);
      } else {
       sipIsErr = 1;
@@ -1193,7 +1192,7 @@ public:
 %End
 
 	Matrix* importImage(const QString&);
-	MultiLayer* plotSpectrogram(Matrix*, Graph::CurveType = Graph::ColorMap) /PyName=plot/;
+	MultiLayer* plotSpectrogram(Matrix*, GraphOptions::CurveType = GraphOptions::ColorMap) /PyName=plot/;
 
     Graph3D* newPlot3D();
     Graph3D* plotXYZ(Table* table, const QString&, int = 0) /PyName=plot3D/;
@@ -1217,6 +1216,7 @@ public:
   sipRes = sipCpp->currentFolder();
 %End
 
+  void newProject(const bool doNotSave = false);
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   Folder* projectFolder() /PyName=rootFolder/;
 
@@ -1231,6 +1231,8 @@ public:
   void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
+  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
+
   MdiSubWindow* clone(MdiSubWindow*);
 
   Matrix* tableToMatrix(Table* t);
@@ -1260,8 +1262,8 @@ ApplicationWindow *sipqti_app()
   PyObject *mydict = PyModule_GetDict(me);
   PyObject *pyapp = PyDict_GetItemString(mydict,"app");
   Py_DECREF(me);
-  if (sipCanConvertToInstance(pyapp, sipClass_ApplicationWindow, SIP_NOT_NONE))
-    return (ApplicationWindow*) sipConvertToInstance(pyapp, sipClass_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
+  if (sipCanConvertToType(pyapp, sipType_ApplicationWindow, SIP_NOT_NONE))
+    return (ApplicationWindow*) sipConvertToType(pyapp, sipType_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
   else
     return NULL;
 }
@@ -1287,7 +1289,9 @@ public:
   // Simulate file-like object (required for IPython)
   void flush();
   // Simulate file-like object (required for colorama)
-  bool closed();
+  bool closed() const;
+  // Simulate file-like object
+  bool isatty() const;
   void set_parent(SIP_PYOBJECT);
 private:
   PythonScripting(const PythonScripting&);
@@ -1303,6 +1307,8 @@ public:
   void flush();
   // Simulate file-like object (required for colorama)
   bool closed();
+  // Simulate file-like object
+  bool isatty() const;
   // Line number trace
   void lineNumberChanged(SIP_PYOBJECT,int);
 private:
@@ -1353,7 +1359,7 @@ public:
   double dataE(int,int) const;
   //int indexX(int,double) const;
   Graph3D* plotGraph3D(int = 3);
-  MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
+  MultiLayer* plotGraph2D(GraphOptions::CurveType = GraphOptions::ColorMap);
   void goToTab(const QString &);
   void goTo(int,int) /PyName = selectCell/;
   void goToRow(int) /PyName = selectRow/;
@@ -1376,7 +1382,7 @@ class InstrumentWindow: MdiSubWindow /PyName=InstrumentView/
     also a tree view of the instrument hierarchy.
 
     For further help see the functions defined on each of the following
-		- InstrumentWidget
+        - InstrumentWidget
         - InstrumentWidgetRenderTab
         - InstrumentWidgetPickTab
         - InstrumentWidgetMaskTab
@@ -1461,23 +1467,27 @@ class MantidUI: QObject
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:
   // Plotting methods
   MultiLayer *plot1D(const QList<QString> &wsnames, const QList<int> &, bool spectrumPlot,
 					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 bool errs = true, GraphOptions::CurveType style = GraphOptions::Unspecified,
 					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
 					 bool waterfallPlot = false);
 
-  MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
+  MultiLayer* drawSingleColorFillPlot(const QString & name, GraphOptions::CurveType style = GraphOptions::ColorMap,
                                       MultiLayer* window = NULL);
 
   MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
     bool clearWindow = false);
+    
+  MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList, 
+                           MantidQt::DistributionFlag distr = MantidQt::DistributionDefault, 
+                           bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);

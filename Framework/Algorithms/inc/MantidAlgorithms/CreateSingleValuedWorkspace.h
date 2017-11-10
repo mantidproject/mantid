@@ -46,10 +46,6 @@ namespace Algorithms {
 */
 class DLLExport CreateSingleValuedWorkspace : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CreateSingleValuedWorkspace() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~CreateSingleValuedWorkspace() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "CreateSingleValuedWorkspace";

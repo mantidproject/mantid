@@ -2,13 +2,17 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
+namespace Geometry {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 /** Integrate single-crystal peaks in reciprocal-space.
@@ -18,9 +22,6 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMD2 : public API::Algorithm {
 public:
-  IntegratePeaksMD2();
-  ~IntegratePeaksMD2() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose
@@ -47,7 +48,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const Geometry::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

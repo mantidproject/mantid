@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Unit.h"
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"

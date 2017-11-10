@@ -1,20 +1,21 @@
-#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 
 # Check whether we are running in MantidPlot
-IS_IN_MANTIDPLOT = False
+# Disable unused import warning
+# pylint: disable=W0611
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
-except:
-    pass
+except(ImportError, ImportWarning):
+    IS_IN_MANTIDPLOT = False
 
 
 class Background(BaseScriptElement):
@@ -33,10 +34,12 @@ class Background(BaseScriptElement):
                 @param execute: if true, the script will be executed
             """
             if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
-                raise RuntimeError, "Direct beam method for background transmission was selected but was selected but all the appropriate data files were not entered."
+                error_str = "Direct beam method for background transmission was selected but was "
+                error_str += "selected but all the appropriate data files were not entered."
+                raise RuntimeError(error_str)
 
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
-            (self.sample_file, self.direct_beam, self.beam_radius)
+                (self.sample_file, self.direct_beam, self.beam_radius)
 
         def from_setup_info(self, xml_str):
             """
@@ -45,12 +48,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
@@ -74,15 +72,17 @@ class Background(BaseScriptElement):
                 @param execute: if true, the script will be executed
             """
             if len(str(self.sample_scatt).strip())==0\
-                or len(str(self.sample_spreader).strip())==0\
-                or len(str(self.direct_scatt).strip())==0\
-                or len(str(self.direct_spreader).strip())==0:
-                raise RuntimeError, "Beam spreader method for background transmission was selected but all the appropriate data files were not entered."
+                    or len(str(self.sample_spreader).strip())==0\
+                    or len(str(self.direct_scatt).strip())==0\
+                    or len(str(self.direct_spreader).strip())==0:
+                error_str = "Beam spreader method for background transmission was selected but "
+                error_str += "all the appropriate data files were not entered."
+                raise RuntimeError(error_str)
 
             return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
-            (self.sample_spreader, self.direct_spreader,
-             self.sample_scatt, self.direct_scatt,
-             self.spreader_trans, self.spreader_trans_spread)
+                (self.sample_spreader, self.direct_spreader,
+                 self.sample_scatt, self.direct_scatt,
+                 self.spreader_trans, self.spreader_trans_spread)
 
         def from_setup_info(self, xml_str):
             """
@@ -91,12 +91,7 @@ class Background(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "BckTransSampleScatteringFilename", default='')
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "BckTransSampleSpreaderFilename", default='')
@@ -131,13 +126,13 @@ class Background(BaseScriptElement):
         # Dark current
         if self.dark_current_corr:
             if len(str(self.dark_current_file).strip())==0:
-                raise RuntimeError, "Dark current subtraction was selected but no dark current data file was entered."
+                raise RuntimeError("Dark current subtraction was selected but no dark current data file was entered.")
             script += "DarkCurrent(\"%s\")\n" % self.dark_current_file
 
         # Background
         if self.background_corr:
             if len(str(self.background_file).strip())==0:
-                raise RuntimeError, "Background subtraction was selected but no background data file was entered."
+                raise RuntimeError("Background subtraction was selected but no background data file was entered.")
             script += "Background(\"%s\")\n" % self.background_file
 
             # Background transmission
@@ -158,7 +153,7 @@ class Background(BaseScriptElement):
             Update data member from reduction output
         """
         if IS_IN_MANTIDPLOT:
-            from mantid.api import PropertyManagerDataService
+            from mantid import PropertyManagerDataService
             from reduction_workflow.command_interface import ReductionSingleton
             property_manager_name = ReductionSingleton().get_reduction_table_name()
             property_manager = PropertyManagerDataService.retrieve(property_manager_name)
@@ -171,21 +166,21 @@ class Background(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Background>\n"
-        xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
-        xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
+        xml_out  = "<Background>\n"
+        xml_out += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
+        xml_out += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
 
-        xml += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
-        xml += "  <background_file>%s</background_file>\n" % self.background_file
-        xml += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
-        xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
-        xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
-        xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
-        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
-        xml += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
-        xml += self.trans_calculation_method.to_xml()
-        xml += "</Background>\n"
-        return xml
+        xml_out += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
+        xml_out += "  <background_file>%s</background_file>\n" % self.background_file
+        xml_out += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
+        xml_out += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
+        xml_out += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
+        xml_out += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml_out += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml_out += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
+        xml_out += self.trans_calculation_method.to_xml()
+        xml_out += "</Background>\n"
+        return xml_out
 
     def from_xml(self, xml_str):
         """
@@ -204,21 +199,21 @@ class Background(BaseScriptElement):
                                                                       default = Background.dark_current_corr)
             self.dark_current_file = BaseScriptElement.getStringElement(instrument_dom, "dark_current_file")
 
-            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",\
-                                                                      default = Background.background_corr)
+            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",
+                                                                    default = Background.background_corr)
             self.background_file = BaseScriptElement.getStringElement(instrument_dom, "background_file")
 
-            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",\
-                                                                           default = Background.bck_transmission_enabled)
+            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",
+                                                                             default = Background.bck_transmission_enabled)
 
-            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",\
-                                                                  default=Background.bck_transmission)
-            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",\
-                                                                  default=Background.bck_transmission_spread)
+            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",
+                                                                      default=Background.bck_transmission)
+            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",
+                                                                             default=Background.bck_transmission_spread)
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = Background.calculate_transmission)
-            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",\
-                                                                           default = Background.theta_dependent)
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+                                                                    default = Background.theta_dependent)
             self.trans_dark_current = BaseScriptElement.getStringElement(instrument_dom, "trans_dark_current")
 
             for m in [Background.DirectBeam, Background.BeamSpreader]:
@@ -235,12 +230,7 @@ class Background(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.background_file = BaseScriptElement.getPropertyValue(alg, "BackgroundFiles", default='')
         self.background_corr = len(self.background_file)>0
@@ -249,7 +239,8 @@ class Background(BaseScriptElement):
 
         # Transmission
         self.bck_transmission = BaseScriptElement.getPropertyValue(alg, "BckTransmissionValue", default=SampleData.transmission)
-        self.bck_transmission_spread = BaseScriptElement.getPropertyValue(alg, "BckTransmissionError", default=SampleData.transmission_spread)
+        self.bck_transmission_spread = BaseScriptElement.getPropertyValue(alg, "BckTransmissionError",
+                                                                          default=SampleData.transmission_spread)
 
         self.trans_dark_current = BaseScriptElement.getPropertyValue(alg, "BckTransmissionDarkCurrentFile", default='')
         self.theta_dependent = BaseScriptElement.getPropertyValue(alg, "BckThetaDependentTransmission",
@@ -279,4 +270,3 @@ class Background(BaseScriptElement):
         self.trans_dark_current = Background.trans_dark_current
         self.trans_calculation_method = Background.trans_calculation_method
         self.sample_thickness = Background.sample_thickness
-

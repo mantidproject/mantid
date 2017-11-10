@@ -1,18 +1,20 @@
 #ifndef MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 #define MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/TypedValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 namespace {
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \
-    Mantid::Kernel::IValidator_sptr clone() const {                            \
+    Mantid::Kernel::IValidator_sptr clone() const override {                   \
       return boost::make_shared<ClassName>();                                  \
     }                                                                          \
-    std::string checkValidity(const HeldType &) const { return ""; }           \
+    std::string checkValidity(const HeldType &) const override { return ""; }  \
   };
 
 /// Dummy object to hold in a shared_ptr for test
@@ -22,9 +24,12 @@ DECLARE_TEST_VALIDATOR(PODTypedValidator, double)
 class FakeDataItem : public Mantid::Kernel::DataItem {
 public:
   const std::string id() const override { return "FakeDataItem"; }
-  const std::string name() const override { return "Empty"; }
+  const std::string &getName() const override { return m_name; }
   bool threadSafe() const override { return true; }
   const std::string toString() const override { return "FakeDataItem{}"; }
+
+private:
+  std::string m_name{"Empty"};
 };
 DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator,
                        boost::shared_ptr<FakeDataItem>)

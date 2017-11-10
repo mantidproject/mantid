@@ -42,7 +42,7 @@ public:
    @param wavelength : wavelength in Angstroms
    */
   double calculateDim0(double wavelength) const override {
-    double wavenumber = 2 * M_PI / wavelength;
+    double wavenumber = 2.0 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
     return ki + kf;
@@ -53,7 +53,7 @@ public:
    @param wavelength : wavelength in Angstroms
    */
   double calculateDim1(double wavelength) const override {
-    double wavenumber = 2 * M_PI / wavelength;
+    double wavenumber = 2.0 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
     return ki - kf;

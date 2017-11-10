@@ -3,7 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"
@@ -16,6 +18,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -47,9 +50,11 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", ws->name()));
+        alg.setPropertyValue("InputWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "PG3_Resolution"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PartialResolutionWorkspaces", "PG3_partial"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOF", 40.0));
 
     alg.execute();
@@ -66,7 +71,7 @@ public:
     TS_ASSERT_EQUALS(numspec, 25873);
 
     for (size_t i = 0; i < numspec; ++i)
-      TS_ASSERT(outputws->readY(i)[0] < 0.03);
+      TS_ASSERT(outputws->y(i)[0] < 0.03);
   }
 
   /** Create an instrument

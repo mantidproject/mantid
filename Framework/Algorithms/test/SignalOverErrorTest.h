@@ -25,7 +25,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SignalOverErrorTest_OutputWS");
 
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(2, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(2, 10);
 
     SignalOverError alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -47,7 +47,7 @@ public:
       return;
 
     // Check the results
-    TS_ASSERT_DELTA(ws->readY(0)[0], sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(ws->readY(0)[0], M_SQRT2, 1e-5);
     TS_ASSERT_DELTA(ws->readE(0)[0], 0.0, 1e-5);
 
     // Remove workspace from the data service.

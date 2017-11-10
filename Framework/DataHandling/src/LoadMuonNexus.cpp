@@ -2,17 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
 #include <limits>
@@ -61,11 +63,12 @@ void LoadMuonNexus::init() {
 
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
-                  "load");
+                  "load. If a range and a list of spectra are both supplied,\n"
+                  "all the specified spectra will be loaded.");
   declareProperty("AutoGroup", false,
                   "Determines whether the spectra are automatically grouped\n"
                   "together based on the groupings in the NeXus file, only\n"
-                  "for single period data (default no)");
+                  "for single period data (default no). Version 1 only.");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
@@ -73,13 +76,14 @@ void LoadMuonNexus::init() {
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
-                  "one worskspace");
+                  "one workspace");
 
   std::vector<std::string> FieldOptions{"Transverse", "Longitudinal"};
   declareProperty("MainFieldDirection", "Transverse",
                   boost::make_shared<StringListValidator>(FieldOptions),
                   "Output the main field direction if specified in Nexus file "
-                  "(run/instrument/detector/orientation, default longitudinal)",
+                  "(run/instrument/detector/orientation, default "
+                  "longitudinal). Version 1 only.",
                   Direction::Output);
 
   declareProperty("TimeZero", 0.0,
@@ -92,13 +96,15 @@ void LoadMuonNexus::init() {
   declareProperty(
       make_unique<WorkspaceProperty<Workspace>>(
           "DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
-      "Table or a group of tables containing detector dead times");
+      "Table or a group of tables containing detector dead times. Version 1 "
+      "only.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
-                      "DetectorGroupingTable", "", Direction::Output,
-                      PropertyMode::Optional),
-                  "Table or a group of tables with information about the "
-                  "detector grouping stored in the file (if any)");
+  declareProperty(
+      make_unique<WorkspaceProperty<Workspace>>("DetectorGroupingTable", "",
+                                                Direction::Output,
+                                                PropertyMode::Optional),
+      "Table or a group of tables with information about the "
+      "detector grouping stored in the file (if any). Version 1 only.");
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set
@@ -156,10 +162,12 @@ void LoadMuonNexus::runLoadInstrument(
 
   // If loading instrument definition file fails,
   // we may get instrument by some other means yet to be decided upon
-  // at present we do nothing.
-  // if ( ! loadInst->isExecuted() )
-  //{
-  //}
+  // at present just create a dummy instrument with the correct name.
+  if (!loadInst->isExecuted()) {
+    auto inst = boost::make_shared<Geometry::Instrument>();
+    inst->setName(m_instrument_name);
+    localWorkspace->setInstrument(inst);
+  }
 }
 
 /**

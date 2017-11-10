@@ -147,7 +147,7 @@ private:
    */
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
     std::lock_guard<std::mutex> lock(m_mutex);
-    CacheMapConstIterator it_found = m_cacheMap.find(key);
+    auto it_found = m_cacheMap.find(key);
     bool isValid = it_found != m_cacheMap.end();
 
     if (isValid) {

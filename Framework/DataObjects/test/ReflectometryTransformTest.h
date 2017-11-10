@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -36,9 +37,8 @@ public:
     // Reset the instrument on the ws
     reflWS->setInstrument(inst);
 
-    auto detPos = reflWS->getDetector(0)->getPos();
-    auto samplePos = inst->getSample()->getPos();
-    auto l2 = detPos.distance(samplePos);
+    const auto &spectrumInfo = reflWS->spectrumInfo();
+    const auto l2 = spectrumInfo.l2(0);
 
     DetectorAngularCache cache = initAngularCaches(reflWS.get());
 

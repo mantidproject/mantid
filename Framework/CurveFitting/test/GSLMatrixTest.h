@@ -25,7 +25,7 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = Tr(m1) * m2;
+    GSLMatrixMult2 mult2 = m1.tr() * m2;
 
     TS_ASSERT_EQUALS(mult2.tr1, true);
     TS_ASSERT_EQUALS(mult2.tr2, false);
@@ -37,7 +37,7 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = m1 * Tr(m2);
+    GSLMatrixMult2 mult2 = m1 * m2.tr();
 
     TS_ASSERT_EQUALS(mult2.tr1, false);
     TS_ASSERT_EQUALS(mult2.tr2, true);
@@ -49,12 +49,24 @@ public:
     GSLMatrix m1(2, 2);
     GSLMatrix m2(2, 2);
 
-    GSLMatrixMult2 mult2 = Tr(m1) * Tr(m2);
+    GSLMatrixMult2 mult2 = m1.tr() * m2.tr();
 
     TS_ASSERT_EQUALS(mult2.tr1, true);
     TS_ASSERT_EQUALS(mult2.tr2, true);
     TS_ASSERT_EQUALS(mult2.m_1.gsl(), m1.gsl());
     TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
+  }
+
+  void test_create_from_initializer_list() {
+    GSLMatrix m({{1.0, 2.0}, {11.0, 12.0}, {21.0, 22.0}});
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 2);
+    TS_ASSERT_EQUALS(m(0, 0), 1.);
+    TS_ASSERT_EQUALS(m(0, 1), 2.);
+    TS_ASSERT_EQUALS(m(1, 0), 11.);
+    TS_ASSERT_EQUALS(m(1, 1), 12.);
+    TS_ASSERT_EQUALS(m(2, 0), 21.);
+    TS_ASSERT_EQUALS(m(2, 1), 22.);
   }
 
   void test_multiply_two_matrices() {
@@ -78,21 +90,21 @@ public:
     TS_ASSERT_EQUALS(m3.get(1, 0), 43.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 50.);
 
-    m3 = Tr(m1) * m2;
+    m3 = m1.tr() * m2;
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 26.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 30.);
     TS_ASSERT_EQUALS(m3.get(1, 0), 38.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 44.);
 
-    m3 = m1 * Tr(m2);
+    m3 = m1 * m2.tr();
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 17.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 23.);
     TS_ASSERT_EQUALS(m3.get(1, 0), 39.);
     TS_ASSERT_EQUALS(m3.get(1, 1), 53.);
 
-    m3 = Tr(m1) * Tr(m2);
+    m3 = m1.tr() * m2.tr();
 
     TS_ASSERT_EQUALS(m3.get(0, 0), 23.);
     TS_ASSERT_EQUALS(m3.get(0, 1), 31.);
@@ -119,7 +131,7 @@ public:
 
     GSLMatrix m;
 
-    m = Tr(m1) * m2 * m3;
+    m = m1.tr() * m2 * m3;
 
     TS_ASSERT_EQUALS(m.size1(), 2);
     TS_ASSERT_EQUALS(m.size2(), 2);
@@ -239,7 +251,7 @@ public:
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
     {
-      GSLMatrix D = Tr(Q) * m * Q;
+      GSLMatrix D = Q.tr() * m * Q;
       double trace_m = 0.0;
       double trace_D = 0.0;
       double det = 1.0;
@@ -253,7 +265,7 @@ public:
       TS_ASSERT_DELTA(det, m.det(), 1e-10);
     }
     {
-      GSLMatrix D = Tr(Q) * Q;
+      GSLMatrix D = Q.tr() * Q;
       for (size_t i = 0; i < n; ++i) {
         TS_ASSERT_DELTA(D.get(i, i), 1.0, 1e-10);
       }
@@ -317,6 +329,96 @@ public:
     TS_ASSERT_EQUALS(row[3], m.get(1, 3));
     row[2] = 0;
     TS_ASSERT_EQUALS(m.get(1, 2), 12);
+  }
+
+  void test_index_operator() {
+    GSLMatrix m(3, 3);
+    m(0, 0) = 0.0;
+    m(0, 1) = 1.0;
+    m(0, 2) = 2.0;
+    m(1, 0) = 10.0;
+    m(1, 1) = 11.0;
+    m(1, 2) = 12.0;
+    m(2, 0) = 20.0;
+    m(2, 1) = 21.0;
+    m(2, 2) = 22.0;
+    TS_ASSERT_EQUALS(m.get(0, 0), 0.0);
+    TS_ASSERT_EQUALS(m.get(0, 1), 1.0);
+    TS_ASSERT_EQUALS(m.get(0, 2), 2.0);
+    TS_ASSERT_EQUALS(m.get(1, 0), 10.0);
+    TS_ASSERT_EQUALS(m.get(1, 1), 11.0);
+    TS_ASSERT_EQUALS(m.get(1, 2), 12.0);
+    TS_ASSERT_EQUALS(m.get(2, 0), 20.0);
+    TS_ASSERT_EQUALS(m.get(2, 1), 21.0);
+    TS_ASSERT_EQUALS(m.get(2, 2), 22.0);
+
+    TS_ASSERT_EQUALS(m(0, 0), 0.0);
+    TS_ASSERT_EQUALS(m(0, 1), 1.0);
+    TS_ASSERT_EQUALS(m(0, 2), 2.0);
+    TS_ASSERT_EQUALS(m(1, 0), 10.0);
+    TS_ASSERT_EQUALS(m(1, 1), 11.0);
+    TS_ASSERT_EQUALS(m(1, 2), 12.0);
+    TS_ASSERT_EQUALS(m(2, 0), 20.0);
+    TS_ASSERT_EQUALS(m(2, 1), 21.0);
+    TS_ASSERT_EQUALS(m(2, 2), 22.0);
+  }
+
+  void test_initializer_list() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 2);
+    TS_ASSERT_EQUALS(m(0, 0), 1.0);
+    TS_ASSERT_EQUALS(m(1, 0), 4.0);
+    TS_ASSERT_EQUALS(m(2, 0), -1.0);
+    TS_ASSERT_EQUALS(m(0, 1), 2.0);
+    TS_ASSERT_EQUALS(m(1, 1), 2.0);
+    TS_ASSERT_EQUALS(m(2, 1), -3.0);
+
+    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}),
+                     std::runtime_error);
+  }
+
+  void test_vector_mul() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    GSLVector b({5.0, 2.0});
+    GSLVector x = m * b;
+    TS_ASSERT_EQUALS(x.size(), 3);
+    TS_ASSERT_EQUALS(x[0], 9.0);
+    TS_ASSERT_EQUALS(x[1], 24.0);
+    TS_ASSERT_EQUALS(x[2], -11.0);
+  }
+
+  void test_solve_singular() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{0.0, 0.0}, {0.0, 0.0}});
+    GSLVector b({1.0, 2.0});
+    GSLVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+  }
+
+  void test_solve_singular_1() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {2.0, 4.0}});
+    GSLVector b({1.0, 2.0});
+    GSLVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+  }
+
+  void test_solve() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}});
+    GSLVector b({5.0, 2.0});
+    GSLVector x;
+    GSLMatrix mm = m;
+    mm.solve(b, x);
+    TS_ASSERT_EQUALS(x.size(), 2);
+    TS_ASSERT_EQUALS(x[0], -1.0);
+    TS_ASSERT_EQUALS(x[1], 3.0);
+    GSLVector bb = m * x;
+    TS_ASSERT_EQUALS(bb[0], 5.0);
+    TS_ASSERT_EQUALS(bb[1], 2.0);
   }
 };
 

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import MatrixWorkspace, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace

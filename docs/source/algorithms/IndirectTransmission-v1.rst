@@ -16,8 +16,8 @@ substantial.
 The sample chemical formula is input for the :ref:`SetSampleMaterial
 <algm-SetSampleMaterial>` algorithm to calculate the cross-sections. The
 instrument analyser reflection is selected to obtain the wavelength of the
-elastic peak to calculate the absorption cross-section. The sample number
-density & thickness is input to then calculate the percentage scattering &
+elastic peak to calculate the absorption cross-section. The sample mass
+density/number density & thickness is input to then calculate the percentage scattering &
 transmission.
 
 Usage
@@ -32,46 +32,46 @@ Usage
     param_values = table_ws.column(1)
 
     for pair in zip(param_names, param_values):
-      print "%s : %s" % pair
+      print("{} : {:1.10f}".format(pair[0], pair[1]))
 
 Output:
 
 .. testoutput:: ExIndirectTransmissionSimple
 
-    Wavelength : 6.65800233718
-    Absorption Xsection : 0.0129590747304
-    Coherent Xsection : 5.551
-    Incoherent Xsection : 0.001
-    Total scattering Xsection : 5.552
-    Number density : 0.1
-    Thickness : 0.1
-    Transmission (abs+scatt) : 0.945870519609
-    Total scattering : 0.0540068963808
+    Wavelength : 6.6580023372
+    Absorption Xsection : 0.0129590747
+    Coherent Xsection : 5.5510000000
+    Incoherent Xsection : 0.0010000000
+    Total scattering Xsection : 5.5520000000
+    Number density : 0.0050139807
+    Thickness : 0.1000000000
+    Transmission (abs+scatt) : 0.9972136294
+    Total scattering : 0.0027798910
 
 **Example - Running IndirectTransmission with a specified number density and thickness.**
 
 .. testcode:: ExIndirectTransmissionParams
 
-    table_ws = IndirectTransmission(Instrument='OSIRIS', NumberDensity=0.5, Thickness=0.3, ChemicalFormula="C")
+    table_ws = IndirectTransmission(Instrument='OSIRIS', DensityType='Number Density', Density=0.5, Thickness=0.3, ChemicalFormula="C")
     param_names = table_ws.column(0)
     param_values = table_ws.column(1)
 
     for pair in zip(param_names, param_values):
-      print "%s : %s" % pair
+      print("{} : {:1.10f}".format(pair[0], pair[1]))
 
 Output:
 
 .. testoutput:: ExIndirectTransmissionParams
 
-    Wavelength : 6.65800233718
-    Absorption Xsection : 0.0129590747304
-    Coherent Xsection : 5.551
-    Incoherent Xsection : 0.001
-    Total scattering Xsection : 5.552
-    Number density : 0.5
-    Thickness : 0.3
-    Transmission (abs+scatt) : 0.433985627752
-    Total scattering : 0.565169943961
+    Wavelength : 6.6580023372
+    Absorption Xsection : 0.0129590747
+    Coherent Xsection : 5.5510000000
+    Incoherent Xsection : 0.0010000000
+    Total scattering Xsection : 5.5520000000
+    Number density : 0.5000000000
+    Thickness : 0.3000000000
+    Transmission (abs+scatt) : 0.4339856278
+    Total scattering : 0.5651699440
 
 .. categories::
 

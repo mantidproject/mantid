@@ -153,6 +153,37 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     }
   };
 
+  class AlgorithmWithDynamicProperty : public Algorithm {
+  public:
+    AlgorithmWithDynamicProperty() : Algorithm() {}
+    ~AlgorithmWithDynamicProperty() override {}
+    const std::string name() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
+
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input));
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output));
+      declareProperty("PropertyA", "Hello");
+      declareProperty("PropertyB", "World");
+    }
+    void exec() override {
+      declareProperty("DynamicProperty1", "value", Direction::Output);
+      setPropertyValue("DynamicProperty1", "outputValue");
+
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
+      setProperty("OutputWorkspace", output);
+    }
+  };
+
 private:
 public:
   void setUp() override {
@@ -160,6 +191,8 @@ public:
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
+    Mantid::API::AlgorithmFactory::Instance()
+        .subscribe<AlgorithmWithDynamicProperty>();
   }
 
   void tearDown() override {
@@ -168,6 +201,8 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(
+        "AlgorithmWithDynamicProperty", 1);
   }
 
   void test_Build_Simple() {
@@ -341,6 +376,51 @@ public:
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
+  }
+
+  void test_Build_Dynamic_Property() {
+    // importantly the Dynamic Property should not be written into the script
+    std::string result =
+        "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
+        "OutputWorkspace='test_output_workspace', PropertyA='A', "
+        "PropertyB='B')\n";
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
+    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+    auto alg =
+        AlgorithmFactory::Instance().create("AlgorithmWithDynamicProperty", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("PropertyA", "A");
+    alg->setProperty("PropertyB", "B");
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "test_output_workspace");
+    auto wsHist = ws->getHistory();
+
+    // check the dynamic property is in the history records
+    const auto &hist_props = wsHist.getAlgorithmHistory(0)->getProperties();
+    bool foundDynamicProperty = false;
+    for (const auto &hist_prop : hist_props) {
+      if (hist_prop->name() == "DynamicProperty1") {
+        foundDynamicProperty = true;
+      }
+    }
+    TSM_ASSERT("Could not find the dynamic property in the algorithm history.",
+               foundDynamicProperty);
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    // The dynamic property should not be in the script.
+    TS_ASSERT_EQUALS(scriptText, result);
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_input_workspace");
   }
 };
 

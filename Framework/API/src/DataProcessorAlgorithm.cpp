@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
@@ -32,11 +32,6 @@ DataProcessorAlgorithm::DataProcessorAlgorithm()
       m_propertyManagerPropertyName("ReductionProperties") {
   enableHistoryRecordingForChild(true);
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DataProcessorAlgorithm::~DataProcessorAlgorithm() {}
 
 //---------------------------------------------------------------------------------------------
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
@@ -241,8 +236,8 @@ Workspace_sptr DataProcessorAlgorithm::assemble(Workspace_sptr partialWS) {
 Workspace_sptr
 DataProcessorAlgorithm::assemble(const std::string &partialWSName,
                                  const std::string &outputWSName) {
-  std::string threadOutput = partialWSName;
 #ifdef MPI_BUILD
+  std::string threadOutput = partialWSName;
   Workspace_sptr partialWS =
       AnalysisDataService::Instance().retrieve(partialWSName);
   IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
@@ -257,6 +252,8 @@ DataProcessorAlgorithm::assemble(const std::string &partialWSName,
     threadOutput = outputWSName;
 #else
   UNUSED_ARG(outputWSName)
+  const std::string &threadOutput = partialWSName;
+
 #endif
   Workspace_sptr outputWS =
       AnalysisDataService::Instance().retrieve(threadOutput);
@@ -277,7 +274,7 @@ void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
     saveOutput = false;
 #endif
 
-  if (saveOutput && outputFile.size() > 0) {
+  if (saveOutput && !outputFile.empty()) {
     IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);
@@ -345,7 +342,7 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
         // The communicator containing all processes
         boost::mpi::communicator world;
         g_log.notice() << "Chunk/Total: " << world.rank() + 1 << "/"
-                       << world.size() << std::endl;
+                       << world.size() << '\n';
         loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
         loadAlg->setProperty("ChunkNumber", world.rank() + 1);
         loadAlg->setProperty("TotalChunks", world.size());
@@ -391,7 +388,7 @@ boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
     processProperties =
         PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
-    getLogger().notice() << "Could not find property manager" << std::endl;
+    getLogger().notice() << "Could not find property manager\n";
     processProperties = boost::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);

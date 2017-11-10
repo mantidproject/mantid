@@ -23,7 +23,7 @@
 </parameter>
 
 <parameter name="Workflow.Diffraction.Correction" type="string">
-    <value val="None" />
+    <value val="Calibration" />
 </parameter>
 
 

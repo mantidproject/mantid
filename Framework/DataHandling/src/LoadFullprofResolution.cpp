@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -17,6 +18,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/AutoPtr.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <fstream>
 
@@ -27,10 +29,8 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {
@@ -38,16 +38,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadFullprofResolution)
 
 std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadFullprofResolution::LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadFullprofResolution::~LoadFullprofResolution() {}
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
@@ -98,8 +88,6 @@ void LoadFullprofResolution::init() {
                   "Default is all workspaces in numerical order."
                   "If default banks are specified, they too are taken to be in "
                   "numerical order");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -199,7 +187,7 @@ void LoadFullprofResolution::exec() {
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
-  if (getPropertyValue("OutputTableWorkspace") != "") {
+  if (!getPropertyValue("OutputTableWorkspace").empty()) {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
@@ -235,13 +223,11 @@ void LoadFullprofResolution::exec() {
         loadParamAlg->execute();
       }
     }
-  } else if (getPropertyValue("OutputTableWorkspace") == "") {
+  } else if (getPropertyValue("OutputTableWorkspace").empty()) {
     // We don't know where to output
     throw std::runtime_error(
         "Either the OutputTableWorkspace or Workspace property must be set.");
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -266,7 +252,7 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 
@@ -278,8 +264,6 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -346,7 +330,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
         string bankterm = level1s.back();
         boost::algorithm::trim(bankterm);
         boost::split(level2s, bankterm, boost::is_any_of(" "));
-        bankid = atoi(level2s[0].c_str());
+        bankid = std::stoi(level2s[0]);
       } else { // Get bank ID as ordinal number of bank
         bankid++;
       }
@@ -360,13 +344,11 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
-                << "Number of ranges = " << bankstartindexmap.size() << endl;
+                << "Number of ranges = " << bankstartindexmap.size() << '\n';
   for (auto &bank : banks) {
     g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
-                  << " to " << bankendindexmap[bank] << endl;
+                  << " to " << bankendindexmap[bank] << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -407,7 +389,6 @@ void LoadFullprofResolution::parseResolutionStrings(
   parammap["NPROF"] = profNumber;
   parammap["CWL"] = cwl;
 
-  double tempdb;
   for (int i = startlineindex + 1; i <= endlineindex; ++i) {
     string line = lines[i];
 
@@ -434,12 +415,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["tof-min"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["step"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["tof-max"] = tempdb;
+        parammap["tof-min"] = parseDoubleValue(terms[1], "tof-min");
+        parammap["step"] = parseDoubleValue(terms[2], "step");
+        parammap["tof-max"] = parseDoubleValue(terms[3], "tof-max");
       }
     } else if (boost::starts_with(line, "D2TOF")) {
       // D2TOF Dtt1 Dtt2 Zero
@@ -453,13 +431,10 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Dtt1"] = tempdb;
+        parammap["Dtt1"] = parseDoubleValue(terms[1], "Dtt1");
         if (terms.size() == 4) {
-          tempdb = atof(terms[2].c_str());
-          parammap["Dtt2"] = tempdb;
-          tempdb = atof(terms[3].c_str());
-          parammap["Zero"] = tempdb;
+          parammap["Dtt2"] = parseDoubleValue(terms[2], "Dtt2");
+          parammap["Zero"] = parseDoubleValue(terms[3], "Zero");
         } else {
           parammap["Dtt2"] = 0.0;
           parammap["Zero"] = 0.0;
@@ -477,11 +452,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Zero"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Dtt1"] = tempdb;
-        parammap["Dtt2"] = 0;
+        parammap["Zero"] = parseDoubleValue(terms[1], "Zero");
+        parammap["Dtt1"] = parseDoubleValue(terms[2], "Dtt1");
+        parammap["Dtt2"] = 0.;
       }
     } // "ZD2TOF"
     else if (boost::starts_with(line, "D2TOT")) {
@@ -495,16 +468,11 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Dtt1t"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Dtt2t"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["Tcross"] = tempdb;
-        tempdb = atof(terms[4].c_str());
-        parammap["Width"] = tempdb;
-        tempdb = atof(terms[5].c_str());
-        parammap["Zerot"] = tempdb;
+        parammap["Dtt1t"] = parseDoubleValue(terms[1], "Dtt1t");
+        parammap["Dtt2t"] = parseDoubleValue(terms[2], "Dtt2t");
+        parammap["Tcross"] = parseDoubleValue(terms[3], "Tcross");
+        parammap["Width"] = parseDoubleValue(terms[4], "Width");
+        parammap["Zerot"] = parseDoubleValue(terms[5], "Zerot");
       }
     } // "D2TOT"
     else if (boost::starts_with(line, "ZD2TOT")) {
@@ -518,16 +486,11 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Zerot"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Dtt1t"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["Dtt2t"] = tempdb;
-        tempdb = atof(terms[4].c_str());
-        parammap["Tcross"] = tempdb;
-        tempdb = atof(terms[5].c_str());
-        parammap["Width"] = tempdb;
+        parammap["Zerot"] = parseDoubleValue(terms[1], "Zerot");
+        parammap["Dtt1t"] = parseDoubleValue(terms[2], "Dtt1t");
+        parammap["Dtt2t"] = parseDoubleValue(terms[3], "Dtt2t");
+        parammap["Tcross"] = parseDoubleValue(terms[4], "Tcross");
+        parammap["Width"] = parseDoubleValue(terms[5], "Width");
       }
     } // "ZD2TOT"
     else if (boost::starts_with(line, "TWOTH")) {
@@ -541,8 +504,7 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["twotheta"] = tempdb;
+        parammap["twotheta"] = parseDoubleValue(terms[1], "twotheta");
       }
     } // "TWOTH"
     else if (boost::starts_with(line, "SIGMA")) {
@@ -556,12 +518,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Sig2"] = sqrt(tempdb);
-        tempdb = atof(terms[2].c_str());
-        parammap["Sig1"] = sqrt(tempdb);
-        tempdb = atof(terms[3].c_str());
-        parammap["Sig0"] = sqrt(tempdb);
+        parammap["Sig2"] = sqrt(parseDoubleValue(terms[1], "Sig2"));
+        parammap["Sig1"] = sqrt(parseDoubleValue(terms[2], "Sig1"));
+        parammap["Sig0"] = sqrt(parseDoubleValue(terms[3], "Sig0"));
       }
     } // "SIGMA"
     else if (boost::starts_with(line, "GAMMA")) {
@@ -575,12 +534,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Gam2"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Gam1"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["Gam0"] = tempdb;
+        parammap["Gam2"] = parseDoubleValue(terms[1], "Gam2");
+        parammap["Gam1"] = parseDoubleValue(terms[2], "Gam1");
+        parammap["Gam0"] = parseDoubleValue(terms[3], "Gam0");
       }
     } // "GAMMA"
     else if (boost::starts_with(line, "ALFBE")) {
@@ -595,14 +551,10 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Alph0"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Beta0"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["Alph1"] = tempdb;
-        tempdb = atof(terms[4].c_str());
-        parammap["Beta1"] = tempdb;
+        parammap["Alph0"] = parseDoubleValue(terms[1], "Alph0");
+        parammap["Beta0"] = parseDoubleValue(terms[2], "Beta0");
+        parammap["Alph1"] = parseDoubleValue(terms[3], "Alph1");
+        parammap["Beta1"] = parseDoubleValue(terms[4], "Beta1");
       }
     } // "ALFBE"
     else if (boost::starts_with(line, "ALFBT")) {
@@ -616,14 +568,10 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        tempdb = atof(terms[1].c_str());
-        parammap["Alph0t"] = tempdb;
-        tempdb = atof(terms[2].c_str());
-        parammap["Beta0t"] = tempdb;
-        tempdb = atof(terms[3].c_str());
-        parammap["Alph1t"] = tempdb;
-        tempdb = atof(terms[4].c_str());
-        parammap["Beta1t"] = tempdb;
+        parammap["Alph0t"] = parseDoubleValue(terms[1], "Alph0t");
+        parammap["Beta0t"] = parseDoubleValue(terms[2], "Beta0t");
+        parammap["Alph1t"] = parseDoubleValue(terms[3], "Alph1t");
+        parammap["Beta1t"] = parseDoubleValue(terms[4], "Beta1t");
       }
     } // "ALFBT"
     else if (boost::starts_with(line, "END")) {
@@ -634,8 +582,6 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // END -IF StartWith
 
   } // For-all-line
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -660,7 +606,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
     iter_split(v, infostr, boost::algorithm::first_finder("CWL"));
 
     // Bank ID
-    bankid = atoi(v[0].c_str());
+    bankid = std::stoi(v[0]);
 
     // CWL
     infostr = v[1];
@@ -671,14 +617,30 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
                     << "'" << v[i] << "'\n";
       string candidate = v[i];
       boost::algorithm::trim(candidate);
-      if (candidate.size() > 0) {
-        cwl = atof(candidate.c_str());
+      if (!candidate.empty()) {
+        cwl = parseDoubleValue(candidate);
         break;
       }
     }
   }
+}
 
-  return;
+double LoadFullprofResolution::parseDoubleValue(const std::string &value,
+                                                const std::string &label) {
+  if (!value.empty()) {
+    try {
+      return std::stod(value);
+    } catch (...) {
+      std::stringstream msg;
+      msg << "Failed to convert \"" << value << "\" to a double";
+      if (!label.empty()) {
+        msg << " for \"" << label << "\"";
+      }
+      msg << " using 0. instead";
+      g_log.warning(msg.str());
+    }
+  }
+  return 0.;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -820,7 +782,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
   writer.setOptions(XMLWriter::PRETTY_PRINT);
 
   //   Get current time
-  Kernel::DateAndTime date = Kernel::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime date = Types::Core::DateAndTime::getCurrentTime();
   std::string ISOdate = date.toISO8601String();
   std::string ISOdateShort =
       ISOdate.substr(0, 19); // Remove fraction of seconds
@@ -1063,8 +1025,6 @@ void LoadFullprofResolution::getTableRowNumbers(
     row >> name;
     parammap.emplace(name, i);
   }
-
-  return;
 }
 
 } // namespace DataHandling

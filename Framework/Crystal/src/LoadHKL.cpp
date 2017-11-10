@@ -1,7 +1,10 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include <fstream>
 
@@ -17,19 +20,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadHKL)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadHKL::LoadHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadHKL::~LoadHKL() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
@@ -42,13 +32,13 @@ void LoadHKL::init() {
                   "Name of the output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
+  bool cosines = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -83,21 +73,32 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
-    double h = atof(line.substr(0, 4).c_str());
-    double k = atof(line.substr(4, 4).c_str());
-    double l = atof(line.substr(8, 4).c_str());
+    if (line.length() > 125)
+      cosines = true;
+    double h = std::stod(line.substr(0, 4));
+    double k = std::stod(line.substr(4, 4));
+    double l = std::stod(line.substr(8, 4));
     if (h == 0.0 && k == 0 && l == 0)
       break;
-    double Inti = atof(line.substr(12, 8).c_str());
-    double SigI = atof(line.substr(20, 8).c_str());
-    double wl = atof(line.substr(32, 8).c_str());
-    double tbar = atof(line.substr(40, 7).c_str()); // tbar
-    int run = atoi(line.substr(47, 7).c_str());
-    static_cast<void>(atoi(line.substr(54, 7).c_str())); // seqNum
-    double trans = atof(line.substr(61, 7).c_str());     // transmission
-    int bank = atoi(line.substr(68, 4).c_str());
-    double scattering = atof(line.substr(72, 9).c_str());
-    static_cast<void>(atof(line.substr(81, 9).c_str())); // dspace
+    double Inti = std::stod(line.substr(12, 8));
+    double SigI = std::stod(line.substr(20, 8));
+    double wl = std::stod(line.substr(32, 8));
+    double tbar, trans, scattering;
+    int run, bank;
+    if (cosines) {
+      tbar = std::stod(line.substr(40, 8)); // tbar
+      run = std::stoi(line.substr(102, 6));
+      trans = std::stod(line.substr(114, 7)); // transmission
+      bank = std::stoi(line.substr(121, 4));
+      scattering = std::stod(line.substr(125, 9));
+    } else {
+      tbar = std::stod(line.substr(40, 7)); // tbar
+      run = std::stoi(line.substr(47, 7));
+      trans = std::stod(line.substr(61, 7)); // transmission
+      bank = std::stoi(line.substr(68, 4));
+      scattering = std::stod(line.substr(72, 9));
+    }
+
     if (first) {
       mu1 = -std::log(trans) / tbar;
       wl1 = wl / 1.8;
@@ -119,6 +120,12 @@ void LoadHKL::exec() {
     std::string bankName = oss.str();
 
     peak.setBankName(bankName);
+    if (cosines) {
+      int col = std::stoi(line.substr(142, 7));
+      int row = std::stoi(line.substr(149, 7));
+      peak.setCol(col);
+      peak.setRow(row);
+    }
     ws->addPeak(peak);
 
   } while (!in.eof());

@@ -2,6 +2,7 @@
 #define NULLVALIDATORTEST_H_
 
 #include <string>
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/NullValidator.h"
 

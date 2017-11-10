@@ -45,7 +45,7 @@ void ExtractFFTSpectrum::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -61,9 +61,7 @@ void ExtractFFTSpectrum::exec() {
     MatrixWorkspace_const_sptr fftTemp =
         childFFT->getProperty("OutputWorkspace");
 
-    outputWS->dataE(i) = fftTemp->readE(fftPart);
-    outputWS->dataY(i) = fftTemp->readY(fftPart);
-    outputWS->dataX(i) = fftTemp->readX(fftPart);
+    outputWS->setHistogram(i, fftTemp->histogram(fftPart));
 
     prog.report();
 

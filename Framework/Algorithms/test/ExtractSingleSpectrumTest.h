@@ -3,6 +3,7 @@
 
 #include "CropWorkspaceTest.h" // Use the test label functionality as it should do the same thing
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::detid_t;
@@ -66,8 +67,10 @@ public:
     // Create and input event workspace
     const int eventsPerPixel(25);
     const int numPixels(10);
-    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, 50, eventsPerPixel, 0.0, 1.0, 1 /*EventPattern=1*/);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*eventWS, false,
+                                                           false, "");
     TS_ASSERT(eventWS);
     const int wsIndex(4);
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);
@@ -79,8 +82,8 @@ public:
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
     do_Spectrum_Tests(outputWS, 4, 4);
     TS_ASSERT_EQUALS(eventWS->blocksize(), 50);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMin(), 4.5, 1e-08);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMax(), 28.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMin(), 4.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMax(), 28.5, 1e-08);
   }
 
 private:
@@ -109,17 +112,13 @@ private:
   void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
                          const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    const Mantid::API::ISpectrum *spectrum(NULL);
-    TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(0));
-    if (spectrum) {
-      TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), specID);
-      auto detids = spectrum->getDetectorIDs();
-      TS_ASSERT_EQUALS(detids.size(), 1);
-      const detid_t id = *(detids.begin());
-      TS_ASSERT_EQUALS(id, detID);
-    } else {
-      TS_FAIL("No spectra/detectors associated with extracted histogram.");
-    }
+    TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
+    const auto &spectrum = outputWS->getSpectrum(0);
+    TS_ASSERT_EQUALS(spectrum.getSpectrumNo(), specID);
+    auto detids = spectrum.getDetectorIDs();
+    TS_ASSERT_EQUALS(detids.size(), 1);
+    const detid_t id = *(detids.begin());
+    TS_ASSERT_EQUALS(id, detID);
   }
 };
 

@@ -72,3 +72,4 @@ inner one in brackets:
 .. categories::
 
 .. sourcelink::
+    :cpp: Framework/API/src/CompositeFunction.cpp

@@ -15,14 +15,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RemovePromptPulse::RemovePromptPulse() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RemovePromptPulse::~RemovePromptPulse() {}
 
 const string RemovePromptPulse::name() const { return "RemovePromptPulse"; }
 
@@ -58,6 +50,9 @@ void RemovePromptPulse::init() {
 namespace { // anonymous namespace begin
 double getMedian(const API::Run &run, const std::string &name) {
 
+  if (!run.hasProperty(name)) {
+    return Mantid::EMPTY_DBL();
+  }
   Kernel::TimeSeriesProperty<double> *log =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
   if (!log)
@@ -70,12 +65,10 @@ double getMedian(const API::Run &run, const std::string &name) {
 void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
   DataObjects::EventWorkspace_const_sptr eventWksp =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
-
-  const bool isEvent = false;
-  if (isEvent) {
-    eventWksp->getEventXMinMax(tmin, tmax);
-  } else {
+  if (eventWksp == nullptr) {
     wksp->getXMinMax(tmin, tmax);
+  } else {
+    eventWksp->getEventXMinMax(tmin, tmax);
   }
 }
 } // anonymous namespace end

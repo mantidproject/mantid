@@ -2,8 +2,6 @@
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
 
-using boost::shared_ptr;
-
 namespace Mantid {
 namespace API {
 namespace {
@@ -43,5 +41,6 @@ TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
   throw Kernel::Exception::NotImplementedError(
       "Don't use this method - use the safe one!!!");
 }
+
 } // namespace Mantid
 } // namespace API

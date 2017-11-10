@@ -169,7 +169,7 @@ template <typename PartA, typename PartB> class mapWrite {
 public:
   /// Write both the key and object
   void operator()(const std::pair<PartA, PartB> &A) const {
-    std::cout << A.first << " " << A.second << std::endl;
+    std::cout << A.first << " " << A.second << '\n';
   }
 };
 

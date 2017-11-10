@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,16 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingFFT::FindUBUsingFFT() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingFFT::~FindUBUsingFFT() {}
-
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 
 int FindUBUsingFFT::version() const { return 1; }
@@ -32,7 +23,6 @@ const std::string FindUBUsingFFT::category() const {
   return "Crystal\\UBMatrix";
 }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
@@ -52,7 +42,6 @@ void FindUBUsingFFT::init() {
                         "Indexing Tolerance (0.15)");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindUBUsingFFT::exec() {
@@ -76,8 +65,8 @@ void FindUBUsingFFT::exec() {
   double error = IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance,
                                         degrees_per_step);
 
-  g_log.notice() << "Error = " << error << std::endl;
-  g_log.notice() << "UB = " << UB << std::endl;
+  g_log.notice() << "Error = " << error << '\n';
+  g_log.notice() << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {

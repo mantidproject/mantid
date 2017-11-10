@@ -1,10 +1,8 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 
@@ -39,9 +37,6 @@ ComptonPeakProfile::ComptonPeakProfile()
     : API::ParamFunction(), API::IFunction1D(), m_wsIndex(0), m_mass(0.0),
       m_voigtCutOff(5000.), m_gauss(), m_voigt(), m_efixed(0.0),
       m_hwhmLorentz(0.0) {}
-
-//-------------------------------------- Private methods
-//-----------------------------------------
 
 /// A string identifier for this function
 std::string ComptonPeakProfile::name() const { return "ComptonPeakProfile"; }
@@ -124,9 +119,10 @@ void ComptonPeakProfile::setWorkspace(
   const double trec = detpar.l1 / v1 + detpar.l2 / v2;
 
   // Compute lorentz width due to in Y due to spread in energy hwhm_lorentz
-  const double dELorentz = ConvertToYSpace::getComponentParameter(
-      workspace->getDetector(m_wsIndex), workspace->constInstrumentParameters(),
-      "hwhm_lorentz");
+  const auto &det = workspace->spectrumInfo().detector(m_wsIndex);
+  const auto &pmap = workspace->constInstrumentParameters();
+  const double dELorentz =
+      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   double yplus(0.0), yminus(0.0), dummy(0.0);
   detpar.efixed += dELorentz;
   ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1,

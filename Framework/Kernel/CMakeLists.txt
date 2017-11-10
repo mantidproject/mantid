@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
+	src/ArrayOrderedPairsValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
@@ -12,17 +13,20 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
 	src/DateAndTime.cpp
+	src/DataItem.cpp
+	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
+	src/Diffraction.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
 	src/DllOpen.cpp
 	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
+	src/EqualBinsChecker.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -31,6 +35,7 @@ set ( SRC_FILES
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
+	src/GitHubApiHelper.cpp
 	src/Glob.cpp
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
@@ -39,9 +44,10 @@ set ( SRC_FILES
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
+	src/InvisibleProperty.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
-	src/ListValidator.cpp
+	src/LiveListenerInfo.cpp
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
@@ -54,11 +60,12 @@ set ( SRC_FILES
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/MaterialBuilder.cpp
+	src/MaterialXMLParser.cpp
 	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
 	src/Math/Distributions/ChebyshevSeries.cpp
-	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
@@ -69,6 +76,8 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/NormalDistribution.cpp
+	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
@@ -76,7 +85,10 @@ set ( SRC_FILES
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
+	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
+	src/PropertyManagerProperty.cpp
+	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -91,8 +103,8 @@ set ( SRC_FILES
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
-	src/Strings.cpp
 	src/StringTokenizer.cpp
+	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
@@ -117,15 +129,15 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
-        )
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
+)
 
 set ( INC_FILES
 	inc/MantidKernel/ANN/ANN.h
@@ -133,6 +145,7 @@ set ( INC_FILES
 	inc/MantidKernel/ANN/ANNx.h
 	inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/ArrayLengthValidator.h
+	inc/MantidKernel/ArrayOrderedPairsValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
@@ -141,29 +154,33 @@ set ( INC_FILES
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CaseInsensitiveMap.h
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
-        inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+    	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
+	inc/MantidKernel/Diffraction.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
 	inc/MantidKernel/DllConfig.h
 	inc/MantidKernel/DllOpen.h
 	inc/MantidKernel/DocumentationHeader.h
 	inc/MantidKernel/DynamicFactory.h
+	inc/MantidKernel/EigenConversionHelpers.h
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
@@ -174,6 +191,7 @@ set ( INC_FILES
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
+	inc/MantidKernel/GitHubApiHelper.h
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/ICatalogInfo.h
 	inc/MantidKernel/IPropertyManager.h
@@ -186,9 +204,11 @@ set ( INC_FILES
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
+	inc/MantidKernel/InvisibleProperty.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
+	inc/MantidKernel/LiveListenerInfo.h
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
@@ -202,11 +222,12 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/MaterialBuilder.h
+	inc/MantidKernel/MaterialXMLParser.h
 	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
 	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
-	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
@@ -217,9 +238,11 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
+	inc/MantidKernel/NormalDistribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -228,9 +251,14 @@ set ( INC_FILES
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
+	inc/MantidKernel/PropertyHelper.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
+	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
+	inc/MantidKernel/PropertyManagerProperty.h
+	inc/MantidKernel/PropertyManager_fwd.h
+	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -248,8 +276,8 @@ set ( INC_FILES
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
-	inc/MantidKernel/Strings.h
 	inc/MantidKernel/StringTokenizer.h
+	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
@@ -281,12 +309,14 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
 
 set ( TEST_FILES
 	ArrayBoundedValidatorTest.h
 	ArrayLengthValidatorTest.h
+	ArrayOrderedPairsValidatorTest.h
 	ArrayPropertyTest.h
 	AtomTest.h
 	BinFinderTest.h
@@ -304,17 +334,21 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
+	CowPtrTest.h
 	DataServiceTest.h
-	DateAndTimeTest.h
+	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
+	DiffractionTest.h
 	DirectoryValidatorTest.h
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
 	DynamicFactoryTest.h
+	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
@@ -324,7 +358,6 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
-	HermitePolynomialsTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
@@ -332,7 +365,9 @@ set ( TEST_FILES
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
+	InvisiblePropertyTest.h
 	ListValidatorTest.h
+	LiveListenerInfoTest.h
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
@@ -342,10 +377,13 @@ set ( TEST_FILES
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
+	MakeCowTest.h
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
+	MaterialBuilderTest.h
 	MaterialTest.h
+	MaterialXMLParserTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -355,14 +393,19 @@ set ( TEST_FILES
 	MutexTest.h
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
+	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
+	NormalDistributionTest.h
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
+	PropertyManagerDataServiceTest.h
+	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
+	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
 	ProxyInfoTest.h
@@ -372,14 +415,15 @@ set ( TEST_FILES
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
 	SLSQPMinimizerTest.h
+	ShrinkToFitTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
+	StringTokenizerTest.h
 	StringsTest.h
-        StringTokenizerTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
 	ThreadPoolTest.h
@@ -434,7 +478,7 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -448,7 +492,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )
@@ -488,6 +532,20 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
 )
+###########################################################################
+# This section deals with creating the GithubApiHelper implementation
+###########################################################################
+
+if ( WIN32 )
+  set ( GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
+elseif ( APPLE )
+  set ( GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
+else()
+  set ( GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
+endif()
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h
+)
 
 ###########################################################################
 # Manipulate the Mantid.properties file to work wherever you build to
@@ -502,13 +560,20 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
+set ( QTPLUGINS "." )
+# %V will be replaced with the major version of Qt at runtime
 if ( MAKE_VATES )
-  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  set ( PV_PLUGINS "./plugins/paraview/qt%V" )
+  if ( MSVC )
+    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  else()
+    set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  endif()
 else ()
   set ( PV_PLUGINS "" )
+  set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
-set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
@@ -549,29 +614,43 @@ foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
   endif()
 endforeach()
 
-# For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
+# For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
-  set ( FILECHANNEL NullChannel )
   set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( FILECHANNEL FileChannel )
+  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
+  if ( ENABLE_FILE_LOGGING )
+    set ( FILELOGGER_CHANNEL fileFilterChannel )
+  else ()
+    set ( FILELOGGER_CHANNEL "" )
+  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
 set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
-                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
-# Then, at build time, copy into appropriate place
-add_custom_command ( TARGET Kernel POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-)
+ # Then, copy into appropriate place
+if(MSVC)
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+else()
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+endif()
 
 ###########################################################################
 # Installation settings
@@ -587,17 +666,26 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-# Whether or not to check for updates is tied to a patch version being defined
-# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
-# This affects Mantid.properties.install only.
-string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
-set (ENABLE_WEB_UPDATES 0)
-if (${VERSION_PATCH_LENGTH} LESS 8)
-  set (ENABLE_WEB_UPDATES 1)
-endif()
-
+# Log to file for installed packages but not mpi
+if ( NOT MPI_BUILD )
+  set ( FILELOGGER_CHANNEL fileFilterChannel )
+endif ()
+set ( ENABLE_WEB_UPDATES 1 )
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+if(MAKE_VATES)
+  if (APPLE)
+    set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
+  elseif (WIN32)
+    set ( PV_LIBS "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}" )
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk" )
+  else () #Linux
+    set ( PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk")
+  endif ()
+else ()
+    set ( PARAVIEW_PYTHON_PATHS "")
+endif()
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
 set ( ENABLE_USAGE_REPORTS "1" )
@@ -640,9 +728,9 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
+  set ( QTPLUGINS "${MANTID_ROOT}/plugins/qt%V" )
+  set ( PV_PLUGINS "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
-  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
 set ( CONSOLECHANNELCLASS "StdoutChannel" )

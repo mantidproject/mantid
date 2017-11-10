@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
@@ -6,7 +7,9 @@
 """
 import os
 from mantid.kernel import Logger
+from mantid.api import FileFinder
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
 
 class DiffractionReductionScripter(BaseReductionScripter):
     """ Organizes the set of reduction parameters that will be used to
@@ -44,7 +47,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             self.facility_name = 'SNS'
         dbmsg = '[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n' \
                 'Auto-save Directory %s' % (self.facility_name, self.instrument_name,
-                       mantidconfigdir)
+                                            mantidconfigdir)
         Logger("DiffractionReductionScripter").debug(str(dbmsg))
 
         return
@@ -75,7 +78,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
         except IOError as e:
-            print "Unable to save script to file. Reason: %s." % (str(e))
+            print ("Unable to save script to file. Reason: %s." % (str(e)))
 
         # Export XML file
         autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
@@ -83,13 +86,12 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # Information output
         wbuf = "Reduction script: (script is saved to %s; setup is saved to %s. \n" % (
-                file_name, autosavexmlfname)
+            file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print wbuf
+        print (wbuf)
 
         return script
-
 
     def to_xml(self, file_name=None):
         """ Extending base class to_xml
@@ -97,7 +99,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         BaseReductionScripter.to_xml(self, file_name)
 
         return
-
 
     def parseTabSetupScript(self, tabsetuptype, setupscript, paramdict):
         """ Parse script returned from tab setup
@@ -193,21 +194,21 @@ class DiffractionReductionScripter(BaseReductionScripter):
                         script += "%sMinimumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
                     if filterdict["MaximumLogValue"] != "":
                         script += "%sMaximumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,\
-                            filterdict["FilterLogValueByChangingDirection"])
+                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                                                 filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "%sLogValueInterval       = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH,
-                                filterdict["LogValueInterval"])
+                            DiffractionReductionScripter.WIDTH,
+                            filterdict["LogValueInterval"])
                     script += "%sLogBoundary    = '%s',\n" % (
-                            DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                        DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
                         script += "%sTimeTolerance  = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                            DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
                         script += "%sLogValueTolerance  = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
+                            DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
                 # ENDIF
                 script += ")\n"
 
@@ -222,11 +223,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # ENDIF : do filter
 
-
-        print "Script and Save XML to default."
+        print ("Script and Save XML to default.")
 
         return script
-
 
     def doFiltering(self, filterdict):
         """ Check filter dictionary to determine whether filtering is required.
@@ -246,75 +245,30 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return dofilter
 
-
     def getDataFileNames(self, runsetupdict, advsetupdict):
         """ Obtain the data file names (run names + SUFFIX)
 
         Return: list of files
         """
-        datafilenames = []
 
         runnumbers_str = str(runsetupdict["RunNumber"])
-        runnumbers_str = runnumbers_str.replace("\"", "")
-        runnumbers_str = runnumbers_str.replace("'", "")
+        if runnumbers_str.count(':') > 0:
+            runnumbers_str = runnumbers_str.replace(':', '-')
+        runnumbers_str = FileFinder.findRuns(self.instrument_name + runnumbers_str)
+        runnumbers_str = [os.path.split(filename)[-1] for filename in runnumbers_str]
 
-        # 1. Parse run numbers string to list of integers
+        # create an integer version
         runnumbers = []
-        terms = runnumbers_str.split(",")
-        for term in terms:
-            term = term.strip()
-            if len(term) == 0:
-                continue
+        for filename in runnumbers_str:
+            for extension in ['_event.nxs', '.nxs.h5']:
+                filename = filename.replace(extension, '')
+            runnumber = filename.split('_')[-1]
+            runnumbers.append(int(runnumber))
 
-            numdashes = term.count("-")
-            if numdashes == 0:
-                # integer
-                try:
-                    run = int(term)
-                except ValueError:
-                    print "Term %s cannot be parsed to integer.  Input error!" % (term)
-                    break
-                if run < 0:
-                    print "Negative run number %d is not supported.  Input error!" % (run)
-                    break
-                runnumbers.append(run)
-
-            elif numdashes == 1:
-                # range of integer
-                twovalues = term.split("-")
-                try:
-                    runstart = int(twovalues[0])
-                    #print "run start = ", runstart
-                except ValueError:
-                    print "Term %s cannot be parsed to a range of integers.  Input error!" % (term)
-                    break
-                try:
-                    runend = int(twovalues[1])
-                    #print "run end = ", runend
-                except ValueError:
-                    print "Term %s cannot be parsed to a range of integers.  Input error!" % (term)
-                    break
-
-                for run in xrange(runstart, runend+1):
-                    runnumbers.append(run)
-
-            else:
-                # cannot be correct.  more than 1 '-'
-                print "Term %s cannot be parsed to an integer or a range of integers.  Input error!" % (term)
-                break
-
-            # ENDIF: number of '-'
-
-        # ENDFOR: term
-
-        # 2. Attach file extension
-        extension = advsetupdict["Extension"].replace("\"", "").replace("'", "")
-        for run in runnumbers:
-            filename = str(self.instrument_name +"_" + str(run) + extension)
-            datafilenames.append((run, filename))
-
-            #print "Input data file %s of run number %s" % (filename, str(run))
-        # ENDFOR
+        # put together the output
+        datafilenames = []
+        for (filename, runnumber) in zip(runnumbers_str, runnumbers):
+            datafilenames.append((runnumber, filename))
 
         return datafilenames
 
@@ -324,8 +278,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """ Build the script to call SNSPowderReduction()
         """
         script = 'SNSPowderReduction(\n'
-        script += "%sInstrument   = '%s',\n" % (DiffractionReductionScripter.WIDTH,
-                                                self.instrument_name)
 
         # 1. Run setup
         # a) determine whether to turn on/off corrections
@@ -370,7 +322,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
             if propname == "RunNumber":
                 # Option to take user input run number
                 if runnumber is not None:
-                    propvalue = str(runnumber)
+                    propvalue = '%s%s' % (self.instrument_name, str(runnumber))
+
+                script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, 'Filename', str(propvalue))
+                continue
 
             # Add value
             script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, propname, str(propvalue))
@@ -396,8 +351,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         if splitwsname is not None and splitwsname != "":
             script += "%sSplittersWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
         if splitinfowsname is not None and splitinfowsname != "":
-            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,\
-                                                              str(splitinfowsname))
+            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                               str(splitinfowsname))
         script += "%s)\n" % (DiffractionReductionScripter.WIDTH)
 
         return script
@@ -408,7 +363,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # Facility instrument
         for observer in self._observers:
             observertype = observer._subject.__class__.__name__
-            print "[ToScript] Observer Type = ", observertype
+            print ("[ToScript] Observer Type = ", observertype)
             if observertype.count("AdvancedWidget") == 1:
                 self.instrument_name = observer._subject._instrument_name
 

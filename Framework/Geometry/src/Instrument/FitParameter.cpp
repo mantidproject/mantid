@@ -4,8 +4,10 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include <MantidKernel/StringTokenizer.h>
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/StringTokenizer.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -20,8 +22,8 @@ Kernel::Logger g_log("FitParameter");
 */
 std::string FitParameter::getConstraint() const {
 
-  if (m_constraintMin.compare("") == 0 && m_constraintMax.compare("") == 0)
-    return std::string("");
+  if (m_constraintMin.empty() && m_constraintMax.empty())
+    return std::string();
 
   std::stringstream constraint;
   size_t foundMinPercentage, foundMaxPercentage;
@@ -29,26 +31,24 @@ std::string FitParameter::getConstraint() const {
   foundMaxPercentage = m_constraintMax.find('%');
   double min = 0;
   double max = 0;
-  if (m_constraintMin.compare("")) {
+  if (!m_constraintMin.empty()) {
     if (foundMinPercentage != std::string::npos)
-      min =
-          atof(m_constraintMin.substr(0, m_constraintMin.size() - 1).c_str()) *
-          m_value * 0.01;
+      min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) *
+            m_value * 0.01;
     else
-      min = atof(m_constraintMin.c_str());
+      min = std::stod(m_constraintMin);
   }
-  if (m_constraintMax.compare("")) {
+  if (!m_constraintMax.empty()) {
     if (foundMaxPercentage != std::string::npos)
-      max =
-          atof(m_constraintMax.substr(0, m_constraintMax.size() - 1).c_str()) *
-          m_value * 0.01;
+      max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) *
+            m_value * 0.01;
     else
-      max = atof(m_constraintMax.c_str());
+      max = std::stod(m_constraintMax);
   }
 
-  if (m_constraintMin.compare("") && m_constraintMax.compare("")) {
+  if (!(m_constraintMin.empty() && m_constraintMax.empty())) {
     constraint << min << " < " << m_name << " < " << max;
-  } else if (m_constraintMin.compare("")) {
+  } else if (!m_constraintMin.empty()) {
     constraint << min << " < " << m_name;
   } else {
     constraint << m_name << " < " << max;
@@ -69,7 +69,7 @@ double FitParameter::getValue(const double &at) const {
     return m_value;
   }
 
-  if (m_formula.compare("") != 0) {
+  if (!m_formula.empty()) {
     size_t found;
     std::string equationStr = m_formula;
     std::string toReplace = "centre"; // replace this string in formula
@@ -96,8 +96,7 @@ double FitParameter::getValue(const double &at) const {
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Cannot evaluate fitting parameter formula."
                     << " Formula which cannot be passed is " << m_formula
-                    << ". Muparser error message is: " << e.GetMsg()
-                    << std::endl;
+                    << ". Muparser error message is: " << e.GetMsg() << '\n';
     }
   }
 
@@ -120,7 +119,6 @@ void FitParameter::printSelf(std::ostream &os) const {
      << m_constraintPenaltyFactor << " , " << m_tie << " , " << m_formula
      << " , " << m_formulaUnit << " , " << m_resultUnit << " , "
      << m_lookUpTable;
-  return;
 }
 
 /**
@@ -176,7 +174,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
         << "Expecting a comma separated list of at each three entries"
         << " (any of which may be empty strings) to set information about a "
            "fitting parameter"
-        << " instead of: " << str << std::endl;
+        << " instead of: " << str << '\n';
     return in;
   }
 
@@ -188,7 +186,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
     if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
                       << " fitting parameter: " << values[1] << ":" << values[2]
-                      << std::endl;
+                      << '\n';
     }
   }
 

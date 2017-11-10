@@ -32,14 +32,14 @@
 #define SINQHMLISTENER_H_
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPClientSession.h>
 
-class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
+class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::LiveListener {
 public:
   SINQHMListener();
 
@@ -48,8 +48,8 @@ public:
   bool buffersEvents() const override { return false; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Kernel::DateAndTime startTime =
-                 Mantid::Kernel::DateAndTime()) override;
+  void start(Mantid::Types::Core::DateAndTime startTime =
+                 Mantid::Types::Core::DateAndTime()) override;
   boost::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;

@@ -1,14 +1,18 @@
 #ifndef MANTID_ALGORITHMS_REMOVEBINS_H_
 #define MANTID_ALGORITHMS_REMOVEBINS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 /** Removes bins from a workspace.
 
@@ -58,8 +62,6 @@ class DLLExport RemoveBins : public API::Algorithm {
 public:
   /// Default constructor
   RemoveBins();
-  /// Destructor
-  ~RemoveBins() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBins"; }
   /// Summary of algorithms purpose
@@ -77,22 +79,25 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  void checkProperties();
   void crop(const double &start, const double &end);
-  void transformRangeUnit(const int &index, double &startX, double &endX);
-  void calculateDetectorPosition(const int &index, double &l1, double &l2,
+  void transformRangeUnit(const int index, double &startX, double &endX);
+  void calculateDetectorPosition(const int index, double &l1, double &l2,
                                  double &twoTheta);
-  int findIndex(const double &value, const MantidVec &vec);
-  void RemoveFromEnds(int start, int end, MantidVec &Y, MantidVec &E);
+  int findIndex(const double &value, const HistogramData::HistogramX &vec);
+  void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y,
+                      HistogramData::HistogramE &E);
   void RemoveFromMiddle(const int &start, const int &end,
                         const double &startFrac, const double &endFrac,
-                        MantidVec &Y, MantidVec &E);
+                        HistogramData::HistogramY &Y,
+                        HistogramData::HistogramE &E);
 
   API::MatrixWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
-  double m_startX;                                  ///< The range start point
-  double m_endX;                                    ///< The range end point
+  const API::SpectrumInfo *m_spectrumInfo;
+  double m_startX;               ///< The range start point
+  double m_endX;                 ///< The range end point
   Kernel::Unit_sptr m_rangeUnit; ///< The unit in which the above range is given
   bool m_interpolate; ///< Whether removed bins should be interpolated
 };

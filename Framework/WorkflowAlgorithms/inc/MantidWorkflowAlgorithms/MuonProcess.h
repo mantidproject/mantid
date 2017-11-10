@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
@@ -32,9 +33,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
-  MuonProcess();
-  ~MuonProcess() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

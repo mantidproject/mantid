@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -12,6 +13,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::HistogramData::detail;
 
 class ConvertToMatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -37,7 +39,7 @@ public:
     cloner.initialize();
     // create 2D input workspace
     Mantid::API::MatrixWorkspace_sptr in =
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+        WorkspaceCreationHelper::create2DWorkspace(5, 10);
     // add instance to variable 'in'
 
     Mantid::API::MatrixWorkspace_sptr out;
@@ -52,15 +54,14 @@ public:
     if (!out)
       return;
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
+    // Best way to test this is to use the CompareWorkspaces algorithm
+    Mantid::Algorithms::CompareWorkspaces checker;
     checker.initialize();
     checker.setProperty("Workspace1", in);
     checker.setProperty("Workspace2", out);
     checker.execute();
 
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT(checker.getProperty("Result"));
   }
 
   void testExec_Event_to_2D() {
@@ -86,24 +87,24 @@ public:
     TS_ASSERT_EQUALS(in->getInstrument()->isParametrized(),
                      out->getInstrument()->isParametrized());
     for (size_t i = 0; i < out->getNumberHistograms(); i++) {
-      const Mantid::API::ISpectrum *inSpec = in->getSpectrum(i);
-      const Mantid::API::ISpectrum *outSpec = out->getSpectrum(i);
+      const auto &inSpec = in->getSpectrum(i);
+      const auto &outSpec = out->getSpectrum(i);
       TSM_ASSERT_EQUALS("Failed on comparing Spectrum Number for Histogram: " +
                             boost::lexical_cast<std::string>(i),
-                        inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
+                        inSpec.getSpectrumNo(), outSpec.getSpectrumNo());
       TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " +
                             boost::lexical_cast<std::string>(i),
-                        *inSpec->getDetectorIDs().begin(),
-                        *outSpec->getDetectorIDs().begin());
+                        *inSpec.getDetectorIDs().begin(),
+                        *outSpec.getDetectorIDs().begin());
       TSM_ASSERT_EQUALS("Failed on readX for Histogram: " +
                             boost::lexical_cast<std::string>(i),
-                        in->readX(i), out->readX(i));
+                        in->x(i), out->x(i));
       TSM_ASSERT_EQUALS("Failed on readY for Histogram: " +
                             boost::lexical_cast<std::string>(i),
-                        in->readY(i), out->readY(i));
+                        in->y(i), out->y(i));
       TSM_ASSERT_EQUALS("Failed on readE for Histogram: " +
                             boost::lexical_cast<std::string>(i),
-                        in->readE(i), out->readE(i));
+                        in->e(i), out->e(i));
     }
   }
 };

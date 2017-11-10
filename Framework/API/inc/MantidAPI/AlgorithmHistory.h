@@ -21,14 +21,23 @@ class IAlgorithm;
 class Algorithm;
 class AlgorithmHistory;
 
+namespace Detail {
+// Written as a template in order to get around circular issue of CompareHistory
+// needing to know the implementation of AlgorithmHistory and AlgorithmHistory
+// needing to know the implementation of CompareHistory.
+template <class T> struct CompareHistory {
+  bool operator()(const boost::shared_ptr<T> &lhs,
+                  const boost::shared_ptr<T> &rhs) const {
+    return (*lhs) < (*rhs);
+  }
+};
+}
+
 // typedefs for algorithm history pointers
 typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
 typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
-
 typedef std::set<AlgorithmHistory_sptr,
-                 boost::function<bool(const AlgorithmHistory_const_sptr,
-                                      const AlgorithmHistory_const_sptr)>>
-    AlgorithmHistories;
+                 Detail::CompareHistory<AlgorithmHistory>> AlgorithmHistories;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
@@ -60,24 +69,26 @@ typedef std::set<AlgorithmHistory_sptr,
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class MANTID_API_DLL AlgorithmHistory final {
+class MANTID_API_DLL AlgorithmHistory {
 
 public:
   /// History container
 
-  /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
-  explicit AlgorithmHistory(
-      const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
-  virtual ~AlgorithmHistory();
+  /// The date-and-time will be stored as the Mantid::Types::Core::DateAndTime
+  /// type
+  explicit AlgorithmHistory(const Algorithm *const alg,
+                            const Types::Core::DateAndTime &start =
+                                Types::Core::DateAndTime::getCurrentTime(),
+                            const double &duration = -1.0,
+                            std::size_t uexeccount = 0);
+  ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
-  AlgorithmHistory(
-      const std::string &name, int vers,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
-  void addExecutionInfo(const Kernel::DateAndTime &start,
+  AlgorithmHistory(const std::string &name, int vers,
+                   const Types::Core::DateAndTime &start =
+                       Types::Core::DateAndTime::getCurrentTime(),
+                   const double &duration = -1.0, std::size_t uexeccount = 0);
+  void addExecutionInfo(const Types::Core::DateAndTime &start,
                         const double &duration);
   void addProperty(const std::string &name, const std::string &value,
                    bool isdefault, const unsigned int &direction = 99);
@@ -92,13 +103,17 @@ public:
   /// get execution duration
   double executionDuration() const { return m_executionDuration; }
   /// get execution date
-  Mantid::Kernel::DateAndTime executionDate() const { return m_executionDate; }
+  Mantid::Types::Core::DateAndTime executionDate() const {
+    return m_executionDate;
+  }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
   /// get parameter list of algorithm in history const
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
   }
+  /// get the string representation of a specified property
+  const std::string &getPropertyValue(const std::string &name) const;
   /// get the child histories of this history object
   const AlgorithmHistories &getChildHistories() const {
     return m_childHistories;
@@ -110,7 +125,8 @@ public:
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream &, const int indent = 0,
+                 const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
     return (execCount() < other.execCount());
@@ -118,11 +134,6 @@ public:
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
     return (execCount() == other.execCount() && name() == other.name());
-  }
-  /// Less than operator for pointers
-  inline bool compareHistory(const boost::shared_ptr<AlgorithmHistory> lhs,
-                             const boost::shared_ptr<AlgorithmHistory> rhs) {
-    return *lhs < *rhs;
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
@@ -133,41 +144,32 @@ public:
   // Set the execution count
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created
-  void fillAlgorithmHistory(
-      const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
+  void fillAlgorithmHistory(const Algorithm *const alg,
+                            const Types::Core::DateAndTime &start,
+                            const double &duration, std::size_t uexeccount);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;
 
 private:
   // private constructor
-  AlgorithmHistory();
+  AlgorithmHistory() = default;
   // Set properties of algorithm
   void setProperties(const Algorithm *const alg);
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm
-  int m_version;
+  int m_version{-1};
   /// The execution date of the algorithm
-  Mantid::Kernel::DateAndTime m_executionDate;
+  Mantid::Types::Core::DateAndTime m_executionDate;
   /// The execution duration of the algorithm
-  double m_executionDuration;
+  double m_executionDuration{-1.0};
   /// The PropertyHistory's defined for the algorithm
   Mantid::Kernel::PropertyHistories m_properties;
   /// count keeps track of execution order of an algorithm
-  std::size_t m_execCount;
+  std::size_t m_execCount{0};
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
-};
-
-struct CompareHistory {
-  /// Less than operator for pointers
-  static bool compare(const AlgorithmHistory_const_sptr lhs,
-                      const AlgorithmHistory_const_sptr rhs) {
-    return (*lhs) < (*rhs);
-  }
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &,

@@ -29,51 +29,55 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid;
+using Mantid::detid_t;
+using Mantid::specnum_t;
+using Mantid::MantidVec;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester() : ISpectrum() {}
-  SpectrumTester(const specnum_t specNo) : ISpectrum(specNo) {}
-
-  void setData(const MantidVec &Y) override { data = Y; }
-  void setData(const MantidVec &Y, const MantidVec &E) override {
-    data = Y;
-    data_E = E;
+  SpectrumTester(Mantid::HistogramData::Histogram::XMode xmode,
+                 Mantid::HistogramData::Histogram::YMode ymode)
+      : ISpectrum(), m_histogram(xmode, ymode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  }
+  SpectrumTester(const specnum_t specNo,
+                 Mantid::HistogramData::Histogram::XMode xmode,
+                 Mantid::HistogramData::Histogram::YMode ymode)
+      : ISpectrum(specNo), m_histogram(xmode, ymode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
   }
 
-  void setData(const MantidVecPtr &Y) override {
-    data.assign(Y->begin(), Y->end());
+  void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X)
+      override {
+    m_histogram.setX(X);
   }
-  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
-  }
-
-  void setData(const MantidVecPtr::ptr_type &Y) override {
-    data.assign(Y->begin(), Y->end());
-  }
-  void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
+  MantidVec &dataX() override { return m_histogram.dataX(); }
+  const MantidVec &dataX() const override { return m_histogram.dataX(); }
+  const MantidVec &readX() const override { return m_histogram.readX(); }
+  Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
+  ptrX() const override {
+    return m_histogram.ptrX();
   }
 
-  MantidVec &dataY() override { return data; }
-  MantidVec &dataE() override { return data_E; }
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
+  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
+  const MantidVec &readDx() const override { return m_histogram.readDx(); }
 
-  const MantidVec &dataY() const override { return data; }
-  const MantidVec &dataE() const override { return data_E; }
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  MantidVec &dataE() override { return m_histogram.dataE(); }
+
+  const MantidVec &dataY() const override { return m_histogram.dataY(); }
+  const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
   size_t getMemorySize() const override {
-    return data.size() * sizeof(double) * 2;
+    return readY().size() * sizeof(double) * 2;
   }
 
   /// Mask the spectrum to this value
@@ -86,45 +90,53 @@ public:
   }
 
 protected:
-  MantidVec data;
-  MantidVec data_E;
+  Mantid::HistogramData::Histogram m_histogram;
+
+private:
+  const Mantid::HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  Mantid::HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
+  }
 };
 
 //===================================================================================================================
-class WorkspaceTester : public MatrixWorkspace {
+class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-      : MatrixWorkspace(nnFactory), spec(0) {}
-  WorkspaceTester() : MatrixWorkspace(), spec(0) {}
-  ~WorkspaceTester() override {}
+  AxeslessWorkspaceTester(const Mantid::Parallel::StorageMode storageMode =
+                              Mantid::Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(storageMode), m_spec(0) {}
 
   // Empty overrides of virtual methods
-  size_t getNumberHistograms() const override { return spec; }
-  const std::string id() const override { return "WorkspaceTester"; }
-  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
-    spec = numspec;
-    vec.resize(spec);
-    for (size_t i = 0; i < spec; i++) {
-      vec[i].dataX().resize(j, 1.0);
-      vec[i].dataY().resize(k, 1.0);
-      vec[i].dataE().resize(k, 1.0);
-      vec[i].addDetectorID(detid_t(i));
-      vec[i].setSpectrumNo(specnum_t(i + 1));
+  size_t getNumberHistograms() const override { return m_spec; }
+  const std::string id() const override { return "AxeslessWorkspaceTester"; }
+  size_t size() const override {
+    size_t total_size = 0;
+    for (const auto &it : m_vec) {
+      total_size += it.dataY().size();
     }
-
-    // Put an 'empty' axis in to test the getAxis method
-    m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
+    return total_size;
   }
-  size_t size() const override { return vec.size() * blocksize(); }
   size_t blocksize() const override {
-    return vec.empty() ? 0 : vec[0].dataY().size();
+    if (m_vec.empty()) {
+      return 0;
+    } else {
+      size_t numY = m_vec[0].dataY().size();
+      for (const auto &it : m_vec) {
+        if (it.dataY().size() != numY)
+          throw std::logic_error("non-constant number of bins");
+      }
+      return numY;
+    }
+    return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
-  ISpectrum *getSpectrum(const size_t index) override { return &vec[index]; }
-  const ISpectrum *getSpectrum(const size_t index) const override {
-    return &vec[index];
-    ;
+  ISpectrum &getSpectrum(const size_t index) override {
+    m_vec[index].setMatrixWorkspace(this, index);
+    return m_vec[index];
+  }
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return m_vec[index];
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}
@@ -133,19 +145,101 @@ public:
     return Mantid::Kernel::None;
   }
 
+protected:
+  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
+    m_spec = numspec;
+    m_vec.resize(m_spec, SpectrumTester(
+                             Mantid::HistogramData::getHistogramXMode(j, k),
+                             Mantid::HistogramData::Histogram::YMode::Counts));
+    for (size_t i = 0; i < m_spec; i++) {
+      m_vec[i].setMatrixWorkspace(this, i);
+      m_vec[i].dataX().resize(j, 1.0);
+      m_vec[i].dataY().resize(k, 1.0);
+      m_vec[i].dataE().resize(k, 1.0);
+      m_vec[i].addDetectorID(detid_t(i));
+      m_vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+  }
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    m_spec = numberOfDetectorGroups();
+    m_vec.resize(m_spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
+    for (size_t i = 0; i < m_spec; i++) {
+      m_vec[i].setHistogram(histogram);
+      m_vec[i].addDetectorID(detid_t(i));
+      m_vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+  }
+
+  AxeslessWorkspaceTester *doClone() const override {
+    return new AxeslessWorkspaceTester(*this);
+  }
+  AxeslessWorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error(
+        "Cloning of AxeslessWorkspaceTester is not implemented.");
+  }
+
+private:
+  std::vector<SpectrumTester> m_vec;
+  size_t m_spec;
+};
+
+class WorkspaceTester : public AxeslessWorkspaceTester {
+public:
+  WorkspaceTester(const Mantid::Parallel::StorageMode storageMode =
+                      Mantid::Parallel::StorageMode::Cloned)
+      : AxeslessWorkspaceTester(storageMode) {}
+
+  const std::string id() const override { return "WorkspaceTester"; }
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceTester> clone() const {
+    return std::unique_ptr<WorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceTester>(doCloneEmpty());
+  }
+
+protected:
+  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
+    AxeslessWorkspaceTester::init(numspec, j, k);
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
+  void init(const Mantid::HistogramData::Histogram &histogram) override {
+    AxeslessWorkspaceTester::init(histogram);
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
+
 private:
   WorkspaceTester *doClone() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(*this);
   }
-  std::vector<SpectrumTester> vec;
-  size_t spec;
+  WorkspaceTester *doCloneEmpty() const override {
+    return new WorkspaceTester(storageMode());
+  }
 };
 
 //===================================================================================================================
 class TableWorkspaceTester : public ITableWorkspace {
 public:
-  TableWorkspaceTester() {}
-  ~TableWorkspaceTester() override {}
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> clone() const {
+    return std::unique_ptr<TableWorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<TableWorkspaceTester>(doCloneEmpty());
+  }
 
   const std::string id() const override { return "TableWorkspaceTester"; }
 
@@ -166,10 +260,6 @@ public:
   }
 
   void removeColumn(const std::string &) override {
-    throw std::runtime_error("removeColumn not implemented");
-  }
-
-  ITableWorkspace *clone() const {
     throw std::runtime_error("removeColumn not implemented");
   }
 
@@ -233,12 +323,21 @@ public:
     throw std::runtime_error("find not implemented");
   }
 
-  void find(V3D, size_t &, const size_t &) override {
+  void find(Mantid::Kernel::V3D, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
 private:
   TableWorkspaceTester *doClone() const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
+  TableWorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &) const override {
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }
@@ -297,6 +396,17 @@ protected:
   }
   const void *void_pointer(size_t) const override {
     throw std::runtime_error("void_pointer const not implemented");
+  }
+};
+
+class VariableBinThrowingTester : public AxeslessWorkspaceTester {
+  size_t blocksize() const override {
+    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
+      return getSpectrum(0).dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
+
+    return 0;
   }
 };
 #endif /* FAKEOBJECTS_H_ */

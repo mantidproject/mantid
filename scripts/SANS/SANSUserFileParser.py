@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 import re
 
@@ -6,6 +7,8 @@ import re
 DarkRunSettings = namedtuple("DarkRunSettings", "run_number time mean mon mon_number")
 
 #pylint: disable=too-many-instance-attributes
+
+
 class BackCommandParser(object):
     def __init__(self):
         super(BackCommandParser, self).__init__()
@@ -195,16 +198,15 @@ class BackCommandParser(object):
 
         # Now pass the arguments back in a defined format
         setting =  DarkRunSettings(mon = self._mon,
-                               run_number = self._run_number,
-                               time = self._use_time,
-                               mean = self._use_mean,
-                               mon_number = self._mon_number)
+                                   run_number = self._run_number,
+                                   time = self._use_time,
+                                   mean = self._use_mean,
+                                   mon_number = self._mon_number)
 
         # Reset the parse results just in case we want to use it again
         self._reset_parse_results()
 
         return setting
-
 
     def _parse(self, arguments):
         '''

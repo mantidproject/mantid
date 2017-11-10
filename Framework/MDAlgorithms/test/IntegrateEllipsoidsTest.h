@@ -2,6 +2,7 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -17,6 +18,7 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 // Add A Fake 'Peak' to both the event data and to the peaks workspace
@@ -31,7 +33,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   const double tofExact = peak->getTOF();
   delete peak;
 
-  EventList &el = eventWS->getEventList(detectorId - totalNPixels);
+  EventList &el = eventWS->getSpectrum(detectorId - totalNPixels);
 
   // Add more events to the event list corresponding to the peak centre
   double start = tofExact - (double(nEvents) / 2 * tofGap);
@@ -68,7 +70,7 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Give the spectra-detector mapping for all event lists
   const int nPixelsTotal = nPixels * nPixels;
   for (int i = 0; i < nPixelsTotal; ++i) {
-    EventList &el = eventWS->getOrAddEventList(i);
+    EventList &el = eventWS->getSpectrum(i);
     el.setDetectorID(i + nPixelsTotal);
   }
 
@@ -235,6 +237,76 @@ public:
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
   }
+
+  void test_execution_events_adaptive() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_eventWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.20));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.23));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.26));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", 0.01));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
+                     integratedPeaksWS->getPeak(0).getIntensity(), 2, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
+                     integratedPeaksWS->getPeak(1).getIntensity(), 0.8, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
+                     integratedPeaksWS->getPeak(2).getIntensity(), 2, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+                     integratedPeaksWS->getPeak(3).getIntensity(), 7, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
+                     integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
+                     integratedPeaksWS->getPeak(5).getIntensity(), 5.83, 0.01);
+  }
+
+  void test_execution_histograms_adaptive() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_histoWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.20));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.23));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.26));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", 0.01));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
+                     integratedPeaksWS->getPeak(0).getIntensity(), 3, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
+                     integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
+                     integratedPeaksWS->getPeak(2).getIntensity(), 3, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+                     integratedPeaksWS->getPeak(3).getIntensity(), 10, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
+                     integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
+                     integratedPeaksWS->getPeak(5).getIntensity(), 9.94, 0.01);
+  }
+
   void test_execution_events_hkl() {
 
     IntegrateEllipsoids alg;

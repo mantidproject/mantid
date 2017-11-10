@@ -2,11 +2,12 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -18,9 +19,6 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMD : public API::Algorithm {
 public:
-  IntegratePeaksMD();
-  ~IntegratePeaksMD() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose

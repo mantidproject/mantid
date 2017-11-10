@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ExponentialMD : public UnaryOperationMD {
 public:
-  ExponentialMD();
-  ~ExponentialMD() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

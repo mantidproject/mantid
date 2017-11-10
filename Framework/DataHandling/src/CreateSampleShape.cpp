@@ -4,6 +4,7 @@
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -36,19 +37,21 @@ void CreateSampleShape::exec() {
   MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
   // Get the XML definition
   std::string shapeXML = getProperty("ShapeXML");
+
   Geometry::ShapeFactory sFactory;
   // Create the object
-  boost::shared_ptr<Geometry::Object> shape_sptr =
-      sFactory.createShape(shapeXML);
-  // Check it's valid and attach it to the workspace sample
-  if (shape_sptr->hasValidShape()) {
-    workspace->mutableSample().setShape(*shape_sptr);
+  auto shape = sFactory.createShape(shapeXML);
+  // Check it's valid and attach it to the workspace sample but preserve any
+  // material
+  if (shape->hasValidShape()) {
+    const auto mat = workspace->sample().getMaterial();
+    shape->setMaterial(mat);
+    workspace->mutableSample().setShape(*shape);
   } else {
-    g_log.warning() << "Object has invalid shape. TopRule = "
-                    << shape_sptr->topRule() << ", number of surfaces = "
-                    << shape_sptr->getSurfacePtr().size() << "\n";
-    throw std::runtime_error(
-        "Shape object is invalid, cannot attach it to workspace.");
+    std::ostringstream msg;
+    msg << "Object has invalid shape. TopRule = " << shape->topRule()
+        << ", number of surfaces = " << shape->getSurfacePtr().size() << "\n";
+    throw std::runtime_error(msg.str());
   }
   // Done!
   progress(1);

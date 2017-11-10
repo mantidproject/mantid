@@ -4,13 +4,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -125,18 +126,17 @@ public:
     }
   }
 
-  void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,
-                         bool OneEventPerBin = false,
+  void do_test_MINITOPAZ(EventType type, int numEventsPer, int numPixels,
+                         size_t numTimesToAdd = 1, bool OneEventPerBin = false,
                          bool MakeWorkspace2D = false) {
 
-    int numEventsPer = 100;
     EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(numEventsPer);
+        createDiffractionEventWorkspace(numEventsPer, numPixels);
     if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }
@@ -173,7 +173,7 @@ public:
 
     // Add to an existing MDEW
     for (size_t i = 1; i < numTimesToAdd; i++) {
-      std::cout << "Iteration " << i << std::endl;
+      std::cout << "Iteration " << i << '\n';
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       alg.setPropertyValue("InputWorkspace", "inputWS");
@@ -201,23 +201,63 @@ public:
     AnalysisDataService::Instance().remove("test_md3");
   }
 
-  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF); }
+  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF, 100, 400); }
 
-  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED); }
+  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED, 100, 400); }
 
-  void test_MINITOPAZ_addToExistingWorkspace() { do_test_MINITOPAZ(TOF, 2); }
+  void test_MINITOPAZ_addToExistingWorkspace() {
+    do_test_MINITOPAZ(TOF, 100, 400, 2);
+  }
 
   void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() {
-    do_test_MINITOPAZ(TOF, 1, true, false);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, false);
   }
 
   void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 1, true, true);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, true);
   }
 
   void test_MINITOPAZ_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 1, false, true);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
   }
+};
+
+class CTDMDWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static CTDMDWorkspaceTestPerformance *createSuite() {
+    return new CTDMDWorkspaceTestPerformance();
+  }
+  static void destroySuite(CTDMDWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,
+                                                                numPixels);
+
+    // Rebin the workspace to have a manageable number bins
+    AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
+                                      "OutputWorkspace", "inputWS", "Params",
+                                      "0, 500, 16e3", "PreserveEvents", "1");
+
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setProperty("OneEventPerBin", false);
+    alg.setPropertyValue("OutputWorkspace", "test_md3");
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testConvertToDiffractionMDWorkspacePerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+private:
+  ConvertToDiffractionMDWorkspace alg;
+  EventWorkspace_sptr in_ws;
+  int numEventsPer = 500;
+  int numPixels = 2000;
 };
 
 #endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */

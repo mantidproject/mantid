@@ -5,10 +5,32 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadFITS.h"
+#include <MantidAPI/FrameworkManager.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+
+namespace {
+
+const std::string g_smallFname1 = "FITS_small_01.fits";
+const std::string g_smallFname2 = "FITS_small_02.fits";
+
+const std::string g_emptyFileName = "FITS_empty_file.fits";
+
+const size_t g_xdim = 512;
+const size_t g_ydim = 512;
+const size_t g_SPECTRA_COUNT = g_xdim * g_ydim;
+const size_t g_SPECTRA_COUNT_ASRECT = g_ydim;
+
+const std::string g_hdrSIMPLE = "T";
+const std::string g_hdrBITPIX = "16";
+const std::string g_hdrNAXIS = "2";
+const std::string g_hdrNAXIS1 = "512";
+const std::string g_hdrNAXIS2 = "512";
+}
 
 class LoadFITSTest : public CxxTest::TestSuite {
 public:
@@ -142,12 +164,12 @@ public:
 
     // Sum the two bins from the last spectra - should be 70400
     double sumY =
-        ws1->readY(g_SPECTRA_COUNT - 1)[0] + ws2->readY(g_SPECTRA_COUNT - 1)[0];
+        ws1->y(g_SPECTRA_COUNT - 1)[0] + ws2->y(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_EQUALS(sumY, 275);
     // Check the sum of the error values for the last spectra in each file -
     // should be 375.183
     double sumE =
-        ws1->readE(g_SPECTRA_COUNT - 1)[0] + ws2->readE(g_SPECTRA_COUNT - 1)[0];
+        ws1->e(g_SPECTRA_COUNT - 1)[0] + ws2->e(g_SPECTRA_COUNT - 1)[0];
     TS_ASSERT_LESS_THAN(std::abs(sumE - 23.4489), 0.0001); // Include a small
     // tolerance check with
     // the assert - not
@@ -188,9 +210,9 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT);
 
       // check Y and Error
-      TS_ASSERT_EQUALS(ws->readY(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
+      TS_ASSERT_EQUALS(ws->y(g_SPECTRA_COUNT - 100)[0], expectedY[i]);
       TS_ASSERT_LESS_THAN(
-          std::abs(ws->readE(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
+          std::abs(ws->e(g_SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
     }
   }
 
@@ -326,15 +348,15 @@ public:
     size_t n = ws0->getNumberHistograms();
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (first one) is not as expected",
-        ws0->readY(n - 1)[0], 137);
+        ws0->y(n - 1)[0], 137);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (middle one) is not as expected",
-        ws0->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
+        ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (last one) is not as expected",
-        ws0->readY(n - 1).back(), 142);
+        ws0->y(n - 1).back(), 142);
 
     MatrixWorkspace_sptr ws1;
     TS_ASSERT_THROWS_NOTHING(
@@ -345,15 +367,15 @@ public:
                       ws1->getTitle(), g_smallFname2);
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (first one) is not as expected",
-        ws1->readY(n - 1)[0], 155);
+        ws1->y(n - 1)[0], 155);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (middle one) is not as expected",
-        ws1->readY(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
+        ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
 
     TSM_ASSERT_EQUALS(
         "The value at a given spectrum and bin (last one) is not as expected",
-        ws1->readY(n - 1).back(), 133);
+        ws1->y(n - 1).back(), 133);
   }
 
   void test_loadEmpty() {
@@ -379,38 +401,56 @@ private:
 
   std::string inputFile;
   std::string outputSpace;
-  static const std::string g_smallFname1;
-  static const std::string g_smallFname2;
-
-  const static std::string g_emptyFileName;
-
-  const static size_t g_xdim;
-  const static size_t g_ydim;
-  const static size_t g_SPECTRA_COUNT;
-  const static size_t g_SPECTRA_COUNT_ASRECT;
-
-  // FITS headers
-  const static std::string g_hdrSIMPLE;
-  const static std::string g_hdrBITPIX;
-  const static std::string g_hdrNAXIS;
-  const static std::string g_hdrNAXIS1;
-  const static std::string g_hdrNAXIS2;
 };
 
-const std::string LoadFITSTest::g_smallFname1 = "FITS_small_01.fits";
-const std::string LoadFITSTest::g_smallFname2 = "FITS_small_02.fits";
+class LoadFITSTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadFITSTestPerformance *createSuite() {
+    return new LoadFITSTestPerformance();
+  }
+  static void destroySuite(LoadFITSTestPerformance *suite) { delete suite; }
 
-const std::string LoadFITSTest::g_emptyFileName = "FITS_empty_file.fits";
+  void setUp() override { FrameworkManager::Instance(); }
 
-const size_t LoadFITSTest::g_xdim = 512;
-const size_t LoadFITSTest::g_ydim = 512;
-const size_t LoadFITSTest::g_SPECTRA_COUNT = g_xdim * g_ydim;
-const size_t LoadFITSTest::g_SPECTRA_COUNT_ASRECT = g_ydim;
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("FitsOutput");
+  }
 
-const std::string LoadFITSTest::g_hdrSIMPLE = "T";
-const std::string LoadFITSTest::g_hdrBITPIX = "16";
-const std::string LoadFITSTest::g_hdrNAXIS = "2";
-const std::string LoadFITSTest::g_hdrNAXIS1 = "512";
-const std::string LoadFITSTest::g_hdrNAXIS2 = "512";
+  void test_Load_Small_01() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname1);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", false);
+    TS_ASSERT(lf.execute());
+  }
+  void test_LoadAsRectImage_Small_01() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname1);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", true);
+    TS_ASSERT(lf.execute());
+  }
+
+  void test_Load_Small_02() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname2);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", false);
+    TS_ASSERT(lf.execute());
+  }
+  void test_LoadAsRectImage_Small_02() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname2);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", true);
+    TS_ASSERT(lf.execute());
+  }
+};
 
 #endif // MANTID_DATAHANDLING_LOADFITSTEST_H_

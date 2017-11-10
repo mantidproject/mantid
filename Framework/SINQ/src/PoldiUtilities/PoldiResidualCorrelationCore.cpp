@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <numeric>
 
@@ -19,7 +20,7 @@ void PoldiResidualCorrelationCore::setWeight(double newWeight) {
 
 /// Returns norm counts (with an added weight).
 double PoldiResidualCorrelationCore::getNormCounts(int x, int y) const {
-  return fabs(m_normCountData->readY(x)[y]) + m_weight;
+  return fabs(m_normCountData->y(x)[y]) + m_weight;
 }
 
 /// Calculates a scaled and weighted average signal/noise value from the
@@ -102,9 +103,9 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
             m_logger.warning()
                 << "Inconsistency foun while calculating distribute "
                    "correlation counts for d-value with index "
-                << boost::lexical_cast<std::string>(k) << ", got middle index: "
-                << boost::lexical_cast<std::string>(middleIndex)
-                << ", ignoring it." << std::endl;
+                << std::to_string(k)
+                << ", got middle index: " << std::to_string(middleIndex)
+                << ", ignoring it.\n";
             break;
           }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);
@@ -185,7 +186,7 @@ DataObjects::Workspace2D_sptr PoldiResidualCorrelationCore::finalizeCalculation(
 /// Adds the supplied value to each data point.
 void PoldiResidualCorrelationCore::addToCountData(int x, int y,
                                                   double newCounts) const {
-  m_countData->dataY(x)[y] += newCounts;
+  m_countData->mutableY(x)[y] += newCounts;
 }
 
 } // namespace Poldi

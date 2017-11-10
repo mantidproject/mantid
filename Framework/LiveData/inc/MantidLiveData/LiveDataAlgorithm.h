@@ -40,13 +40,12 @@ namespace LiveData {
 */
 class DLLExport LiveDataAlgorithm : public API::Algorithm {
 public:
-  LiveDataAlgorithm();
-  ~LiveDataAlgorithm() override;
   const std::string category() const override;
 
   void copyPropertyValuesFrom(const LiveDataAlgorithm &other);
 
-  Mantid::API::ILiveListener_sptr getLiveListener();
+  Mantid::API::ILiveListener_sptr getLiveListener(bool start = true);
+  Mantid::API::ILiveListener_sptr createLiveListener(bool connect = false);
   void setLiveListener(Mantid::API::ILiveListener_sptr listener);
 
   std::map<std::string, std::string> validateInputs() override;
@@ -54,7 +53,7 @@ public:
 protected:
   void initProps();
 
-  Mantid::Kernel::DateAndTime getStartTime() const;
+  Mantid::Types::Core::DateAndTime getStartTime() const;
 
   Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 

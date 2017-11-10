@@ -1,5 +1,7 @@
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -67,7 +69,7 @@ std::string FileValidator::checkValidity(const std::string &value) const {
           g_log.debug() << extension << " ";
         g_log.debug() << "]";
       }
-      g_log.debug() << "\"." << std::endl;
+      g_log.debug() << "\".\n";
     }
   }
 

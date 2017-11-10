@@ -1,10 +1,13 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory,\
     FileProperty, FileAction, MatrixWorkspaceProperty
 from mantid.kernel import Direction
-
+from six.moves import range #pylint: disable=redefined-builtin
 
 _OUTPUTLEVEL = "NOOUTPUT"
+
 
 class LoadFullprofFile(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
@@ -31,16 +34,16 @@ class LoadFullprofFile(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),\
-                "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl or .prf file.")
+        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),
+                             "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl or .prf file.")
 
         #self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output),\
-                "Name of table workspace containing peak parameters from .hkl file.")
+        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output),
+                             "Name of table workspace containing peak parameters from .hkl file.")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
-                "Name of data workspace containing the diffraction pattern in .prf file. ")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+                             "Name of data workspace containing the diffraction pattern in .prf file. ")
 
         return
 
@@ -70,7 +73,6 @@ class LoadFullprofFile(PythonAlgorithm):
 
         return
 
-
     def _loadFPHKLFile(self, filename):
         """ Load Fullprof .hkl file to a TableWorkspace
         """
@@ -81,7 +83,6 @@ class LoadFullprofFile(PythonAlgorithm):
         peakws = self._createReflectionWorkspace(hkldict)
 
         return peakws
-
 
     def _importFullprofHKLFile(self, hklfilename):
         """ Import Fullprof's .hkl file
@@ -135,7 +136,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
             dkey = (h, k, l)
 
-            if hkldict.has_key(dkey):
+            if dkey in hkldict:
                 if _OUTPUTLEVEL == "INFORMATION":
                     self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, l))
                 continue
@@ -185,7 +186,6 @@ class LoadFullprofFile(PythonAlgorithm):
 
         return tablews
 
-
     def _loadFullprofPrfFile(self, prffilename):
         """ Load Fullprof .prf file
         """
@@ -196,16 +196,16 @@ class LoadFullprofFile(PythonAlgorithm):
         tablews = WorkspaceFactory.createTable()
         tablews.addColumn("str", "Name")
         tablews.addColumn("double", "Value")
-        for parname in infodict.keys():
+        for parname in infodict:
             parvalue = infodict[parname]
             tablews.addRow([parname, parvalue])
 
         # 3. Export the data workspace
         datasize = len(data)
-        print "Data Size = ", datasize
+        print("Data Size = ", datasize)
         dataws = WorkspaceFactory.create("Workspace2D", 4, datasize, datasize)
-        for i in xrange(datasize):
-            for j in xrange(4):
+        for i in range(datasize):
+            for j in range(4):
                 dataws.dataX(j)[i] = data[i][0]
                 dataws.dataY(j)[i] = data[i][j+1]
                 dataws.dataE(j)[i] = 1.0
@@ -258,7 +258,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
         # Find data line header
         firstline = -1
-        for i in xrange(1, len(lines)):
+        for i in range(1, len(lines)):
             if lines[i].count("Yobs-Ycal") > 0:
                 firstline = i+1
                 #dataheader = lines[i].strip()
@@ -274,10 +274,9 @@ class LoadFullprofFile(PythonAlgorithm):
         # TOF., ... h k l ...
         #reflectionperline = len(headerterms)-5+3
 
-
         # Parse data
         count = 0
-        for i in xrange(firstline, len(lines)):
+        for i in range(firstline, len(lines)):
             line = lines[i].strip()
             if len(line) == 0: # empty line
                 continue
@@ -332,10 +331,9 @@ class LoadFullprofFile(PythonAlgorithm):
             # ENDIF-ELIF-ELSE (line.count)
         # ENDFOR
 
-        print "Data set counter = ", count
+        print("Data set counter = ", count)
 
         return (infodict, dataset)
-
 
     def _makeEmptyDataWorkspace(self):
         """ Make an empty data workspace (Workspace2D)
@@ -379,7 +377,7 @@ class LoadFullprofFile(PythonAlgorithm):
         vecy = []
         vece = []
 
-        for i in xrange(iline, len(rawlines)):
+        for i in range(iline, len(rawlines)):
             line = rawlines[i].strip()
             if len(line) == 0:
                 continue
@@ -387,11 +385,11 @@ class LoadFullprofFile(PythonAlgorithm):
             terms = line.split()
             numitems = len(terms)
             if numitems % 3 != 0:
-                print "%d-th line '%s' is not a data line" % (i, line)
+                print("%d-th line '%s' is not a data line" % (i, line))
                 continue
 
             numpts = numitems/3
-            for j in xrange(numpts):
+            for j in range(numpts):
                 x = float(terms[j*3])
                 y = float(terms[j*3+1])
                 e = float(terms[j*3+2])
@@ -411,12 +409,13 @@ class LoadFullprofFile(PythonAlgorithm):
         # Create the data workspace
         datasize = len(vecx)
         dataws = WorkspaceFactory.create("Workspace2D", 1, datasize, datasize)
-        for i in xrange(datasize):
+        for i in range(datasize):
             dataws.dataX(0)[i] = vecx[i]
             dataws.dataY(0)[i] = vecy[i]
             dataws.dataE(0)[i] = vece[i]
 
         return (tablews, dataws)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadFullprofFile)

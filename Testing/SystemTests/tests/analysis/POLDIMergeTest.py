@@ -3,13 +3,13 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
+
 class POLDIMergeTest(stresstesting.MantidStressTest):
     '''This test checks that the results of PoldiMerge match the expected outcome.'''
 
     def runTest(self):
         self.testHappyCase()
         self.testDifferentTimings()
-
 
     def testDifferentTimings(self):
         dataFiles = ["poldi2014n019874", "poldi2014n019881"]
@@ -20,7 +20,6 @@ class POLDIMergeTest(stresstesting.MantidStressTest):
             self.assertTrue(False)
         except RuntimeError:
             self.assertTrue(True)
-
 
     def testHappyCase(self):
         dataFiles = ["poldi2013n006903", "poldi2013n006904"]
@@ -38,11 +37,8 @@ class POLDIMergeTest(stresstesting.MantidStressTest):
     # compare result of workspace group merging to previously checked results
         self.compareWorkspaces(workspaceGroupResult, mtd['poldi_sum_6903_6904'])
 
-
-
     def testGroupWorkspace(self, groupWorkspace):
         return PoldiMerge(groupWorkspace)
-
 
     def loadData(self, filenames):
         for dataFile in filenames:
@@ -63,4 +59,3 @@ class POLDIMergeTest(stresstesting.MantidStressTest):
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
             self.assertTrue(np.array_equal(left.dataY(i), right.dataY(i)))
-

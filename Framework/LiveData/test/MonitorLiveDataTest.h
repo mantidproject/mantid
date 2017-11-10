@@ -7,6 +7,7 @@
 
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ConfigService.h"

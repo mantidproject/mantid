@@ -1,10 +1,11 @@
-#pylint: disable=invalid-name
+#pylint: disable = invalid-name
 """
     This class holds all the necessary information to create a reduction script.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
-import os
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
 
 class REFLReductionScripter(BaseReductionScripter):
     """
@@ -48,5 +49,3 @@ class REFLReductionScripter(BaseReductionScripter):
             f.close()
 
         return script
-
-

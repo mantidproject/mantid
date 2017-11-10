@@ -4,6 +4,8 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Timer.h"
 #include <ctime>
+#include <iosfwd>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

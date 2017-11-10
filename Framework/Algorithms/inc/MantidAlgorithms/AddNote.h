@@ -39,7 +39,6 @@ class DLLExport AddNote : public API::Algorithm,
                           public API::DeprecatedAlgorithm {
 public:
   AddNote();
-  ~AddNote() override;
 
   const std::string name() const override;
   int version() const override;

@@ -1,7 +1,9 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import numpy as np
+
 
 class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
     '''Checking results of PoldiFitPeaks1D.'''
@@ -77,14 +79,13 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
                 position = [positions[i], positionErrors[i]]
                 fwhm = [fwhms[i], fwhmErrors[i]]
 
-                print position, fwhm, referencePositions
+                print(position, fwhm, referencePositions)
 
                 self.assertTrue(self.positionAcceptable(position))
                 self.assertTrue(self.fwhmAcceptable(fwhm))
 
           # find closest reference peak
                 deltas = np.array([np.abs(position[0] - x) for x in referencePositions])
-
 
                 self.assertDelta(deltas.min(), 0.0, self.versionDeltas[version])
                 minIndex = deltas.argmin()

@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -7,6 +8,8 @@ import numpy
 import sys
 import os
 import json
+from six import iteritems
+
 
 class USANSReduction(PythonAlgorithm):
 
@@ -29,8 +32,8 @@ class USANSReduction(PythonAlgorithm):
     def PyInit(self):
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,\
-                             direction=Direction.Input), "Runs to reduce")
+        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,
+                                              direction=Direction.Input), "Runs to reduce")
         self.declareProperty("EmptyRun", '', "Run number for the empty run")
 
         #TODO: Mask workspace
@@ -109,12 +112,12 @@ class USANSReduction(PythonAlgorithm):
                         is_scan = True
 
             # Append the info for when we do the reduction
-            self.data_files.append(self.DataFile(workspace=ws_name,\
-                                            monitor=ws_name+'_monitors',\
-                                            empty='__empty',\
-                                            empty_monitor='__empty_monitors',\
-                                            is_scan=is_scan,\
-                                            max_index=max_index))
+            self.data_files.append(self.DataFile(workspace=ws_name,
+                                                 monitor=ws_name+'_monitors',
+                                                 empty='__empty',
+                                                 empty_monitor='__empty_monitors',
+                                                 is_scan=is_scan,
+                                                 max_index=max_index))
             total_points += max_index
 
         return total_points
@@ -157,11 +160,11 @@ class USANSReduction(PythonAlgorithm):
                     self.iq_output[i_wl][point+index_offset] = i_q.dataY(0)[0]
                     self.iq_err_output[i_wl][point+index_offset] = i_q.dataE(0)[0]
                 except:
-                    Logger("USANSReduction").error("Exception caught for "+\
+                    Logger("USANSReduction").error("Exception caught for "+
                                                    "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
                     Logger("USANSReduction").error("Array: "+
                                                    "%s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
-                    Logger("USANSReduction").error(sys.exc_value)
+                    Logger("USANSReduction").error(sys.exc_info()[1])
         return file_info.max_index
 
     def PyExec(self):
@@ -193,6 +196,7 @@ class USANSReduction(PythonAlgorithm):
         x_all = []
         y_all = []
         e_all = []
+
         def compare(p1,p2):
             if p2[0]==p1[0]:
                 return 0
@@ -207,9 +211,9 @@ class USANSReduction(PythonAlgorithm):
             e = self.iq_err_output[i_wl]
 
             # Sort the I(q) point just in case we got them in the wrong order
-            zipped = zip(x,y,e)
+            zipped = list(zip(x,y,e))
             combined = sorted(zipped, compare)
-            x,y,e = zip(*combined)
+            x,y,e = list(zip(*combined))
 
             wl = self.wl_list[i_wl]['wavelength']
             CreateWorkspace(DataX=x,
@@ -219,9 +223,9 @@ class USANSReduction(PythonAlgorithm):
                             OutputWorkspace='iq_%1.2f' % wl)
 
         # Sort the I(q) point just in case we got them in the wrong order
-        zipped = zip(x_all,y_all,e_all)
+        zipped = list(zip(x_all,y_all,e_all))
         combined = sorted(zipped, compare)
-        x,y,e = zip(*combined)
+        x,y,e = list(zip(*combined))
 
         # Create the combined output workspace
         output_ws_name = self.getPropertyValue("OutputWorkspace")
@@ -271,8 +275,8 @@ class USANSReduction(PythonAlgorithm):
         __point = _execute('CropWorkspace', InputWorkspace=sample_monitor,
                            XMin=tof_min, XMax=tof_max,
                            OutputWorkspace='__point')
-        __monitor_count = _execute('Integration', InputWorkspace=__point,
-                                   OutputWorkspace='__monitor_count')
+        #__monitor_count = _execute('Integration', InputWorkspace=__point,
+        #                           OutputWorkspace='__monitor_count')
 
         # The monitor count normalization cancels out when doing the transmission correction
         # of the scattering signal below
@@ -284,10 +288,10 @@ class USANSReduction(PythonAlgorithm):
                                 OutputWorkspace='transmission')
 
         # Scattering signal
-        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,\
-                                     StartWorkspaceIndex=0,\
-                                     EndWorkspaceIndex=nspecs/2,\
-                                     OutputWorkspace='__signal_summed')
+        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,
+                                   StartWorkspaceIndex=0,
+                                   EndWorkspaceIndex=nspecs/2,
+                                   OutputWorkspace='__signal_summed')
         __point = _execute('CropWorkspace', InputWorkspace=__signal_summed,
                            XMin=tof_min, XMax=tof_max,
                            OutputWorkspace='__point')
@@ -301,15 +305,16 @@ class USANSReduction(PythonAlgorithm):
                              OutputWorkspace='intensity')
         return intensity
 
+
 def _execute(algorithm_name, **parameters):
     alg = AlgorithmManager.create(algorithm_name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in parameters.iteritems():
+    for key, value in iteritems(parameters):
         if value is None:
             Logger("USANSReduction").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):
-            if type(value)==str:
+            if isinstance(value, str):
                 alg.setPropertyValue(key, value)
             else:
                 alg.setProperty(key, value)
@@ -319,7 +324,9 @@ def _execute(algorithm_name, **parameters):
             return alg.getProperty("OutputWorkspace").value
     except:
         Logger("USANSReduction").error("Error executing [%s]" % str(alg))
-        Logger("USANSReduction").error(str(sys.exc_value))
+        Logger("USANSReduction").error(str(sys.exc_info()[1]))
     return alg
+
+
 #############################################################################################
 AlgorithmFactory.subscribe(USANSReduction())

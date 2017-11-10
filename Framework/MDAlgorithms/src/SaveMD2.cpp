@@ -1,7 +1,9 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -28,18 +30,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveMD2)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveMD2::SaveMD2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMD2::~SaveMD2() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -143,10 +133,11 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
-    for (size_t n = 0; n < dim->getNBins() + 1; n++)
+    auto nbounds = dim->getNBoundaries();
+    for (size_t n = 0; n < nbounds; n++)
       axis.push_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
-                   static_cast<int>(dim->getNBins() + 1), true);
+                   static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
@@ -167,21 +158,28 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     size[numDims - 1 - d] = int(dim->getNBins());
   }
 
-  file->makeData("signal", ::NeXus::FLOAT64, size, true);
+  std::vector<int> chunks = size;
+  chunks[0] = 1; // Drop the largest stride for chunking, I don't know
+                 // if this is the best but appears to work
+
+  file->makeCompData("signal", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getSignalArray());
   file->putAttr("signal", 1);
   file->putAttr("axes", axes_label);
   file->closeData();
 
-  file->makeData("errors_squared", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("errors_squared", ::NeXus::FLOAT64, size, ::NeXus::LZW,
+                     chunks, true);
   file->putData(ws->getErrorSquaredArray());
   file->closeData();
 
-  file->makeData("num_events", ::NeXus::FLOAT64, size, true);
+  file->makeCompData("num_events", ::NeXus::FLOAT64, size, ::NeXus::LZW, chunks,
+                     true);
   file->putData(ws->getNumEventsArray());
   file->closeData();
 
-  file->makeData("mask", ::NeXus::INT8, size, true);
+  file->makeCompData("mask", ::NeXus::INT8, size, ::NeXus::LZW, chunks, true);
   file->putData(ws->getMaskArray());
   file->closeData();
 

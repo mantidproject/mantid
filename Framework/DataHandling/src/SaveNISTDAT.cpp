@@ -34,7 +34,7 @@ void SaveNISTDAT::init() {
 
 void SaveNISTDAT::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  std::string filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
 
   // prepare to save to file
   std::ofstream out_File(filename.c_str());
@@ -53,11 +53,14 @@ void SaveNISTDAT::exec() {
     const Axis &axis = *inputWS->getAxis(1);
     for (size_t i = 0; i < axis.length() - 1; i++) {
       const double qy = (axis(i) + axis(i + 1)) / 2.0;
-      const MantidVec &XIn = inputWS->readX(i);
-      const MantidVec &YIn = inputWS->readY(i);
-      const MantidVec &EIn = inputWS->readE(i);
+      const auto &XIn = inputWS->x(i);
+      const auto &YIn = inputWS->y(i);
+      const auto &EIn = inputWS->e(i);
 
       for (size_t j = 0; j < XIn.size() - 1; j++) {
+        // Don't write out Q bins without data
+        if (YIn[j] == 0 && EIn[j] == 0)
+          continue;
         // Exclude NaNs
         if (YIn[j] == YIn[j]) {
           out_File << (XIn[j] + XIn[j + 1]) / 2.0;

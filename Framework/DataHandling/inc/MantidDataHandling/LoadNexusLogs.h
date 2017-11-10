@@ -58,8 +58,6 @@ class DLLExport LoadNexusLogs : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexusLogs();
-  /// Destructor
-  ~LoadNexusLogs() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadNexusLogs"; }
   /// Summary of algorithms purpose
@@ -99,6 +97,7 @@ private:
   /// Create a time series property
   Kernel::Property *createTimeSeries(::NeXus::File &file,
                                      const std::string &prop_name) const;
+
   /// Progress reporting object
   boost::shared_ptr<API::Progress> m_progress;
 

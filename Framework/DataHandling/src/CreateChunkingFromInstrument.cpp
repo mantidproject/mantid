@@ -2,13 +2,15 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -18,9 +20,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Types::Core::DateAndTime;
 using namespace std;
 
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+typedef Mantid::Kernel::StringTokenizer tokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)
@@ -46,17 +49,6 @@ const string PARAM_OUT_WKSP("OutputWorkspace");
 const string PARAM_MAX_BANK_NUM("MaxBankNumber");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateChunkingFromInstrument::CreateChunkingFromInstrument() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {
   return "CreateChunkingFromInstrument";
@@ -76,7 +68,6 @@ const string CreateChunkingFromInstrument::summary() const {
          "components.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateChunkingFromInstrument::init() {
@@ -205,7 +196,7 @@ bool startsWith(const string &str, const string &prefix) {
   if (str.length() < prefix.length())
     return false;
 
-  return (str.substr(0, prefix.length()).compare(prefix) == 0);
+  return (str.substr(0, prefix.length()) == prefix);
 }
 
 /**
@@ -246,7 +237,7 @@ string parentName(IComponent_const_sptr comp, const string &prefix) {
 string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   // handle the special case of the component has the name
   for (const auto &name : names)
-    if (name.compare(comp->getName()) == 0)
+    if (name == comp->getName())
       return name;
 
   // find the parent with the correct name
@@ -254,7 +245,7 @@ string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   if (parent) {
     // see if this is the parent
     for (const auto &name : names)
-      if (name.compare(parent->getName()) == 0)
+      if (name == parent->getName())
         return name;
 
     // or recurse
@@ -271,20 +262,12 @@ string parentName(IComponent_const_sptr comp, const vector<string> &names) {
  * @return The vector of instrument component names.
  */
 vector<string> getGroupNames(const string &names) {
-  vector<string> groups;
-
   // check that there is something
   if (names.empty())
-    return groups;
-
+    return std::vector<string>();
   // do the actual splitting
-  const boost::char_separator<char> SEPERATOR(",");
-  tokenizer tokens(names, SEPERATOR);
-  for (auto item = tokens.begin(); item != tokens.end(); ++item) {
-    groups.push_back(*item);
-  }
-
-  return groups;
+  tokenizer tokens(names, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  return tokens.asVector();
 }
 
 /**
@@ -395,10 +378,9 @@ void CreateChunkingFromInstrument::exec() {
   string groupLevel = this->getPropertyValue(PARAM_CHUNK_BY);
   vector<string> groupNames =
       getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
-  if (groupLevel.compare("All") == 0) {
+  if (groupLevel == "All") {
     return; // nothing to do
-  } else if (inst->getName().compare("SNAP") == 0 &&
-             groupLevel.compare("Group") == 0) {
+  } else if (inst->getName() == "SNAP" && groupLevel == "Group") {
     groupNames.clear();
     groupNames.emplace_back("East");
     groupNames.emplace_back("West");

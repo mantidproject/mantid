@@ -9,7 +9,6 @@
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL GEOMETRY_ARRAY_API
 #include <numpy/arrayobject.h>
-#include <boost/python/numeric.hpp>
 
 using boost::python::def;
 
@@ -22,7 +21,6 @@ BOOST_PYTHON_MODULE(_geometry)
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy
   _import_array();
-  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
-  
+
 @EXPORT_FUNCTIONS@
 }

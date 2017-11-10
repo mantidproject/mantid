@@ -14,14 +14,20 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include <memory>
 
 // Forward declarations
 namespace Mantid {
+namespace Kernel {
+class Quat;
+}
 namespace Geometry {
 class CompAssembly;
 class ObjComponent;
 class DetectorGroup;
 class DetectorsRing;
+class IDetector;
+class Instrument;
 }
 }
 
@@ -54,6 +60,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 //----------------------------------------------------------------------------------------------
+/**
+ * Return the appropriate XML for the requested cylinder
+ */
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id);
+
 /**
  * Create a capped cylinder object
  */
@@ -115,10 +129,19 @@ boost::shared_ptr<Mantid::Geometry::DetectorGroup>
 createRingOfCylindricalDetectors(const double R_min = 4.5,
                                  const double R_max = 5,
                                  const double z000000000000000 = 4);
+
 /**
- * Create a group of two monitors
+ * Create a detector vector containing detectors ring
+ * R_min -- min radius of the ring
+ * R_max -- max radius of the ring, center has to be in 0 position,
+ * z     -- axial z-coordinate of the detectors position;
+  The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
+std::vector<std::unique_ptr<Mantid::Geometry::IDetector>>
+createVectorOfCylindricalDetectors(const double R_min = 4.5,
+                                   const double R_max = 5,
+                                   const double z000000000000000 = 4);
+
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
 Mantid::Geometry::Instrument_sptr
@@ -144,6 +167,12 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
     const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
     const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
     const double cylRadius = 0.004, const double cylHeight = 0.0002);
+
+void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
+                        int idStart, int pixels, double pixelSpacing,
+                        std::string bankName,
+                        const Mantid::Kernel::V3D &bankPos,
+                        const Mantid::Kernel::Quat &bankRot);
 
 /// Create a test instrument with n panels of rectangular detectors,
 /// pixels*pixels in size, a source and spherical sample shape.

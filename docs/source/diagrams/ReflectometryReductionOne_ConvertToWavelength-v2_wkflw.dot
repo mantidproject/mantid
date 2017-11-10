@@ -1,0 +1,63 @@
+digraph ReflectometryReductionOne {
+splines=line
+label = "\n"
+rankdir = TB;
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="InputWorkspace", group=gmain]
+  outputWS            [label="OutputWorkspaceWavelength", group=gmain]
+  procCommands        [label="ProcessingInstructions"]
+  wavMin              [label="WavelengthMin"]
+  wavMax              [label="WavelengthMax"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSumInLam   [label="Sum in &lambda;?"]
+  checkSumInLam2  [label="Sum in &lambda;?", group=gmain]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertDet    [label="ConvertUnits\n(AlignBins = True)"]
+  groupDet      [label="GroupDetectors"]
+  cropWav       [label="CropWorkspace"]
+  divideDetDB   [label="Divide\n(Detectors / DirectBeam)"]
+  divideDetMon  [label="Divide\n(Detectors / Monitors)"]
+}
+
+subgraph processes {
+ $process_style
+  createDBWS    [label="Create direct beam\nworkspace"]
+  createMonWS   [label="Create monitor\nworkspace"]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS             -> checkSumInLam [label="Detectors"]
+inputWS             -> createDBWS    [label="Direct Beam"]
+inputWS             -> createMonWS   [label="Monitors"]
+
+checkSumInLam       -> convertDet    [label="No"]
+checkSumInLam       -> groupDet      [label="Yes"]
+
+procCommands        -> groupDet
+groupDet            -> convertDet
+convertDet          -> divideDetDB
+createDBWS          -> divideDetDB
+divideDetDB         -> divideDetMon
+createMonWS         -> divideDetMon
+divideDetMon        -> checkSumInLam2
+
+checkSumInLam2      -> outputWS          [label="No"]
+checkSumInLam2      -> cropWav           [label="Yes"]
+wavMin              -> cropWav
+wavMax              -> cropWav
+cropWav             -> outputWS
+
+{rank=same; wavMin; wavMax; checkSumInLam2}
+}

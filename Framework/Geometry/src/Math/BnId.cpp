@@ -224,7 +224,6 @@ void BnId::setCounters()
     else if (*vc == 0)
       Znum++;
   }
-  return;
 }
 
 int BnId::intValue() const
@@ -255,7 +254,6 @@ void BnId::mapState(const std::vector<int> &Index,
   int i(0);
   for (vc = Index.begin(); vc != Index.end(); ++vc, ++i)
     Base[*vc] = (Tval[i] == 1) ? 1 : 0;
-  return;
 }
 
 std::pair<int, BnId> BnId::makeCombination(const BnId &A) const
@@ -321,7 +319,6 @@ void BnId::reverse()
   transform(Tval.begin(), Tval.end(), Tval.begin(),
             std::bind2nd(std::multiplies<int>(), -1));
   setCounters();
-  return;
 }
 
 std::string BnId::display() const

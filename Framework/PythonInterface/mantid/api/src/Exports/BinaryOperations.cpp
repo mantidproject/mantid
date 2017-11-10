@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 
@@ -114,7 +114,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
     algoName = op + "MD";
 
   ResultType result;
-  std::string error("");
+  std::string error;
   try {
     if (reverse) {
       result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType,
@@ -127,7 +127,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
     }
   } catch (std::runtime_error &exc) {
     error = exc.what();
-    if (error.compare("algorithm") == 0) {
+    if (error == "algorithm") {
       error = "Unknown binary operation requested: " + op;
       throw std::runtime_error(error);
     } else {
@@ -156,7 +156,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
                                      const std::string &name, bool inplace,
                                      bool reverse) {
-  std::string algoName = op;
+  const std::string &algoName = op;
 
   // Create the single valued workspace first so that it is run as a top-level
   // algorithm

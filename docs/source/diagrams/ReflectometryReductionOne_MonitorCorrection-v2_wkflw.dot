@@ -1,0 +1,55 @@
+digraph ReflectometryReductionOne {
+splines=line
+label = "\n"
+rankdir = TB;
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="InputWorkspace", group=gmain]
+  outputWS            [label="MonitorWorkspace", group=gmain]
+  monitorIndex        [label="I0MonitorIndex"]
+  monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monBackWavMin       [label="MonitorBackground-\nWavelengthMin"]
+  monBackWavMax       [label="MonitorBackground-\nWavelengthMax"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertMon    [label="ConvertUnits\n(AlignBins = True)", group=gmon]
+  cropMonWS     [label="CropWorkspace", group=gmon]
+  calcFlatBg    [label="CalculateFlatBackground", group=gmon]
+  intMon        [label="Integration", group=gmon]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS             -> cropMonWS
+
+monitorIndex        -> cropMonWS
+cropMonWS           -> convertMon
+
+convertMon          -> calcFlatBg
+
+monBackWavMin       -> calcFlatBg
+monBackWavMax       -> calcFlatBg
+calcFlatBg          -> intMon
+
+monIntWavMin        -> intMon
+monIntWavMax        -> intMon
+intMon              -> outputWS
+
+{rank=same; monIntWavMin; monIntWavMax}
+{rank=same; monBackWavMin; monBackWavMax}
+}

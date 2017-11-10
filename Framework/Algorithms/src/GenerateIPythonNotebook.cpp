@@ -5,11 +5,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/NotebookBuilder.h"
+#include "MantidAPI/Workspace.h"
 
 #include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
@@ -21,9 +23,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void GenerateIPythonNotebook::init() {
@@ -40,6 +39,7 @@ void GenerateIPythonNotebook::init() {
   declareProperty("NotebookText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
+  getPointerToProperty("NotebookText")->setAutoTrim(false);
 
   declareProperty("UnrollAll", false,
                   "Unroll all algorithms to show just their child algorithms.",
@@ -60,7 +60,6 @@ void GenerateIPythonNotebook::init() {
       "When to specify which algorithm version was used by Mantid.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
 void GenerateIPythonNotebook::exec() {
@@ -73,7 +72,7 @@ void GenerateIPythonNotebook::exec() {
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
   g_log.information() << "Number of history items: " << wsHistory.size()
-                      << std::endl;
+                      << '\n';
 
   auto view = wsHistory.createView();
 
@@ -82,8 +81,8 @@ void GenerateIPythonNotebook::exec() {
   }
 
   // Need at least a start time to do time filter
-  if (startTime != "") {
-    if (endTime == "") {
+  if (!startTime.empty()) {
+    if (endTime.empty()) {
       // If no end time was given then filter up to now
       view->filterBetweenExecDate(DateAndTime(startTime));
     } else {
@@ -100,7 +99,7 @@ void GenerateIPythonNotebook::exec() {
     versionSpecificity = "all";
 
   NotebookBuilder builder(view, versionSpecificity);
-  std::string generatedNotebook = "";
+  std::string generatedNotebook;
   generatedNotebook +=
       builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 

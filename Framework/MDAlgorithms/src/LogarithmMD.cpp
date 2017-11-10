@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(LogarithmMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LogarithmMD::LogarithmMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LogarithmMD::~LogarithmMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LogarithmMD::name() const { return "LogarithmMD"; }
 

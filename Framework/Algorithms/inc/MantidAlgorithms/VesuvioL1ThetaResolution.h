@@ -38,9 +38,6 @@ namespace Algorithms {
 */
 class DLLExport VesuvioL1ThetaResolution : public API::Algorithm {
 public:
-  VesuvioL1ThetaResolution();
-  ~VesuvioL1ThetaResolution() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -51,7 +48,7 @@ private:
   void exec() override;
   void loadInstrument();
 
-  void calculateDetector(Mantid::Geometry::IDetector_const_sptr detector,
+  void calculateDetector(const Mantid::Geometry::IDetector &detector,
                          std::vector<double> &l1Values,
                          std::vector<double> &thetaValues);
   Mantid::API::MatrixWorkspace_sptr

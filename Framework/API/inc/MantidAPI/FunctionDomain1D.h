@@ -45,6 +45,10 @@ namespace API {
 */
 class MANTID_API_DLL FunctionDomain1D : public FunctionDomain {
 public:
+  /// copying is not allowed.
+  FunctionDomain1D(const FunctionDomain1D &right) = delete;
+  /// copying is not allowed.
+  FunctionDomain1D &operator=(const FunctionDomain1D &) = delete;
   /// Return the number of arguments in the domain
   size_t size() const override { return m_n; }
   /// Get an x value.
@@ -54,11 +58,15 @@ public:
   const double *getPointerAt(size_t i) const { return m_data + i; }
   /// Convert to a vector
   std::vector<double> toVector() const;
+  /// Set a peak redius to pass to peak functions.
+  void setPeakRadius(int radius);
+  /// Get the peak radius.
+  int getPeakRadius() const;
 
 protected:
   /// Protected constructor, shouldn't be created directly. Use
   /// FunctionDomain1DView instead.
-  FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n) {}
+  FunctionDomain1D(const double *x, size_t n);
   /// Reset the pointer and size of the domain
   void resetData(const double *x, size_t n) {
     m_data = x;
@@ -66,12 +74,12 @@ protected:
   }
 
 private:
-  /// Private copy constructor - copying is not allowed.
-  FunctionDomain1D(const FunctionDomain1D &right);
-  /// Private copy assignment operator - copying is not allowed.
-  FunctionDomain1D &operator=(const FunctionDomain1D &);
-  const double *m_data; ///< pointer to the start of the domain data
-  size_t m_n;           ///< size of the data
+  /// pointer to the start of the domain data
+  const double *m_data;
+  /// size of the data
+  size_t m_n;
+  /// A peak radius that IPeakFunctions should use
+  int m_peakRadius;
 };
 
 /**
@@ -136,6 +144,32 @@ public:
 private:
   /// The workspace index
   size_t m_workspaceIndex;
+};
+
+/// Implements FunctionDomain1D as a set of bins for a histogram.
+/// operator[i] returns the right boundary of i-th bin.
+/// The left boundary of the first bin (#0) is returned by leftBoundary()
+/// method.
+class MANTID_API_DLL FunctionDomain1DHistogram : public FunctionDomain1D {
+public:
+  /// Constructor.
+  FunctionDomain1DHistogram(const std::vector<double> &bins);
+  /// Constructor.
+  FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
+                            std::vector<double>::const_iterator to);
+
+  /// Disable copy operator
+  FunctionDomain1DHistogram(const FunctionDomain1DHistogram &) = delete;
+
+  /// Disable assignment operator
+  FunctionDomain1DHistogram &
+  operator=(const FunctionDomain1DHistogram &) = delete;
+
+  /// Get the leftmost boundary
+  double leftBoundary() const;
+
+protected:
+  std::vector<double> m_bins; ///< vector of bin boundaries
 };
 
 /// typedef for a shared pointer to a FunctionDomain1D

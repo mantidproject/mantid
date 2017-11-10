@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidMDAlgorithms/FitMD.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -10,7 +7,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
@@ -239,15 +235,12 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
   } while (inputIter->next());
   delete inputIter;
 
-  API::MemoryManager::Instance().releaseFreeMemory();
   // This splits up all the boxes according to split thresholds and sizes.
   auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
   Kernel::ThreadPool threadPool(threadScheduler);
   outputWS->splitAllIfNeeded(threadScheduler);
   threadPool.joinAll();
   outputWS->refreshCache();
-  // Flush memory
-  API::MemoryManager::Instance().releaseFreeMemory();
 
   // Store it
   if (!outputWorkspacePropertyName.empty()) {

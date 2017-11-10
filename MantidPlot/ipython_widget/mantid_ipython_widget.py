@@ -1,6 +1,10 @@
+from __future__ import (absolute_import, division,
+                        print_function)
+
+import inspect
 import threading
 import types
-import inspect
+import warnings
 
 from PyQt4 import QtGui
 
@@ -11,9 +15,20 @@ from pygments.lexer import RegexLexer
 # Monkeypatch!
 RegexLexer.get_tokens_unprocessed_unpatched = RegexLexer.get_tokens_unprocessed
 
-from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
-from IPython.qt.inprocess import QtInProcessKernelManager
+# Ignore Jupyter/IPython deprecation warnings that we can't do anything about
+warnings.filterwarnings('ignore', category=DeprecationWarning, module='IPython.*')
+warnings.filterwarnings('ignore', category=DeprecationWarning, module='ipykernel.*')
+warnings.filterwarnings('ignore', category=DeprecationWarning, module='jupyter_client.*')
+warnings.filterwarnings('ignore', category=DeprecationWarning, module='qtconsole.*')
+del warnings
 
+try:
+    # Later versions of Qtconsole are part of Jupyter
+    from qtconsole.rich_jupyter_widget import RichJupyterWidget as RichIPythonWidget
+    from qtconsole.inprocess import QtInProcessKernelManager
+except ImportError:
+    from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
+    from IPython.qt.inprocess import QtInProcessKernelManager
 
 def our_run_code(self, code_obj, result=None):
     """ Method with which we replace the run_code method of IPython's InteractiveShell class.
@@ -80,4 +95,3 @@ class MantidIPythonWidget(RichIPythonWidget):
 
         self.kernel_manager = kernel_manager
         self.kernel_client = kernel_client
-

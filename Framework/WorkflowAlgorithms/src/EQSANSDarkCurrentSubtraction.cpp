@@ -1,15 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -47,7 +46,7 @@ void EQSANSDarkCurrentSubtraction::init() {
 }
 
 void EQSANSDarkCurrentSubtraction::exec() {
-  std::string output_message = "";
+  std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;
@@ -119,7 +118,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
 
     std::string darkWSOutputName =
         getPropertyValue("OutputDarkCurrentWorkspace");
-    if (!(darkWSOutputName.size() == 0))
+    if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
@@ -148,8 +147,7 @@ void EQSANSDarkCurrentSubtraction::exec() {
     output_message +=
         "\n   Could not find proton charge or duration in sample logs";
     g_log.error()
-        << "ERROR: Could not find proton charge or duration in sample logs"
-        << std::endl;
+        << "ERROR: Could not find proton charge or duration in sample logs\n";
   };
 
   progress.report("Scaling dark current");

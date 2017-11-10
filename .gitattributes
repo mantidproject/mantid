@@ -7,6 +7,9 @@
 # should compress well
 *.xml              hooks.MaxObjectKiB130902=2048
 
+# .dot files are diff'd using Word on Windows by default
+*.dot !diff
+
 # Allowing gSoap generated files to be committed.
 /Code/Mantid/Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h              hooks.MaxObjectKiB131025=2048 
 /Code/Mantid/Framework/ICat/src/ICat3/GSoapGenerated/ICat3C.cpp                       hooks.MaxObjectKiB131025=5120

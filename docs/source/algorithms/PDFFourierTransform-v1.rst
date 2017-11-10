@@ -17,11 +17,19 @@ spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
 The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) `units <http://www.mantidproject.org/Units>`_ . 
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
 
+References
+----------
+
+#. B. H. Toby and T. Egami, *Accuracy of Pair Distribution Functions Analysis Appliced to Crystalline and Non-Crystalline Materials*, Acta Cryst. (1992) A **48**, 336-346
+   `doi: 10.1107/S0108767391011327 <http://dx.doi.org/10.1107/S0108767391011327>`_
+#. B.H. Toby and S. Billinge, *Determination of Standard uncertainities in fits to pair distribution functions*  Acta Cryst. (2004) A **60**, 315-317]
+   `doi: 10.1107/S0108767304011754 <http://dx.doi.org/10.1107/S0108767304011754>`_
+
 .. The algorithm itself is able to identify the unit.  -- not any more. TODO:  should be investigated why this has been disabled
 
 
-Output Options:
-###############
+Output Options
+--------------
 
 **G(r)**
 '''''''''
@@ -136,18 +144,17 @@ Usage
 
 .. testcode:: ExPDFFouurierTransform
 
-    # Simulates Load of a workspace with all necessary parameters #################
+    # Simulates Load of a workspace with all necessary parameters
     import numpy as np;
-    xx= np.array(range(0,100))*0.1
-    yy = np.exp(-((xx)/.5)**2)
-    ws=CreateWorkspace(DataX=xx,DataY=yy,UnitX='MomentumTransfer')
-    Rt= PDFFourierTransform(ws,InputSofQType='S(Q)',PDFType='g(r)');   
-    #
-    # Look at sample results:
-    print 'part of S(Q) and its correlation function'
-    for i in xrange(0,10): 
-       print '! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i],yy[i],Rt.readX(0)[i],Rt.readY(0)[i])
+    xx = np.array(range(0,100))*0.1
+    yy = np.exp(-(2.0 * xx)**2)
+    ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
+    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)')   
 
+    # Look at sample results:
+    print('part of S(Q) and its correlation function')
+    for i in range(10): 
+       print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
 .. testcleanup:: ExPDFFouurierTransform

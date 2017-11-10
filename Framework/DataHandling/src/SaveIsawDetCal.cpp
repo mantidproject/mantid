@@ -1,19 +1,24 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveIsawDetCal.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <fstream>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using std::string;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,19 +26,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawDetCal)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveIsawDetCal::SaveIsawDetCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveIsawDetCal::~SaveIsawDetCal() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
@@ -53,7 +45,6 @@ void SaveIsawDetCal::init() {
                                        "If false, new file (default).");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveIsawDetCal::exec() {
@@ -70,7 +61,7 @@ void SaveIsawDetCal::exec() {
     Kernel::Property *prop = run.getProperty("T0");
     T0 = boost::lexical_cast<double, std::string>(prop->value());
     if (T0 != 0) {
-      g_log.notice() << "T0 = " << T0 << std::endl;
+      g_log.notice() << "T0 = " << T0 << '\n';
     }
   }
 
@@ -83,7 +74,7 @@ void SaveIsawDetCal::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName().compare("WISH") == 0)
+  if (inst->getName() == "WISH")
     bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
@@ -136,24 +127,22 @@ void SaveIsawDetCal::exec() {
     out.open(filename.c_str(), std::ios::app);
   } else {
     out.open(filename.c_str());
-    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):"
-        << std::endl;
-    out << "# Lengths are in centimeters." << std::endl;
-    out << "# Base and up give directions of unit vectors for a local "
-        << std::endl;
-    out << "# x,y coordinate system on the face of the detector." << std::endl;
-    out << "#" << std::endl;
-    out << "#" << std::endl;
-    out << "# " << DateAndTime::getCurrentTime().toISO8601String() << std::endl;
+    out << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):\n";
+    out << "# Lengths are in centimeters.\n";
+    out << "# Base and up give directions of unit vectors for a local \n";
+    out << "# x,y coordinate system on the face of the detector.\n";
+    out << "#\n";
+    out << "#\n";
+    out << "# " << DateAndTime::getCurrentTime().toISO8601String() << '\n';
 
-    out << "6         L1     T0_SHIFT" << std::endl;
+    out << "6         L1     T0_SHIFT\n";
     out << "7 " << std::setw(10);
     out << std::setprecision(4) << std::fixed << (l1 * 100);
-    out << std::setw(13) << std::setprecision(3) << T0 << std::endl;
+    out << std::setw(13) << std::setprecision(3) << T0 << '\n';
 
     out << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
            "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-           "     UpZ" << std::endl;
+           "     UpZ\n";
   }
   // Here would save each detector...
   std::set<int>::iterator it;
@@ -170,8 +159,7 @@ void SaveIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> det =
         inst->getComponentByName(bankName);
-    if (inst->getName().compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
+    if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -223,7 +211,7 @@ void SaveIsawDetCal::exec() {
           << std::right << std::fixed << std::setprecision(5) << up.X() << " "
           << std::setw(8) << std::right << std::fixed << std::setprecision(5)
           << up.Y() << " " << std::setw(8) << std::right << std::fixed
-          << std::setprecision(5) << up.Z() << " " << std::endl;
+          << std::setprecision(5) << up.Z() << " \n";
 
     } else
       g_log.warning() << "Information about detector module " << bankName
@@ -236,7 +224,7 @@ void SaveIsawDetCal::exec() {
 V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -247,7 +235,7 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -269,11 +257,11 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
 
 void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
                                double &xsize, double &ysize) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -286,7 +274,7 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();

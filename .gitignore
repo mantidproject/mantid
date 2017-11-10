@@ -160,6 +160,9 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
+# VSCode cache
+.vscode/
+
 # Mac OS X Finder
 .DS_Store
 
@@ -167,6 +170,8 @@ Desktop.ini
 .tags
 .tags_sorted_by_file
 
+#Dynamically created files
+Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 
 

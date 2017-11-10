@@ -23,21 +23,31 @@ of the first input workspace. Workspace data members other than the data
 (but if they're not identical anyway, then you probably shouldn't be
 using this algorithm!). Both input workspaces will be deleted.
 
-Conflict Spectrum IDs
-#####################
+ConjoinWorkspaces operation
+---------------------------
+
++------------------------------------------+---------------------------------------------+
+|Example case with input workspaces having | .. image:: ../images/ConjoinWorkspaces.png  |
+|2 and 3 spectra respectively.             |    :height: 150                             |
+|                                          |    :width: 400                              |
+|                                          |    :alt: ConjoinWorkspaces operation        |
++------------------------------------------+---------------------------------------------+
+
+Conflict Spectrum Numbers
+#########################
 
 The algorithm adds the spectra from the first workspace and then the
 second workspace.
 
--  The original spectrum IDs will be respected if there is no conflict
-   of spectrum IDs between the first workspace and thfiree second.
--  If there are conflict in spectrum IDs, such that some spectrum IDs
+-  The original spectrum Nos will be respected if there is no conflict
+   of spectrum Nos between the first workspace and the second.
+-  If there are conflict in spectrum Nos, such that some spectrum Nos
    appear in both workspace1 and workspace2, then it will be resolved
-   such that the spectrum IDs of spectra coming from workspace2 will be
-   reset to some integer numbers larger than the largest spectrum ID of
-   the spectra from workspace1. Assuming that the largest spectrum ID of
+   such that the spectrum Nos of spectra coming from workspace2 will be
+   reset to some integer numbers larger than the largest spectrum No of
+   the spectra from workspace1. Assuming that the largest spectrum No of
    workspace1 is S, then for any spectrum of workspace wi in workspace2,
-   its spectrum ID is equal to (S+1)+wi+offset, where offset is a
+   its spectrum No is equal to (S+1)+wi+offset, where offset is a
    non-negative integer.
 
 
@@ -47,6 +57,14 @@ Restrictions on the input workspace
 The input workspaces must come from the same instrument, have common
 units and bins and no detectors that contribute to spectra should
 overlap.
+
+Y axis units and labels
+#######################
+
+The optional parameters YAxisUnit and YAxisLabel can be used to change the
+y axis unit and label when conjoining workspaces. Changing YAxisUnit updates
+YAxisLabel automatically with the value of YAxisUnit, unless a separate value 
+is supplied.
 
 Exception
 #########
@@ -63,19 +81,24 @@ Usage
 .. testcode:: ConjoinWorkspacesEx
 
     ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in first workspace", ws1.getNumberHistograms()
+    print("Number of spectra in first workspace = {}".format(ws1.getNumberHistograms()))
     ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in second workspace", ws2.getNumberHistograms()
-    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False)
-    print "Number of spectra after ConjoinWorkspaces", mtd['ws1'].getNumberHistograms()
+    print("Number of spectra in second workspace = {}".format(ws2.getNumberHistograms()))
+    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False, YAxisUnit="New unit", YAxisLabel="New label")
+    ws = mtd['ws1'] # Have to update workspace from ADS, as it is an in-out parameter
+    print("Number of spectra after ConjoinWorkspaces = {}".format(ws.getNumberHistograms()))
+    print("Y unit is {}".format(ws.YUnit()))
+    print("Y label {}".format(ws.YUnitLabel()))
 
 Output:
 
 .. testoutput:: ConjoinWorkspacesEx
 
-    Number of spectra in first workspace 2
-    Number of spectra in second workspace 3
-    Number of spectra after ConjoinWorkspaces 5
+    Number of spectra in first workspace = 2
+    Number of spectra in second workspace = 3
+    Number of spectra after ConjoinWorkspaces = 5
+    Y unit is New unit
+    Y label New label
 
 .. categories::
 

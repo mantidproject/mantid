@@ -33,7 +33,7 @@ public:
     Poco::AutoPtr<Poco::NullChannel> nullChannel(new Poco::NullChannel);
     Poco::Logger::root().setChannel(nullChannel);
 
-    log.error() << "Error Message 1" << std::endl;
+    log.error() << "Error Message 1\n";
     // cout and clog should be empty
     TS_ASSERT_EQUALS(obuffer.str(), "");
     TS_ASSERT_EQUALS(lbuffer.str(), "");
@@ -44,7 +44,7 @@ public:
     Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
         new Poco::ConsoleChannel);
     Poco::Logger::root().setChannel(consoleChannel);
-    log.error() << "Error Message 2" << std::endl;
+    log.error() << "Error Message 2\n";
     // the error should be in std::clog (or std:err)
     TS_ASSERT_EQUALS(obuffer.str(), "");
     TS_ASSERT_EQUALS(lbuffer.str(), "Error Message 2\n");
@@ -54,7 +54,7 @@ public:
     // Test std channel
     Poco::AutoPtr<Poco::StdoutChannel> stdoutChannel(new Poco::StdoutChannel);
     Poco::Logger::root().setChannel(stdoutChannel);
-    log.error() << "Error Message 3" << std::endl;
+    log.error() << "Error Message 3\n";
     // the error should be in std::cout
     TS_ASSERT_EQUALS(obuffer.str(), "Error Message 3\n");
     TS_ASSERT_EQUALS(lbuffer.str(), "");

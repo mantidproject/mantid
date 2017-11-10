@@ -34,9 +34,6 @@ namespace Algorithms {
 */
 class DLLExport ResetNegatives : public API::Algorithm {
 public:
-  ResetNegatives();
-  ~ResetNegatives() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

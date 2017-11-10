@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IncreasingAxisValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include <boost/shared_ptr.hpp>
+
+#include <algorithm>
 
 using namespace Mantid;
 
@@ -24,27 +26,28 @@ public:
     m_right_ws = boost::make_shared<WorkspaceTester>();
     m_right_ws->initialize(1, 3, 3);
 
-    auto right_x = boost::make_shared<MantidVec>();
-    right_x->push_back(0);
-    right_x->push_back(1);
-    right_x->push_back(2);
-
-    m_right_ws->setX(0, *right_x.get());
+    auto points = {0.0, 1.0, 2.0};
+    m_right_ws->setPoints(0, points);
 
     m_wrong_ws = boost::make_shared<WorkspaceTester>();
     m_wrong_ws->initialize(1, 3, 3);
 
-    auto wrong_x = boost::make_shared<MantidVec>();
-    wrong_x->push_back(2);
-    wrong_x->push_back(1);
-    wrong_x->push_back(0);
-
-    m_wrong_ws->setX(0, *wrong_x.get());
+    auto bad_points = {2.0, 1.0, 0.0};
+    std::copy(bad_points.begin(), bad_points.end(),
+              m_wrong_ws->mutableX(0).begin());
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }
 
   void testWrong() { TS_ASSERT_DIFFERS(validator.isValid(m_wrong_ws), ""); }
+
+  void testSingleValuedWorkspace() {
+    auto testWS = boost::make_shared<AxeslessWorkspaceTester>();
+    testWS->initialize(1, 3, 3);
+    std::string s;
+    TS_ASSERT_THROWS_NOTHING(s = validator.isValid(testWS))
+    TS_ASSERT_DIFFERS(s, "")
+  }
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_wrong_ws; // Workspace with the wrong axis

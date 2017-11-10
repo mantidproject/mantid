@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -75,8 +76,7 @@ size_t ConvToMDBase::initialize(
       try {
         m_NumThreads = boost::lexical_cast<int>(nDThrheads);
         g_Log.information()
-            << "***--> NUM_THREADS property set to: " << m_NumThreads
-            << std::endl;
+            << "***--> NUM_THREADS property set to: " << m_NumThreads << '\n';
         if (m_NumThreads < 0)
           g_Log.information() << "***--> This resets number of threads to the "
                                  "number of physical cores\n ";

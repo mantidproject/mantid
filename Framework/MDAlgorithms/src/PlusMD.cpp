@@ -1,11 +1,11 @@
+#include "MantidMDAlgorithms/PlusMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidMDAlgorithms/PlusMD.h"
-#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -18,18 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(PlusMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PlusMD::PlusMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PlusMD::~PlusMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Perform the adding.
  *
  * Will do m_out_event += m_operand_event
@@ -37,8 +25,7 @@ PlusMD::~PlusMD() {}
  * @param ws ::  MDEventWorkspace being added to
  */
 template <typename MDE, size_t nd>
-void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
+void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)
@@ -58,7 +45,7 @@ void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   MDBoxIterator<MDE, nd> it2(box2, 1000, true);
   do {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // Copy the events from WS2 and add them into WS1
       const std::vector<MDE> &events = box->getConstEvents();
       // Add events, with bounds checking
@@ -69,6 +56,8 @@ void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");
+  // This is freed in the destructor of the ThreadPool class,
+  // it should not be a memory leak
   auto prog2 = new Progress(this, 0.4, 0.9, 100);
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts, 0, prog2);
@@ -160,7 +149,7 @@ void PlusMD::execHistoHisto(
 void PlusMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->add(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->add(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -169,6 +158,9 @@ void PlusMD::execHistoScalar(
 void PlusMD::execEvent() {
   // Now we add m_operand_event into m_out_event.
   CALL_MDEVENT_FUNCTION(this->doPlus, m_out_event);
+
+  // Clear masking (box flags) from the output workspace
+  m_out_event->clearMDMasking();
 
   // Set to the output
   setProperty("OutputWorkspace", m_out_event);

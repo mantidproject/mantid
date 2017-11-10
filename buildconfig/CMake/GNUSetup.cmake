@@ -6,6 +6,15 @@
 # project settings should be included in the relevant CMakeLists.txt file
 # for that project.
 
+option ( USE_CCACHE "Use ccache to cache object artifacts if available" ON )
+if ( USE_CCACHE )
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+  endif()
+endif()
+
 # Set our own compiler version flag from the cmake one and export it globally
 if ( CMAKE_COMPILER_IS_GNUCXX )
   set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
@@ -17,40 +26,41 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
       add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
     endif()
   endif()
-elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   message( STATUS "clang version ${CMAKE_CXX_COMPILER_VERSION}" )
 endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
 # -Wno-unused-result: Do not warn about unused return values in some C functions
-set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
-
-# Check if we have a new enough version for this flag
-# some -pedantic warnings remain with gcc 4.4.7
-if ( CMAKE_COMPILER_IS_GNUCXX )
-  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "4.5"))
-    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result -pedantic")
-  endif ()
-elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-    set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
-endif()
+add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
+                      -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
+                      -Wno-write-strings -Wno-unused-result )
+# C++-specific flags
+add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
+)
 
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
+  add_compile_options ( -Wpedantic )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wsuggest-final-types -Wsuggest-final-methods")
+    add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override> )
   endif()
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
+    # Consider enabling once [[fallthrough]] is available on all platforms.
+    # https://developers.redhat.com/blog/2017/03/10/wimplicit-fallthrough-in-gcc-7/
+    add_compile_options ( -Wimplicit-fallthrough=0 )
+  endif()
+elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
+  add_compile_options ( -Wno-sign-conversion )
 endif()
 
 # Add some options for debug build to help the Zoom profiler
-set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )
+add_compile_options ( $<$<CONFIG:Debug>:-fno-omit-frame-pointer> )
 
 option(WITH_ASAN "Enable address sanitizer" OFF)
 if(WITH_ASAN)
@@ -68,31 +78,16 @@ if(WITH_UBSAN)
   if ( CMAKE_COMPILER_IS_GNUCXX AND GCC_COMPILER_VERSION VERSION_LESS "5.1.0")
     set( UBSAN_NO_RECOVER "")
   endif()
-  set(SAN_FLAGS "-fno-omit-frame-pointer -fno-common -fsanitize=undefined ${UBSAN_NO_RECOVER}")
-  add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=undefined ${UBSAN_NO_RECOVER})
+  # vptr check is generating a lot of false positives, hiding other more serious warnings.
+  set(SAN_FLAGS "-fno-omit-frame-pointer -fno-common -fsanitize=undefined -fno-sanitize=vptr ${UBSAN_NO_RECOVER}")
+  add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=undefined -fno-sanitize=vptr ${UBSAN_NO_RECOVER})
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${SAN_FLAGS}" )
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SAN_FLAGS}" )
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SAN_FLAGS}" )
 endif()
 
-# Set the options for gcc and g++
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
-# -Wno-overloaded-virtual is down here because it's not applicable to the C_FLAGS
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} -Woverloaded-virtual -fno-operator-names" )
-
-if(${CMAKE_VERSION} VERSION_GREATER 3.1.0 OR ${CMAKE_VERSION} VERSION_EQUAL 3.1.0)
-  set(CMAKE_CXX_STANDARD 14)
-  set(CMAKE_CXX_STANDARD_REQUIRED 11)
-else()
-  include(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if(COMPILER_SUPPORTS_CXX14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-  elseif(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  endif()
-endif()
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED 11)
 
 # XCode isn't picking up the standard set above.
 if(CMAKE_GENERATOR STREQUAL Xcode)
@@ -105,12 +100,11 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   # Define an option to statically link libstdc++
   option( STATIC_LIBSTDCXX "If ON then statically link with the C++ standard library" OFF )
   if( STATIC_LIBSTDCXX )
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++" )
+    add_compile_options (
+      -static-libgcc
+      $<$<COMPILE_LANGUAGE:CXX>:-static-libstdc++>
+    )
     set( CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc" )
     set( CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++" )
   endif()
 endif()
-
-# Cleanup
-set ( GNUFLAGS )

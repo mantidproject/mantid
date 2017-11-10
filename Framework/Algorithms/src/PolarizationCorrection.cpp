@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -78,9 +79,11 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
                                       "WorkspaceGroup");
         }
 
-        auto currentX = ws2d->readX(0);
-        auto lastX = lastWS->readX(0);
-        if (currentX != lastX) {
+        auto &currentX = ws2d->x(0);
+        auto &lastX = lastWS->x(0);
+        auto xMatches =
+            std::equal(lastX.cbegin(), lastX.cend(), currentX.cbegin());
+        if (!xMatches) {
           throw std::invalid_argument("X-arrays do not match between all "
                                       "workspaces in the InputWorkspace "
                                       "WorkspaceGroup.");
@@ -107,16 +110,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PolarizationCorrection)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PolarizationCorrection::PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PolarizationCorrection::~PolarizationCorrection() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -244,7 +237,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setX(i, base->readX(i));
+    wsTemplate->setSharedX(i, base->sharedX(i));
   }
   auto zeroed = this->multiply(wsTemplate, 0);
   auto filled = this->add(zeroed, value);
@@ -332,8 +325,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty("InputWorkspace", dataOut->getItem(i));
-    alg->setProperty("OutputWorkspace",
-                     "dataOut_" + boost::lexical_cast<std::string>(i));
+    alg->setProperty("OutputWorkspace", "dataOut_" + std::to_string(i));
     alg->setProperty("NaNValue", 0.0);
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);

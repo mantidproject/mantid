@@ -1,13 +1,17 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory,MatrixWorkspaceProperty,PropertyMode
 from mantid.kernel import Direction
 import mantid.simpleapi
 import mantid
 import numpy
 
+
 class DakotaChiSquared(PythonAlgorithm):
     """ Get chi squared by comparing two mantid nexus files
     """
+
     def category(self):
         """ Return category
         """
@@ -31,19 +35,19 @@ class DakotaChiSquared(PythonAlgorithm):
         fout=mantid.api.FileProperty("OutputFile","",mantid.api.FileAction.Save,".xml")
         self.declareProperty(fout,"Output filename containing chi^2.")
         self.declareProperty("ChiSquared",0.0,Direction.Output)
-        self.declareProperty(MatrixWorkspaceProperty("ResidualsWorkspace", "",Direction.Output,PropertyMode.Optional),\
-            "The name of the workspace that will contain residuals.")
+        self.declareProperty(MatrixWorkspaceProperty("ResidualsWorkspace", "",Direction.Output,PropertyMode.Optional),
+                             "The name of the workspace that will contain residuals.")
         return
 
     def PyExec(self):
         """ Main execution body
         """
-	    #get parameters
+            #get parameters
         f1 = self.getProperty("DataFile").value
         f2 = self.getProperty("CalculatedFile").value
         fout = self.getProperty("OutputFile").value
 
-	    #load files
+            #load files
         __w1=mantid.simpleapi.Load(f1)
         __w2=mantid.simpleapi.Load(f2)
 
@@ -56,7 +60,7 @@ class DakotaChiSquared(PythonAlgorithm):
             mantid.kernel.logger.error('The file sizes are different')
             raise ValueError( 'The file sizes are different')
 
-	    #calculate chi^2
+            #calculate chi^2
         soeName = self.getPropertyValue("ResidualsWorkspace")
         if len(soeName)>0:
             mantid.simpleapi.SignalOverError(__w1-__w2,OutputWorkspace=soeName)
@@ -70,19 +74,19 @@ class DakotaChiSquared(PythonAlgorithm):
         data=__soe2.extractY()
         chisquared=numpy.sum(data)
 
-	    #write out the Dakota chi squared file
+            #write out the Dakota chi squared file
         f = open(fout,'w')
         f.write(str(chisquared)+' obj_fn\n')
         f.close()
 
         self.setProperty("ChiSquared",chisquared)
 
-
-	    #cleanup
-        mantid.simpleapi.DeleteWorkspace(__w1.getName())
-        mantid.simpleapi.DeleteWorkspace(__w2.getName())
-        mantid.simpleapi.DeleteWorkspace(__soe2.getName())
+            #cleanup
+        mantid.simpleapi.DeleteWorkspace(__w1.name())
+        mantid.simpleapi.DeleteWorkspace(__w2.name())
+        mantid.simpleapi.DeleteWorkspace(__soe2.name())
         if len(soeName)==0:
-            mantid.simpleapi.DeleteWorkspace(__soe.getName())
+            mantid.simpleapi.DeleteWorkspace(__soe.name())
+
 
 AlgorithmFactory.subscribe(DakotaChiSquared)

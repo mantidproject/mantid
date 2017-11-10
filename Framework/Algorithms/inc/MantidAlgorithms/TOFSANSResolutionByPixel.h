@@ -21,8 +21,6 @@ class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
 public:
   /// Default constructor
   TOFSANSResolutionByPixel();
-  /// Virtual destructor
-  ~TOFSANSResolutionByPixel() override {}
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolutionByPixel"; }
   /// Summary of algorithms purpose

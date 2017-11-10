@@ -9,6 +9,7 @@
 #include <boost/make_shared.hpp>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -136,7 +137,7 @@ public:
 
   MatrixWorkspace_sptr create1DWorkspace(int size, double signal,
                                          double error) {
-    auto ws = Create1DWorkspaceConstant(size, signal, error);
+    auto ws = create1DWorkspaceConstant(size, signal, error, true);
     ws->getAxis(0)->setUnit("Wavelength");
     return ws;
   }
@@ -167,18 +168,16 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
       checkAlg->setProperty("Tolerance", 3e-16);
       checkAlg->execute();
-      const std::string result = checkAlg->getProperty("Result");
-      TS_ASSERT_EQUALS("Success!", result);
+      TS_ASSERT(checkAlg->getProperty("Result"));
     }
   }
 
@@ -203,17 +202,15 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
       checkAlg->execute();
-      const std::string result = checkAlg->getProperty("Result");
-      TS_ASSERT_EQUALS("Success!", result);
+      TS_ASSERT(checkAlg->getProperty("Result"));
     }
   }
 };

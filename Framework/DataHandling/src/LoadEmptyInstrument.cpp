@@ -1,12 +1,16 @@
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidIndexing/IndexInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,9 +21,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
-
-/// Empty default constructor
-LoadEmptyInstrument::LoadEmptyInstrument() {}
+using namespace HistogramData;
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -52,9 +54,15 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
-      "The filename (including its full or relative path) of an instrument\n"
-      "definition file");
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
+      "The filename (including its full or relative path) of an instrument "
+      "definition file. The file extension must either be .xml or .XML when "
+      "specifying an instrument definition file. Note Filename or "
+      "InstrumentName must be specified but not both.");
+  declareProperty(
+      "InstrumentName", "",
+      "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
@@ -88,10 +96,6 @@ void LoadEmptyInstrument::init() {
  *values
  */
 void LoadEmptyInstrument::exec() {
-  // Get other properties
-  const double detector_value = getProperty("DetectorValue");
-  const double monitor_value = getProperty("MonitorValue");
-
   // load the instrument into this workspace
   MatrixWorkspace_sptr ws = this->runLoadInstrument();
   Instrument_const_sptr instrument = ws->getInstrument();
@@ -107,89 +111,48 @@ void LoadEmptyInstrument::exec() {
         "No detectors found in instrument");
   }
 
+  Indexing::IndexInfo indexInfo(number_spectra);
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
-
-  MatrixWorkspace_sptr outWS;
-
   if (MakeEventWorkspace) {
-    // Make a brand new EventWorkspace
-    EventWorkspace_sptr localWorkspace =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                                     number_spectra, 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace,
-                                                           true);
-
-    // Cast to matrix WS
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+    setProperty(
+        "OutputWorkspace",
+        create<EventWorkspace>(
+            *ws, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
-    // Now create the outputworkspace and copy over the instrument object
-    DataObjects::Workspace2D_sptr localWorkspace =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1));
+    const double detector_value = getProperty("DetectorValue");
+    const double monitor_value = getProperty("MonitorValue");
+    auto ws2D = create<MatrixWorkspace>(
+        *ws, indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
+                                  CountStandardDeviations(1, detector_value)));
 
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
-  }
+    Counts v_monitor_y(1, monitor_value);
+    CountStandardDeviations v_monitor_e(1, monitor_value);
 
-  outWS->rebuildSpectraMapping(true /* include monitors */);
-
-  // ---- Set the values ----------
-  if (!MakeEventWorkspace) {
-    MantidVecPtr x, v, v_monitor;
-    x.access().resize(2);
-    x.access()[0] = 1.0;
-    x.access()[1] = 2.0;
-    v.access().resize(1);
-    v.access()[0] = detector_value;
-    v_monitor.access().resize(1);
-    v_monitor.access()[0] = monitor_value;
-
-    for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      IDetector_const_sptr det = outWS->getDetector(i);
-      if (det->isMonitor())
-        outWS->setData(i, v_monitor, v_monitor);
-      else
-        outWS->setData(i, v, v);
+    const auto &spectrumInfo = ws2D->spectrumInfo();
+    const auto size = static_cast<int64_t>(spectrumInfo.size());
+#pragma omp parallel for
+    for (int64_t i = 0; i < size; i++) {
+      if (spectrumInfo.isMonitor(i)) {
+        ws2D->setCounts(i, v_monitor_y);
+        ws2D->setCountStandardDeviations(i, v_monitor_e);
+      }
     }
+    setProperty("OutputWorkspace", std::move(ws2D));
   }
-  // Save in output
-  this->setProperty("OutputWorkspace", outWS);
 }
 
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
   const std::string filename = getPropertyValue("Filename");
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName =
-      Kernel::ConfigService::Instance().getInstrumentDirectory();
-  const std::string::size_type stripPath = filename.find_last_of("\\/");
-
-  std::string fullPathIDF;
-  if (stripPath != std::string::npos) {
-    fullPathIDF =
-        filename; // since if path already provided don't modify m_filename
-  } else {
-    // std::string instrumentID = m_filename.substr(stripPath+1);
-    fullPathIDF = directoryName + "/" + filename;
-  }
-
+  const std::string instrumentName = getPropertyValue("InstrumentName");
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
-  loadInst->setPropertyValue("Filename", fullPathIDF);
+  loadInst->setPropertyValue("Filename", filename);
+  loadInst->setPropertyValue("InstrumentName", instrumentName);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
 
-  // Now execute the Child Algorithm. Catch and log any error and stop,
-  // because there is no point in continuing without a valid instrument.
-  try {
-    loadInst->execute();
-  } catch (std::runtime_error &exc) {
-    std::ostringstream os;
-    os << "Unable to run LoadInstrument: '" << exc.what() << "'\n";
-    throw std::runtime_error(os.str());
-  }
+  loadInst->execute();
 
   return ws;
 }

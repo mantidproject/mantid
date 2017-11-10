@@ -10,6 +10,7 @@ namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
+using Types::Core::DateAndTime;
 
 namespace {
 /**
@@ -43,8 +44,6 @@ DECLARE_ALGORITHM(AddNote)
 
 //----------------------------------------------------------------------------------------------
 AddNote::AddNote() { useAlgorithm("Comment", 1); }
-
-AddNote::~AddNote() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -130,7 +129,7 @@ void AddNote::removeExisting(API::MatrixWorkspace_sptr &logWS,
  */
 void AddNote::createOrUpdate(API::Run &run, const std::string &name) {
   std::string time = getProperty("Time");
-  if (time.compare(std::string("")) == 0) {
+  if (time.empty()) {
     namespace pt = boost::posix_time;
     auto dateTimeObj = DateAndTime(pt::second_clock::local_time());
     time = dateTimeObj.toISO8601String();

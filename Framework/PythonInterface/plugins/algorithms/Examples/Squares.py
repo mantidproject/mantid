@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+# This __future__ import is for Python 2/3 compatibility
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 
@@ -7,6 +9,8 @@ from mantid.kernel import *
 #  - The class name should match the file name;
 #  - Each file should contain exactly one algorithm.
 #
+
+
 class Squares(PythonAlgorithm):
 
     def category(self):
@@ -24,7 +28,7 @@ class Squares(PythonAlgorithm):
                              "A workspace containing the squares")
 
     def PyExec(self):
-        dummy_msg = self.getProperty("Preamble").value # Convert to string
+        dummy_msg = self.getProperty("Preamble").value # Convert to string # noqa
         endrange = self.getProperty("MaxRange").value # Convert to int
         do_sum = self.getProperty('Sum').value # Convert to boolean
 
@@ -57,5 +61,6 @@ class Squares(PythonAlgorithm):
             sumfile.close()
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(Squares)

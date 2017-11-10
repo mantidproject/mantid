@@ -37,14 +37,15 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
-class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm {
+class MANTID_SINQ_DLL SINQTranspose3D
+    : public Mantid::API::Algorithm,
+      public Mantid::API::DeprecatedAlgorithm {
 public:
-  /// (Empty) Constructor
-  SINQTranspose3D() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~SINQTranspose3D() override {}
+  /// Constructor
+  SINQTranspose3D() { this->useAlgorithm("TransposeMD", 1); }
   /// Algorithm's name
   const std::string name() const override { return "Transpose3D"; }
   /// Summary of algorithms purpose

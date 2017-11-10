@@ -73,7 +73,7 @@ public:
     Property *p = new ConcreteProperty();
     TS_ASSERT_THROWS_NOTHING(runInfo.addProperty(p));
 
-    Property *pp = NULL;
+    Property *pp = nullptr;
     TS_ASSERT_THROWS_NOTHING(pp = runInfo.getProperty("Test"));
     TS_ASSERT_EQUALS(p, pp);
     TS_ASSERT(!pp->name().compare("Test"));
@@ -142,7 +142,7 @@ public:
     const double value = 10.9;
     addTimeSeriesEntry(runInfo, name, value);
 
-    TimeSeriesProperty<double> *tsp(NULL);
+    TimeSeriesProperty<double> *tsp(nullptr);
     TS_ASSERT_THROWS_NOTHING(tsp = runInfo.getTimeSeriesProperty<double>(name));
     TS_ASSERT_DELTA(tsp->firstValue(), value, 1e-12);
   }
@@ -190,13 +190,21 @@ public:
   }
 
   void
-  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Double_Or_TimeSeries_Double() {
+  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric() {
+    Run runInfo;
+    const std::string name = "string_prop";
+    runInfo.addProperty<std::string>(name, "string"); // Adds a string property
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
+                     std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Does_Not_Throw_If_Type_Is_Int() {
     Run runInfo;
     const std::string name = "int_prop";
     runInfo.addProperty(name, 1); // Adds an int property
 
-    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(runInfo.getPropertyAsSingleValue(name));
   }
 
   void

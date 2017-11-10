@@ -1,12 +1,13 @@
 #ifndef MAXMINTEST_H_
 #define MAXMINTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/MaxMin.h"
-#include "MantidAlgorithms/Max.h"
-#include "MantidAlgorithms/Min.h"
-#include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/Max.h"
+#include "MantidAlgorithms/MaxMin.h"
+#include "MantidAlgorithms/Min.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -68,12 +69,12 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
-    TS_ASSERT_EQUALS(result->readX(0)[0], 4)
-    TS_ASSERT_EQUALS(result->readY(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readE(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readX(1)[0], 1)
-    TS_ASSERT_EQUALS(result->readY(1)[0], 1)
-    TS_ASSERT_EQUALS(result->readE(1)[0], 0)
+    TS_ASSERT_EQUALS(result->x(0)[0], 4)
+    TS_ASSERT_EQUALS(result->y(0)[0], 0)
+    TS_ASSERT_EQUALS(result->e(0)[0], 0)
+    TS_ASSERT_EQUALS(result->x(1)[0], 1)
+    TS_ASSERT_EQUALS(result->y(1)[0], 1)
+    TS_ASSERT_EQUALS(result->e(1)[0], 0)
 
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -101,12 +102,12 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
-    TS_ASSERT_EQUALS(result->readX(0)[0], 3)
-    TS_ASSERT_EQUALS(result->readY(0)[0], 3)
-    TS_ASSERT_EQUALS(result->readE(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readX(1)[0], 5)
-    TS_ASSERT_EQUALS(result->readY(1)[0], 5)
-    TS_ASSERT_EQUALS(result->readE(1)[0], 0)
+    TS_ASSERT_EQUALS(result->x(0)[0], 3)
+    TS_ASSERT_EQUALS(result->y(0)[0], 3)
+    TS_ASSERT_EQUALS(result->e(0)[0], 0)
+    TS_ASSERT_EQUALS(result->x(1)[0], 5)
+    TS_ASSERT_EQUALS(result->y(1)[0], 5)
+    TS_ASSERT_EQUALS(result->e(1)[0], 0)
 
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -132,12 +133,12 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
-    TS_ASSERT_EQUALS(result->readX(0)[0], 3)
-    TS_ASSERT_EQUALS(result->readY(0)[0], 3)
-    TS_ASSERT_EQUALS(result->readE(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readX(1)[0], 5)
-    TS_ASSERT_EQUALS(result->readY(1)[0], 5)
-    TS_ASSERT_EQUALS(result->readE(1)[0], 0)
+    TS_ASSERT_EQUALS(result->x(0)[0], 3)
+    TS_ASSERT_EQUALS(result->y(0)[0], 3)
+    TS_ASSERT_EQUALS(result->e(0)[0], 0)
+    TS_ASSERT_EQUALS(result->x(1)[0], 5)
+    TS_ASSERT_EQUALS(result->y(1)[0], 5)
+    TS_ASSERT_EQUALS(result->e(1)[0], 0)
 
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -163,12 +164,12 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outputWSname)))
 
-    TS_ASSERT_EQUALS(result->readX(0)[0], 4)
-    TS_ASSERT_EQUALS(result->readY(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readE(0)[0], 0)
-    TS_ASSERT_EQUALS(result->readX(1)[0], 1)
-    TS_ASSERT_EQUALS(result->readY(1)[0], 1)
-    TS_ASSERT_EQUALS(result->readE(1)[0], 0)
+    TS_ASSERT_EQUALS(result->x(0)[0], 4)
+    TS_ASSERT_EQUALS(result->y(0)[0], 0)
+    TS_ASSERT_EQUALS(result->e(0)[0], 0)
+    TS_ASSERT_EQUALS(result->x(1)[0], 1)
+    TS_ASSERT_EQUALS(result->y(1)[0], 1)
+    TS_ASSERT_EQUALS(result->e(1)[0], 0)
 
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);

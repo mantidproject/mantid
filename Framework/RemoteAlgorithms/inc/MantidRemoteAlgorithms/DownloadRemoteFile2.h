@@ -32,10 +32,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport DownloadRemoteFile2 : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  DownloadRemoteFile2() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~DownloadRemoteFile2() override {}
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose

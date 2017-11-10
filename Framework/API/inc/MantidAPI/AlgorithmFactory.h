@@ -70,8 +70,7 @@ public:
   /// algorithm factory specific function to subscribe algorithms, calls the
   /// dynamic factory subscribe function internally
   template <class C> std::pair<std::string, int> subscribe() {
-    Kernel::Instantiator<C, Algorithm> *newI =
-        new Kernel::Instantiator<C, Algorithm>;
+    auto newI = new Kernel::Instantiator<C, Algorithm>;
     return this->subscribe(newI);
   }
 
@@ -169,16 +168,7 @@ private:
   VersionMap m_vmap;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
-#endif /* _WIN32 */
-
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>
-    AlgorithmFactory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
 
 /// Convenient typedef for an UpdateNotification
 typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification
@@ -188,5 +178,12 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
+}
+}
 
 #endif /*MANTID_API_ALGORITHMFACTORY_H_*/

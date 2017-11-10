@@ -3,22 +3,13 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace MDAlgorithms {
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-BoxControllerSettingsAlgorithm::BoxControllerSettingsAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BoxControllerSettingsAlgorithm::~BoxControllerSettingsAlgorithm() {}
 
 //----------------------------------------------------------------------------------------------
 /** Add Box-controller-specific properties to this algorithm

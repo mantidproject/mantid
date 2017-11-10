@@ -8,6 +8,19 @@
 
 namespace Mantid {
 namespace PythonInterface {
+namespace Converters {
+
+extern template int NDArrayTypeIndex<bool>::typenum;
+extern template int NDArrayTypeIndex<int>::typenum;
+extern template int NDArrayTypeIndex<long>::typenum;
+extern template int NDArrayTypeIndex<long long>::typenum;
+extern template int NDArrayTypeIndex<unsigned int>::typenum;
+extern template int NDArrayTypeIndex<unsigned long>::typenum;
+extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+}
+
 namespace {
 //-------------------------------------------------------------------------
 // Template helpers
@@ -139,7 +152,7 @@ void NDArrayToVector<DestElementType>::typeCheck() {
 // Explicit instantiations
 //------------------------------------------------------------------------
 #define INSTANTIATE_TOVECTOR(ElementType)                                      \
-  template DLLExport struct NDArrayToVector<ElementType>;
+  template struct DLLExport NDArrayToVector<ElementType>;
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_TOVECTOR(int)

@@ -8,6 +8,10 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class Points;
+class BinEdges;
+}
 namespace CurveFitting {
 
 /** FunctionDomain1DSpectrumCreator :
@@ -58,9 +62,6 @@ public:
 
 protected:
   void throwIfWorkspaceInvalid() const;
-
-  MantidVec getVectorHistogram() const;
-  MantidVec getVectorNonHistogram() const;
 
   API::MatrixWorkspace_sptr m_matrixWorkspace;
   size_t m_workspaceIndex;

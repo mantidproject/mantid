@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/DetermineChunking.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 
 using namespace Mantid;

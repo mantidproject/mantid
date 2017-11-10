@@ -12,9 +12,25 @@ Description
 The algorithm LoadNexus will read the given Nexus file and try to
 identify its type so that it can be read into a workspace. The file name
 can be an absolute or relative path and should have the extension .nxs
-or .nx5. Currently only Nexus Muon Version 1 files are recognised, but
-this will be extended as other types are supported such as
-:ref:`algm-LoadNexusProcessed`.
+or .nx5.
+
+The type of Nexus file is identified as follows:
+
+* If the file has a group of class ``SDS`` of name ``"definition"`` or ``"analysis"`` 
+  with value ``"muonTD"`` or ``"pulsedTD"``, 
+  then it is taken to be a muon Nexus file and :ref:`algm-LoadMuonNexus` is called.
+
+* Else if main entry is ``"mantid_workspace_1"``
+  then it is taken to be a processed Nexus file and :ref:`algm-LoadNexusProcessed` is called.
+  *The spectrum properties are ignored in this case.*
+
+* Else if main entry is ``"raw_data_1"``
+  then it is taken to be an ISIS Nexus file and :ref:`algm-LoadISISNexus` is called.
+
+* Else if instrument group has a ``"SNSdetector_calibration_id"`` item, 
+  then :ref:`algm-LoadTOFRawNexus` is called.
+
+* Else exception indicating unsupported type of Nexus file is thrown. 
 
 If the file contains data for more than one period, a separate workspace
 will be generated for each. After the first period the workspace names
@@ -37,7 +53,7 @@ Usage
    # Load LOQ histogram dataset
    ws = LoadNexus('LOQ49886.nxs')
 
-   print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
+   print("The 1st x-value of the first spectrum is: {}".format(ws.readX(0)[0]))
 
 Output:
 
@@ -53,7 +69,7 @@ Output:
    # Load ISIS multiperiod muon MUSR dataset
    ws = LoadNexus('MUSR00015189.nxs')
 
-   print "The number of periods (entries) is: " + str(ws[0].getNumberOfEntries())
+   print("The number of periods (entries) is: {}".format(ws[0].getNumberOfEntries()))
 
 Output:
 
@@ -69,7 +85,7 @@ Output:
    # Load Mantid processed GEM data file
    ws = LoadNexus('focussed.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 

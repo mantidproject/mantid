@@ -109,7 +109,7 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspace() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     ws->mutableRun().addProperty("Ei", 45.0);
     ws->mutableRun().addProperty("ChopperSpeed", 150.0);
     return ws;

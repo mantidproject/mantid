@@ -12,9 +12,9 @@ This package defines the Python interface to the MantidPlot application. For fra
    GraphOptions.rst
    ImageMarker.rst
    ImageSymbol.rst
-   InstrumentWindow.rst
-   InstrumentWindowMaskTab.rst
-   InstrumentWindowPickTab.rst
+   InstrumentView.rst
+   InstrumentViewMaskTab.rst
+   InstrumentViewPickTab.rst
    Layer.rst
    PlotSymbol.rst
    Qt.rst

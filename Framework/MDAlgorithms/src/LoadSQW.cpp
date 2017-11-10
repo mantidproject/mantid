@@ -1,8 +1,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"
@@ -27,7 +29,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 namespace {
-//------------------------------------------------------------------------------------------------
 /** Helper function allowing to typecast sequence of bytes into proper expected
 *type.
 * The input buffer is interpreted as the template type
@@ -61,7 +62,7 @@ int LoadSQW::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // only .sqw can be considered
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".sqw") != 0)
+  if (extn != ".sqw")
     return 0;
 
   if (descriptor.isAscii()) {
@@ -141,8 +142,7 @@ void LoadSQW::exec() {
     if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
       g_log.notice() << "You have enough memory available to load the "
                      << m_nDataPoints << " points into memory; this would be "
-                                         "faster than using a file back-end."
-                     << std::endl;
+                                         "faster than using a file back-end.\n";
 
     IAlgorithm_sptr saver =
         this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
@@ -168,16 +168,15 @@ void LoadSQW::exec() {
       g_log.warning()
           << "You may not have enough physical memory available to load the "
           << m_nDataPoints << " points into memory. You can cancel and specify "
-                              "OutputFilename to load to a file back-end."
-          << std::endl;
+                              "OutputFilename to load to a file back-end.\n";
   }
 
   if (bc->isFileBacked()) {
     std::cout << "File backed? " << bc->isFileBacked() << ". Cache "
-              << bc->getFileIO()->getMemoryStr() << std::endl;
+              << bc->getFileIO()->getMemoryStr() << '\n';
   } else {
     bool ff(false);
-    std::cout << "File backed? " << ff << ". Cache  0" << std::endl;
+    std::cout << "File backed? " << ff << ". Cache  0\n";
   }
 
   // Persist the workspace.
@@ -196,8 +195,7 @@ void LoadSQW::exec() {
   pWs->refreshCache();
 
   if (!m_outputFile.empty()) {
-    g_log.notice() << "Starting SaveMD to update the file back-end."
-                   << std::endl;
+    g_log.notice() << "Starting SaveMD to update the file back-end.\n";
     IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD", 0.76, 1.00);
     saver->setProperty("InputWorkspace", ws);
     saver->setProperty("UpdateFileBackEnd", true);
@@ -212,8 +210,8 @@ void LoadSQW::readEvents(
 
   size_t maxNPix = ~size_t(0);
   if (m_nDataPoints > maxNPix) {
-    throw new std::runtime_error("Not possible to address all datapoints in "
-                                 "memory using this architecture ");
+    throw std::runtime_error("Not possible to address all datapoints in "
+                             "memory using this architecture ");
   }
 
   const size_t ncolumns = 9; // qx, qy, qz, en, s, err, irunid, idetid, ien
@@ -229,8 +227,7 @@ void LoadSQW::readEvents(
 
   const size_t pixel_width = ncolumns * column_size;
   const size_t data_buffer_size = pixel_width * m_nDataPoints;
-  g_log.information() << m_nDataPoints << " data points in this SQW file."
-                      << std::endl;
+  g_log.information() << m_nDataPoints << " data points in this SQW file.\n";
 
   // Load from the input file is smallish blocks
   size_t blockSize = pixel_width * 1000000;
@@ -306,8 +303,7 @@ void LoadSQW::readEvents(
 
     if (eventsAdded > 19000000) {
       g_log.information() << "Splitting boxes after " << eventsAdded
-                          << " events added." << std::endl;
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+                          << " events added.\n";
 
       // This splits up all the boxes according to split thresholds and sizes.
       Kernel::ThreadScheduler *ts = new ThreadSchedulerFIFO();
@@ -318,8 +314,6 @@ void LoadSQW::readEvents(
       // Flush the cache - this will save things out to disk
       if (dbuf)
         dbuf->flushCache();
-      // Flush memory
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
       eventsAdded = 0;
     }
 
@@ -350,13 +344,13 @@ void LoadSQW::readEvents(
     //            }
     //          }
     //          g_log.information() << modified << " of " << boxes.size() << "
-    //          MDBoxes have data added or modified." << std::endl;
+    //          MDBoxes have data added or modified.\n";
     //          g_log.information() << inmem << " MDBoxes are in memory." <<
-    //          std::endl;
+    //          '\n';
     //          //g_log.information() << ondisk << " MDBoxes are on disk." <<
-    //          std::endl;
+    //          '\n';
     //          g_log.information() << double(events)/1e6 << " million events in
-    //          memory." << std::endl;
+    //          memory.\n";
     //        }
 
     // Report progress once per block.
@@ -370,8 +364,6 @@ void LoadSQW::readEvents(
   // Flush the cache - this will save things out to disk
   if (dbuf)
     dbuf->flushCache();
-  // Flush memory
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

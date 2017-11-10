@@ -1,14 +1,13 @@
-#pylint: disable=no-init,too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger
-from mantid import config
 import math
-import os
 
 
 class TransformToIqt(PythonAlgorithm):
-
     _sample = None
     _resolution = None
     _e_min = None
@@ -19,14 +18,11 @@ class TransformToIqt(PythonAlgorithm):
     _output_workspace = None
     _dry_run = None
 
-
     def category(self):
         return "Workflow\\Inelastic;Workflow\\MIDAS"
 
-
     def summary(self):
         return 'Transforms an inelastic reduction to I(Q, t)'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
@@ -47,7 +43,7 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
-        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
+        self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='Table workspace for saving TransformToIqt properties')
@@ -59,7 +55,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self.declareProperty(name='DryRun', defaultValue=False,
                              doc='Only calculate and output the parameters')
-
 
     def PyExec(self):
         self._setup()
@@ -79,7 +74,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
-
 
     def _setup(self):
         """
@@ -105,7 +99,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self._dry_run = self.getProperty('DryRun').value
 
-
     def validateInputs(self):
         """
         Validate input properties.
@@ -122,7 +115,6 @@ class TransformToIqt(PythonAlgorithm):
             issues['EnergyMax'] = energy_swapped
 
         return issues
-
 
     def _calculate_parameters(self):
         """
@@ -191,21 +183,17 @@ class TransformToIqt(PythonAlgorithm):
 
         self.setProperty('ParameterWorkspace', param_table)
 
-
     def _add_logs(self):
-        sample_logs = [
-                ('iqt_sample_workspace', self._sample),
-                ('iqt_resolution_workspace', self._resolution),
-                ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))
-            ]
+        sample_logs = [('iqt_sample_workspace', self._sample),
+                       ('iqt_resolution_workspace', self._resolution),
+                       ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))]
 
         log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.8,
                                             endProgress=1.0, enableLogging=True)
         log_alg.setProperty('Workspace', self._output_workspace)
-        log_alg.setProperty('LogNames',[item[0] for item in sample_logs])
+        log_alg.setProperty('LogNames', [item[0] for item in sample_logs])
         log_alg.setProperty('LogValues', [item[1] for item in sample_logs])
         log_alg.execute()
-
 
     def _transform(self):
         """
@@ -227,7 +215,8 @@ class TransformToIqt(PythonAlgorithm):
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
-        rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
+        # Float conversion to str differs in precision between python 2 and 3, this gives consistent results
+        rebin_param = '{:.14f},{:.14f},{:.14f}'.format(self._e_min, self._e_width, self._e_max)
         trans_prog.report('Rebinning Workspace')
         Rebin(InputWorkspace=self._sample,
               OutputWorkspace='__sam_data',
@@ -293,6 +282,13 @@ class TransformToIqt(PythonAlgorithm):
         CropWorkspace(InputWorkspace=self._output_workspace,
                       OutputWorkspace=self._output_workspace,
                       XMax=bin_v)
+
+        # Replace NaN values in last bin, with zeroes
+        ReplaceSpecialValues(InputWorkspace=self._output_workspace,
+                             OutputWorkspace=self._output_workspace,
+                             InfinityValue=0.0,
+                             BigNumberThreshold=1.0001,
+                             NaNValue=0.0)
 
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')

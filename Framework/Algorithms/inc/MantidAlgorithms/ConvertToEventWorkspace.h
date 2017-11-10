@@ -36,9 +36,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertToEventWorkspace : public API::Algorithm {
 public:
-  ConvertToEventWorkspace();
-  ~ConvertToEventWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ConvertToEventWorkspace"; };
   /// Summary of algorithms purpose

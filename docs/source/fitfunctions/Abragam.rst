@@ -11,7 +11,7 @@ Description
 
 Abragam fitting function for use by Muon scientists defined by
 
-.. math:: \mbox{A}\times cos( 2 \pi \times {Omega} \times {x} + {Phi} ) \times \exp(-{Sigma}^2 \times Tau^2 \times {x}^2 \times ( exp ( {x} / Tau ) - 1 + {x} / Tau ) )
+.. math:: \mbox{A}\cos(2 \pi \omega x + \phi) \times \exp\left(-\sigma^2 \tau^2  x^2 \left(e^{\frac{x}{\tau}} -1 + \frac{x}{\tau}\right)\right)
 
 .. attributes::
 

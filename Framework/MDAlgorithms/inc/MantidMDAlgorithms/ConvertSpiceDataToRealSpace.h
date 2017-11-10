@@ -7,6 +7,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/FileDescriptor.h"
 
+#include <deque>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -36,9 +38,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
-  ConvertSpiceDataToRealSpace();
-  ~ConvertSpiceDataToRealSpace() override;
-
   /// Algorithm's name
   const std::string name() const override {
     return "ConvertSpiceDataToRealSpace";
@@ -77,9 +76,10 @@ private:
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
       DataObjects::TableWorkspace_sptr tablews,
-      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
+      API::MatrixWorkspace_const_sptr parentws,
+      Types::Core::DateAndTime runstart,
       std::map<std::string, std::vector<double>> &logvecmap,
-      std::vector<Kernel::DateAndTime> &vectimes);
+      std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Create an MDEventWorspace by converting vector of matrix workspace data
   API::IMDEventWorkspace_sptr
@@ -102,11 +102,13 @@ private:
                        std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr loadRunToMatrixWS(
-      DataObjects::TableWorkspace_sptr tablews, size_t irow,
-      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
-      size_t ipt, size_t irotangle, size_t itime,
-      const std::vector<std::pair<size_t, size_t>> anodelist, double &duration);
+  API::MatrixWorkspace_sptr
+  loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
+                    API::MatrixWorkspace_const_sptr parentws,
+                    Types::Core::DateAndTime runstart, size_t ipt,
+                    size_t irotangle, size_t itime,
+                    const std::vector<std::pair<size_t, size_t>> anodelist,
+                    double &duration);
 
   /// Append Experiment Info
   void
@@ -117,7 +119,7 @@ private:
   void
   appendSampleLogs(API::IMDEventWorkspace_sptr mdws,
                    const std::map<std::string, std::vector<double>> &logvecmap,
-                   const std::vector<Kernel::DateAndTime> &vectimes);
+                   const std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
   std::map<detid_t, double>
@@ -132,7 +134,7 @@ private:
   std::string m_instrumentName;
 
   /// Number of detectors
-  size_t m_numSpec;
+  size_t m_numSpec = 0;
 
   /// x-y-z-value minimum
   std::vector<double> m_extentMins;
@@ -141,7 +143,7 @@ private:
   /// Number of bins
   std::vector<size_t> m_numBins;
   /// Dimension of the output MDEventWorkspace
-  size_t m_nDimensions;
+  size_t m_nDimensions = 3;
 };
 
 } // namespace DataHandling

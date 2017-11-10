@@ -3,62 +3,66 @@
 Error Propagation
 =================
 
-The purpose of this document is to explain how Mantid deals with Error
-Propogation and how it is used in its algorithms.
+The purpose of this document is to explain how Mantid deals with error
+propagation and how it is used in its algorithms.
 
 Theory
 ------
 
-In order to deal with error propagation, Mantid treats errors as guassian 
-probabilities (also known as a bell curve or normal probabilities) and each 
-observation as independent. Meaning that if X = 100 +- 1 then it is still 
-possible for a value of 102 to occur, but less likely than 101 or 99, and a 
-value of 105 is far less likely still than any of these values.
+In order to deal with error propagation, Mantid treats errors as Gaussian
+probabilities (also known as a bell curve or normal probabilities) and each
+observation as independent. Meaning that if :math:`X = 100 \pm 1` then it is still
+possible for a value of :math:`102` to occur, but less likely than :math:`101`
+or :math:`99`, and a value of :math:`105` is far less likely still than any of
+these values.
 
 Plus and Minus Algorithm
 ------------------------
 
-The plus algorithm adds a selection of datasets together, including their 
-margin of errors. Mantid has to therefore adapt the margin of error so it 
-continues to work with just one margin of error. The way it does this is by 
-simply adding together the certain values. Consider the example where: 
-X\ :sub:`1` = 101 ± 2 and X\ :sub:`2` = 99 ± 2. Then for the Plus algorithm
+The :ref:`algm-Plus` algorithm adds two datasets together, propagating the
+uncertainties. Mantid calculates the result of :math:`X_1 + X_2` as
 
-X = 200 = (101 + 99).
+:math:`X = X_1 + X_2`
 
-The propagated error is calculated by taking the root of the sum of the 
-squares of the two error margins:
+with uncertainty
 
-(√2:sup:`2` + 2\ :sup:`2`) = √8
+:math:`\sigma_X = \sqrt{ \left( \sigma_{X_1} \right)^2 + \left( \sigma_{X_2} \right)^2 }`.
 
-Hence the result of the Plus algorithm can be summarised as:
+Consider the example where :math:`X_1 = 101 \pm 2` and :math:`X_2 = 99 \pm 2`.
+Then for this algorithm:
 
-X = 200 ± √8
+:math:`X = X_1 + X_2 = 101 + 99 = 200`
 
-Mantid deals with the Minus algorithm similarly.
+:math:`\sigma_X = \sqrt{ 2^2 + 2^2} = \sqrt{8} = 2.8284`
+
+Hence the result of :ref:`algm-Plus` can be summarised as :math:`X = 200 \pm \sqrt{8}`.
+
+Mantid deals with the :ref:`algm-Minus` algorithm similarly: the result of :math:`X_1 - X_2` is
+
+:math:`X = X_1 - X_2`
+
+with error
+
+:math:`\sigma_X = \sqrt{ \left( \sigma_{X_1} \right)^2 + \left( \sigma_{X_2} \right)^2 }`.
 
 Multiply and Divide Algorithm
 -----------------------------
 
-The Multiply and Divide Algorithm work slightly different from the Plus
-and Minus Algorithms, in the sense that they have to be more complex, 
-see also `here <http://en.wikipedia.org/wiki/Propagation_of_uncertainty>`_.
+The :ref:`algm-Multiply` and :ref:`algm-Divide` algorithms propagate the uncertainties according
+to (see also `here <http://en.wikipedia.org/wiki/Propagation_of_uncertainty>`_):
 
-To calculate error propagation, of say X\ :sub:`1` and X\ :sub:`2`.
-X\ :sub:`1` = 101 ± 2 and X\ :sub:`2` = 99 ± 2 ,Mantid would
-undertake the following calculation for divide:
+:math:`\sigma_X = \left|X\right| \sqrt{ \left( \frac{\sigma_{X_1}}{X_1} \right)^2 + \left( \frac{\sigma_{X_2}}{X_2} \right)^2 }`,
 
-Q = X\ :sub:`1`/X:sub:`2` = 101/99
+where :math:`X` is the result of the multiplication, :math:`X = X_1 \cdot X_2`, or the division, :math:`X = X_1 / X_2`.
 
-Error Propogation = (√ ± 2/99 + ±2/101) All multiplied by Q = 0.22425
+Considering the example above where :math:`X_1 = 101 \pm 2` and
+:math:`X_2 = 99 \pm 2`. Mantid would calculate the result of :math:`X_1 / X_2` as
+:math:`X = 101 / 99 = 1.0202`, with uncertainty
+:math:`\sigma_X = 1.0202 \sqrt{ \left(2/101\right)^2 + \left(2/99\right)^2} = 0.0288`.
 
-For the multiply algorithm, the only difference is in how Q is created,
-which in turn affects the Error Propogation,
-
-Q = X\ :sub:`1`\ \*X\ :sub:`2` = 101\*99
-
-Error Propogation = (√ ± 2/99 + ±2/101) All multiplied by Q = 0.22425
-
+For :ref:`algm-Multiply`, the result of :math:`X_1 \times X_2` is
+:math:`X = 101 \times 99 = 9999`, with uncertainty
+:math:`\sigma_X = 9999 \sqrt{ \left(2/101\right)^2 + \left(2/99\right)^2} = 282.8568`.
 
 
 .. categories:: Concepts

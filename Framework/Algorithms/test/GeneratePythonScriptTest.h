@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"

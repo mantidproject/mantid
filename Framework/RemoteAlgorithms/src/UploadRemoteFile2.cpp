@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -60,7 +61,7 @@ void UploadRemoteFile2::exec() {
 
   g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
                       << "' to '" << getPropertyValue("LocalFileName") << "'"
-                      << " on the compute resource " << comp << std::endl;
+                      << " on the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

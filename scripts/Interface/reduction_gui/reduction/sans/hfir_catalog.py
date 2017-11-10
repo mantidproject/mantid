@@ -2,9 +2,9 @@
 """
     Data catalog for HFIR SANS
 """
-from data_cat import DataCatalog as BaseCatalog
-from data_cat import DataSet
-from data_cat import DataType
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
+from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 import os
 import time
 
@@ -22,8 +22,10 @@ try:
 except:
     IN_MANTIDPLOT = False
 
+
 class HFIRDataType(DataType):
     TABLE_NAME="hfir_datatype"
+
 
 class HFIRDataSet(DataSet):
     TABLE_NAME="hfir_dataset"
@@ -65,6 +67,7 @@ class HFIRDataSet(DataSet):
                 return str(ws_object.getRun().getProperty(prop).value)
             except:
                 return ""
+
         def read_series(prop):
             try:
                 ws_object = AnalysisDataService.retrieve(ws)
@@ -91,7 +94,7 @@ class HFIRDataSet(DataSet):
 
 
 class DataCatalog(BaseCatalog):
-    extension = "xml"
+    extension = ["xml"]
     data_set_cls = HFIRDataSet
 
     def __init__(self, replace_db=False):

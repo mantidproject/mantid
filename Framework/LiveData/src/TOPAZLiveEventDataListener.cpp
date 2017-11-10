@@ -1,43 +1,28 @@
+#include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidLiveData/TOPAZLiveEventDataListener.h"
-#include "MantidLiveData/Exception.h"
-//#include "MantidDataObjects/Events.h"
-//#include "MantidKernel/DateAndTime.h"
-//#include "MantidKernel/Strings.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-//#include "MantidKernel/WriteLock.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/Exception.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
-//#include <Poco/Net/SocketStream.h>
-//#include <Poco/Timestamp.h>
 
-// Includes for parsing the XML device descriptions
-//#include "Poco/DOM/DOMParser.h"
-//#include "Poco/DOM/Document.h"
-//#include "Poco/DOM/AutoPtr.h"
-//#include "Poco/DOM/NodeList.h"
-//#include "Poco/DOM/NamedNodeMap.h"
-
-//#include <Poco/Thread.h>
-//#include <Poco/Runnable.h>
-
-//#include <time.h>
-//#include <sstream> // for ostringstream
 #include <string>
 #include <fstream>
 #include <exception>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 #if 0
 // Port numbers
@@ -137,7 +122,7 @@ typedef struct neutron_event_struct NEUTRON_EVENT, *NEUTRON_EVENT_PTR;
  ****************************************************************************/
 
 // Helper function to get a DateAndTime value from a pulse_id_struct
-Mantid::Kernel::DateAndTime timeFromPulse(const pulse_id_struct *p) {
+Mantid::Types::Core::DateAndTime timeFromPulse(const pulse_id_struct *p) {
   uint32_t seconds = p->pulseIDhigh;
   uint32_t nanoseconds = p->pulseIDlow;
 
@@ -157,7 +142,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
+    : LiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
       m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
@@ -192,7 +177,7 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
       g_log.fatal() << "TOPAZLiveEventDataListener failed to shut down "
                     << "its background thread! This should never happen and "
                     << "Mantid is pretty much guaranteed to crash shortly.  "
-                    << "Talk to the Mantid developer team." << std::endl;
+                    << "Talk to the Mantid developer team.\n";
     }
   }
 
@@ -202,6 +187,8 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// Connect to the TOPAZ event_catcher util (which will supply us with
 /// events).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
     const Poco::Net::SocketAddress &address)
@@ -217,8 +204,7 @@ bool TOPAZLiveEventDataListener::connect(
   try {
     m_tcpSocket.connect(address); // BLOCKING connect
   } catch (...) {
-    g_log.error() << "Connection to " << address.toString() << " failed."
-                  << std::endl;
+    g_log.error() << "Connection to " << address.toString() << " failed.\n";
     return false;
   }
 
@@ -227,7 +213,7 @@ bool TOPAZLiveEventDataListener::connect(
   m_tcpSocket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0));
   // POCO timespan is seconds, microseconds
 
-  g_log.debug() << "Connected to " << tcpAddress.toString() << std::endl;
+  g_log.debug() << "Connected to " << tcpAddress.toString() << '\n';
 
   // After connecting to the main port (either 9000 or 9100 depending on
   // whether or not we're in test mode), event_catcher will send us the port
@@ -237,12 +223,12 @@ bool TOPAZLiveEventDataListener::connect(
     if (m_tcpSocket.receiveBytes(&dataPort, sizeof(dataPort)) !=
         sizeof(dataPort)) {
       g_log.error() << "Failed to read entire data port num from "
-                    << tcpAddress.toString() << std::endl;
+                    << tcpAddress.toString() << '\n';
       return false;
     }
   } catch (...) {
     g_log.error() << "Error reading data port num from "
-                  << tcpAddress.toString() << std::endl;
+                  << tcpAddress.toString() << '\n';
     return false;
   }
 
@@ -279,7 +265,7 @@ bool TOPAZLiveEventDataListener::isConnected() { return m_isConnected; }
 /// it and stores the resulting events in a temporary workspace.
 /// @param startTime Ignored.  This class doesn't have the capability to
 /// replay historical data.
-void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void TOPAZLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime; // Keep the compiler from complaining about unsed variable
 
   // Initialize the workspace
@@ -314,6 +300,7 @@ void TOPAZLiveEventDataListener::run() {
     // loop until the foreground thread tells us to stop
     while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
+      // cppcheck-suppress oppositeInnerCondition
       if (m_stopThread) {
         break;
       }
@@ -348,8 +335,8 @@ void TOPAZLiveEventDataListener::run() {
           (hdr->iTotalBytes - hdr->Spare1) / sizeof(NEUTRON_EVENT);
 
       g_log.debug() << "Received UDP Packet.  " << bytesRead << " bytes  "
-                    << num_pulse_ids << " pulses  " << num_events << " events"
-                    << std::endl;
+                    << num_pulse_ids << " pulses  " << num_events
+                    << " events\n";
 
       PULSE_ID_PTR pid =
           reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));
@@ -359,9 +346,9 @@ void TOPAZLiveEventDataListener::run() {
 
       for (unsigned i = 0; i < num_pulse_ids; i++) {
         g_log.debug() << "Pulse ID: " << pid[i].pulseIDhigh << ", "
-                      << pid[i].pulseIDlow << std::endl;
-        g_log.debug() << "  Event ID: " << pid[i].eventID << std::endl;
-        g_log.debug() << "  Charge: " << pid[i].charge << std::endl;
+                      << pid[i].pulseIDlow << '\n';
+        g_log.debug() << "  Event ID: " << pid[i].eventID << '\n';
+        g_log.debug() << "  Charge: " << pid[i].charge << '\n';
 
         // Figure out the event indexes that belong to this pulse
         uint64_t firstEvent;
@@ -387,7 +374,7 @@ void TOPAZLiveEventDataListener::run() {
         }
 
         // Timestamp for the events
-        Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
+        Mantid::Types::Core::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
         std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
@@ -401,8 +388,8 @@ void TOPAZLiveEventDataListener::run() {
 
         if (firstEvent > lastEvent) {
           g_log.error() << "Invalid event indexes! firstEvent: " << firstEvent
-                        << "  lastEvent: " << lastEvent << std::endl;
-          g_log.error() << "No events will be processed!" << std::endl;
+                        << "  lastEvent: " << lastEvent << '\n';
+          g_log.error() << "No events will be processed!\n";
         }
 
         for (uint64_t j = firstEvent; j <= lastEvent; j++) {
@@ -429,7 +416,7 @@ void TOPAZLiveEventDataListener::run() {
     // exception handler for generic runtime exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit." << std::endl;
+                  << "Thread will exit.\n";
     m_isConnected = false;
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
@@ -439,7 +426,7 @@ void TOPAZLiveEventDataListener::run() {
     // these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit." << std::endl;
+                  << "Thread will exit.\n";
     m_isConnected = false;
 
     std::string newMsg(
@@ -460,11 +447,9 @@ void TOPAZLiveEventDataListener::run() {
                 "read thread.  Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = boost::shared_ptr<std::runtime_error>(
-        new std::runtime_error("Unknown error in backgound thread"));
+    m_backgroundException = boost::make_shared<std::runtime_error>(
+        "Unknown error in backgound thread");
   }
-
-  return;
 }
 
 /// Workspace initialization
@@ -494,8 +479,14 @@ void TOPAZLiveEventDataListener::initWorkspace() {
 
   loadInst->execute();
 
-  m_eventBuffer->padSpectra(); // expands the workspace to the size of the just
-                               // loaded instrument
+  auto tmp = createWorkspace<DataObjects::EventWorkspace>(
+      m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
+  if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
+    // need to generate the spectra to detector map
+    tmp->rebuildSpectraMapping();
+  }
+  m_eventBuffer = std::move(tmp);
 
   // Set the units
   m_eventBuffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -516,11 +507,11 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,
-                                                    monitorsBuffer, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
+                                                    *monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
-    monitorsBuffer->getSpectrum(i)->setDetectorID(monitors[i]);
+    monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
   }
 
   m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap(true);
@@ -530,7 +521,8 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
 
 /// Adds an event to the workspace
 void TOPAZLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime)
+    uint32_t pixelId, double tof,
+    const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -539,14 +531,14 @@ void TOPAZLiveEventDataListener::appendEvent(
   auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
-    m_eventBuffer->getEventList(workspaceIndex).addEventQuickly(event);
+    Mantid::Types::Event::TofEvent event(tof, pulseTime);
+    m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     // TODO: do we want to disable this warning?  Most of the time, we
     // shouldn't have any invalid ID's, but if we do, we'll probably
     // get a lot and flood the log with messages...
     // g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: "
-    //                << tof << " microseconds)" << std::endl;
+    //                << tof << " microseconds)\n";
   }
 }
 
@@ -578,7 +570,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
                                                          false);
 
   // Clear out the old logs, except for the most recent entry
@@ -597,8 +589,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(monitorBuffer,
-                                                    newMonitorBuffer, false);
+  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
+                                                    *newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces

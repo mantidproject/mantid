@@ -1,5 +1,7 @@
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/ISaveable.h"
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 
@@ -308,7 +310,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
     // Will place the new block at the end of the file
     return retVal;
   } else {
-    //      std::cout << "Block found for allocate " << newSize << std::endl;
+    //      std::cout << "Block found for allocate " << newSize << '\n';
     uint64_t foundPos = it->getFilePosition();
     uint64_t foundSize = it->getSize();
     // Remove the free block you found - it is no longer free
@@ -337,7 +339,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
 uint64_t DiskBuffer::relocate(uint64_t const oldPos, uint64_t const oldSize,
                               const uint64_t newSize) {
   // std::cout << "Relocating " << oldPos << ", " << oldSize << ", " << newSize
-  // << std::endl;
+  // << '\n';
   // First, release the space in the old block.
   this->freeBlock(oldPos, oldSize);
   return this->allocate(newSize);
@@ -365,7 +367,7 @@ void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
     throw std::length_error("Free vector size is not a factor of 2.");
 
   for (auto it = free.begin(); it != free.end(); it += 2) {
-    auto it_next = boost::next(it);
+    auto it_next = std::next(it);
 
     if (*it == 0 && *it_next == 0) {
       continue; // Not really a free space block!

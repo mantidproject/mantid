@@ -1,9 +1,8 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
-
-using Mantid::API::SpectraAxis;
 
 namespace Mantid {
 namespace DataObjects {

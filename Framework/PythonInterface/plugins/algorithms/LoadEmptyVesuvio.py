@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -15,11 +16,13 @@ _LOGGING_ = False
 
 #----------------------------------------------------------------------------------------
 
+
 class LoadEmptyVesuvio(PythonAlgorithm):
 
     def summary(self):
         return "Loads an empty workspace containing the Vesuvio instrument at ISIS."
 #----------------------------------------------------------------------------------------
+
     def category(self):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
@@ -110,5 +113,6 @@ class LoadEmptyVesuvio(PythonAlgorithm):
                              "variants. ncols=%d" % (len(columns)))
 
 #----------------------------------------------------------------------------------------
+
 
 AlgorithmFactory.subscribe(LoadEmptyVesuvio)

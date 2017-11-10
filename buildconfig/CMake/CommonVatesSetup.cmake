@@ -5,6 +5,8 @@ include ( SetMantidSubprojects )
 set_mantid_subprojects (
 Framework/API
 Framework/Geometry
+Framework/HistogramData
+Framework/Types
 Framework/Kernel
 Framework/DataObjects
 )

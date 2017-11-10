@@ -9,6 +9,7 @@ from mantid.api import *
 #sys.path.append("/home/ruth/GIT_MantidBuild/bin/")
 from mantid.simpleapi import *
 
+
 class EllipsoidIntegr( stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
@@ -27,11 +28,9 @@ class EllipsoidIntegr( stresstesting.MantidStressTest):
 
                                               # first, load peaks into a peaks workspace
 
-
         peaks_file = "TOPAZ_3007.peaks"
         peaks_ws_name="TOPAZ_3007_peaks"
         LoadIsawPeaks( Filename=peaks_file,OutputWorkspace = peaks_ws_name)
-
 
                                                # next, load events into an event workspace
         event_file="TOPAZ_3007_bank_37_20_sec.nxs"

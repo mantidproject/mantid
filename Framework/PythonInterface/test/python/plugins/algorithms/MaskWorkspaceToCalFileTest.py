@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import os
 from mantid.kernel import *
@@ -34,7 +36,6 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
             self.assertTrue(mask_boundary_inside == expected_masking_identifier)
             self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
         except LookupError:
-            print "Could not find the requested index"
             self.assertTrue(False, msg="Could not find the requested index")
         finally:
             file.close()

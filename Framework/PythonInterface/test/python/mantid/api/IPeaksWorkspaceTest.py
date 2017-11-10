@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.kernel import V3D
@@ -68,24 +70,39 @@ class IPeaksWorkspaceTest(unittest.TestCase):
             p.setQLabFrame(V3D(1,1,1))
         except Exception:
             self.fail("Tried setQLabFrame with one V3D argument")
+
+        self.assertAlmostEquals( p.getQLabFrame().X(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQLabFrame().Y(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQLabFrame().Z(), 1.0, places=10)
         
         try:
             p.setQLabFrame(V3D(1,1,1), 1)
         except Exception:
             self.fail("Tried setQLabFrame with one V3D argument and a double distance")
+        self.assertAlmostEquals( p.getQLabFrame().X(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQLabFrame().Y(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQLabFrame().Z(), 1.0, places=10)
         
     def test_peak_setQSampleFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
         p = pws.getPeak(0)
+
         try:
             p.setQSampleFrame(V3D(1,1,1))
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument")
+
+        self.assertAlmostEquals( p.getQSampleFrame().X(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQSampleFrame().Y(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQSampleFrame().Z(), 1.0, places=10)
         
         try:
             p.setQSampleFrame(V3D(1,1,1), 1)
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument and a double distance")
+        self.assertAlmostEquals( p.getQSampleFrame().X(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQSampleFrame().Y(), 1.0, places=10)
+        self.assertAlmostEquals( p.getQSampleFrame().Z(), 1.0, places=10)
         
         
 

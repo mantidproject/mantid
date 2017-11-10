@@ -1,4 +1,5 @@
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 
@@ -7,6 +8,8 @@ using Mantid::DataObjects::MaskWorkspace;
 using Mantid::DataObjects::SpecialWorkspace2D;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(MaskWorkspace)
 
 void export_MaskWorkspace() {
   class_<MaskWorkspace, bases<SpecialWorkspace2D, IMaskWorkspace>,

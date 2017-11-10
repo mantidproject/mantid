@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -29,25 +30,13 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadGSASInstrumentFile)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadGSASInstrumentFile::LoadGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadGSASInstrumentFile::~LoadGSASInstrumentFile() {}
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
@@ -98,8 +87,6 @@ void LoadGSASInstrumentFile::init() {
                   "Default is all workspaces in numerical order. "
                   "If default banks are specified, they too are taken to be in "
                   "numerical order");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,7 +149,7 @@ void LoadGSASInstrumentFile::exec() {
   WorkspaceGroup_sptr wsg = getProperty("Workspace");
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
-  if (getPropertyValue("OutputTableWorkspace") != "") {
+  if (!getPropertyValue("OutputTableWorkspace").empty()) {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
@@ -213,8 +200,6 @@ void LoadGSASInstrumentFile::exec() {
       loadParamAlg->execute();
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -239,7 +224,7 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 
@@ -251,8 +236,6 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 /* Get the histogram type

@@ -22,12 +22,13 @@ will return an empty table workspace.
 Usage
 -----
 
-**Example: Powgen**  
+**Example: Powgen**
 
 .. testcode:: ExPowgen
-   
-   ws = CreateChunkingFromInstrument(InstrumentName="pg3", ChunkBy="Group")
-   print "Created %i Chunks" % ws.rowCount()
+
+   pg3 = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+   ws = CreateChunkingFromInstrument(InputWorkspace=pg3, ChunkBy="Group")
+   print("Created {} Chunks".format(ws.rowCount()))
 
 Output:
 
@@ -35,12 +36,12 @@ Output:
 
    Created 4 Chunks
 
-**Example: Snap**  
+**Example: Snap**
 
 .. testcode:: ExSnap
-   
+
    ws = CreateChunkingFromInstrument(InstrumentName="snap", ChunkNames="East,West", MaxBankNumber=20)
-   print "Created %i Chunks" % ws.rowCount()
+   print("Created {} Chunks".format(ws.rowCount()))
 
 Output:
 
@@ -51,7 +52,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-
-

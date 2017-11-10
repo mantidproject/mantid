@@ -1,5 +1,6 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
@@ -12,6 +13,8 @@ GCC_DIAG_OFF(strict-aliasing)
 using Mantid::API::IMaskWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMaskWorkspace)
 
 namespace {
 

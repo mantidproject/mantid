@@ -36,8 +36,7 @@
 /**
  *
  */
-class ColorButton : public QtColorPicker
-{
+class ColorButton : public QtColorPicker {
   Q_OBJECT
 
 public:
@@ -45,11 +44,11 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  ColorButton(QWidget *parent = 0);
+  ColorButton(QWidget *parent = nullptr);
   //! Set the current color to be displayed
-  void setColor(const QColor& c){setCurrentColor (c);};
+  void setColor(const QColor &c) { setCurrentColor(c); };
   //! Get the current color
-  QColor color(){return currentColor();};
+  QColor color() { return currentColor(); };
 
 signals:
   void colorChanged();

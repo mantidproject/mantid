@@ -137,8 +137,8 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 1, pickDetectorID(),
-                              centers); // 1 = run number
+    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+                              centers); // 0 = run index
   }
 
   ws->splitBox();
@@ -273,8 +273,8 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
     }
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 1, pickDetectorID(),
-                              centers); // 1 = run number
+    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+                              centers); // 0 = run index
   }
 
   /// Clean up the generators
@@ -350,8 +350,8 @@ void FakeMD::addFakeRegularData(const std::vector<double> &params,
     float errorSquared = 1.0;
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 1, pickDetectorID(),
-                              centers); // 1 = run number
+    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+                              centers); // 0 = run index
   }
 }
 

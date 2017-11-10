@@ -4,7 +4,7 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
 # are set by Jenkins. The last one corresponds to any labels set on a slave.
 ###############################################################################
 
@@ -22,6 +22,11 @@ echo "SHA1=${sha1}"
 ###############################################################################
 if [ -z "$MANTID_DATA_STORE" ]; then
   export MANTID_DATA_STORE=$HOME/MantidExternalData
+fi
+
+# -z checks for empty string
+if [ -z "$EXTRA_ARGS" ]; then
+  EXTRA_ARGS=''
 fi
 
 ###############################################################################
@@ -62,12 +67,15 @@ $SCL_ON_RHEL6 "cmake --build . -- SystemTestData"
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-# Turn off usage reports and instrument downloading for the mantid call
-# that creates the properties file
+# Turn off any auto updating on startup
 echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
+echo "CheckMantidVersion.OnStartup = 0" >> $userprops
+
+# Remove mismatch files which have not been cleaned up yet
+default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
+find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
-
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR $EXTRA_ARGS

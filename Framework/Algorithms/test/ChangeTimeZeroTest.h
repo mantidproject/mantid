@@ -12,12 +12,14 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateTimeValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 
@@ -111,7 +113,7 @@ Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
 Mantid::API::MatrixWorkspace_sptr
 provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
                             int length) {
-  auto ws = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10);
+  auto ws = WorkspaceCreationHelper::createWorkspaceSingleValue(10);
   // Add the logs
   provideLogs(logType, ws, startTime, length);
   return ws;
@@ -121,7 +123,7 @@ provideWorkspaceSingleValue(LogType logType, DateAndTime startTime,
 Mantid::API::MatrixWorkspace_sptr
 provideEventWorkspaceCustom(LogType logType, DateAndTime startTime, int length,
                             int pixels, int bins, int events) {
-  auto ws = WorkspaceCreationHelper::CreateEventWorkspaceWithStartTime(
+  auto ws = WorkspaceCreationHelper::createEventWorkspaceWithStartTime(
       pixels, bins, events, 0.0, 1.0, 2, 0, startTime);
   // Add the logs
   provideLogs(logType, ws, startTime, length);
@@ -539,11 +541,11 @@ private:
     for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms();
          ++workspaceIndex) {
 
-      auto eventList = ws->getEventListPtr(workspaceIndex);
-      auto eventListDuplicate = duplicateWs->getEventListPtr(workspaceIndex);
+      auto &eventList = ws->getSpectrum(workspaceIndex);
+      auto &eventListDuplicate = duplicateWs->getSpectrum(workspaceIndex);
 
-      auto events = eventList->getEvents();
-      auto eventsDuplicate = eventListDuplicate->getEvents();
+      auto &events = eventList.getEvents();
+      auto &eventsDuplicate = eventListDuplicate.getEvents();
 
       for (unsigned int i = 0; i < events.size(); ++i) {
         double secs = DateAndTime::secondsFromDuration(

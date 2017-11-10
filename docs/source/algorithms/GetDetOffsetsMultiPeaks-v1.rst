@@ -9,9 +9,7 @@
 Description
 -----------
 
-This algorithm requires a workspace that is both in d-spacing, but has
-also been preprocessed by the :ref:`algm-CrossCorrelate`
-algorithm. In this first step you select one spectrum to be the
+This algorithm requires a workspace that is in d-spacingand has been :ref:`rebinned <algm-Rebin>` to a common set of d-spacing bin boundaries. In this first step you select one spectrum to be the
 reference spectrum and all of the other spectrum are cross correlated
 against it. Each output spectrum then contains a peak whose location
 defines the offset from the reference spectrum.
@@ -241,9 +239,9 @@ Usage
   f.close()
 
   # Print out first 10 lines of the file
-  print file[0][:55],'...'
+  print("{} ...".format(file[0][:55]))
   for line in file[1:10]:
-    print line
+    print(line)
 
 Output
 ######

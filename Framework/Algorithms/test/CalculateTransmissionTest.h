@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CalculateTransmission.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/CalculateTransmission.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
@@ -91,8 +91,8 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWsName + "_unfitted")));
 
-    const Mantid::MantidVec &fit = fitted->readY(0),
-                            &unfit = unfitted->readY(0);
+    auto &fit = fitted->y(0);
+    auto &unfit = unfitted->y(0);
     TS_ASSERT_EQUALS(fit.size(), unfit.size())
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
@@ -139,8 +139,8 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 outputWS + "_unfitted")));
 
-    const Mantid::MantidVec &fit = fitted->readY(0),
-                            &unfit = unfitted->readY(0);
+    auto &fit = fitted->y(0);
+    auto &unfit = unfitted->y(0);
     TS_ASSERT_EQUALS(fit.size(), unfit.size())
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
@@ -181,7 +181,7 @@ public:
         fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
-    const Mantid::MantidVec &fit = fitted->readY(0);
+    auto &fit = fitted->y(0);
     for (unsigned int i = 0; i < fit.size(); ++i) {
       // Should all be 1 because I used the same workspace twice as the input
       TS_ASSERT_DELTA(fit[i], 1.0, 0.0005)
@@ -206,11 +206,11 @@ public:
 
     // According to this detector geometry, Monitor #1 is spectrum 0, and
     // Monitor #2 is spectrum 1.
-    empty_ws->dataY(0)[0] = 10.0;
+    empty_ws->mutableY(0)[0] = 10.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(emptyWS,
                                                               empty_ws);
 
-    TS_ASSERT_EQUALS(ws->dataY(0).size(), 1)
+    TS_ASSERT_EQUALS(ws->y(0).size(), 1)
 
     Mantid::Algorithms::CalculateTransmission trans;
     TS_ASSERT_THROWS_NOTHING(trans.initialize());
@@ -232,7 +232,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = boost::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
-    TS_ASSERT_DELTA(output->readY(0)[0], 5.0, 0.005)
+    TS_ASSERT_DELTA(output->y(0)[0], 5.0, 0.005)
 
     // If we reverse the monitors, we should invert the output
     TS_ASSERT_THROWS_NOTHING(trans.setProperty("IncidentBeamMonitor", 2))
@@ -241,7 +241,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = boost::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
-    TS_ASSERT_DELTA(output->readY(0)[0], 0.2, 0.005)
+    TS_ASSERT_DELTA(output->y(0)[0], 0.2, 0.005)
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -269,12 +269,12 @@ public:
 
     // these values were dervived from the debugger when exprolation was first
     // added and are believed to be correct on that basis
-    TS_ASSERT_DELTA(extra->readY(0)[0], 0.2, 0.8937)
-    TS_ASSERT_DELTA(extra->readY(0)[8], 0.2, 0.8801)
-    TS_ASSERT_DELTA(extra->readY(0)[18], 0.2, 0.8634)
-    TS_ASSERT_DELTA(extra->readY(0)[33], 0.2, 0.8390)
-    TS_ASSERT_DELTA(extra->readY(0)[54], 0.2, 0.8059)
-    TS_ASSERT_DELTA(extra->readY(0).back(), 0.2, 0.6914)
+    TS_ASSERT_DELTA(extra->y(0)[0], 0.2, 0.8937)
+    TS_ASSERT_DELTA(extra->y(0)[8], 0.2, 0.8801)
+    TS_ASSERT_DELTA(extra->y(0)[18], 0.2, 0.8634)
+    TS_ASSERT_DELTA(extra->y(0)[33], 0.2, 0.8390)
+    TS_ASSERT_DELTA(extra->y(0)[54], 0.2, 0.8059)
+    TS_ASSERT_DELTA(extra->y(0).back(), 0.2, 0.6914)
 
     Mantid::API::AnalysisDataService::Instance().remove(
         "CalculateTransmissionTest_extra");
@@ -310,8 +310,8 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "CalculateTransmissionTest_linear")));
 
-    const Mantid::MantidVec &log = logged->readY(0),
-                            &linear = lineared->readY(0);
+    auto &log = logged->y(0);
+    auto &linear = lineared->y(0);
 
     TS_ASSERT_EQUALS(log.size(), linear.size())
     for (unsigned int i = 0; i < linear.size(); ++i) {
@@ -352,8 +352,8 @@ public:
                 outputWS + "_unfitted")));
 
     {
-      const Mantid::MantidVec &fitted_y = fitted->readY(0),
-                              &fitted_x = fitted->readX(0);
+      auto &fitted_y = fitted->y(0);
+      auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
       double x;
@@ -395,8 +395,8 @@ public:
                 outputWS + "_unfitted")));
 
     {
-      const Mantid::MantidVec &fitted_y = fitted->readY(0),
-                              &fitted_x = fitted->readX(0);
+      auto &fitted_y = fitted->y(0);
+      auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
       double x;
@@ -461,12 +461,9 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(m_dirWS)),
         source = boost::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_transWS));
-    Mantid::MantidVec &Xfiddle0 = dir->dataX(0), &Xsource = source->dataX(0);
-    Mantid::MantidVec &Xfiddle1 = dir->dataX(1);
-    for (unsigned int i = 0; i < Xfiddle0.size(); ++i) {
-      Xfiddle0[i] = Xsource[i];
-      Xfiddle1[i] = Xsource[i];
-    }
+
+    dir->setSharedX(0, source->sharedX(0));
+    dir->setSharedX(1, source->sharedX(0));
   }
 
 private:

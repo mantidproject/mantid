@@ -54,10 +54,6 @@ namespace Algorithms {
  */
 class DLLExport Min : public API::Algorithm {
 public:
-  /// Default constructor
-  Min() : API::Algorithm(){};
-  /// Destructor
-  ~Min() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Min"; }
   /// Algorithm's version for identification overriding a virtual method

@@ -1,8 +1,10 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 import os
+
 
 class LoadMultipleGSS(PythonAlgorithm):
 
@@ -55,5 +57,6 @@ class LoadMultipleGSS(PythonAlgorithm):
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+
 
 AlgorithmFactory.subscribe(LoadMultipleGSS)

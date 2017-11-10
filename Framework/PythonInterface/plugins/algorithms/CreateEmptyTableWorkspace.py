@@ -1,8 +1,12 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 
 # Create an empty table workspace to be populated by a python script.
+
+
 class CreateEmptyTableWorkspace(PythonAlgorithm):
 
     def summary(self):
@@ -21,6 +25,7 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
         tableWS = WorkspaceFactory.createTable()
 
         self.setProperty("OutputWorkspace", tableWS)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateEmptyTableWorkspace)

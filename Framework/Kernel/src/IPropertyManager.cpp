@@ -1,7 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)
@@ -77,6 +76,18 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
       (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
     }
   }
+}
+
+/** Give settings to a property to determine when it gets enabled/hidden.
+ * Passes ownership of the given IPropertySettings object to the named
+ * property
+ * @param name :: property name
+ * @param settings :: IPropertySettings     */
+void IPropertyManager::setPropertySettings(
+    const std::string &name, std::unique_ptr<IPropertySettings> settings) {
+  Property *prop = getPointerToProperty(name);
+  if (prop)
+    prop->setSettings(std::move(settings));
 }
 
 /**

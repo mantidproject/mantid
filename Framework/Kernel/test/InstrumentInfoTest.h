@@ -31,7 +31,7 @@ public:
                                 "  <technique>Measuring Stuff</technique>"
                                 "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -55,22 +55,19 @@ public:
         "<facilities>"
         "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
         "FileExtensions=\".xyz\">"
-        "    <livedata listener=\"I'm listening\" />"
         "    <instrument name=\"AnInst\">"
-        "      <livedata address=\"127.0.0.1:99\" />"
         "      <technique>Measuring Stuff</technique>"
         "    </instrument>"
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
 
     InstrumentInfo inst = fac->instruments().front();
 
     TS_ASSERT_EQUALS(inst.zeroPadding(123), 99);
     TS_ASSERT_EQUALS(inst.delimiter(), "!");
-    TS_ASSERT_EQUALS(inst.liveListener(), "I'm listening");
 
     delete fac;
   }
@@ -81,23 +78,20 @@ public:
         "<facilities>"
         "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" "
         "FileExtensions=\".xyz\">"
-        "    <livedata listener=\"I'm listening\" />"
         "    <instrument name=\"AnInst\" delimiter=\"?\" >"
         "      <zeropadding size=\"66\"/>"
-        "      <livedata listener=\"pardon\" />"
         "      <technique>Measuring Stuff</technique>"
         "    </instrument>"
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
 
     InstrumentInfo inst = fac->instruments().front();
 
     TS_ASSERT_EQUALS(inst.zeroPadding(123), 66);
     TS_ASSERT_EQUALS(inst.delimiter(), "?");
-    TS_ASSERT_EQUALS(inst.liveListener(), "pardon");
 
     delete fac;
   }
@@ -106,13 +100,16 @@ public:
     const std::string instStr =
         "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
         "  <zeropadding size=\"8\"/>"
-        "  <livedata listener=\"AListener\" address=\"myinst.facility.gov:99\" "
-        "/>"
+        "  <livedata>"
+        "    <connection name=\"default\" "
+        "                listener=\"AListener\" "
+        "                address=\"myinst.facility.gov:99\" />"
+        "  </livedata>"
         "  <technique>Measuring Stuff</technique>"
         "  <technique>Doing Stuff</technique>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -149,7 +146,7 @@ public:
         "  <zeropadding size=\"20\" startRunNumber=\"321\"/>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -235,7 +232,7 @@ public:
         "  <technique>Doing Stuff</technique>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     TS_ASSERT(fac->instruments()[0] == fac->instruments()[0]);
@@ -268,4 +265,4 @@ private:
     return new FacilityInfo(elem);
   }
 };
-#endif /*MANTID_FACILITIESTEST_H_*/
+#endif // INSTRUMENTINFOTEST_H_

@@ -38,9 +38,6 @@ namespace Crystal {
 */
 class DLLExport SetUB : public API::Algorithm {
 public:
-  SetUB();
-  ~SetUB() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

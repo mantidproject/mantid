@@ -52,8 +52,6 @@ namespace Algorithms {
 */
 class DLLExport NormaliseByCurrent : public API::Algorithm {
 public:
-  NormaliseByCurrent();
-  ~NormaliseByCurrent() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }
   /// Summary of algorithms purpose
@@ -73,8 +71,8 @@ private:
   void init() override;
   void exec() override;
   // Extract the charge value from the logs.
-  double
-  extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const;
+  double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
+                       const bool integratePCharge) const;
 };
 
 } // namespace Algorithm

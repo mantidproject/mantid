@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapMonitor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
@@ -26,14 +24,7 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(nullptr) {}
-
-/// Destructor
-UnwrapMonitor::~UnwrapMonitor() {
-  if (m_progress)
-    delete m_progress;
-  m_progress = nullptr;
-}
+      m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapMonitor::init() {
@@ -79,19 +70,16 @@ void UnwrapMonitor::exec() {
   const int numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
-                << std::endl;
+                << '\n';
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
   // Get the min & max frame values
-  m_Tmin = m_inputWS->readX(0).front();
-  m_Tmax = m_inputWS->readX(0).back();
+  m_Tmin = m_inputWS->x(0).front();
+  m_Tmax = m_inputWS->x(0).back();
   g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - "
-                << m_Tmax << std::endl;
-  m_XSize = m_inputWS->readX(0).size();
-
-  // Retrieve the source-sample distance
-  const double L1 = this->getPrimaryFlightpath();
+                << m_Tmax << '\n';
+  m_XSize = m_inputWS->x(0).size();
 
   // Need a new workspace. Will just be used temporarily until the data is
   // rebinned.
@@ -102,34 +90,52 @@ void UnwrapMonitor::exec() {
 
   // This will be used later to store the maximum number of bin BOUNDARIES for
   // the rebinning
-  int max_bins = 0;
-  m_progress = new Progress(this, 0.0, 1.0, numberOfSpectra);
+  size_t max_bins = 0;
+
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
-    // Flag indicating whether the current detector is a monitor, Set in
-    // calculateFlightpath below.
-    bool isMonitor;
-    const double Ld = this->calculateFlightpath(i, L1, isMonitor);
-    if (Ld < 0.0) {
+    if (!spectrumInfo.hasDetectors(i)) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
-                    << " is not available." << std::endl;
-      tempWS->dataX(i).assign(tempWS->dataX(i).size(), 0.0);
-      tempWS->dataY(i).assign(tempWS->dataY(i).size(), 0.0);
-      tempWS->dataE(i).assign(tempWS->dataE(i).size(), 0.0);
+                    << " is not available.\n";
+      tempWS->mutableX(i) = 0.0;
+      tempWS->mutableY(i) = 0.0;
+      tempWS->mutableE(i) = 0.0;
       continue;
     }
 
+    // Getting the unwrapped data is a three step process.
+    // 1. We ge the unwrapped version of the x data.
+    // 2. Then we get the unwrapped version of the y and e data for
+    //    which we require the x data from the previous step
+    // 3. Finally we need to set the newly unwrapped data on the
+    //    histogram
+
     // Unwrap the x data. Returns the bin ranges that end up being used
-    const std::vector<int> rangeBounds = this->unwrapX(tempWS, i, Ld);
+    const double Ld = L1 + spectrumInfo.l2(i);
+    std::vector<double> newX;
+    const std::vector<int> rangeBounds = this->unwrapX(newX, i, Ld);
+
     // Unwrap the y & e data according to the ranges found above
-    this->unwrapYandE(tempWS, i, rangeBounds);
-    assert(tempWS->dataX(i).size() == tempWS->dataY(i).size() + 1);
+    std::vector<double> newY;
+    std::vector<double> newE;
+    this->unwrapYandE(tempWS, i, rangeBounds, newY, newE);
+
+    // Now set the new X, Y and E values on the Histogram
+    auto histogram = tempWS->histogram(i);
+    tempWS->setHistogram(
+        i, Mantid::HistogramData::BinEdges(std::move(newX)),
+        Mantid::HistogramData::Counts(std::move(newY)),
+        Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
-    if (!isMonitor) {
-      const int XLen = static_cast<int>(tempWS->dataX(i).size());
+    if (!spectrumInfo.isMonitor(i)) {
+      const size_t XLen = tempWS->x(i).size();
       if (XLen > max_bins)
         max_bins = XLen;
     }
@@ -147,7 +153,7 @@ void UnwrapMonitor::exec() {
 
     g_log.debug() << "Rebinned workspace has "
                   << outputWS->getNumberHistograms() << " histograms of "
-                  << outputWS->blocksize() << " bins each" << std::endl;
+                  << outputWS->blocksize() << " bins each\n";
     setProperty("OutputWorkspace", outputWS);
   } else
     setProperty("OutputWorkspace", tempWS);
@@ -155,73 +161,17 @@ void UnwrapMonitor::exec() {
   m_inputWS.reset();
 }
 
-/** Gets the primary flightpath (L1)
- *  @return L1
- *  @throw Kernel::Exception::InstrumentDefinitionError if L1 is not available
- */
-double UnwrapMonitor::getPrimaryFlightpath() const {
-  // Get a pointer to the instrument contained in the input workspace
-  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  // Get the distance between the source and the sample
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double L1;
-  try {
-    L1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance (in metres): " << L1 << std::endl;
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", m_inputWS->getTitle());
-  }
-  return L1;
-}
-
-/** Calculates the total flightpath for the given detector.
- *  This is L1+L2 normally, but is the source-detector distance for a monitor.
- *  @param spectrum ::  The workspace index
- *  @param L1 ::        The primary flightpath
- *  @param isMonitor :: Output: true is this detector is a monitor
- *  @return The flightpath (Ld) for the detector linked to spectrum
- *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position
- * can't be obtained
- */
-double UnwrapMonitor::calculateFlightpath(const int &spectrum, const double &L1,
-                                          bool &isMonitor) const {
-  double Ld = -1.0;
-  try {
-    // Get the detector object for this histogram
-    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(spectrum);
-    // Get the sample-detector distance for this detector (or source-detector if
-    // a monitor)
-    // This is the total flightpath
-    isMonitor = det->isMonitor();
-    // Get the L2 distance if this detector is not a monitor
-    if (!isMonitor) {
-      double L2 = det->getDistance(*(m_inputWS->getInstrument()->getSample()));
-      Ld = L1 + L2;
-    }
-    // If it is a monitor, then the flightpath is the distance to the source
-    else {
-      Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
-    }
-  } catch (Exception::NotFoundError &) {
-    // If the detector information is missing, return a negative number
-  }
-
-  return Ld;
-}
-
 /** Unwraps an X array, converting the units to wavelength along the way.
- *  @param tempWS ::   A pointer to the temporary workspace in which the results
- * are being stored
+ *  @param newX ::   A reference to a container which stores our unwrapped x
+ * data.
  *  @param spectrum :: The workspace index
  *  @param Ld ::       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower
  * ranges start & end
  */
-const std::vector<int>
-UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr &tempWS,
-                       const int &spectrum, const double &Ld) {
+const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
+                                              const int &spectrum,
+                                              const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -239,12 +189,11 @@ UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr &tempWS,
       m_XSize); // Doing this possible gives a small efficiency increase
   // Create a vector for the upper range. Make it a reference to the output
   // histogram to save an assignment later
-  MantidVec &tempX_U = tempWS->dataX(spectrum);
-  tempX_U.clear();
-  tempX_U.reserve(m_XSize);
+  newX.clear();
+  newX.reserve(m_XSize);
 
   // Get a reference to the input x data
-  const MantidVec &xdata = m_inputWS->readX(spectrum);
+  const auto &xdata = m_inputWS->x(spectrum);
   // Loop over histogram, selecting bins in appropriate ranges.
   // At the moment, the data in the bin in which a cut-off sits is excluded.
   for (unsigned int bin = 0; bin < m_XSize; ++bin) {
@@ -265,10 +214,10 @@ UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr &tempWS,
     else if (tof > T1) {
       const double velocity = Ld / (tof - m_Tmax + m_Tmin);
       const double wavelength = m_conversionConstant / velocity;
-      tempX_U.push_back(wavelength);
+      newX.push_back(wavelength);
       // Remove the duplicate boundary bin
       if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
-        tempX_U.pop_back();
+        newX.pop_back();
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (binRange[2] == -1)
@@ -295,7 +244,7 @@ UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr &tempWS,
   }
 
   // Append first vector to back of second
-  tempX_U.insert(tempX_U.end(), tempX_L.begin(), tempX_L.end());
+  newX.insert(newX.end(), tempX_L.begin(), tempX_L.end());
 
   return binRange;
 }
@@ -303,9 +252,9 @@ UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr &tempWS,
 /** Deals with the (rare) case where the flightpath is longer than the reference
  *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-std::pair<int, int>
-UnwrapMonitor::handleFrameOverlapped(const MantidVec &xdata, const double &Ld,
-                                     std::vector<double> &tempX) {
+std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
+    const Mantid::HistogramData::HistogramX &xdata, const double &Ld,
+    std::vector<double> &tempX) {
   // Calculate the interval to exclude
   const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef / Ld));
   // This gives us new minimum & maximum tof values
@@ -341,16 +290,20 @@ UnwrapMonitor::handleFrameOverlapped(const MantidVec &xdata, const double &Ld,
  * results are being stored
  *  @param spectrum ::    The workspace index
  *  @param rangeBounds :: The upper and lower ranges for the unwrapping
+ *  @param newY :: A reference to a container which stores our unwrapped y data.
+ *  @param newE :: A reference to a container which stores our unwrapped e data.
  */
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
-                                const std::vector<int> &rangeBounds) {
+                                const std::vector<int> &rangeBounds,
+                                std::vector<double> &newY,
+                                std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
-  MantidVec &Y = tempWS->dataY(spectrum);
-  MantidVec &E = tempWS->dataE(spectrum);
+  std::vector<double> &Y = newY;
+  std::vector<double> &E = newE;
   // Get references to the input data
-  const MantidVec &YIn = m_inputWS->dataY(spectrum);
-  const MantidVec &EIn = m_inputWS->dataE(spectrum);
+  const auto &YIn = m_inputWS->y(spectrum);
+  const auto &EIn = m_inputWS->e(spectrum);
   if (rangeBounds[2] != -1) {
     // Copy in the upper range
     Y.assign(YIn.begin() + rangeBounds[2], YIn.end());
@@ -402,9 +355,10 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  */
 API::MatrixWorkspace_sptr
 UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max, const int &numBins) {
+                     const double &min, const double &max,
+                     const size_t &numBins) {
   // Calculate the width of a bin
-  const double step = (max - min) / numBins;
+  const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
@@ -412,14 +366,11 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
   // Construct the vector that holds the rebin parameters and set the property
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray = {min, step, max};
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "
-                << min << " to " << max << std::endl;
+                << min << " to " << max << '\n';
 
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");

@@ -1,4 +1,4 @@
-from mantiddoc.directives.base import BaseDirective
+from mantiddoc.directives.base import BaseDirective #pylint: disable=unused-import
 import os
 
 class InterfaceDirective(BaseDirective):

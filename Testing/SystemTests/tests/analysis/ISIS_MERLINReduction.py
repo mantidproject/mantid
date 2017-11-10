@@ -1,8 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
-#import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
-
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -15,13 +12,11 @@ class ReduceMERLIN(ReductionWrapper):
     def def_main_properties(self):
         """ Define main properties used in reduction """
 
-
         prop = {}
         prop['sample_run'] = 6398
         prop['wb_run'] = 6399
         prop['incident_energy'] = 18
         prop['energy_bins'] = [-10, 0.2, 15]
-
 
       # Absolute units reduction properties.
        #prop['monovan_run'] = 17589
@@ -45,6 +40,7 @@ class ReduceMERLIN(ReductionWrapper):
 
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -60,8 +56,10 @@ class ReduceMERLIN(ReductionWrapper):
 #----------------------------------------------------------------------------------------------------------------------
 
 
-
 if __name__=="__main__":
+    #import os
+    #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+
     #maps_dir = 'd:/Data/MantidSystemTests/Data'
     #data_dir ='d:/Data/Mantid_Testing/14_11_27'
     #ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
@@ -73,7 +71,6 @@ if __name__=="__main__":
     rd = ReduceMERLIN()
     rd.def_advanced_properties()
     rd.def_main_properties()
-
 
      #using_web_data = False
      #if not using_web_data:

@@ -3,9 +3,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -24,14 +27,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLSANS::LoadILLSANS() : m_defaultBinning(2) {
-  m_supportedInstruments.emplace_back("D33");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLSANS::~LoadILLSANS() {}
+LoadILLSANS::LoadILLSANS()
+    : m_supportedInstruments{"D33"}, m_defaultBinning{0, 0} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -42,7 +39,7 @@ int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const {
-  return "DataHandling\\Nexus";
+  return "DataHandling\\Nexus;ILL\\SANS";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -110,14 +107,14 @@ void LoadILLSANS::exec() {
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
 
-  if (instrumentNamePath == "") {
+  if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
     throw std::runtime_error(message);
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -252,24 +249,18 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       NXInt data = dataGroup.openIntData();
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0()
-                    << "x" << data.dim1() << "x" << data.dim2() << std::endl;
+                    << "x" << data.dim1() << "x" << data.dim2() << '\n';
 
       const size_t vectorSize = data.dim2() + 1;
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
 
-      for (size_t i = 0; i < vectorSize; i++)
-        positionsBinning.push_back(static_cast<double>(i));
+      const HistogramData::BinEdges histoBinEdges(
+          vectorSize, HistogramData::LinearGenerator(0.0, 1.0));
+      const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-      // Assign X
-      m_localWorkspace->dataX(firstIndex)
-          .assign(positionsBinning.begin(), positionsBinning.end());
-      // Assign Y
-      m_localWorkspace->dataY(firstIndex).assign(data(), data() + data.dim2());
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(firstIndex);
-      std::transform(data(), data() + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+      m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
+                                     std::move(histoCounts));
 
       // Add average monitor counts to a property:
       double averageMonitorCounts =
@@ -293,50 +284,38 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   g_log.debug("Loading the data into the workspace:");
   g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << std::endl;
+                << "firstIndex = " << firstIndex << '\n';
   g_log.debug() << "\t"
-                << "Number of Pixels : data.dim0() = " << data.dim0()
-                << std::endl;
+                << "Number of Pixels : data.dim0() = " << data.dim0() << '\n';
   g_log.debug() << "\t"
-                << "Number of Tubes : data.dim1() = " << data.dim1()
-                << std::endl;
+                << "Number of Tubes : data.dim1() = " << data.dim1() << '\n';
   g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << std::endl;
+                << "data.dim2() = " << data.dim2() << '\n';
   g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << std::endl;
+                << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim1();
-  size_t numberOfPixelsPerTube = data.dim0();
+  const size_t numberOfTubes = data.dim1();
+  const size_t numberOfPixelsPerTube = data.dim0();
 
-  Progress progress(this, 0, 1, data.dim0() * data.dim1());
-
-  m_localWorkspace->dataX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
+  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
 
   size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
-      }
-      // Assign Y
-      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
 
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+  const HistogramData::BinEdges binEdges(timeBinning);
+
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
 
       ++spec;
       progress.report();
     }
   }
 
-  g_log.debug() << "Data loading into WS done...." << std::endl;
+  g_log.debug() << "Data loading into WS done....\n";
 
   return spec;
 }
@@ -347,50 +326,37 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
 
   g_log.debug("Loading the data into the workspace:");
   g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << std::endl;
+                << "firstIndex = " << firstIndex << '\n';
   g_log.debug() << "\t"
-                << "Number of Tubes : data.dim0() = " << data.dim0()
-                << std::endl;
+                << "Number of Tubes : data.dim0() = " << data.dim0() << '\n';
   g_log.debug() << "\t"
-                << "Number of Pixels : data.dim1() = " << data.dim1()
-                << std::endl;
+                << "Number of Pixels : data.dim1() = " << data.dim1() << '\n';
   g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << std::endl;
+                << "data.dim2() = " << data.dim2() << '\n';
   g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << std::endl;
+                << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim0();
-  size_t numberOfPixelsPerTube = data.dim1();
+  const size_t numberOfTubes = data.dim0();
+  const size_t numberOfPixelsPerTube = data.dim1();
 
-  Progress progress(this, 0, 1, data.dim0() * data.dim1());
+  Progress progress(this, 0.0, 1.0, data.dim0() * data.dim1());
 
-  m_localWorkspace->dataX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
-
+  const HistogramData::BinEdges binEdges(timeBinning);
   size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
-      }
-      // Assign Y
+
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
 
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
-
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
       ++spec;
       progress.report();
     }
   }
 
-  g_log.debug() << "Data loading inti WS done...." << std::endl;
+  g_log.debug() << "Data loading inti WS done....\n";
 
   return spec;
 }
@@ -457,11 +423,11 @@ void LoadILLSANS::moveDetectorDistance(double distance,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to Z = " << distance << std::endl;
+                  << "' to Z = " << distance << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Z = " << distance << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to Z = " << distance << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -482,11 +448,11 @@ void LoadILLSANS::moveDetectorHorizontal(double shift,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to X = " << shift << std::endl;
+                  << "' to X = " << shift << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to X = " << shift << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to X = " << shift << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -504,11 +470,11 @@ void LoadILLSANS::moveDetectorVertical(double shift,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to Y = " << shift << std::endl;
+                  << "' to Y = " << shift << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Y = " << shift << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to Y = " << shift << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -534,7 +500,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   int runNum = entry.getInt("run_number");
-  std::string run_num = boost::lexical_cast<std::string>(runNum);
+  std::string run_num = std::to_string(runNum);
   runDetails.addProperty("run_number", run_num);
 
   if (entry.getFloat("mode") == 0.0) { // Not TOF
@@ -560,11 +526,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 
   double wavelength =
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
-  g_log.debug() << "Wavelength found in the nexus file: " << wavelength
-                << std::endl;
+  g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
 
   if (wavelength <= 0) {
-    g_log.debug() << "Mode = " << entry.getFloat("mode") << std::endl;
+    g_log.debug() << "Mode = " << entry.getFloat("mode") << '\n';
     g_log.information("The wavelength present in the NeXus file <= 0.");
     if (entry.getFloat("mode") == 0.0) { // Not TOF
       throw std::runtime_error("Working in Non TOF mode and the wavelength in "
@@ -581,14 +546,6 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-
-  // Put the detector distances:
-  //	std::string detectorPath(instrumentNamePath + "/detector");
-  //	// Just for Sample - RearDetector
-  //	double sampleDetectorDistance =
-  // m_loader.getDoubleFromNexusPath(entry,detectorPath + "/det2_calc");
-  //	runDetails.addProperty("sample_detector_distance",
-  // sampleDetectorDistance);
 }
 
 /**
@@ -605,18 +562,15 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
          max = std::numeric_limits<double>::min();
   g_log.debug("Calculating Qmin Qmax...");
   std::size_t nHist = m_localWorkspace->getNumberHistograms();
+  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
   for (std::size_t i = 0; i < nHist; ++i) {
-    Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
-    if (!det->isMonitor()) {
-      const MantidVec &lambdaBinning = m_localWorkspace->readX(i);
-      Kernel::V3D detPos = det->getPos();
+    if (!spectrumInfo.isMonitor(i)) {
+      const auto &lambdaBinning = m_localWorkspace->x(i);
+      Kernel::V3D detPos = spectrumInfo.position(i);
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
       double v1 = calculateQ(*(lambdaBinning.begin()), theta);
       double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      // std::cout << "i=" << i << " theta="<<theta << " lambda_i=" <<
-      // *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) <<
-      // " v1=" << v1 << " v2=" << v2 << std::endl;
       if (i == 0) {
         min = v1;
         max = v1;
@@ -634,12 +588,13 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
         max = v2;
       }
     } else
-      g_log.debug() << "Detector " << i << " is a Monitor : " << det->getID()
-                    << std::endl;
+      g_log.debug() << "Detector " << i
+                    << " is a Monitor : " << spectrumInfo.detector(i).getID()
+                    << '\n';
   }
 
-  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max << "]"
-                << std::endl;
+  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max
+                << "]\n";
 
   return std::pair<double, double>(min, max);
 }

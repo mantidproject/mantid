@@ -41,9 +41,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadFullprofResolution : public API::Algorithm {
 public:
-  LoadFullprofResolution();
-  ~LoadFullprofResolution() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadFullprofResolution"; }
 
@@ -158,6 +155,10 @@ private:
 
   /// Parse 1 bank of lines of profile 10
   void parseProfile10();
+
+  /// Parse a value and prints warning if something is wrong
+  double parseDoubleValue(const std::string &value,
+                          const std::string &label = std::string());
 
   /// Generate output workspace
   DataObjects::TableWorkspace_sptr

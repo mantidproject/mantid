@@ -3,13 +3,15 @@
 Test the SNS inelatic reduction scripts.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 import shutil
 import glob
+import numpy as np
 import mantid
 from mantid.simpleapi import *
-from numpy import *
+
 
 class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     _nxspe_filename=""
@@ -44,19 +46,18 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         shutil.copyfile(filename,os.path.join(self.customDataDir,'SEQ_12385_event.nxs'))
         self.topbottom()
 
-
     #Routines from SNS scripts
-    def createanglelist(self,ws,amin,amax,astep):
+    def createanglelist(self,ws,angmin,angmax,angstep):
         """
         Function to create a map of detectors corresponding to angles in a certain range
         """
-        bin_angles=arange(amin+astep*0.5,amax+astep*0.5,astep)
+        bin_angles=np.arange(angmin+angstep*0.5,angmax+angstep*0.5,angstep)
         a=[[] for i in range(len(bin_angles))] #list of list with detector IDs
         w=mtd[ws]
         origin = w.getInstrument().getSample().getPos()
         for i in range(w.getNumberHistograms()):
-            ang=w.getDetector(i).getTwoTheta(origin,mantid.kernel.V3D(0,0,1))*180/math.pi
-            index=int((ang-amin)/astep)
+            ang=w.getDetector(i).getTwoTheta(origin,mantid.kernel.V3D(0,0,1))*180/np.pi
+            index=int((ang-angmin)/angstep)
             if (index>=0) and (index<len(a)) and ((w.getDetector(i).getID())>0):
                 a[index].append(w.getSpectrum(i).getSpectrumNo())
         #create lists with angles and detector ID only for bins where there are detectors
@@ -68,19 +69,19 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 ang_list.append(ang)
         # file with grouping information
         f = open(os.path.join(self.customDataDir,"group.map"),'w')
-        print >>f,len(ang_list)
+        print(len(ang_list), file=f)
         for i in range(len(ang_list)):
-            print >>f,i
-            print >>f,len(detIDlist[i])
+            print(i, file=f)
+            print(len(detIDlist[i]), file=f)
             mystring=str(detIDlist[i]).strip(']').strip('[')
             mystring=mystring.replace(',','')
-            print >>f,mystring
+            print(mystring, file=f)
         f.close()
         # par file
         f = open(os.path.join(self.customDataDir,"group.par"),'w')
-        print >>f,len(ang_list)
-        for i in range(len(ang_list)):
-            print >>f,5.5,ang_list[i],0.0,1.0,1.0,1
+        print(len(ang_list), file=f)
+        for angi in ang_list:
+            print(5.5,angi,0.0,1.0,1.0,1, file=f)
         f.close()
         return [ang_list,detIDlist]
 
@@ -111,9 +112,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 r=[r]
             temppath=[]
             tempnewruns=[]
-            for i in range(len(r)):
-                temppath.append(os.path.join(folder,prefix+str(r[i])+suffix))
-                tempnewruns.append(r[i])
+            for i,ri in enumerate(r):
+                temppath.append(os.path.join(folder,prefix+str(ri)+suffix))
+                tempnewruns.append(ri)
                 if not os.path.isfile(temppath[i]):
                     raise IOError(temppath[i]+" not found")
             path.append(temppath)
@@ -141,11 +142,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
 
-
     #functions from stresstesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
-
 
     def cleanup(self):
         for ws in ['IWS', 'OWST', 'VAN', 'monitor_ws']:
@@ -188,11 +187,11 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                     LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")
                     Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")
                     Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")
-			        #cleanup
+                                #cleanup
                     DeleteWorkspace("IWS_temp")
                     DeleteWorkspace("monitor_ws_temp")
             w=mtd["IWS"]
-            psi=array(w.getRun()[angle_name].value).mean()+ang_offset
+            psi=np.array(w.getRun()[angle_name].value).mean()+ang_offset
             FilterBadPulses(InputWorkspace="IWS",OutputWorkspace = "IWS",LowerCutoff = 50)
             [Efixed,T0]=self.GetEiT0("monitor_ws",Eguess)
             ChangeBinOffset(InputWorkspace="IWS",OutputWorkspace="OWS",Offset=T0)
@@ -208,7 +207,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")
             if do_powder:
                 if i==0:
-                    dummy_mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
+                    self.createanglelist("OWST",anglemin,anglemax,anglestep)
                 GroupDetectors( InputWorkspace="OWST",OutputWorkspace="OWST",
                                 MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
                 SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
@@ -246,7 +245,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         #find the nxspe filename: it should be only one, but the name might depend on the rounding of phi
         nxspelist=glob.glob(os.path.join(self.customDataDir,'*.nxspe'))
         if len(nxspelist)>1 or len(nxspelist) == 0:
-            print "Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist))
+            print("Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist)))
             return False
 
         # Name encodes rotation
@@ -265,4 +264,3 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         return "OWST",'SEQUOIAReduction.nxs'
-

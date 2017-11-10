@@ -73,7 +73,7 @@ public:
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
   /// @return Dimension ID string.
-  virtual std::string getDimensionId() const = 0;
+  virtual const std::string &getDimensionId() const = 0;
 
   /// @return the minimum extent of this dimension
   virtual coord_t getMinimum() const = 0;
@@ -84,6 +84,9 @@ public:
   /// @return number of bins dimension have (an integrated has one). A axis
   /// directed along dimension would have getNBins+1 axis points.
   virtual size_t getNBins() const = 0;
+
+  /// @return number of bin boundaries (axis points)
+  virtual size_t getNBoundaries() const = 0;
 
   /// @return an XML string representation of the dimension.
   virtual std::string toXMLString() const = 0;

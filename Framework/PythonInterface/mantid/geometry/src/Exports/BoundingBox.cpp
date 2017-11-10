@@ -35,7 +35,8 @@ void export_BoundingBox() {
       .def("isNull", &BoundingBox::isNull, arg("self"),
            "Returns true if the box has no dimensions that have been set")
 
-      .def("isPointInside", &BoundingBox::isPointInside, arg("self"),
+      .def("isPointInside", &BoundingBox::isPointInside,
+           (arg("self"), arg("point")),
            "Returns true if the given point is inside the object. See "
            "mantid.kernel.V3D")
 

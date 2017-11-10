@@ -37,9 +37,6 @@ namespace LiveData {
 */
 class DLLExport MonitorLiveData : public LiveDataAlgorithm {
 public:
-  MonitorLiveData();
-  ~MonitorLiveData() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -57,7 +54,7 @@ private:
 
 public:
   /// Latest chunk number loaded
-  size_t m_chunkNumber;
+  size_t m_chunkNumber{0};
 };
 
 } // namespace LiveData

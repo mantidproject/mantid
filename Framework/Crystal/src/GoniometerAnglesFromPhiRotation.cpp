@@ -1,15 +1,15 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::Logger;
-using Mantid::API::IFunction;
 
 namespace Mantid {
 namespace Crystal {
@@ -21,14 +21,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-
-//--------------------------------------------------------------------------
-/** Constructor
- */
-GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
-    : Algorithm() {}
-
-GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -168,9 +160,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
     if (!PeaksRun1->sample().hasOrientedLattice()) {
       g_log.notice(std::string("Could not find UB for ") +
-                   std::string(PeaksRun1->name()));
+                   std::string(PeaksRun1->getName()));
       throw std::invalid_argument(std::string("Could not find UB for ") +
-                                  std::string(PeaksRun1->name()));
+                                  std::string(PeaksRun1->getName()));
     }
   }
   //-------------get UB raw :No goniometer----------------
@@ -185,9 +177,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   if (N1 < .6 * PeaksRun1->getNumberPeaks()) {
     g_log.notice(std::string("UB did not index well for ") +
-                 std::string(PeaksRun1->name()));
+                 std::string(PeaksRun1->getName()));
     throw std::invalid_argument(std::string("UB did not index well for ") +
-                                std::string(PeaksRun1->name()));
+                                std::string(PeaksRun1->getName()));
   }
 
   //----------------------------------------------
@@ -211,7 +203,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   }
 
   int RunNum = PeaksRun2->getPeak(0).getRunNumber();
-  std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+  std::string RunNumStr = std::to_string(RunNum);
   int Npeaks = PeaksRun2->getNumberPeaks();
 
   // n indexed, av err, phi, chi,omega
@@ -246,28 +238,22 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   g_log.debug() << "Best direction unOptimized is ("
                 << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
-                << "," << (MinData[1] * MinData[4]) << ")" << std::endl;
+                << "," << (MinData[1] * MinData[4]) << ")\n";
 
   //----------------------- Optimize around best
   //-------------------------------------------
 
-  //               --------Create Workspace -------------------
-  boost::shared_ptr<DataObjects::Workspace2D> ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * Npeaks,
-                                              3 * Npeaks));
-  MantidVecPtr Xvals, Yvals;
+  auto ws = createWorkspace<Workspace2D>(1, 3 * Npeaks, 3 * Npeaks);
+
+  MantidVec Xvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
   }
-  ws->setX(0, Xvals);
-  ws->setData(0, Yvals);
+
+  ws->setPoints(0, Xvals);
 
   //       -------------Set up other Fit function arguments------------------
   V3D dir(MinData[2], MinData[3], MinData[4]);
@@ -283,7 +269,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MinData[4] = omchiphi[0];
 
   std::string FunctionArgs =
-      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->name() +
+      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->getName() +
       ",OptRuns=" + RunNumStr + ",phi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[2]) + ",chi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr +
@@ -356,23 +342,21 @@ void GoniometerAnglesFromPhiRotation::exec() {
   double omega2 = atan2(ax3, -ax1) / M_PI * 180;
 
   g_log.notice()
-      << "============================ Results ============================"
-      << std::endl;
+      << "============================ Results ============================\n";
   g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << ","
-                 << omega2 << ")" << std::endl;
-  g_log.notice() << "     #indexed =" << Nindexed << std::endl;
+                 << omega2 << ")\n";
+  g_log.notice() << "     #indexed =" << Nindexed << '\n';
   g_log.notice()
-      << "              =============================================="
-      << std::endl;
+      << "              ==============================================\n";
 
   // std::cout << "============================ Results
-  // ============================" << std::endl;
+  // ============================\n";
   // std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," <<
   // omega2 << ")"
-  //     << std::endl;
-  // std::cout << "     #indexed =" << Nindexed << std::endl;
+  //     << '\n';
+  // std::cout << "     #indexed =" << Nindexed << '\n';
   // std::cout << "              =============================================="
-  // << std::endl;
+  // << '\n';
 
   setProperty("Phi2", phi2);
   setProperty("Chi2", chi2);

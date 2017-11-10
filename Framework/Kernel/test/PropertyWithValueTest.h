@@ -23,7 +23,7 @@ public:
     iProp = new PropertyWithValue<int>("intProp", 1);
     dProp = new PropertyWithValue<double>("doubleProp", 9.99);
     sProp = new PropertyWithValue<std::string>("stringProp", "theValue");
-    lProp = new PropertyWithValue<long long>("int64Prop", -9876543210987654LL);
+    lProp = new PropertyWithValue<int64_t>("int64Prop", -9876543210987654LL);
     bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
@@ -38,26 +38,31 @@ public:
   void testConstructor() {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT(!iProp->name().compare("intProp"));
+    TS_ASSERT(!iProp->type().compare("number"));
     TS_ASSERT(!iProp->documentation().compare(""));
     TS_ASSERT(typeid(int) == *iProp->type_info());
     TS_ASSERT(iProp->isDefault());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"));
+    TS_ASSERT(!dProp->type().compare("number"));
     TS_ASSERT(!dProp->documentation().compare(""));
     TS_ASSERT(typeid(double) == *dProp->type_info());
     TS_ASSERT(dProp->isDefault());
 
     TS_ASSERT(!sProp->name().compare("stringProp"));
+    TS_ASSERT(!sProp->type().compare("string"));
     TS_ASSERT(!sProp->documentation().compare(""));
     TS_ASSERT(typeid(std::string) == *sProp->type_info());
     TS_ASSERT(sProp->isDefault());
 
     TS_ASSERT(!lProp->name().compare("int64Prop"));
+    TS_ASSERT(!lProp->type().compare("number"));
     TS_ASSERT(!lProp->documentation().compare(""));
-    TS_ASSERT(typeid(long long) == *lProp->type_info());
+    TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
 
     TS_ASSERT(!bProp->name().compare("boolProp"));
+    TS_ASSERT(!bProp->type().compare("optional boolean"));
     TS_ASSERT(!bProp->documentation().compare(""));
     TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
     TS_ASSERT(bProp->isDefault());
@@ -148,7 +153,7 @@ public:
     TS_ASSERT_EQUALS(s.setValue("it works"), "");
     TS_ASSERT_EQUALS(s.operator()(), "it works");
 
-    PropertyWithValue<long long> l("test", 1);
+    PropertyWithValue<int64_t> l("test", 1);
     TS_ASSERT_EQUALS(l.setValue("10"), "");
     TS_ASSERT_EQUALS(l, 10);
     TS_ASSERT_EQUALS(l.setValue("1234567890123456"), "");
@@ -164,17 +169,23 @@ public:
 
 private:
   class DataObjectOne : public DataItem {
-    const std::string name() const override { return "MyName1"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectOne"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName1"};
   };
 
   class DataObjectTwo : public DataItem {
-    const std::string name() const override { return "MyName2"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectTwo"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName2"};
   };
 
 public:
@@ -194,7 +205,7 @@ public:
             i.type());
     TS_ASSERT_EQUALS(i.getDefault(), "3");
 
-    PropertyWithValue<long long> l("defau1", 987987987987LL);
+    PropertyWithValue<int64_t> l("defau1", 987987987987LL);
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
     TS_ASSERT_EQUALS(l.setValue("5"), "");
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
@@ -242,10 +253,10 @@ public:
     TS_ASSERT(s.isDefault());
     TS_ASSERT_EQUALS(sProp->operator()(), "theValue");
 
-    PropertyWithValue<long long> l = *lProp;
+    PropertyWithValue<int64_t> l = *lProp;
     TS_ASSERT(!lProp->name().compare("int64Prop"));
     TS_ASSERT(!lProp->documentation().compare(""));
-    TS_ASSERT(typeid(long long) == *lProp->type_info());
+    TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
     TS_ASSERT_EQUALS(l, -9876543210987654LL);
   }
@@ -272,7 +283,7 @@ public:
     TS_ASSERT(!s.isDefault());
     TS_ASSERT_EQUALS(sProp->operator()(), "theValue");
 
-    PropertyWithValue<long long> l("Prop4", 5);
+    PropertyWithValue<int64_t> l("Prop4", 5);
     l = *lProp;
     TS_ASSERT(!l.name().compare("Prop4"));
     TS_ASSERT(!l.documentation().compare(""));
@@ -300,7 +311,7 @@ public:
     s = "testing";
     TS_ASSERT(i.isDefault());
 
-    PropertyWithValue<long long> l("Prop4", 987987987987LL);
+    PropertyWithValue<int64_t> l("Prop4", 987987987987LL);
     TS_ASSERT_EQUALS(l = 2, 2);
     TS_ASSERT(!l.isDefault());
     l = 987987987987LL;
@@ -321,7 +332,7 @@ public:
     TS_ASSERT_EQUALS(ss.operator()(), "tested");
     TS_ASSERT_EQUALS(s.operator()(), "tested");
 
-    PropertyWithValue<long long> ll("Prop4.4", 6);
+    PropertyWithValue<int64_t> ll("Prop4.4", 6);
     l = ll = 789789789789LL;
     TS_ASSERT_EQUALS(ll, 789789789789LL);
     TS_ASSERT_EQUALS(l, 789789789789LL);
@@ -368,7 +379,7 @@ public:
     TS_ASSERT_EQUALS(d, 9.99);
     std::string str = *sProp;
     TS_ASSERT(!str.compare("theValue"));
-    long long l = *lProp;
+    int64_t l = *lProp;
     TS_ASSERT_EQUALS(l, -9876543210987654LL);
   }
 
@@ -383,7 +394,7 @@ public:
 
   void testCasting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -393,7 +404,7 @@ public:
     TS_ASSERT_EQUALS(i, 10);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -408,7 +419,7 @@ public:
     TS_ASSERT_EQUALS(d, 7.777);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -418,8 +429,8 @@ public:
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(0));
-    PropertyWithValue<long long> l("Prop4", 789789789789LL);
+                      static_cast<Property *>(nullptr));
+    PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));
     TS_ASSERT(!pppp->value().compare("789789789789"));
@@ -500,9 +511,9 @@ public:
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
     // int64 tests
-    PropertyWithValue<long long> pl(
+    PropertyWithValue<int64_t> pl(
         "test", 987987987987LL,
-        boost::make_shared<BoundedValidator<long long>>(0, 789789789789LL));
+        boost::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
     TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan +
                                        "789789789789" + end);
     TS_ASSERT_EQUALS(pl.setValue("-1"), start + "-1" + lessThan + "0" + end);
@@ -637,7 +648,7 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
@@ -685,11 +696,61 @@ public:
     }
   }
 
+  void test_trimming_string_property() {
+    std::string stringWithWhitespace = "  value with whitespace\t\t \r\n";
+    std::string trimmedStringWithWhitespace = "value with whitespace";
+    sProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", sProp->value(),
+                      trimmedStringWithWhitespace);
+
+    // turn trimming off
+    sProp->setAutoTrim(false);
+    TSM_ASSERT_EQUALS("Auto trim is not turned off", sProp->autoTrim(), false);
+
+    sProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has been trimmed when it should not",
+                      sProp->value(), stringWithWhitespace);
+
+    // turn trimming on
+    sProp->setAutoTrim(true);
+    TSM_ASSERT_EQUALS("Auto trim is not turned on", sProp->autoTrim(), true);
+
+    // test assignment
+    *sProp = stringWithWhitespace;
+    TSM_ASSERT_EQUALS("Assignment input value has not been trimmed",
+                      sProp->value(), trimmedStringWithWhitespace);
+
+    // test assignment with string literal
+    *sProp = "  value with whitespace\t\t \r\n";
+    TSM_ASSERT_EQUALS("Assignment string literal has not been trimmed",
+                      sProp->value(), trimmedStringWithWhitespace);
+  }
+
+  void test_trimming_integer_property() {
+    std::string stringWithWhitespace = "  1243\t\t \r\n";
+    std::string trimmedStringWithWhitespace = "1243";
+    iProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value has not been trimmed", iProp->value(),
+                      trimmedStringWithWhitespace);
+
+    // turn trimming off
+    iProp->setAutoTrim(false);
+    TSM_ASSERT_EQUALS("Auto trim is not turned off", iProp->autoTrim(), false);
+
+    iProp->setValue(stringWithWhitespace);
+    TSM_ASSERT_EQUALS("Input value should still appear trimmed for an integer",
+                      iProp->value(), trimmedStringWithWhitespace);
+
+    // turn trimming on
+    iProp->setAutoTrim(true);
+    TSM_ASSERT_EQUALS("Auto trim is not turned on", iProp->autoTrim(), true);
+  }
+
 private:
   PropertyWithValue<int> *iProp;
   PropertyWithValue<double> *dProp;
   PropertyWithValue<std::string> *sProp;
-  PropertyWithValue<long long> *lProp;
+  PropertyWithValue<int64_t> *lProp;
   PropertyWithValue<OptionalBool> *bProp;
 };
 

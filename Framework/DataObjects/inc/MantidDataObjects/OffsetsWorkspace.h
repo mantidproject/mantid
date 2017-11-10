@@ -25,6 +25,10 @@ public:
   std::unique_ptr<OffsetsWorkspace> clone() const {
     return std::unique_ptr<OffsetsWorkspace>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<OffsetsWorkspace> cloneEmpty() const {
+    return std::unique_ptr<OffsetsWorkspace>(doCloneEmpty());
+  }
   OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
@@ -37,6 +41,9 @@ protected:
 private:
   OffsetsWorkspace *doClone() const override {
     return new OffsetsWorkspace(*this);
+  }
+  OffsetsWorkspace *doCloneEmpty() const override {
+    return new OffsetsWorkspace();
   }
 };
 

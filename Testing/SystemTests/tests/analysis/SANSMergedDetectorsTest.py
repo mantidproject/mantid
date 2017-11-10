@@ -1,8 +1,11 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 import stresstesting
+
+
 class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)

@@ -26,9 +26,6 @@ enum VULCAN_OFFSET_LEVEL {
  */
 class DLLExport LoadVulcanCalFile : public API::Algorithm {
 public:
-  LoadVulcanCalFile();
-  ~LoadVulcanCalFile() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadVulcanCalFile"; }
   /// Summary of algorithms purpose
@@ -80,7 +77,7 @@ private:
   Geometry::Instrument_const_sptr m_instrument;
 
   /// Type of grouping
-  VULCAN_OFFSET_LEVEL m_groupingType;
+  VULCAN_OFFSET_LEVEL m_groupingType{VULCAN_OFFSET_BANK};
 
   std::string m_offsetFilename;
   std::string m_badPixFilename;
@@ -93,7 +90,7 @@ private:
   // Verification tool
   void alignEventWorkspace();
 
-  bool m_doAlignEventWS;
+  bool m_doAlignEventWS{false};
   DataObjects::EventWorkspace_sptr m_eventWS;
 
   // Map for bank: eff_L and theta (in degree)

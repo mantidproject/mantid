@@ -6,9 +6,13 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+parseNames(const std::string &names_string);
 
 /** CreateMDWorkspace :
  *
@@ -22,9 +26,6 @@ namespace MDAlgorithms {
 class DLLExport CreateMDWorkspace
     : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
-  CreateMDWorkspace();
-  ~CreateMDWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateMDWorkspace"; }
   /// Summary of algorithms purpose

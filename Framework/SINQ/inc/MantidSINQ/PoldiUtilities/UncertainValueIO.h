@@ -50,7 +50,7 @@ public:
   }
 
   static UncertainValue fromString(const std::string &uncertainValueString) {
-    if (uncertainValueString.size() == 0) {
+    if (uncertainValueString.empty()) {
       return UncertainValue();
     }
 

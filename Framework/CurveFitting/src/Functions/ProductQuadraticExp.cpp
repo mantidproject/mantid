@@ -16,11 +16,11 @@ DECLARE_FUNCTION(ProductQuadraticExp)
 /** Constructor
 */
 ProductQuadraticExp::ProductQuadraticExp() {
-  declareParameter("A0", 0.0);
-  declareParameter("A1", 0.0);
-  declareParameter("A2", 0.0);
-  declareParameter("Height", 1.0);
-  declareParameter("Lifetime", 1.0);
+  declareParameter("A0", 0.0, "Coefficient for constant term");
+  declareParameter("A1", 0.0, "Coefficient for linear term");
+  declareParameter("A2", 0.0, "Coefficient for quadratic term");
+  declareParameter("Height", 1.0, "Height");
+  declareParameter("Lifetime", 1.0, "Lifetime");
 }
 
 /**

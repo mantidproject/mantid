@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -51,9 +49,6 @@ int LoadAscii::confidence(Kernel::FileDescriptor &descriptor) const {
   return confidence;
 }
 
-//--------------------------------------------------------------------------
-// Protected methods
-//--------------------------------------------------------------------------
 /**
 * Process the header information. This implementation just skips it entirely.
 * @param file :: A reference to the file stream
@@ -176,7 +171,11 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   // potentially there
   // could be blank lines and comment lines
   int numBins(0), lineNo(0);
-  std::vector<DataObjects::Histogram1D> spectra(numSpectra);
+  std::vector<DataObjects::Histogram1D> spectra(
+      numSpectra,
+      DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
+                               HistogramData::Histogram::YMode::Counts));
+  std::vector<double> dx;
   std::vector<double> values(numCols, 0.);
   do {
     ++lineNo;
@@ -200,19 +199,28 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     }
 
     for (size_t i = 0; i < numSpectra; ++i) {
-      spectra[i].dataX().push_back(values[0]);
-      spectra[i].dataY().push_back(values[i * 2 + 1]);
+      auto hist = spectra[i].histogram();
+      hist.resize(hist.size() + 1);
+      hist.mutableX().back() = values[0];
+      hist.mutableY().back() = values[i * 2 + 1];
       if (haveErrors) {
-        spectra[i].dataE().push_back(values[i * 2 + 2]);
+        hist.mutableE().back() = values[i * 2 + 2];
       }
-      if (haveXErrors) {
-        // Note: we only have X errors with 4-column files.
-        // We are only here when i=0.
-        spectra[i].dataDx().push_back(values[3]);
-      }
+      spectra[i].setHistogram(hist);
+    }
+    if (haveXErrors) {
+      // Note: we only have X errors with 4-column files.
+      // We are only here when i=0.
+      dx.push_back(values[3]);
     }
     ++numBins;
   } while (getline(file, line));
+  auto sharedDx = Kernel::make_cow<HistogramData::HistogramDx>(dx);
+  for (size_t i = 0; i < numSpectra; ++i) {
+    if (haveXErrors) {
+      spectra[i].setSharedDx(sharedDx);
+    }
+  }
 
   MatrixWorkspace_sptr localWorkspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -226,19 +234,10 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   }
 
   for (size_t i = 0; i < numSpectra; ++i) {
-    localWorkspace->dataX(i) = spectra[i].dataX();
-    localWorkspace->dataY(i) = spectra[i].dataY();
-    /* If Y or E errors are not there, DON'T copy across as the 'spectra'
-       vectors
-       have not been filled above. The workspace will by default have vectors of
-       the right length filled with zeroes. */
-    if (haveErrors)
-      localWorkspace->dataE(i) = spectra[i].dataE();
-    if (haveXErrors)
-      localWorkspace->dataDx(i) = spectra[i].dataDx();
+    localWorkspace->setHistogram(i, spectra[i].histogram());
+
     // Just have spectrum number start at 1 and count up
-    localWorkspace->getSpectrum(i)
-        ->setSpectrumNo(static_cast<specnum_t>(i) + 1);
+    localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
   return localWorkspace;
 }
@@ -320,13 +319,14 @@ void LoadAscii::init() {
                                {"Colon", ":"},
                                {"SemiColon", ";"}};
   // For the ListValidator
-  std::vector<std::string> sepOptions;
+  std::array<std::string, 5> sepOptions;
   for (size_t i = 0; i < 5; ++i) {
-    std::string option = spacers[i][0];
+    const auto &option = spacers[i][0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacers[i][1]));
-    sepOptions.push_back(option);
+    sepOptions[i] = option;
   }
+
   declareProperty(
       "Separator", "Automatic",
       boost::make_shared<StringListValidator>(sepOptions),

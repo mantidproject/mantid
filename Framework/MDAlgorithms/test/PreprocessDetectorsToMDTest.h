@@ -2,8 +2,10 @@
 #define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -234,48 +236,15 @@ public:
         API::AnalysisDataService::Instance().retrieve("testMatrWS"));
     const size_t nRows = inputWS->getNumberHistograms();
 
-    // build detectors ID list to mask
-    std::vector<detid_t> detectorList;
-    detectorList.reserve(nRows);
-    std::vector<size_t> indexLis;
-    indexLis.reserve(nRows);
-    for (size_t i = 0; i < nRows; i++) {
-      // get detector or detector group which corresponds to the spectra i
-      Geometry::IDetector_const_sptr spDet;
-      try {
-        spDet = inputWS->getDetector(i);
-      } catch (Kernel::Exception::NotFoundError &) {
-        continue;
-      }
-
-      // Check that we aren't dealing with monitor...
-      if (spDet->isMonitor())
-        continue;
-
-      indexLis.push_back(i);
-      // detectorList.push_back(spDet->getID());
-    }
-
     // Now mask all detectors in the workspace
-    // Geometry::ParameterMap& pmap = inputWS->instrumentParameters();
-    // std::vector<detid_t>::const_iterator it;
-    // Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-    // for (it = detectorList.begin(); it != detectorList.end(); ++it)
-    //{
-    //    try
-    //    {
-    //      if ( const Geometry::ComponentID det =
-    //      instrument->getDetector(*it)->getComponentID() )
-    //      pmap.addBool(det,"masked",true);
-    //    }
-    //    catch(Kernel::Exception::NotFoundError &)
-    //    {
-    //    }
-    //}
-    std::vector<size_t>::const_iterator wit;
-    for (wit = indexLis.begin(); wit != indexLis.end(); ++wit) {
-      inputWS->maskWorkspaceIndex(*wit);
+    auto &spectrumInfo = inputWS->mutableSpectrumInfo();
+    for (size_t i = 0; i < nRows; i++) {
+      if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
+        continue;
+      inputWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
     }
+
     // let's retrieve masks now
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());

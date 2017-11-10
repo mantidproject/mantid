@@ -1,6 +1,12 @@
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidAPI/Workspace.h"
 #include <boost/python/enum.hpp>
+
+using Mantid::API::Workspace;
+using Mantid::API::WorkspaceProperty; // NOLINT
+
+GET_POINTER_SPECIALIZATION(WorkspaceProperty<Workspace>)
 
 void export_WorkspaceProperty() {
   using Mantid::API::PropertyMode;
@@ -15,7 +21,6 @@ void export_WorkspaceProperty() {
       .value("Lock", LockMode::Lock)
       .value("NoLock", LockMode::NoLock);
 
-  using Mantid::API::Workspace;
   using Mantid::PythonInterface::WorkspacePropertyExporter;
   WorkspacePropertyExporter<Workspace>::define("WorkspaceProperty");
 }

@@ -23,7 +23,7 @@ namespace MDAlgorithmsTestHelper {
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points
  * the points are randomly distributed within the box (nEvents>0) or
- *homoheneously and regularly spread through the box (nEvents<0)
+ *homogeneously and regularly spread through the box (nEvents<0)
  *
  * @param wsName :: name of the workspace in ADS
  * @param fileBacked :: true for file-backed
@@ -36,7 +36,7 @@ DataObjects::MDEventWorkspace3Lean::sptr
 makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
                    Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  std::string snEvents = boost::lexical_cast<std::string>(numEvents);
+  std::string snEvents = std::to_string(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
   ws1->getBoxController()->setSplitThreshold(100);
@@ -63,7 +63,7 @@ makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points
  * the points are randomly distributed within the box (nEvents>0) or
- *homoheneously and regularly spread through the box (nEvents<0)
+ *homogeneously and regularly spread through the box (nEvents<0)
  *
  * @param wsName :: name of the workspace in ADS
  * @param fileBacked :: true for file-backed
@@ -79,7 +79,7 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
                               long numEvents,
                               Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  std::string snEvents = boost::lexical_cast<std::string>(numEvents);
+  std::string snEvents = std::to_string(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
           10, 0.0, 10.0, frame, 0);

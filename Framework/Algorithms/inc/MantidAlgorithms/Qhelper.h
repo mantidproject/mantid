@@ -1,11 +1,8 @@
 #ifndef MANTID_ALGORITHMS_QHELPER_H_
 #define MANTID_ALGORITHMS_QHELPER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,6 +44,7 @@ public:
                     API::MatrixWorkspace_const_sptr detectAdj);
 
   size_t waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
+                          const API::SpectrumInfo &spectrumInfo,
                           const double RCut, const double WCut,
                           const size_t wsInd) const;
 

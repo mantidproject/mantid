@@ -2,16 +2,17 @@
 #define DOWNLOADREMOTEFILE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm {
+class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm,
+                                     public API::DeprecatedAlgorithm {
 public:
-  /// (Empty) Constructor
-  DownloadRemoteFile() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~DownloadRemoteFile() override {}
+  /// constructor
+  DownloadRemoteFile();
+
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose

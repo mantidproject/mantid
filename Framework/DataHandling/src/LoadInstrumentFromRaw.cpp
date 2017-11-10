@@ -67,7 +67,6 @@ void LoadInstrumentFromRaw::exec() {
 
   // Create a new Instrument with the right name and add it to the workspace
   Geometry::Instrument_sptr instrument(new Instrument(iraw.i_inst));
-  localWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
@@ -136,7 +135,7 @@ void LoadInstrumentFromRaw::exec() {
         monIndex + numMonitors) {
       instrument->markAsMonitor(detector);
       g_log.information() << "Detector with ID " << detID[i]
-                          << " marked as a monitor." << std::endl;
+                          << " marked as a monitor.\n";
     }
     // otherwise mark as a detector
     else {
@@ -146,6 +145,7 @@ void LoadInstrumentFromRaw::exec() {
     prog += (0.5 / numDetector);
     progress(prog);
   }
+  localWorkspace->setInstrument(instrument);
 
   std::vector<detid_t> monitorList = instrument->getMonitors();
   setProperty("MonitorList", monitorList);
@@ -163,8 +163,6 @@ void LoadInstrumentFromRaw::exec() {
          "the source is " << l1 << "m in front \n"
       << "of the sample. This value can be changed via the 'instrument.l1' "
          "configuration property.\n";
-
-  return;
 }
 
 } // namespace DataHandling

@@ -1,7 +1,10 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi
 import mantid.api
 import mantid.kernel
+
 
 class CorrectLogTimes(mantid.api.PythonAlgorithm):
     """ Class to shift log times to match proton charge
@@ -43,9 +46,8 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
                 else:
                     logList.append(value)
 
-
         if len(logList)==0:
-            logList=self.ws.getRun().keys()
+            logList=list(self.ws.getRun().keys())
 
         for x in logList:
             if x not in ['duration','proton_charge','start_time','run_title','run_start','run_number','gd_prtn_chrg','end_time']:
@@ -54,7 +56,6 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
                 #pylint: disable= bare-except
                 except:
                     pass
-
 
     def ShiftTime(self, logName):
         """

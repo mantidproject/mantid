@@ -29,11 +29,11 @@ Usage
   SortEvents(InputWorkspace='TestEventWS', SortBy="X Value")
 
   ws = mtd["TestEventWS"]
-  ev1 = ws.getEventList(1)
+  ev1 = ws.getSpectrum(1)
   ptimes = ev1.getPulseTimes()
   tofs = ev1.getTofs()
-  for eindex in xrange(10):
-    print "Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex])
+  for eindex in range(10):
+    print("Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex]))
 
 .. testcleanup:: ExSortByX
 
@@ -62,11 +62,11 @@ Output:
   SortEvents(InputWorkspace='TestEventWS',SortBy='Pulse Time + TOF')
 
   ws = mtd["TestEventWS"]
-  ev1 = ws.getEventList(1)
+  ev1 = ws.getSpectrum(1)
   ptimes = ev1.getPulseTimes()
   tofs = ev1.getTofs()
-  for eindex in xrange(10):
-    print "Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex])
+  for eindex in range(10):
+    print("Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex]))
 
 
 .. testcleanup:: ExSortByPulseTOF

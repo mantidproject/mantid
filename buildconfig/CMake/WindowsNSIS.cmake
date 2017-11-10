@@ -10,6 +10,7 @@ set( CPACK_INSTALL_PREFIX "/")
 set( CPACK_NSIS_DISPLAY_NAME "Mantid${CPACK_PACKAGE_SUFFIX}")
 set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
+set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
 set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images\\\\MantidPlot_Icon_32offset.png" )
 set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images\\\\MantidPlot_Icon_32offset.ico" )
@@ -45,6 +46,7 @@ set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_python-mt.dll
     boost_regex-mt.dll
+    boost_serialization-mt.dll
 )
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
@@ -78,8 +80,14 @@ set ( MISC_CORE_DIST_DLLS
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
+    librdkafka.dll
+    librdkafkacpp.dll
     ssleay32.dll
     szip.dll
+    tbb.dll
+    tbbmalloc.dll
+    tbbmalloc_proxy.dll
+    tbb_preview.dll
     zlib.dll
 )
 set ( QT_DIST_DLLS
@@ -126,17 +134,18 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/qt.conf DEST
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
 set ( QT_PLUGIN_DIR ${QT_INSTALL_PREFIX}/plugins )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
-  install ( FILES ${QT_PLUGIN_DIR}/imageformats/${DLL} DESTINATION plugins/qt/imageformats )
+  install ( FILES ${QT_PLUGIN_DIR}/imageformats/${DLL} DESTINATION plugins/qt4/imageformats )
 endforeach()
 # sqlite
-install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/sqldrivers )
+install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4/sqldrivers )
 
 ###########################################################################
 # Startup files
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/mantidpython.bat DESTINATION bin )
+install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
+    RENAME mantidpython.bat )
 
 ###########################################################################
 # Icons for shortcuts

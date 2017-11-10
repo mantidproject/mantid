@@ -5,10 +5,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
-#include <algorithm>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {

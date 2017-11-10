@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 """Defines classes for handling installation
 """
 import platform
@@ -5,21 +6,25 @@ import os
 import glob
 import sys
 import subprocess
+import time
 
 scriptLog = None
+
 
 def createScriptLog(path):
     global scriptLog
     scriptLog = open(path,'w')
 
+
 def stop(installer):
     ''' Save the log, uninstall the package and exit with error code 0 '''
     try:
         installer.uninstall()
-    except Exception, exc:
+    except Exception as exc:
         log("Could not uninstall package %s: %s" % (installer.mantidInstaller, str(exc)))
     scriptLog.close()
     sys.exit(0)
+
 
 def log(txt):
     ''' Write text to the script log file '''
@@ -29,19 +34,21 @@ def log(txt):
         scriptLog.write(txt)
         if not txt.endswith('\n'):
             scriptLog.write('\n')
-        print txt
+        print(txt)
+
 
 def failure(installer):
     ''' Report failure of test(s), try to uninstall package and exit with code 1 '''
     try:
         installer.uninstall()
-    except Exception, exc:
+    except Exception as exc:
         log("Could not uninstall package %s: %s" % (installer.mantidInstaller, str(exc)))
         pass
 
     log('Tests failed')
-    print 'Tests failed'
+    print('Tests failed')
     sys.exit(1)
+
 
 def scriptfailure(txt, installer=None):
     '''Report failure of this script, try to uninstall package and exit with code 1 '''
@@ -51,7 +58,7 @@ def scriptfailure(txt, installer=None):
         try:
             installer.uninstall()
         except Exception:
-            log("Could not uninstall package %s " % self.mantidInstaller)
+            log("Could not uninstall package %s " % str(installer))
     scriptLog.close()
     sys.exit(1)
 
@@ -78,6 +85,7 @@ def get_installer(package_dir, do_install=True):
     else:
         raise scriptfailure("Unsupported platform")
 
+
 def run(cmd):
     """Run a command in a subprocess"""
     try:
@@ -85,12 +93,12 @@ def run(cmd):
         stdout, stderr = p.communicate()
         if p.returncode != 0:
             raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
-    except Exception,err:
+    except Exception as err:
         log('Error in subprocess %s:\n' % str(err))
         raise
     log(stdout)
     return stdout
-    
+
 
 class MantidInstaller(object):
     """
@@ -99,31 +107,33 @@ class MantidInstaller(object):
     mantidInstaller = None
     mantidPlotPath = None
     no_uninstall = False
-    python_cmd = "python"
+    python_cmd = None
+    python_args = "--classic"
 
-    def __init__(self, package_dir, filepattern, 
+    def __init__(self, package_dir, filepattern,
                  do_install):
-        """Initialized with a pattern to 
+        """Initialized with a pattern to
         find a path to an installer
         """
-        if not do_install:
-            return
         # Glob for packages
         matches = glob.glob(os.path.join(package_dir, filepattern))
-        if len(matches) > 0: 
+        if len(matches) > 0:
             # This will put the release mantid packages at the start and the nightly ones at the end
             # with increasing version numbers
-            matches.sort() 
+            matches.sort()
             # Make sure we don't get Vates
             for match in matches:
                 if 'vates'in match:
                     matches.remove(match)
         # Take the last one as it will have the highest version number
-        if len(matches) > 0: 
+        if len(matches) > 0:
             self.mantidInstaller = os.path.join(os.getcwd(), matches[-1])
-            log("Using installer " + self.mantidInstaller)
+            log("Found package" + self.mantidInstaller)
         else:
             raise RuntimeError('Unable to find installer package in "%s"' % os.getcwd())
+        self.no_uninstall = not do_install
+        if not do_install:
+            log("No install requested. Assuming this package has been installed externally.")
 
     def install(self):
         self.do_install()
@@ -138,6 +148,7 @@ class MantidInstaller(object):
     def do_uninstall(self):
         raise NotImplementedError("Override the do_uninstall method")
 
+
 class NSISInstaller(MantidInstaller):
     """Uses an NSIS installer
     to install Mantid
@@ -145,9 +156,9 @@ class NSISInstaller(MantidInstaller):
 
     def __init__(self, package_dir, do_install):
         MantidInstaller.__init__(self, package_dir, 'Mantid-*-win*.exe', do_install)
-        self.mantidPlotPath = 'C:/MantidInstall/bin/MantidPlot.exe'
-        self.python_cmd = "C:/MantidInstall/bin/python.exe"
-        
+        self.mantidPlotPath = 'C:/MantidInstall/bin/launch_mantidplot.bat'
+        self.python_cmd = "C:/MantidInstall/bin/mantidpython.bat"
+
     def do_install(self):
         """
             The NSIS installer spawns a new process and returns immediately.
@@ -156,28 +167,50 @@ class NSISInstaller(MantidInstaller):
             The chained "&& exit 1" ensures that if the return code of the
             installer > 0 then the resulting start process exits with a return code
             of 1 so we can pick this up as a failure
-        """        
+        """
         run('start "Installer" /B /WAIT ' + self.mantidInstaller + ' /S')
 
     def do_uninstall(self):
         "Runs the uninstall exe"
         uninstall_path = 'C:/MantidInstall/Uninstall.exe'
-        run('start "Uninstaller" /B /WAIT ' + uninstall_path + ' /S')
+        # The NSIS uninstaller actually runs a new process & detaches itself from the parent
+        # process so that it is able to remove itself. This means that the /WAIT has no affect
+        # because the parent appears to finish almost immediately
+        run(uninstall_path + ' /S')
+        # Wait for 30 seconds for it to finish
+        log("Waiting 30 seconds for uninstaller to finish")
+        time.sleep(30)
 
-class DebInstaller(MantidInstaller):
+
+class LinuxInstaller(MantidInstaller):
+    """Defines common properties for linux-based packages"""
+
+    def __init__(self, package_dir, filepattern,
+                 do_install):
+        MantidInstaller.__init__(self, package_dir, filepattern, do_install)
+        package = os.path.basename(self.mantidInstaller)
+        install_prefix = '/opt'
+        if 'mantidnightly' in package:
+            install_prefix += '/mantidnightly'
+        elif 'mantidunstable' in package:
+            install_prefix += '/mantidunstable'
+        else:
+            install_prefix += '/Mantid'
+
+        if 'python3' in package:
+            install_prefix += '-python3'
+
+        self.mantidPlotPath = install_prefix + '/bin/MantidPlot'
+        self.python_cmd = install_prefix + '/bin/mantidpython'
+
+
+class DebInstaller(LinuxInstaller):
     """Uses a deb package to install mantid
     """
 
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid*.deb', do_install)
-        package = os.path.basename(self.mantidInstaller)
-        if 'mantidnightly' in package:
-            self.mantidPlotPath = '/opt/mantidnightly/bin/MantidPlot'
-        elif 'mantidunstable' in package:
-            self.mantidPlotPath = '/opt/mantidunstable/bin/MantidPlot'
-        else:
-            self.mantidPlotPath = '/opt/Mantid/bin/MantidPlot'
-        
+        LinuxInstaller.__init__(self, package_dir, 'mantid*.deb', do_install)
+
     def do_install(self):
         """Uses gdebi to run the install
         """
@@ -189,20 +222,14 @@ class DebInstaller(MantidInstaller):
         package_name = os.path.basename(self.mantidInstaller).split("_")[0]
         run('sudo dpkg --purge %s' % package_name)
 
-class RPMInstaller(MantidInstaller):
+
+class RPMInstaller(LinuxInstaller):
     """Uses a rpm package to install mantid
     """
 
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid*.rpm', do_install)
-        package = os.path.basename(self.mantidInstaller)
-        if 'mantidnightly' in package:
-            self.mantidPlotPath = '/opt/mantidnightly/bin/MantidPlot'
-        elif 'mantidunstable' in package:
-            self.mantidPlotPath = '/opt/mantidunstable/bin/MantidPlot'
-        else:
-            self.mantidPlotPath = '/opt/Mantid/bin/MantidPlot'
-        
+        LinuxInstaller.__init__(self, package_dir, 'mantid*.rpm', do_install)
+
     def do_install(self):
         """Uses yum to run the install. Current user must be in sudoers
         """
@@ -213,7 +240,7 @@ class RPMInstaller(MantidInstaller):
             pass
         try:
             run('sudo yum -y install ' + self.mantidInstaller)
-        except Exception, exc:
+        except Exception as exc:
             # This reports an error if the same package is already installed
             if 'does not update installed package' in str(exc):
                 log("Current version is up-to-date, continuing.\n")
@@ -232,11 +259,13 @@ class DMGInstaller(MantidInstaller):
     """
     def __init__(self, package_dir, do_install):
         MantidInstaller.__init__(self, package_dir, 'mantid-*.dmg', do_install)
-        self.mantidPlotPath = '/Applications/MantidPlot.app/Contents/MacOS/MantidPlot'
+        bin_dir = '/Applications/MantidPlot.app/Contents/MacOS'
+        self.mantidPlotPath = bin_dir + '/MantidPlot'
+        self.python_cmd = bin_dir + '/mantidpython'
         # only necessary on 10.8 build
         if int(platform.release().split('.')[0]) < 13:
             os.environ['DYLD_LIBRARY_PATH'] = '/Applications/MantidPlot.app/Contents/MacOS'
-        
+
     def do_install(self):
         """Mounts the dmg and copies the application into the right place.
         """
@@ -257,29 +286,24 @@ class DMGInstaller(MantidInstaller):
 # If called as a standalone script then this can be used to install/uninstall
 # Mantid
 if __name__ == "__main__":
-    import optparse
-    parser = optparse.OptionParser("Usage: %prog <command> <pkg directory>",
-                                   description="Commands available: install, uninstall")
-    parser.add_option("-d", "--dump-exe-path", dest="dump_exe_path",
-                      help="Filepath to write the full path of the MantidPlot executable")
-    (options, args) = parser.parse_args()
-    # All arguments are required
-    if len(args) != 2:
-        parser.print_help()
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(description="Commands available: install, uninstall")
+    parser.add_argument('command', choices=['install', 'uninstall'], help='command to run')
+    parser.add_argument('directory', help='package directory')
+    parser.add_argument('-d', '--dump-exe-path', dest='dump_exe_path',
+                        help='Filepath to write the full path of the MantidPlot executable')
 
-    command, package_dir = args[0], args[1]
-    package_dir = os.path.abspath(package_dir)
-    print "Searching for packages in '%s'" % package_dir
+    options = parser.parse_args()
+
+    package_dir = os.path.abspath(options.directory)
+    print("Searching for packages in '%s'" % package_dir)
     installer = get_installer(package_dir)
-    if command.lower() == "install":
-        print "Installing package '%s'" % installer.mantidInstaller
+    if options.command == "install":
+        print("Installing package '%s'" % installer.mantidInstaller)
         installer.install()
         if options.dump_exe_path is not None:
             with open(options.dump_exe_path, 'w') as f:
                 f.write(installer.mantidPlotPath)
-    elif command.lower() == "uninstall":
-        print "Removing package '%s'" % installer.mantidInstaller
+    elif options.command == "uninstall":
+        print("Removing package '%s'" % installer.mantidInstaller)
         installer.uninstall()
-    else:
-        raise RuntimeError("Invalid command '%s'. Options are: install, uninstall" % command)

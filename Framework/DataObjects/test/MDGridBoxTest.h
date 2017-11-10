@@ -1,10 +1,16 @@
 #ifndef MDGRIDBOXTEST_H
 #define MDGRIDBOXTEST_H
 
+#include "MDBoxTest.h"
+#include "MantidAPI/BoxController.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressText.h"
@@ -12,14 +18,9 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidDataObjects/MDGridBox.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MDBoxTest.h"
+#include <Poco/File.h>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -27,11 +28,11 @@
 #include <boost/random/variate_generator.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 #include <map>
 #include <memory>
-#include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include <vector>
-#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -50,10 +51,12 @@ private:
     MockMDBox()
         : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
           pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
     MOCK_METHOD0(unmask, void());
     ~MockMDBox() override { delete pBC; }
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // the sp to a box controller used as general reference to all tested
@@ -87,37 +90,33 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     if (DODEBUG) {
-      std::cout << sizeof(MDLeanEvent<3>) << " bytes per MDLeanEvent(3)"
-                << std::endl;
-      std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)"
-                << std::endl;
-      std::cout << sizeof(std::mutex) << " bytes per Mutex" << std::endl;
+      std::cout << sizeof(MDLeanEvent<3>) << " bytes per MDLeanEvent(3)\n";
+      std::cout << sizeof(MDLeanEvent<4>) << " bytes per MDLeanEvent(4)\n";
+      std::cout << sizeof(std::mutex) << " bytes per Mutex\n";
       std::cout << sizeof(MDDimensionExtents<coord_t>)
-                << " bytes per MDDimensionExtents" << std::endl;
-      std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)"
-                << std::endl;
-      std::cout << sizeof(MDBox<MDLeanEvent<4>, 4>) << " bytes per MDBox(4)"
-                << std::endl;
+                << " bytes per MDDimensionExtents\n";
+      std::cout << sizeof(MDBox<MDLeanEvent<3>, 3>) << " bytes per MDBox(3)\n";
+      std::cout << sizeof(MDBox<MDLeanEvent<4>, 4>) << " bytes per MDBox(4)\n";
       std::cout << sizeof(MDGridBox<MDLeanEvent<3>, 3>)
-                << " bytes per MDGridBox(3)" << std::endl;
+                << " bytes per MDGridBox(3)\n";
       std::cout << sizeof(MDGridBox<MDLeanEvent<4>, 4>)
-                << " bytes per MDGridBox(4)" << std::endl;
+                << " bytes per MDGridBox(4)\n";
 
       MemoryStats mem;
       size_t start = mem.availMem();
-      std::cout << start << " KB before" << std::endl;
+      std::cout << start << " KB before\n";
       CPUTimer tim;
       for (size_t i = 0; i < 1000000; i++) {
         MDBox<MDLeanEvent<3>, 3> *box = new MDBox<MDLeanEvent<3>, 3>(bcc);
         (void)box;
       }
-      std::cout << tim << " to allocate a million boxes" << std::endl;
+      std::cout << tim << " to allocate a million boxes\n";
       mem.update();
       size_t stop = mem.availMem();
-      std::cout << stop << " KB after " << std::endl;
-      std::cout << start - stop << " KB change " << std::endl;
+      std::cout << stop << " KB after \n";
+      std::cout << start - stop << " KB change \n";
       std::cout << (start - stop) * 1024 / sizeof(MDBox<MDLeanEvent<3>, 3>)
-                << " times the sizeof MDBox3" << std::endl;
+                << " times the sizeof MDBox3\n";
       delete bcc;
     } else
       delete bcc;
@@ -782,7 +781,7 @@ public:
   void xtest_addEvent_with_recursive_gridding_Performance() {
     // Make a 2D box split into 4, 4 levels deep. = 4^4^2 boxes at the bottom =
     // 256^2 boxes.
-    size_t numSplit = 4;
+    const size_t numSplit = 4;
     for (size_t recurseLevels = 1; recurseLevels < 5; recurseLevels++) {
       double boxes_per_side = pow(double(numSplit), double(recurseLevels));
       double spacing = double(numSplit) / boxes_per_side;
@@ -793,8 +792,8 @@ public:
           MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit,
                                                         recurseLevels);
 
-      for (double x = 0; x < numSplit; x += spacing)
-        for (double y = 0; y < numSplit; y += spacing) {
+      for (double x = 0; x < static_cast<double>(numSplit); x += spacing)
+        for (double y = 0; y < static_cast<double>(numSplit); y += spacing) {
           for (size_t i = 0; i < num_to_repeat; i++) {
             coord_t centers[2] = {static_cast<coord_t>(x),
                                   static_cast<coord_t>(y)};
@@ -957,7 +956,7 @@ public:
     delete bcc;
   }
 
-  void test_addEvents_inParallel() { do_test_addEvents_inParallel(NULL); }
+  void test_addEvents_inParallel() { do_test_addEvents_inParallel(nullptr); }
 
   /** Disabled because parallel RefreshCache is not implemented. Might not be
    * ever? */
@@ -1125,7 +1124,7 @@ public:
                     double expectedSignal) {
     //    std::cout << "Bins: X " << std::setw(5) << minX << " to "<<
     //    std::setw(5)  << maxX << ", Y " << std::setw(5) << minY << " to "<<
-    //    std::setw(5)  << maxY      << ". " << message << std::endl;
+    //    std::setw(5)  << maxY      << ". " << message << '\n';
 
     MDBin<MDLeanEvent<2>, 2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);

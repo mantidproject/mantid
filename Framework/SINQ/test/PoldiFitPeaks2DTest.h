@@ -3,20 +3,23 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidKernel/Matrix.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidSINQ/PoldiFitPeaks2D.h"
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class PoldiFitPeaks2DTest : public CxxTest::TestSuite {
 public:
@@ -59,17 +62,14 @@ public:
   }
 
   void testSetDeltaTFromWorkspace() {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
-    for (size_t i = 0; i <= 10; ++i) {
-      ws->dataX(0)[i] = static_cast<double>(i);
-    }
-
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
+    ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(0, 1)));
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.setDeltaTFromWorkspace(ws);
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
 
     MatrixWorkspace_sptr invalidWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     TS_ASSERT_THROWS(spectrumCalculator.setDeltaTFromWorkspace(invalidWs),
                      std::invalid_argument);
   }
@@ -131,8 +131,7 @@ public:
 
       // Integral of gaussian is height * sigma * sqrt(2 * pi)
       peak->setIntensity(UncertainValue(oldIntensity * fwhm /
-                                        (2.0 * sqrt(2.0 * log(2.0))) *
-                                        sqrt(2.0 * M_PI)));
+                                        (2.0 * sqrt(M_LN2)) * sqrt(M_PI)));
       integratedReference->addPeak(peak);
     }
 
@@ -338,7 +337,7 @@ public:
                        referencePeak->fwhm().value());
       TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
       TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(),
-                      sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
+                      sqrt(0.05) * (2.0 * sqrt(2.0 * M_LN2)), 1e-6);
     }
   }
 

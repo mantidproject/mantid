@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -16,17 +17,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-SelectCellOfType::SelectCellOfType() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-SelectCellOfType::~SelectCellOfType() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
@@ -74,7 +64,6 @@ void SelectCellOfType::init() {
                         "Allow permutations of conventional cells");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SelectCellOfType::exec() {
@@ -112,7 +101,7 @@ void SelectCellOfType::exec() {
   Kernel::Matrix<double> T(UB);
   T.Invert();
   T = newUB * T;
-  g_log.notice() << "Transformation Matrix =  " << T.str() << std::endl;
+  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
 
   if (apply) {
     std::vector<double> sigabc(6);
@@ -143,10 +132,10 @@ void SelectCellOfType::exec() {
     }
 
     // Tell the user what happened.
-    g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;
+    g_log.notice() << "Re-indexed the peaks with the new UB. \n";
     g_log.notice() << "Now, " << num_indexed
                    << " are indexed with average error " << average_error
-                   << std::endl;
+                   << '\n';
 
     // Save output properties
     this->setProperty("NumIndexed", num_indexed);

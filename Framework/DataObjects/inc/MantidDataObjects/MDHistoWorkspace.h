@@ -59,6 +59,11 @@ public:
     return std::unique_ptr<MDHistoWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<MDHistoWorkspace> cloneEmpty() const {
+    return std::unique_ptr<MDHistoWorkspace>(doCloneEmpty());
+  }
+
   void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
   void init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
 
@@ -412,9 +417,16 @@ public:
   void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) override;
 
+  /// Return if this workspace is a MDHistoWorkspace. Will always return true.
+  bool isMDHistoWorkspace() const override { return true; }
+
 private:
   MDHistoWorkspace *doClone() const override {
     return new MDHistoWorkspace(*this);
+  }
+
+  MDHistoWorkspace *doCloneEmpty() const override {
+    return new MDHistoWorkspace(0);
   }
 
   void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,

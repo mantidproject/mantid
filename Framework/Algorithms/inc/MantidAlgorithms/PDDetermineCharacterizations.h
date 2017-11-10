@@ -45,9 +45,6 @@ namespace Algorithms {
 */
 class DLLExport PDDetermineCharacterizations : public API::Algorithm {
 public:
-  PDDetermineCharacterizations();
-  ~PDDetermineCharacterizations() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -56,7 +53,8 @@ public:
 
 private:
   double getLogValue(API::Run &run, const std::string &propName);
-  void getInformationFromTable(const double frequency, const double wavelength);
+  void getInformationFromTable(const double frequency, const double wavelength,
+                               const std::string &canName);
   void setDefaultsInPropManager();
   void overrideRunNumProperty(const std::string &inputName,
                               const std::string &propName);

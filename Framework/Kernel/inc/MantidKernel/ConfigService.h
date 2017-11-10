@@ -7,20 +7,22 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ProxyInfo.h"
-#include <vector>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-#include <Poco/AutoPtr.h>
 
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
+class AbstractObserver;
 class Channel;
+template <class C> class AutoPtr;
 namespace Util {
 class PropertyFileConfiguration;
 class SystemConfiguration;
@@ -37,7 +39,6 @@ namespace Kernel {
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-class Logger;
 class FacilityInfo;
 class InstrumentInfo;
 
@@ -121,6 +122,8 @@ public:
     std::string m_prev;  ///< The previous value for the property
   };
 
+  /// Setup the base directory
+  void setBaseDirectory();
   /// Reset to "factory" settings. Removes current user properties
   void reset();
   /// Wipe out the current configuration and load a new one
@@ -201,8 +204,12 @@ public:
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
   void appendDataSearchDir(const std::string &path);
+  /// Appends subdirectory to each of the specified data search directories
+  void appendDataSearchSubDir(const std::string &subdir);
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
+  /// Sets instrument directories
+  void setInstrumentDirectories(const std::vector<std::string> &directories);
   /// Get instrument search directory
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
@@ -224,6 +231,9 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
+  /// registers additional logging filter channels
+  void registerLoggingFilterChannel(const std::string &filterChannelName,
+                                    Poco::Channel *pChannel);
   /// Sets the log level priority for the File log channel
   void setFileLogLevel(int logLevel);
   /// Sets the log level priority for the Console log channel
@@ -245,12 +255,6 @@ public:
   // Starts up the logging
   void configureLogging();
 
-  /// Return true if ParaView plugins are available
-  bool pvPluginsAvailable() const;
-
-  /// Return the path to the pv plugins
-  const std::string getPVPluginsPath() const;
-
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
 
@@ -270,6 +274,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
+
   /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
@@ -291,6 +296,8 @@ private:
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
+  /// Determine the name of the facilities file to use
+  std::string getFacilityFilename(const std::string &fName);
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
   bool addDirectoryifExists(const std::string &directoryName,
@@ -298,6 +305,8 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
+  /// Finds the lowest registered logging filter level
+  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -341,17 +350,14 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
+
+  /// store a list of logging FilterChannels
+  std::vector<std::string> m_filterChannels;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#if defined(__APPLE__) && defined(__INTEL_COMPILER)
-inline
-#endif
-    template class MANTID_KERNEL_DLL
-        Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
-    ConfigService;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;

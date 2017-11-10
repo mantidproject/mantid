@@ -56,10 +56,6 @@ namespace Algorithms {
  */
 class DLLExport Integration : public API::Algorithm {
 public:
-  /// Default constructor
-  Integration() : API::Algorithm(){};
-  /// Destructor
-  ~Integration() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Integration"; }
   /// Summary of algorithms purpose
@@ -91,6 +87,7 @@ private:
   API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS,
                                                const int minSpec,
                                                const int maxSpec);
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithm

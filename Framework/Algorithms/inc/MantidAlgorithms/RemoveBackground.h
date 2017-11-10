@@ -1,19 +1,24 @@
 #ifndef MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
 #define MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/GeometryInfoFactory.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 // forward declarations from other Mantid modules
 namespace Kernel {
 class Unit;
+}
+
+namespace API {
+class SpectrumInfo;
 }
 
 namespace Algorithms {
@@ -56,8 +61,10 @@ public:
                   const API::MatrixWorkspace_sptr &sourceWS, int emode,
                   Kernel::Logger *pLog = nullptr, int nThreads = 1,
                   bool inPlace = true, bool nullifyNegative = false);
-  void removeBackground(int nHist, MantidVec &x_data, MantidVec &y_data,
-                        MantidVec &e_data, int threadNum = 0) const;
+  void removeBackground(int nHist, HistogramData::HistogramX &x_data,
+                        HistogramData::HistogramY &y_data,
+                        HistogramData::HistogramE &e_data,
+                        int threadNum = 0) const;
 
 private:
   // vector of pointers to the units conversion class for the working workspace;
@@ -68,7 +75,7 @@ private:
   // shared pointer to the workspace where background should be removed
   API::MatrixWorkspace_const_sptr m_wkWS;
 
-  std::unique_ptr<API::GeometryInfoFactory> m_geometryInfoFactory;
+  const API::SpectrumInfo *m_spectrumInfo;
 
   // logger from the hosting algorithm
   Kernel::Logger *m_pgLog;
@@ -102,10 +109,6 @@ private:
 
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
-  /// Default constructor
-  RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
-  /// Destructor
-  ~RemoveBackground() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBackground"; }
   /// Summary of algorithms purpose

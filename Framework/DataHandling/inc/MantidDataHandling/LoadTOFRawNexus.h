@@ -46,9 +46,6 @@ public:
   /// Default Constructor
   LoadTOFRawNexus();
 
-  // Destructor
-  ~LoadTOFRawNexus() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadTOFRawNexus"; }
 
@@ -97,7 +94,7 @@ protected:
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
-  std::vector<Kernel::DateAndTime> pulseTimes;
+  std::vector<Types::Core::DateAndTime> pulseTimes;
 
   /// Number of bins
   size_t m_numBins;

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator, FloatBoundedValidator
@@ -87,7 +88,6 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
                 workspaces.append(wsname)
         return workspaces
 
-
     def cleanup(self, wslist):
         """
         deletes workspaces from list
@@ -168,11 +168,9 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         returns number of not masked detectors
         """
         num = 0
-        instrument = workspace.getInstrument()
-        offset = workspace.getSpectrum(0).getDetectorIDs()[0]
+        spectrumInfo = workspace.spectrumInfo()
         for idx in range(workspace.getNumberHistograms()):
-            det = instrument.getDetector(idx + offset)        # for DNS first det ID=1
-            if not det.isMasked():
+            if not spectrumInfo.isMasked(idx):
                 num += 1
         return num
 
@@ -184,7 +182,6 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
             self.toremove.append(wsname)
             result[angle] = wsname
         return result
-
 
     def PyExec(self):
         # Input
@@ -215,20 +212,20 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         total = self._sum_signal(sfv, nsfv, deterota)
 
         # compute vmean
-        _mean_ws_ = api.Mean(",".join(total.values()))     # Mean takes string
-        self.toremove.append(_mean_ws_.getName())
+        _mean_ws_ = api.Mean(",".join(list(total.values())))     # Mean takes string
+        self.toremove.append(_mean_ws_.name())
         num =  self._get_notmasked_detectors_number(_mean_ws_)
         if num == 0:
             self.cleanup(self.toremove)
             raise RuntimeError("All detectors are masked! Cannot compute coefficients.")
         _vana_mean_ = api.SumSpectra(_mean_ws_)/num
-        self.toremove.append(_vana_mean_.getName())
+        self.toremove.append(_vana_mean_.name())
 
         # compute coefficients k_i = (VSF_i + VNSF_i)/Vmean
         outws_name = self.getPropertyValue("OutputWorkspace")
         # for only one detector position only one workspace will be created
         if len(deterota) == 1:
-            api.Divide(total.values()[0], _vana_mean_, OutputWorkspace=outws_name)
+            api.Divide(list(total.values())[0], _vana_mean_, OutputWorkspace=outws_name)
         else:
             # for many detector positions group of workspaces will be created
             results = []
@@ -244,6 +241,7 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         self.setProperty("OutputWorkspace", outws)
 
         return
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSComputeDetEffCorrCoefs)

@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"

@@ -36,7 +36,7 @@ public:
   void testExec2D() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 102, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -49,12 +49,12 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 10);
 
     // Sizes are correct
-    TS_ASSERT_EQUALS(static_cast<int>(data->readX(0).size()), 103);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readY(0).size()), 102);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readE(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 103);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 102);
 
     // value at a single point
-    TS_ASSERT_DELTA(data->readY(0)[0], 0.6986, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[0], 0.6986, 0.0001);
 
     // cleanup the output workspace
     AnalysisDataService::Instance().remove(data->getName());
@@ -63,11 +63,11 @@ public:
   void testExecEvent() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 102, 100, 1.5);
+        WorkspaceCreationHelper::createEventWorkspace(10, 102, 100, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
-    TS_ASSERT_DELTA(testInput->readY(1)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(testInput->y(1)[0], 1.0, 0.0001);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "Wavelength", "Divide");
@@ -76,12 +76,12 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 10);
 
     // Sizes are correct
-    TS_ASSERT_EQUALS(static_cast<int>(data->readX(0).size()), 103);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readY(0).size()), 102);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readE(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 103);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 102);
 
     // value at a single point
-    TS_ASSERT_DELTA(data->readY(1)[0], 0.3493, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[0], 0.3493, 0.0001);
 
     // cleanup the output workspace
     AnalysisDataService::Instance().remove(data->getName());
@@ -89,7 +89,7 @@ public:
 
   void testSpectraDivide() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Divide");
@@ -100,13 +100,13 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 102);
 
     // Sizes are correct
-    TS_ASSERT_EQUALS(static_cast<int>(data->readX(0).size()), 33);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readY(0).size()), 32);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readE(0).size()), 32);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 33);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 32);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 32);
 
     // value at a single point
-    TS_ASSERT_DELTA(data->readY(1)[13], 8.7000, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[13], 8.7000, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[13], 8.7000, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[13], 8.7000, 0.0001);
 
     // cleanup the output workspace
     AnalysisDataService::Instance().remove(data->getName());
@@ -114,7 +114,7 @@ public:
 
   void testSpectraMultip() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);
@@ -125,13 +125,13 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 102);
 
     // Sizes are correct
-    TS_ASSERT_EQUALS(static_cast<int>(data->readX(0).size()), 33);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readY(0).size()), 32);
-    TS_ASSERT_EQUALS(static_cast<int>(data->readE(0).size()), 32);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 33);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 32);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 32);
 
     // value at a single point
-    TS_ASSERT_DELTA(data->readY(7)[5], 0.2791, 0.0001);
-    TS_ASSERT_DELTA(data->readY(7)[5], 0.2791, 0.0001);
+    TS_ASSERT_DELTA(data->y(7)[5], 0.2791, 0.0001);
+    TS_ASSERT_DELTA(data->y(7)[5], 0.2791, 0.0001);
 
     // cleanup the output workspace
     AnalysisDataService::Instance().remove(data->getName());

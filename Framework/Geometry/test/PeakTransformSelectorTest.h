@@ -1,10 +1,11 @@
 #ifndef MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 #define MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformSelector.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -22,10 +23,12 @@ private:
     enum { value = I };
 
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
     MOCK_CONST_METHOD2(createTransform,
                        PeakTransform_sptr(const std::string &,
                                           const std::string &));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   typedef MockPeakTransformFactoryType<0> MockPeakTransformFactory;
@@ -111,10 +114,10 @@ public:
     // Check the outputs and usage.
     TSM_ASSERT("Should not have selected the wrong factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryB>(
-                   selectedFactory) == NULL);
+                   selectedFactory) == nullptr);
     TSM_ASSERT("Should have selected the right factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryA>(
-                   selectedFactory) != NULL);
+                   selectedFactory) != nullptr);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pWrongFactory));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRightFactory));
   }
@@ -146,10 +149,10 @@ public:
     // Check the outputs and usage.
     TSM_ASSERT("Should not have selected the wrong factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryB>(
-                   selectedFactory) == NULL);
+                   selectedFactory) == nullptr);
     TSM_ASSERT("Should have selected the right factory",
                boost::dynamic_pointer_cast<MockPeakTransformFactoryA>(
-                   selectedFactory) != NULL);
+                   selectedFactory) != nullptr);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pWrongFactory));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRightFactory));
   }

@@ -42,10 +42,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveReflThreeColumnAscii : public DataHandling::AsciiPointBase {
 public:
-  /// Default constructor
-  SaveReflThreeColumnAscii() {}
-  /// Destructor
-  ~SaveReflThreeColumnAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveReflThreeColumnAscii"; }
   /// Summary of algorithms purpose

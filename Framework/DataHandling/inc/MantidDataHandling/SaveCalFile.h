@@ -19,9 +19,6 @@ namespace DataHandling {
  */
 class DLLExport SaveCalFile : public API::Algorithm {
 public:
-  SaveCalFile();
-  ~SaveCalFile() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveCalFile"; };
   /// Summary of algorithms purpose
@@ -49,7 +46,7 @@ private:
   void exec() override;
 
   /// Offset precision
-  int m_precision;
+  int m_precision{7};
 };
 
 } // namespace Mantid

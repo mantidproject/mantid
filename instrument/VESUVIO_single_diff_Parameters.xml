@@ -28,7 +28,7 @@
 
   <!-- Standard deviation of detector theta distribution (radians) -->
   <parameter name="sigma_theta">
-    <value val="0.040"/>
+    <value val="0.016"/>
   </parameter>
 
   <!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->
@@ -66,7 +66,7 @@
 
   <!-- Standard deviation of detector theta distribution (radians) -->
   <parameter name="sigma_theta">
-    <value val="0.0227"/>
+    <value val="0.016"/>
   </parameter>
 
   <!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->

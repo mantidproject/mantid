@@ -3,17 +3,21 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MaskDetectors.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
@@ -23,13 +27,18 @@ using namespace Mantid::Geometry;
 using Mantid::MantidVecPtr;
 using Mantid::detid_t;
 using Mantid::specnum_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
   static MaskDetectorsTest *createSuite() { return new MaskDetectorsTest(); }
   static void destroySuite(MaskDetectorsTest *suite) { delete suite; }
 
-  MaskDetectorsTest() {}
+  MaskDetectorsTest() = default;
 
   void testName() { TS_ASSERT_EQUALS(marker.name(), "MaskDetectors"); }
 
@@ -42,10 +51,11 @@ public:
   void setUpWS(bool event, const std::string &name = "testSpace",
                bool asMaskWorkspace = false, int numspec = 9) {
     // 1. Instrument
+    int num_banks = numspec / 9;
+    if (num_banks < 1)
+      num_banks = 1;
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    Detector *d = new Detector("det", 0, 0);
-    instr->markAsDetector(d);
+        ComponentCreationHelper::createTestInstrumentCylindrical(num_banks));
 
     // 2. Workspace
     MatrixWorkspace_sptr space;
@@ -55,33 +65,30 @@ public:
           WorkspaceFactory::Instance().create("EventWorkspace", numspec, 6, 5);
       EventWorkspace_sptr spaceEvent =
           boost::dynamic_pointer_cast<EventWorkspace>(space);
+      space->setInstrument(instr);
 
-      MantidVecPtr x, vec;
+      MantidVecPtr vec;
       vec.access().resize(5, 1.0);
+      std::vector<detid_t> det_ids = instr->getDetectorIDs();
       for (int j = 0; j < numspec; ++j) {
         // Just one event per pixel
         TofEvent event(1.23, int64_t(4.56));
-        spaceEvent->getEventList(j).addEventQuickly(event);
-        spaceEvent->getEventList(j).setDetectorID(j);
-        spaceEvent->getSpectrum(j)->setSpectrumNo(j);
+        spaceEvent->getSpectrum(j).addEventQuickly(event);
+        spaceEvent->getSpectrum(j).setSpectrumNo(j + 1);
+        spaceEvent->getSpectrum(j).setDetectorID(det_ids[j]);
       }
-      x.access().push_back(0.0);
-      x.access().push_back(10.0);
-      spaceEvent->setAllX(x);
+      spaceEvent->setAllX(BinEdges{0.0, 10.0});
 
     } else if (!asMaskWorkspace) {
-      space = WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
-      Workspace2D_sptr space2D =
-          boost::dynamic_pointer_cast<Workspace2D>(space);
+      space = createWorkspace<Workspace2D>(numspec, 6, 5);
+      space->setInstrument(instr);
 
-      MantidVecPtr x, vec;
-      x.access().resize(6, 10.0);
-      vec.access().resize(5, 1.0);
-      for (int j = 0; j < numspec; ++j) {
-        space2D->setX(j, x);
-        space2D->setData(j, vec, vec);
-        space2D->getSpectrum(j)->setSpectrumNo(j);
-        space2D->getSpectrum(j)->setDetectorID(j);
+      BinEdges x(6, LinearGenerator(10.0, 1.0));
+      Counts y(5, 1.0);
+      for (size_t j = 0; j < space->getNumberHistograms(); ++j) {
+        space->setHistogram(j, x, y);
+        space->getSpectrum(j).setSpectrumNo(static_cast<int>(j + 1));
+        space->getSpectrum(j).setDetectorID(static_cast<detid_t>(j + 1));
       }
     } else {
       // In case of MaskWorkspace
@@ -89,12 +96,14 @@ public:
       specspace->initialize(numspec, 1, 1);
       for (size_t i = 0; i < specspace->getNumberHistograms(); i++) {
         // default to use all the detectors
-        specspace->dataY(i)[0] = 0.0;
+        specspace->mutableY(i)[0] = 0.0;
+        specspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
       }
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
+      // Does not have connection between instrument and spectra though has to
+      // have instrument
+      space->setInstrument(instr);
     }
-
-    space->setInstrument(instr);
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);
@@ -110,7 +119,7 @@ public:
     TS_ASSERT(mdd.isInitialized());
 
     std::vector<Property *> props = mdd.getProperties();
-    TS_ASSERT_EQUALS(static_cast<int>(props.size()), 7);
+    TS_ASSERT_EQUALS(static_cast<int>(props.size()), 9);
 
     TS_ASSERT_EQUALS(props[0]->name(), "Workspace");
     TS_ASSERT(props[0]->isDefault());
@@ -131,6 +140,19 @@ public:
     TS_ASSERT_EQUALS(props[4]->name(), "MaskedWorkspace");
     TS_ASSERT(props[4]->isDefault());
     TS_ASSERT(dynamic_cast<WorkspaceProperty<> *>(props[4]));
+
+    TS_ASSERT_EQUALS(props[5]->name(), "ForceInstrumentMasking");
+    TS_ASSERT(props[5]->isDefault());
+
+    TS_ASSERT_EQUALS(props[6]->name(), "StartWorkspaceIndex");
+    TS_ASSERT(props[6]->isDefault());
+
+    TS_ASSERT_EQUALS(props[7]->name(), "EndWorkspaceIndex");
+    TS_ASSERT(props[7]->isDefault());
+
+    TS_ASSERT_EQUALS(props[8]->name(), "ComponentList");
+    TS_ASSERT(props[8]->isDefault());
+    TS_ASSERT(dynamic_cast<ArrayProperty<std::string> *>(props[8]));
   }
 
   //---------------------------------------------------------------------------------------------
@@ -147,24 +169,25 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  void check_outputWS(MatrixWorkspace_const_sptr outputWS) {
+  void check_outputWS(MatrixWorkspace_const_sptr &outputWS) {
     double ones = 1.0;
     double zeroes = 0.0;
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(0)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(1)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(1)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataY(2)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(2)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(3)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(3)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(4)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(4)[0], ones);
-    TS_ASSERT(outputWS->getDetector(0)->isMasked());
-    TS_ASSERT(!outputWS->getDetector(1)->isMasked());
-    TS_ASSERT(outputWS->getDetector(2)->isMasked());
-    TS_ASSERT(outputWS->getDetector(3)->isMasked());
-    TS_ASSERT(!outputWS->getDetector(4)->isMasked());
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(0)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->e(1)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->y(2)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(2)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(3)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(3)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(4)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->e(4)[0], ones);
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.isMasked(0));
+    TS_ASSERT(!spectrumInfo.isMasked(1));
+    TS_ASSERT(spectrumInfo.isMasked(2));
+    TS_ASSERT(spectrumInfo.isMasked(3));
+    TS_ASSERT(!spectrumInfo.isMasked(4));
   }
 
   //---------------------------------------------------------------------------------------------
@@ -184,7 +207,7 @@ public:
     marker2.initialize();
     marker2.setPropertyValue("Workspace", "testSpace");
     marker2.setPropertyValue("DetectorList", "");
-    marker2.setPropertyValue("SpectraList", "2");
+    marker2.setPropertyValue("SpectraList", "3");
     TS_ASSERT_THROWS_NOTHING(marker2.execute());
     TS_ASSERT(marker2.isExecuted());
 
@@ -213,7 +236,7 @@ public:
     marker2.initialize();
     marker2.setPropertyValue("Workspace", "testSpace");
     marker2.setPropertyValue("DetectorList", "");
-    marker2.setPropertyValue("SpectraList", "2");
+    marker2.setPropertyValue("SpectraList", "3");
     TS_ASSERT_THROWS_NOTHING(marker2.execute());
     TS_ASSERT(marker2.isExecuted());
 
@@ -222,6 +245,61 @@ public:
             "testSpace");
     check_outputWS(outputWS);
 
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_Mask_Specific_Components() {
+    const int numBanks = 3;
+    const int numSpec = 9 * numBanks;
+    setUpWS(false, "testSpace", false, numSpec);
+    MaskDetectors masker;
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.initialize())
+    TS_ASSERT(masker.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(masker.setProperty("Workspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(masker.setProperty(
+        "ComponentList", "bank1/pixel-(0;1), bank3/pixel-(1;1)"))
+    const detid_t maskedPixel1 = 7;
+    const detid_t maskedPixel2 = 26;
+    TS_ASSERT_THROWS_NOTHING(masker.execute())
+    TS_ASSERT(masker.isExecuted())
+    MatrixWorkspace_const_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
+            "testSpace");
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    for (size_t i = 0; i < numSpec; ++i) {
+      if (i == maskedPixel1 || i == maskedPixel2) {
+        TS_ASSERT(spectrumInfo.isMasked(i))
+      } else {
+        TS_ASSERT(!spectrumInfo.isMasked(i))
+      }
+    }
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_Mask_Components_Recursively() {
+    const int numBanks = 3;
+    const int numSpec = 9 * numBanks;
+    setUpWS(false, "testSpace", false, numSpec);
+    MaskDetectors masker;
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.initialize())
+    TS_ASSERT(masker.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(masker.setProperty("Workspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(masker.setProperty("ComponentList", "bank2"))
+    TS_ASSERT_THROWS_NOTHING(masker.execute())
+    TS_ASSERT(masker.isExecuted())
+    MatrixWorkspace_const_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
+            "testSpace");
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    for (size_t i = 0; i < numSpec; ++i) {
+      if (i >= 9 && i < 18) {
+        TS_ASSERT(spectrumInfo.isMasked(i))
+      } else {
+        TS_ASSERT(!spectrumInfo.isMasked(i))
+      }
+    }
     AnalysisDataService::Instance().remove("testSpace");
   }
 
@@ -237,19 +315,14 @@ public:
 
     // Mask some detectors on the existing mask workspace
     std::set<int> masked_indices;
-    masked_indices.insert(0);
+    masked_indices.insert(1);
     masked_indices.insert(3);
     masked_indices.insert(4);
 
-    ParameterMap &pmap = existingMask->instrumentParameters();
-    for (int i = 0; i < static_cast<int>(existingMask->getNumberHistograms());
-         ++i) {
-      if (masked_indices.count(i) == 1) {
-        IDetector_const_sptr det;
-        TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
-        pmap.addBool(det.get(), "masked", true);
-      }
-    }
+    auto &detInfo = existingMask->mutableDetectorInfo();
+    for (int i = 0; i < static_cast<int>(detInfo.size()); ++i)
+      if (masked_indices.count(i) == 1)
+        detInfo.setMasked(i, true);
 
     MaskDetectors masker;
     TS_ASSERT_THROWS_NOTHING(masker.initialize());
@@ -269,16 +342,16 @@ public:
     TS_ASSERT(originalWS);
     if (!originalWS)
       return;
+    const auto &spectrumInfo = originalWS->spectrumInfo();
     for (int i = 0; i < static_cast<int>(originalWS->getNumberHistograms());
          ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = originalWS->getDetector(i));
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (masked_indices.count(i) == 1) {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 0.0);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 0.0);
       } else {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 1.0);
       }
     }
 
@@ -310,7 +383,7 @@ public:
     for (int i = 0; i < static_cast<int>(existingMask->getNumberHistograms());
          i++)
       if (masked_indices.count(i) == 1)
-        existingMask->dataY(i)[0] = 1.0;
+        existingMask->mutableY(i)[0] = 1.0;
 
     // 3. Set properties and execute
     MaskDetectors masker;
@@ -333,16 +406,16 @@ public:
     if (!originalWS)
       return;
 
+    const auto &spectrumInfo = originalWS->spectrumInfo();
     for (int i = 0; i < static_cast<int>(originalWS->getNumberHistograms() - 1);
          ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = originalWS->getDetector(i));
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (masked_indices.count(i) == 1) {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 0.0);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 0.0);
       } else {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 1.0);
       }
     }
     AnalysisDataService::Instance().remove(inputWSName);
@@ -354,7 +427,7 @@ public:
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(9);
     setUpWS(false, inputWSName, false, numInputSpec);
-    const int numMaskWSSpec(3);
+    const int numMaskWSSpec(5);
     setUpWS(false, existingMaskName, true, numMaskWSSpec);
     MatrixWorkspace_sptr existingMask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -365,10 +438,11 @@ public:
     TS_ASSERT(existingMask);
     TS_ASSERT(inputWS);
 
-    // Mask workspace index 0,2 in MaskWS. These will be maped to index 3,5 in
+    // Mask workspace index 0,3,4 in MaskWS. These will be maped to index 3,5 in
     // the test input
-    existingMask->dataY(0)[0] = 1.0;
-    existingMask->dataY(2)[0] = 1.0;
+    existingMask->mutableY(0)[0] = 1.0;
+    existingMask->mutableY(3)[0] = 1.0;
+    existingMask->mutableY(4)[0] = 1.0;
 
     // Apply
     MaskDetectors masker;
@@ -383,18 +457,327 @@ public:
         inputWSName);
 
     // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
     for (int i = 0; i < numInputSpec; ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
-      if (i == 3 || i == 5) {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 3 || i == 4) {
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
       } else {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
       }
     }
 
     AnalysisDataService::Instance().remove(inputWSName);
     AnalysisDataService::Instance().remove(existingMaskName);
+  }
+  //
+  void test_rangeMasking() {
+    const std::string inputWSName("inputWS");
+    int numInputSpec(18);
+    setUpWS(false, inputWSName, false, numInputSpec);
+
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setPropertyValue("StartWorkspaceIndex", "3");
+    masker.setPropertyValue("EndWorkspaceIndex", "5");
+    masker.execute();
+
+    TS_ASSERT(masker.isExecuted());
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        inputWSName);
+
+    // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (int i = 0; i < numInputSpec; ++i) {
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 3 || i == 4 || i == 5) {
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
+      } else {
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
+      }
+    }
+
+    AnalysisDataService::Instance().remove(inputWSName);
+  }
+
+  // -- helper function for the next procedure
+  void mask_block(MatrixWorkspace_sptr &existingMask, size_t n_first_index,
+                  size_t n_dets) {
+
+    for (size_t i = n_first_index; i < n_first_index + n_dets; i++) {
+      existingMask->mutableY(i)[0] = 1.0;
+    }
+  }
+  void test_MaskWorksForGroupedWSAllDet() {
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const int numInputSpec(90);
+    setUpWS(false, inputWSName, false, numInputSpec);
+    // group spectra into 10
+    auto grouper = AlgorithmManager::Instance().create("GroupDetectors");
+    grouper->initialize();
+    grouper->setProperty("InputWorkspace", inputWSName);
+    grouper->setPropertyValue("OutputWorkspace", inputWSName);
+    grouper->setPropertyValue(
+        "GroupingPattern",
+        "0-9,10-19,20-29,30-39,40-49,50-59,60-69,70-79,80-89");
+    grouper->execute();
+    TS_ASSERT(grouper->isExecuted());
+
+    const int numMaskWSSpec(90);
+    setUpWS(false, existingMaskName, true, numMaskWSSpec);
+    MatrixWorkspace_sptr existingMask =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            existingMaskName);
+    // Mask workspace index 0,20,55 in MaskWS. These will converted maped to
+    //  indexes 1,2,5 in the target workspace.
+    mask_block(existingMask, 0, 10);
+    mask_block(existingMask, 20, 10);
+    mask_block(existingMask, 50, 10);
+
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSName);
+    TS_ASSERT(existingMask);
+    TS_ASSERT(inputWS);
+
+    // Apply
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setPropertyValue("MaskedWorkspace", existingMaskName);
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        inputWSName);
+
+    // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+      const auto &det = spectrumInfo.detector(i);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 0 || i == 2 || i == 5) {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), true);
+      } else {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), false);
+      }
+    }
+
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove(existingMaskName);
+  }
+
+  void test_MaskWorksForGroupedWSSingleDet() {
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const int numInputSpec(90);
+    setUpWS(false, inputWSName, false, numInputSpec);
+    // group spectra into 10
+    auto grouper = AlgorithmManager::Instance().create("GroupDetectors");
+    grouper->initialize();
+    grouper->setProperty("InputWorkspace", inputWSName);
+    grouper->setPropertyValue("OutputWorkspace", inputWSName);
+    grouper->setPropertyValue(
+        "GroupingPattern",
+        "0-9,10-19,20-29,30-39,40-49,50-59,60-69,70-79,80-89");
+    grouper->execute();
+    TS_ASSERT(grouper->isExecuted());
+
+    const int numMaskWSSpec(90);
+    setUpWS(false, existingMaskName, true, numMaskWSSpec);
+    MatrixWorkspace_sptr existingMask =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            existingMaskName);
+    // Mask workspace index 1,20,55 in MaskWS. These will converted maped to
+    //  indexes 1,2,5 in the target workspace.
+    existingMask->mutableY(10)[0] = 1.0;
+    existingMask->mutableY(20)[0] = 1.0;
+    existingMask->mutableY(55)[0] = 1.0;
+
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSName);
+    TS_ASSERT(existingMask);
+    TS_ASSERT(inputWS);
+
+    // Apply
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setPropertyValue("MaskedWorkspace", existingMaskName);
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        inputWSName);
+
+    // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+      const auto &det = spectrumInfo.detector(i);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 1 || i == 2 || i == 5) {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), true);
+      } else {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), false);
+      }
+    }
+
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove(existingMaskName);
+  }
+
+  void test_MaskWithWorkspaceWithDetectorIDs() {
+    auto &ads = AnalysisDataService::Instance();
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const int numInputSpec(90);
+
+    setUpWS(false, inputWSName, false, numInputSpec);
+
+    auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+
+    // group spectra into 10
+    auto grouper = AlgorithmManager::Instance().create("GroupDetectors");
+    grouper->initialize();
+    grouper->setProperty("InputWorkspace", inputWSName);
+    grouper->setPropertyValue("OutputWorkspace", inputWSName);
+    grouper->setPropertyValue(
+        "GroupingPattern",
+        "0-9,10-19,20-29,30-39,40-49,50-59,60-69,70-79,80-89");
+    grouper->execute();
+
+    TS_ASSERT(grouper->isExecuted());
+
+    inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+    TS_ASSERT(inputWS);
+
+    // Make workspace to act as mask
+    const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
+    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        static_cast<int>(numMaskWSSpec), 1, 0, 0);
+    maskWs->setInstrument(inputWS->getInstrument());
+    for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
+      maskWs->mutableY(i)[0] = 1.0;
+      maskWs->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+    }
+
+    maskWs->mutableY(10)[0] = 0;
+    maskWs->mutableY(20)[0] = 0;
+    maskWs->mutableY(55)[0] = 0;
+
+    // Apply
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setProperty("MaskedWorkspace", maskWs);
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+
+    // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+      const auto &det = spectrumInfo.detector(i);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 1 || i == 2 || i == 5) {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), true);
+      } else {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), false);
+      }
+    }
+  }
+
+  void test_MaskWithWorkspaceWithDetectorIDsAndWsIndexRange() {
+    auto &ads = AnalysisDataService::Instance();
+    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const int numInputSpec(90);
+
+    setUpWS(false, inputWSName, false, numInputSpec);
+
+    auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+
+    // group spectra into 10
+    auto grouper = AlgorithmManager::Instance().create("GroupDetectors");
+    grouper->initialize();
+    grouper->setProperty("InputWorkspace", inputWSName);
+    grouper->setPropertyValue("OutputWorkspace", inputWSName);
+    grouper->setPropertyValue(
+        "GroupingPattern",
+        "0-9,10-19,20-29,30-39,40-49,50-59,60-69,70-79,80-89");
+    grouper->execute();
+
+    TS_ASSERT(grouper->isExecuted());
+
+    inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+    TS_ASSERT(inputWS);
+
+    // Make workspace to act as mask
+    const auto numMaskWSSpec = inputWS->getInstrument()->getNumberDetectors();
+    auto maskWs = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        static_cast<int>(numMaskWSSpec), 1, 0, 0);
+    maskWs->setInstrument(inputWS->getInstrument());
+    for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
+      maskWs->mutableY(i)[0] = 1.0;
+      maskWs->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+    }
+
+    maskWs->mutableY(10)[0] = 0;
+    maskWs->mutableY(20)[0] = 0;
+    maskWs->mutableY(55)[0] = 0;
+
+    // Apply
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setPropertyValue("Workspace", inputWSName);
+    masker.setProperty("MaskedWorkspace", maskWs);
+    masker.setProperty("StartWorkspaceIndex", 2);
+    masker.setProperty("EndWorkspaceIndex", 4);
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+
+    // Check masking
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+      const auto &det = spectrumInfo.detector(i);
+
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      if (i == 2) {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), true);
+      } else {
+        TSM_ASSERT_EQUALS("Detector with id: " +
+                              boost::lexical_cast<std::string>(det.getID()) +
+                              "; Spectra N: " +
+                              boost::lexical_cast<std::string>(i),
+                          spectrumInfo.isMasked(i), false);
+      }
+    }
   }
 
 private:

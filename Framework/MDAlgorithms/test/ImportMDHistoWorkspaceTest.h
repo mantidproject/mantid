@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
@@ -30,7 +31,7 @@ public:
     m_filename = path.toString();
     m_file.open(m_filename.c_str(), std::ios_base::out);
     for (size_t i = 1; i < size + 1; ++i) {
-      m_file << i << "\t" << i + 1 << std::endl;
+      m_file << i << "\t" << i + 1 << '\n';
     }
     m_file.close();
   }

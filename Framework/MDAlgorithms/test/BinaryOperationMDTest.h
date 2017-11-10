@@ -2,9 +2,10 @@
 #define MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -17,6 +18,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace testing;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockBinaryOperationMD : public BinaryOperationMD {
 public:
@@ -32,7 +35,7 @@ public:
            Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
   void exec() override { BinaryOperationMD::exec(); }
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 class BinaryOperationMDTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -62,7 +65,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 5, 10.0, 1.0);
     event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     event_B = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+    scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
     AnalysisDataService::Instance().addOrReplace("histo_A", histo_A);
     AnalysisDataService::Instance().addOrReplace("histo_B", histo_B);
     AnalysisDataService::Instance().addOrReplace("histo2d_100", histo2d_100);

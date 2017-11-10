@@ -76,29 +76,42 @@ void CubicSpline::function1D(double *out, const double *xValues,
 void CubicSpline::setupInput(boost::scoped_array<double> &x,
                              boost::scoped_array<double> &y, int n) const {
   // Populate data points from the input attributes and parameters
-  bool xSortFlag = false;
+  bool isSorted = true;
 
   for (int i = 0; i < n; ++i) {
-    std::string num = boost::lexical_cast<std::string>(i);
 
-    std::string xName = "x" + num;
-    std::string yName = "y" + num;
+    x[i] = getAttribute("x" + std::to_string(i)).asDouble();
+    y[i] = getParameter(i);
 
-    x[i] = getAttribute(xName).asDouble();
-
-    // if x[i] is out of order with its neighbours
-    if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
-      xSortFlag = true;
+    if (isSorted) {
+      // if x[i] is out of order with its neighbours
+      if (i > 1 && i < n && (x[i - 1] < x[i - 2] || x[i - 1] > x[i])) {
+        isSorted = false;
+      }
     }
-
-    y[i] = getParameter(yName);
   }
 
   // sort the data points if necessary
-  if (xSortFlag) {
+  if (!isSorted) {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
-                       "will be sorted." << std::endl;
-    std::sort(x.get(), x.get() + n);
+                       "will be sorted.\n";
+
+    using point = std::pair<double, double>;
+    std::vector<point> pairs;
+    pairs.reserve(n);
+    for (int i = 0; i < n; ++i) {
+      pairs.push_back(std::make_pair(x[i], y[i]));
+    }
+
+    std::sort(pairs.begin(), pairs.end(),
+              [](const point &xy1, const point &xy2) {
+                return xy1.first < xy2.first;
+              });
+
+    for (int i = 0; i < n; ++i) {
+      x[i] = pairs[i].first;
+      y[i] = pairs[i].second;
+    }
   }
 
   // pass values to GSL objects
@@ -165,8 +178,7 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
   // warn user than some values wern't calculated
   if (outOfRange) {
     g_log.warning()
-        << "Some x values where out of range and will not be calculated."
-        << std::endl;
+        << "Some x values where out of range and will not be calculated.\n";
   }
 }
 
@@ -234,8 +246,7 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
   // warn user that some values weren't calculated
   if (outOfRange) {
     g_log.warning()
-        << "Some x values where out of range and will not be calculated."
-        << std::endl;
+        << "Some x values where out of range and will not be calculated.\n";
   }
 }
 
@@ -270,7 +281,7 @@ void CubicSpline::setAttribute(const std::string &attName,
     // check that the number of data points is in a valid range
     if (n > oldN) {
       // get the name of the last x data point
-      std::string oldXName = "x" + boost::lexical_cast<std::string>(oldN - 1);
+      std::string oldXName = "x" + std::to_string(oldN - 1);
       double oldX = getAttribute(oldXName).asDouble();
 
       // reallocate gsl object to new size
@@ -278,7 +289,7 @@ void CubicSpline::setAttribute(const std::string &attName,
 
       // create blank a number of new blank parameters and attributes
       for (int i = oldN; i < n; ++i) {
-        std::string num = boost::lexical_cast<std::string>(i);
+        std::string num = std::to_string(i);
 
         std::string newXName = "x" + num;
         std::string newYName = "y" + num;
@@ -309,7 +320,7 @@ void CubicSpline::setXAttribute(const size_t index, double x) {
 
   // check that setting the x attribute is within our range
   if (index < n) {
-    std::string xName = "x" + boost::lexical_cast<std::string>(index);
+    std::string xName = "x" + std::to_string(index);
     setAttributeValue(xName, x);
 
     // attributes updated, flag for recalculation

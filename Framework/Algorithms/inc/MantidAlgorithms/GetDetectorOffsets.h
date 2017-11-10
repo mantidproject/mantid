@@ -37,10 +37,6 @@ namespace Algorithms {
  */
 class DLLExport GetDetectorOffsets : public API::Algorithm {
 public:
-  /// Default constructorMatrix
-  GetDetectorOffsets();
-  /// Destructor
-  ~GetDetectorOffsets() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GetDetectorOffsets"; }
   /// Summary of algorithms purpose
@@ -71,16 +67,15 @@ private:
 
   API::MatrixWorkspace_sptr inputW; ///< A pointer to the input workspace
   DataObjects::OffsetsWorkspace_sptr
-      outputW;         ///< A pointer to the output workspace
-  double m_Xmin;       ///< The start of the X range for fitting
-  double m_Xmax;       ///< The end of the X range for fitting
-  double m_maxOffset;  ///< The maximum absolute value of offsets
-  double m_dreference; ///< The expected peak position in d-spacing (?)
-  double m_dideal;     ///< The known peak centre value from the NIST standard
+      outputW;               ///< A pointer to the output workspace
+  double m_Xmin = DBL_MAX;   ///< The start of the X range for fitting
+  double m_Xmax = -DBL_MIN;  ///< The end of the X range for fitting
+  double m_maxOffset = 0.0;  ///< The maximum absolute value of offsets
+  double m_dreference = 0.0; ///< The expected peak position in d-spacing (?)
+  double m_dideal = 0.0; ///< The known peak centre value from the NIST standard
   /// information
-  double m_step; ///< The step size
+  double m_step = 0.0; ///< The step size
 };
-
 } // namespace Algorithm
 } // namespace Mantid
 

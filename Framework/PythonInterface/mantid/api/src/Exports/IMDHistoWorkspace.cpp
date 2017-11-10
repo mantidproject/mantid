@@ -1,10 +1,12 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
-#include <boost/python/numeric.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
@@ -12,10 +14,23 @@
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
+namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
+
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+}
+}
+}
 
 namespace {
 /**
+
  * Determine the sizes of each dimensions
  * @param array :: the C++ array
  * @param dims :: the dimensions vector (Py_intptr_t type)
@@ -32,8 +47,8 @@ PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
   PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
 #else
   PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
-      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
-      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, NULL);
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, nullptr,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, nullptr);
   nparray->flags &= ~NPY_WRITEABLE;
 #endif
   return reinterpret_cast<PyObject *>(nparray);
@@ -100,7 +115,7 @@ PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * @param signal :: The new values
  * @param fnLabel :: A message prefix to pass if the sizes are incorrect
  */
-void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
+void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NumPy::NdArray &signal,
                           const std::string &fnLabel) {
   auto wsShape = countDimensions(self);
   const size_t ndims = wsShape.size();
@@ -117,8 +132,8 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
     int arrDim = extract<int>(arrShape[i])();
     if (wsShape[i] != arrDim) {
       std::ostringstream os;
-      os << fnLabel << ": The dimension size for the "
-         << boost::lexical_cast<std::string>(i) << "th dimension do not match. "
+      os << fnLabel << ": The dimension size for the " << std::to_string(i)
+         << "th dimension do not match. "
          << "Workspace dimension size=" << wsShape[i]
          << ", array size=" << arrDim;
       throw std::invalid_argument(os.str());
@@ -134,7 +149,7 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
  * correct
  */
 void setSignalArray(IMDHistoWorkspace &self,
-                    const numeric::array &signalValues) {
+                    const NumPy::NdArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
   object rav = signalValues.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -152,7 +167,7 @@ void setSignalArray(IMDHistoWorkspace &self,
  * correct
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self,
-                          const numeric::array &errorSquared) {
+                          const NumPy::NdArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
   object rav = errorSquared.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -160,6 +175,18 @@ void setErrorSquaredArray(IMDHistoWorkspace &self,
   for (auto i = 0; i < length; ++i) {
     self.setErrorSquaredAt(i, extract<double>(flattened[i])());
   }
+}
+
+/**
+ * Set the signal at a specific index in the workspace
+ */
+void setSignalAt(IMDHistoWorkspace &self, const size_t index,
+                 const double value) {
+  if (index >= self.getNPoints())
+    throw std::invalid_argument("setSignalAt: The index is greater than the "
+                                "number of bins in the workspace");
+
+  self.setSignalAt(index, value);
 }
 }
 
@@ -189,7 +216,7 @@ void export_IMDHistoWorkspace() {
            return_value_policy<copy_non_const_reference>(),
            "Return the squared-errors at the linear index")
 
-      .def("setSignalAt", &IMDHistoWorkspace::setSignalAt,
+      .def("setSignalAt", &setSignalAt,
            (arg("self"), arg("index"), arg("value")),
            "Sets the signal at the specified index.")
 
@@ -242,7 +269,13 @@ void export_IMDHistoWorkspace() {
       .def("getCenter", &IMDHistoWorkspace::getCenter,
            (arg("self"), arg("linear_index")),
            return_value_policy<return_by_value>(),
-           "Return the position of the center of a bin at a given position");
+           "Return the position of the center of a bin at a given position")
+
+      .def("setDisplayNormalization",
+           &IMDHistoWorkspace::setDisplayNormalization,
+           (arg("self"), arg("normalization")),
+           "Sets the visual normalization of"
+           " the workspace.");
 
   //-------------------------------------------------------------------------------------------------
 

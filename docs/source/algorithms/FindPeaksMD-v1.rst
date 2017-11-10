@@ -45,6 +45,14 @@ is not accessible. It may give better results on
 :ref:`MDWorkspaces <MDWorkspace>`.
 
 
+For data which has originally been based on histogram-type data and that has been converted to 
+event-based data it migth be beneficial to select the NumberOfEventNormalization for the `PeakFindingStrategy` property instead of the VolumeNormalization which is the default. This
+will disable the `DensityThresholdFactor` property and enable the `SignalThresholdFactor` property.
+The algorithmic steps remain the same as above but instead of using the signal density as the sorting
+quantity the signal count (total weighted event sum divided by the number of events) is used. If 
+the events are weighted this will result in boxes with signal counts larger than one for peaks and for the majority of background counts the signal count will be 1. Hence it is possible to discriminate between peaks and background. Note that the NumberOfEventNormalization selection of the `PeakFindingStrategy` property  does not make sense for all scenarios and infact might not produce useful results for your particular case.
+
+
 Usage
 ------
 
@@ -68,18 +76,18 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
        for name in tab_names:
            if len(name)>8:
               name= name[0:8];
-           print "| {0:8} ".format(name),
-       print "|\n",
+           print("| {0:8} ".format(name))
+       print("|\n")
    
        for i in xrange(0,nRows):
            for name in tab_names:
                  col = pTWS.column(name);
                  data2pr=col[i]
                  if type(data2pr) is float:
-                      print "| {0:>8.2f} ".format(data2pr),
+                      print("| {0:>8.2f} ".format(data2pr))
                  else:
-                     print "| {0:>8} ".format(data2pr),   
-           print "|\n",
+                     print("| {0:>8} ".format(data2pr))
+           print("|\n")
        
     
    # load test workspace

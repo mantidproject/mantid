@@ -1,16 +1,17 @@
 #ifndef FIND_DETECTORSPAR_H_
 #define FIND_DETECTORSPAR_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <array>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -317,7 +318,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(2, descr.nData_records);
     TS_ASSERT_EQUALS(6, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //  TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -350,7 +351,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(3, descr.nData_records);
     TS_ASSERT_EQUALS(6, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //  TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -382,7 +383,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(3, descr.nData_records);
     TS_ASSERT_EQUALS(7, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //   TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -418,13 +419,13 @@ private:
   MatrixWorkspace_sptr buildUngroupedWS(const std::string &WS_Name) {
     const int NHIST = 3;
 
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST, 10, 1.0);
+    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
 
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
-      ISpectrum *spec = inputWS->getSpectrum(j);
-      spec->setSpectrumNo(j + 1);
-      spec->setDetectorID(j + 1);
+      auto &spec = inputWS->getSpectrum(j);
+      spec.setSpectrumNo(j + 1);
+      spec.setDetectorID(j + 1);
     }
 
     AnalysisDataService::Instance().add(WS_Name, inputWS);
@@ -446,32 +447,36 @@ private:
       AnalysisDataService::Instance().remove(inputWS->getName());
     }
 
-    boost::shared_ptr<Geometry::DetectorGroup> pDet(
-        ComponentCreationHelper::createRingOfCylindricalDetectors(4, 5, 4));
-    const size_t NDET = pDet->nDets();
+    auto detectors =
+        ComponentCreationHelper::createVectorOfCylindricalDetectors(4, 5, 4);
 
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
+    const size_t NDET = detectors.size();
+
+    inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
 
     boost::shared_ptr<Geometry::Instrument> spInst(
         new Geometry::Instrument("basic_ring"));
     Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
+    spInst->add(source);
     spInst->markAsSource(source);
 
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     sample->setPos(0.0, 0.0, -2);
+    spInst->add(sample);
     spInst->markAsSamplePos(sample);
 
-    // get pointers to the detectors, contributed into group;
-    partDetectors = pDet->getDetectors();
-
-    inputWS->getSpectrum(0)->setSpectrumNo(1);
-    inputWS->getSpectrum(0)->clearDetectorIDs();
-    inputWS->getSpectrum(0)->addDetectorIDs(pDet->getDetectorIDs());
-
+    std::vector<detid_t> detectorIDs;
     for (size_t i = 0; i < NDET; i++) {
-      spInst->markAsDetector(partDetectors[i].get());
+      auto *tempUnmanagedDet = detectors[i].release();
+      spInst->add(tempUnmanagedDet);
+      spInst->markAsDetector(tempUnmanagedDet);
+      detectorIDs.push_back(tempUnmanagedDet->getID());
     }
+    inputWS->getSpectrum(0).setSpectrumNo(1);
+    inputWS->getSpectrum(0).clearDetectorIDs();
+    inputWS->getSpectrum(0).addDetectorIDs(detectorIDs);
+
     inputWS->setInstrument(spInst);
 
     AnalysisDataService::Instance().add(WS_Name, inputWS);
@@ -486,7 +491,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -499,7 +504,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -512,7 +517,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -523,7 +528,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }

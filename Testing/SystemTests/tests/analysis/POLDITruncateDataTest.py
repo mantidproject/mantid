@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class POLDITruncateDataTest(stresstesting.MantidStressTest):
     """ This test checks that the results of PoldiAutoCorrelation match the expected outcome."""
 
@@ -82,4 +83,3 @@ class POLDITruncateDataTest(stresstesting.MantidStressTest):
 
         PoldiTruncateData(InputWorkspace=cropped, OutputWorkspace="NamedWorkspaceTest")
         self.assertTrue(not mtd.doesExist("NamedWorkspaceTest"))
-

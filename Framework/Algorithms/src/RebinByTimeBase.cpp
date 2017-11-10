@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -14,6 +16,7 @@ namespace Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Types::Core::DateAndTime;
 
 /**
  Helper method to transform a MantidVector containing absolute times in
@@ -33,17 +36,6 @@ public:
   }
 };
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RebinByTimeBase::RebinByTimeBase() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RebinByTimeBase::~RebinByTimeBase() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RebinByTimeBase::init() {
@@ -122,8 +114,8 @@ void RebinByTimeBase::exec() {
 
   MantidVecPtr XValues_new;
   // create new X axis, with absolute times in seconds.
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rebinningParams, XValues_new.access());
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
+      rebinningParams, XValues_new.access()));
 
   ConvertToRelativeTime transformToRelativeT(runStartTime);
 
@@ -132,9 +124,8 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = WorkspaceFactory::Instance().create("Workspace2D", histnumber,
-                                                 ntcnew, ntcnew - 1);
-  WorkspaceFactory::Instance().initializeFromParent(inWS, outputWS, true);
+  outputWS = DataObjects::create<DataObjects::Workspace2D>(
+      *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {
@@ -157,8 +148,6 @@ void RebinByTimeBase::exec() {
 
   // Go through all the histograms and set the data
   doHistogramming(inWS, outputWS, XValues_new, OutXValues_scaled, prog);
-
-  return;
 }
 
 } // namespace Algorithms

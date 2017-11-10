@@ -17,6 +17,14 @@
 using namespace Mantid::Kernel;
 
 namespace {
+class MockNonSerializableProperty : public PropertyWithValue<int> {
+public:
+  MockNonSerializableProperty(const std::string &name, const int defaultValue)
+      : PropertyWithValue<int>(name, defaultValue, Direction::InOut) {}
+  bool isValueSerializable() const override { return false; }
+  using PropertyWithValue<int>::operator=;
+};
+
 /// Create the test source property
 std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
@@ -28,7 +36,7 @@ createTestSeries(const std::string &name) {
   source->addValue("2007-11-30T16:17:20", 3);
   source->addValue("2007-11-30T16:17:30", 4);
   source->addValue("2007-11-30T16:17:40", 5);
-  return std::move(source);
+  return source;
 }
 
 /// Create test filter
@@ -191,7 +199,7 @@ public:
         "myProp", "theValue",
         boost::make_shared<MandatoryValidator<std::string>>(), "hello"));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp"), "theValue");
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(p = mgr.getProperty("myProp"));
     TS_ASSERT_EQUALS(p->documentation(), "hello");
 
@@ -397,8 +405,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -429,8 +435,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -448,6 +452,19 @@ public:
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
+  }
+
+  void test_asStringWithNonSerializableProperty() {
+    using namespace Mantid::Kernel;
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
+        make_unique<MockNonSerializableProperty>("PropertyName", 0)));
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
+    // Set to non-default value.
+    mgr.setProperty("PropertyName", 1);
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
   }
 
   //-----------------------------------------------------------------------------------------------------------
@@ -524,6 +541,40 @@ public:
     mgr.setProperty("PropertyX", OptionalBool(true));
     TSM_ASSERT("Mandatory validator should be satisfied.",
                mgr.validateProperties());
+  }
+
+  void test_setPropertiesWithSimpleString() {
+    PropertyManagerHelper mgr;
+
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<double>>("double", 12.0),
+        "docs");
+    mgr.declareProperty(
+        Mantid::Kernel::make_unique<PropertyWithValue<int>>("int", 23), "docs");
+
+    mgr.setPropertiesWithString("double= 13.0 ;int=22 ");
+    double d = mgr.getProperty("double");
+    int i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 13.0);
+    TS_ASSERT_EQUALS(i, 22);
+
+    mgr.setPropertiesWithString("double= 23.4 ;int=11", {"int"});
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 23.4);
+    TS_ASSERT_EQUALS(i, 22);
+
+    mgr.setPropertiesWithString("{\"double\": 14.0, \"int\":33}");
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 14.0);
+    TS_ASSERT_EQUALS(i, 33);
+
+    mgr.setPropertiesWithString("{\"double\": 12.3 ,\"int\":11}", {"int"});
+    d = mgr.getProperty("double");
+    i = mgr.getProperty("int");
+    TS_ASSERT_EQUALS(d, 12.3);
+    TS_ASSERT_EQUALS(i, 33);
   }
 
 private:

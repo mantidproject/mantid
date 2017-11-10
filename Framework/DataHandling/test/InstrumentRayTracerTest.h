@@ -47,7 +47,7 @@ public:
   InstrumentRayTracerTestPerformance() {
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
 
-    topazWS = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
+    topazWS = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     AnalysisDataService::Instance().add("TOPAZ_2010", topazWS);
     // Load a small test file
     FrameworkManager::Instance().exec(

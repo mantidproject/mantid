@@ -3,13 +3,17 @@
 //----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/python/extract.hpp>
-#include <boost/python/numeric.hpp>
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+
+using boost::python::extract;
+using boost::python::handle;
+using boost::python::len;
+using boost::python::object;
 
 namespace Mantid {
 namespace PythonInterface {
@@ -21,17 +25,16 @@ namespace Converters {
  * Throws std::invalid_argument if not
  * if that is not the case.
  */
-PyObjectToV3D::PyObjectToV3D(const boost::python::object &p)
-    : m_obj(p), m_alreadyV3D(false) {
+PyObjectToV3D::PyObjectToV3D(const object &p) : m_obj(p), m_alreadyV3D(false) {
   // Is it an already wrapped V3D ?
-  boost::python::extract<Kernel::V3D> converter(p);
+  extract<Kernel::V3D> converter(p);
   if (converter.check()) {
     m_alreadyV3D = true;
     return;
   }
   // Is it a sequence
   try {
-    const size_t length = boost::python::len(p);
+    const size_t length = len(p);
     if (length != 3) {
       throw std::invalid_argument("Incorrect length for conversion to V3D");
     }
@@ -52,19 +55,14 @@ PyObjectToV3D::PyObjectToV3D(const boost::python::object &p)
  * from the PyObject.
  */
 Kernel::V3D PyObjectToV3D::operator()() {
-  using namespace boost::python;
   if (m_alreadyV3D) {
     return extract<Kernel::V3D>(m_obj)();
   }
-  // Numpy arrays need to be forced to a double
-  // as extract cannot convert from a int64->double
-  boost::python::object obj = m_obj;
-  if (PyArray_Check(obj.ptr())) {
-    obj = boost::python::numeric::array(obj).astype('d');
-  }
-  // Must be a sequence
-  return Kernel::V3D(extract<double>(obj[0])(), extract<double>(obj[1])(),
-                     extract<double>(obj[2])());
+  auto toDouble = [](const object &obj) {
+    return extract<double>(object(handle<>(PyNumber_Float(obj.ptr()))))();
+  };
+  return Kernel::V3D(toDouble(m_obj[0]), toDouble(m_obj[1]),
+                     toDouble(m_obj[2]));
 }
 }
 }

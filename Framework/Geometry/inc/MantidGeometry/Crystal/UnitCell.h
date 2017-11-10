@@ -142,7 +142,7 @@ public:
   double recVolume() const;
   virtual void recalculateFromGstar(const Kernel::Matrix<double> &NewGstar);
 
-private:
+protected:
   /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and
   /// radians)
   std::vector<double> da;
@@ -177,11 +177,13 @@ private:
   Kernel::DblMatrix Binv;
 
   // Private functions
-  void recalculate();
+
   void calculateG();
   void calculateGstar();
   void calculateReciprocalLattice();
   void calculateB();
+
+  virtual void recalculate();
 };
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &out,

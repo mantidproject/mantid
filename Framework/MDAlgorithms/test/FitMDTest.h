@@ -2,6 +2,7 @@
 #define CURVEFITTING_FITMDTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -35,10 +36,10 @@ public:
   signal_t getNormalizedError() const override;
   signal_t getSignal() const override { return 0; }
   signal_t getError() const override { return 0; }
-  coord_t *getVertexesArray(size_t &) const override { return NULL; }
+  coord_t *getVertexesArray(size_t &) const override { return nullptr; }
   coord_t *getVertexesArray(size_t &, const size_t,
                             const bool *) const override {
-    return NULL;
+    return nullptr;
   }
   Mantid::Kernel::VMD getCenter() const override;
   size_t getNumEvents() const override { return 0; }
@@ -137,9 +138,10 @@ public:
       Mantid::MantidVec &x = ws2->dataX(is);
       Mantid::MantidVec &y = ws2->dataY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = 10.0 + double(is) + (0.5 + 0.1 * double(is)) * x[i];
+      for (size_t i = 0; i < y.size(); ++i) {
+        x[i] = 0.1 * static_cast<double>(i);
+        const double is_d = static_cast<double>(is);
+        y[i] = 10.0 + is_d + (0.5 + 0.1 * is_d) * x[i];
       }
     }
 

@@ -17,8 +17,6 @@ UnaryOperation::UnaryOperation() : API::Algorithm() {
   this->useHistogram = false;
 }
 
-UnaryOperation::~UnaryOperation() {}
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */
@@ -59,7 +57,8 @@ void UnaryOperation::exec() {
       RebinnedOutput_sptr outtemp =
           boost::dynamic_pointer_cast<RebinnedOutput>(out_work);
       for (size_t i = 0; i < outtemp->getNumberHistograms(); ++i) {
-        MantidVecPtr F;
+        // because setF wants a COW pointer
+        Kernel::cow_ptr<std::vector<double>> F;
         F.access() = intemp->dataF(i);
         outtemp->setF(i, F);
       }
@@ -72,39 +71,35 @@ void UnaryOperation::exec() {
 
   const size_t numSpec = in_work->getNumberHistograms();
   const size_t specSize = in_work->blocksize();
-  const bool isHist = in_work->isHistogramData();
 
   // Initialise the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec);
 
   // Loop over every cell in the workspace, calling the abstract correction
   // function
-  PARALLEL_FOR2(in_work, out_work)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*in_work, *out_work))
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy the X values over
-    out_work->setX(i, in_work->refX(i));
+    out_work->setSharedX(i, in_work->sharedX(i));
     // Get references to the data
     // Output (non-const) ones first because they may copy the vector
     // if it's shared, which isn't thread-safe.
-    MantidVec &YOut = out_work->dataY(i);
-    MantidVec &EOut = out_work->dataE(i);
-    const MantidVec &X = in_work->readX(i);
-    const MantidVec &Y = in_work->readY(i);
-    const MantidVec &E = in_work->readE(i);
+    auto &YOut = out_work->mutableY(i);
+    auto &EOut = out_work->mutableE(i);
+    const auto X = in_work->points(i);
+    const auto &Y = in_work->y(i);
+    const auto &E = in_work->e(i);
 
     for (size_t j = 0; j < specSize; ++j) {
-      // Use the bin centre for the X value if this is histogram data
-      const double XIn = isHist ? (X[j] + X[j + 1]) / 2.0 : X[j];
       // Call the abstract function, passing in the current values
-      performUnaryOperation(XIn, Y[j], E[j], YOut[j], EOut[j]);
+      performUnaryOperation(X[j], Y[j], E[j], YOut[j], EOut[j]);
     }
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  return;
 }
 
 /// Executes the algorithm for events
@@ -116,7 +111,7 @@ void UnaryOperation::execEvent() {
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty(outputPropName());
   if (matrixOutputWS != matrixInputWS) {
-    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    matrixOutputWS = matrixInputWS->clone();
     setProperty(outputPropName(), matrixOutputWS);
   }
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
@@ -126,25 +121,25 @@ void UnaryOperation::execEvent() {
 
   int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper
     // function
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      unaryOperationEventHelper(evlist->getWeightedEvents());
+      unaryOperationEventHelper(evlist.getWeightedEvents());
       break;
 
     case WEIGHTED_NOTIME:
-      unaryOperationEventHelper(evlist->getWeightedEventsNoTime());
+      unaryOperationEventHelper(evlist.getWeightedEventsNoTime());
       break;
     }
 
@@ -156,7 +151,7 @@ void UnaryOperation::execEvent() {
   outputWS->clearMRU();
   auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
-    g_log.information() << "Number of events has changed!!!" << std::endl;
+    g_log.information() << "Number of events has changed!!!\n";
   }
 }
 

@@ -1,14 +1,14 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
 
 class DiagnoseDetectorsScript(BaseScriptElement):
 
@@ -38,7 +38,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         DiagnoseDetectorsScript.high_counts = ip.get_parameter("diag_huge")
         DiagnoseDetectorsScript.low_counts = ip.get_parameter("diag_tiny")
@@ -176,9 +176,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
                                                                                default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)
-            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,\
-                                                              "background_tof_start",\
-                                                              default=DiagnoseDetectorsScript.tof_start)
+            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
+                                                             "background_tof_start",
+                                                             default=DiagnoseDetectorsScript.tof_start)
             self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
                                                            "background_tof_end",
                                                            default=DiagnoseDetectorsScript.tof_end)

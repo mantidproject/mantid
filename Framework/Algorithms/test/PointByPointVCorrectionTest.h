@@ -7,6 +7,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid::API;
+using Mantid::Algorithms::PointByPointVCorrection;
+
 class PointByPointVCorrectionTest : public CxxTest::TestSuite {
 public:
   void testName() { TS_ASSERT_EQUALS(pbpv.name(), "PointByPointVCorrection"); }
@@ -19,22 +22,20 @@ public:
   }
 
   void testExec() {
-    using namespace Mantid::API;
-
     if (!pbpv.isInitialized())
       pbpv.initialize();
 
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
     testVanadium->setInstrument(inst);
     // Change the Y values
-    testSample->dataY(1) = Mantid::MantidVec(5, 3.0);
-    testVanadium->dataY(1) = Mantid::MantidVec(5, 5.5);
+    testSample->mutableY(1) = Mantid::HistogramData::HistogramY(5, 3.0);
+    testVanadium->mutableY(1) = Mantid::HistogramData::HistogramY(5, 5.5);
 
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW2", testVanadium);
@@ -48,21 +49,63 @@ public:
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
 
     // Check a few values
-    TS_ASSERT_DELTA(output->readX(1)[4], 6.5, 0.0001);
-    TS_ASSERT_DELTA(output->readX(1)[1], 2.0, 0.0001);
-    TS_ASSERT_DELTA(output->readX(0)[0], 0.5, 0.000001);
-    TS_ASSERT_DELTA(output->readY(1)[4], 2.9999, 0.0001);
-    TS_ASSERT_DELTA(output->readY(1)[1], 2.9999, 0.0001);
-    TS_ASSERT_DELTA(output->readY(0)[0], 2.0, 0.000001);
-    TS_ASSERT_DELTA(output->readE(1)[3], 1.8745, 0.0001);
-    TS_ASSERT_DELTA(output->readE(1)[2], 1.8745, 0.0001);
-    TS_ASSERT_DELTA(output->readE(0)[0], 2.2803, 0.0001);
+    TS_ASSERT_DELTA(output->x(1)[4], 6.5, 0.0001);
+    TS_ASSERT_DELTA(output->x(1)[1], 2.0, 0.0001);
+    TS_ASSERT_DELTA(output->x(0)[0], 0.5, 0.000001);
+    TS_ASSERT_DELTA(output->y(1)[4], 2.9999, 0.0001);
+    TS_ASSERT_DELTA(output->y(1)[1], 2.9999, 0.0001);
+    TS_ASSERT_DELTA(output->y(0)[0], 2.0, 0.000001);
+    TS_ASSERT_DELTA(output->e(1)[3], 1.8745, 0.0001);
+    TS_ASSERT_DELTA(output->e(1)[2], 1.8745, 0.0001);
+    TS_ASSERT_DELTA(output->e(0)[0], 2.2803, 0.0001);
 
     AnalysisDataService::Instance().remove("out");
   }
 
 private:
-  Mantid::Algorithms::PointByPointVCorrection pbpv;
+  PointByPointVCorrection pbpv;
+};
+
+class PointByPointVCorrectionTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PointByPointVCorrectionTestPerformance *createSuite() {
+    return new PointByPointVCorrectionTestPerformance();
+  }
+
+  static void destroySuite(PointByPointVCorrectionTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    MatrixWorkspace_sptr testSample =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testVanadium =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    // Make the instruments match
+    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
+    testSample->setInstrument(inst);
+    testVanadium->setInstrument(inst);
+    // Change the Y values
+    testSample->mutableY(1) = Mantid::HistogramData::HistogramY(5, 3.0);
+    testVanadium->mutableY(1) = Mantid::HistogramData::HistogramY(5, 5.5);
+
+    pbpv.initialize();
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW2", testVanadium);
+    pbpv.setPropertyValue("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testPerformanceWS() { pbpv.execute(); }
+
+private:
+  PointByPointVCorrection pbpv;
 };
 
 #endif /*POINTBYPOINTVCORRECTIONTEST_H_*/

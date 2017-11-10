@@ -11,12 +11,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-FilterByXValue::FilterByXValue() {}
-
-/// Destructor
-FilterByXValue::~FilterByXValue() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterByXValue::name() const { return "FilterByXValue"; }
 /// Algorithm's version for identification. @see Algorithm::version
@@ -85,17 +79,17 @@ void FilterByXValue::exec() {
     // entail new methods (e.g. iterators) on EventList as this algorithm
     // shouldn't
     // need to know about the type of the events (e.g. weighted).
-    outputWS = EventWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 
   Progress prog(this, 0.0, 1.0, numSpec);
   // Loop over the workspace, removing the events that don't pass the filter
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
 
-    EventList &events = outputWS->getEventList(spec);
+    EventList &events = outputWS->getSpectrum(spec);
     // Sort to make getting the tof min/max faster (& since maskTof will sort
     // anyway)
     events.sortTof();

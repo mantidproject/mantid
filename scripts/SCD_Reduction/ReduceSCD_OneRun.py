@@ -35,18 +35,19 @@
 # the use of either monitor counts (True) or proton charge (False) for
 # scaling.
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
 import ReduceDictionary
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 #sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *
 from mantid.api import *
 
-print "API Version"
-print apiVersion()
+print("API Version")
+print(apiVersion())
 
 start_time = time.time()
 
@@ -54,7 +55,7 @@ start_time = time.time()
 # Get the config file name and the run number to process from the command line
 #
 if len(sys.argv) < 3:
-    print "You MUST give the config file name(s) and run number on the command line"
+    print("You MUST give the config file name(s) and run number on the command line")
     exit(0)
 
 config_files = sys.argv[1:-1]
@@ -124,9 +125,11 @@ optimize_UB               = params_dictionary[ "optimize_UB" ]
 # Get the fully qualified input run file name, either from a specified data
 # directory or from findnexus
 #
-short_filename = "%s_%s_event.nxs" % (instrument_name, str(run))
+short_filename = "%s_%s" % (instrument_name, str(run))
 if data_directory is not None:
-    full_name = data_directory + "/" + short_filename
+    full_name = data_directory + "/" + short_filename + ".nxs.h5"
+    if not os.path.exists(full_name):
+        full_name = data_directory + "/" + short_filename + "_event.nxs"
 else:
     candidates = FileFinder.findRuns(short_filename)
     full_name = ""
@@ -134,12 +137,12 @@ else:
         if os.path.exists(item):
             full_name = str(item)
 
-    if not full_name.endswith('nxs'):
-        print "Exiting since the data_directory was not specified and"
-        print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+    if not full_name.endswith('nxs') and not full_name.endswith('h5'):
+        print("Exiting since the data_directory was not specified and")
+        print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run))
         exit(0)
 
-print "\nProcessing File: " + full_name + " ......\n"
+print("\nProcessing File: " + full_name + " ......\n")
 
 #
 # Name the files to write for this run
@@ -165,19 +168,19 @@ if (calibration_file_1 is not None ) or (calibration_file_2 is not None):
         calibration_file_1 = ""
     if calibration_file_2 is None :
         calibration_file_2 = ""
-    LoadIsawDetCal( event_ws,\
-                  Filename=calibration_file_1, Filename2=calibration_file_2 )
+    LoadIsawDetCal( event_ws,
+                    Filename=calibration_file_1, Filename2=calibration_file_2 )
 
 monitor_ws = LoadNexusMonitors( Filename=full_name )
 proton_charge = monitor_ws.getRun().getProtonCharge() * 1000.0  # get proton charge
-print "\n", run, " has integrated proton charge x 1000 of", proton_charge, "\n"
+print("\n", run, " has integrated proton charge x 1000 of", proton_charge, "\n")
 
 integrated_monitor_ws = Integration( InputWorkspace=monitor_ws,
                                      RangeLower=min_monitor_tof, RangeUpper=max_monitor_tof,
                                      StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index )
 
 monitor_count = integrated_monitor_ws.dataY(0)[0]
-print "\n", run, " has integrated monitor count", monitor_count, "\n"
+print("\n", run, " has integrated monitor count", monitor_count, "\n")
 
 minVals= "-"+max_Q +",-"+max_Q +",-"+max_Q
 maxVals = max_Q +","+max_Q +","+ max_Q
@@ -185,8 +188,8 @@ maxVals = max_Q +","+max_Q +","+ max_Q
 # Make MD workspace using Lorentz correction, to find peaks
 #
 MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
-                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",\
-                   LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
+                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                    LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
 #
 # Find the requested number of peaks.  Once the peaks are found, we no longer
@@ -235,13 +238,13 @@ else:
 # PeakIntegration algorithm.
 #
 if integrate_predicted_peaks:
-    print "PREDICTING peaks to integrate...."
-    peaks_ws = PredictPeaks( InputWorkspace=peaks_ws,\
-                WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,\
-                MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,\
-                ReflectionCondition='Primitive' )
+    print("PREDICTING peaks to integrate....")
+    peaks_ws = PredictPeaks( InputWorkspace=peaks_ws,
+                             WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,
+                             MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,
+                             ReflectionCondition='Primitive' )
 else:
-    print "Only integrating FOUND peaks ...."
+    print("Only integrating FOUND peaks ....")
 #
 # Set the monitor counts for all the peaks that will be integrated
 #
@@ -253,9 +256,9 @@ for i in range(num_peaks):
     else:
         peak.setMonitorCount( proton_charge )
 if use_monitor_counts:
-    print '\n*** Beam monitor counts used for scaling.'
+    print('\n*** Beam monitor counts used for scaling.')
 else:
-    print '\n*** Proton charge x 1000 used for scaling.\n'
+    print('\n*** Proton charge x 1000 used for scaling.\n')
 
 if use_sphere_integration:
 #
@@ -264,17 +267,17 @@ if use_sphere_integration:
 # workspace to do raw integration (we don't need high resolution or
 # LorentzCorrection to do the raw sphere integration )
 #
-    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",\
-                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",\
-                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,\
-                    SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
+    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
+                        dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                        LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
+                        SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
-    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,\
-                  CoordinatesToUse="Q (sample frame)",\
-              BackgroundOuterRadius=bkg_outer_radius,\
-                  BackgroundInnerRadius=bkg_inner_radius,\
-              PeaksWorkspace=peaks_ws,\
-                  IntegrateIfOnEdge=integrate_if_edge_peak )
+    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+                                 CoordinatesToUse="Q (sample frame)",
+                                 BackgroundOuterRadius=bkg_outer_radius,
+                                 BackgroundInnerRadius=bkg_inner_radius,
+                                 PeaksWorkspace=peaks_ws,
+                                 IntegrateIfOnEdge=integrate_if_edge_peak )
 elif use_cylindrical_integration:
 #
 # Integrate found or predicted peaks in Q space using spheres, and save
@@ -282,52 +285,51 @@ elif use_cylindrical_integration:
 # workspace to do raw integration (we don't need high resolution or
 # LorentzCorrection to do the raw sphere integration )
 #
-    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",\
-                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",\
-                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,\
-                    SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
+    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
+                        dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                        LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
+                        SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
-    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,\
-                  CoordinatesToUse="Q (sample frame)",\
-                  BackgroundOuterRadius=bkg_outer_radius,\
-                  BackgroundInnerRadius=bkg_inner_radius,\
-                  PeaksWorkspace=peaks_ws,\
-                  IntegrateIfOnEdge=integrate_if_edge_peak,\
-                  Cylinder=use_cylindrical_integration,CylinderLength=cylinder_length,\
-                  PercentBackground=cylinder_percent_bkg,\
-                  IntegrationOption=cylinder_int_option,\
-                  ProfileFunction=cylinder_profile_fit)
+    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+                                 CoordinatesToUse="Q (sample frame)",
+                                 BackgroundOuterRadius=bkg_outer_radius,
+                                 BackgroundInnerRadius=bkg_inner_radius,
+                                 PeaksWorkspace=peaks_ws,
+                                 IntegrateIfOnEdge=integrate_if_edge_peak,
+                                 Cylinder=use_cylindrical_integration,CylinderLength=cylinder_length,
+                                 PercentBackground=cylinder_percent_bkg,
+                                 IntegrationOption=cylinder_int_option,
+                                 ProfileFunction=cylinder_profile_fit)
 
 elif use_fit_peaks_integration:
-    event_ws = Rebin( InputWorkspace=event_ws,\
-                    Params=rebin_params, PreserveEvents=preserve_events )
-    peaks_ws = PeakIntegration( InPeaksWorkspace=peaks_ws, InputWorkspace=event_ws,\
-                              IkedaCarpenterTOF=use_ikeda_carpenter,\
-                              MatchingRunNo=True,\
-                              NBadEdgePixels=n_bad_edge_pixels )
+    event_ws = Rebin( InputWorkspace=event_ws,
+                      Params=rebin_params, PreserveEvents=preserve_events )
+    peaks_ws = PeakIntegration( InPeaksWorkspace=peaks_ws, InputWorkspace=event_ws,
+                                IkedaCarpenterTOF=use_ikeda_carpenter,
+                                MatchingRunNo=True,
+                                NBadEdgePixels=n_bad_edge_pixels )
 
 elif use_ellipse_integration:
-    peaks_ws= IntegrateEllipsoids( InputWorkspace=event_ws, PeaksWorkspace = peaks_ws,\
-                                 RegionRadius = ellipse_region_radius,\
-                                 SpecifySize = ellipse_size_specified,\
-                                 PeakSize = peak_radius,\
-                                 BackgroundOuterSize = bkg_outer_radius,\
-                                 BackgroundInnerSize = bkg_inner_radius )
+    peaks_ws= IntegrateEllipsoids( InputWorkspace=event_ws, PeaksWorkspace = peaks_ws,
+                                   RegionRadius = ellipse_region_radius,
+                                   SpecifySize = ellipse_size_specified,
+                                   PeakSize = peak_radius,
+                                   BackgroundOuterSize = bkg_outer_radius,
+                                   BackgroundInnerSize = bkg_inner_radius )
 
 elif use_cylindrical_integration:
     profiles_filename = output_directory + "/" + instrument_name + '_' + run + '.profiles'
-    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",\
-                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",\
-                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,\
-                    SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
+    MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
+                        dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                        LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
+                        SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
-    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=cylinder_radius,\
-                  CoordinatesToUse="Q (sample frame)",\
-                  Cylinder='1', CylinderLength = cylinder_length,\
-                  PercentBackground = '20', ProfileFunction = 'NoFit',\
-                  ProfilesFile = profiles_filename,\
-              PeaksWorkspace=peaks_ws,\
-                  )
+    peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=cylinder_radius,
+                                 CoordinatesToUse="Q (sample frame)",
+                                 Cylinder='1', CylinderLength = cylinder_length,
+                                 PercentBackground = '20', ProfileFunction = 'NoFit',
+                                 ProfilesFile = profiles_filename,
+                                 PeaksWorkspace=peaks_ws)
 
 #
 # Save the final integrated peaks, using the Niggli reduced cell.
@@ -342,14 +344,14 @@ else:
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
-        print "WARNING: Cylindrical profiles are NOT transformed!!!"
+    if (cell_type is not None) or (centering is not None):
+        print("WARNING: Cylindrical profiles are NOT transformed!!!")
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
 else:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         run_conventional_matrix_file = output_directory + "/" + run + "_" +        \
                                    cell_type + "_" + centering + ".mat"
         if output_nexus:
@@ -358,23 +360,22 @@ else:
         else:
             run_conventional_integrate_file = output_directory + "/" + run + "_" + \
                                       cell_type + "_" + centering + ".integrate"
-        SelectCellOfType( PeaksWorkspace=peaks_ws,\
-                      CellType=cell_type, Centering=centering,\
-                      AllowPermutations=allow_perm,\
-                      Apply=True, Tolerance=tolerance )
-    if output_nexus:
-        SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
-    else:
-        SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,\
-                      Filename=run_conventional_integrate_file )
-        SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
+        SelectCellOfType( PeaksWorkspace=peaks_ws,
+                          CellType=cell_type, Centering=centering,
+                          AllowPermutations=allow_perm,
+                          Apply=True, Tolerance=tolerance )
+        if output_nexus:
+            SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
+        else:
+            SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
+                          Filename=run_conventional_integrate_file )
+            SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
 
 end_time = time.time()
-print '\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec'
-print 'using config file(s) ' + ", ".join(config_files)
+print('\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec')
+print('using config file(s) ' + ", ".join(config_files))
 
 #
 # Try to get this to terminate when run by ReduceSCD_Parallel.py, from NX session
 #
 sys.exit(0)
-

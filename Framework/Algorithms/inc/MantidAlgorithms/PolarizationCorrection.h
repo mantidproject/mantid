@@ -39,8 +39,6 @@ namespace Algorithms {
  */
 class DLLExport PolarizationCorrection : public API::Algorithm {
 public:
-  PolarizationCorrection();
-  ~PolarizationCorrection() override;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

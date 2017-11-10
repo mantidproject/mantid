@@ -14,7 +14,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Quat.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -33,12 +36,14 @@ using Mantid::Kernel::Quat;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
+
 /**
- * Create a capped cylinder object
+ * Return the XML for a capped cylinder
  */
-Object_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
   std::ostringstream xml;
   xml << "<cylinder id=\"" << id << "\">"
       << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
@@ -48,9 +53,17 @@ Object_sptr createCappedCylinder(double radius, double height,
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
+  return xml.str();
+}
 
-  ShapeFactory shapeMaker;
-  return shapeMaker.createShape(xml.str());
+/**
+ * Create a capped cylinder object
+ */
+Object_sptr createCappedCylinder(double radius, double height,
+                                 const V3D &baseCentre, const V3D &axis,
+                                 const std::string &id) {
+  return ShapeFactory().createShape(
+      cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -164,7 +177,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -187,18 +200,13 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Create a group of detectors arranged in a ring;
- */
-boost::shared_ptr<DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min, const double R_max,
-                                 const double z0) {
-
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+std::vector<std::unique_ptr<IDetector>>
+createVectorOfCylindricalDetectors(const double R_min, const double R_max,
+                                   const double z0) {
+  std::vector<std::unique_ptr<IDetector>> allDetectors;
   // One object
   double R0 = 0.5;
   double h = 1.5;
@@ -221,37 +229,36 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det =
-            boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
+        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
+                                                         detShape, nullptr);
         det->setPos(x, y, z0);
-        groupMembers.push_back(det);
+        allDetectors.emplace_back(std::move(det));
       }
 
       ic++;
     }
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return allDetectors;
 }
 
 //----------------------------------------------------------------------------------------------
 /**
- * Create a group of two monitors
+ * Create a group of detectors arranged in a ring;
  */
-boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
-  const int ndets(2);
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream os;
-    os << "m" << i;
-    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
-    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
-    det->markAsMonitor();
-    groupMembers[i] = det;
+boost::shared_ptr<DetectorGroup>
+createRingOfCylindricalDetectors(const double R_min, const double R_max,
+                                 const double z0) {
+
+  auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
+  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+  groupMembers.reserve(vecOfDetectors.size());
+  for (auto &det : vecOfDetectors) {
+    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
 Instrument_sptr createTestInstrumentCylindrical(
     int num_banks, const Mantid::Kernel::V3D &sourcePos,
     const Mantid::Kernel::V3D &samplePos, const double cylRadius,
@@ -276,7 +283,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
+        lexer << "pixel-(" << j << ";" << i << ")";
         Detector *physicalPixel =
             new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);
@@ -371,8 +378,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   CompAssembly *bank = new CompAssembly("det_ass");
 
   for (size_t i = 0; i < azim.size(); i++) {
-    Detector *physicalPixel = new Detector(
-        "det" + boost::lexical_cast<std::string>(i), pixelID, pixelShape, bank);
+    Detector *physicalPixel =
+        new Detector("det" + std::to_string(i), pixelID, pixelShape, bank);
     double zpos = L2[i] * cos(polar[i]);
     double xpos = L2[i] * sin(polar[i]) * cos(azim[i]);
     double ypos = L2[i] * sin(polar[i]) * sin(azim[i]);
@@ -404,6 +411,37 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 }
 
 //----------------------------------------------------------------------------------------------
+
+void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
+                        double pixelSpacing, std::string bankName,
+                        const V3D &bankPos, const Quat &bankRot) {
+
+  const double cylRadius(pixelSpacing / 2);
+  const double cylHeight(0.0002);
+  // One object
+  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+
+  RectangularDetector *bank = new RectangularDetector(bankName);
+  bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
+                   pixelSpacing, idStart, true, pixels);
+
+  // Mark them all as detectors
+  for (int x = 0; x < pixels; x++)
+    for (int y = 0; y < pixels; y++) {
+      boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+      if (detector)
+        // Mark it as a detector (add to the instrument cache)
+        testInstrument.markAsDetector(detector.get());
+    }
+
+  testInstrument.add(bank);
+  bank->setPos(bankPos);
+  bank->setRot(bankRot);
+}
+
+//----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
  *pixels*pixels in size,
@@ -423,33 +461,14 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                                                 double bankDistanceFromSample) {
   auto testInst = boost::make_shared<Instrument>("basic_rect");
 
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
-  // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
-
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
-
-    RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
-                     pixelSpacing, banknum * pixels * pixels, true, pixels);
-
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
-      }
-
-    testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
+    std::ostringstream bankName;
+    bankName << "bank" << banknum;
+    V3D bankPos(0.0, 0.0, bankDistanceFromSample * banknum);
+    Quat bankRot{}; // Identity
+    addRectangularBank(*testInst, banknum * pixels * pixels, pixels,
+                       pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
   // Define a source component

@@ -13,6 +13,7 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
   src/Exports/CatalogSession.cpp
+  src/Exports/DetectorInfo.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -51,6 +52,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceGroup.cpp
   src/Exports/WorkspaceGroupProperty.cpp
   src/Exports/WorkspaceValidators.cpp
+  src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
@@ -60,18 +62,20 @@ set ( EXPORT_FILES
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp
+  src/Exports/SpectrumInfo.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
   src/Exports/IFunction.cpp
   src/Exports/IFunction1D.cpp
   src/Exports/IPeakFunction.cpp
+  src/Exports/CompositeFunction.cpp
   src/Exports/Jacobian.cpp
-  src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp
   src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
+  src/Exports/MultiDomainFunction.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -140,7 +144,9 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             PythonGeometryModule
             PythonKernelModule
             API
+	    Types
             Kernel
+            HistogramData
             Geometry
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}

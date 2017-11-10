@@ -450,7 +450,7 @@ static ANNkd_ptr annReadTree(istream &in,           // input stream
       exit(0);
     }
 
-    ANNorthHSArray bds = new ANNorthHalfSpace[n_bnds];
+    auto bds = new ANNorthHalfSpace[n_bnds];
     for (int i = 0; i < n_bnds; i++) {
       int sd;               // which side
       in >> cd >> cv >> sd; // input bounding halfspace

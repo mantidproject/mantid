@@ -38,9 +38,9 @@ std::string EnvironmentHistory::osVersion() const {
  */
 void EnvironmentHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Framework Version: " << frameworkVersion()
-     << std::endl;
-  os << std::string(indent, ' ') << "OS name: " << osName() << std::endl;
-  os << std::string(indent, ' ') << "OS version: " << osVersion() << std::endl;
+     << '\n';
+  os << std::string(indent, ' ') << "OS name: " << osName() << '\n';
+  os << std::string(indent, ' ') << "OS version: " << osVersion() << '\n';
 }
 
 /** Prints a text representation

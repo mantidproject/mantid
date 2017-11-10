@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument.h"
@@ -16,6 +16,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+
+constexpr double deg2rad = M_PI / 180.0;
 
 namespace Mantid {
 namespace Algorithms {
@@ -83,9 +85,9 @@ void Q1DWeighted::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
   // XOut defines the output histogram, so its length is equal to the number of
   // bins + 1
-  MantidVecPtr XOut;
+  HistogramData::BinEdges XOut(0);
   const int sizeOut =
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access());
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData());
 
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
@@ -104,13 +106,13 @@ void Q1DWeighted::exec() {
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
-  MantidVec &YOut = outputWS->dataY(0);
-  MantidVec &EOut = outputWS->dataE(0);
+  outputWS->setBinEdges(0, XOut);
+  auto &YOut = outputWS->mutableY(0);
+  auto &EOut = outputWS->mutableE(0);
 
   const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
@@ -118,7 +120,7 @@ void Q1DWeighted::exec() {
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
   const int xLength = static_cast<int>(inputWS->readX(0).size());
-  const double fmp = 4.0 * M_PI;
+  constexpr double fmp = 4.0 * M_PI;
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec * (xLength - 1));
@@ -148,8 +150,8 @@ void Q1DWeighted::exec() {
     wedge_ws->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     wedge_ws->setYUnitLabel("1/cm");
-    wedge_ws->isDistribution(true);
-    wedge_ws->setX(0, XOut);
+    wedge_ws->setDistribution(true);
+    wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
     wedgeWorkspaces.push_back(wedge_ws);
@@ -159,7 +161,9 @@ void Q1DWeighted::exec() {
   std::vector<std::vector<double>> wedge_XNormLambda(
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // Loop over all xLength-1 detector channels
   // Note: xLength -1, because X is a histogram and has a number of boundaries
   // equal to the number of detector channels + 1.
@@ -179,29 +183,19 @@ void Q1DWeighted::exec() {
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
     for (int i = 0; i < numSpec; i++) {
-      // Get the pixel relating to this spectrum
-      IDetector_const_sptr det;
-      try {
-        det = inputWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding"
-                        << std::endl;
-        // Catch if no detector. Next line tests whether this happened - test
-        // placed
-        // outside here because Mac Intel compiler doesn't like 'continue' in a
-        // catch
-        // in an openmp block.
+                        << " has no detector assigned to it - discarding\n";
+        continue;
       }
-      // If no detector found or if it's masked or a monitor, skip onto the next
-      // spectrum
-      if (!det || det->isMonitor() || det->isMasked())
+      // Skip if we have a monitor or if the detector is masked.
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
       // Get the current spectrum for both input workspaces
-      const MantidVec &XIn = inputWS->readX(i);
-      const MantidVec &YIn = inputWS->readY(i);
-      const MantidVec &EIn = inputWS->readE(i);
+      auto &XIn = inputWS->x(i);
+      auto &YIn = inputWS->y(i);
+      auto &EIn = inputWS->e(i);
 
       // Each pixel is sub-divided in the number of pixels given as input
       // parameter (NPixelDivision)
@@ -212,15 +206,15 @@ void Q1DWeighted::exec() {
                        nSubPixels;
         double sub_x = pixelSizeX *
                        (floor(static_cast<double>(isub) / nSubPixels) -
-                        (nSubPixels - 1.0) / 2.0) /
+                        (nSubPixels - 1.0) * 0.5) /
                        nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
-        V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
-        double sinTheta = sin(pos.angle(beamLine) / 2.0);
+        //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
+        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0) - samplePos;
+        double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
         int iq = 0;
@@ -235,9 +229,9 @@ void Q1DWeighted::exec() {
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0;
-               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
-            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
+          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.size()) - 1;
+               i_qbin++) {
+            if (q >= XOut[i_qbin] && q < XOut[(i_qbin + 1)]) {
               iq = i_qbin;
               break;
             }
@@ -275,13 +269,13 @@ void Q1DWeighted::exec() {
               // only over a forward-going cone
               if (isCone)
                 center_angle *= 2.0;
-              center_angle += M_PI / 180.0 * wedgeOffset;
+              center_angle += deg2rad * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));
-              if (angle < M_PI / 180.0 * wedgeAngle / 2.0 ||
+              if (angle < deg2rad * wedgeAngle * 0.5 ||
                   (!isCone &&
-                   fabs(M_PI - angle) < M_PI / 180.0 * wedgeAngle / 2.0)) {
+                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
                 wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
                 wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
                 wedge_XNorm[iWedge][iq] += w;
@@ -305,8 +299,8 @@ void Q1DWeighted::exec() {
         // Normalize wedges
         for (int iWedge = 0; iWedge < nWedges; iWedge++) {
           if (wedge_XNorm[iWedge][k] > 0) {
-            MantidVec &wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
-            MantidVec &wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+            auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+            auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
             wedgeYOut[k] += wedge_lambda_iq[iWedge][k] / wedge_XNorm[iWedge][k];
             wedgeEOut[k] += wedge_lambda_iq_err[iWedge][k] /
                             wedge_XNorm[iWedge][k] / wedge_XNorm[iWedge][k];
@@ -326,8 +320,8 @@ void Q1DWeighted::exec() {
   }
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
     for (int i = 0; i < sizeOut - 1; i++) {
-      MantidVec &wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
-      MantidVec &wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+      auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+      auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
       wedgeYOut[i] /= wedge_XNormLambda[iWedge][i];
       wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedge_XNormLambda[iWedge][i];
     }
@@ -341,7 +335,7 @@ void Q1DWeighted::exec() {
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
-  if (outputWSGroupName.size() == 0) {
+  if (outputWSGroupName.empty()) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSGroupName = outputWSName + "_wedges";
     setPropertyValue("WedgeWorkspace", outputWSGroupName);

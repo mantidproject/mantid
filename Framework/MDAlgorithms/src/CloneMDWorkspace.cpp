@@ -18,18 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(CloneMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CloneMDWorkspace::CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CloneMDWorkspace::~CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {
@@ -61,7 +49,6 @@ void CloneMDWorkspace::init() {
 template <typename MDE, size_t nd>
 void CloneMDWorkspace::doClone(
     const typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  Progress prog(this, 0.0, 10.0, 100);
   BoxController_sptr bc = ws->getBoxController();
 
   if (!bc)
@@ -69,8 +56,7 @@ void CloneMDWorkspace::doClone(
   if (bc->isFileBacked()) {
     if (ws->fileNeedsUpdating()) {
       // Data was modified! You need to save first.
-      g_log.notice() << "InputWorkspace's file-backend being updated. "
-                     << std::endl;
+      g_log.notice() << "InputWorkspace's file-backend being updated. \n";
       IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
       alg->setPropertyValue("UpdateFileBackEnd", "1");
@@ -78,7 +64,6 @@ void CloneMDWorkspace::doClone(
     }
 
     // Generate a new filename to copy to
-    prog.report("Copying File");
     std::string originalFile = bc->getFilename();
     std::string outFilename = getPropertyValue("Filename");
     if (outFilename.empty()) {
@@ -92,9 +77,9 @@ void CloneMDWorkspace::doClone(
 
     // Perform the copying
     g_log.notice() << "Cloned workspace file being copied to: " << outFilename
-                   << std::endl;
+                   << '\n';
     Poco::File(originalFile).copyTo(outFilename);
-    g_log.information() << "File copied successfully." << std::endl;
+    g_log.information() << "File copied successfully.\n";
 
     // Now load it back
     IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
@@ -109,7 +94,7 @@ void CloneMDWorkspace::doClone(
                       boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
-    IMDWorkspace_sptr outWS(ws->clone().release());
+    IMDWorkspace_sptr outWS(ws->clone());
     setProperty("OutputWorkspace", outWS);
   }
 }
@@ -128,7 +113,7 @@ void CloneMDWorkspace::exec() {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
   } else if (inHistoWS) {
     // Polymorphic clone().
-    IMDWorkspace_sptr outWS(inHistoWS->clone().release());
+    IMDWorkspace_sptr outWS(inHistoWS->clone());
     // And set to the output. Easy.
     this->setProperty("OutputWorkspace", outWS);
   } else {

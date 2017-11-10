@@ -6,6 +6,7 @@
 #
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator
@@ -40,7 +41,7 @@ class LoadSINQFile(PythonAlgorithm):
         inst=self.getProperty('Instrument').value
         fname = self.getProperty('Filename').value
 
-        diclookup = {\
+        diclookup = {
             "AMOR":"amor.dic",
             "BOA":"boa.dic",
             "DMC":"dmc.dic",
@@ -53,7 +54,7 @@ class LoadSINQFile(PythonAlgorithm):
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
-            "TRICS":"trics.dic"\
+            "TRICS":"trics.dic"
         }
 
         lookupInstrumentName = inst
@@ -67,7 +68,7 @@ class LoadSINQFile(PythonAlgorithm):
 
         if inst == "POLDI":
             if ws.getNumberHistograms() == 800:
-                ws.maskDetectors(SpectraList=range(0,800)[::2])
+                ws.maskDetectors(SpectraList=list(range(0,800))[::2])
 
                 config.appendDataSearchDir(config['groupingFiles.directory'])
                 grp_file = "POLDI_Grouping_800to400.xml"
@@ -106,6 +107,7 @@ class LoadSINQFile(PythonAlgorithm):
         matches = re.match(pattern, pureFileName)
 
         return int(matches.group(1))
+
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)

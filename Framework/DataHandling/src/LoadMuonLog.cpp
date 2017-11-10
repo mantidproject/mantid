@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidKernel/LogParser.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include <ctime>
 
@@ -21,7 +19,6 @@ using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::FileProperty;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 using API::Progress;
 
@@ -70,8 +67,10 @@ void LoadMuonLog::exec() {
   Progress prog(this, 0.0, 1.0, nxload.numberOfLogs());
   for (int i = 0; i < nxload.numberOfLogs(); i++) {
     std::string logName = nxload.getLogName(i);
-    auto l_PropertyDouble = new TimeSeriesProperty<double>(logName);
-    auto l_PropertyString = new TimeSeriesProperty<std::string>(logName);
+    auto l_PropertyDouble =
+        Kernel::make_unique<TimeSeriesProperty<double>>(logName);
+    auto l_PropertyString =
+        Kernel::make_unique<TimeSeriesProperty<std::string>>(logName);
 
     // Read log file into Property which is then stored in Sample object
     if (!nxload.logTypeNumeric(i)) {
@@ -92,17 +91,14 @@ void LoadMuonLog::exec() {
 
     // store Property in Sample object and delete unused object
     if (nxload.logTypeNumeric(i)) {
-      localWorkspace->mutableRun().addLogData(l_PropertyDouble);
-      delete l_PropertyString;
+      localWorkspace->mutableRun().addLogData(std::move(l_PropertyDouble));
     } else {
-      localWorkspace->mutableRun().addLogData(l_PropertyString);
-      delete l_PropertyDouble;
+      localWorkspace->mutableRun().addLogData(std::move(l_PropertyString));
     }
     prog.report();
   } // end for
 
   // operation was a success and ended normally
-  return;
 }
 
 /** change each element of the string to lower case

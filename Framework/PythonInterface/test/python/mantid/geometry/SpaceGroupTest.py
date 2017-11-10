@@ -1,6 +1,8 @@
-#pylint: disable=no-init,invalid-name,too-many-public-methods
+# pylint: disable=no-init,invalid-name,too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
-from mantid.geometry import SpaceGroupFactory
+from mantid.geometry import SpaceGroupFactory, UnitCell
 
 
 class SpaceGroupTest(unittest.TestCase):
@@ -19,6 +21,32 @@ class SpaceGroupTest(unittest.TestCase):
         self.assertEqual(len(symOpStrings), 2)
         self.assertTrue("x,y,z" in symOpStrings)
         self.assertTrue("-x,-y,-z" in symOpStrings)
+
+    def test_isAllowedUnitCell_cubic(self):
+        cubic = UnitCell(6, 6, 6)
+        tetragonal = UnitCell(6, 6, 6.01)
+        sg = SpaceGroupFactory.createSpaceGroup('P m -3')
+
+        self.assertTrue(sg.isAllowedUnitCell(cubic))
+        self.assertFalse(sg.isAllowedUnitCell(tetragonal))
+
+    def test_isAllowedUnitCell_trigonal(self):
+        rhombohedral = UnitCell(5, 5, 5, 80, 80, 80)
+        hexagonal = UnitCell(5, 5, 4, 90, 90, 120)
+
+        sgRh = SpaceGroupFactory.createSpaceGroup('R -3 c :r')
+        sgHex = SpaceGroupFactory.createSpaceGroup('R -3 c')
+
+        sgP6m = SpaceGroupFactory.createSpaceGroup('P 6/m')
+
+        self.assertTrue(sgRh.isAllowedUnitCell(rhombohedral))
+        self.assertFalse(sgRh.isAllowedUnitCell(hexagonal))
+
+        self.assertTrue(sgHex.isAllowedUnitCell(hexagonal))
+        self.assertFalse(sgHex.isAllowedUnitCell(rhombohedral))
+
+        self.assertTrue(sgP6m.isAllowedUnitCell(hexagonal))
+        self.assertFalse(sgP6m.isAllowedUnitCell(rhombohedral))
 
     def test_equivalentPositions_Triclinic(self):
         wyckoffs = [([0.3, 0.4, 0.45], 2),
@@ -112,6 +140,19 @@ class SpaceGroupTest(unittest.TestCase):
 
         spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
         self.checkWyckoffPositions(spaceGroup, wyckoffs)
+
+    def test_to_string(self):
+        spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
+
+        expected_str = "Space group with Hermann-Mauguin symbol: "\
+                       "F -4 3 c"
+        expected_repr = "SpaceGroupFactory.createSpaceGroup(\"F -4 3 c\")"
+
+        self.assertEqual(expected_str, str(spaceGroup))
+        self.assertEqual(expected_repr, spaceGroup.__repr__())
+
+        newSpaceGroup = eval(spaceGroup.__repr__())
+        self.assertEqual(spaceGroup.getHMSymbol(), newSpaceGroup.getHMSymbol())
 
     def checkWyckoffPositions(self, spaceGroup, wyckoffs):
         for wp in wyckoffs:

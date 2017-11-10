@@ -26,8 +26,8 @@ class RulesIntersectionTest : public CxxTest::TestSuite {
 public:
   void testDefaultConstructor() {
     Intersection A;
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
+    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
 
     // Intersection A;
     // SurfPoint S1,S2;
@@ -58,9 +58,9 @@ public:
     auto ptrS1 = S1.get();
     auto ptrS2 = S2.get();
     Intersection A(std::move(S1), std::move(S2));
-    TS_ASSERT_EQUALS(A.leaf(0), ptrS2);
-    TS_ASSERT_EQUALS(A.leaf(1), ptrS1);
-    TS_ASSERT_EQUALS(A.display(), "-11 10");
+    TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
+    TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
+    TS_ASSERT_EQUALS(A.display(), "10 -11");
   }
 
   void testThreeRuleConstructor() {
@@ -201,7 +201,7 @@ public:
     TS_ASSERT_EQUALS(A.display(), "10 11");
     TS_ASSERT_EQUALS(A.findKey(10), ptrS1);
     TS_ASSERT_EQUALS(A.findKey(11), ptrS2);
-    TS_ASSERT_EQUALS(A.findKey(12), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(12), (Rule *)nullptr);
   }
 
   void testIsComplementary() {

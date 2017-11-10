@@ -141,14 +141,14 @@ public:
     for (size_t i = 0; i < num; i++) {
       sc.push(new TaskWithMutex(mut1, 10.0));
     }
-    // std::cout << tim0.elapsed() << " secs to push." << std::endl;
+    // std::cout << tim0.elapsed() << " secs to push.\n";
     TS_ASSERT_EQUALS(sc.size(), num);
 
     Timer tim1;
     for (size_t i = 0; i < num; i++) {
       delete sc.pop(0);
     }
-    // std::cout << tim1.elapsed() << " secs to pop." << std::endl;
+    // std::cout << tim1.elapsed() << " secs to pop.\n";
     TS_ASSERT_EQUALS(sc.size(), 0);
   }
 
@@ -159,14 +159,14 @@ public:
     for (size_t i = 0; i < num; i++) {
       sc.push(new TaskWithMutex(boost::make_shared<std::mutex>(), 10.0));
     }
-    // std::cout << tim0.elapsed() << " secs to push." << std::endl;
+    // std::cout << tim0.elapsed() << " secs to push.\n";
     TS_ASSERT_EQUALS(sc.size(), num);
 
     Timer tim1;
     for (size_t i = 0; i < num; i++) {
       delete sc.pop(0);
     }
-    // std::cout << tim1.elapsed() << " secs to pop." << std::endl;
+    // std::cout << tim1.elapsed() << " secs to pop.\n";
     TS_ASSERT_EQUALS(sc.size(), 0);
   }
 };

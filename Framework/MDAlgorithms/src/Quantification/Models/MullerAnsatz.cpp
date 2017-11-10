@@ -12,7 +12,8 @@ DECLARE_FOREGROUNDMODEL(MullerAnsatz)
 
 using Kernel::Math::BoseEinsteinDistribution;
 
-struct AnsatzParameters {
+class AnsatzParameters {
+public:
   /*
   !   p(1)	A, the intensity scale factor in the Mueller Ansatz formalism.
   !		p(2)	J (maximum of lower bound is at pi*J/2)

@@ -19,14 +19,14 @@ public:
 
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 10, 10);
+    ws->initialize(2, 10, 10);
     HistogramValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws),
                      "The workspace must contain histogram data");

@@ -45,9 +45,6 @@ namespace LiveData {
 */
 class DLLExport StartLiveData : public LiveDataAlgorithm {
 public:
-  StartLiveData();
-  ~StartLiveData() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -59,6 +56,11 @@ public:
 private:
   void init() override;
   void exec() override;
+  void afterPropertySet(const std::string &) override;
+
+  void copyListenerProperties(
+      const boost::shared_ptr<Mantid::API::ILiveListener> &listener);
+  void removeListenerProperties();
 };
 
 } // namespace LiveData

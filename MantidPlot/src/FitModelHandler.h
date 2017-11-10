@@ -34,8 +34,7 @@
 
 class Fit;
 
-class FitModelHandler : public QXmlDefaultHandler
-{
+class FitModelHandler : public QXmlDefaultHandler {
 public:
   explicit FitModelHandler(Fit *fit);
 
@@ -49,14 +48,14 @@ public:
   QString errorString() const override;
 
 private:
-    Fit* d_fit;
-    bool metFitTag;
-    QString currentText;
-    QString errorStr;
-    QString d_formula;
-    QStringList d_parameters;
-    QStringList d_explanations;
-    QVarLengthArray<double> d_values;
+  Fit *d_fit;
+  bool metFitTag;
+  QString currentText;
+  QString errorStr;
+  QString d_formula;
+  QStringList d_parameters;
+  QStringList d_explanations;
+  QVarLengthArray<double> d_values;
 };
 
 #endif

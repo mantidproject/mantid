@@ -79,7 +79,7 @@ VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
   std::vector<std::string> strs;
   boost::split(strs, sValue, boost::is_any_of(","));
 
-  VectorValueParameterType *product = new VectorValueParameterType(strs.size());
+  auto product = new VectorValueParameterType(strs.size());
   typedef typename VectorValueParameterType::ValueType ValType;
   ValType value = 0;
 

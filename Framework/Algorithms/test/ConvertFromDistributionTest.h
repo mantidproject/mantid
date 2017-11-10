@@ -19,8 +19,8 @@ public:
 
   ConvertFromDistributionTest() : dist("dist") {
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 0.5);
-    WS->isDistribution(true);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
+    WS->setDistribution(true);
     AnalysisDataService::Instance().add(dist, WS);
   }
 
@@ -53,7 +53,7 @@ public:
     for (size_t i = 0; i < Y.size(); ++i) {
       TS_ASSERT_EQUALS(X[i], static_cast<double>(i) / 2.0)
       TS_ASSERT_EQUALS(Y[i], 1)
-      TS_ASSERT_EQUALS(E[i], sqrt(2.0) / 2.0)
+      TS_ASSERT_EQUALS(E[i], M_SQRT2 / 2.0)
     }
     TS_ASSERT(!output->isDistribution())
 

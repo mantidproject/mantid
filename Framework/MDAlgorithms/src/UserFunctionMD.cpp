@@ -65,7 +65,7 @@ void UserFunctionMD::initDimensions() {
     m_vars.resize(m_dimensionIndexMap.size());
     m_varNames.resize(m_dimensionIndexMap.size());
     for (size_t i = 0; i < m_vars.size(); ++i) {
-      m_varNames[i] = "x" + boost::lexical_cast<std::string>(i);
+      m_varNames[i] = "x" + std::to_string(i);
       m_parser.DefineVar(m_varNames[i], &m_vars[i]);
     }
   }
@@ -85,7 +85,7 @@ double UserFunctionMD::functionMD(const API::IMDIterator &r) const {
       m_vars[i] = center[i];
     }
     // std::cerr << m_vars[0] << ',' << m_vars[1] << ' ' << m_parser.Eval() <<
-    // std::endl;
+    // '\n';
     try {
       val = m_parser.Eval();
     } catch (mu::Parser::exception_type &e) {

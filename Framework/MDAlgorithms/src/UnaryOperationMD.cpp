@@ -14,16 +14,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-UnaryOperationMD::UnaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UnaryOperationMD::~UnaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string UnaryOperationMD::name() const { return "UnaryOperationMD"; }
 

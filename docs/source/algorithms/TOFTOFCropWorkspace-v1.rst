@@ -22,7 +22,7 @@ Restrictions on the input workspace
 ###################################
 
 -  The unit of the X-axis must be **Time-of-flight**.
--  Workspace must contain *channel_width* and *full_channels* sample logs.
+-  Workspace must contain *channel_width*, *full_channels* and *TOF1* sample logs.
 
 
 Usage
@@ -35,24 +35,26 @@ Usage
     # Load data
     ws=Load(Filename='TOFTOFTestdata.nxs')
 
-    print "Input workspace"
-    print "Total number of time channels: ",  len(ws.readX(0))
-    print  "Number of filled time channels: ", ws.getRun().getLogData('full_channels').value
+    print("Input workspace")
+
+    print("Total number of time channels: {}".format(len(ws.readX(0))))
+    print ("Number of filled time channels: {}".format(ws.getRun().getLogData('full_channels').value))
 
     wscropped = TOFTOFCropWorkspace(ws)
 
-    print "Output workspace"
-    print "Total number of time channels: ",  len(wscropped.readX(0))    
+    print("Output workspace")
+    print("Total number of time channels: {}".format(len(wscropped.readX(0))))
+
 
 Output:
 
 .. testoutput:: ExTOFTOFCropWorkspace
 
     Input workspace
-    Total number of time channels:  1025
-    Number of filled time channels:  1020.0
+    Total number of time channels: 1025
+    Number of filled time channels: 1020.0
     Output workspace
-    Total number of time channels:  1020
+    Total number of time channels: 1020
     
 .. categories::
 

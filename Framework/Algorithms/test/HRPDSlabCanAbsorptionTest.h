@@ -4,12 +4,20 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Kernel::V3D;
 
@@ -28,15 +36,8 @@ public:
     if (!atten.isInitialized())
       atten.initialize();
 
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.25, 0.5);
-    // Needs to have units of wavelength
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-
     boost::shared_ptr<Instrument> testInst =
         boost::make_shared<Instrument>("testInst");
-    testWS->setInstrument(testInst);
 
     // Define a source and sample position
     // Define a source component
@@ -54,22 +55,28 @@ public:
     testInst->markAsSamplePos(sample);
 
     // Add three detectors - one for each bank of HRPD
-    Mantid::API::Axis *ax1 = testWS->getAxis(1);
-    Detector *det1 = new Detector("2101", ax1->spectraNo(0), testInst.get());
+    Detector *det1 = new Detector("2101", 1, testInst.get());
     det1->setPos(V3D(0.04528, 0.04528, -0.887693));
     testInst->add(det1);
     testInst->markAsDetector(det1);
-    Detector *det2 = new Detector("911000", ax1->spectraNo(1), testInst.get());
+    Detector *det2 = new Detector("911000", 2, testInst.get());
     det2->setPos(V3D(-1.60016, 0.770105, 0.293987));
     testInst->add(det2);
     testInst->markAsDetector(det2);
-    Detector *det3 = new Detector("10101", ax1->spectraNo(2), testInst.get());
+    Detector *det3 = new Detector("10101", 3, testInst.get());
     det3->setPos(V3D(1.98194, 0.0990971, 3.19728));
     testInst->add(det3);
     testInst->markAsDetector(det3);
 
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));
+    auto testWS = create<Workspace2D>(
+        testInst, Mantid::Indexing::IndexInfo(3),
+        Histogram(BinEdges(11, LinearGenerator(0.25, 0.5)), Counts(10, 2.0)));
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    TS_ASSERT_THROWS_NOTHING(atten.setProperty<MatrixWorkspace_sptr>(
+        "InputWorkspace", std::move(testWS)));
     std::string outputWS("factors");
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("OutputWorkspace", outputWS));

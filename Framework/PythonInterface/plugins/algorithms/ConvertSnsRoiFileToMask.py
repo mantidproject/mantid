@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as msapi
 import mantid.api as api
 import mantid.kernel as kernel
@@ -10,6 +12,7 @@ EXTENSIONS = [".dat", ".txt"]
 INSTRUMENTS = ["ARCS", "BASIS", "CNCS", "SEQUOIA"]
 TYPE1 = (8, 128)
 TYPE2 = (64, 64)
+
 
 class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
     """
@@ -44,20 +47,20 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         self.declareProperty(api.FileProperty(name="SnsRoiFile",
                                               defaultValue="",
                                               action=api.FileAction.Load,
-                                              extensions=EXTENSIONS),\
-                                              "SNS reduction ROI file to load.")
+                                              extensions=EXTENSIONS),
+                             "SNS reduction ROI file to load.")
         allowedInstruments = kernel.StringListValidator(INSTRUMENTS)
         self.declareProperty("Instrument", "",
                              validator=allowedInstruments,
                              doc="One of the supported instruments")
         self.declareProperty("OutputFilePrefix", "",
-                             "Overrides the default filename for the output "\
+                             "Overrides the default filename for the output "
                              +"file (Optional). Default is <inst_name>_Mask.")
         self.declareProperty(api.FileProperty(name="OutputDirectory",
                                               defaultValue=config['defaultsave.directory'],
-                                              action=api.FileAction.Directory),\
-                                              "Directory to save mask file."\
-                                              +" Default is current Mantid save directory.")
+                                              action=api.FileAction.Directory),
+                             "Directory to save mask file."
+                             +" Default is current Mantid save directory.")
 
     def PyExec(self):
         """
@@ -123,6 +126,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         parts = idx.split('_')
         bankid = int(parts[0].split('bank')[-1])
         return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid-1))
+
 
 # Register algorithm with Mantid.
 api.AlgorithmFactory.subscribe(ConvertSnsRoiFileToMask)

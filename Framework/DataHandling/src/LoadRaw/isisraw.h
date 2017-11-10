@@ -8,12 +8,9 @@
  */
 
 struct ISISCRPT_STRUCT;
-#include <stdlib.h>
-#include <string.h>
 #include "item_struct.h"
-#ifdef _WIN32 /* _WIN32 */
-#include <time.h>
-#endif
+#include <cstdlib>
+#include <cstring>
 #include "MantidKernel/System.h"
 
 /// Run header (80 bytes)

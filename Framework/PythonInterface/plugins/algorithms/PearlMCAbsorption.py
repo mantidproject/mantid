@@ -1,8 +1,10 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi
 import math
+
 
 class PearlMCAbsorption(PythonAlgorithm):
 
@@ -75,6 +77,7 @@ class PearlMCAbsorption(PythonAlgorithm):
                 input_ws.dataY(i)[j] = math.exp(-1.0*mu_values[j]*thickness)
 
         return input_ws
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(PearlMCAbsorption)

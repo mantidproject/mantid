@@ -173,8 +173,8 @@ public:
         TS_ASSERT_EQUALS(A.setSurface(*vc), 0);
         std::cout << "Cylinder == ";
         A.write(std::cout);
-        std::cout << "TestPoint == " << P << std::endl;
-        std::cout << "Distance == " << A.distance(P) << std::endl;
+        std::cout << "TestPoint == " << P << '\n';
+        std::cout << "Distance == " << A.distance(P) << '\n';
         ;
       }
     }

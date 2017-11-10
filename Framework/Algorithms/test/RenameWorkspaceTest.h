@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::API;
@@ -23,7 +24,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 3);
+    TS_ASSERT_EQUALS(props.size(), 4);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
     TS_ASSERT(props[0]->isDefault());
@@ -73,7 +74,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("OutputWorkspace", "InputWS"));
 
-    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
     TS_ASSERT(!alg3.isExecuted());
 
     Workspace_sptr result;
@@ -83,6 +84,37 @@ public:
     TS_ASSERT(result);
 
     AnalysisDataService::Instance().remove("InputWS");
+  }
+
+  void testExecNameAlreadyExists() {
+    // Tests renaming a workspace to a name which is already used
+    AnalysisDataService::Instance().clear();
+    MatrixWorkspace_sptr inputWs = createWorkspace();
+    AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
+    // Create a workspace to rename
+    MatrixWorkspace_sptr toRename = createWorkspace();
+    AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
+
+    // First test it fails with override existing set to false
+    Mantid::Algorithms::RenameWorkspace renameAlgorithm;
+    renameAlgorithm.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "InputWorkspace", "WorkspaceToRename"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "OutputWorkspace", "ExistingWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverwriteExisting", false));
+
+    // Try to rename it should throw exception
+    renameAlgorithm.setRethrows(true);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::runtime_error);
+    TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
+
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverwriteExisting", true));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
+    TS_ASSERT(renameAlgorithm.isExecuted());
   }
 
   void testGroup() {
@@ -114,9 +146,9 @@ public:
     // course
     TS_ASSERT_EQUALS(resultGroup->size(), 2)
     TS_ASSERT_EQUALS(resultGroup->getItem(0), member1)
-    TS_ASSERT_EQUALS(resultGroup->getItem(0)->name(), "newName_1")
+    TS_ASSERT_EQUALS(resultGroup->getItem(0)->getName(), "newName_1")
     TS_ASSERT_EQUALS(resultGroup->getItem(1), member2)
-    TS_ASSERT_EQUALS(resultGroup->getItem(1)->name(), "newName_2")
+    TS_ASSERT_EQUALS(resultGroup->getItem(1)->getName(), "newName_2")
     // The old ones should not be in the ADS
     TS_ASSERT_THROWS(ads.retrieve("oldName"),
                      Mantid::Kernel::Exception::NotFoundError)
@@ -193,7 +225,7 @@ public:
   }
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
 
     return inputWS;
   }

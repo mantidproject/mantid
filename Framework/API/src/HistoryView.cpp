@@ -11,7 +11,7 @@ namespace API {
 HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
-  const auto algorithms = wsHist.getAlgorithmHistories();
+  const auto &algorithms = wsHist.getAlgorithmHistories();
   m_historyItems =
       std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
 }
@@ -193,12 +193,12 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
  * @param start Start of time range
  * @param end End of time range
  */
-void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
-                                        Mantid::Kernel::DateAndTime end) {
+void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                                        Mantid::Types::Core::DateAndTime end) {
   auto lastItem = std::remove_if(
       m_historyItems.begin(), m_historyItems.end(),
       [&start, &end](const HistoryItem &item) {
-        Mantid::Kernel::DateAndTime algExecutionDate =
+        Mantid::Types::Core::DateAndTime algExecutionDate =
             item.getAlgorithmHistory()->executionDate();
         return algExecutionDate < start || algExecutionDate > end;
       });

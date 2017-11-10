@@ -76,6 +76,8 @@ public:
 
   /// Get parameter of decorated function by name.
   double getParameter(const std::string &name) const override;
+  /// Check if the decorated function has a parameter with this name.
+  bool hasParameter(const std::string &name) const override;
   /// Total number of parameters of decorated function.
   size_t nParams() const override;
   /// Returns the index of parameter of decorated function name.
@@ -90,15 +92,6 @@ public:
   double getError(size_t i) const override;
   /// Set the fitting error for a parameter of decorated function.
   void setError(size_t i, double err) override;
-
-  /// Check if a declared parameter i of decorated function is active.
-  bool isFixed(size_t i) const override;
-  /// Removes a declared parameter i of decorated function from the list of
-  /// active.
-  void fix(size_t i) override;
-  /// Restores a declared parameter i of decorated function to the active
-  /// status.
-  void unfix(size_t i) override;
 
   /// Return parameter index of decorated function from a parameter reference.
   /// Usefull for constraints and ties in composite functions.
@@ -117,8 +110,8 @@ public:
   bool hasAttribute(const std::string &attName) const override;
 
   /// Tie a parameter of decorated function to other parameters (or a constant).
-  ParameterTie *tie(const std::string &parName, const std::string &expr,
-                    bool isDefault = false) override;
+  void tie(const std::string &parName, const std::string &expr,
+           bool isDefault = false) override;
   /// Apply the ties in decorated function.
   void applyTies() override;
   /// Remove all ties of decorated function.
@@ -130,7 +123,7 @@ public:
   ParameterTie *getTie(size_t i) const override;
 
   /// Add a constraint to decorated function.
-  void addConstraint(IConstraint *ic) override;
+  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter of decorated function.
   IConstraint *getConstraint(size_t i) const override;
   /// Remove a constraint of decorated function.
@@ -147,7 +140,9 @@ protected:
   void declareParameter(const std::string &name, double initValue,
                         const std::string &description) override;
 
-  void addTie(ParameterTie *tie) override;
+  void addTie(std::unique_ptr<ParameterTie>) override;
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  ParameterStatus getParameterStatus(size_t i) const override;
 
   virtual void beforeDecoratedFunctionSet(const IFunction_sptr &fn);
   void setDecoratedFunctionPrivate(const IFunction_sptr &fn);

@@ -12,16 +12,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SortPeaksWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SortPeaksWorkspace::SortPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SortPeaksWorkspace::~SortPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SortPeaksWorkspace::name() const {
   return "SortPeaksWorkspace";
@@ -92,7 +82,7 @@ void SortPeaksWorkspace::exec() {
     inputWS->getColumn(columnToSortBy);
 
     if (inputWS != outputWS) {
-      outputWS = boost::shared_ptr<PeaksWorkspace>(inputWS->clone().release());
+      outputWS = inputWS->clone();
     }
 
     // Perform the sorting.

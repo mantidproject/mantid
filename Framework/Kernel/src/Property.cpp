@@ -3,8 +3,12 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <unordered_map>
 
 namespace Mantid {
 namespace Kernel {
@@ -18,7 +22,8 @@ namespace Kernel {
 Property::Property(const std::string &name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(name), m_documentation(""), m_typeinfo(&type),
-      m_direction(direction), m_units(""), m_group(""), m_remember(true) {
+      m_direction(direction), m_units(""), m_group(""), m_remember(true),
+      m_autotrim(true) {
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
@@ -31,13 +36,13 @@ Property::Property(const Property &right)
     : m_name(right.m_name), m_documentation(right.m_documentation),
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
       m_units(right.m_units), m_group(right.m_group),
-      m_remember(right.m_remember) {
+      m_remember(right.m_remember), m_autotrim(right.m_autotrim) {
   if (right.m_settings)
     m_settings.reset(right.m_settings->clone());
 }
 
 /// Virtual destructor
-Property::~Property() {}
+Property::~Property() = default;
 
 /** Get the property's name
  *  @return The name of the property
@@ -107,6 +112,18 @@ bool Property::remember() const { return m_remember; }
  * @param remember :: true to remember
  */
 void Property::setRemember(bool remember) { m_remember = remember; }
+
+/**
+* Returns the value as a pretty printed string
+* The default implementation just returns the value with the size limit applied
+* @param maxLength :: The Max length of the returned string
+* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+*/
+std::string Property::valueAsPrettyStr(const size_t maxLength,
+                                       const bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(value(), maxLength);
+}
 
 /** Sets the user level description of the property.
  *  In addition, if the brief documentation string is empty it will be set to
@@ -192,12 +209,11 @@ void Property::setUnits(const std::string &unit) { m_units = unit; }
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::DateAndTime &start,
-                            const Kernel::DateAndTime &stop) {
+void Property::filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop) {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -214,7 +230,6 @@ void Property::splitByTime(std::vector<SplittingInterval> &splitter,
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
   UNUSED_ARG(isProtonCharge);
-  return;
 }
 
 } // End Kernel namespace
@@ -253,6 +268,7 @@ class SplittersWorkspace;
 }
 
 namespace Kernel {
+class PropertyManager;
 
 /**
  * @param lhs Thing on the left
@@ -310,7 +326,7 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   using namespace Mantid::DataObjects;
   // Compile a lookup table. This is a static local variable that
   // will get initialized when the function is first used
-  static std::map<string, string> typestrings;
+  static std::unordered_map<string, string> typestrings;
   if (typestrings.empty()) {
     typestrings.emplace(typeid(char).name(), string("letter"));
     typestrings.emplace(typeid(int).name(), string("number"));
@@ -328,6 +344,8 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
     typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
                         string("list of str lists"));
+    typestrings.emplace(typeid(OptionalBool).name(),
+                        string("optional boolean"));
 
     // Workspaces
     typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),
@@ -373,9 +391,10 @@ std::string getUnmangledTypeName(const std::type_info &type) {
                         string("Function"));
     typestrings.emplace(typeid(boost::shared_ptr<IAlgorithm>).name(),
                         string("IAlgorithm"));
+    typestrings.emplace(typeid(boost::shared_ptr<PropertyManager>).name(),
+                        string("Dictionary"));
   }
-  std::map<std::string, std::string>::const_iterator mitr =
-      typestrings.find(type.name());
+  auto mitr = typestrings.find(type.name());
   if (mitr != typestrings.end()) {
     return mitr->second;
   }
@@ -383,6 +402,19 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   return type.name();
 }
 
+/**
+* Returns if the property is set to  automatically trim string unput values of
+* whitespace
+* @returns True/False
+*/
+bool Property::autoTrim() const { return m_autotrim; }
+
+/**
+* Sets if the property is set to  automatically trim string unput values of
+* whitespace
+* @param setting The new setting value
+*/
+void Property::setAutoTrim(const bool &setting) { m_autotrim = setting; }
 } // namespace Kernel
 
 } // namespace Mantid

@@ -1,20 +1,18 @@
-//-----------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <algorithm>
-#include <cctype>
+#include <boost/make_shared.hpp>
+
+//#include <cstdlib>
+#include <iterator>
 
 namespace Mantid {
 
@@ -57,21 +55,105 @@ void addExtension(const std::string &extension,
   else
     extensions.push_back(extension);
 }
+
+/**
+ * Get the path to the user's home directory (associated with ~) if it is set
+ * as an environment variable, and cache it
+ * @return The user's home path
+ */
+const std::string &getHomePath() {
+  static std::string homePath;
+  static bool initialised(false);
+
+  if (initialised) {
+    return homePath;
+  }
+  initialised = true;
+
+  char *home = std::getenv("HOME"); // Usually set on Windows and UNIX
+  if (home) {
+    homePath = std::string(home);
+    return homePath;
+  }
+
+  char *userProfile = std::getenv("USERPROFILE"); // Not usually set on UNIX
+  // Return even if it's an empty string, as we can do no better
+  homePath = userProfile ? std::string(userProfile) : "";
+  return homePath;
 }
+
+/** Expand user variables in file path.
+ *  On Windows and UNIX, ~ is replaced by the user's home directory, if found.
+ *  If the path contains no user variables, or expansion fails, the path is
+ *  returned unchanged, for errors to be dealt with by the calling function.
+ *  Note: this function does not support the "~user/blah" format for a named
+ *  user's home directory - if this is encountered, the filepath is returned
+ *  unchanged.
+ *  @param filepath The path to expand
+ *  @return The expanded path
+ */
+std::string expandUser(const std::string &filepath) {
+  auto start = filepath.begin();
+  auto end = filepath.end();
+
+  // Filepath empty or contains no user variables
+  if (start == end || *start != '~')
+    return filepath;
+
+  // Position of the first slash after the variable
+  auto nextSlash =
+      find_if(start, end, [](const char &c) { return c == '/' || c == '\\'; });
+
+  // ~user/blah format - no support for this as yet
+  if (std::distance(start, nextSlash) != 1)
+    return filepath;
+
+  return getHomePath() + std::string(nextSlash, end);
+}
+
+/**
+ * Create a given directory if it does not already exist.
+ * @param path :: The path to the directory, which can include file stem
+ * @returns A string indicating a problem if one occurred
+ */
+std::string createDirectory(const std::string &path) {
+  Poco::Path stempath(path);
+  if (stempath.isFile()) {
+    stempath.makeParent();
+  }
+
+  if (!stempath.toString().empty()) {
+    Poco::File stem(stempath);
+    if (!stem.exists()) {
+      try {
+        stem.createDirectories();
+      } catch (Poco::Exception &e) {
+        std::stringstream msg;
+        msg << "Failed to create directory \"" << stempath.toString()
+            << "\": " << e.what();
+        return msg.str();
+      }
+    }
+  } else {
+    return "Invalid directory.";
+  }
+  return ""; // everything went fine
+}
+} // Anonymous namespace
 
 //-----------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------
 /**
- * Constructor
- * @param name The name of the property
- * @param defaultValue A default value for the property
- * @param action Inndicate whether this should be a load/save
- * property
- * @param exts The allowed extensions. The front entry in the vector
- * will be the default extension
- * @param direction An optional direction (default=Input)
- */
+* Constructor
+* @param name The name of the property
+* @param defaultValue A default value for the property
+* @param action Inndicate whether this should be a load/save
+* property
+* @param exts The allowed extensions. The front entry in the vector
+* will be the default extension
+* @param direction An optional direction (default=Input)
+*/
 FileProperty::FileProperty(const std::string &name,
                            const std::string &defaultValue, unsigned int action,
                            const std::vector<std::string> &exts,
@@ -112,8 +194,8 @@ FileProperty::FileProperty(const std::string &name,
                            unsigned int action,
                            std::initializer_list<std::string> exts,
                            unsigned int direction)
-    : FileProperty(name, default_value, action,
-                   std::vector<std::string>(std::move(exts)), direction) {}
+    : FileProperty(name, default_value, action, std::vector<std::string>(exts),
+                   direction) {}
 
 /**
  * Check if this is a load property
@@ -163,11 +245,14 @@ std::string FileProperty::setValue(const std::string &propValue) {
     return isEmptyValueValid();
   }
 
+  // Expand user variables, if there are any
+  strippedValue = expandUser(strippedValue);
+
   // If this looks like an absolute path then don't do any searching but make
   // sure the
   // directory exists for a Save property
   if (Poco::Path(strippedValue).isAbsolute()) {
-    std::string error("");
+    std::string error;
     if (isSaveProperty()) {
       error = createDirectory(strippedValue);
       if (!error.empty())
@@ -177,7 +262,7 @@ std::string FileProperty::setValue(const std::string &propValue) {
     return PropertyWithValue<std::string>::setValue(strippedValue);
   }
 
-  std::string errorMsg("");
+  std::string errorMsg;
   // For relative paths, differentiate between load and save types
   if (isLoadProperty()) {
     errorMsg = setLoadProperty(strippedValue);
@@ -252,7 +337,7 @@ bool FileProperty::extsMatchRunFiles() {
  */
 std::string FileProperty::setLoadProperty(const std::string &propValue) {
   // determine the initial version of foundFile
-  std::string foundFile("");
+  std::string foundFile;
   if ((propValue == m_oldLoadPropValue) && (!m_oldLoadFoundFile.empty())) {
     foundFile = m_oldLoadFoundFile;
   }
@@ -317,7 +402,7 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
     } else
       return "Empty filename not allowed.";
   }
-  std::string errorMsg("");
+  std::string errorMsg;
   // We have a relative save path so just prepend the path that is in the
   // 'defaultsave.directory'
   // Note that this catches the Poco::NotFoundException and returns an empty
@@ -341,61 +426,6 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
     errorMsg = PropertyWithValue<std::string>::setValue(fullpath);
   }
   return errorMsg;
-}
-
-/**
- * Create a given directory if it does not already exist.
- * @param path :: The path to the directory, which can include file stem
- * @returns A string indicating a problem if one occurred
- */
-std::string FileProperty::createDirectory(const std::string &path) const {
-  Poco::Path stempath(path);
-  if (stempath.isFile()) {
-    stempath.makeParent();
-  }
-
-  if (!stempath.toString().empty()) {
-    Poco::File stem(stempath);
-    if (!stem.exists()) {
-      try {
-        stem.createDirectories();
-      } catch (Poco::Exception &e) {
-        std::stringstream msg;
-        msg << "Failed to create directory \"" << stempath.toString()
-            << "\": " << e.what();
-        return msg.str();
-      }
-    }
-  } else {
-    return "Invalid directory.";
-  }
-  return ""; // everything went fine
-}
-
-/**
- * Check file extension to see if a lower- or upper-cased version will also
- * match if the given one does not exist
- * @param filepath :: A filename whose extension is checked and converted to
- * lower/upper case if necessary.
- * @returns The new filename
- */
-std::string FileProperty::convertExtension(const std::string &filepath) const {
-  Poco::Path fullpath(filepath);
-  std::string ext = fullpath.getExtension();
-  if (ext.empty())
-    return filepath;
-  const size_t nchars = ext.size();
-  for (size_t i = 0; i < nchars; ++i) {
-    int c = static_cast<int>(ext[i]);
-    if (std::islower(c)) {
-      ext[i] = static_cast<char>(std::toupper(c));
-    } else if (std::isupper(c)) {
-      ext[i] = static_cast<char>(std::tolower(c));
-    } else {
-    }
-  }
-  fullpath.setExtension(ext);
-  return fullpath.toString();
 }
 }
 }

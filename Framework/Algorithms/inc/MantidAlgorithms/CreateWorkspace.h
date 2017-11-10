@@ -49,11 +49,6 @@ namespace Algorithms {
 */
 class DLLExport CreateWorkspace : public API::Algorithm {
 public:
-  /// Default constructor
-  CreateWorkspace();
-  /// Default desctructor
-  ~CreateWorkspace() override;
-
   const std::string name() const override {
     return "CreateWorkspace";
   } ///< @return the algorithms name
@@ -71,6 +66,12 @@ public:
   } ///< @return version number of algorithm
 
   std::map<std::string, std::string> validateInputs() override;
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+  void execNonMaster() override;
 
 private:
   /// Initialise the Algorithm (declare properties)

@@ -57,9 +57,6 @@ class DLLExport LoadMuonLog : public API::Algorithm {
 public:
   /// Default constructor
   LoadMuonLog();
-
-  /// Destructor
-  ~LoadMuonLog() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonLog"; };
   /// Summary of algorithms purpose

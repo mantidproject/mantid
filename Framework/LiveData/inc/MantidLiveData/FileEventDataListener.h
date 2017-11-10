@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ILiveListener.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/Void.h>
@@ -40,7 +40,7 @@ namespace LiveData {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class FileEventDataListener : public API::ILiveListener {
+class FileEventDataListener : public API::LiveListener {
 public:
   FileEventDataListener();
   ~FileEventDataListener() override;
@@ -52,7 +52,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;

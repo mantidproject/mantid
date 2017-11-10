@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -17,18 +19,6 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertAxesToRealSpace::ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertAxesToRealSpace::~ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name
 const std::string ConvertAxesToRealSpace::name() const {
@@ -49,7 +39,6 @@ const std::string ConvertAxesToRealSpace::summary() const {
          "the data in the process";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
@@ -85,7 +74,6 @@ void ConvertAxesToRealSpace::init() {
       "The number of bins along the horizontal axis.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertAxesToRealSpace::exec() {
@@ -124,12 +112,12 @@ void ConvertAxesToRealSpace::exec() {
 
   int failedCount = 0;
 
+  const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
-  PARALLEL_FOR2(summedWs, outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
     try {
-      Mantid::Geometry::IDetector_const_sptr det = summedWs->getDetector(i);
-      V3D pos = det->getPos();
+      V3D pos = spectrumInfo.position(i);
       double r, theta, phi;
       pos.getSpherical(r, theta, phi);
 
@@ -152,9 +140,9 @@ void ConvertAxesToRealSpace::exec() {
         } else if (axisSelection == "phi") {
           axisValue = phi;
         } else if (axisSelection == "2theta") {
-          axisValue = inputWs->detectorTwoTheta(det);
+          axisValue = spectrumInfo.twoTheta(i);
         } else if (axisSelection == "signed2theta") {
-          axisValue = inputWs->detectorSignedTwoTheta(det);
+          axisValue = spectrumInfo.signedTwoTheta(i);
         }
 
         if (axisIndex == 0) {
@@ -169,9 +157,9 @@ void ConvertAxesToRealSpace::exec() {
         if (axisValue < axisVector[axisIndex].min)
           axisVector[axisIndex].min = axisValue;
       }
-    } catch (Exception::NotFoundError) {
+    } catch (const Exception::NotFoundError &) {
       g_log.debug() << "Could not find detector for workspace index " << i
-                    << std::endl;
+                    << '\n';
       failedCount++;
       // flag this is the datavector
       dataVector[i].horizontalValue = std::numeric_limits<double>::min();
@@ -179,21 +167,20 @@ void ConvertAxesToRealSpace::exec() {
     }
 
     // take the values from the integrated data
-    dataVector[i].intensity = summedWs->readY(i)[0];
-    dataVector[i].error = summedWs->readE(i)[0];
+    dataVector[i].intensity = summedWs->y(i)[0];
+    dataVector[i].error = summedWs->e(i)[0];
 
     progress.report("Calculating new coords");
   }
 
   g_log.warning() << "Could not find detector for " << failedCount
-                  << " spectra, see the debug log for more details."
-                  << std::endl;
+                  << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
-  MantidVecPtr x, y;
-  MantidVec &xRef = x.access();
-  xRef.resize(axisVector[0].bins);
-  fillAxisValues(xRef, axisVector[0], false);
+  std::vector<double> x_tmp(axisVector[0].bins);
+  MantidVecPtr y;
+  fillAxisValues(x_tmp, axisVector[0], false);
+  HistogramData::Points x(std::move(x_tmp));
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
@@ -223,7 +210,7 @@ void ConvertAxesToRealSpace::exec() {
       dataVector[i].verticalIndex = -1;
     } else {
       int xIndex = static_cast<int>(std::distance(
-          x->begin(), std::lower_bound(x->begin(), x->end(),
+          x.cbegin(), std::lower_bound(x.cbegin(), x.cend(),
                                        dataVector[i].horizontalValue)));
       if (xIndex > 0)
         --xIndex;
@@ -241,9 +228,9 @@ void ConvertAxesToRealSpace::exec() {
 
   // set all the X arrays - share the same vector
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
-    outputWs->setX(i, x);
+    outputWs->setPoints(i, x);
   }
 
   // insert the data into the new workspace
@@ -255,12 +242,12 @@ void ConvertAxesToRealSpace::exec() {
     // using -1 as a flag for could not find detector
     if ((xIndex == -1) || (yIndex == -1)) {
       // do nothing the detector could not be found
-      g_log.warning() << "here " << i << std::endl;
+      g_log.warning() << "here " << i << '\n';
     } else {
       // update the data
-      MantidVec &yVec = outputWs->dataY(yIndex);
+      auto &yVec = outputWs->mutableY(yIndex);
       yVec[xIndex] = yVec[xIndex] + dataVector[i].intensity;
-      MantidVec &eVec = outputWs->dataE(yIndex);
+      auto &eVec = outputWs->mutableE(yIndex);
       eVec[xIndex] = eVec[xIndex] + (dataVector[i].error * dataVector[i].error);
     }
 
@@ -268,9 +255,9 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   // loop over the data and sqrt the errors to complete the error calculation
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
-    MantidVec &errorVec = outputWs->dataE(i);
+    auto &errorVec = outputWs->mutableE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
                    static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");

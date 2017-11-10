@@ -6,7 +6,8 @@
 # was original used in connection with creating usage examples for algorithms
 # and creating an algorithm list for each developer to have a go at
 
-import string, os, re
+from __future__ import (absolute_import, division, print_function)
+import os
 
 import subprocess
 
@@ -36,7 +37,7 @@ for line in allAlgs:
         #print author
         fullline = fullline + ", " + author
 
-    print fullline
+    print(fullline)
 
 #line = 'GroupWorkspaces.cpp'
 #fullline = line

@@ -6,9 +6,9 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
@@ -47,7 +47,7 @@ public:
     inWS->dataY(0)[2] = 0.0;
     inWS->dataE(0)[2] = 0.0;
     inWS->dataY(0)[3] = 2.0;
-    inWS->dataE(0)[3] = sqrt(2.0);
+    inWS->dataE(0)[3] = M_SQRT2;
     inWS->dataY(0)[4] = 10000.0;
     inWS->dataE(0)[4] = 100.0;
 
@@ -85,7 +85,7 @@ public:
       return;
 
     // This performs a full comparison (histogram
-    CheckWorkspacesMatch matcher;
+    CompareWorkspaces matcher;
     matcher.initialize();
     matcher.setProperty("Workspace1",
                         boost::dynamic_pointer_cast<MatrixWorkspace>(inWS));
@@ -95,16 +95,16 @@ public:
     matcher.setProperty("Tolerance", 1e-6);
     matcher.execute();
     TS_ASSERT(matcher.isExecuted());
-    TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), "Success!");
+    TS_ASSERT(matcher.getProperty("Result"));
 
     // Event-specific checks
     TS_ASSERT_EQUALS(outWS->getNumberEvents(),
                      GenerateMultipleEvents ? 1006 : 499);
-    TS_ASSERT_EQUALS(outWS->getEventList(1).getNumberEvents(),
+    TS_ASSERT_EQUALS(outWS->getSpectrum(1).getNumberEvents(),
                      GenerateMultipleEvents ? 20 : 10);
 
     // Check a couple of events
-    EventList &el = outWS->getEventList(0);
+    EventList &el = outWS->getSpectrum(0);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(),
                      GenerateMultipleEvents ? 26 : 9);
     WeightedEventNoTime ev;
@@ -160,7 +160,7 @@ public:
   /// Workspace with infinity or NAN = don't create events there.
   void test_with_nan_and_inf() {
     // Create the input
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
     double inf = std::numeric_limits<double>::infinity();
@@ -211,7 +211,7 @@ public:
   /// Create events for zero-weight bins
   void test_GenerateZeros() {
     // Create the input
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     // Clear the vector
     inWS->dataY(0).assign(10, 0.0);

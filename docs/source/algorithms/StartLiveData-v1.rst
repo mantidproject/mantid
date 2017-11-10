@@ -9,15 +9,42 @@
 Description
 -----------
 
-The StartLiveData algorithm launches a background job that monitors and
+The ``StartLiveData`` algorithm launches a background job that monitors and
 processes live data.
 
-The background algorithm started is
-:ref:`algm-MonitorLiveData`, which simply calls
-:ref:`algm-LoadLiveData` at a fixed interval.
+The background algorithm started is :ref:`algm-MonitorLiveData`, which
+simply calls :ref:`algm-LoadLiveData` at a fixed interval.
 
-For details on the way to specify the data processing steps, see:
-`LoadLiveData <LoadLiveData#Description>`__.
+.. note::
+
+   For details on the way to specify the data processing steps, see
+   `LoadLiveData <LoadLiveData#Description>`__.
+
+Instructions for setting up a "fake" data stream are found `here
+<http://www.mantidproject.org/MBC_Live_Data_Simple_Examples>`__.
+
+Listener Properties
+###################
+
+Specific LiveListeners may provide their own properties, in addition to
+properties provided by StartLiveData. For convenience and accessibility, these
+properties are made available through StartLiveData as well.
+
+In the StartLiveData algorithm dialog, a group box called "Listener Properties"
+will appear at the bottom of the sidebar on the left, if the currently selected
+listener provides additional properties.
+
+In the Python API, these listener properties may also be set as keyword
+arguments when calling StartLiveData. For example, in this code snippet:
+
+.. code-block:: python
+
+    StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                  AccumulationMethod='Replace', PeriodList=[1,3], SpectraList=[2,4,6])
+
+PeriodList and SpectraList are properties of the ISISHistoDataListener. They
+are available as arguments in this call because Instrument is set to
+'ISIS_Histogram', which uses that listener.
 
 Live Plots
 ##########
@@ -46,15 +73,15 @@ Run Transition Behavior
 
 -  When the experimenter starts and stops a run, the Live Data Listener
    receives this as a signal.
--  The *RunTransitionBehavior* property specifies what to do at these
+-  The ``RunTransitionBehavior`` property specifies what to do at these
    run transitions.
 
-   -  Restart: the accumulated data (from the previous run if a run has
+   -  ``Restart``: the accumulated data (from the previous run if a run has
       just ended or from the time between runs a if a run has just
       started) is discarded as soon as the next chunk of data arrives.
-   -  Stop: live data monitoring ends. It will have to be restarted
+   -  ``Stop``: live data monitoring ends. It will have to be restarted
       manually.
-   -  Rename: the previous workspaces are renamed, and monitoring
+   -  ``Rename``: the previous workspaces are renamed, and monitoring
       continues with cleared ones. The run number, if found, is used to
       rename the old workspaces.
 
@@ -68,8 +95,8 @@ Multiple Live Data Sessions
 ###########################
 
 It is possible to have multiple live data sessions running at the same
-time. Simply call StartLiveData more than once, but make sure to specify
-unique names for the *OutputWorkspace*.
+time. Simply call ``StartLiveData`` more than once, but make sure to specify
+unique names for the ``OutputWorkspace``.
 
 Please note that you may be limited in how much simultaneous processing
 you can do by your available memory and CPUs.
@@ -121,8 +148,8 @@ Usage
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -131,7 +158,7 @@ Usage
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i events" % wsOut.getNumberEvents()
+    print("The workspace contains %i events" % wsOut.getNumberEvents())
 
 Output:
 
@@ -160,7 +187,7 @@ Output:
     def captureLive():
         ConfigService.setFacility("TEST_LIVE")
 
-        # Start a Live data listener updating every second, 
+        # Start a Live data listener updating every second,
         # that replaces the results each time with those of the last second.
         # Load only spectra 2,4, and 6 from periods 1 and 3
         StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
@@ -185,8 +212,8 @@ Output:
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 
@@ -195,8 +222,8 @@ Output:
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i periods" % wsOut.getNumberOfEntries()
-    print "Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms()
+    print("The workspace contains %i periods" % wsOut.getNumberOfEntries())
+    print("Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms())
     time.sleep(1)
 
 Output:

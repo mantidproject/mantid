@@ -3,18 +3,21 @@
 
 #include "MantidSINQ/DllConfig.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V2D.h"
-#include "MantidAPI/Algorithm.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+}
 namespace Poldi {
 /** PoldiPeakSearch :
 
@@ -49,8 +52,6 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiPeakSearch : public API::Algorithm {
 public:
   PoldiPeakSearch();
-  ~PoldiPeakSearch() override {}
-
   int version() const override { return 1; }
   const std::string name() const override { return "PoldiPeakSearch"; }
   /// Summary of algorithms purpose
@@ -62,7 +63,8 @@ public:
   const std::string category() const override { return "SINQ\\Poldi"; }
 
 protected:
-  MantidVec getNeighborSums(MantidVec correlationCounts) const;
+  MantidVec
+  getNeighborSums(const HistogramData::HistogramY &correlationCounts) const;
 
   std::list<MantidVec::const_iterator>
   findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end);

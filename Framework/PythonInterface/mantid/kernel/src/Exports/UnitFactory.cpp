@@ -1,6 +1,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
-
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -11,6 +11,8 @@ using Mantid::Kernel::UnitFactoryImpl;
 namespace Policies = Mantid::PythonInterface::Policies;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(UnitFactoryImpl)
 
 void export_UnitFactory() {
   class_<UnitFactoryImpl, boost::noncopyable>("UnitFactoryImpl", no_init)

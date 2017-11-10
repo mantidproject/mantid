@@ -1,14 +1,15 @@
 #include "ScriptFileInterpreter.h"
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <qscilexer.h>
+#include <Qsci/qscilexer.h>
 
 #include <stdexcept>
 
@@ -23,7 +24,7 @@
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
                                              const QString &settingsGroup)
     : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical, this)),
-      m_editor(new ScriptEditor(this, NULL, settingsGroup)),
+      m_editor(new ScriptEditor(this, nullptr, settingsGroup)),
       m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
       m_runner() {
 
@@ -75,7 +76,7 @@ void ScriptFileInterpreter::tabsToSpaces() {
     spaces = spaces + " ";
 
   text = text.replace("\t", spaces, Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Convert spaces in selection to tabs
@@ -95,7 +96,7 @@ void ScriptFileInterpreter::spacesToTabs() {
     spaces = spaces + " ";
 
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Set a font
@@ -210,23 +211,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
 
   m_editor->setSelection(selFromLine, 0, selToLine,
                          m_editor->lineLength(selToLine));
-  replaceSelectedText(m_editor, replacementText);
+  m_editor->replaceSelectedText(replacementText);
   m_editor->setCursorPosition(selFromLine, selFromInd);
-}
-
-// Replaces the currently selected text in the editor
-// Reimplementation of .replaceSelectedText from QScintilla. Added as osx + rhel
-// builds are
-// using an older version(2.4.6) of the library missing the method, and too
-// close to code freeze to update.
-inline void
-ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
-                                           const QString &text) {
-  int UTF8_CodePage = 65001;
-  const char *b =
-      ((editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData()
-                                                  : text.latin1());
-  editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 
 /**
@@ -236,13 +222,14 @@ void ScriptFileInterpreter::showContextMenu(const QPoint &clickPoint) {
   QMenu context(this);
   context.addAction("&Save", m_editor, SLOT(saveToCurrentFile()));
 
-  context.insertSeparator();
-  context.addAction("&Copy", m_editor, SLOT(copy()));
+  auto *copyAction = context.addAction("&Copy", m_editor, SLOT(copy()));
+  context.insertSeparator(copyAction);
   context.addAction("C&ut", m_editor, SLOT(cut()));
   context.addAction("P&aste", m_editor, SLOT(paste()));
 
-  context.insertSeparator();
-  context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  auto *execAction =
+      context.addAction("E&xecute Selection", this, SLOT(executeSelection()));
+  context.insertSeparator(execAction);
   context.addAction("Execute &All", this, SLOT(executeAll()));
 
   context.exec(this->mapToGlobal(clickPoint));

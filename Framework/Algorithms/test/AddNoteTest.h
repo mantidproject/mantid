@@ -18,7 +18,7 @@ public:
   static void destroySuite(AddNoteTest *suite) { delete suite; }
 
   void test_delete_existing_removes_complete_log_first() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     TS_ASSERT_THROWS_NOTHING(executeAlgorithm(
         ws, "Test Name", "2010-09-14T04:20:12", "First Test String"));
     checkLogWithEntryExists<std::string>(ws, "Test Name", "2010-09-14T04:20:12",
@@ -30,12 +30,12 @@ public:
   }
 
   void test_empty_time_property_produces_current_time_in_log_output() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     // Get Current Date Time
     namespace pt = boost::posix_time;
     auto dateTimeObj =
-        Mantid::Kernel::DateAndTime(pt::second_clock::local_time());
+        Mantid::Types::Core::DateAndTime(pt::second_clock::local_time());
     std::string time = dateTimeObj.toISO8601String();
     std::string timeOffset = time;
     TS_ASSERT_THROWS_NOTHING(
@@ -66,7 +66,7 @@ public:
   }
 
   void test_algorithm_fails_if_log_exists_but_is_not_a_time_series() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     auto &run = ws->mutableRun();
     run.addProperty<std::string>("Test Name", "Test");
     TS_ASSERT_THROWS(
@@ -109,7 +109,7 @@ private:
                                const int &logEndTime,
                                const std::string logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
+    using Mantid::Types::Core::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
 
     const auto &run = testWS->run();

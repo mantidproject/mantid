@@ -23,10 +23,6 @@ namespace DataHandling {
 */
 class DLLExport SaveNISTDAT : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SaveNISTDAT() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SaveNISTDAT() override {}
   /// Algorithm's name
   const std::string name() const override { return "SaveNISTDAT"; }
   /// Summary of algorithms purpose

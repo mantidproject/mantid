@@ -65,7 +65,7 @@ public:
 
   void testExec() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     UnaryOpHelper helper3;

@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include <nexus/napi.h>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 //----------------------------------------------------------------------
 // Forward declaration
@@ -113,7 +113,7 @@ public:
   // Constructor
   NXObject(const NXhandle fileID, const NXClass *parent,
            const std::string &name);
-  virtual ~NXObject(){};
+  virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
   // True if complies with our understanding of the www.nexusformat.org
@@ -478,6 +478,10 @@ typedef NXDataSetTyped<float> NXFloat;
 typedef NXDataSetTyped<double> NXDouble;
 /// The char dataset type
 typedef NXDataSetTyped<char> NXChar;
+/// The size_t dataset type
+typedef NXDataSetTyped<std::size_t> NXSize;
+/// The size_t dataset type
+typedef NXDataSetTyped<unsigned int> NXUInt;
 
 //-------------------- classes --------------------------//
 
@@ -577,6 +581,13 @@ public:
   NXChar openNXChar(const std::string &name) const {
     return openNXDataSet<char>(name);
   }
+  /**  Creates and opens a size_t dataset
+  *   @param name :: The name of the dataset
+  *   @return The size_t
+  */
+  NXSize openNXSize(const std::string &name) const {
+    return openNXDataSet<std::size_t>(name);
+  }
   /**  Returns a string
   *   @param name :: The name of the NXChar dataset
   *   @return The string
@@ -599,11 +610,11 @@ public:
   int getInt(const std::string &name) const;
 
   /// Returns a list of all classes (or groups) in this NXClass
-  std::vector<NXClassInfo> &groups() const { return *m_groups.get(); }
+  std::vector<NXClassInfo> &groups() const { return *m_groups; }
   /// Returns whether an individual group (or group) is present
   bool containsGroup(const std::string &query) const;
   /// Returns a list of all datasets in this NXClass
-  std::vector<NXInfo> &datasets() const { return *m_datasets.get(); }
+  std::vector<NXInfo> &datasets() const { return *m_datasets; }
   /** Returns NXInfo for a dataset
   *  @param name :: The name of the dataset
   *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
@@ -671,7 +682,8 @@ private:
     if (start_time.empty()) {
       start_time = "2000-01-01T00:00:00";
     }
-    Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
+    auto start_t =
+        Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
       return nullptr;
@@ -680,14 +692,12 @@ private:
       return nullptr;
 
     if (vinfo.type == NX_CHAR) {
-      Kernel::TimeSeriesProperty<std::string> *logv =
-          new Kernel::TimeSeriesProperty<std::string>(logName);
+      auto logv = new Kernel::TimeSeriesProperty<std::string>(logName);
       NXChar value(*this, "value");
       value.openLocal();
       value.load();
       for (int i = 0; i < value.dim0(); i++) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         for (int j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
@@ -700,14 +710,12 @@ private:
     } else if (vinfo.type == NX_FLOAT64) {
       if (logName.find("running") != std::string::npos ||
           logName.find("period ") != std::string::npos) {
-        Kernel::TimeSeriesProperty<bool> *logv =
-            new Kernel::TimeSeriesProperty<bool>(logName);
+        auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
         NXDouble value(*this, "value");
         value.openLocal();
         value.load();
         for (int i = 0; i < value.dim0(); i++) {
-          Kernel::DateAndTime t =
-              start_t + boost::posix_time::seconds(int(times[i]));
+          auto t = start_t + boost::posix_time::seconds(int(times[i]));
           logv->addValue(t, (value[i] == 0 ? false : true));
         }
         return logv;
@@ -732,16 +740,14 @@ private:
   ///@returns a property pointer
   template <class NX_TYPE, class TIME_TYPE>
   Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
-                               Kernel::DateAndTime start_t,
+                               Types::Core::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
-    Kernel::TimeSeriesProperty<double> *logv =
-        new Kernel::TimeSeriesProperty<double>(logName);
+    auto logv = new Kernel::TimeSeriesProperty<double>(logName);
     value.load();
     for (int i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         logv->addValue(t, value[i]);
       }
     }
@@ -860,6 +866,10 @@ public:
   NXFloat openFloatData() { return openData<float>(); }
   /// Opens data of int type
   NXInt openIntData() { return openData<int>(); }
+  /// Opens data of size type
+  NXSize openSizeData() { return openData<std::size_t>(); }
+  /// Opens data of unsigned int type
+  NXUInt openUIntData() { return openData<unsigned int>(); }
 };
 
 /**  Implements NXdetector Nexus class.

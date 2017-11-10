@@ -23,10 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
-from mantid.api import IFunction1D, FunctionFactory
+from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
+from mantid.api import IFunction1D, FunctionFactory
+
 
 class Lorentz(IFunction1D):
     """
@@ -50,7 +51,7 @@ class Lorentz(IFunction1D):
             @param xvals: numpy array of q-values
         """
         return self.getParameterValue("Scale") / (1.0 + np.power(xvals*self.getParameterValue('Length'), 2)) +\
-               self.getParameterValue('Background')
+            self.getParameterValue('Background')
 
     def functionDeriv1D(self, xvals, jacobian):
         """
@@ -66,6 +67,6 @@ class Lorentz(IFunction1D):
             jacobian.set(i,2, 1.0)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Lorentz)
-

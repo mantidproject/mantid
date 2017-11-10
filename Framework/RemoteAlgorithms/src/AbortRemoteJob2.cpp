@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -44,7 +45,7 @@ void AbortRemoteJob2::exec() {
   std::string jid = getPropertyValue("JobID");
   jobManager->abortRemoteJob(jid);
   g_log.information() << "Aborted job with ID " << jid
-                      << " on the compute resource" << comp << std::endl;
+                      << " on the compute resource" << comp << '\n';
 }
 
 } // namespace RemoteAlgorithms

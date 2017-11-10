@@ -1,7 +1,10 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
 from testhelpers import run_algorithm
 import numpy as np
+import sys
 
 class PropertyWithValueTest(unittest.TestCase):
 
@@ -37,6 +40,13 @@ class PropertyWithValueTest(unittest.TestCase):
     def test_set_property_int(self):
         self._integration.setProperty("StartWorkspaceIndex", 5)
         self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+
+    def test_set_int_property_python_long_py2(self):
+        if sys.version_info[0] < 3:
+            self._integration.setProperty("StartWorkspaceIndex", long(5))
+            self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+        else:
+            pass
 
     def test_set_property_float(self):
         self._integration.setProperty("RangeLower", 100.5)
@@ -95,6 +105,27 @@ class PropertyWithValueTest(unittest.TestCase):
 
         det_list = det_list_prop.value
         self._mask_dets.setProperty("DetectorList", det_list)
+
+    def test_valueAsPrettyStr(self):
+        det_list_prop = self._mask_dets.getProperty("DetectorList")
+        one_to_five = "1,2,3,4,5"
+        det_list_prop.valueAsStr = one_to_five
+        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), one_to_five)
+        self.assertEquals(det_list_prop.valueAsPrettyStr(), "1-5")
+
+        two_ranges =  "1,2,3,4,5,6,8,9,10"
+        det_list_prop.valueAsStr = two_ranges
+        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), two_ranges)
+        self.assertEquals(det_list_prop.valueAsPrettyStr(), "1-6,8-10")
+
+        long_list = ",".join(str(x) for x in range(1,100))
+        det_list_prop.valueAsStr = long_list
+        self.assertEquals(det_list_prop.valueAsPrettyStr(0,False), long_list)
+        self.assertEquals(det_list_prop.valueAsPrettyStr(0,True), "1-99")
+        self.assertEquals(det_list_prop.valueAsPrettyStr(40,True), "1-99")
+        result = det_list_prop.valueAsPrettyStr(40,False)
+        self.assertEquals(result.startswith("1,2,3,"), True)
+        self.assertEquals(result.endswith("98,99"), True)
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')

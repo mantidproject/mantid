@@ -7,6 +7,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -67,7 +68,7 @@ double SpectraAxis::operator()(const std::size_t &index,
                                         "SpectraAxis: Index out of range.");
   }
 
-  return static_cast<double>(m_parentWS->getSpectrum(index)->getSpectrumNo());
+  return static_cast<double>(m_parentWS->getSpectrum(index).getSpectrumNo());
 }
 
 /** Sets the axis value at a given position
@@ -86,7 +87,6 @@ void SpectraAxis::setValue(const std::size_t &index, const double &value) {
  * @param value A value on the axis. It is treated as a spectrum number and cast
  * to specnum_t on input
  * @return The index closest to given value
- * @throws std::out_of_range if the value is out of range of the axis
  */
 size_t SpectraAxis::indexOfValue(const double value) const {
   if (m_edges.empty()) // lazy-instantiation
@@ -101,7 +101,7 @@ size_t SpectraAxis::indexOfValue(const double value) const {
     m_edges[npts] = this->getValue(npts - 1) +
                     (this->getValue(npts - 1) - m_edges[npts - 1]);
   }
-  return NumericAxis::indexOfValue(value, m_edges);
+  return Mantid::Kernel::VectorHelper::indexOfValueFromEdges(m_edges, value);
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)
@@ -115,7 +115,7 @@ specnum_t SpectraAxis::spectraNo(const std::size_t &index) const {
                                         "SpectraAxis: Index out of range.");
   }
 
-  return m_parentWS->getSpectrum(index)->getSpectrumNo();
+  return m_parentWS->getSpectrum(index).getSpectrumNo();
 }
 
 /** Returns a map where spectra is the key and index is the value
@@ -129,7 +129,7 @@ spec2index_map SpectraAxis::getSpectraIndexMap() const {
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   spec2index_map map;
   for (size_t i = 0; i < nel; ++i) {
-    map.emplace(m_parentWS->getSpectrum(i)->getSpectrumNo(), i);
+    map.emplace(m_parentWS->getSpectrum(i).getSpectrumNo(), i);
   }
   return map;
 }
@@ -160,17 +160,17 @@ bool SpectraAxis::operator==(const Axis &axis2) const {
  *  @return label of requested axis index
  */
 std::string SpectraAxis::label(const std::size_t &index) const {
-  return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
+  return "sp-" + std::to_string(spectraNo(index));
 }
 
 /// returns min value defined on axis
 double SpectraAxis::getMin() const {
-  return m_parentWS->getSpectrum(0)->getSpectrumNo();
+  return m_parentWS->getSpectrum(0).getSpectrumNo();
 }
 
 /// returns max value defined on axis
 double SpectraAxis::getMax() const {
-  return m_parentWS->getSpectrum(length() - 1)->getSpectrumNo();
+  return m_parentWS->getSpectrum(length() - 1).getSpectrumNo();
 }
 
 } // namespace API

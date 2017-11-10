@@ -1,4 +1,5 @@
 #pylint: disable-all
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import os
 from mantid.simpleapi import *
@@ -8,12 +9,14 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
 from isis_reflectometry.saveModule import *
-from isis_reflectometry.settings import MissingSettings, Settings
+from isis_reflectometry.settings import Settings
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
 
 class Ui_SaveWindow(object):
     def __init__(self):
@@ -26,7 +29,7 @@ class Ui_SaveWindow(object):
             usersettings = Settings() # This will throw a missing config exception if no config file is available.
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
-            print "DataMountPoint is missing from the config.xml file."
+            print("DataMountPoint is missing from the config.xml file.")
             self.__has_mount_point = False
 
     def setupUi(self, SaveWindow):
@@ -55,7 +58,7 @@ class Ui_SaveWindow(object):
         self.lineEdit.setFont(font)
         self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
         self.gridLayout.addWidget(self.lineEdit, 0, 3, 1, 3)
-        #print QtGui.QMainWindow.findChild(QtGui.QMainWindow.QLabel,'RBEdit')
+        #print(QtGui.QMainWindow.findChild(QtGui.QMainWindow.QLabel,'RBEdit'))
 
 # Prefix label and edit field
         self.PrefixLabel = QtGui.QLabel("Prefix: ",self.centralWidget)
@@ -81,11 +84,8 @@ class Ui_SaveWindow(object):
         self.regExCheckBox = QtGui.QCheckBox("RegEx", self.centralWidget)
         self.gridLayout.addWidget(self.regExCheckBox, 1, 4, 1, 1)
 
-
-
         self.LogsLabel = QtGui.QLabel("List of logged parameters: ",self.centralWidget)
         self.gridLayout.addWidget(self.LogsLabel,1,6,1,3)
-
 
         self.ListLabel = QtGui.QLabel("List of workspaces: ",self.centralWidget)
 
@@ -246,7 +246,7 @@ class Ui_SaveWindow(object):
         # Exclude WorkspaceGroups from our list. We cannot save them to ASCII.
         names = [i for i in names if not isinstance(AnalysisDataService.retrieve(i), WorkspaceGroup)]
         return names
-    
+
     def filterWksp(self):
         self.listWidget.clear()
         names = self._get_saveable_workspace_names()
@@ -269,7 +269,7 @@ class Ui_SaveWindow(object):
     def workspaceSelected(self):
         self.listWidget2.clear()
         #self.listWidget.setCurrentRow(0)
-        print str(self.listWidget.currentItem().text())
+        print(str(self.listWidget.currentItem().text()))
         logs = mtd[str(self.listWidget.currentItem().text())].getRun().getLogData()
         for i in range(0,len(logs)):
             self.listWidget2.addItem(logs[i].name)
@@ -284,14 +284,14 @@ class Ui_SaveWindow(object):
 
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
-            currentInstrument=config['default.instrument']
             if self.SavePath!='':
                 self.lineEdit.setText(self.SavePath)
             else:
                 if self.__has_mount_point:
                     try:
+                        print("mountpoint = ", self.__mountpoint)
                         base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
-                        print "Loading journal from", base_path
+                        print("Loading journal from", base_path)
                         main_journal_path = os.path.join(base_path, 'journal_main.xml')
                         tree1=xml.parse(main_journal_path)
                         root1=tree1.getroot()
@@ -307,27 +307,25 @@ class Ui_SaveWindow(object):
                                 user=root[i][1].text[0:root[i][1].text.find(',')]
                             else:
                                 user=root[i][1].text[0:root[i][1].text.find(' ')]
-                            SavePath = os.path.join('U:', user)
+                            SavePath = os.path.join('U:/', user)
                             self.lineEdit.setText(SavePath)
                         except LookupError:
-                            print "Couldn't find user name in archives!"
+                            print("Couldn't find user name in archives!")
                     except:
-                        print "Journal does not exist or is unreachable, please check your network connection."
+                        print("Journal does not exist or is unreachable, please check your network connection.")
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
-        names = mtd.getObjectNames()
-        dataToSave=[]
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):
             logger.notice("Directory specified doesn't exist or was invalid for your operating system")
-            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
+            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',
+                                       "Directory specified doesn't exist or was invalid for your operating system")
             return
         for idx in self.listWidget.selectedItems():
-            runlist=parseRunList(str(self.spectraEdit.text()))
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if self.comboBox.currentIndex() == 0:
-                print "Custom Ascii format"
+                print("Custom Ascii format")
                 if self.radio1.isChecked():
                     sep=','
                 elif self.radio2.isChecked():
@@ -338,24 +336,25 @@ class Ui_SaveWindow(object):
                     sep=' '
                 saveCustom(idx,fname,sep,self.listWidget2.selectedItems(),self.titleCheckBox.isChecked(),self.xErrorCheckBox.isChecked())
             elif self.comboBox.currentIndex() == 1:
-                print "Not yet implemented!"
+                print("Not yet implemented!")
             elif self.comboBox.currentIndex() == 2:
-                print "ANSTO format"
+                print("ANSTO format")
                 saveANSTO(idx,fname)
             elif self.comboBox.currentIndex() == 3:
-                print "ILL MFT format"
+                print("ILL MFT format")
                 saveMFT(idx,fname,self.listWidget2.selectedItems())
         # for idx in self.listWidget.selectedItems():
             # fname=str(path+prefix+idx.text()+'.dat')
-            # print "FILENAME: ", fname
+            # print("FILENAME: ", fname)
             # wksp=str(idx.text())
             # SaveAscii(InputWorkspace=wksp,Filename=fname)
 
         self.SavePath=self.lineEdit.text()
 
+
 def calcRes(run):
     runno = '_' + str(run) + 'temp'
-    if type(run) == type(int()):
+    if isinstance(run, type(int())):
         Load(Filename=run, OutputWorkspace=runno)
     else:
         Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
@@ -369,17 +368,18 @@ def calcRes(run):
     s2vg = inst.getComponentByName('slit2')
     s2vg = s2vg.getNumberParameter('vertical gap')[0]
 
-    if type(theta) != float:
+    if not isinstance(theta, float):
         th = theta[len(theta) - 1]
     else:
         th = theta
 
-    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
+    print("s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta)
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
-    print "dq/q=", resolution
+    print("dq/q=", resolution)
     DeleteWorkspace(runno)
     return resolution
+
 
 def groupGet(wksp, whattoget, field=''):
     '''
@@ -395,29 +395,30 @@ def groupGet(wksp, whattoget, field=''):
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
                 log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
             except RuntimeError:
                 res = 0
-                print "Block " + field + " not found."
+                print("Block " + field + " not found.")
         return res
     elif whattoget == 'wksp':
         if isinstance(mtd[wksp], WorkspaceGroup):
             return mtd[wksp + '_1'].getNumberHistograms()
         else:
             return mtd[wksp].getNumberHistograms()
+
 
 def getWorkspace(wksp):
 

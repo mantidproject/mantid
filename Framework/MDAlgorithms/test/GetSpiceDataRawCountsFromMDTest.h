@@ -6,6 +6,7 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -61,8 +62,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 44);
     TS_ASSERT_EQUALS(vecY.size(), 44);
     double twotheta1 = 8.9;
@@ -99,8 +100,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double twotheta1 = 6.000; // integer as Pt. number
@@ -138,8 +139,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double pt1 = 1.000; // integer as Pt. number
@@ -177,8 +178,8 @@ public:
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
+    const auto &vecX = outws->x(0);
+    const auto &vecY = outws->y(0);
     TS_ASSERT_EQUALS(vecX.size(), 61);
     TS_ASSERT_EQUALS(vecY.size(), 61);
     double pt1 = 1.000; // integer as Pt. number
@@ -196,8 +197,8 @@ public:
   /** Clean the testing workspaces
    */
   void test_Clean() {
-    AnalysisDataService::Instance().remove(m_dataMD->name());
-    AnalysisDataService::Instance().remove(m_monitorMD->name());
+    AnalysisDataService::Instance().remove(m_dataMD->getName());
+    AnalysisDataService::Instance().remove(m_monitorMD->getName());
   }
 
 private:
@@ -258,8 +259,8 @@ private:
     TS_ASSERT(m_monitorMD);
 
     // Clean
-    AnalysisDataService::Instance().remove(datatablews->name());
-    AnalysisDataService::Instance().remove(parentlogws->name());
+    AnalysisDataService::Instance().remove(datatablews->getName());
+    AnalysisDataService::Instance().remove(parentlogws->getName());
 
     return;
   }

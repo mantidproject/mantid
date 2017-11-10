@@ -86,6 +86,8 @@ public:
   }
   /// Aliases to the algorithm
   const std::string alias() const override { return m_alias; }
+  /// Optional documentation URL for the real algorithm
+  const std::string helpURL() const override { return m_helpURL; }
   /// function returns a summary message that will be displayed in the default
   /// GUI, and in the help.
   const std::string summary() const override { return m_summary; }
@@ -106,8 +108,15 @@ public:
   /// To query whether algorithm is a child. A proxy is always at top level,
   /// returns false
   bool isChild() const override { return m_isChild; }
-  void setAlwaysStoreInADS(const bool) override {}
-  void setChild(const bool val) override { m_isChild = val; }
+  void setChild(const bool val) override {
+    m_isChild = val;
+    setAlwaysStoreInADS(!val);
+  }
+  void setAlwaysStoreInADS(const bool val) override {
+    m_setAlwaysStoreInADS = val;
+  }
+  bool getAlwaysStoreInADS() const { return m_setAlwaysStoreInADS; }
+
   /// Proxies only manage parent algorithms
   void enableHistoryRecordingForChild(const bool) override{};
   void setRethrows(const bool rethrow) override;
@@ -176,6 +185,7 @@ private:
   const std::string
       m_categorySeparator;     ///< category seperator of the real algorithm
   const std::string m_alias;   ///< alias to the algorithm
+  const std::string m_helpURL; ///< Optional documentation URL
   const std::string m_summary; ///<Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 
@@ -190,6 +200,7 @@ private:
                                      /// (default = true)
   bool m_rethrow;                    ///< Whether or not to rethrow exceptions.
   bool m_isChild;                    ///< Is this a child algo
+  bool m_setAlwaysStoreInADS;        ///< If this will save in ADS
 
   /// Temporary holder of external observers wishing to subscribe
   mutable std::vector<const Poco::AbstractObserver *> m_externalObservers;

@@ -32,18 +32,6 @@ using API::WorkspaceGroup_sptr;
 DECLARE_ALGORITHM(MuonProcess)
 
 //----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-MuonProcess::MuonProcess() {}
-
-//----------------------------------------------------------------------------------------------
-/**
- * Destructor
- */
-MuonProcess::~MuonProcess() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonProcess::name() const { return "MuonProcess"; }
 
@@ -134,7 +122,7 @@ void MuonProcess::init() {
  * Execute the algorithm.
  */
 void MuonProcess::exec() {
-  Progress progress(this, 0, 1, 5);
+  Progress progress(this, 0.0, 1.0, 5);
 
   // Supplied input workspace
   Workspace_sptr inputWS = getProperty("InputWorkspace");
@@ -179,7 +167,6 @@ void MuonProcess::exec() {
 
   // If not analysing, the present WS will be the output
   Workspace_sptr outWS = allPeriodsWS;
-
   if (mode != "CorrectAndGroup") {
     // Correct bin values
     double loadedTimeZero = getProperty("LoadedTimeZero");
@@ -194,7 +181,8 @@ void MuonProcess::exec() {
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
     } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
+          getProperty("Xmin"), getProperty("Xmax"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");
@@ -252,7 +240,12 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
       dtc->setProperty("DeadTimeTable", dt);
       dtc->execute();
       result = dtc->getProperty("OutputWorkspace");
-      outWS->addWorkspace(result);
+      if (result) {
+        outWS->addWorkspace(result);
+      } else {
+        throw std::runtime_error("ApplyDeadTimeCorr failed to apply dead time "
+                                 "correction in MuonProcess");
+      }
     }
   }
   return outWS;

@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,6 +30,56 @@ void RenameWorkspace::init() {
       "name: NewWSName by adding the _monitors suffix"
       " (e.g.: NewWSName_monitors)",
       Direction::Input);
+  // Set to default true to maintain compatibility with existing scripts
+  // as this just allowed overriding by default
+  declareProperty<bool>(
+      "OverwriteExisting", true,
+      "If true any existing workspaces with the output name will be"
+      " overwritten. Defaults to true to maintain backwards compatibility.",
+      Direction::Input);
+}
+
+/**
+  * Tests that the inputs are all valid
+  * @return A map containing the incorrect workspace
+  * properties and an error message
+  */
+std::map<std::string, std::string> RenameWorkspace::validateInputs() {
+  using namespace std;
+  map<string, string> errorList;
+
+  // Get the input workspace
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  // get the output workspace name
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  // check if we are overriding existing workspaces
+  bool overrideWorkspaces = getProperty("OverwriteExisting");
+
+  // First check input and output names are different
+  if (getPropertyValue("InputWorkspace") ==
+      getPropertyValue("OutputWorkspace")) {
+    errorList["InputWorkspace"] = "Input and output workspace"
+                                  " names must be different";
+    errorList["OutputWorkspace"] = "Input and output workspace"
+                                   " names must be different";
+  }
+
+  // Test to see if the output already exists
+  if (AnalysisDataService::Instance().doesExist(outputwsName)) {
+    // Output name already exists - either remove or error
+    if (!overrideWorkspaces) {
+      // If we try to delete the workspace here a subtle bug is introduced
+      // Where the workspace group handle is deleted if we are renaming
+      // Its last workspace member, then when we add (or rename) that member
+      // undefined behavior happens usually Python Unit tests breaking
+      errorList["OutputWorkspace"] =
+          "The workspace " + outputwsName + " already exists";
+      errorList["OverwriteExisting"] = "Set OverwriteExisting to true"
+                                       " to overwrite the existing workspace";
+    }
+  }
+
+  return errorList;
 }
 
 /** Executes the algorithm
@@ -44,12 +93,6 @@ void RenameWorkspace::exec() {
   std::string inputwsName = inputWS->getName();
   // get the output workspace name
   std::string outputwsName = getPropertyValue("OutputWorkspace");
-
-  if (getPropertyValue("InputWorkspace") ==
-      getPropertyValue("OutputWorkspace")) {
-    throw std::invalid_argument(
-        "The input and output workspace names must be different");
-  }
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", inputWS);
@@ -69,7 +112,7 @@ void RenameWorkspace::exec() {
   if (monWS) {
     std::string monWSName = monWS->getName();
     // rename the monitor workspace accordingly
-    if (monWSName.size() == 0) {
+    if (monWSName.empty()) {
       // workspace will always have name after added to ADS, so apparently not
       // the case
       AnalysisDataService::Instance().add(outputwsName + "_monitors", monWS);
@@ -89,7 +132,7 @@ void RenameWorkspace::exec() {
 bool RenameWorkspace::processGroups() {
   // Get the input & output workspace names
   Workspace_sptr inputWS = getProperty("InputWorkspace");
-  const std::string inputwsName = inputWS->name();
+  const std::string inputwsName = inputWS->getName();
   std::string outputwsName = getPropertyValue("OutputWorkspace");
 
   if (inputwsName == outputwsName) {
@@ -130,16 +173,13 @@ bool RenameWorkspace::processGroups() {
       } catch (Kernel::Exception::NotFoundError &ex) {
         // Will wind up here if group has somehow got messed up and a member
         // doesn't exist. Should't be possible!
-        g_log.error() << ex.what() << std::endl;
+        g_log.error() << ex.what() << '\n';
       }
     }
   }
   setProperty("OutputWorkspace", inputWS);
 
   // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   g_log.notice() << name() << " successful\n";
 
   return true;

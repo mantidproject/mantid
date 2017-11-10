@@ -1,14 +1,15 @@
 #ifndef MANTID_KERNEL_MAGNETICFORMFACTORTABLE_H_
 #define MANTID_KERNEL_MAGNETICFORMFACTORTABLE_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MagneticIon.h"
 
 #include <vector>
 
 namespace Mantid {
 namespace PhysicalConstants {
+
+// Forward declare
+struct MagneticIon;
 
 /**
   Implements a cached lookup table for a magnetic form factor. The table is
@@ -38,18 +39,23 @@ namespace PhysicalConstants {
 class MANTID_KERNEL_DLL MagneticFormFactorTable {
 public:
   /// Construct the table around an ion
-  MagneticFormFactorTable(const size_t length, const MagneticIon &ion,
-                          const uint16_t j = 0, const uint16_t l = 0);
+  MagneticFormFactorTable(const size_t length, const MagneticIon &ion);
+
+  /// Disable default constructor
+  MagneticFormFactorTable() = delete;
+
+  /// Disable copy operator
+  MagneticFormFactorTable(const MagneticFormFactorTable &) = delete;
+
+  /// Disable assignment operator
+  MagneticFormFactorTable &operator=(const MagneticFormFactorTable &) = delete;
 
   /// Returns an interpolated form factor for the given \f$Q^2\f$ value
   double value(const double qsqr) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(MagneticFormFactorTable)
-  DISABLE_COPY_AND_ASSIGN(MagneticFormFactorTable)
-
   /// Setup the table with the values
-  void setup(const MagneticIon &ion, const uint16_t j, const uint16_t l);
+  void setup(const MagneticIon &ion);
 
   /// Cache the size
   size_t m_length;

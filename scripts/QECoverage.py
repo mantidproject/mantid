@@ -1,5 +1,6 @@
-﻿# pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
+# pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
+from __future__ import (absolute_import, division, print_function)
 import sys
 
 import numpy as np
@@ -198,9 +199,12 @@ class QECoverageGUI(QtGui.QWidget):
         # Matplotlib does seem to rescale x-axis properly after axes.clear()
         self.xlim = 0
 
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
+
     def onHelp(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("QECoverage")
+        showCustomInterfaceHelp("QE Coverage")
 
     def onDirectPlotOverChanged(self, state):
         self.indirect_plotover.setCheckState(state)

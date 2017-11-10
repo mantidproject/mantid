@@ -95,7 +95,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  (arg("self"), arg("name")))
             .def("__setitem__", &DataServiceExporter::addOrReplaceItem,
                  (arg("self"), arg("name"), arg("item")))
-            .def("__contains__", &SvcType::doesExist, arg("self"))
+            .def("__contains__", &SvcType::doesExist,
+                 (arg("self"), arg("name")))
             .def("__delitem__", &SvcType::remove, (arg("self"), arg("name")));
 
     return classType;

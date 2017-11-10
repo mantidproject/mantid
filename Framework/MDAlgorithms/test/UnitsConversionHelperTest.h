@@ -4,6 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -89,6 +90,44 @@ public:
     TS_ASSERT_EQUALS(-100000, range.first);
     TS_ASSERT_EQUALS(0, range.second);
   }
+
+  void testConvertFastFromInelasticWStoFrequency() {
+    UnitsConversionHelper Conv;
+    MDWSDescription WSD;
+
+    // ws description currently needs min/max to be set properly
+    std::vector<double> min(2, -10), max(2, 10);
+    WSD.setMinMax(min, max);
+
+    WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct");
+    WSD.m_PreprDetTable = detLoc;
+
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "DeltaE_inFrequency"));
+
+    const auto &X = ws2D->readX(0);
+    size_t n_bins = X.size() - 1;
+    for (size_t i = 0; i < n_bins; i++) {
+      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency,
+                      Conv.convertUnits(X[i]), 1.e-4);
+    }
+
+    auto range = Conv.getConversionRange(0, 10);
+    TS_ASSERT_EQUALS(0, range.first);
+    TS_ASSERT_EQUALS(3, range.second);
+
+    range = Conv.getConversionRange(-10, 3);
+    TS_ASSERT_EQUALS(-10, range.first);
+    TS_ASSERT_EQUALS(3, range.second);
+
+    range = Conv.getConversionRange(-100000, 2);
+    TS_ASSERT_EQUALS(-100000, range.first);
+    TS_ASSERT_EQUALS(2, range.second);
+
+    range = Conv.getConversionRange(0, -100000);
+    TS_ASSERT_EQUALS(-100000, range.first);
+    TS_ASSERT_EQUALS(0, range.second);
+  }
+
   void testConvertToTofInelasticWS() {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;

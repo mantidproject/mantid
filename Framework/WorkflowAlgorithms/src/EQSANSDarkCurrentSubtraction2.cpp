@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/PropertyManager.h"
@@ -49,7 +49,7 @@ void EQSANSDarkCurrentSubtraction2::init() {
 }
 
 void EQSANSDarkCurrentSubtraction2::exec() {
-  std::string output_message = "";
+  std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;
@@ -82,8 +82,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   if (inputEventWS) {
     g_log.error() << "To use this version of EQSANSDarkCurrentSubtraction, "
                   << "you need to make sure EQSANSLoad produces histograms. "
-                  << "You can also turn the dark current subtraction off."
-                  << std::endl;
+                  << "You can also turn the dark current subtraction off.\n";
     throw std::invalid_argument(
         "EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
   }
@@ -135,7 +134,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
 
     std::string darkWSOutputName =
         getPropertyValue("OutputDarkCurrentWorkspace");
-    if (!(darkWSOutputName.size() == 0))
+    if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
@@ -170,8 +169,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     output_message +=
         "\n   Could not find proton charge or duration in sample logs";
     g_log.error()
-        << "ERROR: Could not find proton charge or duration in sample logs"
-        << std::endl;
+        << "ERROR: Could not find proton charge or duration in sample logs\n";
   };
   // The scaling factor should account for the TOF cuts on each side of a frame
   // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
@@ -202,23 +200,21 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   const int numberOfDarkSpectra =
       static_cast<int>(scaledDarkWS->getNumberHistograms());
   if (numberOfSpectra != numberOfDarkSpectra) {
-    g_log.error()
-        << "Incompatible number of pixels between sample run and dark current"
-        << std::endl;
+    g_log.error() << "Incompatible number of pixels between sample run and "
+                     "dark current\n";
   }
   const int nBins = static_cast<int>(inputWS->readY(0).size());
   const int xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
-    g_log.error() << "The input workspaces are expected to be histograms"
-                  << std::endl;
+    g_log.error() << "The input workspaces are expected to be histograms\n";
   }
 
   progress.report("Subtracting dark current");
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < numberOfSpectra; i++) {
-    IDetector_const_sptr det = inputWS->getDetector(i);
     // If this detector is a monitor, skip to the next one
-    if (det->isMasked())
+    if (spectrumInfo.isMasked(i))
       continue;
 
     const MantidVec &YDarkValues = scaledDarkWS->readY(i);

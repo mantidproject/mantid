@@ -14,11 +14,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
 
-#include <sstream>
 #include <algorithm>
+#include <cfloat>
 #include <functional>
 #include <iterator>
-#include <float.h>
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -93,7 +93,7 @@ void IFunctionMD::evaluateFunction(const FunctionDomainMD &domain,
   for (const IMDIterator *r = domain.getNextIterator(); r != nullptr;
        r = domain.getNextIterator()) {
     this->reportProgress("Evaluating function for box " +
-                         boost::lexical_cast<std::string>(i + 1));
+                         std::to_string(i + 1));
     values.setCalculated(i, functionMD(*r));
     i++;
   };

@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -73,11 +73,11 @@ void CrossCorrelate::exec() {
     throw std::runtime_error("Must specify xmin < xmax");
 
   // Now check if the range between x_min and x_max is valid
-  const MantidVec &referenceX = inputWS->readX(index_ref);
+  auto &referenceX = inputWS->x(index_ref);
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmin));
   if (minIt == referenceX.cend())
-    throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
+    throw std::runtime_error("No data above XMin");
   auto maxIt = std::find_if(minIt, referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmax));
   if (minIt == maxIt)
@@ -110,13 +110,13 @@ void CrossCorrelate::exec() {
   }
 
   // Output message information
-  mess << "There are " << nspecs << " Workspaces in the range" << std::endl;
+  mess << "There are " << nspecs << " Workspaces in the range\n";
   g_log.information(mess.str());
   mess.str("");
 
   // Take a copy of  the reference spectrum
-  const MantidVec &referenceY = inputWS->dataY(index_ref);
-  const MantidVec &referenceE = inputWS->dataE(index_ref);
+  auto &referenceY = inputWS->y(index_ref);
+  auto &referenceE = inputWS->e(index_ref);
 
   std::vector<double> refX(maxIt - minIt);
   std::vector<double> refY(maxIt - minIt - 1);
@@ -135,6 +135,9 @@ void CrossCorrelate::exec() {
   // Create a 2DWorkspace that will hold the result
   const int nY = static_cast<int>(refY.size());
   const int npoints = 2 * nY - 3;
+  if (npoints < 1)
+    throw std::runtime_error("Range is not valid");
+
   MatrixWorkspace_sptr out =
       WorkspaceFactory::Instance().create(inputWS, nspecs, npoints, npoints);
 
@@ -164,28 +167,32 @@ void CrossCorrelate::exec() {
   bool is_distrib = inputWS->isDistribution();
 
   std::vector<double> XX(npoints);
-  for (int i = 0; i < npoints; ++i)
+  for (int i = 0; i < npoints; ++i) {
     XX[i] = static_cast<double>(i - nY + 2);
+  }
   // Initialise the progress reporting object
-  m_progress = new Progress(this, 0.0, 1.0, nspecs);
-  PARALLEL_FOR2(inputWS, out)
+  out->mutableX(0) = XX;
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
     PARALLEL_START_INTERUPT_REGION
     size_t wsIndex = indexes[i]; // Get the ws index from the table
     // Copy spectra info from input Workspace
-    out->getSpectrum(i)->copyInfoFrom(*inputWS->getSpectrum(wsIndex));
-    out->dataX(i) = XX;
+    out->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(wsIndex));
+
+    out->setSharedX(i, out->sharedX(0));
 
     // Get temp references
-    const MantidVec &iX = inputWS->readX(wsIndex);
-    const MantidVec &iY = inputWS->readY(wsIndex);
-    const MantidVec &iE = inputWS->readE(wsIndex);
+    const auto &iX = inputWS->x(wsIndex);
+    const auto &iY = inputWS->y(wsIndex);
+    const auto &iE = inputWS->e(wsIndex);
     // Copy Y,E data of spec(i) to temp vector
     // Now rebin on the grid of reference spectrum
     std::vector<double> tempY(nY);
     std::vector<double> tempE(nY);
-    VectorHelper::rebin(iX, iY, iE, refX, tempY, tempE, is_distrib);
+    VectorHelper::rebin(iX.rawData(), iY.rawData(), iE.rawData(), refX, tempY,
+                        tempE, is_distrib);
     // Calculate the mean value of tempY
     double tempMean = std::accumulate(tempY.begin(), tempY.end(), 0.0);
     tempMean /= static_cast<double>(nY);
@@ -213,8 +220,8 @@ void CrossCorrelate::exec() {
     double normalisationE2 =
         pow((refNorm * tempNormE), 2) + pow((tempNorm * refNormE), 2);
     // Get reference to the ouput spectrum
-    MantidVec &outY = out->dataY(i);
-    MantidVec &outE = out->dataE(i);
+    auto &outY = out->mutableY(i);
+    auto &outE = out->mutableE(i);
 
     for (int k = -nY + 2; k <= nY - 2; ++k) {
       int kp = abs(k);
@@ -248,7 +255,6 @@ void CrossCorrelate::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", out);
-  return;
 }
 
 } // namespace Algorithm

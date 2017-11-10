@@ -65,9 +65,6 @@ class DLLExport MoveInstrumentComponent : public API::Algorithm {
 public:
   /// Default constructor
   MoveInstrumentComponent();
-
-  /// Destructor
-  ~MoveInstrumentComponent() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MoveInstrumentComponent"; };
   /// Summary of algorithms purpose

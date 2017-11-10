@@ -1,10 +1,9 @@
 #ifndef MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 #define MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,9 +32,6 @@ namespace Algorithms {
 */
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
-  EstimateResolutionDiffraction();
-  ~EstimateResolutionDiffraction() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
 
@@ -66,28 +62,32 @@ private:
   ///
   void retrieveInstrumentParameters();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate detector resolution
   void estimateDetectorResolution();
 
-  //------------------------------------------------------
-
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
+  /// Workspace with custom divergence term
+  API::MatrixWorkspace_sptr m_divergenceWS;
+
+  /// workspace holding the term for just the time-of-flight portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resTof;
+  /// workspace holding the term for just the flight path portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resPathLength;
+  /// workspace holding the term for just the angular/solid angle portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resAngle;
 
   /// Output workspace
   API::MatrixWorkspace_sptr m_outputWS;
 
   /// Centre neutron velocity
-  double m_centreVelocity;
-
-  /// L1, source to sample
-  double m_L1;
+  double m_centreVelocity = 0.0;
 
   /// Delta T
-  double m_deltaT;
+  double m_deltaT = 0.0;
 };
 
 } // namespace Algorithms

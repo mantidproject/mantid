@@ -1,17 +1,23 @@
-#include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Functions/BivariateNormal.h"
+
+#include "MantidHistogramData/HistogramY.h"
+
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <fstream>
+
 #include <algorithm>
-#include <math.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <sstream>
 #include <string>
-#include <cstdio>
 
 using namespace Mantid::API;
 
@@ -21,6 +27,7 @@ namespace Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
+using namespace HistogramData;
 
 namespace {
 /// static logger
@@ -85,9 +92,9 @@ void BivariateNormal::function1D(double *out, const double *xValues,
 
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
 
-  const MantidVec &D = ws->dataY(0);
-  const MantidVec &X = ws->dataY(1);
-  const MantidVec &Y = ws->dataY(2);
+  const auto &D = ws->y(0);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
   int K = 1;
 
   if (nParams() > 4)
@@ -104,7 +111,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     inf << "," << getParameter(k);
   if (nParams() < 6)
     inf << "," << Varxx << "," << Varyy << "," << Varxy;
-  inf << std::endl;
+  inf << '\n';
 
   NCells = std::min<int>(static_cast<int>(nData), NCells);
 
@@ -141,8 +148,6 @@ void BivariateNormal::function1D(double *out, const double *xValues,
       }
     }
     double diff = out[x] - D[x];
-    // inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
-    //       D[x]<<")";
     chiSq += diff * diff;
 
     x++;
@@ -153,9 +158,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     if (constr)
       inf << i << "=" << constr->check() << ";";
   }
-  inf << std::endl;
-  inf << std::endl
-      << "    chiSq =" << chiSq << "     nData " << nData << std::endl;
+  inf << "\n\n    chiSq =" << chiSq << "     nData " << nData << '\n';
   g_log.debug(inf.str());
 }
 
@@ -171,7 +174,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   inf << "***penalty(" << penDeriv << "),Parameters=";
   for (size_t k = 0; k < 7; k++)
     inf << "," << LastParams[k];
-  inf << std::endl;
+  inf << '\n';
   g_log.debug(inf.str());
 
   std::vector<double> outf(nData, 0.0);
@@ -186,8 +189,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   }
   */
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
-  MantidVec X = ws->dataY(1);
-  MantidVec Y = ws->dataY(2);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
 
   for (int x = 0; x < NCells; x++) {
 
@@ -401,9 +404,9 @@ double BivariateNormal::initCommon() {
     CommonsOK = false;
 
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
-  MantidVec D = ws->dataY(0);
-  MantidVec X = ws->dataY(1);
-  MantidVec Y = ws->dataY(2);
+  const auto &D = ws->y(0);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
 
   if (NCells < 0) {
     NCells = static_cast<int>(
@@ -473,8 +476,8 @@ double BivariateNormal::initCommon() {
 
     if (getConstraint(0) == nullptr) {
 
-      addConstraint((new BoundaryConstraint(this, "Background", 0,
-                                            Attrib[S_int] / Attrib[S_1])));
+      addConstraint((Kernel::make_unique<BoundaryConstraint>(
+          this, "Background", 0, Attrib[S_int] / Attrib[S_1])));
     }
 
     double maxIntensity = Attrib[S_int] + 3 * sqrt(Attrib[S_int]);
@@ -483,20 +486,23 @@ double BivariateNormal::initCommon() {
       maxIntensity = 100;
 
     if (getConstraint(1) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
+      addConstraint(Kernel::make_unique<BoundaryConstraint>(this, "Intensity",
+                                                            0, maxIntensity));
     }
 
     double minMeany = MinY * .9 + .1 * MaxY;
     double maxMeany = MinY * .1 + .9 * MaxY;
 
     if (getConstraint(3) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
+      addConstraint(Kernel::make_unique<BoundaryConstraint>(
+          this, "Mrow", minMeany, maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
     if (getConstraint(2) == nullptr) {
-      addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
+      addConstraint(Kernel::make_unique<BoundaryConstraint>(
+          this, "Mcol", minMeanx, maxMeanx));
     }
 
     if (CalcVariances && nParams() > 6) {
@@ -585,8 +591,8 @@ double BivariateNormal::initCommon() {
   return penalty;
 }
 
-double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
-                                  const MantidVec &Y, double &coefNorm,
+double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
+                                  const HistogramY &Y, double &coefNorm,
                                   double &expCoeffx2, double &expCoeffy2,
                                   double &expCoeffxy, int &NCells,
                                   double &Varxx, double &Varxy,

@@ -20,7 +20,8 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py
+
 
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
@@ -28,7 +29,7 @@ mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 plugins.directory = @PLUGINS@
 
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
-plugins.exclude = dlopen
+plugins.exclude = Qt5
 
 # Where to find mantid paraview plugin libraries
 pvplugins.directory = @PV_PLUGINS@
@@ -89,6 +90,10 @@ datasearch.directories = @DATADIRS@
 # points to the ParaView obtained from the Mantid download page
 paraview.path = @PARAVIEW_APP_BIN_DIR@
 
+# A semi-colon(;) separated list of directories to use to search for data
+# Use forward slash / for all paths
+paraview.pythonpaths = @PARAVIEW_PYTHON_PATHS@
+
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
 
@@ -120,10 +125,12 @@ MultiThreaded.MaxCores = 0
 
 # Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated.
 # Outside this area peak functions return zero.
-curvefitting.peakRadius = 5
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
+
+#Defines whether or not the sliceViewer will show NonOrthogonal view as a default
+sliceviewer.nonorthogonal=false
 
 # Network Timeouts (in seconds for various uses within Mantid)
 network.default.timeout = 30
@@ -162,33 +169,38 @@ logging.loggers.root.level = information
 # splitting the messages to many logging channels
 logging.loggers.root.channel.class = SplitterChannel
 logging.loggers.root.channel.channel1 = consoleFilterChannel
-logging.loggers.root.channel.channel2 = fileFilterChannel
 
 # specific filter for the console channel raising the level to notice (drop to debug for debugging)
 logging.channels.consoleFilterChannel.class= FilterChannel
 logging.channels.consoleFilterChannel.channel= consoleChannel
 logging.channels.consoleFilterChannel.level= notice
 
-# specific filter for the file channel raising the level to information (drop to debug for debugging)
-logging.channels.fileFilterChannel.class= FilterChannel
-logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= information
-
 # output to the console - primarily for console based apps
 logging.channels.consoleChannel.class = @CONSOLECHANNELCLASS@
 logging.channels.consoleChannel.formatter = f1
 
+# global log formatting
+logging.formatters.f1.class = PatternFormatter
+logging.formatters.f1.pattern = @CONSOLEPATTERN@
+logging.formatters.f1.times = local
+
+# specific filter for the file channel raising the level to information (drop to debug for debugging)
+logging.loggers.root.channel.channel2 = @FILELOGGER_CHANNEL@
+logging.channels.fileFilterChannel.class= FilterChannel
+logging.channels.fileFilterChannel.channel= fileChannel
+logging.channels.fileFilterChannel.level= information
 # output to a file (For error capturing and debugging)
-logging.channels.fileChannel.class = @FILECHANNEL@
+logging.channels.fileChannel.class = FileChannel
+# Blank entry uses default path of HOME/.mantid/mantid.log on Linux/OSX and %APPDATA%\\mantidproject\\mantid
 logging.channels.fileChannel.path =
+# Do not flush file buffers for each newline
+logging.channels.fileChannel.flush = false
 logging.channels.fileChannel.rotation = 1 M
 logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
 logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
 logging.channels.fileChannel.formatter.times = local
-logging.formatters.f1.class = PatternFormatter
-logging.formatters.f1.pattern = @CONSOLEPATTERN@
-logging.formatters.f1.times = local
+
 
 workspace.sendto.SansView.arguments=[file]
 workspace.sendto.SansView.saveusing=SaveCanSAS1D
@@ -211,7 +223,10 @@ loading.multifile=On
 # Limits the maximum number of files Mantid will attempt to load as part of a range.
 # Set to a very high number to disable, however this limit is in place to protect
 # you and your computer from simple formatting mistakes
-loading.multifilelimit=100
+# By default it is facility dependent, and can be specified in Facilities.xml
+# If not specified there for a given facility, it is assumed 100.
+# If overwritten by the user, the user defined value takes priority over facility dependent defaults.
+loading.multifilelimit =
 
 # Hide algorithms that use a Property Manager by default.
 algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development;Remote

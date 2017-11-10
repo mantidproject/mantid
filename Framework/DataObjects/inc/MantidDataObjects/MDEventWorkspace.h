@@ -52,6 +52,11 @@ public:
     return std::unique_ptr<MDEventWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<MDEventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<MDEventWorkspace>(doCloneEmpty());
+  }
+
   /// Perform initialization after dimensions (and others) have been set.
   void initialize() override;
 
@@ -159,7 +164,7 @@ public:
   size_t addEvents(const std::vector<MDE> &events);
 
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) override;
+  getMinimumExtents(size_t depth = 2) const override;
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
@@ -193,6 +198,7 @@ public:
       const Kernel::SpecialCoordinateSystem coordSystem) override;
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
+  void setFileBacked() override;
   /// if workspace was file-backed, this should clear file-backed information
   /// and close back-up files.
   void clearFileBacked(bool LoadFileBackedData) override;
@@ -235,6 +241,10 @@ protected:
 private:
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
+  }
+
+  MDEventWorkspace *doCloneEmpty() const override {
+    return new MDEventWorkspace();
   }
 
   Kernel::SpecialCoordinateSystem m_coordSystem;

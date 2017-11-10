@@ -6,6 +6,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
@@ -18,17 +19,6 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-BinaryOperationMD::BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinaryOperationMD::~BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const {
   return "BinaryOperationMD";
@@ -42,7 +32,6 @@ const std::string BinaryOperationMD::category() const {
   return "MDAlgorithms\\MDArithmetic";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void BinaryOperationMD::init() {
@@ -65,7 +54,6 @@ void BinaryOperationMD::init() {
 /// Optional extra properties
 void BinaryOperationMD::initExtraProperties() {}
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void BinaryOperationMD::exec() {
@@ -176,7 +164,7 @@ void BinaryOperationMD::exec() {
           g_log.warning() << "Dimension " << d << " (" << dimA->getName()
                           << ") has different extents in the two "
                              "MDHistoWorkspaces. The operation may not make "
-                             "sense!" << std::endl;
+                             "sense!\n";
       }
       this->execHistoHisto(m_out_histo, m_operand_histo);
     } else if (m_operand_scalar)
@@ -186,6 +174,11 @@ void BinaryOperationMD::exec() {
           "Unexpected operand workspace type. Expected MDHistoWorkspace or "
           "WorkspaceSingleValue, got " +
           m_rhs->id());
+
+    // Clear any masking flags from the output workspace
+    if (m_out) {
+      m_out->clearMDMasking();
+    }
 
     // When operating on MDHistoWorkspaces, add a simple flag
     // that will be checked in BinMD to avoid binning a modified workspace

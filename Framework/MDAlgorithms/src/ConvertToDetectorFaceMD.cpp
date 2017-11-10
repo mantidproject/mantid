@@ -4,6 +4,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -15,24 +16,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToDetectorFaceMD::ConvertToDetectorFaceMD()
-    : in_ws(), m_numXPixels(0), m_numYPixels(0), m_detID_to_WI(),
-      m_detID_to_WI_offset(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -87,7 +77,7 @@ void ConvertToDetectorFaceMD::convertEventList(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
     uint16_t runIndex, int32_t detectorID) {
-  EventList &el = in_ws->getEventList(workspaceIndex);
+  EventList &el = in_ws->getSpectrum(workspaceIndex);
 
   // The 3/4D DataObjects that will be added into the MDEventWorkspce
   std::vector<MDE> out_events;
@@ -154,7 +144,7 @@ ConvertToDetectorFaceMD::getBanks() {
         int bankNum;
         if (Mantid::Kernel::Strings::convert(bank, bankNum))
           banks[bankNum] = det;
-        g_log.debug() << "Found bank " << bank << "." << std::endl;
+        g_log.debug() << "Found bank " << bank << ".\n";
       }
     }
   } else {
@@ -282,7 +272,7 @@ void ConvertToDetectorFaceMD::exec() {
         coord_t yPos = static_cast<coord_t>(y);
         coord_t bankPos = static_cast<coord_t>(bankNum);
 
-        EventList &el = in_ws->getEventList(wi);
+        EventList &el = in_ws->getSpectrum(wi);
 
         // We want to bind to the right templated function, so we have to know
         // the type of TofEvent contained in the EventList.

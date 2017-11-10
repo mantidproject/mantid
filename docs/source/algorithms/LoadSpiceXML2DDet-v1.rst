@@ -41,6 +41,14 @@ Counts of an :math:`n\times m` 2D detectors  are recorded in XML file as below::
 And the (1,1) position is the bottom left corner of the Anger camera as seen from the sample position.
 
 
+HB3A instrument facts
+#####################
+
+HB3A has 1 detector with :math:`256 \times 256` pixels.
+
+ - Pixel: width = :math:`2 \times 9.921875e-05` m, height = :math:`2 \times 9.921875e-05` m, depth = 0.0001 m.
+ - Detector: 
+
 
 Output Worskpaces
 #################
@@ -92,9 +100,9 @@ Usage
   # Access output workspace and print out some result
   ws = mtd["s0001_0522"]
 
-  print "Number of spectrum = %d." % (ws.getNumberHistograms())
+  print("Number of spectrum = {}.".format(ws.getNumberHistograms()))
   for i, j in [(0, 0), (255, 255), (136, 140), (143, 140)]:
-      print "Y[%-3d, %-3d] = %.5f" % (i, j, ws.readY(i)[j])
+      print("Y[{:<3}, {:<3}] = {:.5f}".format(i, j, ws.readY(i)[j]))
 
 .. testcleanup:: ExLoadHB3AXMLData
 

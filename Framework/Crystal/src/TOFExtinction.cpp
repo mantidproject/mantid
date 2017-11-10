@@ -1,12 +1,15 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -20,19 +23,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 // DECLARE_ALGORITHM(TOFExtinction)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TOFExtinction::TOFExtinction() : m_smu(0.), m_amu(0.), m_radius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TOFExtinction::~TOFExtinction() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void TOFExtinction::init() {
@@ -61,7 +51,6 @@ void TOFExtinction::init() {
                   "Wavelength dependence of beam divergence");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TOFExtinction::exec() {
@@ -70,18 +59,15 @@ void TOFExtinction::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != inPeaksW)
-    peaksW.reset(inPeaksW->clone().release());
+    peaksW = inPeaksW->clone();
 
-  const Kernel::Material *m_sampleMaterial =
-      &(inPeaksW->sample().getMaterial());
-  if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
+  const auto sampleMaterial = inPeaksW->sample().getMaterial();
+  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
-    double rho = m_sampleMaterial->numberDensity();
+    double rho = sampleMaterial.numberDensity();
     m_smu =
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-        rho;
-    m_amu =
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else {
     throw std::invalid_argument(
         "Could not retrieve LinearScatteringCoef from material");
@@ -115,44 +101,44 @@ void TOFExtinction::exec() {
     double tbar = absor_sphere(twoth, wl);
     // Extinction Correction
 
-    if (cType.compare("Type I Zachariasen") == 0) {
+    if (cType == "Type I Zachariasen") {
       // Apply correction to fsq with Type-I Z for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getZachariasen(Xqt);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type I Gaussian") == 0) {
+    } else if (cType == "Type I Gaussian") {
       // Apply correction to fsq with Type-I BCG for testing
-      double EgLaueI = std::sqrt(2.0) *
-                       getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
+      double EgLaueI =
+          M_SQRT2 * getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getGaussian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type I Lorentzian") == 0) {
+    } else if (cType == "Type I Lorentzian") {
       // Apply correction to fsq with Type-I BCL for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getLorentzian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type II Zachariasen") == 0) {
+    } else if (cType == "Type II Zachariasen") {
       // Apply correction to fsq with Type-II Z for testing
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
       y_corr = getZachariasen(Xqt);
       sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type II Gaussian") == 0) {
+    } else if (cType == "Type II Gaussian") {
       // Apply correction to fsq with Type-II BCG for testing
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
       y_corr = getGaussian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type II Lorentzian") == 0) {
+    } else if (cType == "Type II Lorentzian") {
       // Apply correction to fsq with Type-II BCL for testing
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
       y_corr = getLorentzian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type I&II Zachariasen") == 0) {
+    } else if (cType == "Type I&II Zachariasen") {
       // Apply correction to fsq with Type-II Z for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
@@ -160,21 +146,21 @@ void TOFExtinction::exec() {
       double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
       y_corr = getTypeIIZachariasen(Xqt);
       sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type I&II Gaussian") == 0) {
+    } else if (cType == "Type I&II Gaussian") {
       // Apply correction to fsq with Type-II BCG for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double Rg = getRgGaussian(EgLaueI, r_crystallite, wl, twoth);
       double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
       y_corr = getTypeIIGaussian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(Rg, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("Type I&II Lorentzian") == 0) {
+    } else if (cType == "Type I&II Lorentzian") {
       // Apply correction to fsq with Type-II BCL for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double Rg = getRgLorentzian(EgLaueI, r_crystallite, wl, twoth);
       double Xqt = getXqtII(Rg, cell, wl, twoth, tbar, fsq);
       y_corr = getTypeIILorentzian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(Rg, cell, wl, twoth, tbar, fsq, sigfsq);
-    } else if (cType.compare("None, Scaling Only") == 0) {
+    } else if (cType == "None, Scaling Only") {
       y_corr = 1.0; // No extinction correction
       sigfsq_ys = sigfsq;
     }
@@ -182,7 +168,7 @@ void TOFExtinction::exec() {
     double ys = fsq / y_corr;
     // std::cout << fsq << "  " << y_corr<<"  "<<wl<<"  "<<twoth<<"  "<<tbar<< "
     // " << ys <<"\n";
-    if (!boost::math::isnan(ys))
+    if (!std::isnan(ys))
       peak1.setIntensity(ys);
     else
       peak1.setIntensity(0.0);

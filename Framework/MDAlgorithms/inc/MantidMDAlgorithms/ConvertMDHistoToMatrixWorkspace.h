@@ -50,10 +50,6 @@ namespace MDAlgorithms {
  */
 class DLLExport ConvertMDHistoToMatrixWorkspace : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ConvertMDHistoToMatrixWorkspace() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ConvertMDHistoToMatrixWorkspace() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "ConvertMDHistoToMatrixWorkspace";

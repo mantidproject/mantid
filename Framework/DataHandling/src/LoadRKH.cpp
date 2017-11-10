@@ -20,6 +20,25 @@
 #include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
+#include <numeric>
+#include <boost/regex.hpp>
+
+namespace {
+// Check if we are dealing with a unit line
+bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
+  // The unit line needs to have the format of
+  //  1. Either 0 or 6 [06]
+  //  2. Then several characters [\w]
+  //  3. Open bracket
+  //  4. Several characters
+  //  5. Close bracket
+  std::string input =
+      std::accumulate(codes.begin(), codes.end(), std::string(""));
+  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  boost::regex baseRegex(reg);
+  return boost::regex_match(input, baseRegex);
+}
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,46 +47,64 @@ using namespace Mantid::Kernel;
 
 DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
-namespace {
-void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
-                       std::vector<double> &columnOne,
-                       std::vector<double> &ydata, std::vector<double> &errdata,
-                       Progress &prog) {
-  std::string fileline = "";
-  for (int index = 1; index <= readEnd; ++index) {
-    getline(stream, fileline);
-    if (index < readStart)
-      continue;
-    double x(0.), y(0.), yerr(0.);
-    std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    prog.report();
-  }
-}
+/**
+ * Read data from a RKH1D file
+ *
+ * @param stream :: the input stream to read from
+ * @param readStart :: the line to start reading from
+ * @param readEnd :: the line to stop reading at
+ * @param x :: histogram data points to fill
+ * @param y :: histogram data counts to fill
+ * @param ye :: histogram data count standard deviations to fill
+ * @param xe :: histogram data point standard deviations to fill
+ * @param prog :: handle to progress bar
+ * @param readXError :: whether to read x errors (optional, default: false)
+ */
+void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
+                                int readEnd, HistogramData::Points &x,
+                                HistogramData::Counts &y,
+                                HistogramData::CountStandardDeviations &ye,
+                                HistogramData::PointStandardDeviations &xe,
+                                Progress &prog, bool readXError) {
 
-void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
-                                 int readEnd, std::vector<double> &columnOne,
-                                 std::vector<double> &ydata,
-                                 std::vector<double> &errdata,
-                                 std::vector<double> &xError, Progress &prog) {
-  std::string fileline = "";
+  std::vector<double> xData;
+  std::vector<double> yData;
+  std::vector<double> xError;
+  std::vector<double> yError;
+
+  xData.reserve(readEnd);
+  yData.reserve(readEnd);
+  xError.reserve(readEnd);
+  yError.reserve(readEnd);
+
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
       continue;
-    double x(0.), y(0.), yerr(0.), xerr(0.);
+
+    double xValue(0.), yValue(0.), yErrorValue(0.);
     std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr >> xerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    xError.push_back(xerr);
+    datastr >> xValue >> yValue >> yErrorValue;
+
+    xData.push_back(xValue);
+    yData.push_back(yValue);
+    yError.push_back(yErrorValue);
+
+    // check if we need to read in x error values
+    if (readXError) {
+      double xErrorValue(0.);
+      datastr >> xErrorValue;
+      xError.push_back(xErrorValue);
+    }
+
     prog.report();
   }
-}
+
+  x = xData;
+  y = yData;
+  ye = yError;
+  xe = xError;
 }
 
 /**
@@ -81,7 +118,7 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   auto &file = descriptor.data();
-  std::string fileline("");
+  std::string fileline;
 
   // Header looks something like this where the text inside [] could be anything
   //  LOQ Thu 28-OCT-2004 12:23 [W 26  INST_DIRECT_BEAM]
@@ -188,19 +225,24 @@ void LoadRKH::exec() {
   MatrixWorkspace_sptr result = is2D(line) ? read2D(line) : read1D();
 
   // all RKH files contain distribution data
-  result->isDistribution(true);
+  result->setDistribution(true);
   // Set the output workspace
   setProperty("OutputWorkspace", result);
 }
+
 /** Determines if the file is 1D or 2D based on the first after the workspace's
 *  title
 *  @param testLine :: the first line in the file after the title
 *  @return true if the file must contain 1D data
 */
 bool LoadRKH::is2D(const std::string &testLine) {
-  // check the line part of a valid for 2D data else assume the file is 1D
-  return readUnit(testLine) != "C++ no unit found";
+  // split the line into words
+  const Mantid::Kernel::StringTokenizer codes(
+      testLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return isUnit(codes);
 }
+
 /** Read a data file that contains only one spectrum into a workspace
 *  @return the new workspace
 */
@@ -262,23 +304,18 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   int pointsToRead = readEnd - readStart + 1;
   // Now stream sits at the first line of data
-  std::vector<double> columnOne, ydata, errdata, xError;
-  columnOne.reserve(readEnd);
-  ydata.reserve(readEnd);
-  errdata.reserve(readEnd);
+  HistogramData::Points columnOne;
+  HistogramData::Counts ydata;
+  HistogramData::PointStandardDeviations xError;
+  HistogramData::CountStandardDeviations errdata;
 
   auto hasXError = hasXerror(m_fileIn);
 
   Progress prog(this, 0.0, 1.0, readEnd);
 
-  if (hasXError) {
-    xError.reserve(readEnd);
-    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata,
-                                errdata, xError, prog);
-  } else {
-    readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
-                      prog);
-  }
+  readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
+                    xError, prog, hasXError);
+
   m_fileIn.close();
 
   assert(pointsToRead == static_cast<int>(columnOne.size()));
@@ -292,13 +329,14 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   if (colIsUnit) {
     MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, pointsToRead, pointsToRead);
+    localworkspace->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
     localworkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create(firstColVal);
-    localworkspace->dataX(0) = columnOne;
-    localworkspace->dataY(0) = ydata;
-    localworkspace->dataE(0) = errdata;
+    localworkspace->setPoints(0, columnOne);
+    localworkspace->setCounts(0, ydata);
+    localworkspace->setCountStandardDeviations(0, errdata);
     if (hasXError) {
-      localworkspace->dataDx(0) = xError;
+      localworkspace->setPointStandardDeviations(0, xError);
     }
     return localworkspace;
   } else {
@@ -307,14 +345,16 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
-          ->setSpectrumNo(static_cast<int>(columnOne[index]));
+          .setSpectrumNo(static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index)
+          .setDetectorID(static_cast<detid_t>(index + 1));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
 
     if (hasXError) {
       for (int index = 0; index < pointsToRead; ++index) {
-        localworkspace->dataDx(index)[0] = xError[index];
+        localworkspace->setPointStandardDeviations(0, 1, xError[index]);
       }
     }
     return localworkspace;
@@ -337,10 +377,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   Progress prog(read2DHeader(firstLine, outWrksp, axis0Data));
   const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
+  // set the X-values to the common bin values we read above
+  auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    // set the X-values to the common bin values we read above
-    MantidVecPtr toPass;
-    toPass.access() = axis0Data;
     outWrksp->setX(i, toPass);
 
     // now read in the Y values
@@ -428,6 +467,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   // we now have all the data we need to create the output workspace
   outWrksp = WorkspaceFactory::Instance().create(
       "Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
+  for (int i = 0; i < nAxis1Values; ++i) {
+    outWrksp->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+  }
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 
@@ -467,6 +509,11 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   const Mantid::Kernel::StringTokenizer codes(
       line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+
+  if (!isUnit(codes)) {
+    return "C++ no unit found";
+  }
+
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -492,10 +539,11 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // accepted.
     // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
-      std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);
+      std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          unit == "(1/Angstrom)") { // 6 q (1/Angstrom) is the synatx for
-                                    // MomentumTransfer
+          (unit == "(1/Angstrom)" ||
+           unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+                                       // MomentumTransfer
         return "MomentumTransfer";
       }
 
@@ -515,7 +563,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
  * @param nlines :: The number of lines to remove
  */
 void LoadRKH::skipLines(std::istream &strm, int nlines) {
-  std::string buried("");
+  std::string buried;
   for (int i = 0; i < nlines; ++i) {
     getline(strm, buried);
   }

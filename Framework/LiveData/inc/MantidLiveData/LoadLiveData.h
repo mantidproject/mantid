@@ -1,10 +1,10 @@
 #ifndef MANTID_LIVEDATA_LOADLIVEDATA_H_
 #define MANTID_LIVEDATA_LOADLIVEDATA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
+#include "MantidLiveData/LiveDataAlgorithm.h"
 
 namespace Mantid {
 namespace LiveData {
@@ -37,9 +37,6 @@ namespace LiveData {
 */
 class DLLExport LoadLiveData : public LiveDataAlgorithm {
 public:
-  LoadLiveData();
-  ~LoadLiveData() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -68,8 +65,6 @@ private:
   void appendChunk(Mantid::API::Workspace_sptr chunkWS);
   API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS,
                                           Mantid::API::Workspace_sptr chunkWS);
-
-  void doSortEvents(Mantid::API::Workspace_sptr ws);
 
   /// The "accumulation" workspace = after adding, but before post-processing
   Mantid::API::Workspace_sptr m_accumWS;

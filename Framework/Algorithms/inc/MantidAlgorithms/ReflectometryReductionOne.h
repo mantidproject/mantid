@@ -38,11 +38,6 @@ namespace Algorithms {
  */
 class DLLExport ReflectometryReductionOne : public ReflectometryWorkflowBase {
 public:
-  /// Constructor
-  ReflectometryReductionOne();
-  /// Destructor
-  ~ReflectometryReductionOne() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -81,22 +76,18 @@ private:
   correctPosition(API::MatrixWorkspace_sptr &toCorrect,
                   const double &thetaInDeg, const bool isPointDetector);
 
-  /// Sum spectra.
-  Mantid::API::MatrixWorkspace_sptr
-  sumSpectraOverRange(API::MatrixWorkspace_sptr inWS, const int startIndex,
-                      const int endIndex);
-
   /// Perform a transmission correction on the input IvsLam workspace
   API::MatrixWorkspace_sptr transmissonCorrection(
       API::MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
-      const MinMax &wavelengthMonitorBackgroundInterval,
-      const MinMax &wavelengthMonitorIntegrationInterval,
-      const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
+      const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+      const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+      const OptionalInteger &i0MonitorIndex,
+      API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStart,
       const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
       const OptionalDouble &stitchingStartOverlap,
-      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep,
+      const OptionalDouble &stitchingEndOverlap,
       const std::string &numeratorProcessingCommands);
 
   /// Perform transmission correction using either PolynomialCorrection

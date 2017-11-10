@@ -41,7 +41,7 @@ public:
      * 200 events; two in each bin, at time 0.5, 1.5, etc.
      * PulseTime = 1 second, 2 seconds, etc.
      */
-    input = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, 100, 100,
+    input = WorkspaceCreationHelper::createEventWorkspace(numPixels, 100, 100,
                                                           0.0, 1.0, 2);
     AnalysisDataService::Instance().addOrReplace(inputName, input);
     // Quick initial check
@@ -74,19 +74,14 @@ public:
     }
 
     // Half the previous # of events
-    if (numPixels <= 1) {
-      TS_ASSERT_DELTA(output->getNumberEvents(), 100 * numPixels,
-                      PARALLEL_GET_MAX_THREADS * 2);
-    } else {
-      TS_ASSERT_EQUALS(output->getNumberEvents(), 100 * numPixels);
-    }
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 100 * numPixels);
 
     // Event list is now of type WeightedEventNoTime
     TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);
 
     // Check an event to see if it makes sense
-    if (output->getEventList(0).getNumberEvents() > 0) {
-      WeightedEvent ev = output->getEventList(0).getEvent(0);
+    if (output->getSpectrum(0).getNumberEvents() > 0) {
+      WeightedEvent ev = output->getSpectrum(0).getEvent(0);
       TS_ASSERT_DELTA(ev.weight(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.errorSquared(), 2.0, 1e-6);
       TS_ASSERT_DELTA(ev.tof(), 0.5, 1e-6);
@@ -96,7 +91,7 @@ public:
     TS_ASSERT_EQUALS(output->readX(0).size(), 101);
     // Y and E values are the same
     TS_ASSERT_DELTA(output->readY(0)[1], 2.0, 1e-5);
-    TS_ASSERT_DELTA(output->readE(0)[1], sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(output->readE(0)[1], M_SQRT2, 1e-5);
     TS_ASSERT_EQUALS(output->YUnit(), input->YUnit());
     TS_ASSERT_EQUALS(output->getAxis(0)->unit(), input->getAxis(0)->unit());
     TS_ASSERT_EQUALS(output->getAxis(1)->unit(), input->getAxis(1)->unit());

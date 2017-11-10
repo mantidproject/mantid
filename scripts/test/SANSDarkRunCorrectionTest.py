@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 import mantid
 from mantid.simpleapi import *
 from mantid.kernel import DateAndTime

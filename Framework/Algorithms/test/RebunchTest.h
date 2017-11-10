@@ -3,15 +3,23 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/Rebunch.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/Rebunch.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::LinearGenerator;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:
@@ -27,9 +35,9 @@ public:
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebunchdata->dataX(0);
-    const Mantid::MantidVec outY = rebunchdata->dataY(0);
-    const Mantid::MantidVec outE = rebunchdata->dataE(0);
+    auto &outX = rebunchdata->x(0);
+    auto &outY = rebunchdata->y(0);
+    auto &outE = rebunchdata->e(0);
 
     TS_ASSERT_DELTA(outX[0], 1.5, 0.000001);
     TS_ASSERT_DELTA(outY[0], 3.0, 0.000001);
@@ -58,9 +66,9 @@ public:
     MatrixWorkspace_sptr rebunchdata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebunchdata->dataX(0);
-    const Mantid::MantidVec outY = rebunchdata->dataY(0);
-    const Mantid::MantidVec outE = rebunchdata->dataE(0);
+    auto &outX = rebunchdata->x(0);
+    auto &outY = rebunchdata->y(0);
+    auto &outE = rebunchdata->e(0);
 
     TS_ASSERT_DELTA(outX[0], 0.5, 0.000001);
     TS_ASSERT_DELTA(outY[0], 28, 0.000001);
@@ -80,7 +88,7 @@ public:
 
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspaceHist(50, 20);
-    test_in2D->isDistribution(true);
+    test_in2D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     Rebunch rebunch;
@@ -92,9 +100,9 @@ public:
     MatrixWorkspace_sptr rebunchdata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebunchdata->dataX(5);
-    const Mantid::MantidVec outY = rebunchdata->dataY(5);
-    const Mantid::MantidVec outE = rebunchdata->dataE(5);
+    auto &outX = rebunchdata->x(5);
+    auto &outY = rebunchdata->y(5);
+    auto &outE = rebunchdata->e(5);
 
     TS_ASSERT_DELTA(outX[0], 0.5, 0.000001);
     TS_ASSERT_DELTA(outY[0], 3, 0.000001);
@@ -124,9 +132,9 @@ public:
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebunchdata->dataX(5);
-    const Mantid::MantidVec outY = rebunchdata->dataY(5);
-    const Mantid::MantidVec outE = rebunchdata->dataE(5);
+    auto &outX = rebunchdata->x(5);
+    auto &outY = rebunchdata->y(5);
+    auto &outE = rebunchdata->e(5);
 
     TS_ASSERT_DELTA(outX[0], 2.75, 0.000001);
     TS_ASSERT_DELTA(outY[0], 5.5, 0.000001);
@@ -146,17 +154,10 @@ private:
   Workspace2D_sptr Create1DWorkspaceHist(int size) {
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size - 1);
-    double j = 1.0;
-    for (int i = 0; i < size; i++) {
-      retVal->dataX(0)[i] = j * 0.5;
-      j += 1.5;
-    }
-    j = 1.0;
-    for (int i = 0; i < size - 1; i++) {
-      retVal->dataY(0)[i] = j;
-      retVal->dataE(0)[i] = sqrt(j);
-      j += 1;
-    }
+    BinEdges x(static_cast<size_t>(size), LinearGenerator(0.5, 0.75));
+    Counts y(size - 1, LinearGenerator(1.0, 1.0));
+
+    retVal->setHistogram(0, x, y);
 
     return retVal;
   }
@@ -164,77 +165,75 @@ private:
   Workspace2D_sptr Create1DWorkspacePnt(int size) {
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size);
-    double j = 1.0;
-    for (int i = 0; i < size; i++) {
-      retVal->dataX(0)[i] = j * 0.5;
-      retVal->dataY(0)[i] = j;
-      retVal->dataE(0)[i] = sqrt(j);
-      j += 1.0;
-    }
+    Points x(size, LinearGenerator(0.5, 0.5));
+    Counts y(size, LinearGenerator(1.0, 1.0));
+
+    retVal->setHistogram(0, x, y);
 
     return retVal;
   }
 
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e2(
-        new Mantid::MantidVec(xlen - 1, 0.0));
+    BinEdges x1(xlen, LinearGenerator(0.5, 0.75));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
-    double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
-      j += 1.5;
-    }
-    j = 1.0;
-    for (int i = 0; i < xlen - 1; i++) {
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
-      j += 1;
-    }
+    Counts y1(xlen - 1, LinearGenerator(1.0, 1.0));
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setHistogram(i, x1, y1);
     }
 
     return retVal;
   }
 
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e2 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
+    Points x1(xlen, LinearGenerator(0.5, 0.75));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);
-    double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
-      j += 1.5;
-    }
+    Counts y1(xlen, LinearGenerator(1.0, 1.5));
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setHistogram(i, x1, y1);
     }
 
     return retVal;
   }
+};
+
+class RebunchTestPerformance : public CxxTest::TestSuite {
+public:
+  static RebunchTestPerformance *createSuite() {
+    return new RebunchTestPerformance();
+  }
+
+  static void destroySuite(RebunchTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
+    input = boost::make_shared<Workspace2D>();
+    input->initialize(100000, 3000, 2999);
+    input->setDistribution(true);
+    AnalysisDataService::Instance().add("input", input);
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove("test_out");
+  }
+
+  void testExec() {
+    Rebunch rebunch;
+    rebunch.initialize();
+    rebunch.setPropertyValue("InputWorkspace", "input");
+    rebunch.setPropertyValue("OutputWorkspace", "test_out");
+    rebunch.setPropertyValue("NBunch", "5");
+    rebunch.execute();
+  }
+
+private:
+  Workspace2D_sptr input;
 };
 #endif /* REBUNCHTEST */

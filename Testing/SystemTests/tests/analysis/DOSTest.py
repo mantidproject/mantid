@@ -1,10 +1,12 @@
 #pylint: disable=no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
 #------------------------------------------------------------------------------------
+
 
 class DOSPhononTest(stresstesting.MantidStressTest):
 
@@ -23,6 +25,7 @@ class DOSPhononTest(stresstesting.MantidStressTest):
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
+
 
 class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
 
@@ -43,6 +46,7 @@ class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
 
 #------------------------------------------------------------------------------------
 
+
 class DOSCastepTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -60,6 +64,7 @@ class DOSCastepTest(stresstesting.MantidStressTest):
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
+
 
 class DOSRamanActiveTest(stresstesting.MantidStressTest):
 
@@ -82,6 +87,7 @@ class DOSRamanActiveTest(stresstesting.MantidStressTest):
 
 #------------------------------------------------------------------------------------
 
+
 class DOSIRActiveTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -101,6 +107,7 @@ class DOSIRActiveTest(stresstesting.MantidStressTest):
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
+
 
 class DOSPartialTest(stresstesting.MantidStressTest):
 
@@ -122,6 +129,7 @@ class DOSPartialTest(stresstesting.MantidStressTest):
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
+
 
 class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
     """
@@ -152,6 +160,7 @@ class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
 
 #------------------------------------------------------------------------------------
 
+
 class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -173,6 +182,7 @@ class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
+
 
 class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStressTest):
     """

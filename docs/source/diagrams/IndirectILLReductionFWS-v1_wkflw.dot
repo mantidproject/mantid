@@ -1,0 +1,91 @@
+digraph IndirectILLReductionFWS {
+  label="IndirectILLReductionFWS Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	Observable
+  	CalibrationRun
+  	BackgroundRun
+  	CalibrationBackgroundRun
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	IndirectILLEnergyTransfer
+  	IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferCB [label="IndirectILLEnergyTransfer"]
+    SelectNexusFilesByMetadata
+    SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataCB [label="SelectNexusFilesByMetadata"]
+    Integration
+    IntegrationB [label="Integration"]
+    IntegrationC [label="Integration"]
+    IntegrationCB [label="Integration"]
+    GroupWorkspaces
+    SplineInterpolationB [label="SplineInterpolation"]
+    SplineInterpolationC [label="SplineInterpolation"]
+    SplineInterpolationCB [label="SplineInterpolation"]
+    IntegrationBB [label="Integration"]
+    IntegrationCC [label="Integration"]
+    IntegrationCCBB [label="Integration"]
+    MinusA [label="Minus"]
+    MinusB [label="Minus"]
+    Divide
+  }
+
+  subgraph processes {
+  	$process_style
+  	Scan
+  	ScanB [label="Scan"]
+  	ScanC [label="Scan"]
+  	ScanCB [label="Scan"]
+  }
+
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> Integration
+  Integration -> Scan
+  Observable -> Scan
+  BackgroundRun -> SelectNexusFilesByMetadataB
+  SelectNexusFilesByMetadataB -> IndirectILLEnergyTransferB
+  IndirectILLEnergyTransferB ->
+  IntegrationB -> ScanB
+  ScanB -> IntegrationBB [label="Sum"]
+  ScanB -> SplineInterpolationB [label="Interpolate"]
+  CalibrationRun -> SelectNexusFilesByMetadataC
+  SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
+  IndirectILLEnergyTransferC -> IntegrationC
+  IntegrationC -> ScanC
+  ScanC -> MinusB
+  MinusB -> IntegrationCC [label="Sum"]
+  MinusB -> SplineInterpolationC [label="Interpolate"]
+  Scan -> MinusA
+  IntegrationBB -> MinusA
+  SplineInterpolationB -> MinusA
+  MinusA -> Divide
+  IntegrationCC -> Divide
+  SplineInterpolationC -> Divide
+  CalibrationBackgroundRun -> SelectNexusFilesByMetadataCB
+  SelectNexusFilesByMetadataCB -> IndirectILLEnergyTransferCB
+  IndirectILLEnergyTransferCB -> IntegrationCB
+  IntegrationCB -> ScanCB
+  ScanCB -> IntegrationCCBB
+  IntegrationCCBB -> MinusB
+  ScanCB -> SplineInterpolationCB
+  SplineInterpolationCB -> MinusB
+  Divide -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}

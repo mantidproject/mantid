@@ -14,13 +14,16 @@
 #include <sstream>
 
 namespace Mantid {
-
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 
 //-------------------------------------------------------------------------
 // Forward declarations
 //-------------------------------------------------------------------------
-class DateAndTime;
 class Property;
 template <typename T> class TimeSeriesProperty;
 
@@ -64,7 +67,7 @@ public:
                                              const std::string &name);
   /// Check if the icp log commands are in the new style
   static bool isICPEventLogNewStyle(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm);
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm);
 
 public:
   /// Create given the icpevent log property
@@ -89,18 +92,18 @@ public:
 private:
   /// Parse the icp event log with old style commands
   void parseOldStyleCommands(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm,
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm,
       Kernel::TimeSeriesProperty<int> *periods,
       Kernel::TimeSeriesProperty<bool> *status);
 
   /// Parse the icp event log with new style commands
   void parseNewStyleCommands(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm,
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm,
       Kernel::TimeSeriesProperty<int> *periods,
       Kernel::TimeSeriesProperty<bool> *status);
 
   /// Available commands.
-  enum commands { NONE = 0, BEGIN, END, CHANGE_PERIOD };
+  enum class commands { NONE = 0, BEGIN, END, CHANGE_PERIOD, ABORT };
 
   /// Typedef for a map of string commands to an enum of strongly typed
   /// commands.
@@ -119,7 +122,8 @@ private:
   CommandMap createCommandMap(bool newStyle) const;
 
   /// Try to parse period data.
-  void tryParsePeriod(const std::string &scom, const DateAndTime &time,
+  void tryParsePeriod(const std::string &scom,
+                      const Types::Core::DateAndTime &time,
                       std::istringstream &idata,
                       Kernel::TimeSeriesProperty<int> *const periods);
 };

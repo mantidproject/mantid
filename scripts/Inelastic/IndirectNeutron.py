@@ -4,10 +4,14 @@
 Force for ILL backscattering raw
 """
 
+from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-import sys, math, os.path, numpy as np
+import sys
+import math
+import os.path
+import numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
 
 MTD_PLOT = import_mantidplot()
@@ -20,7 +24,7 @@ def Iblock(a, first):  # read Ascii block of Integers
     line2 = a[first + 1]
     val = ExtractInt(line2)
     numb = val[0]
-    lines = numb / 10
+    lines = numb // 10
     last = numb - 10 * lines
     if line1.startswith('I'):
         error = ''
@@ -47,7 +51,7 @@ def Fblock(a, first):  # read Ascii block of Floats
     line2 = a[first + 1]
     val = ExtractInt(line2)
     numb = val[0]
-    lines = numb / 5
+    lines = numb // 5
     last = numb - 5 * lines
     if line1.startswith('F'):
         error = ''
@@ -76,7 +80,7 @@ def ReadIbackGroup(a, first):  # read Ascii block of spectrum values
     next = first
     line1 = a[next]
     next += 1
-    _val = ExtractInt(a[next])
+
     if line1.startswith('S'):
         error = ''
     else:
@@ -121,7 +125,7 @@ def getFilePath(run, ext, instr):
 # Load an ascii/inx file
 def loadFile(path):
     try:
-        handle = open(path, 'r')
+        handle = open(path, 'U')
         asc = []
         for line in handle:
             line = line.rstrip()
@@ -143,7 +147,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
-    _lasc = len(asc)
 
     # raw head
     text = asc[1]
@@ -154,8 +157,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     title = asc[next]  # title line
     next += 1
     text = asc[next]  # user line
-    _user = text[20:32]
-    _time = text[40:50]
     next += 6  # 5 lines of text
     # back head1
     next, Fval = Fblock(asc, next)
@@ -165,21 +166,17 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         freq = Fval[2]
         amp = Fval[3]
         wave = Fval[69]
-        _Ef = 81.787 / (4.0 * wave * wave)
         npt = int(Fval[6])
         nsp = int(Fval[7])
     # back head2
     next, Fval = Fblock(asc, next)
-    _k0 = 4.0 * math.pi / wave
-    _d2r = math.pi / 180.0
     theta = []
-    _Q = []
     for m in range(0, nsp):
         theta.append(Fval[m])
     # raw spectra
     val = ExtractInt(asc[next + 3])
     npt = val[0]
-    lgrp = 5 + npt / 10
+    lgrp = 5 + npt // 10
     val = ExtractInt(asc[next + 1])
     if instr == 'IN10':
         nsp = int(val[2])
@@ -202,7 +199,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
             imax = m
             ymax = ym[m]
     new = imax - imin
-    imid = new / 2 + 1
+    imid = new // 2 + 1
     if instr == 'IN10':
         DRV = 18.706  # fast drive
         vmax = freq * DRV
@@ -220,7 +217,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         eOut.append(em[mm] / 10.0)
     xMon.append(2 * xMon[new - 1] - xMon[new - 2])
     monWS = '__Mon'
-    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut, \
+    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
                     Nspec=1, UnitX='DeltaE')
     #
     _Qaxis = ''
@@ -231,7 +228,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     for n in range(0, nsp):
         next, _xd, yd, ed = ReadIbackGroup(asc, next)
         tot.append(sum(yd))
-        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) + \
+        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) +
                            ' ; Total counts = ' + str(sum(yd)))
         for m in range(0, new + 1):
             mm = m + imin
@@ -244,20 +241,20 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         _Qaxis += str(theta[n])
     ascWS = fname + '_' + ana + refl + '_asc'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
                     Nspec=nsp, UnitX='DeltaE')
-    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS, \
+    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
            AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)  # delete monitor WS
     InstrParas(ascWS, instr, ana, refl)
-    _efixed = RunParas(ascWS, instr, run, title)
+    RunParas(ascWS, instr, run, title)
     ChangeAngles(ascWS, instr, theta)
     if useM:
         map = ReadMap(mapPath)
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -301,7 +298,6 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
     val = ExtractInt(asc[0])
     lgrp = int(val[0])
     ngrp = int(val[2])
-    _npt = int(val[7])
     title = asc[1]
     ltot = ngrp * lgrp
     logger.information('Number of spectra : ' + str(ngrp))
@@ -334,7 +330,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         ns += 1
     ascWS = fname + '_' + ana + refl + '_inx'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
                     Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS, instr, ana, refl)
     efixed = RunParas(ascWS, instr, 0, title)
@@ -351,7 +347,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -370,7 +366,7 @@ def RejectZero(inWS, tot):
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if tot[n] > 0:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', \
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
                                   WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
@@ -383,8 +379,6 @@ def RejectZero(inWS, tot):
 
 
 def ReadMap(path):
-    _workdir = config['defaultsave.directory']
-
     asc = loadFile(path)
 
     lasc = len(asc)
@@ -408,7 +402,7 @@ def UseMap(inWS, map):
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if map[n] == 1:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', \
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
                                   WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
@@ -446,14 +440,14 @@ def ChangeAngles(inWS, instr, theta):
         handle.write(str(n + 1) + '   ' + str(theta[n]) + "\n")
         logger.information('Spectrum ' + str(n + 1) + ' = ' + str(theta[n]))
     handle.close()
-    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False, \
+    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
                              AsciiHeader=head)
 
 
 def InstrParas(ws, instr, ana, refl):
     idf_dir = config['instrumentDefinition.directory']
     idf = idf_dir + instr + '_Definition.xml'
-    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=False)
+    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=True)
     ipf = idf_dir + instr + '_' + ana + '_' + refl + '_Parameters.xml'
     LoadParameterFile(Workspace=ws, Filename=ipf)
 
@@ -483,7 +477,7 @@ def RunParas(ascWS, _instr, run, title):
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
     StartTime('IN13')
-    _samWS = IN13Read(instr, run, ana, refl, Plot, Save)
+    IN13Read(instr, run, ana, refl, Plot, Save)
     EndTime('IN13')
 
 
@@ -495,14 +489,12 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
-    _lasc = len(asc)
 
     # header block
     text = asc[1]
     run = text[:8]
     text = asc[4]  # run line
     instr = text[:4]
-    _time = text[14:33]  # user line
     next, Ival = Iblock(asc, 5)
     nsubsp = Ival[0]
     nspec = Ival[153] - 2
@@ -521,9 +513,9 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
 
     logger.information('No. sub-spectra : ' + str(nsubsp))
     logger.information('No. spectra : ' + str(nspec))
-    logger.information('Scan type : ' + str(int(Fval[8])) + \
+    logger.information('Scan type : ' + str(int(Fval[8])) +
                        ' ; Average energy : ' + str(Fval[9]))
-    logger.information('CaF2 lattice : ' + str(Fval[81]) + \
+    logger.information('CaF2 lattice : ' + str(Fval[81]) +
                        ' ; Graphite lattice : ' + str(Fval[82]))
     logger.information('Wavelength : ' + str(wave))
     logger.information('No. temperatures : ' + str(ntemp))
@@ -537,7 +529,6 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     # monitors
     psd = next + (nspec + 2048) * lspec
     l1m1 = psd + 1
-    _txt = asc[l1m1]
     l2m1 = l1m1 + 3
     mon1 = ExtractFloat(asc[l2m1])
     logger.information('Mon1 : Line ' + str(l2m1) + ' : ' + asc[l2m1])
@@ -605,10 +596,10 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
             xDq = np.append(xDq, sorted_Q)
             yDq = np.append(yDq, y1Dq)
             eDq = np.append(eDq, e1Dq)
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
                     Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(ascWS, run, title, wave)
-    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq, \
+    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
                     Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(outWS, run, title, wave)
     if Save:

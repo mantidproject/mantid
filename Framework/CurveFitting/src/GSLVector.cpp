@@ -4,10 +4,12 @@
 #include "MantidCurveFitting/GSLVector.h"
 
 #include <gsl/gsl_blas.h>
-#include <stdexcept>
-#include <iomanip>
-#include <sstream>
+#include <algorithm>
 #include <cmath>
+#include <iomanip>
+#include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -26,6 +28,16 @@ GSLVector::GSLVector(const size_t n)
 GSLVector::GSLVector(const std::vector<double> &v)
     : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
 
+/// Construct from an initialisation list
+/// @param ilist :: A list of doubles: {V0, V1, V2, ...}
+GSLVector::GSLVector(std::initializer_list<double> ilist)
+    : GSLVector(ilist.size()) {
+  for (auto cell = ilist.begin(); cell != ilist.end(); ++cell) {
+    auto i = static_cast<size_t>(std::distance(ilist.begin(), cell));
+    set(i, *cell);
+  }
+}
+
 /// Copy constructor.
 /// @param v :: The other vector
 GSLVector::GSLVector(const GSLVector &v)
@@ -42,10 +54,26 @@ GSLVector::GSLVector(const gsl_vector *v)
   }
 }
 
+/// Move constructor.
+GSLVector::GSLVector(std::vector<double> &&v)
+    : m_data(std::move(v)),
+      m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+
 /// Copy assignment operator
 /// @param v :: The other vector
 GSLVector &GSLVector::operator=(const GSLVector &v) {
   m_data = v.m_data;
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
+  return *this;
+}
+
+/// Assignment operator
+GSLVector &GSLVector::operator=(const std::vector<double> &v) {
+  if (v.empty()) {
+    m_data.resize(1, 0);
+  } else {
+    m_data = v;
+  }
   m_view = gsl_vector_view_array(m_data.data(), m_data.size());
   return *this;
 }
@@ -116,10 +144,30 @@ GSLVector &GSLVector::operator-=(const GSLVector &v) {
   return *this;
 }
 
+/// Multiply by a vector (per element)
+GSLVector &GSLVector::operator*=(const GSLVector &v) {
+  if (size() != v.size()) {
+    throw std::runtime_error("GSLVectors have different sizes.");
+  }
+  gsl_vector_mul(gsl(), v.gsl());
+  return *this;
+}
+
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  gsl_vector_scale(gsl(), d);
+  for (auto &x : m_data) {
+    x *= d;
+  }
+  return *this;
+}
+
+/// Add a number
+/// @param d :: The number
+GSLVector &GSLVector::operator+=(const double d) {
+  for (auto &x : m_data) {
+    x += d;
+  }
   return *this;
 }
 
@@ -154,6 +202,84 @@ double GSLVector::dot(const GSLVector &v) const {
   gsl_blas_ddot(gsl(), v.gsl(), &res);
   return res;
 }
+
+/// Get index of the minimum element
+size_t GSLVector::indexOfMinElement() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find min element of empty vector.");
+  }
+  auto it = std::min_element(m_data.begin(), m_data.end());
+  if (it == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find min element of vector.");
+  }
+  return static_cast<size_t>(std::distance(m_data.begin(), it));
+}
+
+/// Get index of the maximum element
+size_t GSLVector::indexOfMaxElement() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find ax element of empty vector.");
+  }
+  auto it = std::max_element(m_data.begin(), m_data.end());
+  if (it == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find max element of vector.");
+  }
+  return static_cast<size_t>(std::distance(m_data.begin(), it));
+}
+
+/// Get indices of both the minimum and maximum elements
+std::pair<size_t, size_t> GSLVector::indicesOfMinMaxElements() const {
+  if (m_data.empty()) {
+    throw std::runtime_error("Cannot find min or max element of empty vector.");
+  }
+  auto pit = std::minmax_element(m_data.begin(), m_data.end());
+  if (pit.first == m_data.end() || pit.second == m_data.end()) {
+    // can it ever happen?
+    throw std::runtime_error("Cannot find min or max element of vector.");
+  }
+  return std::make_pair(
+      static_cast<size_t>(std::distance(m_data.begin(), pit.first)),
+      static_cast<size_t>(std::distance(m_data.begin(), pit.second)));
+}
+
+/// Create an index array that would sort this vector
+/// @param ascending :: If true sort in ascending order. Otherwise
+///     sort in descending order.
+std::vector<size_t> GSLVector::sortIndices(bool ascending) const {
+  std::vector<size_t> indices(size());
+  for (size_t i = 0; i < size(); ++i) {
+    indices[i] = i;
+  }
+  if (ascending) {
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
+      return this->m_data[i] < m_data[j];
+    });
+  } else {
+    std::sort(indices.begin(), indices.end(), [this](size_t i, size_t j) {
+      return this->m_data[i] > m_data[j];
+    });
+  }
+  return indices;
+}
+
+/// Sort this vector in order defined by an index array
+/// @param indices :: Indices defining the order of elements in sorted vector.
+void GSLVector::sort(const std::vector<size_t> &indices) {
+  std::vector<double> data(size());
+  for (size_t i = 0; i < size(); ++i) {
+    data[i] = m_data[indices[i]];
+  }
+  std::swap(m_data, data);
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
+}
+
+/// Create a new GSLVector and move all data to it. Destroys this vector.
+GSLVector GSLVector::move() { return GSLVector(std::move(m_data)); }
+
+/// Copy the values to an std vector of doubles
+std::vector<double> GSLVector::toStdVector() const { return m_data; }
 
 /// The << operator.
 std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {

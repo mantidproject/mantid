@@ -8,9 +8,9 @@ if( MSVC )
 
   # Use ExternalProject functionality as it already knows how to do clone/update
   include ( ExternalProject )
-  set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external )
+  set( EXTERNAL_ROOT ${PROJECT_SOURCE_DIR}/external CACHE PATH "Location to clone third party dependencies to" )
   set( THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git" )
-  set ( THIRD_PARTY_GIT_SHA1 234367ca799cac7cdc15c643d63492689f23db67 )
+  set ( THIRD_PARTY_GIT_SHA1 9af2288ba00e184b8659edbeedb12ce771b87bb5 )
   set ( THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty )
   # Generates a script to do the clone/update in tmp
   set ( _project_name ThirdParty )
@@ -65,7 +65,9 @@ if( MSVC )
   unset ( _tmp_dir )
 
   # Print out where we are looking for 3rd party stuff
-  set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/python2.7" )
+  set ( PYTHON_MAJOR_VERSION 2 )
+  set ( PYTHON_MINOR_VERSION 7 )
+  set ( THIRD_PARTY_BIN "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}" )
   message ( STATUS "Third party dependencies are in ${THIRD_PARTY_DIR}" )
   # Add to the path so that cmake can configure correctly without the user having to do it
   set ( ENV{PATH} "${THIRD_PARTY_BIN};$ENV{PATH}" )

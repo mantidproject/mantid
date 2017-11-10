@@ -1,13 +1,16 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory,WorkspaceProperty
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi
 import mantid
 import numpy as np
 
+
 class GetEiMonDet(PythonAlgorithm):
     """ Get incident energy from a monitor and some detectors
     """
+
     def category(self):
         """ Return category
         """
@@ -77,7 +80,6 @@ class GetEiMonDet(PythonAlgorithm):
         rw.setProperty("OutputWorkspace",'__sum')
         rw.setProperty("PreserveEvents",'0')
         rw.execute()
-
 
         ap=mantid.api.AlgorithmManager.createUnmanaged("AppendSpectra")
         ap.setChild(True)

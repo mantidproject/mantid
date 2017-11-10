@@ -3,38 +3,40 @@
     Command set for EQSANS reduction
 """
 # Import the specific commands that we need - some of these are used in systemtests
+from __future__ import (absolute_import, division, print_function)
 from reduction_workflow.command_interface import *
 
-from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
-from hfir_command_interface import SolidAngle, NoSolidAngle
-from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter
-from hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
+# The following imports allow users to import this file and have all functionality automatically imported
+# Do not remove these imports as it will break user scripts which rely on them
 
-from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
-from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
-from hfir_command_interface import NoSensitivityCorrection, DivideByThickness
+from .hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization  # noqa: F401
+from .hfir_command_interface import SolidAngle, NoSolidAngle  # noqa: F401
+from .hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter  # noqa: F401
+from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter  # noqa: F401
 
-from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
+from .hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter  # noqa: F401
+from .hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter  # noqa: F401
+from .hfir_command_interface import NoSensitivityCorrection, DivideByThickness  # noqa: F401
 
-from hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent
-from hfir_command_interface import ThetaDependentTransmission
-from hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter
-from hfir_command_interface import SetTransmission, NoTransmission
+from .hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii  # noqa: F401
 
-from hfir_command_interface import Background, NoBackground, NoBckTransmission
-from hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission
-from hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission
-from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent
+from .hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent  # noqa: F401
+from .hfir_command_interface import ThetaDependentTransmission  # noqa: F401
+from .hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter  # noqa: F401
+from .hfir_command_interface import SetTransmission, NoTransmission  # noqa: F401
 
-from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
-from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
-from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
-from hfir_command_interface import Stitch
+from .hfir_command_interface import Background, NoBackground, NoBckTransmission  # noqa: F401
+from .hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission  # noqa: F401
+from .hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission  # noqa: F401
+from .hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent  # noqa: F401
 
-#from mantid.api import AlgorithmManager
-#from mantid.kernel import Logger
-#import mantid.simpleapi as simpleapi
+from .hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance  # noqa: F401
+from .hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
+from .hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
+from .hfir_command_interface import Stitch  # noqa: F401
+
 from reduction_workflow.find_data import find_data
+
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear()
@@ -47,11 +49,13 @@ def EQSANS(keep_events=False, property_manager=None):
     if property_manager is not None:
         ReductionSingleton().set_reduction_table_name(property_manager)
 
+
 def SetBeamCenter(x,y):
     if x==0 and y==0:
         ReductionSingleton().reduction_properties["UseConfigBeam"]=True
     else:
         BaseSetBeamCenter(x,y)
+
 
 def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     if normalize_to_beam:
@@ -60,32 +64,41 @@ def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     else:
         ReductionSingleton().reduction_properties["Normalisation"]="Charge"
 
+
 def BeamMonitorNormalization(reference_flux_file):
     reference_flux_file = find_data(reference_flux_file, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["Normalisation"]="Monitor"
     ReductionSingleton().reduction_properties["MonitorReferenceFile"]=reference_flux_file
 
+
 def PerformFlightPathCorrection(do_correction=True):
     ReductionSingleton().reduction_properties["CorrectForFlightPath"]=do_correction
+
 
 def SetTOFTailsCutoff(low_cut=0.0, high_cut=0.0):
     ReductionSingleton().reduction_properties["LowTOFCut"]=low_cut
     ReductionSingleton().reduction_properties["HighTOFCut"]=high_cut
 
+
 def UseConfigTOFTailsCutoff(use_config=True):
     ReductionSingleton().reduction_properties["UseConfigTOFCuts"]=use_config
+
 
 def SkipTOFCorrection(skip=True):
     ReductionSingleton().reduction_properties["SkipTOFCorrection"]=skip
 
+
 def UseConfigMask(use_config=True):
     ReductionSingleton().reduction_properties["UseConfigMask"]=use_config
+
 
 def SetWavelengthStep(step=0.1):
     ReductionSingleton().reduction_properties["WavelengthStep"]=step
 
+
 def UseConfig(use_config=True):
     ReductionSingleton().reduction_properties["UseConfig"]=use_config
+
 
 def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False,
                      scale=True):
@@ -96,15 +109,27 @@ def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False,
     ReductionSingleton().reduction_properties["IQLogBinning"]=log_binning
     ReductionSingleton().reduction_properties["IQScaleResults"]=scale
 
+
 def CombineTransmissionFits(combine_frames=True):
     ReductionSingleton().reduction_properties["FitFramesTogether"]=combine_frames
 
+
 def BckCombineTransmissionFits(combine_frames=True):
     ReductionSingleton().reduction_properties["BckFitFramesTogether"]=combine_frames
+
 
 def Resolution(sample_aperture_diameter=10.0):
     ReductionSingleton().reduction_properties["ComputeResolution"]=True
     ReductionSingleton().reduction_properties["SampleApertureDiameter"]=sample_aperture_diameter
 
+
 def IndependentBinning(independent_binning=True):
     ReductionSingleton().reduction_properties["IQIndependentBinning"]=independent_binning
+
+
+def SetDetectorOffset(distance):
+    ReductionSingleton().reduction_properties["DetectorOffset"] = distance
+
+
+def SetSampleOffset(distance):
+    ReductionSingleton().reduction_properties["SampleOffset"] = distance

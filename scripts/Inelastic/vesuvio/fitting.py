@@ -40,9 +40,11 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 
     return FittingOptions(mass_profiles, background, constraints)
 
+
 # --------------------------------------------------------------------------------
 # FittingOptions - Used internally
 # --------------------------------------------------------------------------------
+
 
 class FittingOptions(object):
     """Holds all of the parameters for the fitting that are not related to the domain"""
@@ -58,7 +60,7 @@ class FittingOptions(object):
                 self.intensity_constraints = intensity_constraints
             else:
                 # trailing comma is important or the list gets undone
-                self.intensity_constraints = [intensity_constraints,]
+                self.intensity_constraints = [intensity_constraints, ]
         else:
             self.intensity_constraints = None
         self.background = background
@@ -86,7 +88,7 @@ class FittingOptions(object):
         """
         all_free = (default_vals is not None)
 
-        if all_free:
+        if all_free or (self.intensity_constraints is None):
             function_str = "composite=CompositeFunction,NumDeriv=1;"
         else:
             function_str = "composite=ComptonScatteringCountRate,NumDeriv=1%s;"
@@ -200,4 +202,3 @@ class FittingOptions(object):
         """Returns a string representation of the object
         """
         self.generate_function_str()
-

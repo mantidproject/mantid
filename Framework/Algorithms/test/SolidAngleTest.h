@@ -4,20 +4,26 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAlgorithms/SolidAngle.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/SolidAngle.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -27,33 +33,20 @@ public:
   SolidAngleTest() : inputSpace(""), outputSpace("") {
     // Set up a small workspace for testing
     // Nhist = 144;
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    boost::shared_ptr<Mantid::MantidVec> x =
-        boost::make_shared<Mantid::MantidVec>(11);
-    for (int i = 0; i < 11; ++i) {
-      (*x)[i] = i * 1000;
-    }
-    boost::shared_ptr<Mantid::MantidVec> a =
-        boost::make_shared<Mantid::MantidVec>(10);
-    boost::shared_ptr<Mantid::MantidVec> e =
-        boost::make_shared<Mantid::MantidVec>(10);
-    for (int i = 0; i < 10; ++i) {
-      (*a)[i] = i;
-      (*e)[i] = sqrt(double(i));
-    }
+    auto space2D = createWorkspace<Workspace2D>(Nhist, 11, 10);
+    BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    CountVariances e(a.begin(), a.end());
 
     for (int j = 0; j < Nhist; ++j) {
-      space2D->setX(j, x);
-      space2D->setData(j, a, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j)->setSpectrumNo(j + 1);
+      space2D->setBinEdges(j, x);
+      space2D->setCounts(j, a);
+      space2D->setCountVariances(j, e);
     }
 
     // Register the workspace in the data service
     inputSpace = "SATestWorkspace";
-    AnalysisDataService::Instance().add(inputSpace, space);
+    AnalysisDataService::Instance().add(inputSpace, space2D);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
@@ -68,9 +61,7 @@ public:
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Mark one detector dead to test that it leads to zero solid angle
-    IDetector_const_sptr det143 = space2D->getDetector(143);
-    ParameterMap &pmap = space2D->instrumentParameters();
-    pmap.addBool(det143.get(), "masked", true);
+    space2D->mutableSpectrumInfo().setMasked(143, true);
   }
 
   void testInit() {
@@ -107,21 +98,21 @@ public:
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     for (size_t i = 0; i < numberOfSpectra - 1; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->readY(i)[0], 0.00139, 0.00001);
+      TS_ASSERT_DELTA(output2D->y(i)[0], 0.00139, 0.00001);
 
-      TS_ASSERT_DELTA(output2D->readX(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readX(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readE(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
     }
 
     // some specific, more accurate values
-    TS_ASSERT_DELTA(output2D->readY(5)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(10)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(20)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(50)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(5)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(10)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(20)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(50)[0], 0.00139822, 0.0000001);
 
     // Check 'dead' detector spectrum gives zero solid angle
-    TS_ASSERT_EQUALS(output2D->readY(143).front(), 0);
+    TS_ASSERT_EQUALS(output2D->y(143).front(), 0);
   }
 
   void testExecSubset() {
@@ -152,11 +143,11 @@ public:
     TS_ASSERT_EQUALS(numberOfSpectra, 10);
     for (size_t i = 0; i < numberOfSpectra; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->readY(i)[0], 0.0013, 0.0001);
+      TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
 
-      TS_ASSERT_DELTA(output2D->readX(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readX(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readE(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
     }
   }
 

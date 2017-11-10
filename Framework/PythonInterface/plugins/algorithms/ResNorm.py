@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
@@ -11,12 +12,10 @@ class ResNorm(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "This algorithm creates a group 'normalisation' file by taking a resolution file and fitting "+\
                "it to all the groups in the resolution (vanadium) data file which has the same "+\
                "grouping as the sample data of interest."
-
 
     def PyInit(self):
         self.declareProperty(name='InputType', defaultValue='File',
@@ -48,7 +47,6 @@ class ResNorm(PythonAlgorithm):
                              doc='Plot options')
         self.declareProperty(name='Save', defaultValue=False,
                              doc='Switch Save result to nxs file Off/On')
-
 
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform

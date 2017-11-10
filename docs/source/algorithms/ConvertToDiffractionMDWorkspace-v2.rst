@@ -43,7 +43,7 @@ Types of Conversion
    out, to give Q in the frame of the sample. See
    :ref:`algm-SetGoniometer` to specify the goniometer used in
    the experiment.
--  **HKL**: uses the UB matrix (see :ref:`algm-SetUB`,
+-  **HKL**: uses the :ref:`UB matrix <Lattice>` (see :ref:`algm-SetUB`,
    :ref:`algm-FindUBUsingFFT` and others) to calculate the HKL
    Miller indices of each event.
 
@@ -72,11 +72,11 @@ Usage
    # create or load event workspace
    events = CreateSampleWorkspace(OutputWorkspace='events', WorkspaceType='Event', Function='Multiple Peaks')
    # convert to  MD workspace
-   md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150)
+   md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150, Version=2)
 
    # A way to look at these results as a text:
-   print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
-   print "Workspace Type is: ",md.id()
+   print("Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims()))
+   print("Workspace Type is:  {}".format(md.id()))
 
 **Output:**
 

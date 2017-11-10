@@ -34,9 +34,6 @@ namespace Crystal {
 */
 class DLLExport SortPeaksWorkspace : public API::Algorithm {
 public:
-  SortPeaksWorkspace();
-  ~SortPeaksWorkspace() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

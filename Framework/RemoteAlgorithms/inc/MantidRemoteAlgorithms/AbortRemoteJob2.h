@@ -32,10 +32,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AbortRemoteJob2 : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  AbortRemoteJob2() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~AbortRemoteJob2() override {}
   /// Algorithm's name
   const std::string name() const override { return "AbortRemoteJob"; }
   /// Summary of algorithms purpose

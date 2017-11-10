@@ -39,7 +39,6 @@ class DLLExport FindUBUsingMinMaxD : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:
   FindUBUsingMinMaxD();
-  ~FindUBUsingMinMaxD() override;
 
   /// Algorithm's name for identification
   const std::string name() const override;

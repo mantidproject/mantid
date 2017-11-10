@@ -3,14 +3,23 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
-#include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/InputSource.h>
 
 #include <fstream>
 #include <sstream>
@@ -84,6 +93,7 @@ public:
     TS_ASSERT(savealg.isInitialized());
     savealg.setPropertyValue("InputWorkspace", m_workspace1);
     savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("Process", " Earth < Sun");
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT(savealg.isExecuted());
     // Get the full path to the file again
@@ -157,6 +167,9 @@ public:
 
     testFile.close();
 
+    // Check for the process note
+    doTestProcessNote();
+
     // no more tests on the file are possible after this
     if (Poco::File(m_filename).exists())
       Poco::File(m_filename).remove();
@@ -170,6 +183,12 @@ public:
     savealg.setPropertyValue("InputWorkspace", "SaveCanSAS1DTest_group");
     savealg.setPropertyValue("Filename", m_filename);
     savealg.setPropertyValue("DetectorNames", "HAB");
+
+    savealg.setProperty("Geometry", "Cylinder");
+    savealg.setProperty("SampleHeight", 1.0);
+    savealg.setProperty("SampleWidth", 2.0);
+    savealg.setProperty("SampleThickness", 3.0);
+
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT(savealg.isExecuted());
 
@@ -208,24 +227,45 @@ public:
     TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "IRIS");
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws2d->dataX(0).size(), 2000);
+    TS_ASSERT_EQUALS(ws2d->x(0).size(), 2000);
 
     // some of the data is only stored to 3 decimal places
     double tolerance(1e-04);
-    TS_ASSERT_DELTA(ws2d->dataX(0).front(), 56005, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[1000], 66005, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0).back(), 75995, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0).front(), 56005, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[1000], 66005, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0).back(), 75995, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataY(0).front(), 0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[1000], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0).back(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0).front(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[1000], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0).back(), 0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataE(0).front(), 0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[1000], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0).back(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0).front(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[1000], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0).back(), 0, tolerance);
+
+    // Check that sample information is correct
+    auto &sample = ws2d->sample();
+    TS_ASSERT(sample.getGeometryFlag() == 1);
+    TS_ASSERT(sample.getHeight() == 1.0);
+    TS_ASSERT(sample.getWidth() == 2.0);
+    TS_ASSERT(sample.getThickness() == 3.0);
   }
 
 private:
+  void doTestProcessNote() {
+    std::string xPath = "SASroot/SASentry/SASprocess/SASprocessnote";
+    std::ifstream in(m_filename);
+    Poco::XML::InputSource src(in);
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&src);
+    Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node *pNode = it.root();
+    Poco::XML::Node *node = pNode->getNodeByPath(xPath);
+    auto innerText = node->innerText();
+    std::string expectedInnerText = "Earth < Sun";
+    TSM_ASSERT_EQUALS("Should find process note", innerText, expectedInnerText);
+  }
+
   std::string m_workspace1, m_workspace2, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;

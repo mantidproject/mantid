@@ -6,6 +6,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,16 +19,6 @@ DECLARE_ALGORITHM(SetInstrumentParameter)
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetInstrumentParameter::SetInstrumentParameter() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetInstrumentParameter::~SetInstrumentParameter() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -47,7 +40,7 @@ const std::string SetInstrumentParameter::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetInstrumentParameter::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
@@ -61,7 +54,7 @@ void SetInstrumentParameter::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
-  std::vector<std::string> propOptions{"String", "Number"};
+  std::vector<std::string> propOptions{"String", "Number", "Bool"};
   declareProperty("ParameterType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");
@@ -69,12 +62,57 @@ void SetInstrumentParameter::init() {
   declareProperty("Value", "", "The content of the Parameter");
 }
 
+/// @copydoc Algorithm::validateInputs()
+std::map<std::string, std::string> SetInstrumentParameter::validateInputs() {
+  std::map<std::string, std::string> errors;
+  const std::set<std::string> allowedBoolValues{"1", "0", "true", "false"};
+  const std::string type = getPropertyValue("ParameterType");
+  std::string val = getPropertyValue("Value");
+
+  if (type == "Bool") {
+    boost::algorithm::to_lower(val);
+    if (allowedBoolValues.find(val) == allowedBoolValues.end()) {
+      errors["Value"] = "Invalid value for Bool type.";
+    }
+  } else if (type == "Number") {
+    int intVal;
+    double dblVal;
+    if (!Strings::convert(val, intVal) && !Strings::convert(val, dblVal)) {
+      errors["Value"] = "Invalid value for Number type.";
+    }
+  }
+
+  return errors;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SetInstrumentParameter::exec() {
   // A pointer to the workspace to add a log to
-  MatrixWorkspace_sptr ws = getProperty("Workspace");
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  // Get some stuff from the input workspace
+  Instrument_sptr inst;
+  if (inputW) {
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
+  } else if (inputP) {
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
+  } else {
+    throw std::runtime_error("Could not get a valid instrument from the "
+                             "workspace which does not seem to be valid as "
+                             "input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
+  }
 
   // get the data that the user wants to add
   std::string cmptName = getProperty("ComponentName");
@@ -87,7 +125,6 @@ void SetInstrumentParameter::exec() {
   Strings::strip(paramName);
   Strings::strip(paramValue);
 
-  auto inst = ws->getInstrument();
   std::vector<IDetector_const_sptr> dets;
   std::vector<IComponent_const_sptr> cmptList;
   // set default to whole instrument
@@ -100,18 +137,36 @@ void SetInstrumentParameter::exec() {
     cmptList = inst->getAllComponentsWithName(cmptName);
   }
 
-  auto &paramMap = ws->instrumentParameters();
-  if (!dets.empty()) {
-    for (auto &det : dets) {
-      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
-    }
-  } else {
-    if (!cmptList.empty()) {
-      for (auto &cmpt : cmptList) {
-        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+  if (inputW) {
+    auto &paramMap = inputW->instrumentParameters();
+    if (!dets.empty()) {
+      for (auto &det : dets) {
+        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
       }
     } else {
-      g_log.warning("Could not find the component requested.");
+      if (!cmptList.empty()) {
+        for (auto &cmpt : cmptList) {
+          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+        }
+      } else {
+        g_log.warning("Could not find the component requested.");
+      }
+    }
+  }
+  if (inputP) {
+    auto &paramMap = inputP->instrumentParameters();
+    if (!dets.empty()) {
+      for (auto &det : dets) {
+        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
+      }
+    } else {
+      if (!cmptList.empty()) {
+        for (auto &cmpt : cmptList) {
+          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+        }
+      } else {
+        g_log.warning("Could not find the component requested.");
+      }
     }
   }
 }
@@ -134,22 +189,19 @@ void SetInstrumentParameter::addParameter(
   if (paramType == "String") {
     pmap.addString(cmptId, paramName, paramValue);
   } else if (paramType == "Number") {
-    bool valueIsInt(false);
     int intVal;
-    double dblVal;
     if (Strings::convert(paramValue, intVal)) {
-      valueIsInt = true;
-    } else if (!Strings::convert(paramValue, dblVal)) {
-      throw std::invalid_argument("Error interpreting string '" + paramValue +
-                                  "' as a number.");
-    }
-
-    if (valueIsInt)
       pmap.addInt(cmptId, paramName, intVal);
-    else
+    } else {
+      double dblVal;
+      Strings::convert(paramValue, dblVal);
       pmap.addDouble(cmptId, paramName, dblVal);
-  } else {
-    throw std::invalid_argument("Unknown Parameter Type " + paramType);
+    }
+  } else if (paramType == "Bool") {
+    std::string paramValueLower(paramValue);
+    boost::algorithm::to_lower(paramValueLower);
+    bool paramBoolValue = (paramValueLower == "true" || paramValue == "1");
+    pmap.addBool(cmptId, paramName, paramBoolValue);
   }
 }
 

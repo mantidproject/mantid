@@ -1,10 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
 
@@ -18,27 +19,25 @@ using Kernel::Quat;
  * @param map: pointer to the ParameterMap
  * */
 ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_shape(), m_material() {}
+    : Component(base, map), m_shape() {}
 
 /** Constructor
 *  @param name ::   The name of the component
 *  @param parent :: The Parent geometry object of this component
 */
 ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
-    : IObjComponent(), Component(name, parent), m_shape(), m_material() {}
+    : IObjComponent(), Component(name, parent), m_shape() {}
 
 /** Constructor
 *  @param name ::   The name of the component
 *  @param shape ::  A pointer to the object describing the shape of this
 * component
 *  @param parent :: The Parent geometry object of this component
-*  @param material :: An optional pointer to the material object of this
-* component
 */
-ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
-                           IComponent *parent, Kernel::Material_sptr material)
-    : IObjComponent(), Component(name, parent), m_shape(shape),
-      m_material(material) {}
+ObjComponent::ObjComponent(const std::string &name,
+                           boost::shared_ptr<const Object> shape,
+                           IComponent *parent)
+    : IObjComponent(), Component(name, parent), m_shape(shape) {}
 
 /** Return the shape of the component
  */
@@ -66,8 +65,8 @@ void ObjComponent::setShape(Object_const_sptr newShape) {
  * Return the material of the component. Currently
  * unaffected by parametrization
  */
-const Kernel::Material_const_sptr ObjComponent::material() const {
-  return m_material;
+const Kernel::Material ObjComponent::material() const {
+  return m_shape->material();
 }
 
 /// Does the point given lie within this object component?
@@ -141,6 +140,11 @@ int ObjComponent::interceptSurface(Track &track) const {
 * set
 */
 double ObjComponent::solidAngle(const V3D &observer) const {
+  if (m_map) {
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().solidAngle(index(), observer);
+    }
+  }
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
     throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle",
@@ -172,7 +176,12 @@ double ObjComponent::solidAngle(const V3D &observer) const {
   * the absoluteBB
   */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
-
+  if (m_map) {
+    if (hasComponentInfo()) {
+      absoluteBB = m_map->componentInfo().boundingBox(index(), &absoluteBB);
+      return;
+    }
+  }
   // Start with the box in the shape's coordinates
   const Object_const_sptr s = shape();
   if (!s) {
@@ -325,6 +334,15 @@ void ObjComponent::initDraw() const {
   if (shape() != nullptr)
     shape()->initDraw();
   Handle()->Initialize();
+}
+
+/**
+ * Register the contents of this ObjComponent
+ */
+size_t
+ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
+
+  return componentVisitor.registerGenericObjComponent(*this);
 }
 
 } // namespace Geometry

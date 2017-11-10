@@ -17,6 +17,7 @@ namespace Mantid {
 //---------------------------------------------------------------------------
 namespace Kernel {
 class InstrumentInfo;
+class FacilityInfo;
 }
 namespace API {
 
@@ -60,6 +61,8 @@ public:
                            const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
+  std::vector<IArchiveSearch_sptr>
+  getArchiveSearch(const Kernel::FacilityInfo &facility) const;
   std::string findRun(const std::string &hintstr,
                       const std::set<std::string> &exts) const;
   std::string findRun(
@@ -94,15 +97,14 @@ private:
   int m_globOption;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl>;
-#endif /* _WIN32 */
+typedef Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
+}
+}
 
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl>
-    FileFinder;
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
 }
 }
 

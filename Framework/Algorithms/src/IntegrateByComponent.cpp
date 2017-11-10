@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
 
@@ -15,15 +17,6 @@ DECLARE_ALGORITHM(IntegrateByComponent)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegrateByComponent::IntegrateByComponent() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegrateByComponent::~IntegrateByComponent() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -82,30 +75,24 @@ void IntegrateByComponent::exec() {
     std::vector<std::vector<size_t>> specmap = makeMap(integratedWS, parents);
     API::Progress prog(this, 0.3, 1.0, specmap.size());
     // calculate averages
+    const auto &spectrumInfo = integratedWS->spectrumInfo();
     for (auto hists : specmap) {
       prog.report();
       std::vector<double> averageYInput, averageEInput;
-      Geometry::Instrument_const_sptr instrument =
-          integratedWS->getInstrument();
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
-        const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hists[i])
-                ->getDetectorIDs(); // should be only one detector per spectrum
-        if (instrument->isDetectorMasked(detids))
+        if (spectrumInfo.isMonitor(hists[i]))
           continue;
-        if (instrument->isMonitor(detids))
+        if (spectrumInfo.isMasked(hists[i]))
           continue;
 
         const double yValue = integratedWS->readY(hists[i])[0];
         const double eValue = integratedWS->readE(hists[i])[0];
 
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value
@@ -130,22 +117,17 @@ void IntegrateByComponent::exec() {
             gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
       }
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
-        const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hists[i])
-                ->getDetectorIDs(); // should be only one detector per spectrum
-        if (instrument->isDetectorMasked(detids))
+        if (spectrumInfo.isMonitor(hists[i]))
           continue;
-        if (instrument->isMonitor(detids))
+        if (spectrumInfo.isMasked(hists[i]))
           continue;
 
         const double yValue = integratedWS->readY(hists[i])[0];
         const double eValue = integratedWS->readE(hists[i])[0];
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value
@@ -193,7 +175,6 @@ std::vector<std::vector<size_t>>
 IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
-  Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (parents == 0) // this should not happen in this file, but if one reuses
                     // the function and parents==0, the program has a sudden end
                     // without this check.
@@ -201,27 +182,24 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     return makeInstrumentMap(countsWS);
   }
 
-  if (!instrument) {
-    g_log.warning("Workspace has no instrument. LevelsUP is ignored");
-    return makeInstrumentMap(countsWS);
-  }
-
+  const auto spectrumInfo = countsWS->spectrumInfo();
+  const auto &detectorInfo = countsWS->detectorInfo();
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*((countsWS->getSpectrum(i))->getDetectorIDs().begin()));
-    try {
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-          instrument->getDetector(d)->getAncestors();
-
-      if (anc.size() < static_cast<size_t>(parents)) {
-        g_log.warning("Too many levels up. Will ignore LevelsUp");
-        parents = 0;
-        return makeInstrumentMap(countsWS);
-      }
-      mymap.emplace(anc[parents - 1]->getComponentID(), i);
-    } catch (Mantid::Kernel::Exception::NotFoundError &e) {
-      // do nothing
-      g_log.debug(e.what());
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.debug("Spectrum has no detector, skipping");
+      continue;
     }
+
+    const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
+    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
+        detectorInfo.detector(detIdx).getAncestors();
+
+    if (anc.size() < static_cast<size_t>(parents)) {
+      g_log.warning("Too many levels up. Will ignore LevelsUp");
+      parents = 0;
+      return makeInstrumentMap(countsWS);
+    }
+    mymap.emplace(anc[parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;

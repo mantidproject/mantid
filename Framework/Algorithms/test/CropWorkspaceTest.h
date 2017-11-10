@@ -8,6 +8,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -43,12 +44,11 @@ public:
         for (int k = 0; k < 6; ++k) {
           space2D->dataX(j)[k] = k;
         }
-        space2D->setData(
-            j, boost::shared_ptr<Mantid::MantidVec>(
-                   new std::vector<double>(a + (5 * j), a + (5 * j) + 5)),
-            boost::shared_ptr<Mantid::MantidVec>(
-                new std::vector<double>(e + (5 * j), e + (5 * j) + 5)));
+        space2D->dataY(j) = std::vector<double>(a + (5 * j), a + (5 * j) + 5);
+        space2D->dataE(j) = std::vector<double>(e + (5 * j), e + (5 * j) + 5);
       }
+      InstrumentCreationHelper::addFullInstrumentToWorkspace(*space2D, false,
+                                                             false, "");
       // Register the workspace in the data service
       AnalysisDataService::Instance().add(name, space);
     }
@@ -99,7 +99,7 @@ public:
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateEventWorkspace(36, 50, 50, 0.0, 2., 2);
+        WorkspaceCreationHelper::createEventWorkspace(36, 50, 50, 0.0, 2., 2);
     // Fake a unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     test_in->setInstrument(
@@ -135,11 +135,11 @@ public:
     TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
     TS_ASSERT_EQUALS(30, ws->getNumberEvents());
 
-    TS_ASSERT(40. <= ws->getEventList(0).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(0).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(0).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(0).getTofMax());
 
-    TS_ASSERT(40. <= ws->getEventList(2).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(2).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(2).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(2).getTofMax());
   }
 
   void testExec() {
@@ -181,8 +181,8 @@ public:
       TS_ASSERT_EQUALS(output->readX(i)[3], input->readX(i + 2)[4]);
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i + 2));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i + 2)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i + 2).getDetectorIDs());
     }
   }
 
@@ -226,14 +226,14 @@ public:
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i).getDetectorIDs());
     }
   }
 
   void testWithPointData() {
     AnalysisDataService::Instance().add(
-        "point", WorkspaceCreationHelper::Create2DWorkspace123(5, 5));
+        "point", WorkspaceCreationHelper::create2DWorkspace123(5, 5));
     CropWorkspace crop3;
     TS_ASSERT_THROWS_NOTHING(crop3.initialize());
     TS_ASSERT_THROWS_NOTHING(crop3.setPropertyValue("InputWorkspace", "point"));
@@ -313,7 +313,7 @@ public:
   void testRagged_events() {
     // Event workspace with 10 bins from 0 to 10
     EventWorkspace_sptr input =
-        WorkspaceCreationHelper::CreateEventWorkspace(5, 10, 10, 0.0, 1.0);
+        WorkspaceCreationHelper::createEventWorkspace(5, 10, 10, 0.0, 1.0);
     // Change the first X vector to 3, 4, 5 ..
     for (int k = 0; k <= 10; ++k) {
       input->dataX(0)[k] = k + 3;
@@ -351,7 +351,7 @@ public:
   void testNegativeBinBoundaries() {
     const std::string wsName("neg");
     AnalysisDataService::Instance().add(
-        wsName, WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 5, -6));
+        wsName, WorkspaceCreationHelper::create2DWorkspaceBinned(1, 5, -6));
     CropWorkspace crop4;
     TS_ASSERT_THROWS_NOTHING(crop4.initialize());
     TS_ASSERT_THROWS_NOTHING(crop4.setPropertyValue("InputWorkspace", wsName));
@@ -383,11 +383,12 @@ public:
   // Public so it can be used within ExtractSingleSpectrum test
   static void doTestWithTextAxis(Algorithm *alg) {
     Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace(3, 10);
+        WorkspaceCreationHelper::create2DWorkspace(3, 10);
     // Change the data so we know we've cropped the correct one
     const size_t croppedIndex(1);
     const double flagged(100.0);
-    for (size_t i = 0; i < inputWS->blocksize(); ++i) {
+    const size_t numBins = inputWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       inputWS->dataY(croppedIndex)[i] = flagged;
     }
     const char *labels[3] = {"Entry1", "Entry2", "Entry3"};
@@ -440,7 +441,7 @@ public:
 
   void setUp() override {
     AnalysisDataService::Instance().add(
-        "ToCrop", WorkspaceCreationHelper::CreateEventWorkspace(
+        "ToCrop", WorkspaceCreationHelper::createEventWorkspace(
                       5000, 10000, 8000, 0.0, 1.0, 3));
   }
 

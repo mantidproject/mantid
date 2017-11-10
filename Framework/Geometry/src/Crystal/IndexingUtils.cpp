@@ -1,12 +1,13 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <stdexcept>
+#include <Eigen/Geometry>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
@@ -53,12 +54,9 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
   @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
-  @param  a                   First unit cell edge length in Angstroms.
-  @param  b                   Second unit cell edge length in Angstroms.
-  @param  c                   Third unit cell edge length in Angstroms.
-  @param  alpha               First unit cell angle in degrees.
-  @param  beta                second unit cell angle in degrees.
-  @param  gamma               third unit cell angle in degrees.
+  @param  lattice             The orientated lattice with the lattice
+                              parameters a,b,c and alpha, beta, gamma. The found
+                              UB and errors will be set on this lattice.
   @param  required_tolerance  The maximum allowed deviation of Miller indices
                               from integer values for a peak to be indexed.
   @param  base_index          The sequence number of the peak that should
@@ -77,6 +75,8 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
                               used to scan for an initial orientation matrix.
   @param  degrees_per_step    The number of degrees between different
                               orientations used during the initial scan.
+  @param  fixAll              Fix the lattice parameters and do not optimise
+                              the UB matrix.
 
   @return  This will return the sum of the squares of the residual errors.
 
@@ -87,10 +87,10 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
                                  is <= 0.
 */
 double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
-                              double a, double b, double c, double alpha,
-                              double beta, double gamma,
+                              OrientedLattice &lattice,
                               double required_tolerance, int base_index,
-                              size_t num_initial, double degrees_per_step) {
+                              size_t num_initial, double degrees_per_step,
+                              bool fixAll) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -156,20 +156,18 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   for (size_t i = 0; i < num_initial; i++)
     some_qs.push_back(sorted_qs[i]);
 
-  ScanFor_UB(UB, some_qs, a, b, c, alpha, beta, gamma, degrees_per_step,
-             required_tolerance);
+  ScanFor_UB(UB, some_qs, lattice, degrees_per_step, required_tolerance);
 
   double fit_error = 0;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
   miller_ind.reserve(q_vectors.size());
   indexed_qs.reserve(q_vectors.size());
+
   // now gradually bring in the remaining
   // peaks and re-optimize the UB to index
   // them as well
-  size_t count = 0;
-  while (num_initial < sorted_qs.size()) {
-    count++;
+  while (!fixAll && num_initial < sorted_qs.size()) {
     num_initial = std::lround(1.5 * static_cast<double>(num_initial + 3));
     // add 3, in case we started with
     // a very small number of peaks!
@@ -190,13 +188,15 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     }
   }
 
-  if (q_vectors.size() >= 3) // try one last refinement using all peaks
+  std::vector<double> sigabc(7);
+  if (!fixAll &&
+      q_vectors.size() >= 3) // try one last refinement using all peaks
   {
     try {
       GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                       fit_error);
-      Matrix<double> temp_UB(3, 3, false);
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+      Matrix<double> temp_UB = UB;
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
       UB = temp_UB;
     } catch (...) {
       // failed to improve UB using these peaks, so just return the current UB
@@ -207,6 +207,10 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   // HKL space.
   GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                   fit_error);
+  // set the error on the lattice parameters
+  lattice.setUB(UB);
+  lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                   sigabc[5]);
   return fit_error;
 }
 
@@ -467,7 +471,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 
   if (q_vectors.size() < 4) {
     throw std::invalid_argument(
-        "Find_UB(): Three or more indexed peaks needed to find UB");
+        "Find_UB(): Four or more indexed peaks needed to find UB");
   }
 
   if (min_d >= max_d || min_d <= 0) {
@@ -583,7 +587,9 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
                                   const std::vector<V3D> &hkl_vectors,
                                   const std::vector<V3D> &q_vectors,
                                   std::vector<double> &sigabc) {
-  double result = Optimize_UB(UB, hkl_vectors, q_vectors);
+  double result = 0;
+  result = Optimize_UB(UB, hkl_vectors, q_vectors);
+
   if (sigabc.size() < 6) {
     sigabc.clear();
     return result;
@@ -611,11 +617,10 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
     for (int c = 0; c < 3; c++) {
 
       UB[r][c] += SMALL;
-
       GetLatticeParameters(UB, latNew);
       UB[r][c] -= SMALL;
 
-      for (int l = 0; l < 7; l++)
+      for (size_t l = 0; l < 7; l++)
         derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
     }
 
@@ -723,7 +728,7 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
 
     for (size_t i = 0; i < 3; i++) {
       double value = gsl_vector_get(UB_row, i);
-      if (gsl_isnan(value) || gsl_isinf(value))
+      if (!std::isfinite(value))
         found_UB = false;
     }
 
@@ -843,7 +848,7 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
 
   for (size_t i = 0; i < 3; i++) {
     double value = gsl_vector_get(x, i);
-    if (gsl_isnan(value) || gsl_isinf(value))
+    if (!std::isfinite(value))
       found_best_vec = false;
   }
 
@@ -880,12 +885,8 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
     @param UB                 This will be set to the UB matrix that best
                               indexes the supplied list of q_vectors.
     @param q_vectors          List of locations of peaks in "Q".
-    @param a                  Lattice parameter "a".
-    @param b                  Lattice parameter "b".
-    @param c                  Lattice parameter "c".
-    @param alpha              Lattice parameter alpha.
-    @param beta               Lattice parameter beta.
-    @param gamma              Lattice parameter gamma.
+    @param cell               Unit cell defining the parameters a,b,c and
+                              alpha, beta, gamma.
     @param degrees_per_step   The number of degrees per step used when
                               scanning through all possible directions and
                               orientations for the unit cell. NOTE: The
@@ -906,22 +907,30 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
 
  */
 double IndexingUtils::ScanFor_UB(DblMatrix &UB,
-                                 const std::vector<V3D> &q_vectors, double a,
-                                 double b, double c, double alpha, double beta,
-                                 double gamma, double degrees_per_step,
+                                 const std::vector<V3D> &q_vectors,
+                                 const UnitCell &cell, double degrees_per_step,
                                  double required_tolerance) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
+
+  auto a = cell.a();
+  auto b = cell.b();
+  auto c = cell.c();
+
+  // Precompute required trigonometric functions
+  const auto cosAlpha = std::cos(cell.alpha() * DEG_TO_RAD);
+  const auto cosBeta = std::cos(cell.beta() * DEG_TO_RAD);
+  const auto cosGamma = std::cos(cell.gamma() * DEG_TO_RAD);
+  const auto sinGamma = std::sin(cell.gamma() * DEG_TO_RAD);
+  const auto gamma_degrees = cell.gamma();
 
   V3D a_dir;
   V3D b_dir;
   V3D c_dir;
 
   double num_a_steps = std::round(90.0 / degrees_per_step);
-  double gamma_radians = gamma * DEG_TO_RAD;
-
-  int num_b_steps = boost::math::iround(4.0 * sin(gamma_radians) * num_a_steps);
+  int num_b_steps = boost::math::iround(4.0 * sinGamma * num_a_steps);
 
   std::vector<V3D> a_dir_list =
       MakeHemisphereDirections(boost::numeric_cast<int>(num_a_steps));
@@ -949,13 +958,14 @@ double IndexingUtils::ScanFor_UB(DblMatrix &UB,
     a_dir_temp *= a;
 
     b_dir_list = MakeCircleDirections(boost::numeric_cast<int>(num_b_steps),
-                                      a_dir_temp, gamma);
+                                      a_dir_temp, gamma_degrees);
 
     for (auto &b_dir_num : b_dir_list) {
       b_dir_temp = b_dir_num;
       b_dir_temp = V3D(b_dir_temp);
       b_dir_temp *= b;
-      c_dir_temp = Make_c_dir(a_dir_temp, b_dir_temp, c, alpha, beta, gamma);
+      c_dir_temp = makeCDir(a_dir_temp, b_dir_temp, c, cosAlpha, cosBeta,
+                            cosGamma, sinGamma);
       int num_indexed = 0;
       for (const auto &q_vector : q_vectors) {
         bool indexes_peak = true;
@@ -1673,40 +1683,30 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @param  b_dir   V3D object with length "b" in the direction of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
-    @param  alpha   angle between edges b and c.
-    @param  beta    angle between edges c and a.
-    @param  gamma   angle between edges a and b.
+    @param  cosAlpha   cos angle between edges b and c in radians.
+    @param  cosBeta    cos angle between edges c and a in radians.
+    @param  cosGamma   cos angle between edges a and b in radians.
+    @param  sinGamma   sin angle between edges a and b in radians.
 
     @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
  */
-V3D IndexingUtils::Make_c_dir(const V3D &a_dir, const V3D &b_dir, double c,
-                              double alpha, double beta, double gamma) {
-  double cos_alpha = cos(DEG_TO_RAD * alpha);
-  double cos_beta = cos(DEG_TO_RAD * beta);
-  double cos_gamma = cos(DEG_TO_RAD * gamma);
-  double sin_gamma = sin(DEG_TO_RAD * gamma);
+V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double c,
+                            const double cosAlpha, const double cosBeta,
+                            const double cosGamma, const double sinGamma) {
 
-  double c1 = c * cos_beta;
-  double c2 = c * (cos_alpha - cos_gamma * cos_beta) / sin_gamma;
-  double V = sqrt(1 - cos_alpha * cos_alpha - cos_beta * cos_beta -
-                  cos_gamma * cos_gamma + 2 * cos_alpha * cos_beta * cos_gamma);
-  double c3 = c * V / sin_gamma;
+  double c1 = c * cosBeta;
+  double c2 = c * (cosAlpha - cosGamma * cosBeta) / sinGamma;
+  double V = sqrt(1 - cosAlpha * cosAlpha - cosBeta * cosBeta -
+                  cosGamma * cosGamma + 2 * cosAlpha * cosBeta * cosGamma);
+  double c3 = c * V / sinGamma;
 
-  V3D basis_1(a_dir);
-  basis_1.normalize();
+  auto basis_1 = Kernel::toVector3d(a_dir).normalized();
+  auto basis_3 =
+      Kernel::toVector3d(a_dir).cross(Kernel::toVector3d(b_dir)).normalized();
+  auto basis_2 = basis_3.cross(basis_1).normalized();
 
-  V3D basis_3(a_dir);
-  basis_3 = basis_3.cross_prod(b_dir);
-  basis_3.normalize();
-
-  V3D basis_2(basis_3);
-  basis_2 = basis_2.cross_prod(basis_1);
-  basis_2.normalize();
-
-  V3D c_dir = basis_1 * c1 + basis_2 * c2 + basis_3 * c3;
-
-  return c_dir;
+  return Kernel::toV3D(basis_1 * c1 + basis_2 * c2 + basis_3 * c3);
 }
 
 /**
@@ -1773,7 +1773,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
           if ((length_diff / current_length) < len_tol) // continue scan
           {
             angle = current_dir.angle(next_dir) * RAD_TO_DEG;
-            if ((boost::math::isnan)(angle))
+            if ((std::isnan)(angle))
               angle = 0;
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
               temp.push_back(next_dir);
@@ -1951,8 +1951,7 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   for (size_t row = 0; row < 3; row++)
     for (size_t col = 0; col < 3; col++) {
-      if ((boost::math::isnan)(UB[row][col]) ||
-          (boost::math::isinf)(UB[row][col])) {
+      if (!std::isfinite(UB[row][col])) {
         return false;
       }
     }

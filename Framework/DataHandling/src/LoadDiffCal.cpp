@@ -3,12 +3,16 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Diffraction.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <cmath>
 #include <H5Cpp.h>
@@ -17,7 +21,6 @@ namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
@@ -33,18 +36,6 @@ using namespace H5;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDiffCal)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDiffCal::LoadDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDiffCal::~LoadDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }
@@ -62,7 +53,6 @@ const std::string LoadDiffCal::summary() const {
   return "Loads a calibration file for powder diffraction";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadDiffCal::init() {
@@ -110,47 +100,6 @@ void LoadDiffCal::init() {
 
 namespace { // anonymous
 
-std::string readString(H5File &file, const std::string &path) {
-  try {
-    DataSet data = file.openDataSet(path);
-    std::string value;
-    data.read(value, data.getDataType(), data.getSpace());
-    return value;
-  } catch (H5::FileIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    return "";
-  }
-}
-
-template <typename NumT>
-std::vector<NumT> readArrayCoerce(DataSet &dataset,
-                                  const DataType &desiredDataType) {
-  std::vector<NumT> result;
-  DataType dataType = dataset.getDataType();
-  DataSpace dataSpace = dataset.getSpace();
-
-  if (desiredDataType == dataType) {
-    result.resize(dataSpace.getSelectNpoints());
-    dataset.read(&result[0], dataType, dataSpace);
-  } else if (PredType::NATIVE_UINT32 == dataType) {
-    std::vector<uint32_t> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    result.assign(temp.begin(), temp.end());
-  } else if (PredType::NATIVE_FLOAT == dataType) {
-    std::vector<float> temp(dataSpace.getSelectNpoints());
-    dataset.read(&temp[0], dataType, dataSpace);
-    for (float value : temp)
-      result.push_back(static_cast<NumT>(value));
-  } else {
-    throw DataTypeIException();
-  }
-
-  return result;
-}
-
 bool endswith(const std::string &str, const std::string &ending) {
   if (ending.size() > str.size()) {
     return false;
@@ -189,52 +138,6 @@ void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
 
 } // anonymous namespace
 
-std::vector<double> LoadDiffCal::readDoubleArray(Group &group,
-                                                 const std::string &name) {
-  std::vector<double> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be double"
-                        << "\n";
-  }
-
-  for (double &value : result) {
-    if (std::abs(value) < 1.e-10) {
-      value = 0.;
-    } else if (value != value) { // check for NaN
-      value = 0.;
-    }
-  }
-
-  return result;
-}
-
-std::vector<int32_t> LoadDiffCal::readInt32Array(Group &group,
-                                                 const std::string &name) {
-  std::vector<int32_t> result;
-
-  try {
-    DataSet dataset = group.openDataSet(name);
-    result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
-  } catch (H5::GroupIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-  } catch (H5::DataTypeIException &e) {
-    UNUSED_ARG(e);
-    g_log.information() << "DataSet \"" << name << "\" should be int32"
-                        << "\n";
-  }
-
-  return result;
-}
-
 void LoadDiffCal::getInstrument(H5File &file) {
   // don't bother if there isn't a mask or grouping requested
   bool makeMask = getProperty("MakeMaskWorkspace");
@@ -249,8 +152,9 @@ void LoadDiffCal::getInstrument(H5File &file) {
   }
 
   std::string idf =
-      readString(file, "/calibration/instrument/instrument_source");
-  std::string instrumentName = readString(file, "/calibration/instrument/name");
+      H5Util::readString(file, "/calibration/instrument/instrument_source");
+  std::string instrumentName =
+      H5Util::readString(file, "/calibration/instrument/name");
 
   g_log.debug() << "IDF : " << idf << "\n"
                 << "NAME: " << instrumentName << "\n";
@@ -327,37 +231,6 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-namespace { // anonymous namespace
-
-double calcTofMin(const double difc, const double difa, const double tzero,
-                  const double tofmin) {
-  if (difa == 0.) {
-    if (tzero != 0.) {
-      // check for negative d-spacing
-      return std::max<double>(-1. * tzero, tofmin);
-    }
-  } else if (difa > 0) {
-    // check for imaginary part in quadratic equation
-    return std::max<double>(tzero - .25 * difc * difc / difa, tofmin);
-  }
-
-  // everything else is fine so just return supplied tofmin
-  return tofmin;
-}
-
-double calcTofMax(const double difc, const double difa, const double tzero,
-                  const double tofmax) {
-  if (difa < 0.) {
-    // check for imaginary part in quadratic equation
-    return std::min<double>(tzero - .25 * difc * difc / difa, tofmax);
-  }
-
-  // everything else is fine so just return supplied tofmax
-  return tofmax;
-}
-
-} // end of anonymous namespace
-
 void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difc,
                                    const std::vector<double> &difa,
@@ -412,14 +285,16 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       newrow << offsets[i];
 
     // calculate tof range for information
-    const double tofMinRow = calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    const double tofMinRow =
+        Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow = calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      const double tofMaxRow =
+          Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {
@@ -471,10 +346,11 @@ void LoadDiffCal::runLoadCalFile() {
   bool makeCalWS = getProperty("MakeCalWorkspace");
   bool makeMaskWS = getProperty("MakeMaskWorkspace");
   bool makeGroupWS = getProperty("MakeGroupingWorkspace");
+  API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
-  alg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+  alg->setProperty("InputWorkspace", inputWs);
   alg->setPropertyValue("InstrumentName", getPropertyValue("InstrumentName"));
   alg->setPropertyValue("InstrumentFilename",
                         getPropertyValue("InstrumentFilename"));
@@ -529,22 +405,30 @@ void LoadDiffCal::exec() {
   }
 
   progress.report("Reading detid");
-  std::vector<int32_t> detids = readInt32Array(calibrationGroup, "detid");
+  std::vector<int32_t> detids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "detid");
   progress.report("Reading dasid");
-  std::vector<int32_t> dasids = readInt32Array(calibrationGroup, "dasid");
+  std::vector<int32_t> dasids =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "dasid");
   progress.report("Reading group");
-  std::vector<int32_t> groups = readInt32Array(calibrationGroup, "group");
+  std::vector<int32_t> groups =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "group");
   progress.report("Reading use");
-  std::vector<int32_t> use = readInt32Array(calibrationGroup, "use");
+  std::vector<int32_t> use =
+      H5Util::readArray1DCoerce<int32_t>(calibrationGroup, "use");
 
   progress.report("Reading difc");
-  std::vector<double> difc = readDoubleArray(calibrationGroup, "difc");
+  std::vector<double> difc =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difc");
   progress.report("Reading difa");
-  std::vector<double> difa = readDoubleArray(calibrationGroup, "difa");
+  std::vector<double> difa =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "difa");
   progress.report("Reading tzero");
-  std::vector<double> tzero = readDoubleArray(calibrationGroup, "tzero");
+  std::vector<double> tzero =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "tzero");
   progress.report("Reading offset");
-  std::vector<double> offset = readDoubleArray(calibrationGroup, "offset");
+  std::vector<double> offset =
+      H5Util::readArray1DCoerce<double>(calibrationGroup, "offset");
 
   file.close();
 

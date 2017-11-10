@@ -27,34 +27,35 @@
  *                                                                         *
  ***************************************************************************/
 #include "Fit.h"
-#include "fit_gsl.h"
-#include "Table.h"
-#include "Matrix.h"
-#include "QwtErrorPlotCurve.h"
-#include "FunctionCurve.h"
 #include "ColorBox.h"
-#include "MultiLayer.h"
 #include "FitModelHandler.h"
+#include "FunctionCurve.h"
 #include "Mantid/MantidCurve.h"
+#include "Matrix.h"
+#include "MultiLayer.h"
+#include "QwtErrorPlotCurve.h"
+#include "Table.h"
+#include "fit_gsl.h"
 
-#include <gsl/gsl_statistics.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_statistics.h>
+#include <gsl/gsl_version.h>
 
 #include <QApplication>
-#include <QMessageBox>
 #include <QDateTime>
 #include <QLocale>
+#include <QMessageBox>
 #include <QTextStream>
 
 Fit::Fit(ApplicationWindow *parent, Graph *g, const QString &name)
-    : Filter(parent, g, name), d_f(NULL), d_df(NULL), d_fdf(NULL),
-      d_fsimplex(NULL), d_w(NULL) {
+    : Filter(parent, g, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr),
+      d_fsimplex(nullptr), d_w(nullptr) {
   init();
 }
 
 Fit::Fit(ApplicationWindow *parent, Table *t, const QString &name)
-    : Filter(parent, t, name), d_f(NULL), d_df(NULL), d_fdf(NULL),
-      d_fsimplex(NULL), d_w(NULL) {
+    : Filter(parent, t, name), d_f(nullptr), d_df(nullptr), d_fdf(nullptr),
+      d_fsimplex(nullptr), d_w(nullptr) {
   init();
 }
 
@@ -66,35 +67,35 @@ void Fit::init() {
   }
   d_p = 0;
   d_n = 0;
-  d_x = 0;
-  d_y = 0;
+  d_x = nullptr;
+  d_y = nullptr;
   d_curveColorIndex = 1;
   d_solver = ScaledLevenbergMarquardt;
   d_tolerance = 1e-4;
   d_gen_function = true;
   d_points = 100;
   d_max_iterations = 1000;
-  d_curve = 0;
+  d_curve = nullptr;
   d_formula = QString::null;
   d_result_formula = QString::null;
   d_explanation = QString::null;
   d_weighting = NoWeighting;
   weighting_dataset = QString::null;
   is_non_linear = true;
-  d_results = 0;
-  d_errors = 0;
+  d_results = nullptr;
+  d_errors = nullptr;
   d_init_err = false;
   chi_2 = -1;
   d_scale_errors = false;
   d_sort_data = false;
   d_prec = app->fit_output_precision;
-  d_param_table = 0;
-  d_cov_matrix = 0;
-  covar = 0;
-  d_param_init = 0;
+  d_param_table = nullptr;
+  d_cov_matrix = nullptr;
+  covar = nullptr;
+  d_param_init = nullptr;
   d_fit_type = BuiltIn;
-  d_param_range_left = 0;
-  d_param_range_right = 0;
+  d_param_range_left = nullptr;
+  d_param_range_right = nullptr;
 }
 
 gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
@@ -141,7 +142,14 @@ gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
     status = gsl_multifit_test_delta(s->dx, s->x, d_tolerance, d_tolerance);
   } while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);
 
+#if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(s->J, 0.0, covar);
+#else
+  gsl_matrix *J = gsl_matrix_alloc(d_n, d_p);
+  gsl_multifit_fdfsolver_jac(s, J);
+  gsl_multifit_covar(J, 0.0, covar);
+  gsl_matrix_free(J);
+#endif
   iterations = static_cast<int>(iter);
   return s;
 }
@@ -227,7 +235,7 @@ void Fit::setDataCurve(int curve, double start, double end) {
   PlotCurve *plotCurve = dynamic_cast<PlotCurve *>(d_curve);
   DataCurve *dataCurve = dynamic_cast<DataCurve *>(d_curve);
   // if it is a DataCurve (coming from a Table)
-  if (plotCurve && dataCurve && plotCurve->type() != Graph::Function) {
+  if (plotCurve && dataCurve && plotCurve->type() != GraphOptions::Function) {
     QList<DataCurve *> lst = dataCurve->errorBarsList();
     foreach (DataCurve *c, lst) {
       QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c);
@@ -432,8 +440,8 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
     }
 
     bool error = true;
-    QwtErrorPlotCurve *er = 0;
-    if (dataCurve && dataCurve->type() != Graph::Function) {
+    QwtErrorPlotCurve *er = nullptr;
+    if (dataCurve && dataCurve->type() != GraphOptions::Function) {
       QList<DataCurve *> lst = dataCurve->errorBarsList();
       foreach (DataCurve *c, lst) {
         er = dynamic_cast<QwtErrorPlotCurve *>(c);
@@ -467,7 +475,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
       d_w[i] = sqrt(d_y[i]);
   } break;
   case Dataset: // Dataset weighting
-  { // d_w are equal to the values of the arbitrary dataset
+  {             // d_w are equal to the values of the arbitrary dataset
     if (colName.isEmpty())
       return false;
 
@@ -476,10 +484,10 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
       return false;
 
     if (t->numRows() < d_n) {
-      QMessageBox::critical(app, tr("MantidPlot - Error"),
-                            tr("The column %1 has less points than the fitted "
-                               "data set. Please choose another column!.")
-                                .arg(colName));
+      QMessageBox::critical(
+          app, tr("MantidPlot - Error"),
+          tr("The column %1 has less points than the fitted "
+             "data set. Please choose another column!.").arg(colName));
       return false;
     }
 
@@ -507,8 +515,7 @@ Table *Fit::parametersTable(const QString &tableName) {
         app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
   }
 
-  d_param_table->setHeader(QStringList() << tr("Parameter") << tr("Value")
-                                         << tr("Error"));
+  d_param_table->setHeader({tr("Parameter"), tr("Value"), tr("Error")});
   d_param_table->setColPlotDesignation(2, Table::yErr);
   d_param_table->setHeaderColType();
 
@@ -611,8 +618,7 @@ void Fit::fit() {
   if (d_p > d_n) {
     QMessageBox::critical(app, tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!")
-                              .arg(d_p));
+                             "operation. Operation aborted!").arg(d_p));
     return;
   }
   if (d_formula.isEmpty()) {
@@ -624,17 +630,12 @@ void Fit::fit() {
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  const char *function = d_formula.ascii();
+  const char *function = d_formula.toAscii().constData();
   QString names = d_param_names.join(",");
-  const char *parNames = names.ascii();
+  const char *parNames = names.toAscii().constData();
 
-  struct FitData d_data = {static_cast<size_t>(d_n),
-                           static_cast<size_t>(d_p),
-                           d_x,
-                           d_y,
-                           d_w,
-                           function,
-                           parNames};
+  struct FitData d_data = {static_cast<size_t>(d_n), static_cast<size_t>(d_p),
+                           d_x, d_y, d_w, function, parNames};
 
   int status, iterations = d_max_iterations;
   if (d_solver == NelderMeadSimplex) {
@@ -721,7 +722,7 @@ void Fit::insertFitFunctionCurve(const QString &name, double *x, double *y,
   c->setData(x, y, d_points);
   c->setRange(d_x[0], d_x[d_n - 1]);
   c->setFormula(formula);
-  d_output_graph->insertPlotItem(c, Graph::Line);
+  d_output_graph->insertPlotItem(c, GraphOptions::Line);
   d_output_graph->addFitCurve(c);
 }
 
@@ -730,10 +731,9 @@ bool Fit::save(const QString &fileName) {
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
     QMessageBox::critical(
-        0, tr("MantidPlot") + " - " + tr("File Save Error"),
+        nullptr, tr("MantidPlot") + " - " + tr("File Save Error"),
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(fileName));
+           "you have the right to write to this location!").arg(fileName));
     return false;
   }
 
@@ -833,11 +833,11 @@ void Fit::freeMemory() {
 
   if (d_x) {
     delete[] d_x;
-    d_x = NULL;
+    d_x = nullptr;
   }
   if (d_y) {
     delete[] d_y;
-    d_y = NULL;
+    d_y = nullptr;
   }
 }
 

@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import time
 import datetime
 import numbers
@@ -7,6 +8,7 @@ import numpy
 from mantid.api import * # PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import * # StringArrayProperty
 from mantid.simpleapi import * # needed for Load
+
 
 class LoadLogPropertyTable(PythonAlgorithm):
 
@@ -28,7 +30,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),
                              "The Last file to load from, must be in the same directory, all files in between will also be used")
         self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),
-                             "The comma seperated list of properties to include. \n"+\
+                             "The comma seperated list of properties to include. \n"+
                              "The full list will be printed if an invalid value is used.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",Direction.Output),"Table of results")
 
@@ -45,7 +47,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         try:
             v=ws.getRun().getProperty(name)
         except:
-            possibleLogs = ws.getRun().keys()
+            possibleLogs = list(ws.getRun().keys())
             possibleLogs.insert(0,'comment')
             message =  "The log name '" + name + "' was not found, possible choices are: " + str(possibleLogs)
             raise ValueError(message)
@@ -55,7 +57,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except StandardError:
+        except: #pylint: disable=bare-except
             # print "probably not a time series"
             pass
         if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):

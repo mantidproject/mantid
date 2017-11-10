@@ -57,9 +57,6 @@ namespace DataHandling {
 */
 class DLLExport FindDetectorsInShape : public API::Algorithm {
 public:
-  FindDetectorsInShape();
-  ~FindDetectorsInShape() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsInShape"; };
   /// Summary of algorithms purpose

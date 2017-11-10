@@ -1,16 +1,12 @@
 #ifndef MANTID_DATAHANDLING_SAVEISISNEXUS_H_
 #define MANTID_DATAHANDLING_SAVEISISNEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+
+#include <nexus/NeXusFile.hpp>
 
 #include <climits>
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 class ISISRAW2;
 
 namespace Mantid {
@@ -52,9 +48,6 @@ class DLLExport SaveISISNexus : public API::Algorithm {
 public:
   /// Default constructor
   SaveISISNexus();
-
-  /// Destructor
-  ~SaveISISNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveISISNexus"; };
   /// Summary of algorithms purpose

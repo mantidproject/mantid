@@ -10,6 +10,9 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidAPI/Run.h"
+
+#include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,7 +22,6 @@ using Mantid::Kernel::Strings::strip;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 SlicingAlgorithm::SlicingAlgorithm()
@@ -28,12 +30,6 @@ SlicingAlgorithm::SlicingAlgorithm()
       m_axisAligned(true), m_outD(0), // unititialized and should be invalid
       m_NormalizeBasisVectors(false) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SlicingAlgorithm::~SlicingAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SlicingAlgorithm::initSlicingProps() {
@@ -181,7 +177,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
 
   // Get the entire name
   std::string name = Strings::strip(input.substr(0, n_first_comma));
-  if (name.size() == 0)
+  if (name.empty())
     throw std::invalid_argument("name should not be blank.");
 
   // Now remove the name and comma
@@ -255,20 +251,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   double binningScaling = double(numBins) / (lengthInInput);
 
   // Extract the arguments
-  std::string id = name;
   std::string units = Strings::strip(strs[0]);
 
   // Create the appropriate frame
   auto frame = createMDFrameForNonAxisAligned(units, basis);
 
   // Create the output dimension
-  MDHistoDimension_sptr out(
-      new MDHistoDimension(name, id, *frame, static_cast<coord_t>(min),
-                           static_cast<coord_t>(max), numBins));
+  auto out = boost::make_shared<MDHistoDimension>(
+      name, name, *frame, static_cast<coord_t>(min), static_cast<coord_t>(max),
+      numBins);
 
   // Put both in the algo for future use
   m_bases.push_back(basis);
-  m_binDimensions.push_back(out);
+  m_binDimensions.push_back(std::move(out));
   m_binningScaling.push_back(binningScaling);
   m_transformScaling.push_back(transformScaling);
 }
@@ -383,7 +378,7 @@ void SlicingAlgorithm::createGeneralTransform() {
     g_log.information() << "Basis vectors forced to be orthogonal: ";
     for (auto &base : m_bases)
       g_log.information() << base.toString(",") << "; ";
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 
   // Now, convert the original vector to the coordinates of the ORIGNAL ws, if
@@ -398,7 +393,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   for (size_t d = 0; d < m_outD; d++)
     // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
     m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
-  // std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
+  // std::cout << m_inputMinPoint << " m_inputMinPoint \n";
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
   auto ct = new DataObjects::CoordTransformAffine(inD, m_outD);
@@ -434,8 +429,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
     auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
-    Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
-    Matrix<coord_t> toMatrix = fromMatrix;
+    Matrix<coord_t> toMatrix = ctFrom->getMatrix();
     // Invert the affine matrix to get the reverse transformation
     toMatrix.Invert();
     ctTo->setMatrix(toMatrix);
@@ -494,7 +488,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     Strings::convert(strs[0], min);
     Strings::convert(strs[1], max);
     Strings::convert(strs[2], numBins);
-    if (name.size() == 0)
+    if (name.empty())
       throw std::invalid_argument("Name should not be blank.");
     if (min >= max)
       throw std::invalid_argument("Min should be > max.");
@@ -689,7 +683,7 @@ void SlicingAlgorithm::createTransform() {
 
     g_log.notice() << "Performing " << this->name()
                    << " on the original workspace, '" << m_originalWS->getName()
-                   << "'" << std::endl;
+                   << "'\n";
   }
 
   // Create the coordinate transformation
@@ -735,57 +729,6 @@ void SlicingAlgorithm::createTransform() {
     // for future binning
     m_inWS = m_originalWS;
   }
-
-  //
-  //    if (m_inWS->hasOriginalWorkspace())
-  //    {
-  //      // A was transformed to B
-  //      // Now we transform B to C
-  //      // So we come up with the A -> C transformation
-  //
-  //      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
-  //      g_log.notice() << "Performing " << this->name() << " on the original
-  //      workspace, '" << origWS->getName() << "'" << std::endl;
-  //
-  //      if (origWS->getNumDims() != m_inWS->getNumDims())
-  //        throw std::runtime_error("SlicingAlgorithm::createTransform():
-  //        Cannot propagate a transformation if the number of dimensions has
-  //        changed.");
-  //
-  //      // A->C transformation
-  //      CoordTransform * fromOrig =
-  //      CoordTransformAffine::combineTransformations(
-  //      m_inWS->getTransformFromOriginal(), m_transformFromOriginal );
-  //      // C->A transformation
-  //      CoordTransform * toOrig =
-  //      CoordTransformAffine::combineTransformations( m_transformToOriginal,
-  //      m_inWS->getTransformToOriginal() );
-  //      // A->C binning transformation
-  //      CoordTransform * binningTransform =
-  //      CoordTransformAffine::combineTransformations(
-  //      m_inWS->getTransformFromOriginal(), m_transform );
-  //
-  //      // Replace the transforms
-  //      delete m_transformFromOriginal;
-  //      delete m_transformToOriginal;
-  //      delete m_transform;
-  //      m_transformFromOriginal = fromOrig;
-  //      m_transformToOriginal = toOrig;
-  //      m_transform = binningTransform;
-  //
-  //      coord_t in[2] = {0,0};
-  //      coord_t out[2] = {0,0};
-  //      m_transform->apply(in, out);
-  //      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) <<
-  //      std::endl;
-  //      in[0] = 10; in[1] = 10;
-  //      m_transform->apply(in, out);
-  //      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) <<
-  //      std::endl;
-  //
-  //      // Replace the input workspace
-  //      m_inWS = origWS;
-  //    }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -794,11 +737,8 @@ void SlicingAlgorithm::createTransform() {
  * This needs to be in the space of the INPUT MDEventWorkspace.
  *
  * In the most general case, this function assumes ORTHOGONAL BASIS VECTORS!
- * However, the following cases handle non-orthogonal vectors:
- *  2 bases in 2D space
- *  2 bases in 3D space
- *  3 bases in 3D space
- *  3 bases in 4D space
+ * However, in the case of N dimensions with N or N-1 bases then non-orthogonal
+ * basis vectors are allowed.
  *
  * @param chunkMin :: the minimum index in each dimension to consider "valid"
  *(inclusive).
@@ -822,7 +762,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
   VMD o2 = m_translation;
   // And this the list of basis vectors. Each vertex is given by o1+bases[i].
   std::vector<VMD> bases;
-  VMD x, y, z, t;
+  VMD x;
 
   for (size_t d = 0; d < m_bases.size(); d++) {
     double xMin = m_binDimensions[d]->getMinimum();
@@ -835,127 +775,63 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     // Offset the origin by the position along the basis vector
     o1 += (m_bases[d] * xMin);
     o2 += (m_bases[d] * xMax);
+
     VMD thisBase = m_bases[d] * (xMax - xMin);
     bases.push_back(thisBase);
     if (d == 0)
       x = thisBase;
-    if (d == 1)
-      y = thisBase;
-    if (d == 2)
-      z = thisBase;
-    if (d == 3)
-      t = thisBase;
   }
 
   // Dimensionality of the box
   size_t boxDim = bases.size();
 
-  // Create a Z vector by doing the cross-product of X and Y
-  if (boxDim == 2 && nd == 3) {
-    z = x.cross_prod(y);
-    z.normalize();
-  }
-
   // Point that is sure to be inside the volume of interest
   VMD insidePoint = (o1 + o2) / 2.0;
-  VMD normal = bases[0];
 
   if (boxDim == 1) {
     // 2 planes defined by 1 basis vector
     // Your normal = the x vector
     func->addPlane(MDPlane(x, o1));
     func->addPlane(MDPlane(x * -1.0, o2));
-  } else if (boxDim == 2 && nd == 2) {
-    // 4 planes defined by 2 basis vectors (general to non-orthogonal basis
-    // vectors)
-    std::vector<VMD> vectors;
-    // X plane
-    vectors.clear();
-    vectors.push_back(x);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // Y plane
-    vectors.clear();
-    vectors.push_back(y);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-  } else if (boxDim == 2 && nd == 3) {
-    // 4 planes defined by 2 basis vectors (general to non-orthogonal basis
-    // vectors)
-    // The vertical = cross-product of X and Y basis vectors
-    z = x.cross_prod(y);
+  } else if (boxDim == nd || boxDim == nd - 1) {
+    // Create a pair of planes for each base supplied. This is general to non-
+    // orthogonal bases. If we have bases (x y z t) then we create the planes
+    //
+    // y z t
+    // x z t
+    // x y t
+    // x y z
+    //
+    // Note: the last plane may or may not be created depending on the number
+    // of bases supplied to the slicing algorithm relative to the number
+    // of dimensions. i.e. if 3 bases were supplied and we have 4 dimensions
+    // then 6 planes are created instead of 8.
     std::vector<VMD> vectors;
 
-    // X plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(z);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
+    for (size_t ignoreIndex = 0; ignoreIndex < boxDim; ++ignoreIndex) {
+      vectors.clear();
+      // Create a list of vectors that excludes the "current" basis
+      for (size_t baseIndex = 0; baseIndex < boxDim; ++baseIndex) {
+        if (baseIndex != ignoreIndex)
+          vectors.push_back(bases[baseIndex]);
+      }
 
-    // Y plane
-    vectors.clear();
-    vectors.push_back(y);
-    vectors.push_back(z);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-  } else if (boxDim == 3 && nd == 3) {
-    // 6 planes defined by 3 basis vectors (general to non-orthogonal basis
-    // vectors)
-    VMD xyNormal = x.cross_prod(y);
-    // Flip the normal if the input bases were NOT right-handed.
-    if (!MDPlane(xyNormal, o1).isPointBounded(insidePoint))
-      xyNormal *= -1.0;
-    func->addPlane(MDPlane(xyNormal, o1));
-    func->addPlane(MDPlane(xyNormal * -1.0, o2));
-    VMD xzNormal = z.cross_prod(x);
-    if (!MDPlane(xzNormal, o1).isPointBounded(insidePoint))
-      xzNormal *= -1.0;
-    func->addPlane(MDPlane(xzNormal, o1));
-    func->addPlane(MDPlane(xzNormal * -1.0, o2));
-    VMD yzNormal = y.cross_prod(z);
-    if (!MDPlane(yzNormal, o1).isPointBounded(insidePoint))
-      yzNormal *= -1.0;
-    func->addPlane(MDPlane(yzNormal, o1));
-    func->addPlane(MDPlane(yzNormal * -1.0, o2));
-  } else if (boxDim == 3 && nd == 4) {
-    // 6 planes defined by 3 basis vectors, in 4D world. (General to
-    // non-orthogonal basis vectors)
+      // if we have fewer basis vectors than dimensions
+      // create a normal for the final dimension
+      if (boxDim == nd - 1)
+        vectors.push_back(VMD::getNormalVector(bases));
 
-    // Get a vector (in 4D) that is normal to all 3 other bases.
-    t = VMD::getNormalVector(bases);
-    // All the planes will have "t" in their plane.
-
-    std::vector<VMD> vectors;
-
-    // XY plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(y);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // XZ plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // YZ plane
-    vectors.clear();
-    vectors.push_back(y);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
+      // Add two planes for each set of vectors
+      func->addPlane(MDPlane(vectors, o1, insidePoint));
+      func->addPlane(MDPlane(vectors, o2, insidePoint));
+    }
   } else {
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
     // Assumes orthogonality!
+    g_log.warning("SlicingAlgorithm given " + std::to_string(boxDim) +
+                  " bases and " + std::to_string(nd) + " dimensions and " +
+                  "therefore will assume orthogonality");
     for (auto &base : bases) {
       // For each basis vector, make two planes, perpendicular to it and facing
       // inwards
@@ -1080,7 +956,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  */
 Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, std::string) const {
+    std::vector<size_t> indicesWithProjection, std::string units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";
@@ -1098,7 +974,34 @@ SlicingAlgorithm::extractMDFrameForNonAxisAligned(
   }
 
   Mantid::Geometry::MDFrame_uptr mdFrame(referenceMDFrame.clone());
+  setTargetUnits(mdFrame, units);
+
   return mdFrame;
+}
+
+/*
+ * Set units of the output workspace
+ * @param mdFrame: MDFrame to be added to the output workspace
+ * @param unit: the unit to use in mdFrame
+ */
+void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame,
+                                      const std::string &unit) const {
+  boost::regex pattern("in.*A.*\\^-1");
+
+  if (boost::regex_match(unit, pattern)) {
+    // RLU with special label
+    auto md_unit = ReciprocalLatticeUnit(unit);
+    mdFrame->setMDUnit(md_unit);
+  } else if (unit == "r") {
+    // RLU
+    auto md_unit = ReciprocalLatticeUnit();
+    mdFrame->setMDUnit(md_unit);
+  } else if (unit == "a") {
+    // Inverse angstroms
+    auto md_unit = InverseAngstromsUnit();
+    mdFrame->setMDUnit(md_unit);
+  }
+  // else leave the unit the same as the input workspace
 }
 
 } // namespace Mantid

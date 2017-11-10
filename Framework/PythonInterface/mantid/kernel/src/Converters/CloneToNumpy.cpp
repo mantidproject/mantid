@@ -10,6 +10,17 @@
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
+
+extern template int NDArrayTypeIndex<bool>::typenum;
+extern template int NDArrayTypeIndex<int>::typenum;
+extern template int NDArrayTypeIndex<long>::typenum;
+extern template int NDArrayTypeIndex<long long>::typenum;
+extern template int NDArrayTypeIndex<unsigned int>::typenum;
+extern template int NDArrayTypeIndex<unsigned long>::typenum;
+extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+
 namespace Impl {
 /**
  * Returns a new numpy array with the a copy of the data from 1D vector with the
@@ -65,7 +76,9 @@ PyObject *cloneND(const ElementType *carray, const int ndims,
   }
   void *arrayData = PyArray_DATA(nparray);
   const void *data = static_cast<void *>(const_cast<ElementType *>(carray));
-  std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  if (dims[0] > 0) {
+    std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  }
   return reinterpret_cast<PyObject *>(nparray);
 }
 

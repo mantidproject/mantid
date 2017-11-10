@@ -18,6 +18,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "PropertyManagerHelper.h"
 
 #include <Poco/File.h>
@@ -213,11 +215,11 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           mprops1->addProperty<std::string>("TestProp1-3", "value1-3"));
       TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
-      // THE CHANGES TO PW ARE APPLIED TO the COPY (PW1 too!!!!)
+      // The changes to pw should not affect pw1
       TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
-      TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+      TS_ASSERT(!pw1->run().hasProperty("TestProp1-3"));
     }
-    TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+    TS_ASSERT(!pw1->run().hasProperty("TestProp1-3"));
     if (trueSwitch) {
       // but this will cause it to diverge
       LogManager_sptr mprops2 = pw1->logs();
@@ -481,6 +483,25 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IPeaksWorkspace_sptr)val);
     TS_ASSERT(wsCastNonConst != NULL);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  void test_removePeaks() {
+    // build peaksworkspace (note number of peaks = 1)
+    auto pw = buildPW();
+    Instrument_const_sptr inst = pw->getInstrument();
+
+    // add peaks
+    Peak p(inst, 1, 3.0);
+    Peak p2(inst, 2, 6.0);
+    Peak p3(inst, 3, 9.0);
+    pw->addPeak(p);
+    pw->addPeak(p2);
+    pw->addPeak(p3);
+
+    // number of peaks = 4, now remove 3
+    std::vector<int> badPeaks{0, 2, 3};
+    pw->removePeaks(std::move(badPeaks));
+    TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
   }
 
 private:

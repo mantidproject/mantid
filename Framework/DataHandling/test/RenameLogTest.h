@@ -2,7 +2,9 @@
 #define MANTID_DATAHANDLING_RENAMELOGTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
@@ -102,7 +104,7 @@ private:
     m_rawValues.clear();
 
     for (size_t i = 0; i < m_num1; i++) {
-      Kernel::DateAndTime time(t1_ns);
+      Types::Core::DateAndTime time(t1_ns);
       p1->addValue(time, v1);
 
       m_rawTimes.push_back(time);
@@ -126,7 +128,7 @@ private:
     rp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         resultWS->run().getProperty(logName));
 
-    std::vector<Kernel::DateAndTime> newtimes = rp->timesAsVector();
+    std::vector<Types::Core::DateAndTime> newtimes = rp->timesAsVector();
     TS_ASSERT_EQUALS(newtimes.size(), m_num1);
     for (size_t i = 0; i < m_num1; i++) {
       double newvalue;
@@ -137,7 +139,7 @@ private:
   }
 
   size_t m_num1;
-  std::vector<Kernel::DateAndTime> m_rawTimes;
+  std::vector<Types::Core::DateAndTime> m_rawTimes;
   std::vector<double> m_rawValues;
 };
 

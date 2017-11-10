@@ -43,8 +43,7 @@ searchForLoader(const std::string &filename,
   for (auto it = names.begin(); it != iend; ++it) {
     const std::string &name = it->first;
     const int version = it->second;
-    logger.debug() << "Checking " << name << " version " << version
-                   << std::endl;
+    logger.debug() << "Checking " << name << " version " << version << '\n';
 
     // Use static cast for speed. Checks have been done at registration to check
     // the types
@@ -53,7 +52,7 @@ searchForLoader(const std::string &filename,
     try {
       const int confidence = alg->confidence(descriptor);
       logger.debug() << name << " returned with confidence=" << confidence
-                     << std::endl;
+                     << '\n';
       if (confidence > maxConfidence) // strictly greater
       {
         bestLoader = alg;
@@ -61,7 +60,7 @@ searchForLoader(const std::string &filename,
       }
     } catch (std::exception &exc) {
       logger.warning() << "Checking loader '" << name << "' raised an error: '"
-                       << exc.what() << "'. Loader skipped." << std::endl;
+                       << exc.what() << "'. Loader skipped.\n";
     }
     callback.apply(descriptor);
   }
@@ -100,8 +99,7 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::NexusDescriptor;
 
-  m_log.debug() << "Trying to find loader for '" << filename << "'"
-                << std::endl;
+  m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
   if (NexusDescriptor::isHDF(filename)) {
@@ -120,7 +118,7 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
     throw Kernel::Exception::NotFoundError(filename, "Unable to find loader");
   }
   m_log.debug() << "Found loader " << bestLoader->name() << " for file '"
-                << filename << "'" << std::endl;
+                << filename << "'\n";
   return bestLoader;
 }
 
@@ -174,7 +172,7 @@ FileLoaderRegistryImpl::FileLoaderRegistryImpl()
 
 /**
  */
-FileLoaderRegistryImpl::~FileLoaderRegistryImpl() {}
+FileLoaderRegistryImpl::~FileLoaderRegistryImpl() = default;
 
 /**
  * @param name A string containing the algorithm name

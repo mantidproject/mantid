@@ -1,5 +1,7 @@
 #include "MantidAPI/SampleValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {

@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/RenameLog.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -11,16 +12,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(RenameLog)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RenameLog::RenameLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RenameLog::~RenameLog() {}
-
 void RenameLog::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -32,8 +23,6 @@ void RenameLog::init() {
   declareProperty("NewLogName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Log's new name.");
-
-  return;
 }
 
 void RenameLog::exec() {
@@ -49,21 +38,19 @@ void RenameLog::exec() {
 
   if (!timeprop) {
     // g_log.error() << "After Log data is removed, TimeSeriesProperty " <<
-    // origlogname << " is deleted from memory" << std::endl;
+    // origlogname << " is deleted from memory\n";
     throw std::runtime_error("Not a TimeSeriesProperty!");
   }
 
-  // std::cout << "Remove log" << origlogname << std::endl;
+  // std::cout << "Remove log" << origlogname << '\n';
   matrixWS->mutableRun().removeLogData(origlogname);
 
-  // std::cout << "Change log name" << std::endl;
+  // std::cout << "Change log name\n";
   timeprop->setName(newlogname);
-  // std::cout << "Add log" << timeprop->name() << std::endl;
-  // std::vector<Kernel::DateAndTime> newtimes = timeprop->timesAsVector();
-  // std::cout << "Entries = " << newtimes.size() << std::endl;
+  // std::cout << "Add log" << timeprop->name() << '\n';
+  // std::vector<Types::Core::DateAndTime> newtimes = timeprop->timesAsVector();
+  // std::cout << "Entries = " << newtimes.size() << '\n';
   matrixWS->mutableRun().addProperty(timeprop);
-
-  return;
 }
 
 } // namespace Mantid

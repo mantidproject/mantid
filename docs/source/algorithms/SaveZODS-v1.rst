@@ -17,7 +17,7 @@ location.
 **You must be in HKL space for the output of this algorithm to make
 sense!**
 
-From http://www.crystal.mat.ethz.ch/research/DiffuseXrayScattering:
+From http://www.crystal.mat.ethz.ch/research/DiffuseXrayScattering.html:
 
 -  In the frame of an international cooperation between our group, the
    University of Zurich and Oak Ridge National Laboratories, we are
@@ -87,13 +87,26 @@ using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
     import os
     savefile = os.path.join(config["defaultsave.directory"], "ZODS.h5")
     SaveZODS(InputWorkspace=ws, FileName=savefile)
-    print "File created:", os.path.exists(savefile)
+    print("File created: {}".format(os.path.exists(savefile)))
 
 Output:
 
 .. testoutput:: SaveZODSEx
 
    File created: True 
+
+.. testcleanup:: SaveZODSEx
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["ZODS.h5"])
 
 
 .. categories::

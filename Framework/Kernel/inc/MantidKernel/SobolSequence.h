@@ -26,7 +26,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/QuasiRandomNumberSequence.h"
-#include "MantidKernel/ClassMacros.h"
 #include <gsl/gsl_qrng.h>
 
 //------------------------------------------------------------------------------
@@ -46,6 +45,16 @@ public:
   explicit SobolSequence(const unsigned int ndims);
   /// Destructor
   ~SobolSequence() override;
+
+  /// Disable default constructor
+  SobolSequence() = delete;
+
+  /// Disable copy operator
+  SobolSequence(const SobolSequence &) = delete;
+
+  /// Disable assignment operator
+  SobolSequence &operator=(const SobolSequence &) = delete;
+
   /// Generates the next value in the sequence
   void generateNextPoint() override;
   /// Reset the sequence
@@ -57,9 +66,6 @@ public:
   void restore() override;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SobolSequence)
-  DISABLE_COPY_AND_ASSIGN(SobolSequence)
-
   /// Set the number of dimensions
   void setNumberOfDimensions(const unsigned int ndims);
   /// Frees resources allocated by current generator

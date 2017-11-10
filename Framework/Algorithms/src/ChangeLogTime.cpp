@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ChangeLogTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <sstream>
 
@@ -15,12 +16,7 @@ using std::vector;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-
-/// Empty constructor allocates no resources.
-ChangeLogTime::ChangeLogTime() {}
-
-/// Empty destructor deallocates no resources.
-ChangeLogTime::~ChangeLogTime() {}
+using Types::Core::DateAndTime;
 
 /// Algorithm's name for identification
 const string ChangeLogTime::name() const { return "ChangeLogTime"; }

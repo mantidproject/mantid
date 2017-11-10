@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatBoundedValidator,Direction,logger
 import numpy
@@ -7,6 +9,7 @@ import numpy
 class SuggestTibHYSPEC(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
     """
+
     def category(self):
         """ Return category
         """
@@ -50,7 +53,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         t_det_us = dist_mm /self.e2v(energy) * 1000 + T0_moderator
         frame_start_us = t_det_us - 16667/2
         frame_end_us = t_det_us + 16667/2
-        index_under_frame = numpy.divide(int(t_det_us),16667)
+        index_under_frame = int(numpy.divide(int(t_det_us),16667))
         pre_lead_us = 16667 * index_under_frame
         pre_tail_us = pre_lead_us + tail_length_us
         post_lead_us = 16667 * (1+ index_under_frame)
@@ -113,7 +116,6 @@ class SuggestTibHYSPEC(PythonAlgorithm):
             logger.debug('I cannot find a good TIB range')
             TIB_low_us = 0.0
             TIB_high_us = 0.0
-
 
         #return the result
         self.setProperty("TibMin",TIB_low_us)

@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;
 
@@ -69,11 +71,11 @@ public:
     TS_ASSERT_EQUALS(nhist, 12120);
 
     for (size_t i = 0; i < nhist; ++i) {
-      ISpectrum *spectrum(NULL);
-      TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(i));
+      TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(i));
+      auto &spectrum = outputWS->getSpectrum(i);
 
-      TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), i + 1);
-      TS_ASSERT_EQUALS(spectrum->getDetectorIDs().size(), 1);
+      TS_ASSERT_EQUALS(spectrum.getSpectrumNo(), i + 1);
+      TS_ASSERT_EQUALS(spectrum.getDetectorIDs().size(), 1);
     }
   }
 
@@ -86,10 +88,10 @@ public:
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 2529);
 
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 10);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getSpectrumNo(), 7);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getDetectorIDs().size(), 10);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getSpectrumNo(), 2084);
 
     // The HET15869 data set was measured around 2005 on the HET instrument.
     // This is also the latest IDF.
@@ -118,10 +120,10 @@ public:
     const size_t nhist = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(nhist, 17790);
 
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(6)->getSpectrumNo(), 7);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083)->getSpectrumNo(), 2084);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(6).getSpectrumNo(), 7);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2083).getSpectrumNo(), 2084);
 
     // The LOQ49886 data set was measured around 2009 on the LOQ instrument.
     // It does not link to the most recent version of the LOQ IDF (2012 or
@@ -155,7 +157,7 @@ private:
   runAlgorithm(const std::string &inst, const std::string &unitx = "",
                const std::string &maptable = "") {
     using namespace Mantid::API;
-    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    IAlgorithm_sptr alg = createAlgorithm(m_wsName);
 
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", inst));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "-30,3,279"));
@@ -225,4 +227,33 @@ private:
   std::string m_wsName;
 };
 
+class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+
+    // Starting bin, bin width, last bin
+    const std::string binParams("-30,3,279");
+
+    alg.initialize();
+
+    alg.setPropertyValue("Instrument", "HET");
+    alg.setPropertyValue("BinParams", "-30,3,279");
+    alg.setPropertyValue("OutputWorkspace", outWsName);
+
+    alg.setRethrows(true);
+  }
+
+  void testCreateSimulationWorkspacePerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove(outWsName);
+  }
+
+private:
+  CreateSimulationWorkspace alg;
+
+  const std::string outWsName = "outTestWs";
+};
 #endif /* MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_ */

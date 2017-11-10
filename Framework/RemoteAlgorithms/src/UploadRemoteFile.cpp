@@ -1,4 +1,5 @@
 #include "MantidRemoteAlgorithms/UploadRemoteFile.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
@@ -90,7 +91,7 @@ void UploadRemoteFile::exec() {
     {
       g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
                           << "' to '" << getPropertyValue("LocalFileName")
-                          << "'" << std::endl;
+                          << "'\n";
     } else {
       JSONObject resp;
       initFromStream(resp, respStream);

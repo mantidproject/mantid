@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/ExtractMaskToTable.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -16,16 +17,6 @@ using namespace Mantid::Kernel;
 using namespace std;
 
 DECLARE_ALGORITHM(ExtractMaskToTable)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractMaskToTable::ExtractMaskToTable() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractMaskToTable::~ExtractMaskToTable() {}
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
@@ -65,7 +56,7 @@ void ExtractMaskToTable::exec() {
 
   bool m_inputIsMask = false;
   if (maskws) {
-    g_log.notice() << "InputWorkspace " << m_dataWS->name()
+    g_log.notice() << "InputWorkspace " << m_dataWS->getName()
                    << " is a MaskWorkspace.\n";
     m_inputIsMask = true;
   } else {
@@ -118,8 +109,6 @@ void ExtractMaskToTable::exec() {
   }
 
   addToTableWorkspace(outws, maskeddetids, xmin, xmax, prevmaskeddetids);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,8 +135,8 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
     chkcolumans[2] = "DetectorIDsList";
     for (int i = 0; i < 3; ++i) {
       if (colnames[i] != chkcolumans[i]) {
-        g_log.error() << "Mask table workspace " << masktablews->name() << "'s "
-                      << i << "-th column name is " << colnames[i]
+        g_log.error() << "Mask table workspace " << masktablews->getName()
+                      << "'s " << i << "-th column name is " << colnames[i]
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
@@ -214,22 +203,19 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   std::vector<detid_t> maskeddetids;
 
   // Get on hold of instrument
-  Instrument_const_sptr instrument = m_dataWS->getInstrument();
-  if (!instrument)
+  const auto &detectorInfo = m_dataWS->detectorInfo();
+  if (detectorInfo.size() == 0)
     throw runtime_error("There is no instrument in input workspace.");
 
   // Extract
-  size_t numdets = instrument->getNumberDetectors();
-  vector<detid_t> detids = instrument->getDetectorIDs();
+  const vector<detid_t> &detids = detectorInfo.detectorIDs();
 
-  for (size_t i = 0; i < numdets; ++i) {
-    detid_t tmpdetid = detids[i];
-    IDetector_const_sptr tmpdetector = instrument->getDetector(tmpdetid);
-    bool masked = tmpdetector->isMasked();
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    bool masked = detectorInfo.isMasked(i);
     if (masked) {
-      maskeddetids.push_back(tmpdetid);
+      maskeddetids.push_back(detids[i]);
     }
-    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << tmpdetid
+    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
                   << ", Masked = " << masked << ".\n";
   }
 
@@ -259,13 +245,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
     if (maskws->readY(i)[0] < 1.0E-9)
       continue;
 
-    // Get spectrum
-    const API::ISpectrum *spec = maskws->getSpectrum(i);
-    if (!spec)
-      throw runtime_error(
-          "Unable to get spectrum reference from mask workspace.");
-
-    const set<detid_t> detidset = spec->getDetectorIDs();
+    const auto &detidset = maskws->getSpectrum(i).getDetectorIDs();
     std::copy(detidset.cbegin(), detidset.cend(),
               std::inserter(maskeddetids, maskeddetids.end()));
   }
@@ -284,7 +264,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
   vector<string> targetcolnames = targetWS->getColumnNames();
   if (sourcecolnames.size() != targetcolnames.size()) {
     stringstream errmsg;
-    errmsg << "Soruce table workspace " << sourceWS->name()
+    errmsg << "Soruce table workspace " << sourceWS->getName()
            << " has different number of columns (" << sourcecolnames.size()
            << ") than target table workspace's (" << targetcolnames.size()
            << ")";
@@ -312,8 +292,6 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
     TableRow newrow = targetWS->appendRow();
     newrow << xmin << xmax << speclist;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -396,8 +374,6 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
   string specliststr = spectralist.str();
   TableRow newrow = outws->appendRow();
   newrow << xmin << xmax << specliststr;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

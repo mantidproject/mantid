@@ -1,16 +1,13 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace API {
@@ -24,7 +21,7 @@ using std::size_t;
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl()
     : Mantid::Kernel::DynamicFactory<Workspace>() {
-  g_log.debug() << "WorkspaceFactory created." << std::endl;
+  g_log.debug() << "WorkspaceFactory created.\n";
 }
 
 /** Create a new instance of the same type of workspace as that given as
@@ -75,9 +72,76 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   MatrixWorkspace_sptr ws = create(id, NVectors, XLength, YLength);
 
   // Copy over certain parent data members
-  initializeFromParent(parent, ws, differentSize);
+  initializeFromParent(*parent, *ws, differentSize);
 
   return ws;
+}
+
+/** Initialize a workspace from its parent
+ * This sets values such as instrument, units, sample, spectramap.
+ * This does NOT copy any data.
+ * This does NOT copy any sample logs, i.e., Run object of the workspace won't
+ * be copied
+ * from its parent.
+ * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
+ * @param parent
+ * @param child
+ * @param differentSize
+ */
+void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
+    const bool differentSize) const {
+  child.setTitle(parent.getTitle());
+  child.setComment(parent.getComment());
+  child.setInstrument(parent.getInstrument()); // This call also copies the
+                                               // SHARED POINTER to the
+                                               // parameter map
+
+  // This call will (should) perform a COPY of the parameter map.
+  child.instrumentParameters();
+  child.m_sample = parent.m_sample;
+  child.m_run = boost::make_shared<API::Run>();
+  child.setYUnit(parent.m_YUnit);
+  child.setYUnitLabel(parent.m_YUnitLabel);
+  child.setDistribution(parent.isDistribution());
+
+  // Only copy the axes over if new sizes are not given
+  if (!differentSize) {
+    // Only copy mask map if same size for now. Later will need to check
+    // continued validity.
+    child.m_masks = parent.m_masks;
+  }
+
+  // Same number of histograms = copy over the spectra data
+  if (parent.getNumberHistograms() == child.getNumberHistograms()) {
+    for (size_t i = 0; i < parent.getNumberHistograms(); ++i)
+      child.getSpectrum(i).copyInfoFrom(parent.getSpectrum(i));
+    // We use this variant without ISpectrum update to avoid costly rebuilds
+    // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
+    // for spectrum definitions, so it is important to call this *afterwards*,
+    // since it clears the flags:
+    child.setIndexInfoWithoutISpectrumUpdate(parent.indexInfo());
+  }
+
+  // deal with axis
+  for (size_t i = 0; i < parent.m_axes.size(); ++i) {
+    const size_t newAxisLength = child.getAxis(i)->length();
+    const size_t oldAxisLength = parent.getAxis(i)->length();
+
+    if (!differentSize || newAxisLength == oldAxisLength) {
+      // Need to delete the existing axis created in init above
+      delete child.m_axes[i];
+      // Now set to a copy of the parent workspace's axis
+      child.m_axes[i] = parent.m_axes[i]->clone(&child);
+    } else {
+      if (!parent.getAxis(i)->isSpectra()) // WHY???
+      {
+        delete child.m_axes[i];
+        // Call the 'different length' clone variant
+        child.m_axes[i] = parent.m_axes[i]->clone(newAxisLength, &child);
+      }
+    }
+  }
 }
 
 /** Initialize a workspace from its parent
@@ -90,59 +154,10 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  *different sizes
  */
 void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace_const_sptr parent, const MatrixWorkspace_sptr child,
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
-  child->setTitle(parent->getTitle());
-  child->setComment(parent->getComment());
-  child->setInstrument(parent->getInstrument()); // This call also copies the
-                                                 // SHARED POINTER to the
-                                                 // parameter map
-  // This call will (should) perform a COPY of the parameter map.
-  child->instrumentParameters();
-  child->m_sample = parent->m_sample;
-  child->m_run = parent->m_run;
-  child->setYUnit(parent->m_YUnit);
-  child->setYUnitLabel(parent->m_YUnitLabel);
-  child->isDistribution(parent->isDistribution());
-
-  // Only copy the axes over if new sizes are not given
-  if (!differentSize) {
-    // Only copy mask map if same size for now. Later will need to check
-    // continued validity.
-    child->m_masks = parent->m_masks;
-  }
-
-  // Same number of histograms = copy over the spectra data
-  if (parent->getNumberHistograms() == child->getNumberHistograms()) {
-    for (size_t wi = 0; wi < parent->getNumberHistograms(); wi++) {
-      ISpectrum *childSpec = child->getSpectrum(wi);
-      const ISpectrum *parentSpec = parent->getSpectrum(wi);
-      // Copy spectrum number and detector IDs
-      childSpec->copyInfoFrom(*parentSpec);
-    }
-  }
-
-  // deal with axis
-  for (size_t i = 0; i < parent->m_axes.size(); ++i) {
-    const size_t newAxisLength = child->getAxis(i)->length();
-    const size_t oldAxisLength = parent->getAxis(i)->length();
-
-    if (!differentSize || newAxisLength == oldAxisLength) {
-      // Need to delete the existing axis created in init above
-      delete child->m_axes[i];
-      // Now set to a copy of the parent workspace's axis
-      child->m_axes[i] = parent->m_axes[i]->clone(child.get());
-    } else {
-      if (!parent->getAxis(i)->isSpectra()) // WHY???
-      {
-        delete child->m_axes[i];
-        // Call the 'different length' clone variant
-        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, child.get());
-      }
-    }
-  }
-
-  return;
+  initializeFromParentWithoutLogs(parent, child, differentSize);
+  child.m_run = parent.m_run;
 }
 
 /** Creates a new instance of the class with the given name, and allocates

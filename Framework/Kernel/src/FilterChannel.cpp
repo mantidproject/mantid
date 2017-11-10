@@ -1,9 +1,11 @@
 
 #include "MantidKernel/FilterChannel.h"
+#include <MantidKernel/StringTokenizer.h>
 
 #include <Poco/LoggingRegistry.h>
-#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Message.h>
+
+#include <algorithm>
 
 namespace Poco {
 
@@ -37,7 +39,7 @@ void FilterChannel::setProperty(const std::string &name,
 void FilterChannel::log(const Message &msg) {
   std::lock_guard<std::mutex> lock(_mutex);
 
-  if (msg.getPriority() <= _priority) {
+  if ((_channel) && (msg.getPriority() <= _priority)) {
     _channel->log(msg);
   }
 }

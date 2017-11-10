@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 namespace Mantid {
@@ -46,6 +47,8 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   Expression expr;
   try {
     expr.parse(input);
+  } catch (Expression::ParsingError &e) {
+    inputError(input + "\n    " + e.what());
   } catch (...) {
     inputError(input);
   }
@@ -110,15 +113,24 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       fun->setAttribute(parName, att);
     } else if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
       // or it can be a list of constraints
-      addConstraints(fun, (*term)[1]);
+      addConstraints(fun, (*term)[1].bracketsRemoved());
     } else if (parName == "ties") {
-      addTies(fun, (*term)[1]);
+      addTies(fun, (*term)[1].bracketsRemoved());
     } else if (!parName.empty() && parName[0] == '$') {
       parName.erase(0, 1);
       parentAttributes[parName] = parValue;
     } else {
       // set initial parameter value
-      fun->setParameter(parName, atof(parValue.c_str()));
+      try {
+        fun->setParameter(parName, boost::lexical_cast<double>(parValue));
+      } catch (boost::bad_lexical_cast &) {
+        throw std::runtime_error(
+            std::string("Error in value of parameter ")
+                .append(parName)
+                .append(".\n")
+                .append(parValue)
+                .append(" cannot be interpreted as a floating point value."));
+      }
     }
   } // for term
 
@@ -204,10 +216,10 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     } else {
       std::string parName = term[0].name();
       if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
-        addConstraints(cfun, term[1]);
+        addConstraints(cfun, term[1].bracketsRemoved());
         continue;
       } else if (parName == "ties") {
-        addTies(cfun, term[1]);
+        addTies(cfun, term[1].bracketsRemoved());
         continue;
       } else {
         fun = createSimple(term, pAttributes);
@@ -216,7 +228,14 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
     for (auto &pAttribute : pAttributes) {
-      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      // Apply parent attributes of the child function to this function. If this
+      // function doesn't have those attributes, they get passed up the chain to
+      // this function's parent.
+      if (cfun->hasLocalAttribute(pAttribute.first)) {
+        cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      } else {
+        parentAttributes[pAttribute.first] = pAttribute.second;
+      }
     }
   }
 
@@ -262,9 +281,9 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
  */
 void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
                                         const Expression &expr) const {
-  IConstraint *c =
-      ConstraintFactory::Instance().createInitialized(fun.get(), expr);
-  fun->addConstraint(c);
+  auto c = std::unique_ptr<IConstraint>(
+      ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  fun->addConstraint(std::move(c));
 }
 
 /**
@@ -290,7 +309,7 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
 void FunctionFactoryImpl::addTie(IFunction_sptr fun,
                                  const Expression &expr) const {
   if (expr.size() > 1) { // if size > 2 it is interpreted as setting a tie (last
-                         // expr.term) to multiple parameters, e.g
+    // expr.term) to multiple parameters, e.g
     // f1.alpha = f2.alpha = f3.alpha = f0.beta^2/2
     const std::string value = expr[expr.size() - 1].str();
     for (size_t i = expr.size() - 1; i != 0;) {

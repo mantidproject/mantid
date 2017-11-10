@@ -18,7 +18,7 @@ Limitations
 ###########
 
 The algorithm assumes that the workspace has common X values for all spectra
-(i.e. is not a `ragged workspace <Ragged Workspace>`__).
+(i.e. is not a :ref:`ragged workspace <Ragged_Workspace>` )
 
 Usage
 -----
@@ -44,7 +44,7 @@ Usage
     # perform the algorithm
     SaveAscii(InputWorkspace=ws1,Filename=savefile)
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIISimple
 
@@ -77,7 +77,7 @@ Output:
     # perform the algorithm
     SaveAscii(InputWorkspace=ws1,Filename=savefile,Separator="Space")
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIIDelimiter
 
@@ -112,7 +112,7 @@ Output:
     # CommentIndicator can be changed, but when read back in must be specified
     SaveAscii(InputWorkspace=ws1,Filename=savefile,CommentIndicator="!")
 
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExSaveASCIIComment
 

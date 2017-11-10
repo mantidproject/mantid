@@ -13,7 +13,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -123,10 +123,10 @@ public:
 
     // The values are cleared at the start
     for (size_t i = 0; i < ws.getNPoints(); i++) {
-      TS_ASSERT(boost::math::isnan(ws.getSignalAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getErrorAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getSignalNormalizedAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getErrorNormalizedAt(i)));
+      TS_ASSERT(std::isnan(ws.getSignalAt(i)));
+      TS_ASSERT(std::isnan(ws.getErrorAt(i)));
+      TS_ASSERT(std::isnan(ws.getSignalNormalizedAt(i)));
+      TS_ASSERT(std::isnan(ws.getErrorNormalizedAt(i)));
       TS_ASSERT(!ws.getIsMaskedAt(i));
     }
 
@@ -511,10 +511,10 @@ public:
     TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(1.5, 1.5)), 11.0, 1e-6);
     TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(9.5, 9.5)), 99.0, 1e-6);
     // Out of range = NaN
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(-0.01, 2.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(-0.01, 2.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02))));
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -563,12 +563,12 @@ public:
     // when MDMaskValue is NaN.
     // TS_ASSERT_DELTA(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5)), MDMaskValue,
     // 1e-6);
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(std::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
 
-    TS_ASSERT(boost::math::isnan(
-        iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
-    TS_ASSERT(boost::math::isnan(
+    TS_ASSERT(
+        std::isnan(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(std::isnan(
         iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
@@ -679,7 +679,7 @@ public:
 
     TS_ASSERT_EQUALS(line.y.size(), 10);
     // Masked value should be zero
-    TS_ASSERT(boost::math::isnan(line.y[2]));
+    TS_ASSERT(std::isnan(line.y[2]));
     // Unmasked value
     TS_ASSERT_DELTA(line.y[9], 9.0, 1e-5);
   }
@@ -739,15 +739,15 @@ public:
     VMD end(1.9, 1.5);
     auto line = ws->getLineData(start, end, NoNormalization);
     std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
-              << std::endl;
+              << '\n';
     std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
-              << std::endl;
+              << '\n';
 
     TS_ASSERT_EQUALS(line.x.size(), 4);
     TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
-    TS_ASSERT_DELTA(line.x[1], 0.1 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(line.x[2], 0.5 * sqrt(2.0), 1e-5);
-    TS_ASSERT_DELTA(line.x[3], 1.0 * sqrt(2.0), 1e-5);
+    TS_ASSERT_DELTA(line.x[1], 0.1 * M_SQRT2, 1e-5);
+    TS_ASSERT_DELTA(line.x[2], 0.5 * M_SQRT2, 1e-5);
+    TS_ASSERT_DELTA(line.x[3], M_SQRT2, 1e-5);
 
     TS_ASSERT_EQUALS(line.y.size(), 3);
     TS_ASSERT_DELTA(line.y[0], 0.0, 1e-5);
@@ -866,7 +866,7 @@ public:
   void test_divide_scalar() {
     MDHistoWorkspace_sptr a = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         3.0, 2, 5, 10.0, 3.0 /*errorSquared*/);
-    a->divide(2.0, sqrt(2.0));
+    a->divide(2.0, M_SQRT2);
     checkWorkspace(a, 1.5, 1.5 * 1.5 * (.5 + 1. / 3.), 1.0);
   }
 
@@ -958,6 +958,31 @@ public:
     checkWorkspace(a, 0.0, 0.0);
     b->operatorNot();
     checkWorkspace(b, 1.0, 0.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_boolean_operatorNot_maskedWorkspace() {
+    // 4x4x4 histoWorkspace
+    MDHistoWorkspace_sptr ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1., 3, 4, 10.0);
+
+    std::vector<coord_t> min;
+    std::vector<coord_t> max;
+
+    // Make the box that covers the whole workspace.
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(10);
+    max.push_back(10);
+    max.push_back(10);
+
+    // Create an function that encompases ALL of the total bins.
+    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+
+    ws->setMDMasking(function);
+    ws->operatorNot();
+    checkWorkspace(ws, 1.0, 0.0);
   }
 
   //--------------------------------------------------------------------------------------
@@ -1057,7 +1082,7 @@ public:
 
   void doTestMasking(MDImplicitFunction *function,
                      size_t expectedNumberMasked) {
-    // 10x10x10 eventWorkspace
+    // 10x10x10 histoWorkspace
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 10, 10.0);
 
@@ -1069,7 +1094,7 @@ public:
   }
 
   void test_maskNULL() {
-    doTestMasking(NULL, 0); // 1000 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 1000 out of 1000 bins masked
   }
 
   void test_mask_everything() {
@@ -1201,6 +1226,12 @@ public:
     TS_ASSERT_EQUALS(targetDisplayNormalization, clone->displayNormalization());
   }
 
+  void test_is_histogram_is_true() {
+    MDHistoWorkspace_sptr hw =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
+    TSM_ASSERT("Should always be true for histogram workspace",
+               hw->isMDHistoWorkspace());
+  }
   /**
   * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
   * sptr

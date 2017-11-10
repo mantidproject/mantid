@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2017-02-18 10:35:21.877396" name="HB3A" valid-from="2017-02-12 10:35:21" valid-to="2017-04-24 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--Created by Wenduo Zhou-->
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-2.0"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--PANEL-->
+  <component idfillbyfirst="x" idstart="1" idstepbyrow="512" type="arm">
+    <location name="bank1">
+      <parameter name="r-position">
+	      <logfile eq="1.0*value+0.3750" id="diffr"/>
+      </parameter>
+      <parameter name="t-position">
+        <logfile eq="-1.0*value+0.0" id="2theta"/>
+      </parameter>
+      <parameter name="p-position">
+        <value val="0.0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile eq="-1.0*value+0.0" id="2theta"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="arm">
+	  <component type="panel">
+		  <location>
+			  <parameter name="x">
+				  <logfile eq='value' id='deltax'/>
+			  </parameter>
+			  <parameter name="y">
+				  <logfile eq='value' id='deltay'/>
+			  </parameter>
+		  </location>
+	  </component>
+  </type>
+  <type is="rectangular_detector" name="panel" type="pixel" xpixels="512" xstart="0.0564140625" xstep="-0.0002265625" ypixels="512" ystart="-0.0355703125" ystep="0.0002265625">
+ </type>
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point x="-0.00011328125" y="-0.00011328125" z="0.0"/>
+      <left-front-top-point x="-0.00011328125" y="0.00011328125" z="0.0"/>
+      <left-back-bottom-point x="-0.00011328125" y="-0.00011328125" z="-0.0001"/>
+      <right-front-bottom-point x="0.00011328125" y="-0.00011328125" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+</instrument>

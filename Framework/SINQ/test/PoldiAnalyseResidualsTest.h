@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidSINQ/PoldiAnalyseResiduals.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -32,7 +32,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.sumCounts(testWorkspace, std::vector<int>(1, 1)), 2.0);
     TS_ASSERT_EQUALS(alg.sumCounts(testWorkspace, std::vector<int>(1, 0)), 0.0);
 
@@ -44,7 +44,7 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.numberOfPoints(testWorkspace, std::vector<int>(1, 1)),
                      2);
     TS_ASSERT_EQUALS(alg.numberOfPoints(testWorkspace, std::vector<int>(1, 0)),
@@ -58,16 +58,16 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_THROWS_NOTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 1)));
     TS_ASSERT_THROWS_NOTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 0)));
 
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[0], 4.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[1], 4.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 3.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[1], 3.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[0], 4.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[1], 4.0);
 
     TS_ASSERT_THROWS_ANYTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 3)));
@@ -77,50 +77,50 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr measured =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     Workspace2D_sptr calculated =
-        WorkspaceCreationHelper::Create2DWorkspace154(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace154(2, 2);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.calculateResidualWorkspace(measured, calculated));
     Workspace2D_sptr residuals =
         alg.calculateResidualWorkspace(measured, calculated);
-    TS_ASSERT_EQUALS(residuals->readY(0)[0], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(0)[1], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[0], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[1], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[0], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[1], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[0], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[1], -3.0);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.calculateResidualWorkspace(calculated, measured));
     residuals = alg.calculateResidualWorkspace(calculated, measured);
-    TS_ASSERT_EQUALS(residuals->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[0], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[1], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[0], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[1], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[0], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[1], 3.0);
   }
 
   void testNormalizeResiduals() {
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     TS_ASSERT_THROWS_NOTHING(
         alg.normalizeResiduals(testWorkspace, std::vector<int>(1, 1)));
 
     // nothing happens here
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[0], 2.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[1], 2.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 2.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[1], 2.0);
 
     // but here, because 1 is a valid workspace index
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[0], 0.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[1], 0.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[0], 0.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[1], 0.0);
   }
 
   void testRelativeCountChange() {
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     TS_ASSERT_EQUALS(alg.relativeCountChange(testWorkspace, 10.0), 0.0);
 
     alg.addValue(testWorkspace, 10.0, std::vector<int>(1, 0));
@@ -132,16 +132,16 @@ public:
     TestablePoldiAnalyseResiduals alg;
 
     Workspace2D_sptr lhs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     Workspace2D_sptr rhs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     Workspace2D_sptr sum = alg.addWorkspaces(lhs, rhs);
 
-    TS_ASSERT_EQUALS(sum->readY(0)[0], 0.0);
-    TS_ASSERT_EQUALS(sum->readY(0)[1], 0.0);
-    TS_ASSERT_EQUALS(sum->readY(1)[0], 2.0);
-    TS_ASSERT_EQUALS(sum->readY(1)[1], 2.0);
+    TS_ASSERT_EQUALS(sum->y(0)[0], 0.0);
+    TS_ASSERT_EQUALS(sum->y(0)[1], 0.0);
+    TS_ASSERT_EQUALS(sum->y(1)[0], 2.0);
+    TS_ASSERT_EQUALS(sum->y(1)[1], 2.0);
   }
 
   void testRelativeChangeIsLargerThanLimit() {

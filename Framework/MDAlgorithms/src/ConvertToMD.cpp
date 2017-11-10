@@ -3,6 +3,10 @@
 #include <algorithm>
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -16,10 +20,12 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
@@ -92,11 +98,22 @@ void ConvertToMD::init() {
                                            Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
+
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
+      "The name of the Nexus file to write, as a full or relative path.\n"
+      "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "FileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("FileBackEnd", false,
+                  "If true, Filename must also be specified. The algorithm "
+                  "will create the specified file in addition to an output "
+                  "workspace. The workspace will load data from the file on "
+                  "demand in order to reduce memory use.");
 }
 //----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMD::~ConvertToMD() {}
 
 const std::string ConvertToMD::name() const { return "ConvertToMD"; }
 
@@ -104,6 +121,13 @@ int ConvertToMD::version() const { return 1; }
 
 std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::map<std::string, std::string> result;
+
+  const std::string filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
+  if (fileBackEnd && filename.empty()) {
+    result["Filename"] = "Filename must be given if FileBackEnd is required.";
+  }
 
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
@@ -149,6 +173,9 @@ void ConvertToMD::exec() {
   // -------- get Input workspace
   m_InWS2D = getProperty("InputWorkspace");
 
+  const std::string out_filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
   // get the output workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
 
@@ -171,6 +198,25 @@ void ConvertToMD::exec() {
   std::vector<double> dimMin = getProperty("MinValues");
   std::vector<double> dimMax = getProperty("MaxValues");
 
+  // Sanity check some options
+  if (QModReq != MDTransfQ3D().transfID()) {
+    MDWSTransform transform;
+    const std::string autoSelect =
+        transform.getTargetFrames()[CnvrtToMD::AutoSelect];
+    if (QFrame != autoSelect) {
+      g_log.warning("Q3DFrames value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      QFrame = autoSelect;
+    }
+    const std::string noScaling =
+        transform.getQScalings()[CnvrtToMD::NoScaling];
+    if (convertTo_ != noScaling) {
+      g_log.warning("QConversionScales value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      convertTo_ = noScaling;
+    }
+  }
+
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
   MDWSDescription targWSDescr;
@@ -182,7 +228,7 @@ void ConvertToMD::exec() {
 
   // create and initiate new workspace or set up existing workspace as a target.
   if (createNewTargetWs) // create new
-    spws = this->createNewMDWorkspace(targWSDescr);
+    spws = this->createNewMDWorkspace(targWSDescr, fileBackEnd, out_filename);
   else // setup existing MD workspace as workspace target.
     m_OutWSWrapper->setMDWS(spws);
 
@@ -219,6 +265,15 @@ void ConvertToMD::exec() {
   // Set the normalization of the event workspace
   m_Convertor->setDisplayNormalization(spws, m_InWS2D);
 
+  if (fileBackEnd) {
+    auto savemd = this->createChildAlgorithm("SaveMD");
+    savemd->setProperty("InputWorkspace", spws);
+    savemd->setPropertyValue("Filename", out_filename);
+    savemd->setProperty("UpdateFileBackEnd", true);
+    savemd->setProperty("MakeFileBacked", false);
+    savemd->executeAsChildAlg();
+  }
+
   // JOB COMPLETED:
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -228,7 +283,6 @@ void ConvertToMD::exec() {
   // free up the sp to the input workspace, which would be deleted if nobody
   // needs it any more;
   m_InWS2D.reset();
-  return;
 }
 /**
  * Copy over the part of metadata necessary to initialize ConvertToMD plugin
@@ -273,28 +327,28 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
-  bool dector_found(false);
+  bool detector_found(false);
+  const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    try {
-      auto det = m_InWS2D->getDetector(i);
-      if (!det->isMonitor()) {
-        spectra_index = i;
-        dector_found = true;
-        g_log.debug() << "Using spectra N " << i << " as the source of the bin "
-                                                    "boundaries for the "
-                                                    "resolution corrections \n";
-        break;
-      }
-    } catch (...) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
+      spectra_index = i;
+      detector_found = true;
+      g_log.debug() << "Using spectra N " << i
+                    << " as the source of the bin "
+                       "boundaries for the resolution corrections \n";
+      break;
     }
   }
-  if (!dector_found)
-    g_log.warning() << "No detectors in the workspace are associated with "
-                       "spectra. Using spectrum 0 trying to retrieve the bin "
-                       "boundaries \n";
+  if (!detector_found) {
+    g_log.information()
+        << "No spectra in the workspace have detectors associated "
+           "with them. Storing bin boundaries from first spectrum for"
+           "resolution calculation\n";
+  }
 
   // retrieve representative bin boundaries
-  MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
+  auto binBoundaries = m_InWS2D->x(spectra_index);
+
   // check if the boundaries transformation is necessary
   if (m_Convertor->getUnitConversionHelper().isUnitConverted()) {
 
@@ -307,12 +361,12 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (double &binBoundarie : binBoundaries) {
-        binBoundarie = unitConv.convertUnits(binBoundarie);
+      for (auto &binBoundary : binBoundaries) {
+        binBoundary = unitConv.convertUnits(binBoundary);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
-    if (binBoundaries[0] > binBoundaries[binBoundaries.size() - 1]) {
+    if (binBoundaries[0] > binBoundaries.back()) {
       g_log.information() << "Bin boundaries are not arranged monotonously. "
                              "Sorting performed\n";
       std::sort(binBoundaries.begin(), binBoundaries.end());
@@ -323,11 +377,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // objects instead
   auto mapping = boost::make_shared<det2group_map>();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
-    if (!dets.empty()) {
-      mapping->emplace(*dets.begin(),
-                       std::vector<detid_t>(dets.begin(), dets.end()));
-    }
+    const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
+    mapping->emplace(*dets.begin(), dets);
   }
 
   // The last experiment info should always be the one that refers
@@ -337,13 +388,11 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   if (nexpts > 0) {
     ExperimentInfo_sptr expt =
         mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
-    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
     expt->cacheDetectorGroupings(*mapping);
   }
 }
 
-/** Constructor */
-ConvertToMD::ConvertToMD() {}
 /** handle the input parameters and build target workspace description as
 function of input parameters
 * @param spws shared pointer to target MD workspace (just created or already
@@ -409,19 +458,29 @@ bool ConvertToMD::buildTargetWSDescription(
   double m_AbsMin = getProperty("AbsMinQ");
   targWSDescr.setAbsMin(m_AbsMin);
 
-  // instantiate class, responsible for defining Mslice-type projection
+  // Set optional projections for Q3D mode
   MDAlgorithms::MDWSTransform MsliceProj;
-  // identify if u,v are present among input parameters and use defaults if not
-  std::vector<double> ut = getProperty("UProj");
-  std::vector<double> vt = getProperty("VProj");
-  std::vector<double> wt = getProperty("WProj");
-  try {
-    // otherwise input uv are ignored -> later it can be modified to set ub
-    // matrix if no given, but this may over-complicate things.
-    MsliceProj.setUVvectors(ut, vt, wt);
-  } catch (std::invalid_argument &) {
-    g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+  if (QModReq == MDTransfQ3D().transfID()) {
+    try {
+      // otherwise input uv are ignored -> later it can be modified to set ub
+      // matrix if no given, but this may over-complicate things.
+      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"),
+                              getProperty("WProj"));
+    } catch (std::invalid_argument &) {
+      g_log.warning() << "The projections are coplanar. Will use defaults "
+                         "[1,0,0],[0,1,0] and [0,0,1]\n";
+    }
+  } else {
+    auto warnIfSet = [this](const std::string &propName) {
+      Property *prop = this->getProperty(propName);
+      if (!prop->isDefault()) {
+        g_log.warning(propName + " value ignored with QDimensions != " +
+                      MDTransfQ3D().transfID());
+      }
+    };
+    for (const auto &name : {"UProj", "VProj", "WProj"}) {
+      warnIfSet(name);
+    }
   }
 
   if (createNewTargetWs) {
@@ -458,11 +517,15 @@ bool ConvertToMD::buildTargetWSDescription(
 /**
 * Create new MD workspace and set up its box controller using algorithm's box
 * controllers properties
-* @param targWSDescr
-* @return
+* @param targWSDescr :: Description of workspace to create
+* @param filebackend :: true if the workspace will have a file back end
+* @param filename :: file to use for file back end of workspace
+* @return :: Shared pointer for the created workspace
 */
 API::IMDEventWorkspace_sptr
-ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr) {
+ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
+                                  const bool filebackend,
+                                  const std::string &filename) {
   // create new md workspace and set internal shared pointer of m_OutWSWrapper
   // to this workspace
   API::IMDEventWorkspace_sptr spws =
@@ -478,6 +541,9 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr) {
   // Build up the box controller, using the properties in
   // BoxControllerSettingsAlgorithm
   this->setBoxController(bc, m_InWS2D->getInstrument());
+  if (filebackend) {
+    setupFileBackend(filename, m_OutWSWrapper->pWorkspace());
+  }
 
   // Check if the user want sto force a top level split or not
   bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
@@ -583,7 +649,7 @@ void ConvertToMD::findMinMax(
       {
         g_log.information()
             << " Min Value: " << minVal[i] << " for dimension N: " << i
-            << " equal or exceeds max value:" << maxVal[i] << std::endl;
+            << " equal or exceeds max value:" << maxVal[i] << '\n';
         wellDefined = false;
         break;
       }
@@ -655,6 +721,31 @@ void ConvertToMD::findMinMax(
         maxVal[i] = maxAlgValues[i];
     }
   }
+}
+
+/**
+ * Setup the filebackend for the output workspace. It assumes that the
+ * box controller has already been initialized
+ * @param filebackPath :: Path to the file used for backend storage
+ * @param outputWS :: Workspace on which to set the file back end
+ */
+void ConvertToMD::setupFileBackend(
+    std::string filebackPath, Mantid::API::IMDEventWorkspace_sptr outputWS) {
+  using DataObjects::BoxControllerNeXusIO;
+  auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
+  savemd->setProperty("InputWorkspace", outputWS);
+  savemd->setPropertyValue("Filename", filebackPath);
+  savemd->setProperty("UpdateFileBackEnd", false);
+  savemd->setProperty("MakeFileBacked", false);
+  savemd->executeAsChildAlg();
+
+  // create file-backed box controller
+  auto boxControllerMem = outputWS->getBoxController();
+  auto boxControllerIO =
+      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+  boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
+  outputWS->setFileBacked();
+  boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
 } // namespace Mantid

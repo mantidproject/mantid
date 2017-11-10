@@ -3,11 +3,12 @@
 //------------------------------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/GramCharlierComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/Math/Distributions/HermitePolynomials.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_gamma.h> // for factorial
 #include <gsl/gsl_spline.h>
+
+#include <boost/math/special_functions/hermite.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -175,7 +176,7 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
   }
   // Include Kfse if it is not fixed
   const size_t kIndex = this->parameterIndex(KFSE_NAME);
-  if (!isFixed(kIndex)) {
+  if (isActive(kIndex)) {
     indices.push_back(kIndex);
   }
 
@@ -193,7 +194,7 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
  */
 size_t GramCharlierComptonProfile::fillConstraintMatrix(
     Kernel::DblMatrix &cmatrix, const size_t start,
-    const std::vector<double> &errors) const {
+    const HistogramData::HistogramE &errors) const {
   std::vector<double> profile(NFINE_Y, 0.0);
   const size_t nData(ySpace().size());
   std::vector<double> result(nData, 0.0);
@@ -293,8 +294,8 @@ void GramCharlierComptonProfile::addMassProfile(
   const double denom = ((std::pow(2.0, static_cast<int>(npoly))) * factorial);
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] / std::sqrt(2.) / wg;
-    const double hermiteI = Math::hermitePoly(npoly, y);
+    const double y = m_yfine[j] / M_SQRT2 / wg;
+    const double hermiteI = boost::math::hermite(npoly, y);
     result[j] += ampNorm * std::exp(-y * y) * hermiteI * hermiteCoeff / denom;
   }
 }
@@ -316,8 +317,8 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
     kfse *= getParameter("C_0");
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] / std::sqrt(2.) / wg;
-    const double he3 = Math::hermitePoly(3, y);
+    const double y = m_yfine[j] / M_SQRT2 / wg;
+    const double he3 = boost::math::hermite(3, y);
     lhs[j] += ampNorm * std::exp(-y * y) * he3 * (kfse / m_qfine[j]);
   }
 }
@@ -363,19 +364,18 @@ void GramCharlierComptonProfile::setMatrixWorkspace(
 
 /**
  * @param tseconds A vector containing the time-of-flight values in seconds
- * @param isHistogram True if histogram tof values have been passed in
  * @param detpar Structure containing detector parameters
  */
 void GramCharlierComptonProfile::cacheYSpaceValues(
-    const std::vector<double> &tseconds, const bool isHistogram,
+    const HistogramData::Points &tseconds,
     const Algorithms::DetectorParams &detpar) {
-  ComptonProfile::cacheYSpaceValues(tseconds, isHistogram,
+  ComptonProfile::cacheYSpaceValues(tseconds,
                                     detpar); // base-class calculations
 
   // Is FSE fixed at the moment?
   // The ComptonScatteringCountRate fixes it but we still need to know if the
   // user wanted it fixed
-  m_userFixedFSE = this->isFixed(this->parameterIndex(KFSE_NAME));
+  m_userFixedFSE = !this->isActive(this->parameterIndex(KFSE_NAME));
 
   const auto &yspace = ySpace();
   const auto &modq = modQ();

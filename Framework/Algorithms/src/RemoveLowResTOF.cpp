@@ -2,6 +2,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IComponent.h"
@@ -9,10 +10,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
 #include <limits>
 #include <map>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,8 +23,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using DataObjects::EventWorkspace;
-using Kernel::Exception::InstrumentDefinitionError;
-using Kernel::Exception::NotFoundError;
 using std::size_t;
 using std::string;
 
@@ -30,12 +30,11 @@ DECLARE_ALGORITHM(RemoveLowResTOF)
 
 /// Default constructor
 RemoveLowResTOF::RemoveLowResTOF()
-    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_instrument(),
-      m_sample(), m_L1(0.), m_Tmin(0.), m_wavelengthMin(0.),
-      m_numberOfSpectra(0), m_progress(nullptr), m_outputLowResTOF(false) {}
+    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_Tmin(0.),
+      m_wavelengthMin(0.), m_numberOfSpectra(0), m_outputLowResTOF(false) {}
 
 /// Destructor
-RemoveLowResTOF::~RemoveLowResTOF() { delete m_progress; }
+RemoveLowResTOF::~RemoveLowResTOF() {}
 
 /// Algorithm's name for identification overriding a virtual method
 const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
@@ -97,16 +96,7 @@ void RemoveLowResTOF::init() {
 void RemoveLowResTOF::exec() {
   // Get the input workspace
   m_inputWS = this->getProperty("InputWorkspace");
-
-  // without the primary flight path the algorithm cannot work
-  try {
-    m_instrument = m_inputWS->getInstrument();
-    m_sample = m_instrument->getSample();
-    m_L1 = m_instrument->getSource()->getDistance(*m_sample);
-  } catch (NotFoundError &) {
-    throw InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", m_inputWS->getTitle());
-  }
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   m_DIFCref = this->getProperty("ReferenceDIFC");
   m_K = this->getProperty("K");
@@ -115,7 +105,7 @@ void RemoveLowResTOF::exec() {
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
 
   std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
-  if (lowreswsname.size() > 0)
+  if (!lowreswsname.empty())
     m_outputLowResTOF = true;
   else
     m_outputLowResTOF = false;
@@ -123,31 +113,31 @@ void RemoveLowResTOF::exec() {
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
-    outputWS = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    outputWS = m_inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if (m_inputEvWS != nullptr) {
-    this->execEvent();
+    this->execEvent(spectrumInfo);
     return;
   }
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   this->getTminData(false);
 
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     // calculate where to zero out to
-    double tofMin = this->calcTofMin(workspaceIndex);
-    const MantidVec &X = m_inputWS->readX(0);
+    const double tofMin = this->calcTofMin(workspaceIndex, spectrumInfo);
+    const auto &X = m_inputWS->x(0);
     auto last = std::lower_bound(X.cbegin(), X.cend(), tofMin);
     if (last == X.end())
       --last;
-    size_t endBin = last - X.begin();
+    const size_t endBin = last - X.begin();
 
     // flatten out the data
     for (size_t i = 0; i < endBin; i++) {
@@ -161,14 +151,14 @@ void RemoveLowResTOF::exec() {
 
 /** Remove low resolution TOF from an EventWorkspace
   */
-void RemoveLowResTOF::execEvent() {
+void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = getProperty("OutputWorkspace");
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   MatrixWorkspace_sptr matrixLowResW = getProperty("LowResTOFWorkspace");
   if (m_outputLowResTOF) {
-    matrixLowResW = MatrixWorkspace_sptr(m_inputWS->clone().release());
+    matrixLowResW = m_inputWS->clone();
     setProperty("LowResTOFWorkspace", matrixLowResW);
   }
   auto lowW = boost::dynamic_pointer_cast<EventWorkspace>(matrixLowResW);
@@ -178,10 +168,10 @@ void RemoveLowResTOF::execEvent() {
 
   std::size_t numEventsOrig = outW->getNumberEvents();
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
-  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
+  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
 
   this->getTminData(true);
   size_t numClearedEventLists = 0;
@@ -190,46 +180,45 @@ void RemoveLowResTOF::execEvent() {
   // do the actual work
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    if (outW->getEventList(workspaceIndex).getNumberEvents() > 0) {
-      double tmin = this->calcTofMin(workspaceIndex);
+    if (outW->getSpectrum(workspaceIndex).getNumberEvents() > 0) {
+      double tmin = this->calcTofMin(workspaceIndex, spectrumInfo);
       if (tmin != tmin) {
         // Problematic
         g_log.warning() << "tmin for workspaceIndex " << workspaceIndex
                         << " is nan. Clearing out data. "
                         << "There are "
-                        << outW->getEventList(workspaceIndex).getNumberEvents()
+                        << outW->getSpectrum(workspaceIndex).getNumberEvents()
                         << " of it. \n";
         numClearedEventLists += 1;
-        numClearedEvents +=
-            outW->getEventList(workspaceIndex).getNumberEvents();
-        outW->getEventList(workspaceIndex).clear(false);
+        numClearedEvents += outW->getSpectrum(workspaceIndex).getNumberEvents();
+        outW->getSpectrum(workspaceIndex).clear(false);
 
         if (m_outputLowResTOF)
-          lowW->getEventList(workspaceIndex).clear(false);
+          lowW->getSpectrum(workspaceIndex).clear(false);
       } else if (tmin > 0.) {
         // there might be events between 0 and tmin (i.e., low resolution)
-        outW->getEventList(workspaceIndex).maskTof(0., tmin);
-        if (outW->getEventList(workspaceIndex).getNumberEvents() == 0)
+        outW->getSpectrum(workspaceIndex).maskTof(0., tmin);
+        if (outW->getSpectrum(workspaceIndex).getNumberEvents() == 0)
           numClearedEventLists += 1;
 
         if (m_outputLowResTOF) {
-          double tmax = lowW->getEventList(workspaceIndex).getTofMax();
+          double tmax = lowW->getSpectrum(workspaceIndex).getTofMax();
           if (tmax != tmax) {
             g_log.warning() << "tmax for workspaceIndex " << workspaceIndex
                             << " is nan. Clearing out data. \n";
-            lowW->getEventList(workspaceIndex).clear(false);
+            lowW->getSpectrum(workspaceIndex).clear(false);
           } else {
             // There is possibility that tmin calculated is larger than TOF-MAX
             // of the spectrum
             if (tmax + DBL_MIN > tmin)
-              lowW->getEventList(workspaceIndex).maskTof(tmin, tmax + DBL_MIN);
+              lowW->getSpectrum(workspaceIndex).maskTof(tmin, tmax + DBL_MIN);
           }
         }
       } else {
         // do nothing if tmin <= 0. for outW
         if (m_outputLowResTOF) {
           // tmin = 0.  no event will be in low resolution
-          lowW->getEventList(workspaceIndex).clear(false);
+          lowW->getSpectrum(workspaceIndex).clear(false);
         }
       } //
     }
@@ -251,24 +240,23 @@ void RemoveLowResTOF::execEvent() {
   this->runMaskDetectors();
 }
 
-double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
-  const Kernel::V3D &sourcePos = m_instrument->getSource()->getPos();
-  const Kernel::V3D &samplePos = m_sample->getPos();
-  const Kernel::V3D &beamline = samplePos - sourcePos;
-  double beamline_norm = 2. * beamline.norm();
+double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
+                                   const SpectrumInfo &spectrumInfo) {
+
+  const double l1 = spectrumInfo.l1();
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
-  const std::set<detid_t> &detSet =
-      m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
+  const auto &detSet = m_inputWS->getSpectrum(workspaceIndex).getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
-    double dspmap =
-        Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
-                                   m_instrument, detNumbers, offsets);
+    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
+    double dspmap = Conversion::tofToDSpacingFactor(
+        l1, spectrumInfo.l2(workspaceIndex),
+        spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
 
     // this is related to the reference tof
     double sqrtdmin =
@@ -280,17 +268,13 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
       g_log.warning() << "tmin is nan because dspmap = " << dspmap << ".\n";
     }
   } else {
-    double l2 = 0;
-    for (auto det : detSet) {
-      l2 += m_instrument->getDetector(det)->getDistance(*m_sample);
-    }
-    l2 /= static_cast<double>(detSet.size());
+    const double l2 = spectrumInfo.l2(workspaceIndex);
 
     Kernel::Unit_sptr wavelength = UnitFactory::Instance().create("Wavelength");
     // unfortunately there isn't a good way to convert a single value
     std::vector<double> X(1), temp(1);
     X[0] = m_wavelengthMin;
-    wavelength->toTOF(X, temp, m_L1, l2, 0., 0, 0., 0.);
+    wavelength->toTOF(X, temp, l1, l2, 0., 0, 0., 0.);
     tmin = X[0];
   }
 

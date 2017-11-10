@@ -4,9 +4,10 @@
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -21,11 +22,6 @@ DECLARE_ALGORITHM(CalculateTransmissionBeamSpreader)
 using namespace Kernel;
 using namespace API;
 using std::size_t;
-
-CalculateTransmissionBeamSpreader::CalculateTransmissionBeamSpreader()
-    : API::Algorithm(), logFit(false) {}
-
-CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader() {}
 
 void CalculateTransmissionBeamSpreader::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -106,9 +102,9 @@ void CalculateTransmissionBeamSpreader::exec() {
         "The input workspaces do not come from the same instrument");
   }
   // Check that the two inputs have matching binning
-  if (!WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_spreaderWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, sample_scatterWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_scatterWS)) {
+  if (!WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_spreaderWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *sample_scatterWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_scatterWS)) {
     g_log.error("Input workspaces do not have matching binning");
     throw std::invalid_argument(
         "Input workspaces do not have matching binning");
@@ -163,10 +159,10 @@ void CalculateTransmissionBeamSpreader::exec() {
   MatrixWorkspace_sptr spreader_trans =
       WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   spreader_trans->setYUnit("");
-  spreader_trans->isDistribution(true);
-  spreader_trans->dataX(0)[0] = 0.0;
-  spreader_trans->dataY(0)[0] = getProperty("SpreaderTransmissionValue");
-  spreader_trans->dataE(0)[0] = getProperty("SpreaderTransmissionError");
+  spreader_trans->setDistribution(true);
+  spreader_trans->mutableX(0)[0] = 0.0;
+  spreader_trans->mutableY(0)[0] = getProperty("SpreaderTransmissionValue");
+  spreader_trans->mutableE(0)[0] = getProperty("SpreaderTransmissionError");
 
   // The main calculation
   MatrixWorkspace_sptr numerator =
@@ -191,7 +187,7 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Check that there are more than a single bin in the transmission
   // workspace. Skip the fit it there isn't.
-  if (transmission->dataY(0).size() == 1) {
+  if (transmission->y(0).size() == 1) {
     setProperty("OutputWorkspace", transmission);
   } else {
     MatrixWorkspace_sptr fit;
@@ -205,8 +201,8 @@ void CalculateTransmissionBeamSpreader::exec() {
 
       // Take the log of each datapoint for fitting. Preserve errors
       // percentage-wise.
-      MantidVec &Y = logTransmission->dataY(0);
-      MantidVec &E = logTransmission->dataE(0);
+      auto &Y = logTransmission->mutableY(0);
+      auto &E = logTransmission->mutableE(0);
       Progress progress(this, 0.4, 0.6, Y.size());
       for (size_t i = 0; i < Y.size(); ++i) {
         E[i] = std::abs(E[i] / Y[i]);
@@ -249,7 +245,7 @@ API::MatrixWorkspace_sptr
 CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
                                                    const size_t index) {
   // Check that given spectra are monitors
-  if (!WS->getDetector(index)->isMonitor()) {
+  if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
         "The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
@@ -294,11 +290,11 @@ CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
     b = std::pow(10, b);
     m = std::pow(10, m);
 
-    const MantidVec &X = result->readX(0);
-    MantidVec &Y = result->dataY(0);
-    MantidVec &E = result->dataE(0);
+    auto X = result->points(0);
+    auto &Y = result->mutableY(0);
+    auto &E = result->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
-      Y[i] = b * (std::pow(m, 0.5 * (X[i] + X[i + 1])));
+      Y[i] = b * (std::pow(m, X[i]));
       E[i] = std::abs(E[i] * Y[i]);
     }
   }

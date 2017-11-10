@@ -2,8 +2,10 @@
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 FILE_LOCATION = "/SNS/EQSANS/IPTS-5636/data/"
+
 
 class EQSANSFlatTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
@@ -65,4 +67,3 @@ class EQSANSFlatTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_5729_event_frame1_Iq", 'EQSANSFlatTest.nxs'
-

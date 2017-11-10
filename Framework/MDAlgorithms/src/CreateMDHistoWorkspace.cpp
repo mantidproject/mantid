@@ -22,16 +22,6 @@ struct Square : public std::unary_function<double, void> {
 DECLARE_ALGORITHM(CreateMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDHistoWorkspace::CreateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDHistoWorkspace::~CreateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateMDHistoWorkspace::name() const {
   return "CreateMDHistoWorkspace";

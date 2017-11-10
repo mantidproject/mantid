@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,19 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-IndexPeaks::IndexPeaks() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-IndexPeaks::~IndexPeaks() {}
-
-//--------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
@@ -54,7 +42,6 @@ void IndexPeaks::init() {
                         "Round H, K and L values to integers");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void IndexPeaks::exec() {
@@ -64,7 +51,7 @@ void IndexPeaks::exec() {
   }
 
   OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error(
@@ -168,9 +155,9 @@ void IndexPeaks::exec() {
     if (run_numbers.size() > 1) {
       g_log.notice() << "Run " << run << ": indexed " << num_indexed
                      << " Peaks out of " << q_vectors.size()
-                     << " with tolerance of " << tolerance << std::endl;
+                     << " with tolerance of " << tolerance << '\n';
       g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                     << average_error << std::endl;
+                     << average_error << '\n';
     }
 
     size_t miller_index_counter = 0;
@@ -189,9 +176,9 @@ void IndexPeaks::exec() {
 
   // tell the user how many were indexed overall and the overall average error
   g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
-                 << n_peaks << " with tolerance of " << tolerance << std::endl;
+                 << n_peaks << " with tolerance of " << tolerance << '\n';
   g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                 << average_error << std::endl;
+                 << average_error << '\n';
 
   // Save output properties
   this->setProperty("NumIndexed", total_indexed);

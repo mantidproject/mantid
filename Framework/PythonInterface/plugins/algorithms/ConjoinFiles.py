@@ -1,8 +1,11 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
 import os
+
 
 class ConjoinFiles(PythonAlgorithm):
     def category(self):
@@ -64,5 +67,5 @@ class ConjoinFiles(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", mtd[wksp])
 
-AlgorithmFactory.subscribe(ConjoinFiles)
 
+AlgorithmFactory.subscribe(ConjoinFiles)

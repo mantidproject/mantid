@@ -1,9 +1,8 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
-
-using Mantid::API::SpectraAxis;
 
 using std::size_t;
 using namespace Mantid::API;
@@ -43,7 +42,7 @@ GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_const_sptr inst)
 void GroupingWorkspace::makeDetectorIDToGroupMap(
     std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
-  for (size_t wi = 0; wi < this->m_noVectors; ++wi) {
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
@@ -69,7 +68,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
 void GroupingWorkspace::makeDetectorIDToGroupVector(
     std::vector<int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
-  for (size_t wi = 0; wi < this->m_noVectors; ++wi) {
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)

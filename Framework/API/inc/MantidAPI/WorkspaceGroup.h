@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
+#include <iterator>
 #include <mutex>
 
 namespace Mantid {
@@ -62,6 +63,8 @@ public:
 
   /// The collection itself is considered to take up no space
   size_t getMemorySize() const override { return 0; }
+  /// Sort the internal data structure according to member name
+  void sortMembersByName();
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -86,16 +89,34 @@ public:
   /// Prints the group to the screen using the logger at debug
   void print() const;
 
+  /// Returns a non-const iterator pointing at the first element in the
+  /// workspace group
+  std::vector<Workspace_sptr>::iterator begin();
+  /// Returns a non-const iterator pointing at the last element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::iterator end();
+  /// Returns a const iterator pointing at the first element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::const_iterator begin() const;
+  /// Returns a const iterator pointing at the last element in the workspace
+  /// group
+  std::vector<Workspace_sptr>::const_iterator end() const;
+
   /// @name Wrapped ADS calls
   //@{
 
+  /// Invokes the ADS to sort group members by orkspace name
+  void sortByName() {
+    AnalysisDataService::Instance().sortGroupByName(this->getName());
+  }
+
   /// Adds a workspace to the group.
   void add(const std::string &wsName) {
-    AnalysisDataService::Instance().addToGroup(this->name(), wsName);
+    AnalysisDataService::Instance().addToGroup(this->getName(), wsName);
   }
   /// Remove a name from the group
   void remove(const std::string &wsName) {
-    AnalysisDataService::Instance().removeFromGroup(this->name(), wsName);
+    AnalysisDataService::Instance().removeFromGroup(this->getName(), wsName);
   }
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;
@@ -107,17 +128,16 @@ public:
   /// returns a copy as the internal vector can mutate while the vector is being
   /// iterated over.
   std::vector<std::string> getNames() const;
-
   //@}
 
-protected:
-  /// Protected, unimplemented copy constructor
-  WorkspaceGroup(const WorkspaceGroup &ref);
-  /// Protected, unimplemented copy assignment operator
-  const WorkspaceGroup &operator=(const WorkspaceGroup &);
+  WorkspaceGroup(const WorkspaceGroup &ref) = delete;
+  WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
 private:
   WorkspaceGroup *doClone() const override {
+    throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
+  }
+  WorkspaceGroup *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
   }
   /// ADS removes a member of this group using this method. It doesn't send
@@ -127,19 +147,22 @@ private:
   void observeADSNotifications(const bool observeADS);
   /// Check if a workspace is included in any child groups and groups in them.
   bool isInChildGroup(const Workspace &workspaceToCheck) const;
+
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(
       Mantid::API::WorkspacePostDeleteNotification_ptr notice);
-  /// Observer for workspace delete notfications
+
+  /// Callback when a before-replace notification is received
+  void workspaceBeforeReplaceHandle(
+      Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
+
+  /// Observer for workspace delete notifications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification>
       m_deleteObserver;
-  /// Callback when a before-replace notification is received
-  void workspaceReplaceHandle(
-      Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
-  /// Observer for workspace before-replace notfications
+  /// Observer for workspace before-replace notifications
   Poco::NObserver<WorkspaceGroup,
                   Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_replaceObserver;
+      m_beforeReplaceObserver;
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS

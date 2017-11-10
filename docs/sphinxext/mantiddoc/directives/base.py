@@ -1,5 +1,5 @@
 from docutils import statemachine
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive #pylint: disable=unused-import
 import re
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
@@ -73,8 +73,14 @@ class BaseDirective(Directive):
         """
         Inserts the currently tracked rst lines into the state_machine
         """
-        self.state_machine.insert_input(self.rst_lines, "")
+        self.state_machine.insert_input(self.rst_lines, self.source())
         self.rst_lines = []
+
+    def source(self):
+        """
+        Returns the full path to the source document
+        """
+        return self.state.document.settings.env.docname
 
     def make_header(self, name, pagetitle=False):
         """
@@ -207,5 +213,4 @@ class AlgorithmBaseDirective(BaseDirective):
         document. The expected name of the document is "AlgorithmName-v?", which
         is the name of the file with the extension removed
         """
-        env = self.state.document.settings.env
-        (self.algm_name, self.algm_version) = algorithm_name_and_version(env.docname)
+        (self.algm_name, self.algm_version) = algorithm_name_and_version(self.source())

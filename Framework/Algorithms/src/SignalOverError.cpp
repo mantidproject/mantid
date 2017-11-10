@@ -19,11 +19,6 @@ SignalOverError::SignalOverError() : UnaryOperation() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SignalOverError::~SignalOverError() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SignalOverError::name() const { return "SignalOverError"; }
 

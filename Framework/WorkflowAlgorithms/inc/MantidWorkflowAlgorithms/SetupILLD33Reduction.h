@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
@@ -36,12 +37,9 @@ namespace WorkflowAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport SetupILLD33Reduction : public API::Algorithm {
+class DLLExport SetupILLD33Reduction : public API::Algorithm,
+                                       public API::DeprecatedAlgorithm {
 public:
-  /// Constructor
-  SetupILLD33Reduction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SetupILLD33Reduction() override {}
   /// Algorithm's name
   const std::string name() const override { return "SetupILLD33Reduction"; }
   /// Summary of algorithms purpose

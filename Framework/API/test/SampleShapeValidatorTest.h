@@ -3,12 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include "boost/make_shared.hpp"
 
+using namespace Mantid::Kernel;
 using Mantid::API::SampleShapeValidator;
 
 class SampleShapeValidatorTest : public CxxTest::TestSuite {

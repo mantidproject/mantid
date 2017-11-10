@@ -39,7 +39,6 @@ National Laboratory & European Spallation Source
 class DLLExport MultiPeriodGroupAlgorithm : public Algorithm {
 public:
   MultiPeriodGroupAlgorithm();
-  ~MultiPeriodGroupAlgorithm() override;
 
 private:
   /// Overriden from Algorithm base

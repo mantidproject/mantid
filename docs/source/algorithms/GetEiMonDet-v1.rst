@@ -19,7 +19,7 @@ algorithm. The output of this algorithm is identical to that of
 .. Note ::
 
     For some instruments (like CNCS and HYSPEC), :ref:`algm-GetEi` uses the incident 
-    energy guess as the output instead of calculating one, so this algorithm does not
+    energy guess as the output instead of calculating one, so this algorithm does
     get a better estimate of Ei. The algorithm might soon be deprecated. 
 
 .. categories::

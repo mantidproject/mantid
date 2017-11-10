@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name,bare-except,too-many-arguments,multiple-statements
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import os
@@ -9,10 +11,11 @@ import os
 class CleanFileCache(PythonAlgorithm):
     """ Remove cache files from the cache directory
     """
+
     def category(self):
         """
         """
-        return "Utility"
+        return "Workflow\\DataHandling"
 
     def name(self):
         """
@@ -62,26 +65,31 @@ class CleanFileCache(PythonAlgorithm):
 
 
 def _run(cache_dir, days):
-    import glob, re, time
+    import glob
+    import re
+    import time
     from datetime import timedelta, date
     rm_date = date.today() - timedelta(days = days)
     rm_date = time.mktime(rm_date.timetuple()) + 24*60*60
     for f in glob.glob(os.path.join(cache_dir, "*.nxs")):
         # skip over non-files
-        if not os.path.isfile(f): continue
+        if not os.path.isfile(f):
+            continue
         # skip over new files
         # print os.stat(f).st_mtime, rm_date
-        if os.stat(f).st_mtime > rm_date: continue
+        if os.stat(f).st_mtime > rm_date:
+            continue
         # check filename pattern
         base = os.path.basename(f)
         if re.match(".*_[0-9a-f]{40}.nxs", base):
-            os.remove(f); continue
+            os.remove(f)
+            continue
         if re.match("[0-9a-f]{40}.nxs", base):
-            os.remove(f); continue
+            os.remove(f)
+            continue
         continue
     return
 
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CleanFileCache)
-

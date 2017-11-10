@@ -1,14 +1,14 @@
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -20,18 +20,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SliceMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SliceMD::SliceMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SliceMD::~SliceMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -162,7 +150,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (!filename.empty()) {
 
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD to create file back-end" << std::endl;
+    g_log.notice() << "Running SaveMD to create file back-end\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", outWS);
@@ -197,7 +185,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -211,7 +199,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (int i = 0; i < int(boxes.size()); i++) {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     // Perform the binning in this separate method.
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // An array to hold the rotated/transformed coordinates
       coord_t outCenter[ond];
 
@@ -269,11 +257,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Account for events that were added after the last split
   totalAdded += numSinceSplit;
   g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "s added to the output workspace." << std::endl;
+                 << "s added to the output workspace.\n";
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setProperty("UpdateFileBackEnd", true);
     alg->setProperty("InputWorkspace", outWS);
@@ -289,7 +277,6 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // return the size of the input workspace write buffer to its initial value
   // bc->setCacheParameters(sizeof(MDE),writeBufSize);
   this->setProperty("OutputWorkspace", outEvent);
-  delete prog;
 }
 
 //----------------------------------------------------------------------------------------------

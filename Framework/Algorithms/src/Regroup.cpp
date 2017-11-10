@@ -16,6 +16,9 @@
 #include <numeric>
 
 namespace Mantid {
+using HistogramData::HistogramX;
+using HistogramData::HistogramY;
+using HistogramData::HistogramE;
 namespace Algorithms {
 
 // Register the class into the algorithm factory
@@ -57,7 +60,7 @@ void Regroup::exec() {
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
   // can work only if all histograms have the same boundaries
-  if (!API::WorkspaceHelpers::commonBoundaries(inputW)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputW)) {
     g_log.error("Histograms with different boundaries");
     throw std::runtime_error("Histograms with different boundaries");
   }
@@ -65,11 +68,12 @@ void Regroup::exec() {
   bool dist = inputW->isDistribution();
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  MantidVecPtr XValues_new;
-  const MantidVec &XValues_old = inputW->readX(0);
+  HistogramData::BinEdges XValues_new(0);
+  auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params, XValues_old, XValues_new.access(), xoldIndex);
+  int ntcnew = newAxis(rb_params, XValues_old.rawData(),
+                       XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
@@ -81,18 +85,18 @@ void Regroup::exec() {
     progress_step = 1;
   for (int hist = 0; hist < histnumber; hist++) {
     // get const references to input Workspace arrays (no copying)
-    const MantidVec &XValues = inputW->readX(hist);
-    const MantidVec &YValues = inputW->readY(hist);
-    const MantidVec &YErrors = inputW->readE(hist);
+    auto &XValues = inputW->x(hist);
+    auto &YValues = inputW->y(hist);
+    auto &YErrors = inputW->e(hist);
 
     // get references to output workspace data (no copying)
-    MantidVec &YValues_new = outputW->dataY(hist);
-    MantidVec &YErrors_new = outputW->dataE(hist);
+    auto &YValues_new = outputW->mutableY(hist);
+    auto &YErrors_new = outputW->mutableE(hist);
 
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
 
-    outputW->setX(hist, XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     if (hist % progress_step == 0) {
       progress(double(hist) / histnumber);
@@ -100,7 +104,7 @@ void Regroup::exec() {
     }
   }
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())
@@ -114,28 +118,23 @@ void Regroup::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /** Regroup the data according to new output X array
  *
  * @param xold :: old x array of data
- * @param xoldIndex :: indeces of new x in XValues_old
  * @param yold :: old y array of data
- * @param ynew :: new y array of data
  * @param eold :: old error array of data
+ * @param xoldIndex :: indeces of new x in XValues_old
+ * @param ynew :: new y array of data
  * @param enew :: new error array of data
  * @param distribution :: flag defining if distribution data (1) or not (0)
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Regroup::rebin(const std::vector<double> &xold,
-                    const std::vector<double> &yold,
-                    const std::vector<double> &eold,
-                    const std::vector<int> &xoldIndex,
-                    std::vector<double> &ynew, std::vector<double> &enew,
-                    bool distribution) {
+void Regroup::rebin(const HistogramX &xold, const HistogramY &yold,
+                    const HistogramE &eold, std::vector<int> &xoldIndex,
+                    HistogramY &ynew, HistogramE &enew, bool distribution) {
 
   for (int i = 0; i < int(xoldIndex.size() - 1); i++) {
 
@@ -172,8 +171,6 @@ void Regroup::rebin(const std::vector<double> &xold,
       enew[i] = sqrt(enew[i]);
     }
   }
-
-  return; // without problems
 }
 
 /** Creates a new  output X array  according to specific boundary defnitions

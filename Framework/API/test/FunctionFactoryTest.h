@@ -12,6 +12,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
@@ -342,6 +343,26 @@ public:
     TS_ASSERT_EQUALS(funa->getParameter("a1"), 4);
   }
 
+  void testCreateWithTies3() {
+    std::string fnString =
+        "name=FunctionFactoryTest_FunctA,ties=(a0=2,a1=4*(2+2))";
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"), 2);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"), 16);
+  }
+
+  void testCreateWithTies4() {
+    std::string fnString =
+        "name=FunctionFactoryTest_FunctA,ties=(a0=2,a1=a0/(2*2))";
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"), 2);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"), 0.5);
+  }
+
   void testCreateCompositeWithTies() {
     std::string fnString = "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
                            "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties="
@@ -358,32 +379,110 @@ public:
     IFunction_sptr fun1 =
         FunctionFactory::Instance().createInitialized(fun->asString());
 
-    fun1->setParameter(0, 0.);
-    fun1->setParameter(1, 0.);
+    fun1->setParameter(0, 1.);
+    fun1->setParameter(1, 2.);
     fun1->setParameter(2, 0.);
     fun1->setParameter(3, 789);
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 0.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 0.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
 
     fun1->applyTies();
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2), 3.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
   }
 
-  void test_MultiDomainFunction_creation() {
-    std::string fnString = "composite=MultiDomainFunction;"
-                           "name=FunctionFactoryTest_FunctA;"
-                           "name=FunctionFactoryTest_FunctB";
+  void testCreateCompositeWithTies1() {
+    std::string fnString = "name=FunctionFactoryTest_FunctA,ties=(a0=a1=16);"
+                           "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties="
+                           "(f1.b1=f0.a1/(2*2))";
+
     IFunction_sptr fun =
         FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    // TODO: add more asserts
+    TS_ASSERT_EQUALS(fun->getParameter(0), 16.);
+    TS_ASSERT_EQUALS(fun->getParameter(1), 16.);
+    TS_ASSERT_EQUALS(fun->getParameter(2), 0.2);
+    TS_ASSERT_EQUALS(fun->getParameter(3), 4.);
+  }
+
+  void test_MultiDomainFunction_creation() {
+    const std::string fnString = "composite=MultiDomainFunction;"
+                                 "name=FunctionFactoryTest_FunctA;"
+                                 "name=FunctionFactoryTest_FunctB";
+    IFunction_sptr fun;
+    TS_ASSERT_THROWS_NOTHING(
+        fun = FunctionFactory::Instance().createInitialized(fnString));
+    TS_ASSERT(fun);
+    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    TS_ASSERT(mdfunc);
+    if (mdfunc) {
+      TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
+      const auto funcA = mdfunc->getFunction(0);
+      const auto funcB = mdfunc->getFunction(1);
+      TS_ASSERT_EQUALS(funcA->name(), "FunctionFactoryTest_FunctA");
+      TS_ASSERT_EQUALS(funcB->name(), "FunctionFactoryTest_FunctB");
+    }
+  }
+
+  void test_MultiDomainFunction_creation_moreComplex() {
+    const std::string fnString =
+        "composite=MultiDomainFunction,NumDeriv=true;(name=FunctionFactoryTest_"
+        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties="
+        "(b1=0.2),$domains=i);(name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;"
+        "name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,$domains=i);ties=(f1.f1."
+        "b1=f0.f1.b1)";
+    IFunction_sptr fun;
+    TS_ASSERT_THROWS_NOTHING(
+        fun = FunctionFactory::Instance().createInitialized(fnString));
+    TS_ASSERT(fun);
+    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    TS_ASSERT(mdfunc);
+    if (mdfunc) {
+      TS_ASSERT_EQUALS(mdfunc->asString(),
+                       "composite=MultiDomainFunction,NumDeriv=true;(composite="
+                       "CompositeFunction,NumDeriv=false,$domains=i;name="
+                       "FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties=(b1=0.2))"
+                       ";(composite=CompositeFunction,NumDeriv=false,$domains="
+                       "i;name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2);ties=(f1.f1."
+                       "b1=f0.f1.b1)");
+      TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
+
+      // test the domains for each function
+      std::vector<size_t> domainsFirstFunc, domainsSecondFunc;
+      mdfunc->getDomainIndices(0, 1, domainsFirstFunc);
+      mdfunc->getDomainIndices(1, 1, domainsSecondFunc);
+      TS_ASSERT_EQUALS(domainsFirstFunc, std::vector<size_t>{0});
+      TS_ASSERT_EQUALS(domainsSecondFunc, std::vector<size_t>{1});
+
+      // test composite functions
+      const auto first = boost::dynamic_pointer_cast<CompositeFunction>(
+          mdfunc->getFunction(0));
+      const auto second = boost::dynamic_pointer_cast<CompositeFunction>(
+          mdfunc->getFunction(1));
+      TS_ASSERT(first);
+      TS_ASSERT(second);
+
+      // test each individual function
+      auto testFunc = [](CompositeFunction_sptr f) {
+        if (f) {
+          TS_ASSERT_EQUALS(f->nFunctions(), 2);
+          TS_ASSERT_EQUALS(f->getFunction(0)->name(),
+                           "FunctionFactoryTest_FunctA");
+          TS_ASSERT_EQUALS(f->getFunction(1)->name(),
+                           "FunctionFactoryTest_FunctB");
+        }
+      };
+      testFunc(first);
+      testFunc(second);
+    }
   }
 
   void test_getFunctionNames() {

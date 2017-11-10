@@ -6,7 +6,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
-#include <stdio.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <cstdio>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -218,8 +222,6 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -232,15 +234,15 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 
   vector<double> vecdouble;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      double item = atof(str.c_str());
+    if (!str.empty()) {
+      double item = std::stod(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
   }
 
   // cout << "[C]* Input: " << instring << ": size of double vector: " <<
-  // vecdouble.size() << endl;
+  // vecdouble.size() << '\n';
 
   return vecdouble;
 }
@@ -255,8 +257,8 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 
   vector<unsigned int> vecinteger;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      int item = atoi(str.c_str());
+    if (!str.empty()) {
+      int item = std::stoi(str);
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
@@ -266,7 +268,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   }
 
   // cout << "[C]* Input : " << instring << ": size of string vector: " <<
-  // vecinteger.size() << endl;
+  // vecinteger.size() << '\n';
 
   return vecinteger;
 }
@@ -279,13 +281,6 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
       m_frequency(0), m_id_line(), m_sample(), m_vecBankID2File(),
       m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(),
       m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
@@ -340,8 +335,6 @@ void SaveGSASInstrumentFile::init() {
   declareProperty("TwoTheta", EMPTY_DBL(), mustBePositive,
                   "Angle of the detector bank. "
                   "It must be given if L2 is not given. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -389,8 +382,6 @@ void SaveGSASInstrumentFile::exec() {
     g_log.error(errorstr);
     throw std::runtime_error(errorstr);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -435,7 +426,7 @@ void SaveGSASInstrumentFile::processProperties() {
   m_2theta = getProperty("TwoTheta");
   m_L2 = getProperty("L2");
   string freqtempstr = getProperty("ChopperFrequency");
-  m_frequency = atoi(freqtempstr.c_str());
+  m_frequency = std::stoi(freqtempstr);
 
   /* Set default value for L1
   if (m_L1 == EMPTY_DBL())
@@ -503,8 +494,6 @@ void SaveGSASInstrumentFile::initConstants(
     throw runtime_error(errss.str());
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -558,8 +547,6 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     unsigned int bankid = vecbankindex[i];
     profilemap.emplace(bankid, vec_maptemp[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -738,8 +725,6 @@ void SaveGSASInstrumentFile::convertToGSAS(
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -816,8 +801,6 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
                   << "\t  " << setw(20) << setprecision(10) << instC << "\t "
                   << setw(20) << setprecision(10) << m_gdt[k] << ".\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -842,8 +825,6 @@ void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
   fprintf(pFile, "INS   FPATH1     %f \n", m_L1);
   fprintf(pFile, "INS   HTYPE   PNTR \n");
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -983,8 +964,6 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   }
 
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1123,8 +1102,6 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   if (!m_inpWS)
     throw runtime_error("Failed to obtain a table workspace from "
                         "LoadFullprofResolution's output.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

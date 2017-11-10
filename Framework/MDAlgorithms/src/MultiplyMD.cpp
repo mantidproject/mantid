@@ -1,9 +1,9 @@
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -14,16 +14,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MultiplyMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiplyMD::MultiplyMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiplyMD::~MultiplyMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -57,10 +47,10 @@ void MultiplyMD::checkInputs() {
 template <typename MDE, size_t nd>
 void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
-  float scalar = float(m_rhs_scalar->dataY(0)[0]);
-  float scalarError = float(m_rhs_scalar->dataE(0)[0]);
-  float scalarRelativeErrorSquared =
-      (scalarError * scalarError) / (scalar * scalar);
+  float scalar = static_cast<float>(m_rhs_scalar->y(0)[0]);
+  float scalarError = static_cast<float>(m_rhs_scalar->e(0)[0]);
+  float scalarErrorSquared = scalarError * scalarError;
+  float scalarSquared = scalar * scalar;
 
   // Get all the MDBoxes contained
   MDBoxBase<MDE, nd> *parentBox = ws->getBox();
@@ -85,9 +75,8 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
-        float errorSquared =
-            signal * signal * (it->getErrorSquared() / (oldSignal * oldSignal) +
-                               scalarRelativeErrorSquared);
+        float errorSquared = scalarSquared * it->getErrorSquared() +
+                             oldSignal * oldSignal * scalarErrorSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
       }
@@ -130,7 +119,7 @@ void MultiplyMD::execHistoHisto(
 void MultiplyMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->multiply(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->multiply(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 } // namespace Mantid

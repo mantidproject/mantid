@@ -5,6 +5,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
@@ -47,10 +48,6 @@ namespace DataHandling {
 */
 class DLLExport LoadRKH : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// Constructor
-  LoadRKH() : m_unitKeys(), m_RKHKeys() {}
-  /// Virtual destructor
-  ~LoadRKH() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadRKH"; }
   /// Summary of algorithms purpose
@@ -96,6 +93,13 @@ private:
 
   /// Check if we the data set stores an X-Error values
   bool hasXerror(std::ifstream &stream);
+
+  /// Read data from the RKH file
+  void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
+                         HistogramData::Points &x, HistogramData::Counts &y,
+                         HistogramData::CountStandardDeviations &ye,
+                         HistogramData::PointStandardDeviations &xe,
+                         API::Progress &prog, bool readXError = false);
 };
 }
 }

@@ -1,9 +1,10 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import *
 from numpy import *
-from string import *
 
 class GetEiT0atSNSTest(unittest.TestCase):
 
@@ -19,7 +20,7 @@ class GetEiT0atSNSTest(unittest.TestCase):
             res=GetEiT0atSNS(w,0.1)
         except Exception as e:
             s="Could not get Ei, and this is not a white beam run\nNo peak found for the monitor with spectra num: 2"
-            self.assertEquals(find(e.message,s),0)
+            self.assertEqual(str(e).find(s),0)
         DeleteWorkspace(w)
 
 if __name__ == '__main__':

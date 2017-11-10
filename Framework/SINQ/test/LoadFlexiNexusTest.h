@@ -1,14 +1,15 @@
 #ifndef __LOADFLEXINEXUSTEST
 #define __LOADFLEXINEXUSTEST
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/LoadFlexiNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidSINQ/LoadFlexiNexus.h"
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -95,18 +96,15 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
-    MantidVec &X = data->dataX(0);
-    MantidVec &Y = data->dataY(0);
-    double dSum = .0;
-    for (size_t i = 0; i < Y.size(); i++) {
-      dSum += Y[i];
-    }
+    const auto &X = data->x(0);
+    const auto &Y = data->y(0);
+    double dSum = std::accumulate(Y.cbegin(), Y.cend(), 0.);
     TS_ASSERT_EQUALS(dSum, 198812);
 
     // test X
     TS_ASSERT_EQUALS(X.size(), 360);
-    TS_ASSERT_DELTA(X[0], 32471.4, .1);
-    TS_ASSERT_DELTA(X[X.size() - 1], 194590.43, .1);
+    TS_ASSERT_DELTA(X.front(), 32471.4, .1);
+    TS_ASSERT_DELTA(X.back(), 194590.43, .1);
 
     // test some meta data
     std::string title = data->getTitle();

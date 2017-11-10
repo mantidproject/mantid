@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/CompositeDomain.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -89,8 +91,6 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
 
   PARALLEL_ATOMIC
   m_value += m_factor * retVal;
-
-  return;
 }
 
 /** Calculate the derivatives of the cost function
@@ -191,7 +191,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
     m_dirtyDeriv = false;
   }
 
-  if (evalDeriv) {
+  if (evalHessian) {
     if (m_includePenalty) {
       size_t i = 0;
       for (size_t ip = 0; ip < np; ++ip) {
@@ -227,10 +227,10 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
                                               bool evalDeriv,
                                               bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
-  size_t np = function->nParams(); // number of parameters
-  size_t ny = domain->size();      // number of data points
-  Jacobian jacobian(ny, np);
   function->function(*domain, *values);
+  size_t np = function->nParams(); // number of parameters
+  size_t ny = values->size();      // number of data points
+  Jacobian jacobian(ny, np);
   function->functionDeriv(*domain, jacobian);
 
   size_t iActiveP = 0;
@@ -366,34 +366,6 @@ void CostFuncLeastSquares::drop() {
   }
   m_pushed = false;
   setDirty();
-}
-
-/**
- * Copy the parameter values from a GSLVector.
- * @param params :: A vector to copy the parameters from
- */
-void CostFuncLeastSquares::setParameters(const GSLVector &params) {
-  if (nParams() != params.size()) {
-    throw std::runtime_error(
-        "Parameter vector has wrong size in CostFuncLeastSquares.");
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    setParameter(i, params.get(i));
-  }
-  m_function->applyTies();
-}
-
-/**
- * Copy the parameter values to a GSLVector.
- * @param params :: A vector to copy the parameters to
- */
-void CostFuncLeastSquares::getParameters(GSLVector &params) const {
-  if (params.size() != nParams()) {
-    params.resize(nParams());
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    params.set(i, getParameter(i));
-  }
 }
 
 /**

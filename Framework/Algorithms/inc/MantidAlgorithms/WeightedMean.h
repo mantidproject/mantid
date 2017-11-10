@@ -44,11 +44,6 @@ namespace Algorithms {
  */
 class DLLExport WeightedMean : public BinaryOperation {
 public:
-  /// Empty Constructor
-  WeightedMean() : BinaryOperation() {}
-  /// Empty Destructor
-  ~WeightedMean() override {}
-
   const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

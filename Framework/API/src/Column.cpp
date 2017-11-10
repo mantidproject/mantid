@@ -26,7 +26,7 @@ void Column::setPlotType(int t) {
     m_plotType = t;
   else {
     g_log.error() << "Cannot set plot of column to " << t
-                  << " . Ignore this attempt." << std::endl;
+                  << " . Ignore this attempt.\n";
   }
 }
 

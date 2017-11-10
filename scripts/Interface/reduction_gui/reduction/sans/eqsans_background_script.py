@@ -1,10 +1,12 @@
 """
     Sample data options for EQSANS reduction
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_background_script import Background as BaseBackground
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData
+
 
 class Background(BaseBackground):
 
@@ -21,10 +23,11 @@ class Background(BaseBackground):
                 Generate reduction script
             """
             if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
-                raise RuntimeError, "Direct beam method for background transmission was selected but was selected but all the appropriate data files were not entered."
+                raise RuntimeError("Direct beam method for background transmission was selected but was selected "
+                                   "but all the appropriate data files were not entered.")
 
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
-            (self.sample_file, self.direct_beam, self.beam_radius)
+                (self.sample_file, self.direct_beam, self.beam_radius)
 
         def from_setup_info(self, xml_str):
             """
@@ -33,12 +36,7 @@ class Background(BaseBackground):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "BckTransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "BckTransmissionEmptyDataFile", default='')
@@ -107,11 +105,6 @@ class Background(BaseBackground):
         self.reset()
         super(Background, self).from_setup_info(xml_str)
 
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "BckFitFramesTogether",
                                                                               default=SampleData.combine_transmission_frames)

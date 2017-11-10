@@ -1,13 +1,20 @@
 #include "MantidKernel/StringContainsValidator.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 StringContainsValidator::StringContainsValidator() {
   m_requiredStrings = std::vector<std::string>();
+}
+
+/** Constructor with required sub strings
+*/
+StringContainsValidator::StringContainsValidator(
+    const std::vector<std::string> &strings) {
+  m_requiredStrings = strings;
 }
 
 /**
@@ -33,7 +40,7 @@ void StringContainsValidator::setRequiredStrings(
  */
 std::string
 StringContainsValidator::checkValidity(const std::string &value) const {
-  std::string error("");
+  std::string error;
   if (m_requiredStrings.empty() && !value.empty()) {
     return "";
   } else {

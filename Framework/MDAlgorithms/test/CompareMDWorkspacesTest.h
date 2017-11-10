@@ -42,7 +42,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     std::string result = alg.getPropertyValue("Result");
-    std::cout << result << std::endl;
+    std::cout << result << '\n';
     TSM_ASSERT(result.c_str(), boost::starts_with(result, resultExpected));
   }
 

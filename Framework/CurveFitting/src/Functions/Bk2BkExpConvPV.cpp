@@ -38,17 +38,11 @@ void Bk2BkExpConvPV::init() {
   declareParameter("Beta", 1.0);
   declareParameter("Sigma2", 1.0);
   declareParameter("Gamma", 0.0);
-
-  return;
 }
 
 /** Set peak height
   */
-void Bk2BkExpConvPV::setHeight(const double h) {
-  setParameter("Height", h);
-
-  return;
-}
+void Bk2BkExpConvPV::setHeight(const double h) { setParameter("Height", h); }
 
 /** Get peak height
   */
@@ -111,7 +105,7 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
   To " << xValues[nData-1]
                 << " TOF_h = " << tof_h << " Height = " << height << " alpha = "
   << alpha << " beta = "
-                << beta << " H = " << H << " eta = " << eta << std::endl;
+                << beta << " H = " << H << " eta = " << eta << '\n';
                 */
 
   // 2. Do calculation for each data point
@@ -121,8 +115,6 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
         calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
     out[id] = height * omega;
   }
-
-  return;
 }
 
 /** Local derivative
@@ -219,14 +211,12 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
 void Bk2BkExpConvPV::geneatePeak(double *out, const double *xValues,
                                  const size_t nData) {
   this->functionLocal(out, xValues, nData);
-
-  return;
 }
 
 void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
                                 double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * log(2.0));
+  double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
@@ -245,10 +235,8 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
 
   if (eta > 1 || eta < 0) {
     g_log.error() << "Bk2BkExpConvPV: Calculated eta = " << eta
-                  << " is out of range [0, 1]." << std::endl;
+                  << " is out of range [0, 1].\n";
   }
-
-  return;
 }
 
 } // namespace Mantid

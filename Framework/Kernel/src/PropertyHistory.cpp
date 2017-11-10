@@ -1,8 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
+
+#include <algorithm>
+#include <boost/lexical_cast.hpp>
+#include <cstdint>
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {
@@ -16,28 +23,33 @@ PropertyHistory::PropertyHistory(const std::string &name,
       m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
-    : // PropertyHistory::PropertyHistory(prop->name(), prop->value(),
-      // prop->type(), prop->isDefault(), prop->direction())
-      m_name(prop->name()),
-      m_value(prop->value()), m_type(prop->type()),
-      m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
+    : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)),
+      m_type(prop->type()), m_isDefault(prop->isDefault()),
+      m_direction(prop->direction()) {}
 
 /** Prints a text representation of itself
- *  @param os :: The ouput stream to write to
+ *  @param os :: The output stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
  * sub-objects
+ *  @param maxPropertyLength :: the max length for any property value string (0
+ * = full length)
  */
-void PropertyHistory::printSelf(std::ostream &os, const int indent) const {
+void PropertyHistory::printSelf(std::ostream &os, const int indent,
+                                const size_t maxPropertyLength) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
-  os << ", Value: " << m_value;
+  if ((maxPropertyLength > 0) && (m_value.size() > maxPropertyLength)) {
+    os << ", Value: " << Strings::shorten(m_value, maxPropertyLength);
+  } else {
+    os << ", Value: " << m_value;
+  }
   os << ", Default?: " << (m_isDefault ? "Yes" : "No");
-  os << ", Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
+  os << ", Direction: " << Kernel::Direction::asText(m_direction) << '\n';
 }
 
 /** Prints a text representation
- *  @param os :: The ouput stream to write to
+ *  @param os :: The output stream to write to
  *  @param AP :: The PropertyHistory to output
- *  @returns The ouput stream
+ *  @returns The output stream
  */
 std::ostream &operator<<(std::ostream &os, const PropertyHistory &AP) {
   AP.printSelf(os);
@@ -60,9 +72,9 @@ bool PropertyHistory::isEmptyDefault() const {
   }
   // Empty values
   if (emptyValues.empty()) {
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_INT()));
+    emptyValues.push_back(std::to_string(EMPTY_INT()));
     emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_LONG()));
+    emptyValues.push_back(std::to_string(EMPTY_LONG()));
   }
 
   // If default, input, number type and matches empty value then return true

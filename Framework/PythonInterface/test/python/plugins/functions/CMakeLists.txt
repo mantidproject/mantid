@@ -8,9 +8,12 @@ set ( TEST_PY_FILES
   ExamplePeakFunctionTest.py
   StretchedExpFTTest.py
   AttributeTest.py
+  MsdGaussTest.py
+  MsdPetersTest.py
+  MsdYiTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonFunctions
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonFunctions ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.functions ${TEST_PY_FILES} )

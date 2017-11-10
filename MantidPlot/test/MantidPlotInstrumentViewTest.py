@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test the interaction with the instrument view.
 Assertion that things work is difficult so mosts
 test will just that things don't crash.

@@ -30,8 +30,6 @@ void SplittersWorkspace::addSplitter(
   row << splitter.start().totalNanoseconds();
   row << splitter.stop().totalNanoseconds();
   row << splitter.index();
-
-  return;
 }
 
 Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {
@@ -43,8 +41,8 @@ Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {
   row >> stop;
   row >> wsgroup;
 
-  Kernel::SplittingInterval splitter(Kernel::DateAndTime(start),
-                                     Kernel::DateAndTime(stop), wsgroup);
+  Kernel::SplittingInterval splitter(Types::Core::DateAndTime(start),
+                                     Types::Core::DateAndTime(stop), wsgroup);
 
   return splitter;
 }
@@ -56,8 +54,7 @@ size_t SplittersWorkspace::getNumberSplitters() const {
 bool SplittersWorkspace::removeSplitter(size_t index) {
   bool removed;
   if (index >= this->rowCount()) {
-    g_log.error() << "Try to delete a non-existing splitter " << index
-                  << std::endl;
+    g_log.error() << "Try to delete a non-existing splitter " << index << '\n';
     removed = false;
   } else {
     this->removeRow(index);

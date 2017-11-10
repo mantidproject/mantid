@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid {
@@ -35,7 +35,7 @@ namespace DataObjects {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport WorkspaceSingleValue : public API::MatrixWorkspace {
+class DLLExport WorkspaceSingleValue : public API::HistoWorkspace {
 public:
   /**	Gets the name of the workspace type
    * @return Standard string name  */
@@ -47,6 +47,10 @@ public:
   std::unique_ptr<WorkspaceSingleValue> clone() const {
     return std::unique_ptr<WorkspaceSingleValue>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceSingleValue> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceSingleValue>(doCloneEmpty());
+  }
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return 1; }
@@ -57,13 +61,8 @@ public:
   /// @return the number of histograms (spectra)
   std::size_t getNumberHistograms() const override { return 1; }
 
-  //------------------------------------------------------------
-  // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  // Return the underlying ISpectrum ptr (const version) at the given workspace
-  // index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  Histogram1D &getSpectrum(const size_t index) override;
+  const Histogram1D &getSpectrum(const size_t index) const override;
 
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
@@ -80,13 +79,18 @@ private:
   WorkspaceSingleValue *doClone() const override {
     return new WorkspaceSingleValue(*this);
   }
+  WorkspaceSingleValue *doCloneEmpty() const override {
+    return new WorkspaceSingleValue();
+  }
 
   // allocates space in a new workspace - does nothing in this case
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
-  Histogram1D data;
+  Histogram1D data{HistogramData::Histogram::XMode::Points,
+                   HistogramData::Histogram::YMode::Counts};
 };
 
 /// shared pointer to the WorkspaceSingleValue class

@@ -8,27 +8,24 @@ set (SYSTEM_PACKAGE_TARGET RUNTIME)
 ###########################################################################
 # Compiler options.
 ###########################################################################
-add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
+add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
+# Workaround Qt compiler detection
+#https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+#https://bugreports.qt.io/browse/QTBUG-39142
+add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
-# /w34296 - Treat warning C4396, about comparison on unsigned and zero,
-#           as a level 3 warning
-# /w34389 - Treat warning C4389, about equality comparison on unsigned
-#           and signed, as a level 3 warning
+# /W3     - Warning Level 3 (This is also the default)
 # /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
 #           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
-
-# As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
-# gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
-add_definitions ( -D_variadic_max=10 )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
@@ -44,13 +41,12 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" 
 endif()
 
 ###########################################################################
-# On Windows we want to bundle Python. The necessary libraries are in
-# THIRD_PARTY_DIR/lib/python2.7
+# On Windows we want to bundle Python.
 ###########################################################################
-set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python2.7 )
+set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION} )
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${PYTHON_DIR}/Include" )
-set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python27.lib )
+set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION}.lib )
 
 ## The executable
 set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
@@ -96,10 +92,48 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat ${PROJECT_BINARY_DIR}
 configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
 
 ###########################################################################
+# Configure Mantid startup scripts
+###########################################################################
+set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
+# build version
+set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+
+if ( MAKE_VATES )
+  set ( PARAVIEW_PYTHON_PATHS ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk" )
+else ()
+  set (PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
+configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
+    ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY )
+# place it in the appropriate directory
+file(GENERATE
+     OUTPUT
+     ${PROJECT_BINARY_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/mantidpython.bat
+     INPUT
+     ${PROJECT_BINARY_DIR}/mantidpython.bat.in
+  )
+# install version
+set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
+
+if (MAKE_VATES)
+  set ( PV_LIBS "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
+  set ( PARAVIEW_PYTHON_PATHS ";${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk" )
+else ()
+  set ( PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
+configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
+    ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
+
+###########################################################################
 # (Fake) installation variables to keep windows sweet
 ###########################################################################
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
-set ( PVPLUGINS_DIR PVPlugins )
-set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview ) # Need to tidy these things up!

@@ -49,6 +49,7 @@ gcov_cmd = "gcov"
 output_re = re.compile("[Cc]reating [`'](.*)'$")
 source_re = re.compile("cannot open (source|graph) file")
 
+
 def version_str():
     ans = __version__
     m = re.match('\$Revision:\s*(\S+)\s*\$', src_revision)
@@ -59,6 +60,8 @@ def version_str():
 #
 # Container object for coverage statistics
 #
+
+
 class CoverageData(object):
 
     def __init__(self, fname, uncovered, covered, branches, noncode):
@@ -99,7 +102,7 @@ class CoverageData(object):
 
             tmp.sort()
             return ",".join([str(x) for x in tmp]) or ""
-        
+
         tmp = list(self.uncovered)
         if len(tmp) == 0:
             return ""
@@ -119,7 +122,7 @@ class CoverageData(object):
                        == item - last - 1:
                     last = item
                     continue
-                
+
                 if first==last:
                     ranges.append(str(first))
                 else:
@@ -143,7 +146,7 @@ class CoverageData(object):
         else:
             total = len(self.all_lines)
             cover = len(self.covered)
-            
+
         percent = total and str(int(100.0*cover/total)) or "--"
         return (total, cover, percent)
 
@@ -159,7 +162,7 @@ class CoverageData(object):
 
         (total, cover, percent) = self.coverage()
         return ( total, cover,
-                 tmp + str(total).rjust(8) + str(cover).rjust(8) + \
+                 tmp + str(total).rjust(8) + str(cover).rjust(8) +
                  percent.rjust(6) + "%   " + self.uncovered_str() )
 
 
@@ -266,6 +269,8 @@ aliases = PathAliaser()
 # path, along with the full path of all links 1 directory at a time and
 # check for embedded symlinks.
 #
+
+
 def link_walker(path):
     targets = [os.path.abspath(path)]
     while targets:
@@ -391,7 +396,7 @@ def process_gcov_data(file, covdata, options):
                 lineno = int(segments[1].strip())
             except:
                 pass # keep previous line number!
-            
+
         if tmp[0] == '#':
             uncovered.add( lineno )
         elif tmp[0] in "0123456789":
@@ -435,7 +440,7 @@ def process_gcov_data(file, covdata, options):
     # remove lines that are covered here.  Otherwise,
     # initialize covdata
     #
-    if not fname in covdata:
+    if fname not in covdata:
         covdata[fname] = CoverageData(fname,uncovered,covered,branches,noncode)
     else:
         covdata[fname].update(uncovered,covered,branches,noncode)
@@ -466,6 +471,8 @@ def process_gcov_data(file, covdata, options):
 # identifying the original gcc working directory (there is a bit of
 # trial-and-error here)
 #
+
+
 def process_datafile(filename, covdata, options):
     #
     # Launch gcov
@@ -518,7 +525,7 @@ def process_datafile(filename, covdata, options):
                 errors.append("ERROR: cannot identify the location where GCC "
                               "was run using --object-directory=%s\n" %
                               options.objdir)
-            # Revert to the normal 
+            # Revert to the normal
             #sys.exit(1)
 
     # no objdir was specified (or it was a parent dir); walk up the dir tree
@@ -531,21 +538,19 @@ def process_datafile(filename, covdata, options):
                 break
 
     cmd = [ gcov_cmd, abs_filename,
-            "--branch-counts", "--branch-probabilities", "--preserve-paths", 
+            "--branch-counts", "--branch-probabilities", "--preserve-paths",
             '--object-directory', dirname ]
 
     # NB: We are lazy English speakers, so we will only parse English output
     env = dict(os.environ)
     env['LC_ALL'] = 'en_US'
-    
 
     while len(potential_wd) > 0 and not Done:
         # NB: either len(potential_wd) == 1, or all entires are absolute
         # paths, so we don't have to chdir(starting_dir) at every
         # iteration.
-        os.chdir(potential_wd.pop(0)) 
-        
-        
+        os.chdir(potential_wd.pop(0))
+
         #if options.objdir:
         #    cmd.extend(["--object-directory", Template(options.objdir).substitute(filename=filename, head=dirname, tail=base, root=name, ext=ext)])
 
@@ -599,27 +604,31 @@ def process_datafile(filename, covdata, options):
     if options.delete:
         if not abs_filename.endswith('gcno'):
             os.remove(abs_filename)
-        
+
     if not Done:
         sys.stderr.write(
             "(WARNING) GCOV produced the following errors processing %s:\n"
-            "\t   %s" 
+            "\t   %s"
             "\t(gcovr could not infer a working directory that resolved it.)\n"
             % ( filename, "\t   ".join(errors) ) )
 
 #
 # Produce the classic gcovr text report
 #
+
+
 def print_text_report(covdata):
     def _num_uncovered(key):
         (total, covered, percent) = covdata[key].coverage()
         return total - covered
+
     def _percent_uncovered(key):
         (total, covered, percent) = covdata[key].coverage()
         if covered:
             return -1.0*covered/total
         else:
             return total or 1e6
+
     def _alpha(key):
         return key
 
@@ -638,7 +647,7 @@ def print_text_report(covdata):
 
     # Data
     keys = list(covdata.keys())
-    keys.sort(key=options.sort_uncovered and _num_uncovered or \
+    keys.sort(key=options.sort_uncovered and _num_uncovered or
               options.sort_percent and _percent_uncovered or _alpha)
     for key in keys:
         (t, n, txt) = covdata[key].summary()
@@ -649,8 +658,8 @@ def print_text_report(covdata):
     # Footer & summary
     OUTPUT.write("-"*78 + '\n')
     percent = total_lines and str(int(100.0*total_covered/total_lines)) or "--"
-    OUTPUT.write("TOTAL".ljust(40) + str(total_lines).rjust(8) + \
-          str(total_covered).rjust(8) + str(percent).rjust(6)+"%" + '\n')
+    OUTPUT.write("TOTAL".ljust(40) + str(total_lines).rjust(8) +
+                 str(total_covered).rjust(8) + str(percent).rjust(6)+"%" + '\n')
     OUTPUT.write("-"*78 + '\n')
 
     # Close logfile
@@ -660,6 +669,8 @@ def print_text_report(covdata):
 #
 # Produce an XML report in the Cobertura format
 #
+
+
 def print_xml_report(covdata):
     branchTotal = 0
     branchCovered = 0
@@ -677,7 +688,7 @@ def print_xml_report(covdata):
         (total, covered, percent) = covdata[key].coverage()
         lineTotal += total
         lineCovered += covered
-    
+
     impl = xml.dom.minidom.getDOMImplementation()
     docType = impl.createDocumentType(
         "coverage", None,
@@ -702,8 +713,7 @@ def print_xml_report(covdata):
     packages = {}
     source_dirs = set()
 
-    keys = list(covdata.keys())
-    keys.sort()
+    keys = sorted(covdata.keys())
     for f in keys:
         data = covdata[f]
         dir = options.filter.sub('',f)
@@ -719,7 +729,7 @@ def print_xml_report(covdata):
             # the beginning of the string
             dir = f
         (dir, fname) = os.path.split(dir)
-        
+
         package = packages.setdefault(
             dir, [ doc.createElement("package"), {},
                    0, 0, 0, 0 ] )
@@ -761,7 +771,7 @@ def print_xml_report(covdata):
                 conditions = doc.createElement("conditions")
                 conditions.appendChild(cond)
                 l.appendChild(conditions)
-                
+
             lines.appendChild(l)
 
         className = fname.replace('.', '_')
@@ -779,19 +789,17 @@ def print_xml_report(covdata):
         package[5] += class_branches
 
     for packageName, packageData in packages.items():
-        package = packageData[0];
+        package = packageData[0]
         packageXml.appendChild(package)
         classes = doc.createElement("classes")
         package.appendChild(classes)
-        classNames = list(packageData[1].keys())
-        classNames.sort()
+        classNames = sorted(packageData[1].keys())
         for className in classNames:
             classes.appendChild(packageData[1][className])
         package.setAttribute("name", packageName.replace(os.sep, '.'))
         package.setAttribute("line-rate", str(packageData[2]/(1.0*packageData[3] or 1.0)))
         package.setAttribute( "branch-rate", str(packageData[4] / (1.0*packageData[5] or 1.0) ))
         package.setAttribute("complexity", "0.0")
-
 
     # Populate the <sources> element: this is either the root directory
     # (specified by --root), or relative directories based
@@ -809,7 +817,7 @@ def print_xml_report(covdata):
             elif cwd.startswith(d):
                 i = 1
                 while normpath(d) != \
-                          normpath(os.path.join(*tuple([cwd]+['..']*i))):
+                        normpath(os.path.join(*tuple([cwd]+['..']*i))):
                     i += 1
                 reldir = os.path.join(*tuple(['..']*i))
             else:
@@ -840,80 +848,80 @@ def print_xml_report(covdata):
 #
 parser = OptionParser()
 parser.add_option("--version",
-        help="Print the version number, then exit",
-        action="store_true",
-        dest="version",
-        default=False)
+                  help="Print the version number, then exit",
+                  action="store_true",
+                  dest="version",
+                  default=False)
 parser.add_option("-v","--verbose",
-        help="Print progress messages",
-        action="store_true",
-        dest="verbose",
-        default=False)
+                  help="Print progress messages",
+                  action="store_true",
+                  dest="verbose",
+                  default=False)
 parser.add_option('--object-directory',
-        help="Specify the directory that contains the gcov data files.  gcovr must be able to identify the path between the *.gcda files and the directory where gcc was originally run.  Normally, gcovr can guess correctly.  This option overrides gcovr's normal path detection and can specify either the path from gcc to the gcda file (i.e. what was passed to gcc's '-o' option), or the path from the gcda file to gcc's original working directory.",
-        action="store",
-        dest="objdir",
-        default=None)
+                  help="Specify the directory that contains the gcov data files.  gcovr must be able to identify the path between the *.gcda files and the directory where gcc was originally run.  Normally, gcovr can guess correctly.  This option overrides gcovr's normal path detection and can specify either the path from gcc to the gcda file (i.e. what was passed to gcc's '-o' option), or the path from the gcda file to gcc's original working directory.",
+                  action="store",
+                  dest="objdir",
+                  default=None)
 parser.add_option("-o","--output",
-        help="Print output to this filename",
-        action="store",
-        dest="output",
-        default=None)
+                  help="Print output to this filename",
+                  action="store",
+                  dest="output",
+                  default=None)
 parser.add_option("-k","--keep",
-        help="Keep temporary gcov files",
-        action="store_true",
-        dest="keep",
-        default=False)
+                  help="Keep temporary gcov files",
+                  action="store_true",
+                  dest="keep",
+                  default=False)
 parser.add_option("-d","--delete",
-        help="Delete the coverage files after they are processed",
-        action="store_true",
-        dest="delete",
-        default=False)
+                  help="Delete the coverage files after they are processed",
+                  action="store_true",
+                  dest="delete",
+                  default=False)
 parser.add_option("-f","--filter",
-        help="Keep only the data files that match this regular expression",
-        action="store",
-        dest="filter",
-        default=None)
+                  help="Keep only the data files that match this regular expression",
+                  action="store",
+                  dest="filter",
+                  default=None)
 parser.add_option("-e","--exclude",
-        help="Exclude data files that match this regular expression",
-        action="append",
-        dest="exclude",
-        default=[])
+                  help="Exclude data files that match this regular expression",
+                  action="append",
+                  dest="exclude",
+                  default=[])
 parser.add_option("--gcov-filter",
-        help="Keep only gcov data files that match this regular expression",
-        action="store",
-        dest="gcov_filter",
-        default=None)
+                  help="Keep only gcov data files that match this regular expression",
+                  action="store",
+                  dest="gcov_filter",
+                  default=None)
 parser.add_option("--gcov-exclude",
-        help="Exclude gcov data files that match this regular expression",
-        action="append",
-        dest="gcov_exclude",
-        default=[])
+                  help="Exclude gcov data files that match this regular expression",
+                  action="append",
+                  dest="gcov_exclude",
+                  default=[])
 parser.add_option("-r","--root",
-        help="Defines the root directory.  This is used to filter the files, and to standardize the output.",
-        action="store",
-        dest="root",
-        default=None)
+                  help="Defines the root directory.  This is used to filter the files, and to standardize the output.",
+                  action="store",
+                  dest="root",
+                  default=None)
 parser.add_option("-x","--xml",
-        help="Generate XML instead of the normal tabular output.",
-        action="store_true",
-        dest="xml",
-        default=None)
+                  help="Generate XML instead of the normal tabular output.",
+                  action="store_true",
+                  dest="xml",
+                  default=None)
 parser.add_option("-b","--branches",
-        help="Tabulate the branch coverage instead of the line coverage.",
-        action="store_true",
-        dest="show_branch",
-        default=None)
+                  help="Tabulate the branch coverage instead of the line coverage.",
+                  action="store_true",
+                  dest="show_branch",
+                  default=None)
 parser.add_option("-u","--sort-uncovered",
-        help="Sort entries by increasing number of uncovered lines.",
-        action="store_true",
-        dest="sort_uncovered",
-        default=None)
+                  help="Sort entries by increasing number of uncovered lines.",
+                  action="store_true",
+                  dest="sort_uncovered",
+                  default=None)
 parser.add_option("-p","--sort-percentage",
-        help="Sort entries by decreasing percentage of covered lines.",
-        action="store_true",
-        dest="sort_percent",
-        default=None)
+                  help="Sort entries by decreasing percentage of covered lines.",
+                  action="store_true",
+                  dest="sort_percent",
+                  default=None)
 parser.usage="gcovr [options]"
 parser.description="A utility to run gcov and generate a simple report that summarizes the coverage"
 #

@@ -102,8 +102,6 @@ void NeutronBk2BkExpConvPVoigt::init() {
 
   // Set flag
   m_cellParamValueChanged = true;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -122,21 +120,21 @@ double NeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
   // Get value
   double paramvalue(EMPTY_DBL());
 
-  if (paramname.compare("Alpha") == 0)
+  if (paramname == "Alpha")
     paramvalue = m_Alpha;
-  else if (paramname.compare("Beta") == 0)
+  else if (paramname == "Beta")
     paramvalue = m_Beta;
-  else if (paramname.compare("Sigma2") == 0)
+  else if (paramname == "Sigma2")
     paramvalue = m_Sigma2;
-  else if (paramname.compare("Gamma") == 0)
+  else if (paramname == "Gamma")
     paramvalue = m_Gamma;
-  else if (paramname.compare("d_h") == 0)
+  else if (paramname == "d_h")
     paramvalue = m_dcentre;
-  else if (paramname.compare("Eta") == 0)
+  else if (paramname == "Eta")
     paramvalue = m_eta;
-  else if (paramname.compare("TOF_h") == 0)
+  else if (paramname == "TOF_h")
     paramvalue = m_centre;
-  else if (paramname.compare("FWHM") == 0)
+  else if (paramname == "FWHM")
     paramvalue = m_fwhm;
   else {
     stringstream errss;
@@ -266,8 +264,6 @@ void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const {
 
   // Reset the flag
   m_hasNewParameterValue = false;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -289,8 +285,6 @@ void NeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double &value,
     ParamFunction::setParameter(i, value, explicitlySet);
     m_hasNewParameterValue = true;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -299,7 +293,7 @@ void NeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double &value,
 void NeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
                                              const double &value,
                                              bool explicitlySet) {
-  if (name.compare("LatticeConstant") == 0) {
+  if (name == "LatticeConstant") {
     // Lattice parameter
     if (fabs(m_unitCellSize - value) > 1.0E-8) {
       // If change in value is non-trivial
@@ -312,8 +306,6 @@ void NeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
     ParamFunction::setParameter(name, value, explicitlySet);
     m_hasNewParameterValue = true;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -351,8 +343,6 @@ void NeutronBk2BkExpConvPVoigt::function(vector<double> &out,
                                  m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
     pos++;
   } // ENDFOR data points
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -388,8 +378,6 @@ void NeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues,
                     << ".\n";
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -398,7 +386,7 @@ void NeutronBk2BkExpConvPVoigt::function1D(double *out, const double *xValues,
 void NeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
                                            double &H, double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * log(2.0));
+  double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
@@ -419,8 +407,6 @@ void NeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
   } else {
     g_log.debug() << "[DBx121] Eta = " << eta << "; Gamma = " << gamma << ".\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

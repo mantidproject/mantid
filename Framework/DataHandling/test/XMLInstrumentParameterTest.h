@@ -5,9 +5,12 @@
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -45,20 +48,32 @@ public:
     TS_ASSERT_EQUALS(output2->getNumberHistograms(), 4)
 
     // get the parameter map for the period 1 CRISP data
-    ParameterMap &paramMap = output1->instrumentParameters();
+    const auto &paramMap = output1->constInstrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
+    const auto &detectorInfo = output1->detectorInfo();
+    const auto pos1 = detectorInfo.position(2); // ID 3 -> index 2
     std::vector<V3D> ret1 = paramMap.getV3D("point-detector", "pos");
-    TS_ASSERT_EQUALS(static_cast<int>(ret1.size()), 1);
-    TS_ASSERT_DELTA(ret1[0].Z(), 12.113, 0.0001);
-    TS_ASSERT_DELTA(ret1[0].X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret1[0].Y(), 0.0081, 0.0001);
+    // point-detector is a single detector, its position is stored in
+    // DetectorInfo, parameter has been purged from the map
+    TS_ASSERT_EQUALS(static_cast<int>(ret1.size()), 0);
+    TS_ASSERT_DELTA(pos1.Z(), 12.113, 0.0001);
+    TS_ASSERT_DELTA(pos1.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos1.Y(), 0.0081, 0.0001);
+    // linear-detector is composite, i.e., not a detector and thus not stored in
+    // DetectorInfo but in ComponentInfo
+    const auto &componentInfo = output1->componentInfo();
+    const auto &linearDetector = output1->getInstrument()
+                                     ->getComponentByName("linear-detector")
+                                     ->getComponentID();
+    const auto pos2 =
+        componentInfo.position(componentInfo.indexOf(linearDetector));
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
-    TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 1);
-    TS_ASSERT_DELTA(ret2[0].Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret2[0].X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret2[0].Z(), 0.1499, 0.0001);
-    std::vector<double> ret3 = paramMap.getDouble("slit1", "opening height");
+    TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 0);
+    TS_ASSERT_DELTA(pos2.Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos2.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos2.Z(), 0.1499, 0.0001);
+    std::vector<double> ret3 = paramMap.getDouble("slit1", "vertical gap");
     TS_ASSERT_EQUALS(static_cast<int>(ret3.size()), 1);
     TS_ASSERT_DELTA(ret3[0], 0.5005, 0.0001);
   }
@@ -67,7 +82,7 @@ public:
   // the test here simply
   // checks that this is done ok
   void testParsing() {
-    IComponent *comp(NULL);
+    IComponent *comp(nullptr);
     boost::shared_ptr<Interpolation> interpolation =
         boost::make_shared<Interpolation>();
     std::vector<std::string> constraint;
@@ -82,7 +97,7 @@ public:
         constraint, penaltyFactor, fitFunc, extractSingleValueAs, eq, comp,
         angleConvert, "bla bla bla");
 
-    TimeSeriesProperty<double> *dummy = NULL;
+    TimeSeriesProperty<double> *dummy = nullptr;
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);
 
     interpolation->addPoint(201.0, 60);

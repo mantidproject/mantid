@@ -28,24 +28,23 @@
  *    void connectToViewer(QObject* viewer);
  *          to connect to a viewer object (eg Graph3D)
  */
-class Function2D : public Qwt3D::Function
-{
+class Function2D : public Qwt3D::Function {
 public:
-    Function2D();
-    /// Get minimum positive value. It is needed for logarithmic scales.
-    virtual double getMinPositiveValue()const = 0;
-    /// Save function parameters to a string.
-    virtual QString saveToString() const = 0;
-    /// Connect to a viewer object
-    virtual void connectToViewer(QObject*) {}
+  Function2D();
+  /// Get minimum positive value. It is needed for logarithmic scales.
+  virtual double getMinPositiveValue() const = 0;
+  /// Save function parameters to a string.
+  virtual QString saveToString() const = 0;
+  /// Connect to a viewer object
+  virtual void connectToViewer(QObject *) {}
 
-    size_t rows() const {return d_rows;}
-    size_t columns() const {return d_columns;}
-    void setMesh (size_t columns, size_t rows);
+  size_t rows() const { return d_rows; }
+  size_t columns() const { return d_columns; }
+  void setMesh(size_t columns, size_t rows);
+
 private:
-      size_t d_rows, d_columns;
+  size_t d_rows, d_columns;
 };
-
 
 /**
  * @brief The UserFunction2D class implements a user defined 2D function.
@@ -54,21 +53,20 @@ private:
  * x and y for the function arguments.
  *
  */
-class UserFunction2D : public Function2D
-{
+class UserFunction2D : public Function2D {
 public:
   explicit UserFunction2D(const QString &s);
-    /// Get function value
+  /// Get function value
   double operator()(double x, double y) override;
-    /// Get minimum positive value.
+  /// Get minimum positive value.
   double getMinPositiveValue() const override;
-    /// Save function parameters to a string.
+  /// Save function parameters to a string.
   QString saveToString() const override;
 
-    QString formula() const {return d_formula;}
+  QString formula() const { return d_formula; }
 
 private:
-      QString d_formula;
+  QString d_formula;
 };
 
 #endif

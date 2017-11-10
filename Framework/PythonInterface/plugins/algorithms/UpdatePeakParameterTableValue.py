@@ -1,8 +1,12 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import mantid
 import mantid.api
 import mantid.kernel
 import mantid.simpleapi
+
 
 class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
@@ -32,7 +36,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+\
+                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+
                              "'Max', 'Min', 'StepSize' and 'Value'")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
@@ -69,18 +73,18 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         elif len(rownumberlist) == 0:
             # if no input row number/parameter name, set the value to all rows
             numrows = tableWS.rowCount()
-            rownumberlist = range(0, numrows)
+            rownumberlist = list(range(0, numrows))
         # ENDIF
         # for irow in rownumberlist:
         #     print "Update value on row %d" % (irow)
 
         # 3. Process column (to change) information
         colname = self.getProperty("Column").value
-        if colnamedict.has_key(colname):
+        if colname in colnamedict:
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"\
-                    % (colname, tablews.name()))
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
+                                      % (colname, tableWS.name()))
 
         # 3. Set value
         if colname in ["FitOrTie", "Name"]:
@@ -165,7 +169,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         # 2. Take in the case that there is no match
         if len(rownumbers) == 0:
             # No Match
-            print "Warning! There is no match for parameter %s" % (parnametofit)
+            mantid.logger.warning("Warning! There is no match for parameter %s" % (parnametofit))
             rownumbers.append(-1000)
         # ENDIFELSE
 
@@ -182,7 +186,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         colnames = tablews.getColumnNames()
         self.tableColNames = colnames
         colnamedict = {}
-        for ic in xrange( len(colnames) ):
+        for ic in range( len(colnames) ):
             colnamedict[colnames[ic]] = ic
 
         # 2. Check validity of workspace
@@ -196,7 +200,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         self.parameternames = []
 
         numrows = tablews.rowCount()
-        for irow in xrange(numrows):
+        for irow in range(numrows):
             parname = tablews.cell(irow, 0)
             parname = parname.lower().strip()
             parnamedict[parname] = irow
@@ -204,7 +208,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
             # NEW! Collect each variable in
             valuelist = []
-            for icol in xrange(len(colnames)):
+            for icol in range(len(colnames)):
                 value = tablews.cell(irow, icol)
                 valuelist.append(value)
                 parameterdict[parname] = valuelist

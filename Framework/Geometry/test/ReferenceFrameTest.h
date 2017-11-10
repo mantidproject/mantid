@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 #define MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -43,6 +43,19 @@ public:
     ReferenceFrame frame2(Z, X, Right, "source");
     TS_ASSERT_EQUALS(Y, frame1.pointingAlongBeam());
     TS_ASSERT_EQUALS(X, frame2.pointingAlongBeam());
+  }
+
+  void testVectorAlongBeam() {
+    V3D testVector = V3D(0, 0, 1);
+    ReferenceFrame frame1(Y, Z, Right, "source");
+    ReferenceFrame frame2(Z, X, Right, "source");
+
+    TSM_ASSERT("Should be positive because test vector is paralell to along "
+               "beam vector",
+               frame1.isVectorPointingAlongBeam(testVector));
+    TSM_ASSERT("Should be negative because test vector is perpendicular to "
+               "along beam vector",
+               !frame2.isVectorPointingAlongBeam(testVector));
   }
 
   void testGetHorizontal() {
@@ -125,6 +138,35 @@ public:
     TS_ASSERT_EQUALS(0, z_vec[0]);
     TS_ASSERT_EQUALS(0, z_vec[1]);
     TS_ASSERT_EQUALS(1, z_vec[2]);
+  }
+
+  void testGetThetaSignAxisVector() {
+    // Default constructor, theta-sign axis is the same as up
+    ReferenceFrame y(Y, X, Right, "source");
+    V3D y_vec = y.vecThetaSign();
+    TS_ASSERT_EQUALS(0, y_vec[0]);
+    TS_ASSERT_EQUALS(1, y_vec[1]);
+    TS_ASSERT_EQUALS(0, y_vec[2]);
+
+    // Again up but with explicit constructor
+    ReferenceFrame y2(Y, X, Y, Right, "source");
+    V3D y_vec2 = y2.vecThetaSign();
+    TS_ASSERT_EQUALS(0, y_vec2[0]);
+    TS_ASSERT_EQUALS(1, y_vec2[1]);
+    TS_ASSERT_EQUALS(0, y_vec2[2]);
+
+    // Theta sign is the third axis
+    ReferenceFrame x(Y, Z, X, Right, "source");
+    V3D x_vec = x.vecThetaSign();
+    TS_ASSERT_EQUALS(1, x_vec[0]);
+    TS_ASSERT_EQUALS(0, x_vec[1]);
+    TS_ASSERT_EQUALS(0, x_vec[2]);
+
+    // Error if theta sign is along the beam
+    TS_ASSERT_THROWS_EQUALS(
+        ReferenceFrame z(Y, Z, Z, Right, "source"),
+        const std::invalid_argument &e, std::string(e.what()),
+        "Scattering angle sign axis cannot be the same as the beam direction");
   }
 
   void testAxisLabelReturns() {

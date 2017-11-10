@@ -1,0 +1,343 @@
+digraph pearlRunFocus {
+    label="PearlDiffraction pearl_run_focus"
+    $global_style
+    
+    // Global prefix: Focus_run_
+    
+    Focus_run_start             [label="Start pearl_run_focus"]
+    Focus_run_start_VanCalib    [label="Start with vanadium calibration"]
+    Focus_run_start_without_VanCalib [label="Start without vanadium calibration"]
+    
+    Focus_run_start_FocusModeAll    [label="Focus Mode: 'all'"]
+    Focus_run_start_FocusModeGroups [label="Focus Mode: 'groups'"]
+    Focus_run_start_FocusModeTrans  [label="Focus Mode: 'trans'"]
+    Focus_run_start_FocusModeMods   [label="Focus Mode: 'mods'"]
+    
+    subgraph params {
+    $param_style
+    
+    Focus_run_param_atten               [label="atten"]
+    Focus_run_param_current_run_number  [label="Cycle number"]
+    Focus_run_param_vanadium_norm       [label="van_norm"]
+    Focus_run_param_f_mode              [label="fmode"]
+    Focus_run_param_focus_mode          [label="focus_mode"]
+    
+    //Read steps - suffix:read
+    Focus_run_global_calFile_read       [label="calfile"]
+    Focus_run_global_ext_read           [label="ext"]
+    Focus_run_global_groupFile_read     [label="groupfile"]
+    
+    //Vanadium calibration steps - suffix: VanCalib
+    Focus_run_global_vanFile_VanCalib   [label="vanfile"]
+    
+    //--Use param style for out file names instead of labels--    
+    //Focus Mode:'all' - suffix: FocusModeAll
+    SaveGSS_out_FocusModeAll            [label="GSS file"]
+    SaveNexus_out_FocusModeAll          [label="Nexus file"]
+    
+    //Focus Mode:'groups' - suffix: FocusModeGroups
+    SaveGSS_out_Mode1_FocusModeGroups   [label="GSS file"]
+    SaveGSS_out_Mode2_FocusModeGroups   [label="GSS file"]
+    SaveNexus_out_FocusModeGroups       [label="Nexus file"]
+    SaveGSS_out_range_FocusModeGroups   [label="GSS file"]
+    SaveNexus_out_range_FocusModeGroups [label="Nexus file"]
+    
+    //Focus Mode:'trans' - suffix: FocusModeTrans
+    SaveFocusedXYE_out_TOF_FocusModeTrans   [label="PRL<RunNumber>_tof_xye.dat"]
+    SaveFocusedXYE_out_dSpacing_FocusModeTrans  [label="PRL<RunNumber>_d_xye.dat"]
+    SaveNexus_out_FocusModeTrans        [label="Nexus file"]
+    SaveNexus_two_out_FocusModeTrans    [label="Nexus file"]
+    
+    //Focus Mode:'mods' - suffix: FocusModeMods
+    SaveGSS_out_FocusModeMods           [label="GSS file"]
+    SaveNexus_out_FocusModeMods         [label="Nexus file"]
+    
+    //--Output workspaces--
+    Focus_run_atten_out_FocusModeTrans  [label="Workspace 'PRL<RunNumber>_noatten'"]
+    Focus_run_final_output              [label="Workspace 'PRL<RunNumber>'"]
+
+    } // End of params
+    
+    subgraph processes {
+    $process_style
+
+    // Read steps - suffix:read
+    Focus_run_get_calib_files_read      [label="PEARL_getcalibfiles"]
+    Focus_run_read                      [label="PEARL_read"]
+    Focus_run_atten                     [label="PEARL_atten"]
+    
+    // Subgraphs:
+    Focus_run_process_VanCalib          [label="Start with vanadium calibration"]
+    Focus_run_process_without_VanCalib  [label="Start without vanadium calibration"]
+    Focus_run_process_FocusModeAll      [label="Focus Mode: 'all'"]
+    Focus_run_process_FocusModeGroups   [label="Focus Mode: 'groups'"]
+    Focus_run_process_FocusModeTrans    [label="Focus Mode: 'trans'"]
+    Focus_run_process_FocusModeMods     [label="Focus Mode: 'mods'"]
+    
+    // Remove intermediate workspaces steps
+    Remove_temp_workspace_read          [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_VanCalib      [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeAll  [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeGroups   [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeTrans    [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeMods [label="Remove intermediate workspaces"]
+    
+    } //End of processes
+    
+    subgraph algorithms {
+    $algorithm_style
+    
+    // Read steps - suffix:read
+    AlignDetectors_read                 [label="Align Detectors"]
+    DiffractionFocusing_read            [label="Diffraction Focussing"]
+    Rebin_read                          [label="Rebin"]
+
+    //Vanadium calibration steps if true - Suffix:VanCalibTrue
+    LoadNexus_VanCalibTrue              [label="Load Nexus file"]
+    ExtractSingleSpectrum_VanCalibTrue  [label="Extract single spectrum"]
+    Rebin_Step_One_VanCalibTrue         [label="Rebin"]
+    ConvertUnits_TOF_VanCalibTrue       [label="Convert units to TOF"]
+    Rebin_Step_Two_VanCalibTrue         [label="Rebin"]
+    Divide_VanCalibTrue                 [label="Divide"]
+    CropWorkspace_VanCalibTrue          [label="Crop workspace"]
+    Scale_VanCalibTrue                  [label="Scale"]
+
+    //Vanadium calibration steps if false - Suffix:VanCalibFalse
+    ExtractSingleSpectrum_VanCalibFalse [label="Extract single spectrum"]
+    ConvertUnits_TOF_VanCalibFalse      [label="Convert units to TOF"]
+    Rebin_VanCalibFalse                 [label="Rebin"]
+    CropWorkspace_VanCalibFalse         [label="Crop workspace"]
+
+    //Focus mode set to 'all' steps - Suffix: FocusModeAll
+    CloneWorkspace_FocusModeAll         [label="Clone workspace"]
+    Plus_FocusModeAll                   [label="Plus"]
+    Scale_FocusModeAll                  [label="Scale"]
+    SaveGSS_FocusModeAll                [label="Save GSS file"]
+    ConvertUnits_dSpacing_FocusModeAll  [label="Convert units to dSpacing"]
+    SaveNexus_FocusModeAll              [label="Save Nexus file"]
+
+    //Focus mode set to 'groups' steps - Suffix: FocusModeGroups
+    CloneWorkspace_FocusModeGroups      [label="Clone Workspace"]
+    Plus_StepOne_FocusModeGroups        [label="Plus"]
+    Plus_StepTwo_FocusModeGroups        [label="Plus"]
+    Plus_StepThree_FocusModeGroups      [label="Plus"]
+    Plus_StepFour_FocusModeGroups       [label="Plus"]
+    Scale_StepOne_FocusModeGroups       [label="Scale"]
+    Scale_StepTwo_FocusModeGroups       [label="Scale"]
+    SaveGSS_FocusModeGroups             [label="Save GSS File"]
+    ConvertUnits_dSpacing_FocusModeGroups [label="Convert Units to dSpacing"]
+    SaveNexus_FocusModeGroups           [label="Save Nexus File"]
+    SaveGSS_Range_FocusModeGroups       [label="Save GSS File"]
+    ConvertUnits_second_dSpacing_FocusModeGroups [label="Convert Units to dSpacing"]
+    SaveNexus_Range_FocusModeGroups     [label="Save Nexus File"]
+
+    //Focus mode set to 'trans' steps - Suffix: FocusModeTrans
+    CloneWorkspace_FocusModeTrans       [label="Clone Workspace"]
+    Plus_FocusModeTrans                 [label="Plus"]
+    Scale_FocusModeTrans                [label="Scale"]
+    ConvertUnits_dSpacing_atten_FocusModeTrans [label="Convert Units to dSpacing"]
+    CloneWorkspace_atten_FocusModeTrans [label="Clone Workspace"]
+    ConvertUnits_TOF_atten_FocusModeTrans   [label="Convert Units to TOF"]
+    SaveGSS_FocusModeTrans              [label="Save GSS File"]
+    SaveFocusedXYE_TOF_FocusModeTrans       [label="Save Focus XYE File"]
+    ConvertUnits_dSpacing_FocusModeTrans    [label="Convert Units to dSpacing"]
+    SaveFocusedXYE_dSpacing_FocusModeTrans  [label="Save Focus XYE File"]
+    SaveNexus_FocusModeTrans            [label="Save Nexus File"]
+    ConvertUnits_dSpacing_two_FocusModeTrans [label="Convert Units to dSpacing"]
+    SaveNexus_two_FocusModeTrans        [label="Save Nexus File"]
+
+    //Focus mode set to 'mods' steps - Suffix: FocusModeMods
+    SaveGSS_FocusModeMods               [label="Save GSS File"]
+    ConvertUnits_dSpacing_FocusModeMods [label="Convert Units to dSpacing"]
+    SaveNexus_FocusModeMods             [label="Save Nexus File"]
+    
+    LoadNexus_finalOutput               [label="Load Nexus file"]
+
+    } //End of algorithms
+    
+    subgraph decisions {
+    $decision_style
+    
+    // Debug checks
+    Focus_run_if_debug_mode_read        [label="If debug mode"]
+    Focus_run_if_debug_mode_VanCalib    [label="If debug mode"]
+    Focus_run_if_debug_mode_FocusModeAll    [label="If debug mode"]
+    Focus_run_if_debug_mode_FocusModeGroups [label="If debug mode"]
+    Focus_run_if_debug_mode_FocusModeTrans  [label="If debug mode"]
+    Focus_run_if_debug_mode_FocusModeMods  [label="If debug mode"]
+    
+    
+    Focus_run_switch_f_mode             [label="fmode set to:"]
+    Focus_run_if_van_norm               [label="If van_norm"]
+    Focus_run_if_focus_mode_FocusModeGroups [label="focus_mode set to:"]
+    Focus_run_if_atten_FocusModeTrans   [label="If atten:"]
+    
+    } //End of decisions
+    
+    subgraph Focus_run_main_alg {
+    
+    // Read step - Suffix:read
+    Focus_run_start                     -> Focus_run_get_calib_files_read
+    Focus_run_get_calib_files_read      -> Focus_run_read
+    //Params passed to pearl_read
+    Focus_run_param_current_run_number  -> Focus_run_read
+    Focus_run_global_ext_read           -> Focus_run_read
+    Focus_run_read                      -> Rebin_read
+    Rebin_read                          -> AlignDetectors_read
+    Focus_run_global_calFile_read       -> AlignDetectors_read
+    AlignDetectors_read                 -> DiffractionFocusing_read
+    Focus_run_global_groupFile_read     -> DiffractionFocusing_read
+    DiffractionFocusing_read            -> Focus_run_if_debug_mode_read
+    
+    // Debug mode is on (ie. don't remove temp workspaces)
+    Focus_run_if_debug_mode_read        -> Remove_temp_workspace_read       [label="false"]
+    Remove_temp_workspace_read          -> Focus_run_if_van_norm
+    // Debug mode is off:
+    Focus_run_if_debug_mode_read        -> Focus_run_if_van_norm            [label="true"]
+    
+    //Vanadium calibration steps if true - Suffix:VanCalibTrue
+    Focus_run_param_vanadium_norm       -> Focus_run_if_van_norm
+    // If we are using vanadium calibration
+    Focus_run_if_van_norm               -> Focus_run_process_VanCalib       [label="true"]
+    Focus_run_if_van_norm               -> Focus_run_process_without_VanCalib [label="false"]
+    Focus_run_process_VanCalib          -> Focus_run_if_debug_mode_VanCalib
+    Focus_run_process_without_VanCalib  -> Focus_run_if_debug_mode_VanCalib
+    
+    // Finished vanadium calibration - debug mode flag test
+    // Debug mode is off:
+    Focus_run_if_debug_mode_VanCalib    -> Remove_temp_workspace_VanCalib   [label="false"]
+    Remove_temp_workspace_VanCalib      -> Focus_run_switch_f_mode
+    // Debug mode is on (ie. don't remove temp workspaces)
+    Focus_run_if_debug_mode_VanCalib    -> Focus_run_switch_f_mode          [label="true"]
+    
+    // Check the param to determine next behaviour 
+    Focus_run_param_f_mode              -> Focus_run_switch_f_mode  
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeAll   [label="all"]
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeGroups [label="groups"]
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeTrans [label="trans"]
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeMods  [label="mods"]
+    
+    Focus_run_process_FocusModeAll      -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeGroups   -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeTrans    -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeMods     -> LoadNexus_finalOutput
+    
+    LoadNexus_finalOutput               -> Focus_run_final_output
+    }
+    
+    subgraph Focus_run_with_van_calib{
+    //Vanadium calibration set to true
+    Focus_run_global_vanFile_VanCalib   -> LoadNexus_VanCalibTrue
+    Focus_run_start_VanCalib            -> LoadNexus_VanCalibTrue           
+    LoadNexus_VanCalibTrue              -> ExtractSingleSpectrum_VanCalibTrue
+    ExtractSingleSpectrum_VanCalibTrue  -> Rebin_Step_One_VanCalibTrue
+    Rebin_Step_One_VanCalibTrue         -> ConvertUnits_TOF_VanCalibTrue 
+    ConvertUnits_TOF_VanCalibTrue       -> Rebin_Step_Two_VanCalibTrue
+    Rebin_Step_Two_VanCalibTrue         -> Divide_VanCalibTrue
+    Divide_VanCalibTrue                 -> CropWorkspace_VanCalibTrue
+    CropWorkspace_VanCalibTrue          -> Scale_VanCalibTrue    
+    }
+    
+    subgraph Focus_run_without_van_calib{
+    //Vanadium calibration set to false
+    Focus_run_start_without_VanCalib    -> ExtractSingleSpectrum_VanCalibFalse 
+    ExtractSingleSpectrum_VanCalibFalse -> ConvertUnits_TOF_VanCalibFalse
+    ConvertUnits_TOF_VanCalibFalse      -> Rebin_VanCalibFalse
+    Rebin_VanCalibFalse                 -> CropWorkspace_VanCalibFalse
+    }
+    
+    subgraph Focus_run_FocusModeAll{
+    //Focus mode set to 'all' steps - Suffix: FocusModeAll
+    Focus_run_start_FocusModeAll        -> CloneWorkspace_FocusModeAll
+    CloneWorkspace_FocusModeAll         -> Plus_FocusModeAll                [label="Workspace 1"]
+    Plus_FocusModeAll                   -> Plus_FocusModeAll                [label="Workspaces 2-9"]
+    Plus_FocusModeAll                   -> Scale_FocusModeAll               [label="Sum of all inputs"]
+    Scale_FocusModeAll                  -> SaveGSS_FocusModeAll
+    SaveGSS_FocusModeAll                -> SaveGSS_out_FocusModeAll
+    SaveGSS_FocusModeAll                -> ConvertUnits_dSpacing_FocusModeAll  
+    ConvertUnits_dSpacing_FocusModeAll  -> SaveNexus_FocusModeAll
+    SaveNexus_FocusModeAll              -> SaveNexus_out_FocusModeAll
+    SaveNexus_FocusModeAll              -> Focus_run_if_debug_mode_FocusModeAll
+    //Finally debug mode test
+    // Debug mode is off:
+    Focus_run_if_debug_mode_FocusModeAll -> Remove_temp_workspace_FocusModeAll  [label="false"] 
+    
+    }
+    
+    subgraph Focus_run_FocusModeGroups{
+    //Focus mode set to 'groups' steps - Suffix: FocusModeGroups
+    Focus_run_start_FocusModeGroups     -> CloneWorkspace_FocusModeGroups
+    //First workspaces 0-2 - we will 1 based index as that's what Mantid will output 
+    CloneWorkspace_FocusModeGroups      -> Plus_StepOne_FocusModeGroups     [label="Workspaces 1,2,3"]
+    CloneWorkspace_FocusModeGroups      -> Plus_StepTwo_FocusModeGroups     [label="Workspaces 4,5,6"]
+    CloneWorkspace_FocusModeGroups      -> Plus_StepThree_FocusModeGroups   [label="Workspaces 7,8,9"]
+    Plus_StepOne_FocusModeGroups        -> Scale_StepOne_FocusModeGroups    [label="Sum all in groups"]
+    Plus_StepTwo_FocusModeGroups        -> Scale_StepOne_FocusModeGroups    [label="Sum all in groups"]
+    Plus_StepThree_FocusModeGroups      -> Scale_StepOne_FocusModeGroups    [label="Sum all in groups"]
+    // Add left and right 90 degree bank modules
+    Scale_StepOne_FocusModeGroups       -> Plus_StepFour_FocusModeGroups
+    Plus_StepFour_FocusModeGroups       -> Scale_StepTwo_FocusModeGroups    [label="Add left and right banks (4-9)"]
+    Scale_StepTwo_FocusModeGroups       -> SaveGSS_FocusModeGroups
+    SaveGSS_FocusModeGroups             -> Focus_run_if_focus_mode_FocusModeGroups
+    Focus_run_if_focus_mode_FocusModeGroups
+    Focus_run_param_focus_mode          -> Focus_run_if_focus_mode_FocusModeGroups
+    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_out_Mode1_FocusModeGroups    [label="'1' Appending to file"]
+    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_out_Mode2_FocusModeGroups    [label="'2' Not appending to file"]
+    
+    SaveGSS_FocusModeGroups             -> ConvertUnits_dSpacing_FocusModeGroups 
+    ConvertUnits_dSpacing_FocusModeGroups -> SaveNexus_FocusModeGroups
+    SaveNexus_FocusModeGroups           -> SaveNexus_out_FocusModeGroups
+    SaveNexus_FocusModeGroups           -> SaveGSS_Range_FocusModeGroups
+    SaveGSS_Range_FocusModeGroups       -> SaveGSS_out_range_FocusModeGroups        [label="Appending to file"]
+    SaveGSS_Range_FocusModeGroups       -> ConvertUnits_second_dSpacing_FocusModeGroups
+    ConvertUnits_second_dSpacing_FocusModeGroups  -> SaveNexus_Range_FocusModeGroups 
+    SaveNexus_Range_FocusModeGroups     -> SaveNexus_out_range_FocusModeGroups      [label="Appending to file"]
+    SaveNexus_Range_FocusModeGroups     -> Focus_run_if_debug_mode_FocusModeGroups
+    //Finally debug mode test - Debug mode is off
+    Focus_run_if_debug_mode_FocusModeGroups -> Remove_temp_workspace_FocusModeGroups [label="false"]
+    
+    }
+    
+    subgraph Focus_run_FocusModeTrans{
+    //Focus mode set to 'trans' steps - Suffix: FocusModeTrans
+    Focus_run_start_FocusModeTrans      -> CloneWorkspace_FocusModeTrans
+    CloneWorkspace_FocusModeTrans       -> Plus_FocusModeTrans              [label="Workspace 1"]
+    Plus_FocusModeTrans                 -> Plus_FocusModeTrans              [label="Workspaces 2-9"]
+    Plus_FocusModeTrans                 -> Scale_FocusModeTrans
+    Scale_FocusModeTrans                -> Focus_run_if_atten_FocusModeTrans
+    Focus_run_param_atten               -> Focus_run_if_atten_FocusModeTrans  
+    // If atten == true:
+    Focus_run_if_atten_FocusModeTrans   -> ConvertUnits_dSpacing_atten_FocusModeTrans   [label="true"]
+    ConvertUnits_dSpacing_atten_FocusModeTrans -> CloneWorkspace_atten_FocusModeTrans
+    CloneWorkspace_atten_FocusModeTrans -> Focus_run_atten
+    CloneWorkspace_atten_FocusModeTrans -> Focus_run_atten_out_FocusModeTrans
+    Focus_run_atten                     -> ConvertUnits_TOF_atten_FocusModeTrans
+    ConvertUnits_TOF_atten_FocusModeTrans -> SaveGSS_FocusModeTrans
+    // Continuing algorithm 
+    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans           [label="else"]
+    SaveGSS_FocusModeTrans              -> SaveFocusedXYE_TOF_FocusModeTrans
+    SaveFocusedXYE_TOF_FocusModeTrans   -> SaveFocusedXYE_out_TOF_FocusModeTrans
+    SaveFocusedXYE_TOF_FocusModeTrans   -> ConvertUnits_dSpacing_FocusModeTrans
+    ConvertUnits_dSpacing_FocusModeTrans -> SaveFocusedXYE_dSpacing_FocusModeTrans 
+    SaveFocusedXYE_dSpacing_FocusModeTrans -> SaveFocusedXYE_out_dSpacing_FocusModeTrans
+    SaveFocusedXYE_dSpacing_FocusModeTrans -> SaveNexus_FocusModeTrans
+    SaveNexus_FocusModeTrans            -> SaveNexus_out_FocusModeTrans
+    SaveNexus_FocusModeTrans            -> ConvertUnits_dSpacing_two_FocusModeTrans
+    ConvertUnits_dSpacing_two_FocusModeTrans -> SaveNexus_two_FocusModeTrans        [label="Workspaces 1-9"]
+    SaveNexus_two_FocusModeTrans        -> SaveNexus_two_out_FocusModeTrans         [label="Appending to file"]
+    SaveNexus_two_FocusModeTrans        -> Focus_run_if_debug_mode_FocusModeTrans
+    Focus_run_if_debug_mode_FocusModeTrans -> Remove_temp_workspace_FocusModeTrans  [label="false"]
+    
+    }
+    
+    subgraph Focus_run_FocusModeMods{
+    //Focus mode set to 'mods' steps - Suffix: FocusModeMods
+    Focus_run_start_FocusModeMods       -> SaveGSS_FocusModeMods
+    SaveGSS_FocusModeMods               -> SaveGSS_out_FocusModeMods                [label="Appending to file"]
+    SaveGSS_FocusModeMods               -> ConvertUnits_dSpacing_FocusModeMods
+    ConvertUnits_dSpacing_FocusModeMods -> SaveNexus_FocusModeMods
+    SaveNexus_FocusModeMods             -> SaveNexus_out_FocusModeMods              [label="Appending to file"]
+    SaveNexus_FocusModeMods             -> Focus_run_if_debug_mode_FocusModeMods
+    Focus_run_if_debug_mode_FocusModeMods -> Remove_temp_workspace_FocusModeMods    [label="false"]
+    }
+}

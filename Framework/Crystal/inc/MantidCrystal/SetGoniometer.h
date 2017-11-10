@@ -15,9 +15,6 @@ namespace Crystal {
  */
 class DLLExport SetGoniometer : public API::Algorithm {
 public:
-  SetGoniometer();
-  ~SetGoniometer() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SetGoniometer"; };
   /// Summary of algorithms purpose

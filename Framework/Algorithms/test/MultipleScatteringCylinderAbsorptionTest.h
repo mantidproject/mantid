@@ -5,9 +5,12 @@
 #include <vector>
 
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -16,9 +19,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 using Mantid::DataObjects::EventWorkspace;
-using Mantid::DataObjects::EventWorkspace_sptr;
-using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::MantidVec;
 
 class MultipleScatteringCylinderAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -62,13 +62,14 @@ public:
   }
 
   void testCalculationHist() {
-    // setup the test workspace
-    Workspace2D_sptr wksp =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(9, 16, 1000, 1000);
-    wksp->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    using namespace Mantid::HistogramData;
+    auto wksp = DataObjects::create<DataObjects::Workspace2D>(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1),
+        Indexing::IndexInfo(9),
+        Histogram(BinEdges(17, LinearGenerator(1000.0, 1000.0)),
+                  Counts(16, 2.0)));
     wksp->getAxis(0)->setUnit("TOF");
-    AnalysisDataService::Instance().add("TestInputWS", wksp);
+    AnalysisDataService::Instance().add("TestInputWS", std::move(wksp));
 
     // convert to wavelength
     auto convertUnitsAlg =
@@ -116,7 +117,7 @@ public:
          3.49139}};
 
     // do the final comparison
-    const MantidVec &y_actual = test_output_WS->readY(0);
+    auto &y_actual = test_output_WS->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(y_actual[i], y_expected[i], 0.00001);
 
@@ -132,12 +133,11 @@ public:
         "MultipleScatteringCylinderAbsorptionEventOutput");
 
     // setup the test workspace
-    EventWorkspace_sptr wksp =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1,
-                                                                        false);
+    auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        1, 1, false);
     wksp->getAxis(0)
         ->setUnit("Wavelength"); // cheat and set the units to Wavelength
-    wksp->getEventList(0)
+    wksp->getSpectrum(0)
         .convertTof(.09, 1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
     AnalysisDataService::Instance().add(outName, wksp);
@@ -165,7 +165,7 @@ public:
 
     // do the final comparison - this is done by bounding
     std::vector<double> y_actual;
-    wksp->getEventList(0).getWeights(y_actual);
+    wksp->getSpectrum(0).getWeights(y_actual);
     for (size_t i = 0; i < y_actual.size(); ++i) {
       TS_ASSERT_LESS_THAN(1.19811, y_actual[i]);
       TS_ASSERT_LESS_THAN(y_actual[i], 3.3324);

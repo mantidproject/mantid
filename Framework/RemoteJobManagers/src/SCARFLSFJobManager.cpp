@@ -85,12 +85,12 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     UsernameToken tok(username, Token(url, token_str));
     g_tokenStash.insert(tok); // the password is never stored
     g_log.notice() << "Got authentication token for user '" + username +
-                          "'. You are now logged in " << std::endl;
+                          "'. You are now logged in \n";
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
-                             boost::lexical_cast<std::string>(code) +
-                             ", with this response: " + resp);
+                             std::to_string(code) + ", with this response: " +
+                             resp);
   }
 }
 
@@ -125,11 +125,11 @@ bool SCARFLSFJobManager::ping() {
     if (std::string::npos != resp.find("Web Services are ready")) {
       g_log.notice()
           << "Pinged compute resource with apparently good response: " << resp
-          << std::endl;
+          << '\n';
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: " << resp << std::endl;
+                         "error message: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -185,8 +185,8 @@ void SCARFLSFJobManager::logout(const std::string &username) {
                              std::string(ie.what()));
   }
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
-    g_log.notice() << "Logged out." << std::endl;
-    g_log.debug() << "Response from server: " << ss.str() << std::endl;
+    g_log.notice() << "Logged out.\n";
+    g_log.debug() << "Response from server: " << ss.str() << '\n';
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              fullURL.toString() +

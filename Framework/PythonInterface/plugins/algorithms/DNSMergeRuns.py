@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,  WorkspaceGroup
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, StringArrayLengthValidator
@@ -186,6 +187,7 @@ class DNSMergeRuns(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", outws)
         return
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSMergeRuns)

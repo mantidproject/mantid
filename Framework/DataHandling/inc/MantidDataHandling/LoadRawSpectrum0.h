@@ -60,8 +60,6 @@ class DLLExport LoadRawSpectrum0 : public LoadRawHelper {
 public:
   /// Default constructor
   LoadRawSpectrum0();
-  /// Destructor
-  ~LoadRawSpectrum0() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawSpectrum0"; }
   /// Summary of algorithms purpose

@@ -7,6 +7,7 @@ Public methods:
     screenshot(): take a screenshot and save to a report
 
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 import os
 import unittest
@@ -24,7 +25,7 @@ try:
     qtest = True
 except:
     qtest = False
-    print "QTest not available"
+    print("QTest not available")
 
 def moveMouseToCentre(widget):
     """Moves the mouse over the widget
@@ -58,10 +59,10 @@ def runTests(classname):
     QtCore.QCoreApplication.processEvents()
     QtCore.QCoreApplication.processEvents()
 
-    # Set Mantid exit code
+    # Close Mantid and set exit code
     if not res.wasSuccessful():
-        _qti.app.setExitCode(1)
+        sys.exit(1)
     else:
-        _qti.app.setExitCode(0)
+        sys.exit(0)
 
     return res

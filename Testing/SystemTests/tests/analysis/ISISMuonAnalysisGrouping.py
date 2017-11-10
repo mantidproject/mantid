@@ -1,11 +1,15 @@
 #pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 #----------------------------------------------------------------------
-class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
+
+
+class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply
@@ -21,7 +25,6 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
         - x_min: Float value of the minimum x.
         - x_max: Float value of the maximum x.
     """
-    __metaclass__ = ABCMeta # Mark as an abstract class
 
     @abstractmethod
     def get_reference_file(self):
@@ -57,7 +60,6 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
         if self.asym:
             RemoveExpDecay(InputWorkspace=outputWS, OutputWorkspace=outputWS)
 
-
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-7
@@ -71,19 +73,18 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
         """Check the object properties are
       in an expected state to continue
       """
-        if type(self.file_name) != str:
+        if not isinstance(self.file_name, str):
             raise RuntimeError("file_name property should be a string")
-        if type(self.map_name) != str:
+        if not isinstance(self.map_name, str):
             raise RuntimeError("map_name property should be a string")
-        if type(self.instr_name) != str:
+        if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
-        if type(self.period_data) != bool:
+        if not isinstance(self.period_data, bool):
             raise RuntimeError("period_data property should be a bool")
-        if type(self.asym) != bool:
+        if not isinstance(self.asym, bool):
             raise RuntimeError("asym property should be a bool")
-        if type(self.logs) != bool:
+        if not isinstance(self.logs, bool):
             raise RuntimeError("log property should be a bool")
-
 
 
 #------------------------- ARGUS group fwd test -------------------------------------------------
@@ -121,7 +122,6 @@ class EMUAnalysisFromFile(ISISMuonAnalysisGrouping):
         self.logs = False
         self.x_min = 0.11
         self.x_max = 10
-
 
     def get_reference_file(self):
         return "EMUAnalysisAsymFwd.nxs"
@@ -163,8 +163,5 @@ class MuSRAnalysisFromFile(ISISMuonAnalysisGrouping):
         self.x_min = 1.4
         self.x_max = 3.9
 
-
     def get_reference_file(self):
         return "MuSRAnalysisLog1.nxs"
-
-

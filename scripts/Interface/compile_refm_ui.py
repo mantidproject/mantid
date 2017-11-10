@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+from __future__ import (absolute_import, division, print_function)
 from compile_util import compile_ui
-from distutils.core import setup
 
 # Compile resource file
 try:
@@ -15,4 +15,4 @@ try:
     compile_ui("ui/reflectometer/refl_stitching.ui")
 
 except:
-    print "Could not compile resource file"
+    print("Could not compile resource file")

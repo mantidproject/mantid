@@ -39,10 +39,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport SetupHFIRReduction : public API::Algorithm {
 public:
-  /// Constructor
-  SetupHFIRReduction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SetupHFIRReduction() override {}
   /// Algorithm's name
   const std::string name() const override { return "SetupHFIRReduction"; }
   /// Summary of algorithms purpose

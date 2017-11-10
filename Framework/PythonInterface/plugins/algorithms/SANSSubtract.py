@@ -1,13 +1,16 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import Direction, FloatBoundedValidator
 import mantid.simpleapi
 import os
 
+
 class SANSSubtract(PythonAlgorithm):
     """
         I(Q) subtraction
     """
+
     def category(self):
         """
             Return category
@@ -169,5 +172,6 @@ class SANSSubtract(PythonAlgorithm):
             op.execute()
 
         return
+
 
 AlgorithmFactory.subscribe(SANSSubtract)

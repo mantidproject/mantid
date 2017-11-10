@@ -9,6 +9,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
+
+namespace Histogram {
+class BinEdges;
+}
 namespace Algorithms {
 /** Masks bins in a workspace. Bins falling within the range given (even
    partially) are
@@ -55,8 +59,6 @@ class DLLExport MaskBins : public API::Algorithm {
 public:
   /// Constructor
   MaskBins();
-  /// Virtual destructor
-  ~MaskBins() override {}
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose
@@ -76,7 +78,8 @@ private:
   void exec() override;
   void execEvent();
 
-  void findIndices(const MantidVec &X, MantidVec::difference_type &startBin,
+  void findIndices(const HistogramData::BinEdges &X,
+                   MantidVec::difference_type &startBin,
                    MantidVec::difference_type &endBin);
 
   double m_startX; ///< The range start point

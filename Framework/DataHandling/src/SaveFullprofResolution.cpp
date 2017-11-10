@@ -9,6 +9,7 @@
 #include <Poco/File.h>
 
 #include <fstream>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -28,11 +29,6 @@ SaveFullprofResolution::SaveFullprofResolution()
     : API::Algorithm(), m_profileParamMap(), m_profileTableWS(),
       m_outIrfFilename(), m_bankID(-1), m_fpProfileNumber(-1), m_append(false) {
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveFullprofResolution::~SaveFullprofResolution() {}
 
 //----------------------------------------------------------------------------------------------
 /** Init to define parameters
@@ -111,8 +107,6 @@ void SaveFullprofResolution::exec() {
   }
   ofile << filestr;
   ofile.close();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -124,7 +118,7 @@ void SaveFullprofResolution::processProperties() {
 
   // Output file and operation
   m_outIrfFilename = getPropertyValue("OutputFilename");
-  if (m_outIrfFilename.size() == 0)
+  if (m_outIrfFilename.empty())
     throw runtime_error("Input file name invalid. ");
   m_append = getProperty("Append");
   if (m_append) {
@@ -151,8 +145,6 @@ void SaveFullprofResolution::processProperties() {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -231,10 +223,8 @@ void SaveFullprofResolution::parseTableWorkspace() {
   map<string, double>::iterator mit;
   for (mit = m_profileParamMap.begin(); mit != m_profileParamMap.end(); ++mit)
     dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second
-         << endl;
+         << '\n';
   g_log.debug(dbss.str());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -197,7 +197,7 @@ std::string BoxController::toXMLString() const {
   DOMWriter writer;
   writer.writeNode(xmlstream, pDoc);
 
-  return xmlstream.str().c_str();
+  return xmlstream.str();
 }
 /** the function left for compartibility with the previous bc python interface.
  @return  -- the file name of the file used for backup if file backup mode is

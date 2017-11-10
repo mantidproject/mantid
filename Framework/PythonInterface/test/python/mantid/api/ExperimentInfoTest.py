@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 ###############################################################################
 # This has to be tested through a workspace as it cannot be created in
@@ -35,6 +37,11 @@ class ExperimentInfoTest(unittest.TestCase):
     def test_get_energy_mode(self):
         emode = self._expt_ws.getEMode()
         self.assertEquals(emode, 0)
+
+    def test_detectorInfo(self):
+        detInfo = self._expt_ws.detectorInfo()
+        # No instrument in test workspace, so size is 0.
+        self.assertEquals(detInfo.size(), 0)
 
 #    def test_set_and_get_efixed(self):
 #      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)

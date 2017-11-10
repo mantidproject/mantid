@@ -45,6 +45,11 @@ public:
   std::string shapeName() const override;
   /// Get the coordinate frame
   Kernel::SpecialCoordinateSystem frame() const override;
+  boost::optional<double> radius(RadiusType) const override {
+    return boost::optional<double>{};
+  }
+  /// Return the shape name
+  static const std::string noShapeName();
 };
 
 } // namespace DataObjects

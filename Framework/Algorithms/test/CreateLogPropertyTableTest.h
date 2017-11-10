@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class CreateLogPropertyTableTest : public CxxTest::TestSuite {
 public:
@@ -109,7 +110,7 @@ private:
     using namespace WorkspaceCreationHelper;
 
     MatrixWorkspace_sptr eventws =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     int64_t runstoptime_ns = runStart + 1000000;
     int64_t pulsetime_ns(100000);

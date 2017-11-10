@@ -1,13 +1,11 @@
 // SaveNeXus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveNexusProcessed
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
@@ -94,8 +92,6 @@ void SaveNexus::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
 
   runSaveNexusProcessed();
-
-  return;
 }
 /** virtual method to set the non workspace properties for this algorithm
  *  @param alg :: pointer to the algorithm
@@ -146,7 +142,7 @@ void SaveNexus::runSaveNexusProcessed() {
   // If we're tracking history, add the entry before we save it to file
   if (trackingHistory()) {
     m_history->fillAlgorithmHistory(
-        this, Mantid::Kernel::DateAndTime::getCurrentTime(), 0,
+        this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
         Algorithm::g_execCount);
     if (!isChild()) {
       m_inputWorkspace->history().addHistory(m_history);
@@ -175,11 +171,6 @@ Overriden process groups.
 */
 bool SaveNexus::processGroups() {
   this->exec();
-
-  // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
 
   return true;
 }

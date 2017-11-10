@@ -76,8 +76,6 @@ class DLLExport LoadISISNexus2
 public:
   /// Default constructor
   LoadISISNexus2();
-  /// Destructor
-  ~LoadISISNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -128,8 +126,7 @@ private:
   void loadSampleData(DataObjects::Workspace2D_sptr &,
                       Mantid::NeXus::NXEntry &entry);
   /// Load log data from the nexus file
-  void loadLogs(DataObjects::Workspace2D_sptr &ws,
-                Mantid::NeXus::NXEntry &entry);
+  void loadLogs(DataObjects::Workspace2D_sptr &ws);
   // Load a given period into the workspace
   void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry,
                       DataObjects::Workspace2D_sptr &local_workspace,
@@ -187,7 +184,7 @@ private:
   std::vector<SpectraBlock> m_spectraBlocks;
 
   /// Time channels
-  boost::shared_ptr<MantidVec> m_tof_data;
+  boost::shared_ptr<HistogramData::HistogramX> m_tof_data;
   /// Proton charge
   double m_proton_charge;
   /// Spectra numbers
@@ -216,6 +213,9 @@ private:
                                  int64_t ndets, int64_t n_vms_compat_spectra,
                                  std::map<int64_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
+
+  /// Check if is the file is a multiple time regime file
+  bool isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const;
 };
 
 } // namespace DataHandling

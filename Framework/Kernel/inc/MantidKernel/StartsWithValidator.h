@@ -1,14 +1,11 @@
 #ifndef MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 #define MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
-#ifndef Q_MOC_RUN
-#include <boost/lexical_cast.hpp>
-#endif
+#include "MantidKernel/System.h"
+#include <set>
+#include <string>
 #include <vector>
 
 namespace Mantid {
@@ -40,34 +37,20 @@ namespace Kernel {
 */
 class DLLExport StartsWithValidator : public Kernel::StringListValidator {
 public:
+  StartsWithValidator() = default;
+  StartsWithValidator(const std::vector<std::string> &values);
+  StartsWithValidator(const std::set<std::string> &values);
+  IValidator_sptr clone() const override;
+
   /**
-   * Default constructor.
-   *
+   * Constructor
+   * @param values :: An array with the allowed values
    */
-  StartsWithValidator() : Kernel::StringListValidator() {}
-  /**
-   * Constructor.
-   * @param values :: A vector with the allowed values.
-   */
-  StartsWithValidator(const std::vector<std::string> &values)
+  template <std::size_t SIZE>
+  StartsWithValidator(const std::array<std::string, SIZE> &values)
       : Kernel::StringListValidator(values) {}
-  /**
-   * Constructor.
-   * @param values :: A set with the allowed values.
-   */
-  StartsWithValidator(const std::set<std::string> &values)
-      : Kernel::StringListValidator(values) {}
-  /// Clone the validator
-  IValidator_sptr clone() const override {
-    return boost::make_shared<StartsWithValidator>(*this);
-  }
 
 protected:
-  /** Checks if the string passed starts with one from the list
-   *  @param value :: The value to test
-   *  @return "" if the value is on the list, or "The value does not start with
-   * any of the allowed values"
-   */
   std::string checkValidity(const std::string &value) const override;
 };
 

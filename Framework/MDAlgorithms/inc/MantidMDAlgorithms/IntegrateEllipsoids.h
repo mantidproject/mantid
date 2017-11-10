@@ -12,12 +12,13 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
+namespace Geometry {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 class DLLExport IntegrateEllipsoids : public API::Algorithm {
 public:
-  IntegrateEllipsoids();
-  ~IntegrateEllipsoids() override;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -29,6 +30,8 @@ public:
   const std::string category() const override;
 
 private:
+  using PrincipleAxes = std::array<std::vector<double>, 3>;
+
   void init() override;
   void exec() override;
   void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
@@ -39,7 +42,7 @@ private:
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

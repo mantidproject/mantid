@@ -1,24 +1,21 @@
+#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Utils.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidMDAlgorithms/BinMD.h"
-#include <boost/algorithm/string.hpp>
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
-
-using Mantid::Kernel::CPUTimer;
-using Mantid::Kernel::EnabledWhenProperty;
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -35,16 +32,8 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(nullptr), implicitFunction(nullptr),
-      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
-      numEvents(nullptr) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinMD::~BinMD() {}
-
-//----------------------------------------------------------------------------------------------
+    : outWS(), implicitFunction(nullptr), indexMultiplier(nullptr),
+      signals(nullptr), errors(nullptr), numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -81,6 +70,13 @@ void BinMD::init() {
       "file-backed workspaces, where running in parallel makes things slower "
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate results from "
+                  "multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -120,7 +116,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Now transform to the output dimensions
       m_transform->apply(inCenter, outCenter);
       // std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to "
-      // <<  VMD(nd,outCenter) << std::endl;
+      // <<  VMD(nd,outCenter) << '\n';
 
       // To build up the linear index
       size_t linearIndex = 0;
@@ -181,7 +177,6 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
   // If you get here, you could not determine that the entire box was in the
   // same bin.
   // So you need to iterate through events.
-
   const std::vector<MDE> &events = box->getConstEvents();
   for (auto it = events.begin(); it != events.end(); ++it) {
     // Cache the center of the event (again for speed)
@@ -253,8 +248,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   errors = outWS->getErrorSquaredArray();
   numEvents = outWS->getNumEventsArray();
 
-  // Start with signal/error/numEvents at 0.0
-  outWS->setTo(0.0, 0.0, 0.0);
+  if (!m_accumulate) {
+    // Start with signal/error/numEvents at 0.0
+    outWS->setTo(0.0, 0.0, 0.0);
+  }
 
   // The dimension (in the output workspace) along which we chunk for parallel
   // processing
@@ -278,14 +275,13 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Total number of steps
   size_t progNumSteps = 0;
-  if (prog)
+  if (prog) {
     prog->setNotifyStep(0.1);
-  if (prog)
     prog->resetNumSteps(100, 0.00, 1.0);
+  }
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
-  // it is
-  // thread safe to write to it..
+  // it is thread safe to write to it..
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for (int chunk = 0;
@@ -327,7 +323,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (prog) {
         PARALLEL_CRITICAL(BinMD_progress) {
           g_log.debug() << "Chunk " << chunk << ": found " << boxes.size()
-                        << " boxes within the implicit function." << std::endl;
+                        << " boxes within the implicit function.\n";
           progNumSteps += boxes.size();
           prog->setNumSteps(progNumSteps);
         }
@@ -337,7 +333,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       for (auto &boxe : boxes) {
         MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
-        if (box)
+        if (box && !box->getIsMasked())
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting
@@ -381,12 +377,18 @@ void BinMD::exec() {
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
             ImplicitFunctionXML);
 
-  prog = new Progress(
-      this, 0, 1.0,
-      1); // This gets deleted by the thread pool; don't delete it in here.
+  // This gets deleted by the thread pool; don't delete it in here.
+  prog = make_unique<Progress>(this, 0.0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryDataWorkspace");
+  outWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!outWS) {
+    outWS = boost::make_shared<MDHistoWorkspace>(m_binDimensions);
+  } else {
+    m_accumulate = true;
+  }
 
   // Saves the geometry transformation from original to binned in the workspace
   outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);
@@ -407,7 +409,7 @@ void BinMD::exec() {
   bool IterateEvents = getProperty("IterateEvents");
   if (!IterateEvents) {
     g_log.warning() << "IterateEvents=False is no longer supported. Setting "
-                       "IterateEvents=True." << std::endl;
+                       "IterateEvents=True.\n";
     IterateEvents = true;
   }
 
@@ -418,7 +420,7 @@ void BinMD::exec() {
   IMDHistoWorkspaces is if they also happen to contain original workspaces
   that are MDEventWorkspaces.
   */
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inWS)) {
+  if (m_inWS->isMDHistoWorkspace()) {
     throw std::runtime_error(
         "Cannot rebin a workspace that is histogrammed and has no original "
         "workspace that is an MDEventWorkspace. "
@@ -427,17 +429,22 @@ void BinMD::exec() {
 
   CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
-  // Copy the
-
   // Copy the coordinate system & experiment infos to the output
   IMDEventWorkspace_sptr inEWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
   if (inEWS) {
     outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
-    outWS->copyExperimentInfos(*inEWS);
+    try {
+      outWS->copyExperimentInfos(*inEWS);
+    } catch (std::runtime_error &) {
+      g_log.warning()
+          << this->name()
+          << " was not able to copy experiment info to output workspace "
+          << outWS->getName() << '\n';
+    }
   }
 
-  //  Pass on the display normalization from the input workspace
+  // Pass on the display normalization from the input workspace
   outWS->setDisplayNormalization(m_inWS->displayNormalizationHisto());
 
   outWS->updateSum();

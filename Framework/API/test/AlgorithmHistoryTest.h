@@ -54,6 +54,13 @@ public:
     TS_ASSERT_LESS_THAN(first, second);
   }
 
+  void test_getPropertyValue() {
+    AlgorithmHistory alg = createTestHistory();
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "y");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg2_param"), "23");
+    TS_ASSERT_THROWS_ANYTHING(alg.getPropertyValue("none_existant"));
+  }
+
   void test_Created_Algorithm_Matches_History() {
     Mantid::API::AlgorithmFactory::Instance().subscribe<testalg>();
     Algorithm *testInput = new testalg;
@@ -197,9 +204,9 @@ private:
     timeinfo->tm_sec = 49;
     // Convert to time_t but assuming the tm is specified in UTC time.
     std::time_t execTime_t =
-        Mantid::Kernel::DateAndTimeHelpers::utc_mktime(timeinfo);
+        Mantid::Types::Core::DateAndTime::utc_mktime(timeinfo);
     // Create a UTC datetime from it
-    Mantid::Kernel::DateAndTime execTime;
+    Mantid::Types::Core::DateAndTime execTime;
     execTime.set_from_time_t(execTime_t);
 
     // Not really much to test

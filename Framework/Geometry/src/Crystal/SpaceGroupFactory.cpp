@@ -24,7 +24,7 @@ bool isValidGeneratorString(const std::string &generatorString) {
   for (auto &generatorString : generatorStrings) {
     try {
       SymmetryOperationSymbolParser::parseIdentifier(generatorString);
-    } catch (Kernel::Exception::ParseError) {
+    } catch (const Kernel::Exception::ParseError &) {
       return false;
     }
   }
@@ -413,8 +413,8 @@ void SpaceGroupFactoryImpl::fillPointGroupMap() {
   for (auto &generator : m_generatorMap) {
     SpaceGroup_const_sptr spaceGroup = getPrototype(generator.first);
 
-    m_pointGroupMap.insert(std::make_pair(
-        spaceGroup->getPointGroup()->getSymbol(), generator.first));
+    m_pointGroupMap.emplace(spaceGroup->getPointGroup()->getSymbol(),
+                            generator.first);
   }
 }
 

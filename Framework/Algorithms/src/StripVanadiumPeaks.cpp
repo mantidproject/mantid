@@ -5,6 +5,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
@@ -87,10 +88,9 @@ void StripVanadiumPeaks::exec() {
   // Copy the data over from the input to the output workspace
   const int nhists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, nhists * 2);
+
   for (int k = 0; k < nhists; ++k) {
-    outputWS->dataX(k) = inputWS->readX(k);
-    outputWS->dataY(k) = inputWS->readY(k);
-    outputWS->dataE(k) = inputWS->readE(k);
+    outputWS->setHistogram(k, inputWS->histogram(k));
     progress.report();
   }
 
@@ -117,15 +117,13 @@ void StripVanadiumPeaks::exec() {
   for (int k = 0; k < nhists; ++k) {
     if ((!singleSpectrum) || (singleIndex == k)) {
       // Get the X and Y vectors
-      MantidVec X = outputWS->dataX(k);
-      MantidVec Y = outputWS->dataY(k);
+      const auto &X = outputWS->x(k);
 
       // Middle of each X bin
-      MantidVec midX;
-      convertToBinCentre(X, midX);
+      auto midX = outputWS->points(k);
 
       // This'll be the output
-      MantidVec outY = Y;
+      auto &outY = outputWS->mutableY(k);
 
       // Strip each peak listed
       std::vector<double>::iterator it;
@@ -137,20 +135,26 @@ void StripVanadiumPeaks::exec() {
         // Find the bin indices on both sides.
         //  We use averaging regions of 1/2 width, centered at +- width/2 from
         //  the center
-        int L1 = getBinIndex(X, center - width * 0.75);
-        int L2 = getBinIndex(X, center - width * 0.25);
+        int L1 = getBinIndex(X.rawData(), center - width * 0.75);
+        int L2 = getBinIndex(X.rawData(), center - width * 0.25);
         double leftX = (midX[L1] + midX[L2]) / 2;
         double totY = 0;
-        for (int i = L1; i <= L2; i++)
-          totY += Y[i];
+
+        for (int i = L1; i <= L2; i++) {
+          totY += outY[i];
+        }
+
         double leftY = totY / (L2 - L1 + 1);
 
-        int R1 = getBinIndex(X, center + width * 0.25);
-        int R2 = getBinIndex(X, center + width * 0.75);
+        int R1 = getBinIndex(X.rawData(), center + width * 0.25);
+        int R2 = getBinIndex(X.rawData(), center + width * 0.75);
         double rightX = (midX[R1] + midX[R2]) / 2;
         totY = 0;
-        for (int i = R1; i <= R2; i++)
-          totY += Y[i];
+
+        for (int i = R1; i <= R2; i++) {
+          totY += outY[i];
+        }
+
         double rightY = totY / (R2 - R1 + 1);
 
         // Make a simple fit with these two points
@@ -166,7 +170,7 @@ void StripVanadiumPeaks::exec() {
       }
 
       // Save the output
-      outputWS->dataY(k) = outY;
+      outputWS->mutableY(k) = outY;
     } // if the spectrum is to be changed.
     progress.report();
   } // each spectrum

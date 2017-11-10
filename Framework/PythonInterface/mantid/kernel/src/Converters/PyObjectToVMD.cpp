@@ -4,13 +4,16 @@
 #include "MantidPythonInterface/kernel/Converters/PyObjectToVMD.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/extract.hpp>
-#include <boost/python/numeric.hpp>
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+
+using boost::python::extract;
+using boost::python::object;
+using boost::python::len;
 
 // clang-format off
 GCC_DIAG_OFF(strict-aliasing)
@@ -26,17 +29,16 @@ namespace Converters {
  * Throws std::invalid_argument if not
  * if that is not the case.
  */
-PyObjectToVMD::PyObjectToVMD(const boost::python::object &p)
-    : m_obj(p), m_alreadyVMD(false) {
+PyObjectToVMD::PyObjectToVMD(const object &p) : m_obj(p), m_alreadyVMD(false) {
   // Is it an already wrapped VMD ?
-  boost::python::extract<Kernel::VMD> converter(p);
+  extract<Kernel::VMD> converter(p);
   if (converter.check()) {
     m_alreadyVMD = true;
     return;
   }
   // Is it a sequence
   try {
-    const size_t length = boost::python::len(p);
+    const size_t length = len(p);
     if (length < 3) {
       throw std::invalid_argument("Must be > 2 for conversion to VMD");
     }
@@ -57,24 +59,14 @@ PyObjectToVMD::PyObjectToVMD(const boost::python::object &p)
  * from the PyObject.
  */
 Kernel::VMD PyObjectToVMD::operator()() {
-  using namespace boost::python;
   if (m_alreadyVMD) {
     return extract<Kernel::VMD>(m_obj)();
   }
-  // Numpy arrays need to be forced to a double
-  // as extract cannot convert from a int64->double
-  boost::python::object obj = m_obj;
-  if (PyArray_Check(obj.ptr())) {
-    obj = boost::python::numeric::array(obj).astype('d');
-  }
-  // Must be a sequence
-
-  const size_t length = boost::python::len(obj);
+  const size_t length = len(m_obj);
   Kernel::VMD ret(length);
-
-  for (size_t i = 0; i < length; ++i)
-    ret[i] = extract<float>(obj[i])();
-
+  for (size_t i = 0; i < length; ++i) {
+    ret[i] = extract<float>(m_obj[i])();
+  }
   return ret;
 }
 }

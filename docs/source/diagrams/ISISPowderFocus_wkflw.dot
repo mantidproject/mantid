@@ -1,0 +1,128 @@
+digraph isisPowderfocus{
+    label="ISISPowder - 'focus'"
+    $global_style
+
+    // **Labels
+    label_start                     [label="Start ISISPowder 'focus'"]
+
+    // **Parameters
+    subgraph params {
+        $param_style
+
+        // User input
+        param_runNumbers                [label="User param: Run number(s)"]
+        param_sampleEmptyRunNumber      [label="User param: Sample empty run number(s)"]
+        param_vanNorm                   [label="User param: Vanadium normalisation"]
+
+        // From user provided files
+        param_calFileName               [label="Calibration file name"]
+        param_calMapping_1              [label="Calibration mapping file"]
+        param_calMapping_2              [label="Calibration mapping file"]
+        param_emptyRunNumber            [label="Empty run number(s)"]
+
+        // From advanced config
+        param_groupingCalFile           [label="Adv config: Grouping cal file name"]
+        param_rawTOFCropValues          [label="Adv config: Raw TOF cropping values"]
+
+    }
+
+    // **Processes (inc. bespoke inst steps)
+    subgraph {
+        $process_style
+
+        // Common
+        proc_LoadCurrentNormWS_1        [label="Load current normalised workspace(s)"]
+
+        // Bespoke
+        proc_InstApplyAbsorbCorr        [label="Inst specific: Apply absorption corrections"]
+        proc_InstReduceBinWidths        [label="Inst specific: Rebin to reduce final bin widths"]
+        proc_InstSaveFocused            [label="Inst specific: Save focused banks"]
+    }
+
+    // **Algorithms
+    subgraph algorithms{
+        $algorithm_style
+
+        alg_Align                       [label="Align Detectors"]
+        alg_ConvertUnitsTOFVan          [label="Convert Units: TOF"]
+        alg_CropRawTOF                  [label="Crop data to expected TOF"]
+        alg_CropFinalTOF                [label="Crop data to final TOF range"]
+        alg_DiffractionFocusing         [label="Diffraction Focusing"]
+        alg_DivideVan                   [label="Divide: data / Vanadium"]
+        alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
+        alg_LoadNexusVan                [label="Load splined Vanadium from 'create_vanadium'"]
+        alg_RebinToWorkspaceVan         [label="Rebin: Van ws to match data binning"]
+        alg_Subtract_sample_empty       [label="Subtract: runs - sample empty"]
+        alg_Subtract_van_empty          [label="Subtract: runs - instrument empty"]
+    }
+
+    // **Decisions
+    subgraph decisions{
+        $decision_style
+
+        if_apply_absorb                 [label="If: absorb corrections"]
+        if_van_normalisation            [label="If: Vanadium normalisation"]
+        if_sample_empty_provided_1      [label="If: Sample empty given"]
+    }
+
+    // **Graph layout
+    subgraph ISISPwd_focus {
+        // Load workspace to be processed
+        label_start                     ->  param_runNumbers
+        param_runNumbers                ->  proc_LoadCurrentNormWS_1
+
+        // Load empty workspace
+        param_calMapping_1              ->      param_emptyRunNumber
+        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_1
+
+        // Load sample empty run numbers
+        if_sample_empty_provided_1      ->      param_sampleEmptyRunNumber
+        param_sampleEmptyRunNumber      ->      proc_LoadCurrentNormWS_1
+
+        // Subtract empty instrument
+        proc_LoadCurrentNormWS_1        ->      alg_Subtract_van_empty
+
+        // Subtract sample empty
+        alg_Subtract_van_empty          ->      alg_Subtract_sample_empty   [label="If: Sample empty given"]
+
+        // Crop raw data in TOF
+        param_rawTOFCropValues          ->      alg_CropRawTOF
+        alg_Subtract_sample_empty       ->      alg_CropRawTOF
+        alg_Subtract_van_empty          ->      alg_CropRawTOF
+
+        // Align detectors
+        param_calMapping_2              ->      param_calFileName
+        param_calFileName               ->      alg_Align
+        alg_CropRawTOF                  ->      alg_Align
+
+        // Apply absorption corrections
+        alg_Align                       ->      if_apply_absorb
+        param_apply_absorb              ->      if_apply_absorb
+        if_apply_absorb                 ->      proc_InstApplyAbsorbCorr    [label="True"]
+
+        // Focusing
+        param_groupingCalFile           ->      alg_DiffractionFocusing
+        if_apply_absorb                 ->      alg_DiffractionFocusing     [label="False"]
+        proc_InstApplyAbsorbCorr        ->      alg_DiffractionFocusing
+
+        // Splitting into banks
+        alg_DiffractionFocusing         ->      alg_ConvertUnitsTOFVan
+        alg_ConvertUnitsTOFVan          ->      alg_ExtractWsSpectra
+
+        // Vanadium normalisation
+        alg_ExtractWsSpectra            ->      if_van_normalisation
+        param_vanNorm                   ->      if_van_normalisation
+        if_van_normalisation            ->      alg_LoadNexusVan            [label="True"]
+        alg_LoadNexusVan                ->      alg_RebinToWorkspaceVan
+        alg_RebinToWorkspaceVan         ->      alg_DivideVan
+
+        // Crop data to final TOF range
+        if_van_normalisation            ->      alg_CropFinalTOF            [label="False"]
+        alg_DivideVan                   ->      alg_CropFinalTOF
+        alg_CropFinalTOF                ->      proc_InstReduceBinWidths
+
+        // Save data
+        proc_InstReduceBinWidths        ->      proc_InstSaveFocused
+    }
+
+}

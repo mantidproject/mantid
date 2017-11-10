@@ -365,12 +365,12 @@ private:
 
     // create tm struct
 
-    time_since_1900.tm_year = atoi(str.substr(0, 4).c_str()) - 1900;
-    time_since_1900.tm_mon = atoi(str.substr(5, 2).c_str()) - 1;
-    time_since_1900.tm_mday = atoi(str.substr(8, 2).c_str());
-    time_since_1900.tm_hour = atoi(str.substr(11, 2).c_str());
-    time_since_1900.tm_min = atoi(str.substr(14, 2).c_str());
-    time_since_1900.tm_sec = atoi(str.substr(17, 2).c_str());
+    time_since_1900.tm_year = std::stoi(str.substr(0, 4)) - 1900;
+    time_since_1900.tm_mon = std::stoi(str.substr(5, 2)) - 1;
+    time_since_1900.tm_mday = std::stoi(str.substr(8, 2));
+    time_since_1900.tm_hour = std::stoi(str.substr(11, 2));
+    time_since_1900.tm_min = std::stoi(str.substr(14, 2));
+    time_since_1900.tm_sec = std::stoi(str.substr(17, 2));
 
     return std::mktime(&time_since_1900);
   }

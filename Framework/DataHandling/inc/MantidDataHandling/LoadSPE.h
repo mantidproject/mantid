@@ -43,10 +43,6 @@ namespace DataHandling {
  */
 class DLLExport LoadSPE : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// Constructor
-  LoadSPE() : API::IFileLoader<Kernel::FileDescriptor>() {}
-  /// Virtual destructor
-  ~LoadSPE() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadSPE"; }
   /// Summary of algorithms purpose

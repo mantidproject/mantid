@@ -1,12 +1,15 @@
 #ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
 #define MANTID_CRYSTAL_CentroidPeaksTEST_H_
 
-#include "MantidCrystal/CentroidPeaks.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
+#include "MantidCrystal/CentroidPeaks.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -17,8 +20,8 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <math.h>
 #include <cxxtest/TestSuite.h>
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -27,6 +30,9 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -64,15 +70,15 @@ public:
       gens[d] = gen;
     }
 
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numPixels, 1, 1);
+    boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
+        numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();
     loadInst->initialize();
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("Workspace", retVal);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
@@ -83,10 +89,8 @@ public:
 
     DateAndTime run_start("2010-01-01T00:00:00");
 
-    for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
-      el.setSpectrumNo(pix);
-      el.setDetectorID(pix);
+    for (int pix = 0; pix < numPixels; ++pix) {
+      auto &el = retVal->getSpectrum(pix);
       // Background
       for (int i = 0; i < numBins; i++) {
         // Two events per bin
@@ -110,17 +114,6 @@ public:
     for (size_t d = 0; d < nd; ++d)
       delete gens[d];
 
-    // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
-
-    // Set all the histograms at once.
-    retVal->setAllX(x1);
-
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
     std::map<int, Geometry::IDetector_const_sptr> dets;
@@ -142,26 +135,20 @@ public:
     EventWorkspace_sptr in_ws =
         boost::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
-    /*if (type == WEIGHTED)
-      in_ws *= 2.0;
-    if (type == WEIGHTED_NOTIME)
-    {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
-      {
-        EventList & el = in_ws->getEventList(i);
-        el.compressEvents(0.0, &el);
-      }
-    }*/
     // Register the workspace in the data service
 
     // Create the peaks workspace
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
     // pkws->setName("TOPAZ");
 
-    // Create a single peak on that particular detector
-    Peak PeakObj(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    // Create two peaks on that particular detector
+    // First peak is at edge to check EdgePixels option
+    Peak PeakObj(in_ws->getInstrument(), 0, 2., V3D(1, 1, 1));
     PeakObj.setRunNumber(3007);
     pkws->addPeak(PeakObj);
+    Peak PeakObj2(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    PeakObj2.setRunNumber(3007);
+    pkws->addPeak(PeakObj2);
     AnalysisDataService::Instance().addOrReplace("TOPAZ", pkws);
 
     inputW->mutableRun().addProperty("run_number", 3007);

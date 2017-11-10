@@ -168,7 +168,7 @@ typedef boost::shared_ptr<SymmetryElementWithAxis> SymmetryElementWithAxis_sptr;
 class MANTID_GEOMETRY_DLL SymmetryElementRotation
     : public SymmetryElementWithAxis {
 public:
-  enum RotationSense { Positive, Negative, None };
+  enum RotationSense { Positive, Negative, NoRotation };
 
   SymmetryElementRotation(const std::string &symbol, const V3R &axis,
                           const V3R &translation = V3R(0, 0, 0),

@@ -13,9 +13,6 @@ namespace Algorithms {
 
 class DLLExport ChangeTimeZero : public API::Algorithm {
 public:
-  ChangeTimeZero();
-  ~ChangeTimeZero() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };
   /// Summary of algorithms purpose
@@ -45,7 +42,7 @@ private:
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift,
                        double startProgress, double stopProgress);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::Core::DateAndTime
   getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(std::string val) const;
@@ -68,7 +65,7 @@ private:
   bool isRelativeTimeShift(double offset) const;
   bool isAbsoluteTimeShift(const std::string &offset) const;
 
-  const double m_defaultTimeShift;
+  const double m_defaultTimeShift = 0.0;
   const std::string m_defaultAbsoluteTimeShift;
 };
 

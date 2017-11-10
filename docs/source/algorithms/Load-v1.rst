@@ -16,6 +16,13 @@ to load the given file. The specific load algorithm is then run as a
 child algorithm with the exception that it logs messages to the Mantid
 logger.
 
+Filename Property
+#################
+
+The ``Load`` algorithm changes the default ``Filename`` property to a
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>` and
+follows its syntax.
+
 Specific Load Algorithm Properties
 ##################################
 
@@ -29,19 +36,19 @@ Load algorithm are redeclared on to that copy of Load.
 Loading Nexus files
 ###################
 
-When the file to be loaded is a :ref:`Nexus file<Nexus file>`, 
+When the file to be loaded is a :ref:`Nexus file<Nexus file>`,
 the type nexus file loaded is determined by its group structure.
 
 If the nexus file has a group of type ``NXevent_data``,
 then :ref:`algm-LoadEventNexus` will be run.
-Else if the nexus file has a ``/raw_data_1`` path, 
-then :ref:`algm-LoadISISNexus` will be run 
+Else if the nexus file has a ``/raw_data_1`` path,
+then :ref:`algm-LoadISISNexus` will be run
 and it will only load data within the group with this pathname.
 Also a nexus file with certain groups present will be
 loaded by :ref:`algm-LoadMuonNexus`.
 A nexus file with a group of path ``/mantid_workspace_1`` is
 loaded by :ref:`algm-LoadNexusProcessed`.
-See the specific load algorithms for more details. 
+See the specific load algorithms for more details.
 
 
 
@@ -58,7 +65,7 @@ Usage
    # Load ISIS LOQ histogram dataset
    ws = Load('LOQ49886.nxs')
 
-   print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
+   print("The 1st x-value of the first spectrum is: {}".format(ws.readX(0)[0]))
 
 Output:
 
@@ -74,7 +81,7 @@ Output:
    # Load SNS HYS event dataset
    ws = Load('HYS_11092_event.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 
@@ -90,7 +97,7 @@ Output:
    # Load ISIS multiperiod muon MUSR dataset
    ws = Load('MUSR00015189.nxs')
 
-   print "The number of periods (entries) is: " + str(ws[0].getNumberOfEntries())
+   print("The number of periods (entries) is: {}".format(ws[0].getNumberOfEntries()))
 
 Output:
 
@@ -106,7 +113,7 @@ Output:
    # Load Mantid processed GEM data file
    ws = Load('focussed.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 

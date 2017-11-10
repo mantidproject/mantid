@@ -1,38 +1,43 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
-#include <Poco/Path.h>
-#include <Poco/String.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
+#include <Poco/String.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 #include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -150,7 +155,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
 
-  std::string retVal = "";
+  std::string retVal;
   // use the xml in preference if available
   auto xml = Poco::trim(m_instrument->getXmlText());
   if (!(xml.empty())) {
@@ -187,15 +192,36 @@ Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument() {
   return m_pDoc;
 }
 
+/**
+ * Type names in the IDF must be unique. Throw an exception if this one is not.
+ *
+ * @param filename :: Filename of the IDF, for the exception message
+ * @param typeName :: Name of the type being checked
+ */
+void InstrumentDefinitionParser::throwIfTypeNameNotUnique(
+    const std::string &filename, const std::string &typeName) const {
+  if (getTypeElement.find(typeName) != getTypeElement.end()) {
+    g_log.error(std::string("XML file: ")
+                    .append(filename)
+                    .append("contains more than one type element named ")
+                    .append(typeName));
+    throw Kernel::Exception::InstrumentDefinitionError(
+        std::string(
+            "XML instrument file contains more than one type element named ")
+            .append(typeName)
+            .append(filename));
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Fully parse the IDF XML contents and returns the instrument thus created
  *
- * @param prog :: Optional Progress reporter object. If NULL, no progress
- *reporting.
+ * @param progressReporter :: Optional Progress reporter object. If NULL, no
+ * progress reporting.
  * @return the instrument that was created
  */
 Instrument_sptr
-InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
+InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *progressReporter) {
   auto pDoc = getDocument();
 
   // Get pointer to root element
@@ -209,24 +235,13 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   setValidityRange(pRootElem);
   readDefaults(pRootElem->getChildElement("defaults"));
-  // create maps: isTypeAssembly and mapTypeNameToShape
   Geometry::ShapeFactory shapeCreator;
 
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  // Get all the type and component element pointers.
   std::vector<Element *> typeElems;
   std::vector<Element *> compElems;
-  for (Node *pNode = pRootElem->firstChild(); pNode != nullptr;
-       pNode = pNode->nextSibling()) {
-    auto pElem = dynamic_cast<Element *>(pNode);
-    if (pElem) {
-      if (pElem->tagName() == "type")
-        typeElems.push_back(pElem);
-      else if (pElem->tagName() == "component")
-        compElems.push_back(pElem);
-    }
-  }
+  getTypeAndComponentPointers(pRootElem, typeElems, compElems);
 
   if (typeElems.empty()) {
     g_log.error("XML file: " + filename + "contains no type elements.");
@@ -234,162 +249,104 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
         "No type elements in XML instrument file", filename);
   }
 
-  // Collect some information about types for later use including:
-  //  * populate directory getTypeElement
-  //  * populate directory isTypeAssemply
-  //  * create shapes for all none assembly components and store in
-  //  mapTyepNameToShape
-  //  * If 'Outline' attribute set for assembly add attribute object_created=no
-  //  to tell
-  //  create shape for such assembly also later
-  const size_t numberTypes = typeElems.size();
-  for (size_t iType = 0; iType < numberTypes; ++iType) {
+  collateTypeInformation(filename, typeElems, shapeCreator);
+
+  // Populate m_hasParameterElement
+  createVectorOfElementsContainingAParameterElement(pRootElem);
+
+  // See if any parameters set at instrument level
+  setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
+
+  parseLocationsForEachTopLevelComponent(progressReporter, filename, compElems);
+
+  // Don't need this anymore (if it was even used) so empty it out to save
+  // memory
+  m_tempPosHolder.clear();
+
+  // Read in or create the geometry cache file
+  m_cachingOption = setupGeometryCache();
+
+  // Add/overwrite any instrument params with values specified in
+  // <component-link> XML elements
+  setComponentLinks(m_instrument, pRootElem);
+
+  if (m_indirectPositions)
+    createNeutronicInstrument();
+
+  // Instrument::markAsDetector is slow unless the detector IDs in the IDF are
+  // sorted. To circumvent this we use the 2-part interface,
+  // markAsDetectorIncomplete (which does not sort) and markAsDetectorFinalize
+  // (which does the final sorting).
+  m_instrument->markAsDetectorFinalize();
+
+  // And give back what we created
+  return m_instrument;
+}
+
+/**
+ * Collect some information about types for later use including:
+ * - populate directory getTypeElement
+ * - populate directory isTypeAssembly
+ * - create shapes for all none assembly components and store in
+ * mapTypeNameToShape
+ * - If 'Outline' attribute set for assembly add attribute object_created=no
+ * to indicate the shape for this assembly should be created later.
+ *
+ * @param filename :: Name of the IDF, for exception message
+ * @param typeElems :: Vector of pointers to type elements
+ * @param shapeCreator :: Factory for creating a shape
+ */
+void InstrumentDefinitionParser::collateTypeInformation(
+    const std::string &filename, const std::vector<Element *> &typeElems,
+    ShapeFactory &shapeCreator) {
+  const size_t numberOfTypes = typeElems.size();
+  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
     Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
-    // check if contain <combine-components-into-one-shape>. If this then such
-    // types are adjusted after this loop has completed
+    // If type contains <combine-components-into-one-shape> then make adjustment
+    // after this loop has completed
     Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
         pTypeElem->getElementsByTagName("combine-components-into-one-shape");
     if (pNL_type_combine_into_one_shape->length() > 0) {
       continue;
     }
 
-    // Each type in the IDF must be uniquely named, hence return error if type
-    // has already been defined
-    if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error("XML file: " + filename +
-                  "contains more than one type element named " + typeName);
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "XML instrument file contains more than one type element named " +
-              typeName,
-          filename);
-    }
+    throwIfTypeNameNotUnique(filename, typeName);
     getTypeElement[typeName] = pTypeElem;
-
-    // identify for now a type to be an assemble by it containing elements
-    // with tag name 'component'
-    Poco::AutoPtr<NodeList> pNL_local =
-        pTypeElem->getElementsByTagName("component");
-    if (pNL_local->length() == 0) {
-      isTypeAssembly[typeName] = false;
-
-      // for now try to create a geometry shape associated with every type
-      // that does not contain any component elements
-      mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-      mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
-    } else {
-      isTypeAssembly[typeName] = true;
-      if (pTypeElem->hasAttribute("outline")) {
-        pTypeElem->setAttribute("object_created", "no");
-      }
-    }
+    createShapeIfTypeIsNotAnAssembly(shapeCreator, iType, pTypeElem, typeName);
   }
 
-  // Deal with adjusting types containing <combine-components-into-one-shape>
-  for (size_t iType = 0; iType < numberTypes; ++iType) {
-    Element *pTypeElem = typeElems[iType];
-    std::string typeName = pTypeElem->getAttribute("name");
+  adjustTypesContainingCombineComponentsElement(shapeCreator, filename,
+                                                typeElems, numberOfTypes);
+}
 
-    // In this loop only interested in types containing
-    // <combine-components-into-one-shape>
-    Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
-        pTypeElem->getElementsByTagName("combine-components-into-one-shape");
-    const unsigned long nelements = pNL_type_combine_into_one_shape->length();
-    if (nelements == 0)
-      continue;
-
-    // Each type in the IDF must be uniquely named, hence return error if type
-    // has already been defined
-    if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error("XML file: " + filename +
-                  "contains more than one type element named " + typeName);
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "XML instrument file contains more than one type element named " +
-              typeName,
-          filename);
-    }
-    getTypeElement[typeName] = pTypeElem;
-
-    InstrumentDefinitionParser helper;
-    helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
-
-    isTypeAssembly[typeName] = false;
-
-    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
-  }
-
-  // create m_hasParameterElement
-  Poco::AutoPtr<NodeList> pNL_parameter =
-      pRootElem->getElementsByTagName("parameter");
-
-  unsigned long numParameter = pNL_parameter->length();
-  m_hasParameterElement.reserve(numParameter);
-
-  // It turns out that looping over all nodes and checking if their nodeName is
-  // equal
-  // to "parameter" is much quicker than looping over the pNL_parameter
-  // NodeList.
-  Poco::XML::NodeIterator it(pRootElem, Poco::XML::NodeFilter::SHOW_ELEMENT);
-  Poco::XML::Node *pNode = it.nextNode();
-  while (pNode) {
-    if (pNode->nodeName() == "parameter") {
-      Element *pParameterElem = static_cast<Element *>(pNode);
-      m_hasParameterElement.push_back(
-          static_cast<Element *>(pParameterElem->parentNode()));
-    }
-    pNode = it.nextNode();
-  }
-
-  m_hasParameterElement_beenSet = true;
-
-  // See if any parameters set at instrument level
-  setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
-
-  //
-  // do analysis for each top level component element
-  //
-  if (prog)
-    prog->resetNumSteps(compElems.size(), 0.0, 1.0);
+/**
+ * Aggregate locations and IDs for components
+ *
+ * @param progressReporter :: A progress reporter
+ * @param filename :: Name of the IDF, for exception message
+ * @param compElems :: Vector of pointers for component elements
+ */
+void InstrumentDefinitionParser::parseLocationsForEachTopLevelComponent(
+    ProgressBase *progressReporter, const std::string &filename,
+    const std::vector<Element *> &compElems) {
+  if (progressReporter)
+    progressReporter->resetNumSteps(compElems.size(), 0.0, 1.0);
 
   for (auto pElem : compElems) {
-    if (prog)
-      prog->report("Loading instrument Definition");
+    if (progressReporter)
+      progressReporter->report("Loading instrument Definition");
 
     {
       IdList idList; // structure to possibly be populated with detector IDs
 
-      // Get all <location> and <locations> elements contained in component
-      // element
-      // just for the purpose of a IDF syntax check
-      Poco::AutoPtr<NodeList> pNL_location =
-          pElem->getElementsByTagName("location");
-      Poco::AutoPtr<NodeList> pNL_locations =
-          pElem->getElementsByTagName("locations");
-      // do a IDF syntax check
-      if (pNL_location->length() == 0 && pNL_locations->length() == 0) {
-        g_log.error(std::string("A component element must contain at least one "
-                                "<location> or <locations> element") +
-                    " even if it is just an empty location element of the form "
-                    "<location />");
-        throw Kernel::Exception::InstrumentDefinitionError(
-            std::string("A component element must contain at least one "
-                        "<location> or <locations> element") +
-                " even if it is just an empty location element of the form "
-                "<location />",
-            filename);
-      }
+      checkComponentContainsLocationElement(pElem, filename);
 
-      // Loop through all <location> and <locations> elements of this component
-      // by looping
-      // all the child nodes and then see if any of these nodes are either
-      // <location> or
-      // <locations> elements. Done this way order these locations are processed
-      // is the
-      // order they are listed in the IDF. The latter needed to get detector IDs
-      // assigned
-      // as expected
+      // Loop through all children of this component and see if any
+      // are a <location> or <locations>. Done this way, the
+      // order they are processed is the order they are listed in the
+      // IDF. This is necessary to match the order of the detector IDs.
       for (Node *pNode = pElem->firstChild(); pNode != nullptr;
            pNode = pNode->nextSibling()) {
         auto pChildElem = dynamic_cast<Element *>(pNode);
@@ -407,53 +364,191 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
           // append <locations> elements in <locations>
           appendLocations(m_instrument.get(), pChildElem, pElem, idList);
         }
-      } // finished looping over all childs of this component
+      } // finished looping over all children of this component
 
-      // A check
-      if (idList.counted != static_cast<int>(idList.vec.size())) {
-        std::stringstream ss1, ss2;
-        ss1 << idList.vec.size();
-        ss2 << idList.counted;
-        if (!pElem->hasAttribute("idlist")) {
-          g_log.error("No detector ID list found for detectors of type " +
-                      pElem->getAttribute("type"));
-        } else if (idList.vec.empty()) {
-          g_log.error("No detector IDs found for detectors in list " +
-                      pElem->getAttribute("idlist") + "for detectors of type" +
-                      pElem->getAttribute("type"));
-        } else {
-          g_log.error(
-              "The number of detector IDs listed in idlist named " +
-              pElem->getAttribute("idlist") +
-              " is larger than the number of detectors listed in type = " +
-              pElem->getAttribute("type"));
-        }
-        throw Kernel::Exception::InstrumentDefinitionError(
-            "Number of IDs listed in idlist (=" + ss1.str() +
-                ") is larger than the number of detectors listed in type = " +
-                pElem->getAttribute("type") + " (=" + ss2.str() + ").",
-            filename);
-      }
+      checkIdListExistsAndDefinesEnoughIDs(idList, pElem, filename);
       idList.reset();
     }
   }
+}
 
-  // Don't need this anymore (if it was even used) so empty it out to save
-  // memory
-  m_tempPosHolder.clear();
+/**
+ * Component must contain a \<location\> or \<locations\>
+ * Throw an exception if it does not
+ *
+ * @param pElem :: Element with the idlist
+ * @param filename :: Name of the IDF, for exception message
+ */
+void InstrumentDefinitionParser::checkComponentContainsLocationElement(
+    Element *pElem, const std::string &filename) const {
+  Poco::AutoPtr<NodeList> pNL_location =
+      pElem->getElementsByTagName("location");
+  Poco::AutoPtr<NodeList> pNL_locations =
+      pElem->getElementsByTagName("locations");
 
-  // Read in or create the geometry cache file
-  m_cachingOption = setupGeometryCache();
+  if (pNL_location->length() == 0 && pNL_locations->length() == 0) {
+    g_log.error(std::string("A component element must contain at least one "
+                            "<location> or <locations> element") +
+                " even if it is just an empty location element of the form "
+                "<location />");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        std::string("A component element must contain at least one "
+                    "<location> or <locations> element") +
+            " even if it is just an empty location element of the form "
+            "<location />",
+        filename);
+  }
+}
 
-  // Add/overwrite any instrument params with values specified in
-  // <component-link> XML elements
-  setComponentLinks(m_instrument, pRootElem);
+/**
+ * Check that the required IdList exists in the IDF and defines a sufficient
+ * number of IDs
+ *
+ * @param idList :: The IdList
+ * @param pElem :: Element with the idlist
+ * @param filename :: Name of the IDF, for exception message
+ */
+void InstrumentDefinitionParser::checkIdListExistsAndDefinesEnoughIDs(
+    IdList idList, Element *pElem, const std::string &filename) const {
+  if (idList.counted != static_cast<int>(idList.vec.size())) {
+    std::stringstream ss1, ss2;
+    ss1 << idList.vec.size();
+    ss2 << idList.counted;
+    if (!pElem->hasAttribute("idlist")) {
+      g_log.error("No detector ID list found for detectors of type " +
+                  pElem->getAttribute("type"));
+    } else if (idList.vec.empty()) {
+      g_log.error("No detector IDs found for detectors in list " +
+                  pElem->getAttribute("idlist") + "for detectors of type" +
+                  pElem->getAttribute("type"));
+    } else {
+      g_log.error("The number of detector IDs listed in idlist named " +
+                  pElem->getAttribute("idlist") +
+                  " is larger than the number of detectors listed in type = " +
+                  pElem->getAttribute("type"));
+    }
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Number of IDs listed in idlist (=" + ss1.str() +
+            ") is larger than the number of detectors listed in type = " +
+            pElem->getAttribute("type") + " (=" + ss2.str() + ").",
+        filename);
+  }
+}
 
-  if (m_indirectPositions)
-    createNeutronicInstrument();
+/**
+ * Create a vector of elements which contain a \<parameter\>
+ *
+ * @param pRootElem :: Pointer to the root element
+ */
+void InstrumentDefinitionParser::
+    createVectorOfElementsContainingAParameterElement(Element *pRootElem) {
+  Poco::AutoPtr<NodeList> pNL_parameter =
+      pRootElem->getElementsByTagName("parameter");
+  unsigned long numParameter = pNL_parameter->length();
+  m_hasParameterElement.reserve(numParameter);
 
-  // And give back what we created
-  return m_instrument;
+  // It turns out that looping over all nodes and checking if their nodeName is
+  // equal to "parameter" is much quicker than looping over the pNL_parameter
+  // NodeList.
+  NodeIterator it(pRootElem, NodeFilter::SHOW_ELEMENT);
+  Node *pNode = it.nextNode();
+  while (pNode) {
+    if (pNode->nodeName() == "parameter") {
+      auto pParameterElem = dynamic_cast<Element *>(pNode);
+      m_hasParameterElement.push_back(
+          dynamic_cast<Element *>(pParameterElem->parentNode()));
+    }
+    pNode = it.nextNode();
+  }
+
+  m_hasParameterElement_beenSet = true;
+}
+
+/**
+ * "Adjust" (see adjust method) each type which contains a
+ * \<combine-components-into-one-shape\> element
+ *
+ * @param shapeCreator :: Factory for creating a shape
+ * @param filename :: Name of the IDF file
+ * @param typeElems :: Vector of pointers to type elements
+ * @param numberOfTypes :: Total number of type elements
+ */
+void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(
+    ShapeFactory &shapeCreator, const std::string &filename,
+    const std::vector<Element *> &typeElems, const size_t numberOfTypes) {
+  for (size_t iType = 0; iType < numberOfTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
+    std::string typeName = pTypeElem->getAttribute("name");
+
+    // In this loop only interested in types containing
+    // <combine-components-into-one-shape>
+    Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape =
+        pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+    if (pNL_type_combine_into_one_shape->length() == 0)
+      continue;
+
+    throwIfTypeNameNotUnique(filename, typeName);
+    getTypeElement[typeName] = pTypeElem;
+
+    InstrumentDefinitionParser helper;
+    helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
+
+    isTypeAssembly[typeName] = false;
+
+    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+  }
+}
+
+/**
+ * If type does not contain a component element then it is not an assembly
+ * and a shape can be created
+ *
+ * @param shapeCreator :: Factory for creating a shape
+ * @param iType :: The i-th type
+ * @param pTypeElem :: Pointer to the type element
+ * @param typeName :: Name of the type
+ */
+void InstrumentDefinitionParser::createShapeIfTypeIsNotAnAssembly(
+    ShapeFactory &shapeCreator, size_t iType, Element *pTypeElem,
+    const std::string &typeName) {
+  Poco::AutoPtr<NodeList> pNL_local =
+      pTypeElem->getElementsByTagName("component");
+  if (pNL_local->length() == 0) {
+    isTypeAssembly[typeName] = false;
+
+    // for now try to create a geometry shape associated with every type
+    // that does not contain any component elements
+    mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+    mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+  } else {
+    isTypeAssembly[typeName] = true;
+    if (pTypeElem->hasAttribute("outline")) {
+      pTypeElem->setAttribute("object_created", "no");
+    }
+  }
+}
+
+/**
+ * Create vectors of pointers to \<type\>s and \<component\>s"
+ *
+ * @param pRootElem :: Pointer to the root element
+ * @param typeElems :: Reference to type vector to populate
+ * @param compElems :: Reference to component vector to populate
+ */
+void InstrumentDefinitionParser::getTypeAndComponentPointers(
+    const Element *pRootElem, std::vector<Element *> &typeElems,
+    std::vector<Element *> &compElems) const {
+  for (auto pNode = pRootElem->firstChild(); pNode != nullptr;
+       pNode = pNode->nextSibling()) {
+    auto pElem = dynamic_cast<Element *>(pNode);
+    if (pElem) {
+      if (pElem->tagName() == "type")
+        typeElems.push_back(pElem);
+      else if (pElem->tagName() == "component")
+        compElems.push_back(pElem);
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -523,6 +618,26 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
   outFile.close();
 }
 
+double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
+                                                const std::string &name) {
+  if (pElem->hasAttribute(name)) {
+    const std::string &value = pElem->getAttribute(name);
+    if (!value.empty()) {
+      try {
+        return std::stod(value);
+      } catch (...) {
+        std::stringstream msg;
+        msg << "failed to convert \"" << value
+            << "\" to double for xml attribute \"" << name
+            << "\" - using 0. instead";
+        g_log.warning(msg.str());
+        return 0.;
+      }
+    }
+  }
+  return 0.;
+}
+
 //-----------------------------------------------------------------------------------------------------------------------
 /** Set location (position) of comp as specified in XML location element.
  *
@@ -545,20 +660,19 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
   // Rotate coordinate system of this component
   if (pElem->hasAttribute("rot")) {
-    double rotAngle =
-        angleConvertConst *
-        atof((pElem->getAttribute("rot")).c_str()); // assumed to be in degrees
+    double rotAngle = angleConvertConst *
+                      attrToDouble(pElem, "rot"); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
     double axis_z = 1.0;
 
     if (pElem->hasAttribute("axis-x"))
-      axis_x = atof((pElem->getAttribute("axis-x")).c_str());
+      axis_x = std::stod(pElem->getAttribute("axis-x"));
     if (pElem->hasAttribute("axis-y"))
-      axis_y = atof((pElem->getAttribute("axis-y")).c_str());
+      axis_y = std::stod(pElem->getAttribute("axis-y"));
     if (pElem->hasAttribute("axis-z"))
-      axis_z = atof((pElem->getAttribute("axis-z")).c_str());
+      axis_z = std::stod(pElem->getAttribute("axis-z"));
 
     comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
   }
@@ -612,20 +726,19 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
     } // end translation
 
     if (rElem) {
-      double rotAngle =
-          angleConvertConst * atof((rElem->getAttribute("val"))
-                                       .c_str()); // assumed to be in degrees
+      double rotAngle = angleConvertConst *
+                        attrToDouble(rElem, "val"); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
       double axis_z = 1.0;
 
       if (rElem->hasAttribute("axis-x"))
-        axis_x = atof((rElem->getAttribute("axis-x")).c_str());
+        axis_x = std::stod(rElem->getAttribute("axis-x"));
       if (rElem->hasAttribute("axis-y"))
-        axis_y = atof((rElem->getAttribute("axis-y")).c_str());
+        axis_y = std::stod(rElem->getAttribute("axis-y"));
       if (rElem->hasAttribute("axis-z"))
-        axis_z = atof((rElem->getAttribute("axis-z")).c_str());
+        axis_z = std::stod(rElem->getAttribute("axis-z"));
 
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
 
@@ -659,21 +772,17 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
   if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
       pElem->hasAttribute("p") || pElem->hasAttribute("R") ||
       pElem->hasAttribute("theta") || pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
 
-    if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
-    if (pElem->hasAttribute("t"))
-      theta = angleConvertConst * atof((pElem->getAttribute("t")).c_str());
-    if (pElem->hasAttribute("p"))
-      phi = angleConvertConst * atof((pElem->getAttribute("p")).c_str());
+    double R = attrToDouble(pElem, "r");
+    double theta = angleConvertConst * attrToDouble(pElem, "t");
+    double phi = angleConvertConst * attrToDouble(pElem, "p");
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = attrToDouble(pElem, "R");
     if (pElem->hasAttribute("theta"))
-      theta = angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+      theta = angleConvertConst * attrToDouble(pElem, "theta");
     if (pElem->hasAttribute("phi"))
-      phi = angleConvertConst * atof((pElem->getAttribute("phi")).c_str());
+      phi = angleConvertConst * attrToDouble(pElem, "phi");
 
     if (deltaOffsets) {
       // In this case, locations given are radial offsets to the (radial)
@@ -723,14 +832,9 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     }
 
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
-
-    if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
-    if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
-    if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retVal(x, y, z);
   }
@@ -751,7 +855,7 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
   if ((pLocElem->tagName()).compare("location") &&
       (pLocElem->tagName()).compare("locations")) {
-    std::string tagname = pLocElem->tagName();
+    const std::string &tagname = pLocElem->tagName();
     g_log.error("Argument to function getParentComponent must be a pointer to "
                 "an XML element with tag name location or locations.");
     throw std::logic_error(
@@ -852,9 +956,9 @@ void InstrumentDefinitionParser::setValidityRange(
 
 PointingAlong axisNameToAxisType(std::string &input) {
   PointingAlong direction;
-  if (input.compare("x") == 0) {
+  if (input == "x") {
     direction = X;
-  } else if (input.compare("y") == 0) {
+  } else if (input == "y") {
     direction = Y;
   } else {
     direction = Z;
@@ -933,12 +1037,14 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Element *handednessElement =
         referenceFrameElement->getChildElement("handedness");
     Element *originElement = referenceFrameElement->getChildElement("origin");
+    Element *thetaSignElement =
+        referenceFrameElement->getChildElement("theta-sign");
 
     // Defaults
     XMLString s_alongBeam("z");
     XMLString s_pointingUp("y");
     XMLString s_handedness("right");
-    XMLString s_origin("");
+    XMLString s_origin;
 
     // Make extractions from sub elements where possible.
     if (alongElement) {
@@ -954,14 +1060,21 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
       s_origin = originElement->getAttribute("val");
     }
 
+    // Extract theta sign axis if specified.
+    XMLString s_thetaSign(s_pointingUp);
+    if (thetaSignElement) {
+      s_thetaSign = thetaSignElement->getAttribute("axis");
+    }
+
     // Convert to input types
     PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
     PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
-    Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
+    PointingAlong thetaSign = axisNameToAxisType(s_thetaSign);
+    Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
     m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
-        pointingUp, alongBeam, handedness, s_origin));
+        pointingUp, alongBeam, thetaSign, handedness, s_origin));
   }
 }
 
@@ -1065,16 +1178,15 @@ void InstrumentDefinitionParser::appendAssembly(
       m_instrument
           ->getLogfileCache()); // params specified within specific <location>
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
   // check if special Component
-  if (category.compare("SamplePos") == 0 ||
-      category.compare("samplePos") == 0) {
+  if (category == "SamplePos" || category == "samplePos") {
     m_instrument->markAsSamplePos(ass);
   }
-  if (category.compare("Source") == 0 || category.compare("source") == 0) {
+  if (category == "Source" || category == "source") {
     m_instrument->markAsSource(ass);
   }
 
@@ -1092,7 +1204,7 @@ void InstrumentDefinitionParser::appendAssembly(
 
   Node *pNode = it.nextNode();
   while (pNode) {
-    if (pNode->nodeName().compare("location") == 0) {
+    if (pNode->nodeName() == "location") {
       // pLocElem is the location of a type. This type is here an assembly and
       // pElem below is a <location> within this type
       const Element *pElem = static_cast<Element *>(pNode);
@@ -1119,7 +1231,7 @@ void InstrumentDefinitionParser::appendAssembly(
         }
       }
     }
-    if (pNode->nodeName().compare("locations") == 0) {
+    if (pNode->nodeName() == "locations") {
       const Element *pLocationsElems = static_cast<Element *>(pNode);
       const Element *pParentLocationsElem =
           InstrumentDefinitionParser::getParentComponent(pLocationsElems);
@@ -1155,8 +1267,351 @@ void InstrumentDefinitionParser::appendAssembly(
   }
 }
 
+void InstrumentDefinitionParser::createDetectorOrMonitor(
+    Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+    const Poco::XML::Element *pCompElem, const std::string &filename,
+    IdList &idList, const std::string &category) {
+
+  //-------------- Create a Detector
+  //------------------------------------------------
+  std::string name =
+      InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
+
+  // before setting detector ID check that the IDF satisfies the following
+
+  if (idList.counted >= static_cast<int>(idList.vec.size())) {
+    std::stringstream ss1, ss2;
+    ss1 << idList.vec.size();
+    ss2 << idList.counted;
+    if (idList.idname.empty()) {
+      g_log.error("No list of detector IDs found for location element " + name);
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "Detector location element " + name + " has no idlist.", filename);
+    } else if (idList.vec.empty()) {
+      g_log.error("No detector IDs found for detectors in list " +
+                  idList.idname);
+    } else {
+      g_log.error("The number of detector IDs listed in idlist named " +
+                  idList.idname + " is less then the number of detectors");
+    }
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Number of IDs listed in idlist (=" + ss1.str() +
+            ") is less than the number of detectors.",
+        filename);
+  }
+
+  std::string typeName = pCompElem->getAttribute("type");
+
+  // Create detector and increment id. Finally add the detector to the parent
+  Geometry::Detector *detector = new Geometry::Detector(
+      name, idList.vec[idList.counted], mapTypeNameToShape[typeName], parent);
+  idList.counted++;
+  parent->add(detector);
+
+  // set location for this newly added comp and set facing if specified in
+  // instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
+  setLocation(detector, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setFacing(detector, pLocElem);
+  setLogfile(
+      detector, pCompElem,
+      m_instrument->getLogfileCache()); // params specified within <component>
+  setLogfile(
+      detector, pLocElem,
+      m_instrument
+          ->getLogfileCache()); // params specified within specific <location>
+
+  // If enabled, check for a 'neutronic position' tag and add to cache
+  // (null pointer added INTENTIONALLY if not found)
+  if (m_indirectPositions) {
+    m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
+  }
+
+  // mark-as is a depricated attribute used before is="monitor" was introduced
+  if (pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as")) {
+    g_log.warning() << "Attribute 'mark-as' is a depricated attribute in "
+                       "Instrument Definition File."
+                    << " Please see the deprecated section of "
+                       "www.mantidproject.org/IDF for how to remove this "
+                       "warning message\n";
+  }
+
+  try {
+    if (category == "Monitor" || category == "monitor")
+      m_instrument->markAsMonitor(detector);
+    else {
+      // for backwards compatebility look for mark-as="monitor"
+      if ((pCompElem->hasAttribute("mark-as") &&
+           pCompElem->getAttribute("mark-as") == "monitor") ||
+          (pLocElem->hasAttribute("mark-as") &&
+           pLocElem->getAttribute("mark-as") == "monitor")) {
+        m_instrument->markAsMonitor(detector);
+      } else
+        m_instrument->markAsDetectorIncomplete(detector);
+    }
+
+  } catch (Kernel::Exception::ExistsError &) {
+    std::stringstream convert;
+    convert << detector->getID();
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Detector with ID = " + convert.str() +
+            " present more then once in XML instrument file",
+        filename);
+  }
+
+  // Add all monitors and detectors to 'facing component' container. This is
+  // only used if the
+  // "facing" elements are defined in the instrument definition file
+  m_facingComponent.push_back(detector);
+}
+
+void InstrumentDefinitionParser::createRectangularDetector(
+    Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+    const Poco::XML::Element *pCompElem, const std::string &filename,
+    const Poco::XML::Element *pType) {
+  //-------------- Create a RectangularDetector
+  //------------------------------------------------
+  std::string name =
+      InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
+
+  // Create the bank with the given parent.
+  auto bank = new Geometry::RectangularDetector(name, parent);
+
+  // set location for this newly added comp and set facing if specified in
+  // instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
+  setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setFacing(bank, pLocElem);
+  setLogfile(
+      bank, pCompElem,
+      m_instrument->getLogfileCache()); // params specified within <component>
+  setLogfile(
+      bank, pLocElem,
+      m_instrument
+          ->getLogfileCache()); // params specified within specific <location>
+
+  // Extract all the parameters from the XML attributes
+  int xpixels = 0;
+  int ypixels = 0;
+  int idstart = 0;
+  bool idfillbyfirst_y = true;
+  int idstepbyrow = 0;
+  int idstep = 1;
+
+  // The shape!
+  // Given that this leaf component is actually an assembly, its constituent
+  // component detector shapes comes from its type attribute.
+  const std::string shapeType = pType->getAttribute("type");
+  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+
+  // These parameters are in the TYPE defining RectangularDetector
+  if (pType->hasAttribute("xpixels"))
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
+  double xstart = attrToDouble(pType, "xstart");
+  double xstep = attrToDouble(pType, "xstep");
+
+  if (pType->hasAttribute("ypixels"))
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
+  double ystart = attrToDouble(pType, "ystart");
+  double ystep = attrToDouble(pType, "ystep");
+
+  // THESE parameters are in the INSTANCE of this type - since they will
+  // change.
+  if (pCompElem->hasAttribute("idstart"))
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
+  if (pCompElem->hasAttribute("idfillbyfirst"))
+    idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
+  // Default ID row step size
+  if (idfillbyfirst_y)
+    idstepbyrow = ypixels;
+  else
+    idstepbyrow = xpixels;
+  if (pCompElem->hasAttribute("idstepbyrow")) {
+    idstepbyrow = std::stoi(pCompElem->getAttribute("idstepbyrow"));
+  }
+  // Default ID row step size
+  if (pCompElem->hasAttribute("idstep"))
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  // Now, initialize all the pixels in the bank
+  bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,
+                   idstart, idfillbyfirst_y, idstepbyrow, idstep);
+
+  // Loop through all detectors in the newly created bank and mark those in
+  // the instrument.
+  try {
+    for (int x = 0; x < bank->nelements(); x++) {
+      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+      for (int y = 0; y < xColumn->nelements(); y++) {
+        boost::shared_ptr<Geometry::Detector> detector =
+            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        if (detector) {
+          // Make default facing for the pixel
+          Geometry::IComponent *comp =
+              static_cast<IComponent *>(detector.get());
+          if (m_haveDefaultFacing)
+            makeXYplaneFaceComponent(comp, m_defaultFacing);
+          // Mark it as a detector (add to the instrument cache)
+          m_instrument->markAsDetectorIncomplete(detector.get());
+        }
+      }
+    }
+  } catch (Kernel::Exception::ExistsError &) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Duplicate detector ID found when adding RectangularDetector " + name +
+        " in XML instrument file" + filename);
+  }
+}
+
+void InstrumentDefinitionParser::createStructuredDetector(
+    Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+    const Poco::XML::Element *pCompElem, const std::string &filename,
+    const Poco::XML::Element *pType) {
+  //-------------- Create a StructuredDetector
+  //------------------------------------------------
+  std::string name =
+      InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
+
+  // Create the bank with the given parent.
+  auto bank = new Geometry::StructuredDetector(name, parent);
+
+  // set location for this newly added comp and set facing if specified in
+  // instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
+  setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setLogfile(
+      bank, pCompElem,
+      m_instrument->getLogfileCache()); // params specified within <component>
+  setLogfile(
+      bank, pLocElem,
+      m_instrument
+          ->getLogfileCache()); // params specified within specific <location>
+
+  // Extract all the parameters from the XML attributes
+  int xpixels = 0;
+  int ypixels = 0;
+  int idstart = 0;
+  bool idfillbyfirst_y = true;
+  int idstepbyrow = 0;
+  int idstep = 1;
+  std::vector<double> xValues;
+  std::vector<double> yValues;
+
+  // The shape!
+  // Given that this leaf component is actually an assembly, its constituent
+  // component detector shapes comes from its type attribute.
+  const std::string shapeType = pType->getAttribute("type");
+  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+
+  std::string typeName = pType->getAttribute("name");
+  // These parameters are in the TYPE defining StructuredDetector
+  if (pType->hasAttribute("xpixels"))
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
+  if (pType->hasAttribute("ypixels"))
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
+
+  // THESE parameters are in the INSTANCE of this type - since they will
+  // change.
+  if (pCompElem->hasAttribute("idstart"))
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
+  if (pCompElem->hasAttribute("idfillbyfirst"))
+    idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
+  // Default ID row step size
+  if (idfillbyfirst_y)
+    idstepbyrow = ypixels;
+  else
+    idstepbyrow = xpixels;
+  if (pCompElem->hasAttribute("idstepbyrow")) {
+    idstepbyrow = std::stoi(pCompElem->getAttribute("idstepbyrow"));
+  }
+  // Default ID row step size
+  if (pCompElem->hasAttribute("idstep"))
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  // Access type element which defines structured detecor vertices
+  Element *pElem = nullptr;
+  NodeIterator tags(pCompElem->ownerDocument(), NodeFilter::SHOW_ELEMENT);
+  Node *pNode = tags.nextNode();
+
+  while (pNode) {
+    Element *check = static_cast<Element *>(pNode);
+    if (pNode->nodeName() == "type" && check->hasAttribute("is")) {
+      std::string is = check->getAttribute("is");
+      if (StructuredDetector::compareName(is) &&
+          typeName == check->getAttribute("name")) {
+        pElem = check;
+        break;
+      }
+    }
+
+    pNode = tags.nextNode();
+  }
+
+  if (pElem == nullptr)
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "No <type> with attribute is=\"StructuredDetector\"", filename);
+
+  // Ensure vertices are present within the IDF
+  Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
+  if (pNL->length() == 0)
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "StructuredDetector must contain vertices.", filename);
+
+  NodeIterator it(pElem, NodeFilter::SHOW_ELEMENT);
+
+  pNode = it.nextNode();
+
+  while (pNode) {
+    if (pNode->nodeName() == "vertex") {
+      Element *pVertElem = static_cast<Element *>(pNode);
+
+      if (pVertElem->hasAttribute("x"))
+        xValues.push_back(attrToDouble(pVertElem, "x"));
+      if (pVertElem->hasAttribute("y"))
+        yValues.push_back(attrToDouble(pVertElem, "y"));
+    }
+
+    pNode = it.nextNode();
+  }
+
+  V3D zVector(0, 0, 1); // Z aligned beam
+  bool isZBeam =
+      m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
+  // Now, initialize all the pixels in the bank
+  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
+                   idfillbyfirst_y, idstepbyrow, idstep);
+
+  // Loop through all detectors in the newly created bank and mark those in
+  // the instrument.
+  try {
+    for (int x = 0; x < bank->nelements(); x++) {
+      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+      for (int y = 0; y < xColumn->nelements(); y++) {
+        boost::shared_ptr<Geometry::Detector> detector =
+            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        if (detector) {
+          // Make default facing for the pixel
+          Geometry::IComponent *comp =
+              static_cast<IComponent *>(detector.get());
+          if (m_haveDefaultFacing)
+            makeXYplaneFaceComponent(comp, m_defaultFacing);
+          // Mark it as a detector (add to the instrument cache)
+          m_instrument->markAsDetectorIncomplete(detector.get());
+        }
+      }
+    }
+  } catch (Kernel::Exception::ExistsError &) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Duplicate detector ID found when adding StructuredDetector " + name +
+        " in XML instrument file" + filename);
+  }
+}
+
 //-----------------------------------------------------------------------------------------------------------------------
-/** Assumes second argument is pointing to a leaf, which here means the location
+/** Assumes second argument is pointing to a leaf, which here means the
+*location
 *element (indirectly
 *  representing a component element) that contains no sub-components. This
 *component is appended
@@ -1203,219 +1658,30 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     }
   }
 
-  // get the type element of the component element in order to determine if the
+  // get the type element of the component element in order to determine if
+  // the
   // type
   // belong to the category: "detector", "SamplePos or "Source".
 
   std::string typeName = pCompElem->getAttribute("type");
   Element *pType = getTypeElement[typeName];
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
+  static const boost::regex exp("Detector|detector|Monitor|monitor");
+
   // do stuff a bit differently depending on which category the type belong to
-  if (category.compare("RectangularDetector") == 0 ||
-      category.compare("rectangularDetector") == 0 ||
-      category.compare("rectangulardetector") == 0 ||
-      category.compare("rectangular_detector") == 0) {
-    //-------------- Create a RectangularDetector
-    //------------------------------------------------
-    std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
-        pLocElem, pCompElem);
-
-    // Create the bank with the given parent.
-    auto bank = new Geometry::RectangularDetector(name, parent);
-
-    // set location for this newly added comp and set facing if specified in
-    // instrument def. file. Also
-    // check if any logfiles are referred to through the <parameter> element.
-    setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
-    setFacing(bank, pLocElem);
-    setLogfile(
-        bank, pCompElem,
-        m_instrument->getLogfileCache()); // params specified within <component>
-    setLogfile(
-        bank, pLocElem,
-        m_instrument
-            ->getLogfileCache()); // params specified within specific <location>
-
-    // Extract all the parameters from the XML attributes
-    int xpixels = 0;
-    double xstart = 0.;
-    double xstep = 0.;
-    int ypixels = 0;
-    double ystart = 0.;
-    double ystep = 0.;
-    int idstart = 0;
-    bool idfillbyfirst_y = true;
-    int idstepbyrow = 0;
-    int idstep = 1;
-
-    // The shape!
-    // Given that this leaf component is actually an assembly, its constituent
-    // component detector shapes comes from its type attribute.
-    const std::string shapeType = pType->getAttribute("type");
-    boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
-
-    // These parameters are in the TYPE defining RectangularDetector
-    if (pType->hasAttribute("xpixels"))
-      xpixels = atoi((pType->getAttribute("xpixels")).c_str());
-    if (pType->hasAttribute("xstart"))
-      xstart = atof((pType->getAttribute("xstart")).c_str());
-    if (pType->hasAttribute("xstep"))
-      xstep = atof((pType->getAttribute("xstep")).c_str());
-    if (pType->hasAttribute("ypixels"))
-      ypixels = atoi((pType->getAttribute("ypixels")).c_str());
-    if (pType->hasAttribute("ystart"))
-      ystart = atof((pType->getAttribute("ystart")).c_str());
-    if (pType->hasAttribute("ystep"))
-      ystep = atof((pType->getAttribute("ystep")).c_str());
-
-    // THESE parameters are in the INSTANCE of this type - since they will
-    // change.
-    if (pCompElem->hasAttribute("idstart"))
-      idstart = atoi((pCompElem->getAttribute("idstart")).c_str());
-    if (pCompElem->hasAttribute("idfillbyfirst"))
-      idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
-    // Default ID row step size
-    if (idfillbyfirst_y)
-      idstepbyrow = ypixels;
-    else
-      idstepbyrow = xpixels;
-    if (pCompElem->hasAttribute("idstepbyrow")) {
-      idstepbyrow = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
-    }
-    // Default ID row step size
-    if (pCompElem->hasAttribute("idstep"))
-      idstep = atoi((pCompElem->getAttribute("idstep")).c_str());
-
-    // Now, initialize all the pixels in the bank
-    bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,
-                     idstart, idfillbyfirst_y, idstepbyrow, idstep);
-
-    // Loop through all detectors in the newly created bank and mark those in
-    // the instrument.
-    try {
-      for (int x = 0; x < bank->nelements(); x++) {
-        boost::shared_ptr<Geometry::ICompAssembly> xColumn =
-            boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
-        for (int y = 0; y < xColumn->nelements(); y++) {
-          boost::shared_ptr<Geometry::Detector> detector =
-              boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
-          if (detector) {
-            // Make default facing for the pixel
-            Geometry::IComponent *comp =
-                static_cast<IComponent *>(detector.get());
-            if (m_haveDefaultFacing)
-              makeXYplaneFaceComponent(comp, m_defaultFacing);
-            // Mark it as a detector (add to the instrument cache)
-            m_instrument->markAsDetector(detector.get());
-          }
-        }
-      }
-    } catch (Kernel::Exception::ExistsError &) {
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Duplicate detector ID found when adding RectangularDetector " +
-          name + " in XML instrument file" + filename);
-    }
-  } else if (category.compare("Detector") == 0 ||
-             category.compare("detector") == 0 ||
-             category.compare("Monitor") == 0 ||
-             category.compare("monitor") == 0) {
-    //-------------- Create a Detector
-    //------------------------------------------------
-    std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
-        pLocElem, pCompElem);
-
-    // before setting detector ID check that the IDF satisfies the following
-
-    if (idList.counted >= static_cast<int>(idList.vec.size())) {
-      std::stringstream ss1, ss2;
-      ss1 << idList.vec.size();
-      ss2 << idList.counted;
-      if (idList.idname == "") {
-        g_log.error("No list of detector IDs found for location element " +
-                    name);
-        throw Kernel::Exception::InstrumentDefinitionError(
-            "Detector location element " + name + " has no idlist.", filename);
-      } else if (idList.vec.empty()) {
-        g_log.error("No detector IDs found for detectors in list " +
-                    idList.idname);
-      } else {
-        g_log.error("The number of detector IDs listed in idlist named " +
-                    idList.idname + " is less then the number of detectors");
-      }
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Number of IDs listed in idlist (=" + ss1.str() +
-              ") is less than the number of detectors.",
-          filename);
-    }
-
-    // Create detector and increment id. Finally add the detector to the parent
-    Geometry::Detector *detector = new Geometry::Detector(
-        name, idList.vec[idList.counted], mapTypeNameToShape[typeName], parent);
-    idList.counted++;
-    parent->add(detector);
-
-    // set location for this newly added comp and set facing if specified in
-    // instrument def. file. Also
-    // check if any logfiles are referred to through the <parameter> element.
-    setLocation(detector, pLocElem, m_angleConvertConst, m_deltaOffsets);
-    setFacing(detector, pLocElem);
-    setLogfile(
-        detector, pCompElem,
-        m_instrument->getLogfileCache()); // params specified within <component>
-    setLogfile(
-        detector, pLocElem,
-        m_instrument
-            ->getLogfileCache()); // params specified within specific <location>
-
-    // If enabled, check for a 'neutronic position' tag and add to cache
-    // (null pointer added INTENTIONALLY if not found)
-    if (m_indirectPositions) {
-      m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
-    }
-
-    // mark-as is a depricated attribute used before is="monitor" was introduced
-    if (pCompElem->hasAttribute("mark-as") ||
-        pLocElem->hasAttribute("mark-as")) {
-      g_log.warning() << "Attribute 'mark-as' is a depricated attribute in "
-                         "Instrument Definition File."
-                      << " Please see the deprecated section of "
-                         "www.mantidproject.org/IDF for how to remove this "
-                         "warning message\n";
-    }
-
-    try {
-      if (category.compare("Monitor") == 0 || category.compare("monitor") == 0)
-        m_instrument->markAsMonitor(detector);
-      else {
-        // for backwards compatebility look for mark-as="monitor"
-        if ((pCompElem->hasAttribute("mark-as") &&
-             pCompElem->getAttribute("mark-as").compare("monitor") == 0) ||
-            (pLocElem->hasAttribute("mark-as") &&
-             pLocElem->getAttribute("mark-as").compare("monitor") == 0)) {
-          m_instrument->markAsMonitor(detector);
-        } else
-          m_instrument->markAsDetector(detector);
-      }
-
-    } catch (Kernel::Exception::ExistsError &) {
-      std::stringstream convert;
-      convert << detector->getID();
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "Detector with ID = " + convert.str() +
-              " present more then once in XML instrument file",
-          filename);
-    }
-
-    // Add all monitors and detectors to 'facing component' container. This is
-    // only used if the
-    // "facing" elements are defined in the instrument definition file
-    m_facingComponent.push_back(detector);
+  if (RectangularDetector::compareName(category)) {
+    createRectangularDetector(parent, pLocElem, pCompElem, filename, pType);
+  } else if (StructuredDetector::compareName(category)) {
+    createStructuredDetector(parent, pLocElem, pCompElem, filename, pType);
+  } else if (boost::regex_match(category, exp)) {
+    createDetectorOrMonitor(parent, pLocElem, pCompElem, filename, idList,
+                            category);
   } else {
-    //-------------- Not a Detector nor a RectangularDetector
+    //-------------- Not a Detector, RectangularDetector or Structured Detector
     //------------------------------
     std::string name = InstrumentDefinitionParser::getNameOfLocationElement(
         pLocElem, pCompElem);
@@ -1425,15 +1691,13 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     parent->add(comp);
 
     // check if special Source or SamplePos Component
-    if (category.compare("Source") == 0 || category.compare("source") == 0) {
+    if (category == "Source" || category == "source") {
       m_instrument->markAsSource(comp);
     }
-    if (category.compare("SamplePos") == 0 ||
-        category.compare("samplePos") == 0) {
+    if (category == "SamplePos" || category == "samplePos") {
       m_instrument->markAsSamplePos(comp);
     }
-    if (category.compare("ChopperPos") == 0 ||
-        category.compare("chopperPos") == 0) {
+    if (category == "ChopperPos" || category == "chopperPos") {
       m_instrument->markAsChopperPoint(comp);
     }
 
@@ -1446,10 +1710,9 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     setLogfile(
         comp, pCompElem,
         m_instrument->getLogfileCache()); // params specified within <component>
-    setLogfile(
-        comp, pLocElem,
-        m_instrument
-            ->getLogfileCache()); // params specified within specific <location>
+    setLogfile(comp, pLocElem,
+               m_instrument->getLogfileCache()); // params specified within
+                                                 // specific <location>
   }
 }
 
@@ -1483,17 +1746,17 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
   // Otherwise id sub-elements
 
   if (pE->hasAttribute("start")) {
-    int startID = atoi((pE->getAttribute("start")).c_str());
+    int startID = std::stoi(pE->getAttribute("start"));
 
     int endID;
     if (pE->hasAttribute("end"))
-      endID = atoi((pE->getAttribute("end")).c_str());
+      endID = std::stoi(pE->getAttribute("end"));
     else
       endID = startID;
 
     int increment = 1;
     if (pE->hasAttribute("step"))
-      increment = atoi((pE->getAttribute("step")).c_str());
+      increment = std::stoi(pE->getAttribute("step"));
 
     if (0 == increment) {
       std::stringstream ss;
@@ -1506,7 +1769,8 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
     int steps = (endID - startID) / increment;
     if (steps < 0) {
       std::stringstream ss;
-      ss << "The start, end, and step elements do not allow a single id in the "
+      ss << "The start, end, and step elements do not allow a single id in "
+            "the "
             "idlist entry - ";
       ss << "start: " << startID << ",  end: " << endID
          << ", step: " << increment;
@@ -1535,24 +1799,24 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 
     Node *pNode = it.nextNode();
     while (pNode) {
-      if (pNode->nodeName().compare("id") == 0) {
+      if (pNode->nodeName() == "id") {
         Element *pIDElem = static_cast<Element *>(pNode);
 
         if (pIDElem->hasAttribute("val")) {
-          int valID = atoi((pIDElem->getAttribute("val")).c_str());
+          int valID = std::stoi(pIDElem->getAttribute("val"));
           idList.vec.push_back(valID);
         } else if (pIDElem->hasAttribute("start")) {
-          int startID = atoi((pIDElem->getAttribute("start")).c_str());
+          int startID = std::stoi(pIDElem->getAttribute("start"));
 
           int endID;
           if (pIDElem->hasAttribute("end"))
-            endID = atoi((pIDElem->getAttribute("end")).c_str());
+            endID = std::stoi(pIDElem->getAttribute("end"));
           else
             endID = startID;
 
           int increment = 1;
           if (pIDElem->hasAttribute("step"))
-            increment = atoi((pIDElem->getAttribute("step")).c_str());
+            increment = std::stoi(pIDElem->getAttribute("step"));
 
           // check the start end and increment values are sensible
           if (0 == increment) {
@@ -1565,7 +1829,8 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
           int numSteps = (endID - startID) / increment;
           if (numSteps < 0) {
             std::stringstream ss;
-            ss << "The start, end, and step elements do not allow a single id "
+            ss << "The start, end, and step elements do not allow a single "
+                  "id "
                   "in the idlist entry - ";
             ss << "start: " << startID << ",  end: " << endID
                << ", step: " << increment;
@@ -1595,7 +1860,8 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 //-----------------------------------------------------------------------------------------------------------------------
 /** Returns True if the (string) type given is an assembly.
  *
- *  @param type ::  name of the type of a component in XML instrument definition
+ *  @param type ::  name of the type of a component in XML instrument
+ *definition
  *  @return True if the type is an assembly
  *  @throw InstrumentDefinitionError Thrown if type not defined in XML
  *definition
@@ -1652,7 +1918,8 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
   // now aim to rotate shape such that the z-axis of of the object we want to
   // rotate
-  // points in the direction of facingDirection. That way the XY plane faces the
+  // points in the direction of facingDirection. That way the XY plane faces
+  // the
   // 'facing object'.
   Kernel::V3D z = Kernel::V3D(0, 0, 1);
   Kernel::Quat R = in->getRotation();
@@ -1687,33 +1954,22 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
   if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
       pElem->hasAttribute("p") || pElem->hasAttribute("R") ||
       pElem->hasAttribute("theta") || pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
-    if (pElem->hasAttribute("t"))
-      theta = m_angleConvertConst * atof((pElem->getAttribute("t")).c_str());
-    if (pElem->hasAttribute("p"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("p")).c_str());
+    double R = attrToDouble(pElem, "r");
+    double theta = m_angleConvertConst * attrToDouble(pElem, "t");
+    double phi = m_angleConvertConst * attrToDouble(pElem, "p");
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = attrToDouble(pElem, "R");
     if (pElem->hasAttribute("theta"))
-      theta =
-          m_angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+      theta = m_angleConvertConst * attrToDouble(pElem, "theta");
     if (pElem->hasAttribute("phi"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("phi")).c_str());
+      phi = m_angleConvertConst * attrToDouble(pElem, "phi");
 
     retV3D.spherical(R, theta, phi);
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
-
-    if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
-    if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
-    if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retV3D(x, y, z);
   }
@@ -1726,11 +1982,13 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
 *sub-element of a location element).
 *
 *  @param comp :: To set facing of
-*  @param pElem ::  Poco::XML element that points a \<location\> element, which
+*  @param pElem ::  Poco::XML element that points a \<location\> element,
+*which
 *optionally may be detached (meaning it is not required to be part of the DOM
 *tree of the IDF)
 *
-*  @throw logic_error Thrown if second argument is not a pointer to a 'location'
+*  @throw logic_error Thrown if second argument is not a pointer to a
+*'location'
 *XML element
 */
 void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
@@ -1751,8 +2009,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
     if (facingElem->hasAttribute("rot")) {
       double rotAngle =
-          m_angleConvertConst * atof((facingElem->getAttribute("rot"))
-                                         .c_str()); // assumed to be in degrees
+          m_angleConvertConst *
+          attrToDouble(facingElem, "rot"); // assumed to be in degrees
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0, 0, 1)));
     }
 
@@ -1765,9 +2023,11 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
     if (facingElem->hasAttribute("val"))
       return;
 
-    // Face the component, i.e. rotate the z-axis of the component such that it
+    // Face the component, i.e. rotate the z-axis of the component such that
+    // it
     // points in the direction from
-    // the point x,y,z (or r,t,p) specified by the <facing> xml element towards
+    // the point x,y,z (or r,t,p) specified by the <facing> xml element
+    // towards
     // the component
 
     makeXYplaneFaceComponent(comp, parseFacingElementToV3D(facingElem));
@@ -1810,7 +2070,7 @@ void InstrumentDefinitionParser::setLogfile(
     // we are only interest in the top level parameter elements hence
     // the reason for the if statement below
     if (!((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-          ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0))
+          ((pNL_comp->item(i))->nodeName()) == "parameter"))
       continue;
 
     Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
@@ -1824,7 +2084,7 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::string paramName = pParamElem->getAttribute("name");
 
-    if (paramName.compare("rot") == 0 || paramName.compare("pos") == 0) {
+    if (paramName == "rot" || paramName == "pos") {
       g_log.error()
           << "XML element with name or type = " << comp->getName()
           << " contains <parameter> element with name=\"" << paramName << "\"."
@@ -1835,12 +2095,12 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
-    std::string logfileID = "";
-    std::string value = "";
+    std::string logfileID;
+    std::string value;
 
     std::string type = "double";               // default
     std::string extractSingleValueAs = "mean"; // default
-    std::string eq = "";
+    std::string eq;
 
     Poco::AutoPtr<NodeList> pNLvalue =
         pParamElem->getElementsByTagName("value");
@@ -1923,10 +2183,10 @@ void InstrumentDefinitionParser::setLogfile(
 
     // some processing
 
-    std::string fittingFunction = "";
-    std::string tie = "";
+    std::string fittingFunction;
+    std::string tie;
 
-    if (type.compare("fitting") == 0) {
+    if (type == "fitting") {
       size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name
@@ -2021,17 +2281,17 @@ void InstrumentDefinitionParser::setLogfile(
 
       for (unsigned long i = 0; i < numberPoint; i++) {
         Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
-        double x = atof(pPoint->getAttribute("x").c_str());
-        double y = atof(pPoint->getAttribute("y").c_str());
+        double x = attrToDouble(pPoint, "x");
+        double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
       }
     }
 
     // Check if formula is specified
 
-    std::string formula = "";
-    std::string formulaUnit = "";
-    std::string resultUnit = "";
+    std::string formula;
+    std::string formulaUnit;
+    std::string resultUnit;
 
     if (numberFormula >= 1) {
       Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
@@ -2051,7 +2311,7 @@ void InstrumentDefinitionParser::setLogfile(
         resultUnit = pFormula->getAttribute("result-unit");
     }
     // Check if parameter description is
-    std::string description = "";
+    std::string description;
 
     Poco::AutoPtr<NodeList> pNLDescription =
         pParamElem->getElementsByTagName("description");
@@ -2132,18 +2392,18 @@ void InstrumentDefinitionParser::setComponentLinks(
         // If we didn't find anything with the detector id, explain why to the
         // user, and throw an exception.
         if (!detector) {
+          g_log.error() << "Error whilst loading parameters. No detector "
+                           "found with id '" << detid << "'\n";
           g_log.error()
-              << "Error whilst loading parameters. No detector found with id '"
-              << detid << "'" << std::endl;
-          g_log.error() << "Please check that your detectors' ids are correct."
-                        << std::endl;
+              << "Please check that your detectors' ids are correct.\n";
           throw Kernel::Exception::InstrumentDefinitionError(
               "Invalid detector id in component-link tag.");
         }
 
         sharedIComp.push_back(detector);
 
-        // If the user also supplied a name, make sure it's consistent with the
+        // If the user also supplied a name, make sure it's consistent with
+        // the
         // detector id.
         if (name.length() > 0) {
           auto comp = boost::dynamic_pointer_cast<const IComponent>(detector);
@@ -2153,11 +2413,10 @@ void InstrumentDefinitionParser::setComponentLinks(
             if (!consistent) {
               g_log.warning() << "Error whilst loading parameters. Name '"
                               << name << "' does not match id '" << detid
-                              << "'." << std::endl;
+                              << "'.\n";
               g_log.warning()
                   << "Parameters have been applied to detector with id '"
-                  << detid << "'. Please check the name is correct."
-                  << std::endl;
+                  << detid << "'. Please check the name is correct.\n";
             }
           }
         }
@@ -2165,8 +2424,8 @@ void InstrumentDefinitionParser::setComponentLinks(
         // No detector id given, fall back to using the name
 
         if (name.find('/', 0) == std::string::npos) { // Simple name, look for
-                                                      // all components of that
-                                                      // name.
+          // all components of that
+          // name.
           sharedIComp = instrument->getAllComponentsWithName(name);
         } else { // Pathname given. Assume it is unique.
           boost::shared_ptr<const Geometry::IComponent> shared =
@@ -2257,7 +2516,8 @@ InstrumentDefinitionParser::writeAndApplyCache(
 InstrumentDefinitionParser::CachingOption
 InstrumentDefinitionParser::setupGeometryCache() {
   // Get cached file name
-  // If the instrument directory is writable, put them there else use temporary
+  // If the instrument directory is writable, put them there else use
+  // temporary
   // directory.
   IDFObject_const_sptr fallBackCache = boost::make_shared<const IDFObject>(
       Poco::Path(ConfigService::Instance().getTempDir())
@@ -2287,28 +2547,28 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  auto physical = boost::make_shared<Instrument>(*m_instrument);
+  auto physical = Kernel::make_unique<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
-  m_instrument->setPhysicalInstrument(physical);
+  m_instrument->setPhysicalInstrument(std::move(physical));
 
-  // Now we manipulate the original instrument (m_instrument) to hold neutronic
-  // positions
-  std::map<IComponent *, Poco::XML::Element *>::const_iterator it;
-  for (it = m_neutronicPos.begin(); it != m_neutronicPos.end(); ++it) {
-    if (it->second) {
-      setLocation(it->first, it->second, m_angleConvertConst, m_deltaOffsets);
+  // Now we manipulate the original instrument (m_instrument) to hold
+  // neutronic positions
+  for (const auto &component : m_neutronicPos) {
+    if (component.second) {
+      setLocation(component.first, component.second, m_angleConvertConst,
+                  m_deltaOffsets);
       // TODO: Do we need to deal with 'facing'???
 
       // Check for a 'type' attribute, indicating that we want to set the
       // neutronic shape
-      if (it->second->hasAttribute("type") &&
-          dynamic_cast<ObjComponent *>(it->first)) {
-        const Poco::XML::XMLString shapeName = it->second->getAttribute("type");
-        std::map<std::string, Object_sptr>::const_iterator shapeIt =
-            mapTypeNameToShape.find(shapeName);
+      if (component.second->hasAttribute("type") &&
+          dynamic_cast<ObjComponent *>(component.first)) {
+        const Poco::XML::XMLString shapeName =
+            component.second->getAttribute("type");
+        auto shapeIt = mapTypeNameToShape.find(shapeName);
         if (shapeIt != mapTypeNameToShape.end()) {
           // Change the shape on the current component to the one requested
-          auto objCmpt = dynamic_cast<ObjComponent *>(it->first);
+          auto objCmpt = dynamic_cast<ObjComponent *>(component.first);
           if (objCmpt)
             objCmpt->setShape(shapeIt->second);
         } else {
@@ -2320,29 +2580,30 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
            // neutronic position
     {
       // This should only happen for detectors
-      Detector *det = dynamic_cast<Detector *>(it->first);
+      Detector *det = dynamic_cast<Detector *>(component.first);
       if (det)
         m_instrument->removeDetector(det);
     }
   }
 }
 
-/** Takes as input a \<type\> element containing a
-*<combine-components-into-one-shape>, and
-*   adjust the \<type\> element by replacing its containing \<component\>
-*elements with \<cuboid\>'s
-*   (note for now this will only work for \<cuboid\>'s and when necessary this
-*can be extended).
-*
-*  @param pElem ::  Poco::XML \<type\> element that we want to adjust
-*  @param isTypeAssembly [in] :: tell whether any other type, but the special
-*one treated here, is assembly or not
-*  @param getTypeElement [in] :: contain pointers to all types but the onces
-*treated here
-*
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+/**
+ * Takes as input a \<type\> element containing a
+ * <combine-components-into-one-shape>, and
+ * adjust the \<type\> element by replacing its containing \<component\>
+ * elements with \<cuboid\>'s
+ * (note for now this will only work for \<cuboid\>'s and when necessary this
+ * can be extended).
+ *
+ *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
+ *  @param isTypeAssembly [in] :: tell whether any other type, but the special
+ * one treated here, is assembly or not
+ *  @param getTypeElement [in] :: contain pointers to all types but the onces
+ * treated here
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ * instrument file
+ */
 void InstrumentDefinitionParser::adjust(
     Poco::XML::Element *pElem, std::map<std::string, bool> &isTypeAssembly,
     std::map<std::string, Poco::XML::Element *> &getTypeElement) {
@@ -2377,8 +2638,8 @@ void InstrumentDefinitionParser::adjust(
   unsigned long numLocation = pNL->length();
   if (numLocation == 0) {
     throw Exception::InstrumentDefinitionError(
-        std::string(
-            "At least one <location> element must be part of a <type>, which") +
+        std::string("At least one <location> element must be part of a "
+                    "<type>, which") +
         " includes a <combine-components-into-one-shape> element. See "
         "www.mantidproject.org/IDF.");
   }
@@ -2424,7 +2685,8 @@ void InstrumentDefinitionParser::adjust(
         "base"); // dummy assembly used to get to end assembly if nested
     ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
                                            // hold the shape coordinate system
-    // get shape coordinate system, returned as endComponent, as defined by pLoc
+    // get shape coordinate system, returned as endComponent, as defined by
+    // pLoc
     // and nested <location> elements
     // of pLoc
     std::string shapeTypeName =
@@ -2469,32 +2731,16 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (const auto comp : allComponentInType)
-    pElem->removeChild(comp);
-}
-
-/// return absolute position of point which is set relative to the
-/// coordinate system of the input component
-/// @param comp Reference coordinate system
-/// @param pos A position relative to the coord. sys. of comp
-/// @return absolute position
-V3D InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(
-    ICompAssembly *comp, V3D pos) {
-  Component *dummyComp = new Component("dummy", comp);
-  comp->add(dummyComp);
-
-  dummyComp->setPos(pos); // set pos relative to comp coord. sys.
-
-  V3D retVal = dummyComp->getPos(); // get absolute position
-
-  return retVal;
+  for (const auto &component : allComponentInType)
+    pElem->removeChild(component);
 }
 
 /// Returns a translated and rotated \<cuboid\> element with "id" attribute
 /// equal cuboidName
 /// @param comp coordinate system to translate and rotate cuboid to
 /// @param cuboidEle Input \<cuboid\> element
-/// @param cuboidName What the "id" attribute of the returned \<coboid\> will be
+/// @param cuboidName What the "id" attribute of the returned \<coboid\> will
+/// be
 /// set to
 /// @return XML string of translated and rotated \<cuboid\>
 std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
@@ -2545,11 +2791,29 @@ std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
   return obj_str.str();
 }
 
+/// return absolute position of point which is set relative to the
+/// coordinate system of the input component
+/// @param comp Reference coordinate system
+/// @param pos A position relative to the coord. sys. of comp
+/// @return absolute position
+V3D InstrumentDefinitionParser::getAbsolutPositionInCompCoorSys(
+    ICompAssembly *comp, V3D pos) {
+  Component *dummyComp = new Component("dummy", comp);
+  comp->add(dummyComp);
+
+  dummyComp->setPos(pos); // set pos relative to comp coord. sys.
+
+  V3D retVal = dummyComp->getPos(); // get absolute position
+
+  return retVal;
+}
+
 /// Returns a translated and rotated \<cuboid\> element with "id" attribute
 /// equal cuboidName
 /// @param comp coordinate system to translate and rotate cuboid to
 /// @param cuboidXML Input \<cuboid\> xml string
-/// @param cuboidName What the "id" attribute of the returned \<coboid\> will be
+/// @param cuboidName What the "id" attribute of the returned \<coboid\> will
+/// be
 /// set to
 /// @return XML string of translated and rotated \<cuboid\>
 std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
@@ -2598,7 +2862,7 @@ InstrumentDefinitionParser::convertLocationsElement(
         "www.mantidproject.org/IDF.");
   }
 
-  std::string name("");
+  std::string name;
   if (pElem->hasAttribute("name")) {
     name = pElem->getAttribute("name");
   }
@@ -2612,7 +2876,8 @@ InstrumentDefinitionParser::convertLocationsElement(
   // A list of numeric attributes which are allowed to have corresponding -end
   std::set<std::string> rangeAttrs = {"x", "y", "z", "r", "t", "p", "rot"};
 
-  // Numeric attributes related to rotation. Doesn't make sense to have -end for
+  // Numeric attributes related to rotation. Doesn't make sense to have -end
+  // for
   // those
   std::set<std::string> rotAttrs = {"axis-x", "axis-y", "axis-z"};
 
@@ -2621,7 +2886,8 @@ InstrumentDefinitionParser::convertLocationsElement(
   allAttrs.insert(rangeAttrs.begin(), rangeAttrs.end());
   allAttrs.insert(rotAttrs.begin(), rotAttrs.end());
 
-  // Attribute values as read from <locations>. If the attribute doesn't have a
+  // Attribute values as read from <locations>. If the attribute doesn't have
+  // a
   // value here, it
   // means that it wasn't set
   std::map<std::string, double> attrValues;
@@ -2665,8 +2931,7 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute(
-          "name", name + boost::lexical_cast<std::string>(nameCountStart + i));
+      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
     }
 
     // Copy values of all the attributes set
@@ -2738,14 +3003,9 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
 
   if (pElem->hasAttribute("R") || pElem->hasAttribute("theta") ||
       pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
-    if (pElem->hasAttribute("theta"))
-      theta = atof((pElem->getAttribute("theta")).c_str());
-    if (pElem->hasAttribute("phi"))
-      phi = atof((pElem->getAttribute("phi")).c_str());
+    double R = attrToDouble(pElem, "R");
+    double theta = attrToDouble(pElem, "theta");
+    double phi = attrToDouble(pElem, "phi");
 
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
@@ -2754,25 +3014,16 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
   // which may be preferred in the long run to the more verbose of
   // using R, theta and phi.
   {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
-    if (pElem->hasAttribute("t"))
-      theta = atof((pElem->getAttribute("t")).c_str());
-    if (pElem->hasAttribute("p"))
-      phi = atof((pElem->getAttribute("p")).c_str());
+    double R = attrToDouble(pElem, "r");
+    double theta = attrToDouble(pElem, "t");
+    double phi = attrToDouble(pElem, "p");
 
     retVal.spherical(R, theta, phi);
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
 
-    if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
-    if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
-    if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retVal(x, y, z);
   }
@@ -2802,7 +3053,8 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(
     Geometry::ICompAssembly *parent, Poco::XML::Element *pLocElem,
     std::map<std::string, Poco::XML::Element *> &getTypeElement,
     Geometry::ICompAssembly *&endAssembly) {
-  // The location element is required to be a child of a component element. Get
+  // The location element is required to be a child of a component element.
+  // Get
   // this component element
   Element *pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
@@ -2810,7 +3062,8 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(
   Geometry::ICompAssembly *ass;
 
   // The newly added component is required to have a type. Find out what this
-  // type is and find all the location elements of this type. Finally loop over
+  // type is and find all the location elements of this type. Finally loop
+  // over
   // these
   // location elements
 

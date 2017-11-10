@@ -1,7 +1,9 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
 import os
 import mantid.api as api
 from mantid.simpleapi import *
+
 
 def find_file(filename=None, startswith=None, data_dir=None):
     """
@@ -10,7 +12,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
         @param startswith: string that files should start with.
         @param data_dir: additional directory to search
     """
-    raise RuntimeError, "find_file is no longer in use"
+    raise RuntimeError("find_file is no longer in use")
     # Files found
     files_found = []
     filename = str(filename).strip()
@@ -51,6 +53,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
 
     return files_found
 
+
 def find_data(file, instrument='', allow_multiple=False):
     """
         Finds a file path for the specified data set, which can either be:
@@ -86,7 +89,8 @@ def find_data(file, instrument='', allow_multiple=False):
                 # Mantid returns its own list object type, so make a real list out if it
                 if len(f)==n_files:
                     return [i for i in f]
-            else: return f[0]
+            else:
+                return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
@@ -99,11 +103,12 @@ def find_data(file, instrument='', allow_multiple=False):
                 # Mantid returns its own list object type, so make a real list out if it
                 if len(f)==n_files:
                     return [i for i in f]
-            else: return f[0]
+            else:
+                return f[0]
     except:
         # FileFinder couldn't make sense of the the supplied information
         pass
 
     # If we didn't find anything, raise an exception
     logger.error("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
-    raise RuntimeError, "Could not find a file for %s" % str(file)
+    raise RuntimeError("Could not find a file for %s" % str(file))

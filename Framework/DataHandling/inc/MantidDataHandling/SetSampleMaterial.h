@@ -41,10 +41,6 @@ namespace DataHandling {
 */
 class DLLExport SetSampleMaterial : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SetSampleMaterial();
-  /// Virtual destructor
-  ~SetSampleMaterial() override;
   /// Algorithm's name
   const std::string name() const override;
   /// Summary of algorithms purpose

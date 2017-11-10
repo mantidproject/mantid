@@ -2,12 +2,13 @@
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/list.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
-using Mantid::PythonInterface::Environment::CallMethod0;
-using Mantid::PythonInterface::Environment::CallMethod1;
-using Mantid::PythonInterface::Environment::CallMethod2;
+using API::IFunction;
+using PythonInterface::Environment::callMethod;
+using PythonInterface::Environment::UndefinedAttributeError;
 using namespace boost::python;
 
 namespace {
@@ -18,22 +19,40 @@ namespace {
  * float,int,str,bool.
  * @return :: The created attribute.
  */
-Mantid::API::IFunction::Attribute
-createAttributeFromPythonValue(const object &value) {
-  PyObject *rawptr = value.ptr();
-  Mantid::API::IFunction::Attribute attr;
+IFunction::Attribute createAttributeFromPythonValue(const object &value) {
 
-  if (PyBool_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<bool>(rawptr)());
-  else if (PyInt_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<int>(rawptr)());
-  else if (PyFloat_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<double>(rawptr)());
-  else if (PyString_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<std::string>(rawptr)());
-  else
+  PyObject *rawptr = value.ptr();
+  IFunction::Attribute attr;
+
+  if (PyBool_Check(rawptr) == 1) {
+    attr = IFunction::Attribute(extract<bool>(rawptr)());
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyLong_Check(rawptr) == 1) {
+#else
+  else if (PyInt_Check(rawptr) == 1) {
+#endif
+    attr = IFunction::Attribute(extract<int>(rawptr)());
+  } else if (PyFloat_Check(rawptr) == 1) {
+    attr = IFunction::Attribute(extract<double>(rawptr)());
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyUnicode_Check(rawptr) == 1) {
+#else
+  else if (PyBytes_Check(rawptr) == 1) {
+#endif
+    attr = IFunction::Attribute(extract<std::string>(rawptr)());
+  } else if (PyList_Check(rawptr) == 1) {
+    auto n = PyList_Size(rawptr);
+    std::vector<double> vec;
+    for (Py_ssize_t i = 0; i < n; ++i) {
+      auto v = extract<double>(PyList_GetItem(rawptr, i))();
+      vec.push_back(v);
+    }
+    attr = IFunction::Attribute(vec);
+  } else
     throw std::invalid_argument(
-        "Invalid attribute type. Allowed types=float,int,str,bool");
+        "Invalid attribute type. Allowed types=float,int,str,bool,list(float)");
 
   return attr;
 }
@@ -56,15 +75,16 @@ std::string IFunctionAdapter::name() const { return m_name; }
  * Specify a category for the function
  */
 const std::string IFunctionAdapter::category() const {
-  return CallMethod0<std::string>::dispatchWithDefaultReturn(
-      getSelf(), "category", IFunction::category());
+  try {
+    return callMethod<std::string>(getSelf(), "category");
+  } catch (UndefinedAttributeError &) {
+    return IFunction::category();
+  }
 }
 
 /**
  */
-void IFunctionAdapter::init() {
-  CallMethod0<void>::dispatchWithException(getSelf(), "init");
-}
+void IFunctionAdapter::init() { callMethod<void>(getSelf(), "init"); }
 
 /**
  * Declare an attribute on the given function from a python object
@@ -75,29 +95,35 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
   auto attr = createAttributeFromPythonValue(defaultValue);
   IFunction::declareAttribute(name, attr);
-  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
-    CallMethod2<void, std::string, object>::dispatchWithException(
-        getSelf(), "setAttributeValue", name, defaultValue);
+  try {
+    callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
+                                          defaultValue);
+  } catch (UndefinedAttributeError &) {
   }
 }
 
 /**
  * Get the value of the named attribute as a Python object
- * @param name :: The name of the new attribute
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(const std::string &name) {
-  auto attr = IFunction::getAttribute(name);
-  return getAttributeValue(attr);
+PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
+                                              const std::string &name) {
+  auto attr = self.getAttribute(name);
+  return getAttributeValue(self, attr);
 }
 
 /**
  * Get the value of the given attribute as a Python object
+ * @param self :: A reference to a function object that has the attribute.
  * @param attr An attribute object
  * @returns The value of the attribute
  */
 PyObject *
-IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
+IFunctionAdapter::getAttributeValue(IFunction &self,
+                                    const API::IFunction::Attribute &attr) {
+  UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
   if (type == "int")
@@ -108,10 +134,25 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
     result = to_python_value<const std::string &>()(attr.asString());
   else if (type == "bool")
     result = to_python_value<const bool &>()(attr.asBool());
+  else if (type == "std::vector<double>")
+    result = to_python_value<const std::vector<double> &>()(attr.asVector());
   else
     throw std::runtime_error("Unknown attribute type, cannot convert C++ type "
                              "to Python. Contact developement team.");
   return result;
+}
+
+/**
+ * Set the attribute's value in the default IFunction's cache
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the attribute
+ * @param value :: The value to set
+ */
+void IFunctionAdapter::setAttributePythonValue(IFunction &self,
+                                               const std::string &name,
+                                               const object &value) {
+  auto attr = createAttributeFromPythonValue(value);
+  self.setAttribute(name, attr);
 }
 
 /**
@@ -122,24 +163,30 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
  */
 void IFunctionAdapter::setAttribute(const std::string &attName,
                                     const Attribute &attr) {
-  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
-    object value = object(handle<>(getAttributeValue(attr)));
-    CallMethod2<void, std::string, object>::dispatchWithException(
-        getSelf(), "setAttributeValue", attName, value);
-  } else {
+  try {
+    object value = object(handle<>(getAttributeValue(*this, attr)));
+    callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
+                                          attName, value);
+    storeAttributeValue(attName, attr);
+  } catch (UndefinedAttributeError &) {
     IFunction::setAttribute(attName, attr);
   }
 }
 
-/**
- * Store the attribute's value in the default IFunction's cache
- * @param name :: The name of the attribute
- * @param value :: The value to store
+/** Split this function (if needed) into a list of independent functions.
+ * @param self :: A reference to a function object. If it's a multi-domain
+ *    function the result should in general contain more than 1 function.
+ *    For a single domain function it should have a single element (self).
+ * @return A python list of IFunction_sprs.
  */
-void IFunctionAdapter::storeAttributePythonValue(const std::string &name,
-                                                 const object &value) {
-  auto attr = createAttributeFromPythonValue(value);
-  storeAttributeValue(name, attr);
+boost::python::object
+IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
+  auto functions = self.createEquivalentFunctions();
+  boost::python::list list;
+  for (const auto &fun : functions) {
+    list.append(fun);
+  }
+  return list;
 }
 
 /**
@@ -149,8 +196,11 @@ void IFunctionAdapter::storeAttributePythonValue(const std::string &name,
  * @param i The index of the parameter
  */
 double IFunctionAdapter::activeParameter(size_t i) const {
-  return CallMethod1<double, size_t>::dispatchWithDefaultReturn(
-      getSelf(), "activeParameter", this->getParameter(i), i);
+  try {
+    return callMethod<double, size_t>(getSelf(), "activeParameter", i);
+  } catch (UndefinedAttributeError &) {
+    return IFunction::activeParameter(i);
+  }
 }
 
 /**
@@ -162,9 +212,8 @@ double IFunctionAdapter::activeParameter(size_t i) const {
  */
 void IFunctionAdapter::setActiveParameter(size_t i, double value) {
   try {
-    CallMethod2<void, size_t, double>::dispatchWithException(
-        getSelf(), "setActiveParameter", i, value);
-  } catch (std::runtime_error &) {
+    callMethod<void, size_t, double>(getSelf(), "setActiveParameter", i, value);
+  } catch (UndefinedAttributeError &) {
     IFunction::setActiveParameter(i, value);
   }
 }

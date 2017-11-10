@@ -1,7 +1,5 @@
 #pylint: disable=invalid-name
 """ Sample MAPS reduction scrip """
-import os
-os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -56,6 +54,7 @@ class ReduceMAPS(ReductionWrapper):
 
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -69,6 +68,7 @@ class ReduceMAPS(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAP',web_var)
     #
+
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
           In addition to that, example of accessing reduction properties
@@ -95,8 +95,11 @@ class ReduceMAPS(ReductionWrapper):
         # use this method to use standard file name generating function
         return None
 
+
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
+    import os
+    os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 
     data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
     data_dir  = os.path.join(data_root,r'Testing\Data\SystemTest')

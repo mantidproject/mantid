@@ -84,9 +84,6 @@ class DLLExport SaveCSV : public API::Algorithm {
 public:
   /// Default constructor
   SaveCSV();
-
-  /// Destructor
-  ~SaveCSV() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveCSV"; };
   /// Summary of algorithms purpose

@@ -1,4 +1,5 @@
 # pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import re
 from mantid.simpleapi import *
@@ -62,9 +63,9 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
         pointGroup = spaceGroup.getPointGroup()
 
         self.assertFalse(
-                set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
-                ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
-                                                                            " matrices of symmetry operations."))
+            set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
+            ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
+                                                                        " matrices of symmetry operations."))
 
     def loadReferenceData(self):
         # Reference data, generated using sginfo (http://cci.lbl.gov/sginfo/)
@@ -81,7 +82,7 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
             if matchedSeparator is not None:
                 currentGroup = matchedSeparator.group(1)
 
-                print currentGroup
+                print(currentGroup)
 
                 spaceGroups[currentGroup] = set()
             else:

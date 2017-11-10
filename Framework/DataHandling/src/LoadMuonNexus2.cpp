@@ -1,30 +1,32 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <cmath>
 #include <numeric>
+
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -32,9 +34,14 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
+using namespace DateAndTimeHelpers;
 using namespace API;
 using Geometry::Instrument;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
+using Mantid::Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
@@ -131,6 +138,9 @@ void LoadMuonNexus2::doExec() {
   spectrum_index.load();
   m_numberOfSpectra = spectrum_index.dim0();
 
+  // Load detector mapping
+  const auto &detMapping = loadDetectorMapping(spectrum_index);
+
   // Call private method to validate the optional parameters, if set
   checkOptionalProperties();
 
@@ -173,7 +183,7 @@ void LoadMuonNexus2::doExec() {
   // Set y axis unit
   localWorkspace->setYUnit("Counts");
 
-  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<'\n';
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
   if (entry.containsDataSet("title")) {
     wsGrpSptr->setTitle(entry.getString("title"));
@@ -209,7 +219,7 @@ void LoadMuonNexus2::doExec() {
     }
   }
 
-  API::Progress progress(this, 0., 1., m_numberOfPeriods * total_specs);
+  API::Progress progress(this, 0.0, 1.0, m_numberOfPeriods * total_specs);
   // Loop over the number of periods in the Nexus file, putting each period in a
   // separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period) {
@@ -225,7 +235,7 @@ void LoadMuonNexus2::doExec() {
           WorkspaceFactory::Instance().create(localWorkspace));
     }
 
-    std::string outws("");
+    std::string outws;
     if (m_numberOfPeriods > 1) {
       std::string outputWorkspace = "OutputWorkspace";
       std::stringstream suffix;
@@ -244,13 +254,16 @@ void LoadMuonNexus2::doExec() {
       index_spectrum[spectrum_index[i]] = i;
     }
 
-    int counter = 0;
+    int wsIndex = 0;
+    localWorkspace->mutableX(0) = timeBins;
     for (int spec = static_cast<int>(m_spec_min);
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
-      loadData(counts, timeBins, counter, period, i, localWorkspace);
-      localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[i]);
-      counter++;
+      localWorkspace->setHistogram(
+          wsIndex, loadData(localWorkspace->binEdges(0), counts, period, i));
+      localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[i]);
+      localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(i));
+      wsIndex++;
       progress.report();
     }
 
@@ -258,14 +271,16 @@ void LoadMuonNexus2::doExec() {
     if (m_list) {
       for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
-        loadData(counts, timeBins, counter, period, k, localWorkspace);
-        localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
-        counter++;
+        localWorkspace->setHistogram(
+            wsIndex, loadData(localWorkspace->binEdges(0), counts, period, k));
+        localWorkspace->getSpectrum(wsIndex).setSpectrumNo(spectrum_index[k]);
+        localWorkspace->getSpectrum(wsIndex).setDetectorIDs(detMapping.at(k));
+        wsIndex++;
         progress.report();
       }
     }
     // Just a sanity check
-    assert(counter == total_specs);
+    assert(wsIndex == total_specs);
 
     bool autogroup = getProperty("AutoGroup");
 
@@ -288,15 +303,9 @@ void LoadMuonNexus2::doExec() {
 /** loadData
 *  Load the counts data from an NXInt into a workspace
 */
-void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
-                              const std::vector<double> &timeBins, int wsIndex,
-                              int period, int spec,
-                              API::MatrixWorkspace_sptr localWorkspace) {
-  MantidVec &X = localWorkspace->dataX(wsIndex);
-  MantidVec &Y = localWorkspace->dataY(wsIndex);
-  MantidVec &E = localWorkspace->dataE(wsIndex);
-  X.assign(timeBins.begin(), timeBins.end());
-
+Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
+                                   const Mantid::NeXus::NXInt &counts,
+                                   int period, int spec) {
   int nBins = 0;
   int *data = nullptr;
 
@@ -307,14 +316,10 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
     nBins = counts.dim1();
     data = &counts(spec, 0);
   } else {
-    throw std::runtime_error("Data have unsupported dimansionality");
+    throw std::runtime_error("Data have unsupported dimensionality");
   }
-  assert(nBins + 1 == static_cast<int>(timeBins.size()));
 
-  Y.assign(data, data + nBins);
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  return Histogram(edges, Counts(data, data + nBins));
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
@@ -349,8 +354,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
     ws->setComment(entry.getString("notes"));
   }
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));
@@ -395,8 +399,8 @@ void LoadMuonNexus2::loadRunDetails(
   }
 
   { // Duration taken to be stop_time minus stat_time
-    DateAndTime start(start_time);
-    DateAndTime end(stop_time);
+    auto start = createFromSanitizedISO8601(start_time);
+    auto end = createFromSanitizedISO8601(stop_time);
     double duration_in_secs = DateAndTime::secondsFromDuration(end - start);
     runDetails.addProperty("dur_secs", duration_in_secs);
   }
@@ -446,6 +450,76 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   } catch (...) {
   }
   return 0;
+}
+
+/**
+ * Loads the mapping between index -> set of detector IDs
+ *
+ * If "detector_index", "detector_count" and "detector_list" are all present,
+ * use these to get the mapping, otherwise spectrum number = detector ID
+ * (one-to-one)
+ *
+ * The spectrum spectrum_index[i] maps to detector_count[i] detectors, whose
+ * detector IDs are in detector_list starting at the index detector_index[i]
+ *
+ * @returns :: map of index -> detector IDs
+ * @throws std::runtime_error if fails to read data from file
+ */
+std::map<int, std::set<int>>
+LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
+  std::map<int, std::set<int>> mapping;
+  const int nSpectra = spectrumIndex.dim0();
+
+  // Find and open the data group
+  NXRoot root(getPropertyValue("Filename"));
+  NXEntry entry = root.openEntry(m_entry_name);
+  const std::string detectorName = [&entry]() {
+    // Only the first NXdata found
+    for (auto &group : entry.groups()) {
+      std::string className = group.nxclass;
+      if (className == "NXdata") {
+        return group.nxname;
+      }
+    }
+    throw std::runtime_error("No NXdata found in file");
+  }();
+  NXData dataGroup = entry.openNXData(detectorName);
+
+  // Usually for muon data, detector id = spectrum number
+  // If not, the optional groups "detector_index", "detector_list" and
+  // "detector_count" will be present to map one to the other
+  const bool hasDetectorMapping = dataGroup.containsDataSet("detector_index") &&
+                                  dataGroup.containsDataSet("detector_list") &&
+                                  dataGroup.containsDataSet("detector_count");
+  if (hasDetectorMapping) {
+    // Read detector IDs
+    try {
+      const auto detIndex = dataGroup.openNXInt("detector_index");
+      const auto detCount = dataGroup.openNXInt("detector_count");
+      const auto detList = dataGroup.openNXInt("detector_list");
+      const int nSpectra = detIndex.dim0();
+      for (int i = 0; i < nSpectra; ++i) {
+        const int start = detIndex[i];
+        const int nDetectors = detCount[i];
+        std::set<int> detIDs;
+        for (int jDet = 0; jDet < nDetectors; ++jDet) {
+          detIDs.insert(detList[start + jDet]);
+        }
+        mapping[i] = detIDs;
+      }
+    } catch (const ::NeXus::Exception &err) {
+      // Throw a more user-friendly message
+      std::ostringstream message;
+      message << "Failed to read detector mapping: " << err.what();
+      throw std::runtime_error(message.str());
+    }
+  } else {
+    for (int i = 0; i < nSpectra; ++i) {
+      mapping[i] = std::set<int>{spectrumIndex[i]};
+    }
+  }
+
+  return mapping;
 }
 
 } // namespace DataHandling

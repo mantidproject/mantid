@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport GreaterThanMD : public BooleanBinaryOperationMD {
 public:
-  GreaterThanMD();
-  ~GreaterThanMD() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

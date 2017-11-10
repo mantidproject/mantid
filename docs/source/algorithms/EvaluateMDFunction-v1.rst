@@ -37,10 +37,10 @@ Usage
     out = EvaluateMDFunction(ws,function)
 
     # Check the result workspace
-    print out.getNumDims()
-    print out.getXDimension().getName()
-    print out.getYDimension().getName()
-    print out.getZDimension().getName()
+    print(out.getNumDims())
+    print(out.getXDimension().name)
+    print(out.getYDimension().name)
+    print(out.getZDimension().name)
     
     
 Output

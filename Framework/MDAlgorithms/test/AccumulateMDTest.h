@@ -98,7 +98,7 @@ public:
 
     // Create a cheap workspace
     std::string ws_name = "ACCUMULATEMDTEST_EXISTENTWORKSPACE";
-    auto bkg_ws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
+    auto bkg_ws = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
     // add to ADS (no choice but to use ADS here)
     AnalysisDataService::Instance().add(ws_name, bkg_ws);
 

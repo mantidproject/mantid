@@ -60,9 +60,15 @@
 // Export/Import declarations
 #define DLLExport __declspec(dllexport)
 #define DLLImport __declspec(dllimport)
+#define EXTERN_IMPORT extern
+#elif defined(__GNUC__) && !defined(__clang__)
+#define DLLExport __attribute__((visibility("default")))
+#define DLLImport
+#define EXTERN_IMPORT extern
 #else
 #define DLLExport
 #define DLLImport
+#define EXTERN_IMPORT
 #endif
 
 /**
@@ -75,7 +81,7 @@
 /**
  * A Macro to mark a function as deprecated.
  */
-#ifdef __GNUC__
+#if (defined(__GNUC__) || defined(__clang__))
 #define DEPRECATED(func) func __attribute__((deprecated))
 #elif defined(_MSC_VER)
 #define DEPRECATED(func) __declspec(deprecated) func
@@ -88,37 +94,6 @@
  *  For size_t and ptrdiff_t
  */
 #include <cstddef>
-
-/**
- * Information for holding onto stdint.h if it is
- * not available
- */
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#else
-#ifdef BOOST_CSTDINT_HPP
-#include <cstdint.hpp>
-#else
-#ifdef _WIN32
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned uint32_t;
-typedef long long int64_t;
-typedef unsigned long long uint64_t;
-#else
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned int uint32_t;
-typedef long int64_t;
-typedef unsigned long uint64_t;
-#endif
-#endif
-#endif
+#include <cstdint>
 
 #endif /*MANTID_KERNEL_SYSTEM_H_*/

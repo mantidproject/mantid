@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 
 from mantid.kernel import *
@@ -24,7 +26,6 @@ class ConjoinSpectraTest(unittest.TestCase):
         wsIndex = 0
         inDataY = mtd[self._aWS].readY(wsIndex)
         inDataE = mtd[self._aWS].readE(wsIndex)
-        print type(conjoinedWS)
         outDataY1 = conjoinedWS.readY(0)
         outDataY2 = conjoinedWS.readY(1)
         outDataE1 = conjoinedWS.readE(0)

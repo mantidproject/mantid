@@ -14,6 +14,9 @@ namespace Mantid {
 namespace API {
 class ExperimentInfo;
 }
+namespace Geometry {
+class OrientedLattice;
+}
 
 namespace MDAlgorithms {
 
@@ -42,9 +45,6 @@ namespace MDAlgorithms {
   */
 class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  LoadSQW2();
-  ~LoadSQW2() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -89,7 +89,7 @@ private:
   std::unique_ptr<std::ifstream> m_file;
   std::unique_ptr<Kernel::BinaryStreamReader> m_reader;
   boost::shared_ptr<SQWWorkspace> m_outputWS;
-  uint16_t m_nspe;
+  uint16_t m_nspe = 0;
   Kernel::DblMatrix m_uToRLU;
   std::string m_outputFrame;
 };

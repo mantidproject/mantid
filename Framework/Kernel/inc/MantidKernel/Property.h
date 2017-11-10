@@ -8,6 +8,11 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+
+namespace NeXus {
+class File;
+}
+
 #include <set>
 #include <string>
 #include <vector>
@@ -17,12 +22,16 @@ class typeinfo;
 }
 
 namespace Mantid {
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
 class DataItem;
-class DateAndTime;
 class IPropertySettings;
 class PropertyHistory;
 class SplittingInterval;
@@ -129,8 +138,18 @@ public:
   void setDocumentation(const std::string &documentation);
   void setBriefDocumentation(const std::string &documentation);
 
+  virtual void saveProperty(::NeXus::File * /*file*/) {
+    throw std::invalid_argument("Property::saveProperty - Cannot save '" +
+                                this->name() +
+                                "', property type not implemented.");
+  }
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
+  /// Returns the value of the property as a pretty printed string
+  virtual std::string valueAsPrettyStr(const size_t maxLength = 0,
+                                       const bool collapseLists = true) const;
+  /// Whether the string returned by value() can be used for serialization.
+  virtual bool isValueSerializable() const { return true; }
   /// Set the value of the property via a string.  If the value is unacceptable
   /// the value is not changed but a string is returned
   virtual std::string setValue(const std::string &) = 0;
@@ -142,6 +161,11 @@ public:
   /// Get the default value for the property which is the value the property was
   /// initialised with
   virtual std::string getDefault() const = 0;
+
+  /** Is Multiple Selection Allowed
+  *  @return true if multiple selection is allowed
+  */
+  virtual bool isMultipleSelectionAllowed() { return false; };
 
   virtual std::vector<std::string> allowedValues() const;
 
@@ -157,8 +181,8 @@ public:
 
   /// Add to this
   virtual Property &operator+=(Property const *rhs) = 0;
-  virtual void filterByTime(const Kernel::DateAndTime &start,
-                            const Kernel::DateAndTime &stop);
+  virtual void filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop);
   virtual void splitByTime(std::vector<SplittingInterval> &splitter,
                            std::vector<Property *> outputs,
                            bool isProtonCharge = true) const;
@@ -181,6 +205,9 @@ public:
 
   /// @return the group this property belongs to
   const std::string &getGroup() { return m_group; }
+
+  bool autoTrim() const;
+  void setAutoTrim(const bool &setting);
 
 protected:
   /// Constructor
@@ -217,6 +244,10 @@ private:
 
   /// Flag whether to save input values
   bool m_remember;
+
+  /// Flag to determine if string inputs to the property should be automatically
+  /// trimmed of whitespace
+  bool m_autotrim;
 };
 
 /// Compares this to another property for equality

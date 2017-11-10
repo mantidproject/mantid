@@ -24,9 +24,11 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/ILiveListener.h"
+#include "MantidKernel/LiveListenerInfo.h"
 
 namespace Mantid {
 namespace API {
+class IAlgorithm;
 /** The factory for creating instances of ILiveListener implementations.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -51,11 +53,16 @@ class MANTID_API_DLL LiveListenerFactoryImpl
     : public Kernel::DynamicFactory<ILiveListener> {
 public:
   boost::shared_ptr<ILiveListener>
-  create(const std::string &instrumentName, bool connect,
-         const Kernel::IPropertyManager *properties = nullptr) const;
+  create(const std::string &instrumentName, bool connect = false,
+         const API::IAlgorithm *callingAlgorithm = nullptr,
+         const std::string &listenerConnectionName = "") const;
+
+  boost::shared_ptr<ILiveListener>
+  create(const Kernel::LiveListenerInfo &info, bool connect = false,
+         const API::IAlgorithm *callingAlgorithm = nullptr) const;
+
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
-  bool checkConnection(const std::string &instrumentName) const;
 
 private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;
@@ -73,17 +80,16 @@ private:
   ILiveListener *createUnwrapped(const std::string &className) const override;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder (needed for
-/// dllexport/dllimport).
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_API_DLL Kernel::SingletonHolder<LiveListenerFactoryImpl>;
-#endif /* _WIN32 */
-/// The specialisation of the SingletonHolder class that holds the
-/// LiveListenerFactory
 typedef Kernel::SingletonHolder<LiveListenerFactoryImpl> LiveListenerFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
+}
+}
 
 #endif /* MANTID_API_LIVELISTENERFACTORYIMPL_H_ */

@@ -1,12 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GeneralisedSecondDifference.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <numeric>
 #include <sstream>
@@ -19,13 +18,6 @@ DECLARE_ALGORITHM(GeneralisedSecondDifference)
 
 using namespace Kernel;
 using namespace API;
-
-/// Constructor
-GeneralisedSecondDifference::GeneralisedSecondDifference()
-    : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
-
-/// Destructor
-GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
 
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {
@@ -90,14 +82,14 @@ void GeneralisedSecondDifference::exec() {
   // Calculate the Cij and Cij^2 coefficients
   computePrefactors();
 
-  const int n_specs = spec_max - spec_min + 1;
-  const int n_points = static_cast<int>(inputWS->dataY(0).size()) - 2 * n_av;
+  const int n_points = static_cast<int>(inputWS->y(0).size()) - 2 * n_av;
   if (n_points < 1) {
     throw std::invalid_argument("Invalid (M,Z) values");
   }
   // Create OuputWorkspace
-  MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
-      inputWS, n_specs, n_points + 1, n_points);
+  auto out = DataObjects::create<HistoWorkspace>(
+      *inputWS, Indexing::extract(inputWS->indexInfo(), spec_min, spec_max),
+      HistogramData::BinEdges(n_points + 1));
 
   const int nsteps = 2 * n_av + 1;
 
@@ -105,16 +97,15 @@ void GeneralisedSecondDifference::exec() {
       boost::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
-    out->getSpectrum(out_index)
-        ->setSpectrumNo(inputWS->getSpectrum(i)->getSpectrumNo());
-    const MantidVec &refX = inputWS->readX(i);
-    const MantidVec &refY = inputWS->readY(i);
-    const MantidVec &refE = inputWS->readE(i);
-    MantidVec &outX = out->dataX(out_index);
-    MantidVec &outY = out->dataY(out_index);
-    MantidVec &outE = out->dataE(out_index);
+    const auto &refX = inputWS->x(i);
+    const auto &refY = inputWS->y(i);
+    const auto &refE = inputWS->e(i);
+    auto &outX = out->mutableX(out_index);
+    auto &outY = out->mutableY(out_index);
+    auto &outE = out->mutableE(out_index);
 
     std::copy(refX.begin() + n_av, refX.end() - n_av, outX.begin());
+
     auto itInY = refY.cbegin();
     auto itOutY = outY.begin();
     auto itInE = refE.cbegin();
@@ -129,9 +120,7 @@ void GeneralisedSecondDifference::exec() {
     }
     progress->report();
   }
-  setProperty("OutputWorkspace", out);
-
-  return;
+  setProperty("OutputWorkspace", std::move(out));
 }
 /** Compute the Cij
  *
@@ -148,9 +137,9 @@ void GeneralisedSecondDifference::computePrefactors() {
   if (m_z == 0) //
   {
     m_Cij.resize(3);
-    std::copy(previous.begin(), previous.end(), m_Cij.begin());
+    m_Cij.assign(previous.begin(), previous.end());
     m_Cij2.resize(3);
-    std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
+    std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
                    VectorHelper::Squares<double>());
     return;
   }
@@ -170,18 +159,16 @@ void GeneralisedSecondDifference::computePrefactors() {
           next[i] += previous[index];
       }
     }
-    previous.resize(n_el);
-    std::copy(next.begin(), next.end(), previous.begin());
+    previous = next;
     max_index_prev = max_index;
     n_el_prev = n_el;
   } while (zz != m_z);
 
   m_Cij.resize(2 * m_z * m_m + 3);
-  std::copy(previous.begin(), previous.end(), m_Cij.begin());
+  m_Cij.assign(previous.begin(), previous.end());
   m_Cij2.resize(2 * m_z * m_m + 3);
-  std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
+  std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
                  VectorHelper::Squares<double>());
-  return;
 }
 
 } // namespace Algorithm

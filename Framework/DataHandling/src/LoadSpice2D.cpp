@@ -1,22 +1,26 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataHandling/XmlHandler.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -32,18 +36,23 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-//-----------------------------------------------------------------------
+#include <utility>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
-using Poco::XML::Node;
-using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
+
+using Mantid::Kernel::Direction;
+using Mantid::API::WorkspaceProperty;
+using Types::Core::DateAndTime;
+using namespace Kernel;
+using namespace API;
+using namespace Geometry;
+using namespace DataObjects;
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSpice2D)
 
@@ -68,16 +77,16 @@ bool from_string(T &t, const std::string &s,
  */
 void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
                  double error, double wavelength, double dwavelength) {
-  MantidVec &X = ws->dataX(specID);
-  MantidVec &Y = ws->dataY(specID);
-  MantidVec &E = ws->dataE(specID);
+  auto &X = ws->mutableX(specID);
+  auto &Y = ws->mutableY(specID);
+  auto &E = ws->mutableE(specID);
   // The following is mostly to make Mantid happy by defining a histogram with
   // a single bin around the neutron wavelength
   X[0] = wavelength - dwavelength / 2.0;
   X[1] = wavelength + dwavelength / 2.0;
   Y[0] = value;
   E[0] = error;
-  ws->getSpectrum(specID)->setSpectrumNo(specID);
+  ws->getSpectrum(specID).setSpectrumNo(specID);
 }
 
 /**
@@ -87,7 +96,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * be used
  */
 int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension().compare(".xml") != 0)
+  if (descriptor.extension() != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -100,6 +109,11 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     Poco::AutoPtr<Document> pDoc;
     try {
       pDoc = pParser.parse(&src);
+    } catch (Poco::Exception &e) {
+      throw Kernel::Exception::FileError("Unable to parse File (" +
+                                             descriptor.filename() + ")",
+                                         e.displayText());
+
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:",
                                          descriptor.filename());
@@ -107,7 +121,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SPICErack") == 0) {
+      if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
       }
     }
@@ -115,14 +129,6 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
   return confidence;
 }
-
-/// Constructor
-LoadSpice2D::LoadSpice2D()
-    : m_wavelength_input(0), m_wavelength_spread_input(0), m_numberXPixels(0),
-      m_numberYPixels(0), m_wavelength(0), m_dwavelength(0) {}
-
-/// Destructor
-LoadSpice2D::~LoadSpice2D() {}
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
@@ -157,11 +163,15 @@ void LoadSpice2D::init() {
 void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
+  setTimes();
   std::map<std::string, std::string> metadata =
       m_xmlHandler.get_metadata("Detector");
+
+  setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
 
-  std::vector<int> data = getData("//Data/Detector");
+  std::vector<int> data = getData("//Data");
+
   double monitorCounts = 0;
   from_string<double>(monitorCounts, metadata["Counters/monitor"], std::dec);
   double countingTime = 0;
@@ -177,29 +187,48 @@ void LoadSpice2D::exec() {
   // run load instrument
   std::string instrument = metadata["Header/Instrument"];
   runLoadInstrument(instrument, m_workspace);
-  runLoadMappingTable(m_workspace, m_numberXPixels, m_numberYPixels);
+
+  // ugly hack for Biosans wing detector:
+  // it tests if there is metadata tagged with the wing detector
+  // if so, puts the detector in the right angle
+  if (metadata.find("Motor_Positions/det_west_wing_rot") != metadata.end()) {
+    double angle = boost::lexical_cast<double>(
+        metadata["Motor_Positions/det_west_wing_rot"]);
+    rotateDetector(-angle);
+    // To make the property is set and the detector rotates!
+    runLoadInstrument(instrument, m_workspace);
+  }
 
   // sample_detector_distances
   double detector_distance = detectorDistance(metadata);
-  moveDetector(detector_distance);
+  double detector_tranlation = detectorTranslation(metadata);
+  moveDetector(detector_distance, detector_tranlation);
+
+  setProperty("OutputWorkspace", m_workspace);
 }
 
 /**
  * Parse the 2 integers of the form: INT32[192,256]
  * @param dims_str : INT32[192,256]
  */
-void LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
+std::pair<int, int>
+LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 
   // Read in the detector dimensions from the Detector tag
+
+  std::pair<int, int> dims = std::make_pair(0, 0);
 
   boost::regex b_re_sig("INT\\d+\\[(\\d+),(\\d+)\\]");
   if (boost::regex_match(dims_str, b_re_sig)) {
     boost::match_results<std::string::const_iterator> match;
     boost::regex_search(dims_str, match, b_re_sig);
     // match[0] is the full string
-    Kernel::Strings::convert(match[1], m_numberXPixels);
-    Kernel::Strings::convert(match[2], m_numberYPixels);
+    Kernel::Strings::convert(match[1], dims.first);
+    Kernel::Strings::convert(match[2], dims.second);
   }
+  if (dims.first == 0 || dims.second == 0)
+    g_log.notice() << "Could not read in the number of pixels!" << '\n';
+  return dims;
 }
 
 /**
@@ -225,8 +254,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
   m_wavelength_spread_input = getProperty("WavelengthSpread");
 
   g_log.debug() << "setInputPropertiesAsMemberProperties: "
-                << m_wavelength_input << " , " << m_wavelength_input
-                << std::endl;
+                << m_wavelength_input << " , " << m_wavelength_input << '\n';
 
   std::string fileName = getPropertyValue("Filename");
   // Set up the XmlHandler handler and parse xml file
@@ -245,7 +273,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
   // Read in wavelength and wavelength spread
 
   g_log.debug() << "setWavelength: " << m_wavelength_input << " , "
-                << m_wavelength_input << std::endl;
+                << m_wavelength_input << '\n';
 
   if (isEmpty(m_wavelength_input)) {
     std::string s = metadata["Header/wavelength"];
@@ -253,8 +281,16 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     s = metadata["Header/wavelength_spread"];
     from_string<double>(m_dwavelength, s, std::dec);
 
+    // 20160720: New wavelength will be a ratio
+    // HUGLY HACK! Comparing dates...
+    DateAndTime changingDate("2016-06-13 00:00:00");
+    if (m_startTime >= changingDate) {
+      g_log.debug() << "Using wavelength spread as a ratio" << '\n';
+      m_dwavelength = m_wavelength * m_dwavelength;
+    }
+
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
-                  << std::endl;
+                  << '\n';
 
   } else {
     m_wavelength = m_wavelength_input;
@@ -265,28 +301,61 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
  * Parses the data dimensions and stores them as member variables
  * Reads the data and returns a vector
  */
-std::vector<int>
-LoadSpice2D::getData(const std::string &dataXpath = "//Data/Detector") {
-  // type : INT32[192,256]
-  std::map<std::string, std::string> attributes =
-      m_xmlHandler.get_attributes_from_tag(dataXpath);
-  parseDetectorDimensions(attributes["type"]);
-  if (m_numberXPixels == 0 || m_numberYPixels == 0)
-    g_log.notice() << "Could not read in the number of pixels!" << std::endl;
+std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
-  std::string data_str = m_xmlHandler.get_text_from_tag(dataXpath);
-  // convert string data into a vector<int>
+  // data container
   std::vector<int> data;
-  std::stringstream iss(data_str);
-  int number;
-  while (iss >> number) {
-    data.push_back(number);
+  unsigned int totalDataSize = 0;
+
+  // let's see how many detectors we have
+  std::vector<std::string> detectors = m_xmlHandler.get_subnodes(dataXpath);
+  g_log.debug() << "Number the detectors found in Xpath " << dataXpath << " = "
+                << detectors.size() << '\n';
+
+  // iterate every detector in the xml file
+  for (const auto &detector : detectors) {
+    std::string detectorXpath =
+        std::string(dataXpath).append("/").append(detector);
+    // type : INT32[192,256]
+    std::map<std::string, std::string> attributes =
+        m_xmlHandler.get_attributes_from_tag(detectorXpath);
+    std::pair<int, int> dims = parseDetectorDimensions(attributes["type"]);
+
+    // Horrible hack:
+    // Some old files had a: //Data/DetectorWing with dimensions:
+    // 16 x 256 = 4096. This must be igored as it is not in the IDF.
+    if (detectorXpath.find("DetectorWing") != std::string::npos &&
+        dims.first * dims.second <= 4096)
+      break;
+
+    totalDataSize += dims.first * dims.second;
+    g_log.debug() << "Parsing detector XPath " << detectorXpath
+                  << " with dimensions: " << dims.first << " x " << dims.second
+                  << " = " << dims.first * dims.second << '\n';
+
+    std::string data_str = m_xmlHandler.get_text_from_tag(detectorXpath);
+    g_log.debug() << "The size of detector contents (xpath = " << detectorXpath
+                  << ") is " << data_str.size() << " bytes." << '\n';
+
+    // convert string data into a vector<int>
+    std::stringstream iss(data_str);
+    double number;
+    while (iss >> number) {
+      data.push_back(static_cast<int>(number));
+    }
+    g_log.debug() << "Detector XPath: " << detectorXpath
+                  << " parsed. Total size of data processed up to now = "
+                  << data.size() << " from a total of " << totalDataSize
+                  << '\n';
   }
 
-  if (data.size() != static_cast<size_t>(m_numberXPixels * m_numberYPixels))
+  if (data.size() != totalDataSize) {
+    g_log.error() << "Total data size = " << totalDataSize
+                  << ". Parsed data size = " << data.size() << '\n';
     throw Kernel::Exception::NotImplementedError(
         "Inconsistent data set: There were more data pixels found than "
         "declared in the Spice XML meta-data.");
+  }
   return data;
 }
 
@@ -298,7 +367,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
                                   double monitor1_counts,
                                   double monitor2_counts) {
   int nBins = 1;
-  int numSpectra = m_numberXPixels * m_numberYPixels + LoadSpice2D::nMonitors;
+  int numSpectra = static_cast<int>(data.size()) + LoadSpice2D::nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
@@ -309,7 +378,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   m_workspace->setYUnit("");
   API::Workspace_sptr workspace =
       boost::static_pointer_cast<API::Workspace>(m_workspace);
-  setProperty("OutputWorkspace", workspace);
+  // setProperty("OutputWorkspace", workspace);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -354,52 +423,100 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
 
 /**
  * Sets the beam trap as Run Property
+ * There's several beamstrap position. We have to find the maximum of every
+ *motor above certain treshold.
+ * The maximum motor position will be the trap in use.
+ *
+ * Notes:
+ * Resting positions:
+ * GPSANS: 1.0
+ * BIOSANS: 9.999980
+ *
+ * Working positions:
+ * GPSANS: 548.999969
+ * BIOSANS: 544.999977
  */
 void LoadSpice2D::setBeamTrapRunProperty(
     std::map<std::string, std::string> &metadata) {
 
-  // Read in beam trap positions
-  double trap_pos = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_25mm"],
-                      std::dec);
+  std::vector<double> trapDiameters = {76.2, 50.8, 76.2, 101.6};
+  // default use the shortest trap
+  double trapDiameterInUse = trapDiameters[1];
 
-  double beam_trap_diam = 25.4;
+  std::vector<double> trapMotorPositions;
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_25mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_50mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
-  double highest_trap = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_101mm"],
-                      std::dec);
-
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 101.6;
+  // Check how many traps are in use (store indexes):
+  std::vector<size_t> trapIndexInUse;
+  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
+    if (trapMotorPositions[i] > 26.0) {
+      // Resting positions are below 25. Make sure we have one trap in use!
+      trapIndexInUse.push_back(i);
+    }
   }
 
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_50mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 50.8;
+  g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
+
+  // store trap diameters in use
+  std::vector<double> trapDiametersInUse;
+  trapDiametersInUse.reserve(trapIndexInUse.size());
+  for (auto index : trapIndexInUse) {
+    trapDiametersInUse.push_back(trapDiameters[index]);
   }
 
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_76mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    beam_trap_diam = 76.2;
-  }
+  g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()
+                << "\n";
 
-  addRunProperty<double>("beam-trap-diameter", beam_trap_diam, "mm");
+  // The maximum value for the trapDiametersInUse is the trap in use
+  std::vector<double>::iterator trapDiameterInUseIt =
+      std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
+  if (trapDiameterInUseIt != trapDiametersInUse.end())
+    trapDiameterInUse = *trapDiameterInUseIt;
+
+  g_log.debug() << "trapDiameterInUse:" << trapDiameterInUse << "\n";
+
+  addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
-void LoadSpice2D::setMetadataAsRunProperties(
-    std::map<std::string, std::string> &metadata) {
-  setBeamTrapRunProperty(metadata);
 
+void LoadSpice2D::setTimes() {
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
-  addRunProperty<std::string>(attributes, "start_time", "start_time", "");
-  addRunProperty<std::string>(attributes, "start_time", "run_start", "");
+
+  m_startTime = DateAndTime(attributes["start_time"]);
+  m_endTime = DateAndTime(attributes["end_time"]);
+}
+
+void LoadSpice2D::setMetadataAsRunProperties(
+    std::map<std::string, std::string> &metadata) {
+
+  setBeamTrapRunProperty(metadata);
+
+  addRunProperty<std::string>("start_time", m_startTime.toISO8601String(), "");
+  addRunProperty<std::string>("run_start", m_startTime.toISO8601String(), "");
+
+  m_workspace->mutableRun().setStartAndEndTime(m_startTime, m_endTime);
 
   // sample thickness
+  // XML 1.03: source distance is now in meters
+  double sample_thickness;
+  from_string<double>(sample_thickness, metadata["Header/Sample_Thickness"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug()
+        << "sans_spice_xml_format_version >= 1.03 :: sample_thickness "
+           "in mm. Converting to cm...";
+    sample_thickness *= 0.1;
+  }
+  addRunProperty<double>("sample-thickness", sample_thickness, "cm");
+
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
                          "sample-thickness", "mm");
 
@@ -407,13 +524,25 @@ void LoadSpice2D::setMetadataAsRunProperties(
                          "source-aperture-diameter", "mm");
   addRunProperty<double>(metadata, "Header/sample_aperture_size",
                          "sample-aperture-diameter", "mm");
-  addRunProperty<double>(metadata, "Header/source_distance",
-                         "source-sample-distance", "mm");
+
+  // XML 1.03: source distance is now in meters
+  double source_distance;
+  from_string<double>(source_distance, metadata["Header/source_distance"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance "
+                     "in meters. Converting to mm...";
+    source_distance *= 1000.0;
+  }
+  addRunProperty<double>("source-sample-distance", source_distance, "mm");
+
   addRunProperty<int>(metadata, "Motor_Positions/nguides", "number-of-guides",
                       "");
 
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
+  addRunProperty<double>("wavelength-spread-ratio",
+                         m_dwavelength / m_wavelength);
 
   addRunProperty<double>(metadata, "Counters/monitor", "monitor", "");
   addRunProperty<double>(metadata, "Counters/time", "timer", "sec");
@@ -422,33 +551,83 @@ void LoadSpice2D::setMetadataAsRunProperties(
 /**
  * Calculates the detector distances and sets them as Run properties
  * Here fog starts:
- * BioSANS: distance = sample_det_dist + offset!
- * GPSANS: distance = sample_det_dist + offset + sample_to_flange!
+ * GPSANS: distance = sample_det_dist + offset!
+ * BioSANS: distance = sample_det_dist + offset + sample_to_flange!
  * Mathieu is using sample_det_dist to move the detector later
  * So I'll do the same (Ricardo)
+ * June 14th 2016:
+ * New changes:
+ * sample_det_dist is not available
+ * flange_det_dist is new = old sample_det_dist + offset
+ * offset is not used
+ * GPSANS: distance = flange_det_dist! (sample_to_flange is 0 for GPSANS)
+ * BioSANS: distance = flange_det_dist + sample_to_flange!
+ * For back compatibility I'm setting the offset to 0 and not reading it from
+ * the file
+ * Last Changes:
+ * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
 double
 LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
-  // sample_detector_distances
-  double sample_detector_distance = 0;
-  from_string<double>(sample_detector_distance,
-                      metadata["Motor_Positions/sample_det_dist"], std::dec);
-  sample_detector_distance *= 1000.0;
-  addRunProperty<double>("sample-detector-distance", sample_detector_distance,
-                         "mm");
+  double sample_detector_distance = 0, sample_detector_distance_offset = 0,
+         sample_si_window_distance = 0;
 
-  double sample_detector_distance_offset =
-      addRunProperty<double>(metadata, "Header/tank_internal_offset",
-                             "sample-detector-distance-offset", "mm");
+  // check if it's the new format
+  if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
+    // Old Format
 
-  double sample_si_window_distance = addRunProperty<double>(
-      metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/sample_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
 
-  double total_sample_detector_distance = sample_detector_distance +
-                                          sample_detector_distance_offset +
-                                          sample_si_window_distance;
+    sample_detector_distance_offset =
+        addRunProperty<double>(metadata, "Header/tank_internal_offset",
+                               "sample-detector-distance-offset", "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+
+  } else {
+    // New format:
+    from_string<double>(sample_detector_distance,
+                        metadata["Motor_Positions/flange_det_dist"], std::dec);
+    sample_detector_distance *= 1000.0;
+
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+
+    sample_si_window_distance = addRunProperty<double>(
+        metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
+  }
+
+  double total_sample_detector_distance;
+  if (metadata.find("Motor_Positions/sdd") != metadata.end()) {
+
+    // When sdd exists overrides all the distances
+    from_string<double>(total_sample_detector_distance,
+                        metadata["Motor_Positions/sdd"], std::dec);
+    total_sample_detector_distance *= 1000.0;
+    sample_detector_distance = total_sample_detector_distance;
+
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+    addRunProperty<double>("sample-si-window-distance", 0, "mm");
+
+    g_log.debug() << "Sample-Detector-Distance from SDD tag = "
+                  << total_sample_detector_distance << '\n';
+
+  } else {
+    total_sample_detector_distance = sample_detector_distance +
+                                     sample_detector_distance_offset +
+                                     sample_si_window_distance;
+  }
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
 
@@ -459,10 +638,29 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   return sample_detector_distance;
 }
 
+double
+LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+
+  // detectorTranslations
+  double detectorTranslation = 0;
+  from_string<double>(detectorTranslation,
+                      metadata["Motor_Positions/detector_trans"], std::dec);
+  detectorTranslation /= 1000.0; // mm to meters conversion
+
+  g_log.debug() << "Detector Translation = " << detectorTranslation
+                << " meters." << '\n';
+  return detectorTranslation;
+}
+
 /**
  * Places the detector at the right sample_detector_distance
  */
-void LoadSpice2D::moveDetector(double sample_detector_distance) {
+void LoadSpice2D::moveDetector(double sample_detector_distance,
+                               double translation_distance) {
+  // Some tests fail if the detector is moved here.
+  // TODO: Move the detector here and not the SANSLoad
+  UNUSED_ARG(translation_distance);
+
   // Move the detector to the right position
   API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
 
@@ -475,6 +673,7 @@ void LoadSpice2D::moveDetector(double sample_detector_distance) {
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
     mover->setProperty("ComponentName", detID);
     mover->setProperty("Z", sample_detector_distance / 1000.0);
+    // mover->setProperty("X", -translation_distance);
     mover->execute();
   } catch (std::invalid_argument &e) {
     g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
@@ -502,7 +701,7 @@ void LoadSpice2D::runLoadInstrument(
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
@@ -512,54 +711,8 @@ void LoadSpice2D::runLoadInstrument(
   }
 }
 
-/**
- * Populate spectra mapping to detector IDs
- *
- * TODO: Get the detector size information from the workspace directly
- *
- * @param localWorkspace: Workspace2D object
- * @param nxbins: number of bins in X
- * @param nybins: number of bins in Y
- */
-void LoadSpice2D::runLoadMappingTable(
-    DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins) {
-  // Get the number of monitor channels
-  boost::shared_ptr<const Geometry::Instrument> instrument =
-      localWorkspace->getInstrument();
-  std::vector<detid_t> monitors = instrument->getMonitors();
-  const int nMonitors = static_cast<int>(monitors.size());
-
-  // Number of monitors should be consistent with data file format
-  if (nMonitors != LoadSpice2D::nMonitors) {
-    std::stringstream error;
-    error << "Geometry error for " << instrument->getName()
-          << ": Spice data format defines " << LoadSpice2D::nMonitors
-          << " monitors, " << nMonitors << " were/was found";
-    throw std::runtime_error(error.str());
-  }
-
-  // Generate mapping of detector/channel IDs to spectrum ID
-
-  // Detector/channel counter
-  int icount = 0;
-
-  // Monitor: IDs start at 1 and increment by 1
-  for (int i = 0; i < nMonitors; i++) {
-    localWorkspace->getSpectrum(icount)->setDetectorID(icount + 1);
-    icount++;
-  }
-
-  // Detector pixels
-  for (int ix = 0; ix < nxbins; ix++) {
-    for (int iy = 0; iy < nybins; iy++) {
-      localWorkspace->getSpectrum(icount)
-          ->setDetectorID(1000000 + iy * 1000 + ix);
-      icount++;
-    }
-  }
-}
-
-/* This method throws not found error if a element is not found in the xml file
+/* This method throws not found error if a element is not found in the xml
+ * file
  * @param elem :: pointer to  element
  * @param name ::  element name
  * @param fileName :: xml file name
@@ -571,6 +724,42 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
     throw Kernel::Exception::NotFoundError(
         name + " element not found in Spice XML file", fileName);
   }
+}
+
+/**
+ * This will rotate the detector named componentName around z-axis
+ *
+ *
+ * @param angle in degrees
+ */
+void LoadSpice2D::rotateDetector(const double &angle) {
+
+  g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
+
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+  //	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double>
+  //>("rotangle");
+
+  p->addValue(DateAndTime::getCurrentTime(), angle);
+  runDetails.addLogData(p);
+}
+
+/***
+ * 2016/11/09 : There is a new tag sans_spice_xml_format_version in the XML
+ * It identifies changes in the XML format.
+ * Useful to test tags rather than using the date.
+ * @param metadata
+ */
+void LoadSpice2D::setSansSpiceXmlFormatVersion(
+    std::map<std::string, std::string> &metadata) {
+
+  if (metadata.find("Header/sans_spice_xml_format_version") != metadata.end()) {
+    m_sansSpiceXmlFormatVersion = boost::lexical_cast<double>(
+        metadata["Header/sans_spice_xml_format_version"]);
+  }
+  g_log.debug() << "Sans_spice_xml_format_version == "
+                << m_sansSpiceXmlFormatVersion << "\n";
 }
 }
 }

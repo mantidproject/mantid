@@ -47,10 +47,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport Transpose : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Transpose() : API::Algorithm() {}
-  /// Virtual destructor
-  ~Transpose() override {}
   /// Algorithm's name
   const std::string name() const override { return "Transpose"; }
   /// Summary of algorithms purpose

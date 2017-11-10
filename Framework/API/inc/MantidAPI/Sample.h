@@ -14,15 +14,12 @@ namespace Mantid {
 // Geometry forward declarations
 //------------------------------------------------------------------------------
 namespace Geometry {
-class OrientedLattice;
 class CrystalStructure;
+class OrientedLattice;
+class SampleEnvironment;
 }
 
 namespace API {
-//-----------------------------------------------------------------------------
-// API forward declarations
-//------------------------------------------------------------------------------
-class SampleEnvironment;
 
 /**
   This class stores information about the sample used in particular
@@ -79,15 +76,15 @@ public:
   /** @name Material properties.*/
   //@{
   /// Return the material (convenience method)
-  const Kernel::Material &getMaterial() const;
+  const Kernel::Material getMaterial() const;
   //@}
 
   /** @name Access the environment information */
   //@{
   /// Get a reference to the sample's environment
-  const SampleEnvironment &getEnvironment() const;
+  const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample
-  void setEnvironment(SampleEnvironment *env);
+  void setEnvironment(Geometry::SampleEnvironment *env);
   //@}
 
   /** @name Access the sample's lattice structure and orientation */
@@ -143,7 +140,7 @@ private:
   /// The sample shape object
   Geometry::Object m_shape;
   /// An owned pointer to the SampleEnvironment object
-  boost::shared_ptr<SampleEnvironment> m_environment;
+  boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
   Geometry::OrientedLattice *m_lattice;
 

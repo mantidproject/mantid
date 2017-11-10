@@ -40,7 +40,7 @@ void NexusTestHelper::createFile(std::string barefilename) {
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
   file = new ::NeXus::File(filename, NXACC_CREATE5);
-  file->makeGroup("test_entry", "NXentry", 1);
+  file->makeGroup("test_entry", "NXentry", true);
 }
 
 //----------------------------------------------------------------------------------------------

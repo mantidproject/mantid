@@ -1,10 +1,13 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from mantid import logger
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectResolution(DataProcessorAlgorithm):
 
     _input_files = None
@@ -16,15 +19,13 @@ class IndirectResolution(DataProcessorAlgorithm):
     _background = None
     _rebin_string = None
     _scale_factor = None
-
+    _load_logs = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
-
     def summary(self):
         return 'Creates a resolution workspace for an indirect inelastic instrument.'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -45,16 +46,17 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
                              doc='Energy range to use as background.')
 
-
         self.declareProperty(name='RebinParam', defaultValue='',
                              doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor to scale resolution curve by')
 
+        self.declareProperty(name = "LoadLogFiles", defaultValue=True,
+                             doc='Option to load log files')
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output resolution workspace.')
-
 
     def PyExec(self):
         self._setup()
@@ -68,10 +70,11 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.setProperty('SumFiles', True)
         iet_alg.setProperty('InputFiles', self._input_files)
         iet_alg.setProperty('SpectraRange', self._detector_range)
+        iet_alg.setProperty('LoadLogFiles', self._load_logs)
         iet_alg.execute()
 
         group_ws = iet_alg.getProperty('OutputWorkspace').value
-        icon_ws = group_ws.getItem(0).getName()
+        icon_ws = group_ws.getItem(0).name()
 
         workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
 
@@ -98,7 +101,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
 
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -115,7 +117,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._background = self.getProperty('BackgroundRange').value
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
-
+        self._load_logs = self.getProperty('LoadLogFiles').value
 
     def _post_process(self):
         """
@@ -139,8 +141,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         log_alg.setProperty('Workspace', self._out_ws)
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
-
         self.setProperty('OutputWorkspace', self._out_ws)
+        log_alg.execute()
 
 
 AlgorithmFactory.subscribe(IndirectResolution)

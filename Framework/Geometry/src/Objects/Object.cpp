@@ -1,26 +1,37 @@
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/MultiThreaded.h"
+
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
-
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/ranlux.hpp>
+#include <boost/random/uniform_01.hpp>
 
+#include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -28,34 +39,26 @@
 namespace Mantid {
 namespace Geometry {
 
+using Kernel::Material;
 using Kernel::V3D;
 using Kernel::Quat;
 
 /**
 *  Default constuctor
 */
-Object::Object()
-    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
-      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
-      handle(), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
-      m_material() // empty by default
-{
-  handle = boost::make_shared<CacheGeometryHandler>(this);
-}
+Object::Object() : Object("") {}
 
 /**
 *  Construct with original shape xml knowledge.
 *  @param shapeXML : string with original shape xml.
 */
 Object::Object(const std::string &shapeXML)
-    : ObjName(0), TopRule(), m_boundingBox(), AABBxMax(0), AABByMax(0),
-      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
+    : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
       handle(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
-      m_shapeXML(shapeXML), m_material() // empty by default
+      m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
   handle = boost::make_shared<CacheGeometryHandler>(this);
 }
@@ -64,17 +67,7 @@ Object::Object(const std::string &shapeXML)
 * Copy constructor
 * @param A :: The object to initialise this copy from
 */
-Object::Object(const Object &A)
-    : ObjName(A.ObjName), TopRule((A.TopRule) ? A.TopRule->clone() : nullptr),
-      m_boundingBox(A.m_boundingBox), AABBxMax(A.AABBxMax),
-      AABByMax(A.AABByMax), AABBzMax(A.AABBzMax), AABBxMin(A.AABBxMin),
-      AABByMin(A.AABByMin), AABBzMin(A.AABBzMin), boolBounded(A.boolBounded),
-      handle(A.handle->clone()), bGeometryCaching(A.bGeometryCaching),
-      vtkCacheReader(A.vtkCacheReader), vtkCacheWriter(A.vtkCacheWriter),
-      m_shapeXML(A.m_shapeXML), m_material(A.m_material) {
-  if (TopRule)
-    createSurfaceList();
-}
+Object::Object(const Object &A) : Object() { *this = A; }
 
 /**
 * Assignment operator
@@ -83,7 +76,6 @@ Object::Object(const Object &A)
 */
 Object &Object::operator=(const Object &A) {
   if (this != &A) {
-    ObjName = A.ObjName;
     TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
@@ -92,12 +84,14 @@ Object &Object::operator=(const Object &A) {
     AABByMin = A.AABByMin;
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
+    ObjNum = A.ObjNum;
     handle = A.handle->clone();
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
     vtkCacheWriter = A.vtkCacheWriter;
     m_shapeXML = A.m_shapeXML;
-    m_material = A.m_material;
+    m_id = A.m_id;
+    m_material = Kernel::make_unique<Material>(A.material());
 
     if (TopRule)
       createSurfaceList();
@@ -112,13 +106,18 @@ Object::~Object() = default;
  * @param material The new Material that the object is composed from
  */
 void Object::setMaterial(const Kernel::Material &material) {
-  m_material = material;
+  m_material = Mantid::Kernel::make_unique<Material>(material);
 }
 
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material &Object::material() const { return m_material; }
+const Kernel::Material Object::material() const {
+  if (m_material)
+    return *m_material;
+  else
+    return Material();
+}
 
 /**
 * Returns whether this object has a valid shape
@@ -145,7 +144,7 @@ int Object::setObject(const int ON, const std::string &Ln) {
   if (procString(Ln)) // this currently does not fail:
   {
     SurList.clear();
-    ObjName = ON;
+    ObjNum = ON;
     return 1;
   }
 
@@ -163,7 +162,6 @@ void Object::convertComplement(const std::map<int, Object> &MList)
 
 {
   this->procString(this->cellStr(MList));
-  return;
 }
 
 /**
@@ -235,7 +233,7 @@ int Object::complementaryObject(const int Cnum, std::string &Ln) {
 
   std::string Part = Ln.substr(posA, posB - (posA + 1));
 
-  ObjName = Cnum;
+  ObjNum = Cnum;
   if (procString(Part)) {
     SurList.clear();
     Ln.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
@@ -271,7 +269,6 @@ int Object::hasComplement() const {
 int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule.get());
-  int Rcount(0);
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
@@ -283,7 +280,6 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
-          Rcount++;
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
                                                  KV->getKeyN());
@@ -341,9 +337,11 @@ int Object::procPair(std::string &Ln,
   }
   if (Rend == Ln.size() ||
       !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) ||
-      Rlist.find(Rb) == Rlist.end())
+      Rlist.find(Rb) == Rlist.end()) {
+    // No second rule but we did find the first one
+    compUnit = Ra;
     return 0;
-
+  }
   // Get end of number (digital)
   for (Rend++; Rend < Ln.size() && Ln[Rend] >= '0' && Ln[Rend] <= '9'; Rend++)
     ;
@@ -509,12 +507,18 @@ int Object::createSurfaceList(const int outFlag) {
       }
     }
   }
+  // Remove duplicates
+  sort(SurList.begin(), SurList.end());
+  auto sc = unique(SurList.begin(), SurList.end());
+  if (sc != SurList.end()) {
+    SurList.erase(sc, SurList.end());
+  }
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << std::endl;
-      std::cerr << (*vc)->getName() << std::endl;
+      std::cerr << "Point == " << *vc << '\n';
+      std::cerr << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -594,15 +598,14 @@ void Object::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjName << std::endl;
-  std::cout << "Rules == " << Rcount << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   std::cout << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
     std::cout << (*mc) << " ";
   }
-  std::cout << std::endl;
-  return;
+  std::cout << '\n';
 }
 
 /**
@@ -611,16 +614,14 @@ void Object::print() const {
 void Object::makeComplement() {
   std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
   TopRule = std::move(NCG);
-  return;
 }
 
 /**
 * Displays the rule tree
 */
 void Object::printTree() const {
-  std::cout << "Name == " << ObjName << std::endl;
-  std::cout << TopRule->display() << std::endl;
-  return;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << TopRule->display() << '\n';
 }
 
 /**
@@ -643,7 +644,7 @@ std::string Object::cellCompStr() const {
 std::string Object::str() const {
   std::ostringstream cx;
   if (TopRule) {
-    cx << ObjName << " ";
+    cx << ObjNum << " ";
     cx << TopRule->display();
   }
   return cx.str();
@@ -659,7 +660,6 @@ void Object::write(std::ostream &OX) const {
   cx.precision(10);
   cx << str();
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**
@@ -734,16 +734,16 @@ int Object::procString(const std::string &Line) {
   }
   // Do outside loop...
   int nullInt;
-  while (procPair(Ln, RuleList, nullInt))
-    ;
-
-  if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
-    exit(1);
-    return 0;
+  while (procPair(Ln, RuleList, nullInt)) {
   }
-  TopRule = std::move((RuleList.begin())->second);
+
+  if (RuleList.size() == 1) {
+    TopRule = std::move((RuleList.begin())->second);
+  } else {
+    throw std::logic_error("Object::procString() - Unexpected number of "
+                           "surface rules found. Expected=1, found=" +
+                           std::to_string(RuleList.size()));
+  }
   return 1;
 }
 
@@ -1013,41 +1013,49 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   int nTri = this->NumberOfTriangles();
   // Cylinders are by far the most frequently used
-  if (type == 3)
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID:
+    return CuboidSolidAngle(observer, geometry_vectors);
+    break;
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return SphereSolidAngle(observer, geometry_vectors, radius);
+    break;
+  case GluGeometryHandler::GeometryType::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
-  else if (type == 1)
-    return CuboidSolidAngle(observer, geometry_vectors);
-  else if (type == 2)
-    return SphereSolidAngle(observer, geometry_vectors, radius);
-  else if (type == 4)
+    break;
+  case GluGeometryHandler::GeometryType::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
-  else if (nTri == 0) // Fall back to raytracing if there are no triangles
-  {
-    return rayTraceSolidAngle(observer);
-  }
-  // Compute a generic shape that has been triangulated
-  else {
-    double *vertices = this->getTriangleVertices();
-    int *faces = this->getTriangleFaces();
-    double sangle(0.0), sneg(0.0);
-    for (int i = 0; i < nTri; i++) {
-      int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
-      V3D vp1 =
-          V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
-      V3D vp2 =
-          V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
-      V3D vp3 =
-          V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
-      double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-      if (sa > 0.0) {
-        sangle += sa;
-      } else {
-        sneg += sa;
+    break;
+  default:
+    if (nTri == 0) // Fall back to raytracing if there are no triangles
+    {
+      return rayTraceSolidAngle(observer);
+    } else { // Compute a generic shape that has been triangulated
+      double *vertices = this->getTriangleVertices();
+      int *faces = this->getTriangleFaces();
+      double sangle(0.0), sneg(0.0);
+      for (int i = 0; i < nTri; i++) {
+        int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
+        V3D vp1 =
+            V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
+        V3D vp2 =
+            V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
+        V3D vp3 =
+            V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
+        double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+        if (sa > 0.0) {
+          sangle += sa;
+        } else {
+          sneg += sa;
+        }
       }
+      return 0.5 * (sangle - sneg);
     }
-    return 0.5 * (sangle - sneg);
   }
 }
 /**
@@ -1091,12 +1099,22 @@ double Object::triangleSolidAngle(const V3D &observer,
     int type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    if (type == 1) {
+    GluGeometryHandler::GeometryType gluType =
+        static_cast<GluGeometryHandler::GeometryType>(type);
+
+    switch (gluType) {
+    case GluGeometryHandler::GeometryType::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
-    } else if (type == 2) // this is wrong for scaled objects
+      break;
+    case GluGeometryHandler::GeometryType::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
+      break;
+    default:
+      break;
+    }
+
     //
     // No special case, do the ray trace.
     //
@@ -1464,6 +1482,153 @@ double Object::ConeSolidAngle(const V3D &observer,
 }
 
 /**
+ * For simple shapes, the volume is calculated exactly. For more
+ * complex cases, we fall back to Monte Carlo.
+ * @return The volume.
+ */
+double Object::volume() const {
+  int type;
+  double height;
+  double radius;
+  std::vector<Kernel::V3D> vectors;
+  this->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID: {
+    // Here, the volume is calculated by the triangular method.
+    // We use one of the vertices (vectors[0]) as the reference
+    // point.
+    double volume = 0.0;
+    // Vertices. Name codes follow flb = front-left-bottom etc.
+    const Kernel::V3D &flb = vectors[0];
+    const Kernel::V3D &flt = vectors[1];
+    const Kernel::V3D &frb = vectors[3];
+    const Kernel::V3D frt = frb + flt - flb;
+    const Kernel::V3D &blb = vectors[2];
+    const Kernel::V3D blt = blb + flt - flb;
+    const Kernel::V3D brb = blb + frb - flb;
+    const Kernel::V3D brt = frt + blb - flb;
+    // Normals point out, follow right-handed rule when
+    // defining the triangle faces.
+    volume += flb.scalar_prod(flt.cross_prod(blb));
+    volume += blb.scalar_prod(flt.cross_prod(blt));
+    volume += flb.scalar_prod(frb.cross_prod(flt));
+    volume += frb.scalar_prod(frt.cross_prod(flt));
+    volume += flb.scalar_prod(blb.cross_prod(frb));
+    volume += blb.scalar_prod(brb.cross_prod(frb));
+    volume += frb.scalar_prod(brb.cross_prod(frt));
+    volume += brb.scalar_prod(brt.cross_prod(frt));
+    volume += flt.scalar_prod(frt.cross_prod(blt));
+    volume += frt.scalar_prod(brt.cross_prod(blt));
+    volume += blt.scalar_prod(brt.cross_prod(blb));
+    volume += brt.scalar_prod(brb.cross_prod(blb));
+    return volume / 6;
+  }
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return 4.0 / 3.0 * M_PI * radius * radius * radius;
+  case GluGeometryHandler::GeometryType::CYLINDER:
+    return M_PI * radius * radius * height;
+  default:
+    // Fall back to Monte Carlo method.
+    return monteCarloVolume();
+  }
+}
+
+/**
+ * Calculates the volume of this object by the Monte Carlo method.
+ * This method manages singleShotMonteCarloVolume() and uses the
+ * standard error as the convergence criteria.
+ * @returns The simulated volume of this object.
+ */
+double Object::monteCarloVolume() const {
+  using namespace boost::accumulators;
+  const int singleShotIterations = 10000;
+  accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>>
+      accumulate;
+  // For seeding the single shot runs.
+  boost::random::ranlux48 rnEngine;
+  // Warm up statistics.
+  for (int i = 0; i < 10; ++i) {
+    const auto seed = rnEngine();
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+  }
+  const double relativeErrorTolerance = 1e-3;
+  double currentMean;
+  double currentError;
+  do {
+    const auto seed = rnEngine();
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+    currentMean = mean(accumulate);
+    currentError = error_of<tag::mean>(accumulate);
+    if (std::isnan(currentError)) {
+      currentError = 0;
+    }
+  } while (currentError / currentMean > relativeErrorTolerance);
+  return currentMean;
+}
+
+/**
+ * Calculates the volume using the Monte Carlo method.
+ * @param shotSize Number of iterations.
+ * @param seed A number to seed the random number generator.
+ * @returns The simulated volume of this object.
+ */
+double Object::singleShotMonteCarloVolume(const int shotSize,
+                                          const size_t seed) const {
+  const auto &boundingBox = getBoundingBox();
+  if (boundingBox.isNull()) {
+    throw std::runtime_error("Cannot calculate volume: invalid bounding box.");
+  }
+  int totalHits = 0;
+  const double boundingDx = boundingBox.xMax() - boundingBox.xMin();
+  const double boundingDy = boundingBox.yMax() - boundingBox.yMin();
+  const double boundingDz = boundingBox.zMax() - boundingBox.zMin();
+  PARALLEL {
+    const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
+    const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
+    size_t blocksize = shotSize / threadCount;
+    if (currentThreadNum == threadCount - 1) {
+      // Last thread may have to do threadCount extra iterations in
+      // the worst case.
+      blocksize = shotSize - (threadCount - 1) * blocksize;
+    }
+    boost::random::mt19937 rnEngine(
+        static_cast<boost::random::mt19937::result_type>(seed));
+    // All threads init their engine with the same seed.
+    // We discard the random numbers used by the other threads.
+    // This ensures reproducible results independent of the number
+    // of threads.
+    // We need three random numbers for each iteration.
+    rnEngine.discard(currentThreadNum * 3 * blocksize);
+    boost::random::uniform_01<double> rnDistribution;
+    int hits = 0;
+    for (int i = 0; i < static_cast<int>(blocksize); ++i) {
+      double rnd = rnDistribution(rnEngine);
+      const double x = boundingBox.xMin() + rnd * boundingDx;
+      rnd = rnDistribution(rnEngine);
+      const double y = boundingBox.yMin() + rnd * boundingDy;
+      rnd = rnDistribution(rnEngine);
+      const double z = boundingBox.zMin() + rnd * boundingDz;
+      if (isValid(V3D(x, y, z))) {
+        ++hits;
+      }
+    }
+    // Collect results.
+    PARALLEL_ATOMIC
+    totalHits += hits;
+  }
+  const double ratio =
+      static_cast<double>(totalHits) / static_cast<double>(shotSize);
+  const double boundingVolume = boundingDx * boundingDy * boundingDz;
+  return ratio * boundingVolume;
+}
+
+/**
 * Returns an axis-aligned bounding box that will fit the shape
 * @returns A reference to a bounding box for this shape.
 */
@@ -1599,11 +1764,12 @@ void Object::calcBoundingBoxByGeometry() {
 
   // Will only work for shapes handled by GluGeometryHandler
   handle->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
 
   // Type of shape is given as a simple integer
-  switch (type) {
-  case 1: // CUBOID
-  {
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1636,10 +1802,23 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
+  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+    // These will be replaced by more realistic values in the loop below
+    minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
+    maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
 
-  case 3: // CYLINDER
-  case 5: // SEGMENTED_CYLINDER
-  {
+    // Loop over all corner points to find minima and maxima on each axis
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
+    }
+  } break;
+  case GluGeometryHandler::GeometryType::CYLINDER:
+  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1662,8 +1841,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case 4: // CONE
-  {
+  case GluGeometryHandler::GeometryType::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base
@@ -1799,6 +1977,54 @@ int Object::getPointInObject(Kernel::V3D &point) const {
 }
 
 /**
+ * Generate a random point within the object. The method simply generates a
+ * point within the bounding box and tests if this is a valid point within
+ * the object: if so the point is return otherwise a new point is selected.
+ * @param rng  A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const size_t maxAttempts) const {
+  const auto &bbox = getBoundingBox();
+  if (bbox.isNull()) {
+    throw std::runtime_error("Object::generatePointInObject() - Invalid "
+                             "bounding box. Cannot generate new point.");
+  }
+  return generatePointInObject(rng, bbox, maxAttempts);
+}
+
+/**
+ * Generate a random point within the object that is also bound by the
+ * activeRegion box.
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param activeRegion Restrict point generation to this sub-region of the
+ * object
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The newly generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const BoundingBox &activeRegion,
+                                  const size_t maxAttempts) const {
+  size_t attempts(0);
+  while (attempts < maxAttempts) {
+    const double r1 = rng.nextValue();
+    const double r2 = rng.nextValue();
+    const double r3 = rng.nextValue();
+    auto pt = activeRegion.generatePointInside(r1, r2, r3);
+    if (this->isValid(pt))
+      return pt;
+    else
+      ++attempts;
+  };
+  throw std::runtime_error("Object::generatePointInObject() - Unable to "
+                           "generate point in object after " +
+                           std::to_string(maxAttempts) + " attempts");
+}
+
+/**
 * Try to find a point that lies within (or on) the object, given a seed point
 * @param point :: on entry the seed point, on exit point in object, if found
 * @return 1 if point found, 0 otherwise
@@ -1811,17 +2037,10 @@ int Object::searchForObject(Kernel::V3D &point) const {
   Kernel::V3D testPt;
   if (isValid(point))
     return 1;
-  std::vector<Kernel::V3D> axes;
-  axes.reserve(6);
-  axes.push_back(Kernel::V3D(1, 0, 0));
-  axes.push_back(Kernel::V3D(-1, 0, 0));
-  axes.push_back(Kernel::V3D(0, 1, 0));
-  axes.push_back(Kernel::V3D(0, -1, 0));
-  axes.push_back(Kernel::V3D(0, 0, 1));
-  axes.push_back(Kernel::V3D(0, 0, -1));
-  std::vector<Kernel::V3D>::const_iterator dir;
-  for (dir = axes.begin(); dir != axes.end(); ++dir) {
-    Geometry::Track tr(point, (*dir));
+  for (const auto &dir :
+       {V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+        V3D(0., 0., 1.), V3D(0., 0., -1.)}) {
+    Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
       return 1;

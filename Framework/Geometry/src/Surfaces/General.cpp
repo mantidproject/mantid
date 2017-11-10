@@ -88,9 +88,7 @@ void General::setBaseEqn()
   Set baseEqn (nothing to do) as it is
   already a baseEqn driven system
 */
-{
-  return;
-}
+{}
 
 void General::getBoundingBox(double &xmax, double &ymax, double &zmax,
                              double &xmin, double &ymin, double &zmin) {

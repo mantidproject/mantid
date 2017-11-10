@@ -3,11 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ScaleX.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -123,18 +126,18 @@ void ScaleX::exec() {
   }
 
   // do the shift in X
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy y and e data
-    auto &outY = outputW->dataY(i);
-    outY = inputW->dataY(i);
-    auto &outE = outputW->dataE(i);
-    outE = inputW->dataE(i);
+    outputW->setHistogram(i, inputW->histogram(i));
 
-    auto &outX = outputW->dataX(i);
-    const auto &inX = inputW->readX(i);
+    auto &outX = outputW->mutableX(i);
+    auto &outY = outputW->mutableY(i);
+    auto &outE = outputW->mutableE(i);
+
+    const auto &inX = inputW->x(i);
     // Change bin value by offset
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       double factor = getScaleFactor(inputW, i);
@@ -147,9 +150,8 @@ void ScaleX::exec() {
         std::reverse(outY.begin(), outY.end());
         std::reverse(outE.begin(), outE.end());
       }
-    } else {
-      outX = inX; // copy
     }
+
     m_progress->report("Scaling X");
 
     PARALLEL_END_INTERUPT_REGION
@@ -176,26 +178,26 @@ void ScaleX::execEvent() {
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   if (matrixOutputWS != matrixInputWS) {
-    matrixOutputWS = MatrixWorkspace_sptr(matrixInputWS->clone().release());
+    matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string op = getPropertyValue("Operation");
   int numHistograms = static_cast<int>(outputWS->getNumberHistograms());
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       auto factor = getScaleFactor(outputWS, i);
       if (op == "Multiply") {
-        outputWS->getEventList(i).scaleTof(factor);
+        outputWS->getSpectrum(i).scaleTof(factor);
         if (factor < 0) {
-          outputWS->getEventList(i).reverse();
+          outputWS->getSpectrum(i).reverse();
         }
       } else if (op == "Add") {
-        outputWS->getEventList(i).addTof(factor);
+        outputWS->getSpectrum(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");
@@ -229,25 +231,18 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   if (m_parname.empty())
     return m_algFactor;
 
-  // Try and get factor from component. If we see a DetectorGroup use this will
+  // Try and get factor from component. If we see a DetectorGroup this will
   // use the first component
-  Geometry::IDetector_const_sptr det;
-  auto inst = inputWS->getInstrument();
-
-  auto *spec = inputWS->getSpectrum(index);
-  const auto &ids = spec->getDetectorIDs();
-  const size_t ndets(ids.size());
-  if (ndets > 0) {
-    try {
-      det = inst->getDetector(*ids.begin());
-    } catch (Exception::NotFoundError &) {
-      return 0.0;
-    }
-  } else
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index)) {
     return 0.0;
+  }
 
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
+  const auto &det = detectorInfo.detector(detIndex);
   const auto &pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det->getComponentID(), m_parname);
+  auto par = pmap.getRecursive(det.getComponentID(), m_parname);
   if (par) {
     if (!m_combine)
       return par->value<double>();

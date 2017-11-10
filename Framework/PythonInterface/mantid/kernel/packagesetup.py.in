@@ -4,6 +4,8 @@
     Handles set up of aspects related to extra Python packages e.g. adding
     any required paths to sys.path, setting environment variables etc.
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 import os as _os
 import sys as _sys
 ###############################################################################
@@ -57,7 +59,7 @@ def set_NEXUSLIB_var():
 import os as _os
 update_sys_paths(_os.environ.get("MANTIDPATH",""))
 
-from _aliases import config as _config
+from ._aliases import config as _config
 _path_keys = ['requiredpythonscript.directories','pythonscripts.directories']
 for key in _path_keys:
     paths = _config[key]

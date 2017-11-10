@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid {
@@ -33,9 +34,6 @@ namespace Algorithms {
 */
 class DLLExport CalculateDIFC : public API::Algorithm {
 public:
-  CalculateDIFC();
-  ~CalculateDIFC() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -44,12 +42,6 @@ public:
 private:
   void init() override;
   void exec() override;
-
-  /// Calculate the DIFC for every pixel
-  void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
-                 DataObjects::OffsetsWorkspace_sptr &offsetsWS, double l1,
-                 double beamlineNorm, Kernel::V3D &beamline,
-                 Kernel::V3D &samplePos, detid2det_map &allDetectors);
 };
 
 } // namespace Algorithms

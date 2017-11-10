@@ -38,9 +38,6 @@ namespace DataHandling {
 */
 class DLLExport SaveDiffCal : public API::Algorithm {
 public:
-  SaveDiffCal();
-  ~SaveDiffCal() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -58,7 +55,7 @@ private:
   void generateDetidToIndex();
   bool tableHasColumn(const std::string ColumnName) const;
 
-  std::size_t m_numValues;
+  std::size_t m_numValues{0};
   API::ITableWorkspace_sptr m_calibrationWS;
   std::map<detid_t, size_t> m_detidToIndex;
 };

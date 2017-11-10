@@ -68,6 +68,57 @@ If the file has an ``isis_vms_compat`` then it is taken to be an ISIS file and
 the data will be modified according to the information obtained from this group.
 
 
+Here are some tables that show it in more detail:
+
++------------------------------+-------------------------------------------+-------------------------------------+
+| Description of Data          | Found in Nexus file                       | Placed in Workspace (Workspace2D)   |
+|                              | (within 'raw_data_1')                     |                                     |
++==============================+===========================================+=====================================+
+| Monitor Data                 | groups of Class NXMonitor                 | Monitor Data                        |
+|                              | (one monitor per group)                   |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Detector Data                | groups of Class NXevent_data              | Event data                          |
+|                              | (one bank per group)                      |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Instrument                   | group ``Instrument``                      | Workspace instrument                |
+|                              |                                           | if not overridden                   |
++------------------------------+-------------------------------------------+-------------------------------------+
+|                              | If ``isis_vms_compat`` exists,            |                                     |
+| Spectrum of each detector ID | ``NSP1``, ``UDET`` and ``SPEC``           | Spectra-Detector mapping            |
+|                              | within it,                                |                                     |
+|                              | else one spectrum per detector assumed    |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+| Run                          | mainly as loaded from                     | Run Object                          |
+|                              | :ref:`algm-LoadNexusLogs`                 |                                     | 
++------------------------------+-------------------------------------------+-------------------------------------+
+| Sample                       | If ``isis_vms_compat`` exists,            | Sample Object                       |
+|                              | ``SPB`` and ``RSPB`` within               |                                     |
+|                              | ``isis_vms_compat``                       |                                     |
+|                              | else sample not loaded                    |                                     |
++------------------------------+-------------------------------------------+-------------------------------------+
+
+Sample Object
+'''''''''''''
+
+If ``isis_vms_compat`` exists,
+then the following sample properties are read from it: 
+
++-------------+-------------------------+
+| Nexus       | Workspace sample object |
++=============+=========================+
+| ``SPB[2]``  | Geometry flag           |
++-------------+-------------------------+
+| ``RSPB[3]`` | Thickness               |
++-------------+-------------------------+
+| ``RSPB[4]`` | Height                  |
++-------------+-------------------------+
+| ``RSPB[5]`` | Width                   |
++-------------+-------------------------+
+
+This is the same as read by :ref:`algm-LoadISISNexus`.
+
+
+
 Usage
 -----
 
@@ -80,7 +131,7 @@ Usage
    # Load SNS HYS event dataset
    ws = LoadEventNexus('HYS_11092_event.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 
@@ -95,7 +146,7 @@ Output:
    # Load SNS CNCS event dataset between 10 and 20 minutes
    ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=600, FilterByTimeStop=1200)
 
-   print "The number of events: " + str(ws.getNumberEvents())
+   print("The number of events: {}".format(ws.getNumberEvents()))
 
 Output:
 

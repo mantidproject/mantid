@@ -1,0 +1,92 @@
+digraph SimulatedDensityOfStates {
+  label="SimulatedDensityOfStates Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+	CASTEPFile
+	PHONONFile
+	SpectrumType
+	Ions
+	SumContributions
+	ScaleByCrossSection
+	OutputWorkspace
+    OutputWorkspace1    [label="OutputWorkspace"]
+    OutputWorkspace2    [label="OutputWorkspace"]
+    OutputWorkspace3    [label="OutputWorkspace"]
+    OutputWorkspace4    [label="OutputWorkspace"]
+    OutputWorkspace5    [label="OutputWorkspace"]
+    OutputWorkspace6    [label="OutputWorkspace"]
+	file_data
+    file_data1      [label="file_data"]
+    file_data2      [label="file_data"]
+	partial_workspaces      [label="partial_workspaces"]
+	partial_ions
+	sum_workspace
+    DoS_Workspace
+    DoS_Workspace1          [label="DoS_Workspace"]
+    DoS_Workspace2          [label="DoS_Workspace"]
+  }
+
+  subgraph process  {
+    $process_style
+	read_data_from_file
+	ion_table_process                   [label="Extract ion data from file, convert data to cartesian coordinates and add to table workspace"]
+    bond_table_process                  [label="Extract bond data from file and add the data to the bond table"]
+    compute_partial_ion_workflow        [label="Compute partial DoS workspaces for a given set of ions then sum into single spectra"]
+    compute_partial_ion_workflow1       [label="Compute partial DoS workspaces for a given set of ions then sum into single spectra"]
+    compute_DOS                         [label="Uses frequencies and weights from file to create a matrix workspace containing the Density of states"]
+    compute_DOS_IR                      [label="Uses frequencies, ir_intensities and weights from the file to create a matrix workspace containing the Density of states"]
+    compute_DOS_Ramen                   [label="Uses frequencies, ramen_intensities and weights from the file to create a matrix workspace containing the Density of states"]
+    sum_workspace                       [label="sum_workspace"]
+    sum_workspace1                      [label="sum_workspace"]
+  }
+
+  CASTEPFile						->	read_data_from_file
+  PHONONFile						->	read_data_from_file
+  read_data_from_file				-> 	file_data
+  file_data                         ->  SpectrumType
+
+  // Ion Table
+  SpectrumType						-> 	ion_table_process				[label="IonTable"]
+    ion_table_process                   ->  OutputWorkspace             [label="Output Table of Ions"]
+
+  // Bond Table
+  SpectrumType						->  bond_table_process				[label="BondTable"]
+    bond_table_process                  -> OutputWorkspace1             [label="Output Table of Bonds"]
+
+  // DOS + calc_partial
+  SpectrumType						->	partial_ions							[label="DOS and ions given in input"]
+	partial_ions					->	compute_partial_ion_workflow
+    file_data1                      ->  compute_partial_ion_workflow
+    compute_partial_ion_workflow    ->  SumContributions                        [label="Outputs partial_workspaces and sum_workspace"]
+	SumContributions				->	sum_workspace							[label="Yes"]
+		sum_workspace					-> 	OutputWorkspace2
+	SumContributions				-> 	GroupWorkspaces 						[label="No"]
+		partial_workspaces				->  GroupWorkspaces
+        GroupWorkspaces					-> 	OutputWorkspace2
+
+  // DOS + scale_by_cross_section
+  SpectrumType						->	Ions                                    [label="DOS and scale_by_cross_section"]
+    Ions	    						->  all_ions                            [label="Convert user input to dictionary"]
+    all_ions                            ->  compute_partial_ion_workflow1
+    file_data2                          ->  compute_partial_ion_workflow1
+    ScaleByCrossSection                 ->  compute_partial_ion_workflow1
+    compute_partial_ion_workflow1       ->  sum_workspace1
+    sum_workspace1                      ->  OutputWorkspace3
+
+  // DOS
+  SpectrumType						->	compute_DOS								[label="DOS"]
+    compute_DOS                         -> DoS_Workspace
+    DoS_Workspace                       -> OutputWorkspace4
+
+  // IR_Active
+  SpectrumType						->  compute_DOS_IR							[label="IR_Active"]
+    compute_DOS_IR                      -> DoS_Workspace1
+    DoS_Workspace1                      -> OutputWorkspace5
+
+  //Raman_Active
+  SpectrumType						-> 	compute_DOS_Ramen							[label="Raman_Active"]
+    compute_DOS_Ramen                   -> DoS_Workspace2
+    DoS_Workspace2                      -> OutputWorkspace6
+}

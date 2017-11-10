@@ -330,22 +330,27 @@ public:
     IFunction_sptr fun1 =
         FunctionFactory::Instance().createInitialized(fun->asString());
 
-    fun1->setParameter(0, 0.);
-    fun1->setParameter(1, 0.);
+    fun1->setParameter(0, 1.);
+    fun1->setParameter(1, 2.);
     fun1->setParameter(2, 0.);
     fun1->setParameter(3, 789);
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 0.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 0.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
 
     fun1->applyTies();
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2), 3.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
+
+    TS_ASSERT(fun1->isFixed(0));
+    TS_ASSERT(fun1->isFixed(1));
+    TS_ASSERT(!fun1->isActive(2));
+    TS_ASSERT(fun1->isActive(3));
   }
 };
 

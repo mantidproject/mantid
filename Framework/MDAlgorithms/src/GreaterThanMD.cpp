@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(GreaterThanMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GreaterThanMD::GreaterThanMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GreaterThanMD::~GreaterThanMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string GreaterThanMD::name() const { return "GreaterThanMD"; }
 
@@ -40,7 +30,7 @@ void GreaterThanMD::execHistoHisto(
 void GreaterThanMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->greaterThan(scalar->dataY(0)[0]);
+  out->greaterThan(scalar->y(0)[0]);
 }
 
 } // namespace Mantid

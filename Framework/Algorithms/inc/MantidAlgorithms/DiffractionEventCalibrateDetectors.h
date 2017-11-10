@@ -40,10 +40,6 @@ namespace Algorithms {
  */
 class DLLExport DiffractionEventCalibrateDetectors : public API::Algorithm {
 public:
-  /// Default constructor
-  DiffractionEventCalibrateDetectors();
-  /// Destructor
-  ~DiffractionEventCalibrateDetectors() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "DiffractionEventCalibrateDetectors";

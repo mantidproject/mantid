@@ -1,19 +1,18 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <list>
-#include <vector>
-#include <boost/shared_ptr.hpp>
+#include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
+}
+namespace HistogramData {
+class HistogramX;
 }
 namespace Algorithms {
 /** Combines the data contained in an arbitrary number of input workspaces.
@@ -61,10 +60,9 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
-  MergeRuns();
-  ~MergeRuns() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MergeRuns"; }
   /// Summary of algorithms purpose
@@ -93,10 +91,7 @@ private:
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
-  /// test the compatibility of the given workspace with others
-  void testCompatibility(API::MatrixWorkspace_const_sptr ws,
-                         const std::string &xUnitID, const std::string &YUnit,
-                         const bool dist, const std::string instrument) const;
+
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
@@ -134,24 +129,32 @@ private:
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                             const API::MatrixWorkspace_const_sptr &ws2,
                             std::vector<double> &params) const;
-  void noOverlapParams(const MantidVec &X1, const MantidVec &X2,
+  void noOverlapParams(const HistogramData::HistogramX &X1,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
-  void intersectionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                          const HistogramData::HistogramX &X2,
                           std::vector<double> &params) const;
-  void inclusionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
+  API::MatrixWorkspace_sptr
+  buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
+                               const API::MatrixWorkspace_sptr &addee);
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// List of input EVENT workspaces
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
   /// List of input matrix workspace
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
-  std::vector<boost::shared_ptr<AdditionTable>> m_tables;
+  std::vector<AdditionTable> m_tables;
+  /// Total number of histograms in the output workspace
+  size_t m_outputSize = 0;
 };
 
 } // namespace Algorithm

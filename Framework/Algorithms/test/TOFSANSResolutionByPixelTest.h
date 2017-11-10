@@ -58,12 +58,12 @@ createTestInstrument(const Mantid::detid_t id,
   inst->markAsSamplePos(sampleHolder);
 
   // Just give it a single detector
-  Detector *det0(NULL);
+  Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
     det0 = new Detector("det0", id, shape, NULL);
   } else {
-    det0 = new Detector("det0", id, NULL);
+    det0 = new Detector("det0", id, nullptr);
   }
   det0->setPos(detPos);
   inst->add(det0);
@@ -116,7 +116,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
-  Mantid::Kernel::DateAndTime startTime("2010-01-01T00:10:00");
+  Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
     timeSeries->addValue(startTime + static_cast<double>(i), value);
@@ -137,11 +137,11 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     std::vector<double> guideLogDetails = std::vector<double>()) {
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        twos(), static_cast<int>(nhist), x0, x1, dx);
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        ones(), static_cast<int>(nhist), x0, x1, dx);
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
   // Set the units to Wavelength (is needed for both types of worspaces)
@@ -173,10 +173,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   // Link workspace with detector
   for (size_t i = 0; i < nhist; ++i) {
     const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto *spec = ws2d->getSpectrum(i);
-    spec->setSpectrumNo(specID);
-    spec->clearDetectorIDs();
-    spec->addDetectorID(id);
+    auto &spec = ws2d->getSpectrum(i);
+    spec.setSpectrumNo(specID);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(id);
   }
   return ws2d;
 }
@@ -236,8 +236,8 @@ public:
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
-    const Mantid::MantidVec &xOUT = result->dataX(0);
-    const Mantid::MantidVec &xIN = testWorkspace->dataX(0);
+    const auto &xOUT = result->x(0);
+    const auto &xIN = testWorkspace->x(0);
 
     TSM_ASSERT_EQUALS("Output should have the same binning as the input.",
                       xOUT.size(), xIN.size());

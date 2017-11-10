@@ -8,14 +8,13 @@
  * Defines a static class for simple text file
  * I/O.
  */
-class TextFileIO
-{
+class TextFileIO {
 public:
   /// Construct the object with a list of file filters
   explicit TextFileIO(QStringList fileFilters = QStringList());
 
   /// Save to a file
-  bool save(const QString & txt, const QString & filename) const;
+  bool save(const QString &txt, const QString &filename) const;
 
 private:
   /// Open a save dialog
@@ -23,6 +22,5 @@ private:
 
   const QStringList m_filters;
 };
-
 
 #endif /* TEXTFILEIO_H_ */

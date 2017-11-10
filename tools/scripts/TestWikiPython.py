@@ -4,12 +4,14 @@
 # run with -h for command line arguments
 #
 ##########################################################################################
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import sys
 import urllib2
 import argparse
 import json
+
 
 def readWebPage(url):
     # set your environment HTTP_PROXY to be your proxy
@@ -21,7 +23,7 @@ def readWebPage(url):
 
 def getTestablePages(url):
     retList = []
-    print "Reading Testable pages from " + url
+    print("Reading Testable pages from " + url)
     output = readWebPage(url)
     jsonObj = json.loads(output)
     for member in jsonObj['query']['categorymembers']:
@@ -31,6 +33,7 @@ def getTestablePages(url):
 
 def convertURLToRaw(url):
     return url.replace(" ","%20") + "?action=raw"
+
 
 def writeTestRst(filepath,mediawikiText,pageName):
     '''
@@ -42,10 +45,11 @@ def writeTestRst(filepath,mediawikiText,pageName):
     try:
         if filepath is not None:
             sys.stdout = open(filepath, 'w')
-        print ":orphan:\n"
+        print(":orphan:\n")
         findCodeSections(mediawikiText,pageName)
     finally:
         sys.stdout = sys.__stdout__
+
 
 def findCodeSections(mediawikiText,pageName):
     '''
@@ -88,25 +92,27 @@ def findCodeSections(mediawikiText,pageName):
         testName = pageName + "[" + str(line) + "]"
         #print the test
         if m.group(1) is not None:
-            print ".. Skipping Test ", testName
-            print
+            print(".. Skipping Test ", testName)
+            print()
         else:
             printDirective("testsetup",testName,m.group(3),True)
             printDirective("testcode",testName,m.group(4),False)
             printDirective("testcleanup",testName,m.group(6),True)
             printDirective("testoutput",testName,m.group(8),True, "+ELLIPSIS, +NORMALIZE_WHITESPACE")
-        print
+        print()
+
 
 def printDirective (directive, name, contents, hideIfNone = False,options = None):
     if not(hideIfNone and contents is None):
-        print ".. {}:: {}".format(directive,name)
+        print(".. {}:: {}".format(directive,name))
         if options is not None:
-            print "   :options: {}".format(options)
-        print
+            print("   :options: {}".format(options))
+        print()
         if contents is not None:
             for line in contents.split("\n"):
-                print "   " + line
-        print
+                print("   " + line)
+        print()
+
 
 def coords_of_str_index(string, index):
     """Get (line_number, col) of `index` in `string`."""
@@ -117,6 +123,7 @@ def coords_of_str_index(string, index):
             return linenum + 1, index-curr_pos
         curr_pos += len(line)
 
+
 def ensureDirectoriesExist(path):
     try:
         os.makedirs(path)
@@ -124,6 +131,7 @@ def ensureDirectoriesExist(path):
         pass
 
 ################################################################################################################
+
 
 parser = argparse.ArgumentParser(description='Extracts code blocks marked as python from mediawiki pages and tests they run.')
 parser.add_argument('-i', '--i',
@@ -148,19 +156,19 @@ outputDir = None
 if args.o is not None:
     ensureDirectoriesExist(args.o)
     if not os.path.isdir(args.o):
-        print "Output directory not found", args.o
-        print "Output will be to stdout"
+        print("Output directory not found", args.o)
+        print("Output will be to stdout")
     else:
         outputDir = args.o
 
 for url in urlList:
     pageName = "mwTest_" + url.replace(" ","_").replace(":","")
-    print "Parsing ", pageName,
+    print("Parsing ", pageName, end=' ')
 
     outputFile = None
     if outputDir is not None:
         outputFile = os.path.join(outputDir, pageName+".rst")
-    print "->", outputFile
+    print("->", outputFile)
 
     #run pandoc and get the output in rst
     mediawikiText = readWebPage(convertURLToRaw(baseUrl + url))

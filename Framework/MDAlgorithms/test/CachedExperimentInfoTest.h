@@ -5,6 +5,8 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -42,8 +44,7 @@ public:
   void test_trying_to_construct_object_with_unknown_id_throws_exception() {
     // createEmptyExptInfo();
     auto expt = boost::make_shared<Mantid::API::ExperimentInfo>();
-    TS_ASSERT_THROWS(CachedExperimentInfo(*expt, 1000),
-                     Mantid::Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS(CachedExperimentInfo(*expt, 1000), std::out_of_range);
   }
 
   void test_trying_to_construct_object_with_no_chopper_throws() {
@@ -162,8 +163,8 @@ public:
                                        DeltaEMode::Direct, V3D(1, 1, 1));
     const double sintheta = std::sqrt(2. / 3.);
     const double costheta = 1. / std::sqrt(3.);
-    const double sinphi = 0.5 * std::sqrt(2.);
-    const double cosphi = 0.5 * std::sqrt(2.);
+    const double sinphi = 0.5 * M_SQRT2;
+    const double cosphi = 0.5 * M_SQRT2;
     double expectedMatrix[3][3] = {{costheta * cosphi, -sinphi, costheta},
                                    {costheta * cosphi, cosphi, costheta},
                                    {-sintheta, 0.0, costheta}};

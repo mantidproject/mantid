@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <Poco/Timer.h>
@@ -38,7 +38,7 @@ namespace LiveData {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class TOPAZLiveEventDataListener : public API::ILiveListener,
+class TOPAZLiveEventDataListener : public API::LiveListener,
                                    public Poco::Runnable {
 public:
   TOPAZLiveEventDataListener();
@@ -49,7 +49,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -67,7 +68,7 @@ private:
   void initMonitorWorkspace();
 
   void appendEvent(uint32_t pixelId, double tof,
-                   const Mantid::Kernel::DateAndTime pulseTime);
+                   const Mantid::Types::Core::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse.  (There's some documentation that says nanoseconds,
   // but Russell Taylor assures me it's really in microseconds!)

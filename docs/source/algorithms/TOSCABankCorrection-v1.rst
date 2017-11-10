@@ -71,13 +71,13 @@ Usage
     corrected_reduction, peak_position, scale_factor_1, scale_factor_2 = \
       TOSCABankCorrection(InputWorkspace=original_reduction)
 
-    print 'Target peak centre: %.f' % peak_position
+    print('Target peak centre: %.f' % peak_position)
 
 Output:
 
 .. testoutput:: ExTOSCABankCorrectionAutomatic
 
-    Target peak centre: 1077
+    Target peak centre: 1080
 
 **Example - Manual peak selection.**
 
@@ -89,12 +89,12 @@ Output:
       TOSCABankCorrection(InputWorkspace=original_reduction,
                           PeakPosition='715')
 
-    print 'Target peak centre: %.f' % peak_position
+    print('Target peak centre: %.f' % peak_position)
 
 Output:
 
 .. testoutput:: ExTOSCABankCorrectionManual
 
-    Target peak centre: 713
+    Target peak centre: 714
 
 .. categories::

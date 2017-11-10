@@ -42,7 +42,6 @@ namespace API {
 class DLLExport DataProcessorAlgorithm : public Algorithm {
 public:
   DataProcessorAlgorithm();
-  ~DataProcessorAlgorithm() override;
   std::string getPropertyValue(const std::string &name) const override;
   TypedValue getProperty(const std::string &name) const override;
 

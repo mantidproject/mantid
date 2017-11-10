@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -24,7 +26,7 @@ class PoldiCompound(object):
                 self._atomString = ';'.join(c[1:])
             elif c[0] == "lattice":
                 cellNames = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
-                self._cellDict = dict(zip(cellNames, c[1:]))
+                self._cellDict = dict(list(zip(cellNames, c[1:])))
             elif c[0] == "spacegroup":
                 self._spacegroup = c[1]
 
@@ -45,6 +47,8 @@ def raiseParseErrorException(message):
     raise ParseException(message)
 
 # pylint: disable=too-many-instance-attributes
+
+
 class PoldiCrystalFileParser(object):
     """Small parser for crystal structure files used at POLDI
 
@@ -110,7 +114,7 @@ class PoldiCrystalFileParser(object):
 
         self.compoundName = Word(alphanums + '_')
 
-        self.compound = Group(self.compoundName + Optional(self.whiteSpace) + \
+        self.compound = Group(self.compoundName + Optional(self.whiteSpace) +
                               self.groupOpener + self.compoundContent + self.groupCloser)
 
         self.comment = Suppress(Literal('#') + restOfLine)
@@ -136,6 +140,7 @@ class PoldiCrystalFileParser(object):
 
 class PoldiCreatePeaksFromFile(PythonAlgorithm):
     _parser=None
+
     def category(self):
         return "SINQ\\Poldi"
 
@@ -184,7 +189,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             # If two compounds have the same name, a warning is written to the log.
             for compound in compounds:
                 if compound.getName() in workspaces:
-                    self.log().warning("A compound with the name '" + compound.getName() + \
+                    self.log().warning("A compound with the name '" + compound.getName() +
                                        "' has already been created. Please check the file '" + crystalFileName + "'")
                 else:
                     workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
@@ -197,7 +202,6 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             errorString += "The parser reported the following error:\n\t" + str(error)
 
             self.log().error(errorString)
-
 
     def _createPeaksFromCell(self, compound, dMin, dMax):
         if not SpaceGroupFactory.isSubscribedSymbol(compound.getSpaceGroup()):
@@ -218,5 +222,5 @@ try:
 
     AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
 except ImportError:
-    logger.debug('Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing' \
+    logger.debug('Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing'
                  'may be missing (https://pypi.python.org/pypi/pyparsing)')

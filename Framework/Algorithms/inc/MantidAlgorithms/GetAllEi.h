@@ -45,8 +45,6 @@ namespace Algorithms {
 class DLLExport GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
-  ~GetAllEi() override{};
-
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -98,7 +96,8 @@ protected: // for testing, private otherwise.
                        const std::vector<size_t> &monsRangeMax,
                        double &position, double &height, double &twoSigma);
   /**Find indexes of each expected peak intervals */
-  void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
+  void findBinRanges(const HistogramData::HistogramX &eBins,
+                     const HistogramData::HistogramY &signal,
                      const std::vector<double> &guess_energy,
                      double eResolution, std::vector<size_t> &irangeMin,
                      std::vector<size_t> &irangeMax,

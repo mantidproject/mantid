@@ -1,5 +1,6 @@
 #include "MantidDataHandling/CheckMantidVersion.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
@@ -17,22 +18,9 @@ namespace Mantid {
 namespace DataHandling {
 
 using namespace Mantid::Kernel;
-using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckMantidVersion)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CheckMantidVersion::CheckMantidVersion() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CheckMantidVersion::~CheckMantidVersion() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CheckMantidVersion::name() const {
@@ -53,7 +41,6 @@ const std::string CheckMantidVersion::summary() const {
          "the Github API";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CheckMantidVersion::init() {
@@ -64,13 +51,12 @@ void CheckMantidVersion::init() {
                   Direction::Output);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CheckMantidVersion::exec() {
   std::string currentVersion = getCurrentVersion();
   setProperty("CurrentVersion", currentVersion);
-  std::string mostRecentVersion = "";
+  std::string mostRecentVersion;
 
   std::string gitHubReleaseUrl = ConfigService::Instance().getString(
       "CheckMantidVersion.GitHubReleaseURL");
@@ -84,7 +70,7 @@ void CheckMantidVersion::exec() {
     downloadUrl = "http://download.mantidproject.org";
   }
 
-  std::string json = "";
+  std::string json;
   try {
     json = getVersionsFromGitHub(gitHubReleaseUrl);
   } catch (Exception::InternetError &ex) {
@@ -114,9 +100,8 @@ void CheckMantidVersion::exec() {
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
                          "Error trying to parse this JSON string: " << json
-                      << std::endl
-                      << ". Parsing error details: "
-                      << r.getFormattedErrorMessages() << std::endl;
+                      << "\n. Parsing error details: "
+                      << r.getFormattedErrorMessages() << '\n';
     }
 
     std::string gitHubVersionTag;
@@ -127,7 +112,7 @@ void CheckMantidVersion::exec() {
           << "Error while trying to get the field 'tag_name' from "
              "the version information retrieved from GitHub. This "
              "algorithm cannot continue and will stop now. Error details: "
-          << re.what() << std::endl;
+          << re.what() << '\n';
 
       mostRecentVersion = "Could not get information from GitHub";
       setProperty("MostRecentVersion", mostRecentVersion);
@@ -237,11 +222,11 @@ behaviour.
 */
 std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 
-  Kernel::InternetHelper inetHelper;
+  Kernel::GitHubApiHelper inetHelper;
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().emplace(
+  inetHelper.addHeader(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),

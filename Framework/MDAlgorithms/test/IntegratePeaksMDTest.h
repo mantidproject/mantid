@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
@@ -16,7 +17,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -156,7 +156,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
@@ -164,7 +164,7 @@ public:
     // More accurate integration changed values
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
                "IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
@@ -175,7 +175,7 @@ public:
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
-    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     // 0.2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     1e-2);*/
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge
     // false------------------------
@@ -195,7 +195,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 
@@ -365,17 +365,11 @@ public:
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
     double actualPeakRadius =
-        atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
-    double actualBackgroundOutterRadius =
-        atof(outWS->mutableRun()
-                 .getProperty("BackgroundOuterRadius")
-                 ->value()
-                 .c_str());
-    double actualBackgroundInnerRadius =
-        atof(outWS->mutableRun()
-                 .getProperty("BackgroundInnerRadius")
-                 ->value()
-                 .c_str());
+        std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
+    double actualBackgroundOutterRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
+    double actualBackgroundInnerRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);

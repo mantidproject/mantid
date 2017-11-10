@@ -4,13 +4,13 @@
 #include <QDialog>
 
 namespace Ui {
-    class RemoveErrorsDialog;
+class RemoveErrorsDialog;
 }
 
 class RemoveErrorsDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 public:
-  explicit RemoveErrorsDialog(QWidget *parent = 0);
+  explicit RemoveErrorsDialog(QWidget *parent = nullptr);
   ~RemoveErrorsDialog() override;
 
   //! Supply the dialog with a curves list
@@ -18,14 +18,14 @@ public:
 
 signals:
 
-    void curveName(const QString&);
+  void curveName(const QString &);
 
 protected slots:
 
   void remove();
 
 private:
-    Ui::RemoveErrorsDialog *ui;
+  Ui::RemoveErrorsDialog *ui;
 };
 
 #endif // REMOVEERRORSDIALOG_H

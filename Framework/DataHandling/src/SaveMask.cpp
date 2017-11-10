@@ -1,34 +1,21 @@
-#include <fstream>
-#include <sstream>
-#include <algorithm>
+#include "MantidDataHandling/SaveMask.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidDataHandling/SaveMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 
-#include <boost/shared_ptr.hpp>
-
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 #include <Poco/XML/XMLWriter.h>
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
+#include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -39,17 +26,6 @@ namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveMask)
-
-//----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-SaveMask::SaveMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMask::~SaveMask() {}
 
 /// Define input parameters
 void SaveMask::init() {
@@ -89,29 +65,17 @@ void SaveMask::exec() {
   // 2. Convert Workspace to ...
   std::vector<detid_t> detid0s;
   for (size_t i = 0; i < inpWS->getNumberHistograms(); i++) {
-    if (inpWS->dataY(i)[0] > 0.1) {
+    if (inpWS->y(i)[0] > 0.1) {
       // It is way from 0 but smaller than 1
-      // a) workspace index -> spectrum -> detector ID
-      const API::ISpectrum *spec = inpWS->getSpectrum(i);
-      if (!spec) {
-        g_log.error() << "No spectrum corresponds to workspace index " << i
-                      << std::endl;
-        throw std::invalid_argument("Cannot find spectrum");
-      }
-
-      const auto detids = spec->getDetectorIDs();
-
-      // b) get detector id & Store
-      for (const auto &det_id : detids) {
-        // c) store
+      for (const auto &det_id : inpWS->getSpectrum(i).getDetectorIDs()) {
         detid0s.push_back(det_id);
       }
-    } // if
-  }   // for
+    }
+  }
 
   // d) sort
   g_log.debug() << "Number of detectors to be masked = " << detid0s.size()
-                << std::endl;
+                << '\n';
 
   // 3. Count workspace to count 1 and 0
   std::vector<detid_t> idx0sts; // starting point of the pair
@@ -146,8 +110,7 @@ void SaveMask::exec() {
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
       g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "
-                          << idx0eds[i] << " to be masked and recorded."
-                          << std::endl;
+                          << idx0eds[i] << " to be masked and recorded.\n";
     }
   } // Only work for detid > 0
 
@@ -187,7 +150,7 @@ void SaveMask::exec() {
   } // for
   std::string textvalue = ss.str();
   g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size()
-                << "\n" << textvalue << std::endl;
+                << "\n" << textvalue << '\n';
 
   // c2. Create element
   AutoPtr<Element> pDetid = pDoc->createElement("detids");
@@ -208,8 +171,6 @@ void SaveMask::exec() {
   writer.writeNode(std::cout, pDoc);
   writer.writeNode(ofs, pDoc);
   ofs.close();
-
-  return;
 }
 
 } // namespace DataHandling

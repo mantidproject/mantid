@@ -31,11 +31,12 @@ public:
     RunPythonScript alg;
     alg.initialize();
 
-    TS_ASSERT_EQUALS(3, alg.getProperties().size());
+    TS_ASSERT_EQUALS(4, alg.getProperties().size());
 
     TS_ASSERT(alg.existsProperty("InputWorkspace"));
     TS_ASSERT(alg.existsProperty("Code"));
     TS_ASSERT(alg.existsProperty("OutputWorkspace"));
+    TS_ASSERT(alg.existsProperty("Filename"));
   }
 };
 

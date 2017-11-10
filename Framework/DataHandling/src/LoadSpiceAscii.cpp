@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -20,6 +21,7 @@ using namespace boost::algorithm;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -35,7 +37,7 @@ static bool endswith(const std::string &s, const std::string &subs) {
   // get a substring
   std::string tail = s.substr(s.size() - subs.size());
 
-  return tail.compare(subs) == 0;
+  return tail == subs;
 }
 
 static bool checkIntersection(std::vector<std::string> v1,
@@ -50,16 +52,6 @@ static bool checkIntersection(std::vector<std::string> v1,
                                        v2.end(), intersectvec.begin());
   return static_cast<int>(outiter - intersectvec.begin()) != 0;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadSpiceAscii::LoadSpiceAscii() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSpiceAscii::~LoadSpiceAscii() {}
 
 //----------------------------------------------------------------------------------------------
 /** Name
@@ -143,8 +135,6 @@ void LoadSpiceAscii::init() {
       make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "",
                                                       Direction::Output),
       "Name of TableWorkspace containing experimental information.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -247,7 +237,7 @@ void LoadSpiceAscii::parseSPICEAscii(
     // Strip
     boost::trim(line);
     // skip for empyt line
-    if (line.size() == 0)
+    if (line.empty())
       continue;
 
     // Comment line for run information
@@ -264,7 +254,7 @@ void LoadSpiceAscii::parseSPICEAscii(
         g_log.debug() << "Title = " << terms[0]
                       << ", number of splitted terms = " << terms.size()
                       << "\n";
-        std::string infovalue("");
+        std::string infovalue;
         if (terms.size() == 2) {
           infovalue = terms[1];
           boost::trim(infovalue);
@@ -296,7 +286,8 @@ void LoadSpiceAscii::parseSPICEAscii(
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "Line " << line << " cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line
+            << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info
@@ -312,8 +303,6 @@ void LoadSpiceAscii::parseSPICEAscii(
   g_log.debug() << "Run info dictionary has " << runinfodict.size()
                 << " entries."
                 << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -332,7 +321,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
       boost::make_shared<DataObjects::TableWorkspace>();
   size_t ipt = -1;
   for (size_t i = 0; i < titles.size(); ++i) {
-    if (titles[i].compare("Pt.") == 0) {
+    if (titles[i] == "Pt.") {
       outws->addColumn("int", titles[i]);
       ipt = i;
     } else {
@@ -348,9 +337,9 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
     for (size_t icol = 0; icol < numcols; ++icol) {
       std::string item = datalist[irow][icol];
       if (icol == ipt)
-        newrow << atoi(item.c_str());
+        newrow << std::stoi(item);
       else
-        newrow << atof(item.c_str());
+        newrow << std::stod(item);
     }
   }
 
@@ -406,10 +395,10 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         std::vector<std::string> terms;
         boost::iter_split(terms, strvalue,
                           boost::algorithm::first_finder("+/-"));
-        value = atof(terms[0].c_str());
-        error = atof(terms[1].c_str());
+        value = std::stod(terms[0]);
+        error = std::stod(terms[1]);
       } else {
-        value = atof(strvalue.c_str());
+        value = std::stod(strvalue);
         error = 0;
       }
 
@@ -423,7 +412,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(),
                                   title)) {
       // It is an integer log
-      addProperty<int>(infows, title, atoi(strvalue.c_str()));
+      addProperty<int>(infows, title, std::stoi(strvalue));
     } else if (!ignoreunlisted ||
                std::binary_search(strlognamelist.begin(), strlognamelist.end(),
                                   title)) {
@@ -499,7 +488,7 @@ void LoadSpiceAscii::setupRunStartTime(
 std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
                                               const std::string &dateformat) {
   // Identify splitter
-  std::string splitter("");
+  std::string splitter;
   if (dateformat.find('/') != std::string::npos)
     splitter += "/";
   else if (dateformat.find('-') != std::string::npos)
@@ -518,20 +507,20 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
 
   if (dateterms.size() != formatterms.size() || dateterms.size() != 3)
     throw std::runtime_error("Unsupported date string and format");
-  std::string year("");
-  std::string month("");
-  std::string day("");
+  std::string year;
+  std::string month;
+  std::string day;
   for (size_t i = 0; i < 3; ++i) {
     if (formatterms[i].find('Y') != std::string::npos)
       year = dateterms[i];
     else if (formatterms[i].find('M') != std::string::npos) {
       month = dateterms[i];
       if (month.size() == 1)
-        month = "0" + month;
+        month.insert(0, 1, '0');
     } else {
       day = dateterms[i];
       if (day.size() == 1)
-        day = "0" + day;
+        day.insert(0, 1, '0');
     }
   }
 
@@ -567,12 +556,12 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
     std::vector<std::string> terms;
     boost::split(terms, rawtime, boost::is_any_of(" "));
     bool pm = false;
-    if (terms[1].compare("PM") == 0)
+    if (terms[1] == "PM")
       pm = true;
 
     std::vector<std::string> terms2;
     boost::split(terms2, terms[0], boost::is_any_of(":"));
-    int hour = atoi(terms[0].c_str());
+    int hour = std::stoi(terms[0]);
     if (hour < 12 && pm)
       hour += 12;
 
@@ -605,8 +594,6 @@ template <typename T>
 void LoadSpiceAscii::addProperty(API::MatrixWorkspace_sptr ws,
                                  const std::string &pname, T pvalue) {
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
-
-  return;
 }
 
 } // namespace DataHandling

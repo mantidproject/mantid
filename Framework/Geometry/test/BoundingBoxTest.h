@@ -7,6 +7,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
 
+#include <float.h>
+
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -17,7 +19,7 @@ using Mantid::Kernel::V3D;
 class BoundingBoxTest : public CxxTest::TestSuite {
 public:
   void test_That_Construction_With_Six_Valid_Points_Gives_A_BoundingBox() {
-    BoundingBox *bbox = NULL;
+    BoundingBox *bbox = nullptr;
     TS_ASSERT_THROWS_NOTHING(bbox =
                                  new BoundingBox(1.0, 4.0, 5.0, 0.0, 2.0, 3.0));
     if (!bbox) {
@@ -209,6 +211,18 @@ public:
     TS_ASSERT_EQUALS(box.maxPoint() == V3D(-FLT_MAX, -FLT_MAX, -FLT_MAX), true);
     TS_ASSERT_EQUALS(box.minPoint() == V3D(FLT_MAX, FLT_MAX, FLT_MAX), true);
   }
+
+  void test_generatePointInside_Gives_Point_Inside() {
+    BoundingBox box(3.0, 4.0, 5.0, 1.0, 1.0, 2.5);
+
+    auto pt = box.generatePointInside(0.1, 0.2, 0.3);
+    TS_ASSERT(box.isPointInside(pt));
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(1.2, pt.X(), tolerance);
+    TS_ASSERT_DELTA(1.6, pt.Y(), tolerance);
+    TS_ASSERT_DELTA(3.25, pt.Z(), tolerance);
+  }
+
   void testBB_expansion_works_fine() {
     BoundingBox box(3.0, 4.0, 5.5, 1.0, 1.0, 1.5);
     std::vector<V3D> points;
@@ -280,10 +294,10 @@ public:
     bbox.realign(&cs);
     TS_ASSERT_EQUALS(bbox.isAxisAligned(), false);
 
-    TSM_ASSERT_EQUALS("min point should be (0,-sqrt(2.)/2,-1)",
-                      bbox.minPoint() == V3D(0, -sqrt(2.) / 2, -1), true);
-    TSM_ASSERT_EQUALS("max point should be (sqrt(2.),sqrt(2.)/2,0)",
-                      bbox.maxPoint() == V3D(sqrt(2.), sqrt(2.) / 2, 0), true);
+    TSM_ASSERT_EQUALS("min point should be (0,-sqrt(2)/2,-1)",
+                      bbox.minPoint() == V3D(0, -0.5 * M_SQRT2, -1), true);
+    TSM_ASSERT_EQUALS("max point should be (sqrt(2),sqrt(2)/2,0)",
+                      bbox.maxPoint() == V3D(M_SQRT2, 0.5 * M_SQRT2, 0), true);
   }
   void testBBComplexRealignment2OK() {
     BoundingBox bbox(2, 2, 2, 1, 1, 1);
@@ -298,10 +312,27 @@ public:
     bbox.realign(&cs);
     TS_ASSERT_EQUALS(bbox.isAxisAligned(), false);
 
-    TSM_ASSERT_EQUALS("min point should be (0,0,-sqrt(2.)/2)",
-                      bbox.minPoint() == V3D(0, 0, -sqrt(2.) / 2), true);
-    TSM_ASSERT_EQUALS("max point should be (1,sqrt(2.),sqrt(2.)/2)",
-                      bbox.maxPoint() == V3D(1, sqrt(2.), sqrt(2.) / 2), true);
+    TSM_ASSERT_EQUALS("min point should be (0,0,-sqrt(2)/2)",
+                      bbox.minPoint() == V3D(0, 0, -0.5 * M_SQRT2), true);
+    TSM_ASSERT_EQUALS("max point should be (1,sqrt(2),sqrt(2)/2)",
+                      bbox.maxPoint() == V3D(1, M_SQRT2, 0.5 * M_SQRT2), true);
+  }
+
+  void test_grow_by_null() {
+
+    BoundingBox a{};
+    TS_ASSERT(a.isNull());
+    BoundingBox b{};
+    a.grow(b);
+    TSM_ASSERT("Null grown by Null is Null", a.isNull());
+
+    a = BoundingBox(2, 2, 2, 1, 1, 1);
+    TS_ASSERT(!a.isNull());
+    a.grow(b);
+    TSM_ASSERT("Grow by Null (default constructed) is not Null", !a.isNull());
+
+    b.grow(a);
+    TSM_ASSERT("Grow Null by not Null is not Null", !b.isNull());
   }
 
 private:

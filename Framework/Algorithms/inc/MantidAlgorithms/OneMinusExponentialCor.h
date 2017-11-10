@@ -55,8 +55,6 @@ class DLLExport OneMinusExponentialCor : public UnaryOperation {
 public:
   /// Default constructor
   OneMinusExponentialCor();
-  /// Destructor
-  ~OneMinusExponentialCor() override{};
   /// Algorithm's name for identification
   const std::string name() const override { return "OneMinusExponentialCor"; }
   /// Summary of algorithms purpose

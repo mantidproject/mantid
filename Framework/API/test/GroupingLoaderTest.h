@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"
 

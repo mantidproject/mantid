@@ -41,8 +41,6 @@ class DLLExport SaveAscii : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii();
-  /// Destructor
-  ~SaveAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveAscii"; }
   /// Summary of algorithms purpose

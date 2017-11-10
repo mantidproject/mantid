@@ -1,11 +1,9 @@
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+#ifndef MANTID_CURVEFITTING_Jacobian_H_
+#define MANTID_CURVEFITTING_Jacobian_H_
 
 #include "MantidAPI/Jacobian.h"
-#include <gsl/gsl_matrix.h>
 
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -15,7 +13,7 @@ An implementation of Jacobian using std::vector.
 @author Roman Tolchenov
 @date 17/02/2012
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2010-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -74,7 +72,7 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     m_data[iY * m_np + iP] = value;
   }
@@ -84,13 +82,15 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     return m_data[iY * m_np + iP];
   }
+  /// overwrite base method
+  void zero() override { m_data.assign(m_data.size(), 0.0); }
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/
+#endif /*MANTID_CURVEFITTING_Jacobian_H_*/

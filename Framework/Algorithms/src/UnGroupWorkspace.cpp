@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid {
 namespace Algorithms {

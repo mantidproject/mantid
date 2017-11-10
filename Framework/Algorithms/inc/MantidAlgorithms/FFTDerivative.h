@@ -2,8 +2,16 @@
 #define FFTDERIVATIVE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class Histogram;
+class HistogramX;
+class HistogramY;
+}
+
 namespace Algorithms {
 
 /** Calculates derivatives of the spectra in a MatrixWorkspace using a Fast
@@ -35,10 +43,6 @@ namespace Algorithms {
  */
 class FFTDerivative : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  FFTDerivative() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~FFTDerivative() override {}
   /// Algorithm's name
   const std::string name() const override { return "FFTDerivative"; }
   /// Summary of algorithms purpose
@@ -57,8 +61,14 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  void execRealFFT();
   void execComplexFFT();
+  void symmetriseSpectrum(const HistogramData::Histogram &in,
+                          HistogramData::HistogramX &symX,
+                          HistogramData::HistogramY &symY, const size_t nx,
+                          const size_t ny);
+  void multiplyTransform(HistogramData::HistogramX &nu,
+                         HistogramData::HistogramY &re,
+                         HistogramData::HistogramY &im);
 };
 
 } // FFT

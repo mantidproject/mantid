@@ -34,18 +34,19 @@
 #define Foundation_FilterChannel_INCLUDED
 
 #include "MantidKernel/DllConfig.h"
-#include <Poco/Foundation.h>
 #include <Poco/Channel.h>
-#include <vector>
+#include <string>
 #include <mutex>
 
 namespace Poco {
+// Forward declare
+class Message;
 
 /// This channel sends a message to multiple
 /// channels simultaneously.
 class MANTID_KERNEL_DLL FilterChannel : public Channel {
 public:
-  /// Creates the SplitterChannel.
+  /// Creates the FilterChannel.
   FilterChannel();
 
   /// destructor

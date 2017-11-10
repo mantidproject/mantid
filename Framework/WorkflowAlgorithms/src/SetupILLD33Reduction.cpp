@@ -10,7 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "Poco/NumberFormatter.h"
 
@@ -483,9 +483,8 @@ void SetupILLD33Reduction::init() {
 void SetupILLD33Reduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  if (reductionManagerName.size() == 0) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty"
-                  << std::endl;
+  if (reductionManagerName.empty()) {
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   boost::shared_ptr<PropertyManager> reductionManager =
@@ -533,7 +532,7 @@ void SetupILLD33Reduction::exec() {
 
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-  if (darkCurrentFile.size() > 0) {
+  if (!darkCurrentFile.empty()) {
     IAlgorithm_sptr darkAlg =
         createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
@@ -584,7 +583,7 @@ void SetupILLD33Reduction::exec() {
     if (!boost::iequals(centerMethod, "DirectBeam"))
       useDirectBeamMethod = false;
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    if (beamCenterFile.size() > 0) {
+    if (!beamCenterFile.empty()) {
       const double beamRadius = getProperty("BeamRadius");
 
       IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
@@ -599,7 +598,7 @@ void SetupILLD33Reduction::exec() {
       reductionManager->declareProperty(std::move(algProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided" << std::endl;
+                       " but no file was provided\n";
     }
   }
 
@@ -704,7 +703,7 @@ void SetupILLD33Reduction::setupSensitivity(
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0) {
+  if (!sensitivityFile.empty()) {
     const bool useSampleDC = getProperty("UseDefaultDC");
     const std::string sensitivityDarkCurrentFile =
         getPropertyValue("SensitivityDarkCurrentFile");
@@ -738,7 +737,7 @@ void SetupILLD33Reduction::setupSensitivity(
       const double sensitivityBeamRadius =
           getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
@@ -754,7 +753,7 @@ void SetupILLD33Reduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
 
@@ -825,7 +824,7 @@ void SetupILLD33Reduction::setupTransmission(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("TransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
@@ -839,7 +838,7 @@ void SetupILLD33Reduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -855,7 +854,7 @@ void SetupILLD33Reduction::setupBackground(
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
-  if (backgroundFile.size() > 0)
+  if (!backgroundFile.empty())
     reductionManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
                                                             backgroundFile));
@@ -916,7 +915,7 @@ void SetupILLD33Reduction::setupBackground(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("BckTransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
@@ -929,7 +928,7 @@ void SetupILLD33Reduction::setupBackground(
         reductionManager->declareProperty(std::move(btbcAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided" << std::endl;
+                         " but no file was provided\n";
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);

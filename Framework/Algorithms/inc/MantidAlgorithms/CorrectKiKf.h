@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,10 +61,6 @@ namespace Algorithms {
 
 class DLLExport CorrectKiKf : public API::Algorithm {
 public:
-  /// Default constructor
-  CorrectKiKf();
-  /// Virtual destructor
-  ~CorrectKiKf() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CorrectKiKf"; }
   /// Summary of algorithms purpose
@@ -94,6 +91,9 @@ private:
   template <class T>
   void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
                               const std::string emodeStr);
+  void getEfixedFromParameterMap(double &Efi, int64_t i,
+                                 const Mantid::API::SpectrumInfo &spectrumInfo,
+                                 const Mantid::Geometry::ParameterMap &pmap);
 };
 
 } // namespace Algorithm

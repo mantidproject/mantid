@@ -7,6 +7,7 @@
 #include <Poco/Path.h>
 
 #include <cstring>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -124,9 +125,10 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
   }
   try {
     initialize(filename);
-  } catch (::NeXus::Exception &) {
-    throw std::invalid_argument("NexusDescriptor::initialize - File '" +
-                                filename + "' does not look like a HDF file.");
+  } catch (::NeXus::Exception &e) {
+    throw std::invalid_argument(
+        "NexusDescriptor::initialize - File '" + filename +
+        "' does not look like a HDF file.\n Error was: " + e.what());
   }
 }
 
@@ -245,8 +247,9 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   for (auto it = dirents.begin(); it != itend; ++it) {
     const std::string &entryName = it->first;
     const std::string &entryClass = it->second;
-    const std::string entryPath = rootPath + "/" + entryName;
-    if (entryClass == "SDS") {
+    const std::string entryPath =
+        std::string(rootPath).append("/").append(entryName);
+    if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this

@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByTime2.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -28,7 +28,7 @@ public:
   /** Setup for loading raw data */
   void setUp_Event() {
     inputWS = "eventWS";
-    LoadEventPreNexus loader;
+    LoadEventPreNexus2 loader;
     loader.initialize();
     std::string eventfile("CNCS_7860_neutron_event.dat");
     std::string pulsefile("CNCS_7860_pulseid.dat");
@@ -44,7 +44,7 @@ public:
    */
   void NtestTooManyParams() {
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 1);
+        WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
     // Do the filtering now.
@@ -155,8 +155,8 @@ public:
 
     int count = 0;
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      double diff = fabs(double(outWS->getEventList(i).getNumberEvents() -
-                                outWS2->getEventList(i).getNumberEvents()));
+      double diff = fabs(double(outWS->getSpectrum(i).getNumberEvents() -
+                                outWS2->getSpectrum(i).getNumberEvents()));
       // No more than 2 events difference because of rounding to 0.01 second
       TS_ASSERT_LESS_THAN(diff, 3);
       if (diff > 3)

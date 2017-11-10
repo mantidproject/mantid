@@ -47,7 +47,7 @@ public:
     // Construct quaternion to represent rotation
     // of 45 degrees around the 111 axis.
     Mantid::Kernel::Quat q1(90.0, v);
-    double c = 1.0 / sqrt(2.0);
+    double c = M_SQRT1_2;
     double s = c / sqrt(3.0);
     TS_ASSERT_DELTA(q1[0], c, 0.000001);
     TS_ASSERT_DELTA(q1[1], s, 0.000001);
@@ -66,7 +66,7 @@ public:
   void testoperatorassignmentfromangleaxis() {
     Mantid::Kernel::V3D v(1, 1, 1);
     q(90.0, v);
-    double c = 1.0 / sqrt(2.0);
+    double c = M_SQRT1_2;
     double s = c / sqrt(3.0);
     TS_ASSERT_DELTA(q[0], c, 0.000001);
     TS_ASSERT_DELTA(q[1], s, 0.000001);
@@ -77,7 +77,7 @@ public:
     q(45, V3D(0, 1, 0));
     V3D X(1, 0, 0);
     q.rotate(X);
-    double a = sqrt(2.0) / 2;
+    double a = 0.5 * M_SQRT2;
     TS_ASSERT(X == V3D(a, 0, -a));
     // Now rotate -45 degrees around y
     q(-45, V3D(0, 1, 0));
@@ -189,7 +189,7 @@ public:
   }
 
   void testRotateVector() {
-    double a = sqrt(2.0) / 2;
+    double a = 0.5 * M_SQRT2;
 
     // Trivial
     p(1, 0, 0, 0); // Identity quaternion
@@ -428,7 +428,7 @@ public:
 
   void testSetFromDirectionCosineMatrix2b() {
     // Rotate -45 deg around Y
-    double a = sqrt(2.0) / 2;
+    double a = 0.5 * M_SQRT2;
     V3D rX(a, 0, a);
     V3D rY(0, 1, 0);
     V3D rZ(-a, 0, a);
@@ -569,7 +569,7 @@ public:
   }
 
   void testConstructorFromDirectionCosine() {
-    double a = sqrt(2.0) / 2;
+    double a = 0.5 * M_SQRT2;
     V3D rX(a, 0, a);
     V3D rY(0, 1, 0);
     V3D rZ(-a, 0, a);

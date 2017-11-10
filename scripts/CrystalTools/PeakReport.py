@@ -2,12 +2,14 @@
 """
 This is a module for creating peak integration reports.
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import mantid.api
 from mantidplot import plotSlice
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import *
+
 
 class PeakReport(object):
     """
@@ -158,4 +160,3 @@ class PeakReport(object):
             parts.append(Spacer(0,10))
 
         doc.build(parts)
-

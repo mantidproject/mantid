@@ -9,6 +9,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -57,16 +58,6 @@ whichNormalisation(const std::string &strNormalisation) {
   }
   return requestedNormalisation;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-QueryMDWorkspace::QueryMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QueryMDWorkspace::~QueryMDWorkspace() {}
 
 /// Initialise the properties
 void QueryMDWorkspace::init() {
@@ -233,7 +224,7 @@ void QueryMDWorkspace::exec() {
   // entry.
   int rowCounter = 0;
 
-  Progress progress(this, 0, 1, int64_t(input->getNPoints()));
+  Progress progress(this, 0.0, 1.0, int64_t(input->getNPoints()));
   while (true) {
     size_t cellIndex = 0;
     output->appendRow();

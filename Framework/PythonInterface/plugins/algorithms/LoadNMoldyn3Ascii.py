@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name,no-init,too-many-locals,too-many-branches
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -12,6 +13,7 @@ import numpy as np
 
 #==============================================================================
 
+
 def _find_starts(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -21,6 +23,7 @@ def _find_starts(data, c, l1):
     return line
 
 #==============================================================================
+
 
 def _find_tab_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -32,6 +35,7 @@ def _find_tab_starts(data, c, l1):
 
 #==============================================================================
 
+
 def _find_ends(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -42,6 +46,7 @@ def _find_ends(data, c, l1):
 
 #==============================================================================
 
+
 def _make_list(a, l1, l2):
     data = ''
     for m in range(l1, l2 + 1):
@@ -50,6 +55,7 @@ def _make_list(a, l1, l2):
     return alist
 
 #==============================================================================
+
 
 def _cdl_find_dimensions(data):
     """
@@ -77,6 +83,7 @@ def _cdl_find_dimensions(data):
 
 #==============================================================================
 
+
 class LoadNMoldyn3Ascii(PythonAlgorithm):
 
     _file_name = None
@@ -100,7 +107,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.Load,
                                           extensions=['.cdl', '.dat']),
-                                          doc='File path for data')
+                             doc='File path for data')
 
         self.declareProperty(StringArrayProperty('Functions'),
                              doc='Names of functions to attempt to load from file')
@@ -436,6 +443,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         return wks
 
 #==============================================================================
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadNMoldyn3Ascii)

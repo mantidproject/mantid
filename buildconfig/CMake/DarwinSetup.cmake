@@ -36,19 +36,11 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
-execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX)
-string(STRIP ${PYTHON_PREFIX} PYTHON_PREFIX)
-set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython2.7.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
-set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python2.7" CACHE PATH "PYTHON_INCLUDE_DIR")
+###########################################################################
+# Use python libraries associated with PYTHON_EXECUTABLE
+# If unspecified, use first python executable in the PATH.
+###########################################################################
 
-###########################################################################
-# Use the system-installed version of Python.
-###########################################################################
-find_package ( PythonLibs REQUIRED )
-# If found, need to add debug library into libraries variable
-if ( PYTHON_DEBUG_LIBRARIES )
-  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
-endif ()
 # Find the python interpreter to get the version we're using (needed for install commands below)
 find_package ( PythonInterp )
 if ( PYTHON_VERSION_MAJOR )
@@ -57,6 +49,36 @@ if ( PYTHON_VERSION_MAJOR )
 else ()
   # Older versions of CMake don't set these variables so just assume 2.7
   set ( PY_VER 2.7 )
+endif ()
+
+find_package ( PythonLibs REQUIRED )
+# If found, need to add debug library into libraries variable
+if ( PYTHON_DEBUG_LIBRARIES )
+  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
+endif ()
+
+# Generate a target to put a mantidpython wrapper in the appropriate directory
+if ( NOT TARGET mantidpython )
+  if(MAKE_VATES)
+    set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages:${ParaView_DIR}/lib/site-packages/vtk" )
+  else ()
+    set ( PARAVIEW_PYTHON_PATHS "" )
+  endif ()
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx @ONLY )
+
+  add_custom_target ( mantidpython ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx
+      ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
+      COMMENT "Generating mantidpython" )
+  #Configure install script at the same time. Doing it later causes a warning from ninja.
+  if ( MAKE_VATES )
+    set ( PARAVIEW_PYTHON_PATHS ":\${SCRIPT_PATH}/../Libraries:\${SCRIPT_PATH}/../Python:\${SCRIPT_PATH}/../Python/vtk" )
+  else ()
+    set ( PARAVIEW_PYTHON_PATHS "" )
+  endif ()
+
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
 
 ###########################################################################
@@ -80,9 +102,12 @@ endif ()
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR MantidPlot.app/plugins )
-set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
-set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview )
 
 set(CMAKE_MACOSX_RPATH 1)
 # Assume we are using homebrew for now
@@ -112,6 +137,10 @@ if (NOT OPENSSL_ROOT_DIR)
   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif(NOT OPENSSL_ROOT_DIR)
 
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
+
 # Python packages
 
 install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )
@@ -135,15 +164,11 @@ endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
-# done as part of packaging step in 10.9+ builds.
-
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
-          DESTINATION MantidPlot.app/Contents/Resources/
-)
-
+          DESTINATION MantidPlot.app/Contents/Resources/ )
 # Add launcher script for mantid python
-install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
-          DESTINATION MantidPlot.app/Contents/MacOS/ 
+install ( PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
+          DESTINATION MantidPlot.app/Contents/MacOS/
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
@@ -165,7 +190,7 @@ install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
-set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
+set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})

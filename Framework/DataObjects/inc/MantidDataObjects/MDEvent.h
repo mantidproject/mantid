@@ -12,9 +12,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-// To ensure the structure is as small as possible
-#pragma pack(push, 2)
-
 /** Templated class holding data about a neutron detection event
  * in N-dimensions (for example, Qx, Qy, Qz, E).
  *
@@ -203,10 +200,7 @@ public:
     totalErrSq = 0;
 
     size_t index(0);
-    typename std::vector<MDEvent<nd>>::const_iterator it = events.begin();
-    typename std::vector<MDEvent<nd>>::const_iterator it_end = events.end();
-    for (; it != it_end; ++it) {
-      const MDEvent<nd> &event = *it;
+    for (const auto &event : events) {
       float signal = event.signal;
       float errorSquared = event.errorSquared;
       data[index++] = static_cast<coord_t>(signal);
@@ -253,17 +247,15 @@ public:
       coord_t const *const centers = &(data[ii + 4]);
 
       // Create the event with signal, error squared, and the centers
-      events.push_back(MDEvent<nd>(signal_t(data[ii]), signal_t(data[ii + 1]),
-                                   uint16_t(data[ii + 2]),
-                                   int32_t(data[ii + 3]), centers));
+      events.emplace_back(static_cast<signal_t>(data[ii]),
+                          static_cast<signal_t>(data[ii + 1]),
+                          static_cast<uint16_t>(data[ii + 2]),
+                          static_cast<int32_t>(data[ii + 3]), centers);
     }
   }
 };
-// Return to normal packing
-#pragma pack(pop)
 
 } // namespace DataObjects
-
 } // namespace Mantid
 
 #endif /* MDEVENT_H_ */

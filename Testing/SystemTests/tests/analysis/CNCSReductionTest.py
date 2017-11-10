@@ -3,9 +3,10 @@
 System test for CNCS reduction
 """
 
-from mantid.simpleapi import *
 import os
 import stresstesting
+from mantid.simpleapi import *
+
 
 class CNCSReductionTest(stresstesting.MantidStressTest):
     parFile=''
@@ -29,7 +30,6 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         if os.path.exists(self.vanFile):
             os.remove(self.vanFile)
         return True
-
 
     def runTest(self):
         self.groupingFile=os.path.join(config.getString('defaultsave.directory'),'CNCS_powder_group.xml')
@@ -75,6 +75,3 @@ class CNCSReductionTest(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
 
         return 'nxspe','CNCSReduction_TIBasEvents.nxs'
-
-
-

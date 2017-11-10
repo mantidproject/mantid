@@ -234,7 +234,7 @@ public:
     view->unrollAll();
     NotebookBuilder builder(view);
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -286,7 +286,7 @@ public:
 
     NotebookBuilder builder(view);
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -329,7 +329,7 @@ public:
 
     NotebookBuilder builder(wsHist.createView());
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;

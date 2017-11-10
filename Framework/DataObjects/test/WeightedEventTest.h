@@ -5,7 +5,6 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -14,6 +13,7 @@ using namespace Mantid::DataObjects;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
+using Mantid::Types::Event::TofEvent;
 
 //==========================================================================================
 class WeightedEventTest : public CxxTest::TestSuite {

@@ -23,10 +23,10 @@ public:
     // InputWorkspace has to be an EventWorkspace
     TS_ASSERT_THROWS(
         alg.setProperty("InputWorkspace",
-                        WorkspaceCreationHelper::Create2DWorkspace(1, 1)),
+                        WorkspaceCreationHelper::create2DWorkspace(1, 1)),
         std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()));
+        "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // At least one of XMin & XMax must be specified
     auto errorMap = alg.validateInputs();
@@ -48,7 +48,7 @@ public:
   void test_exec() {
     using Mantid::DataObjects::EventWorkspace_sptr;
     EventWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::CreateEventWorkspace2(5, 1);
+        WorkspaceCreationHelper::createEventWorkspace2(5, 1);
     // Add the workspace to the ADS so that it gets a name (stops validation
     // complaints)
     Mantid::API::AnalysisDataService::Instance().add("inWS", inputWS);
@@ -80,7 +80,7 @@ public:
 
   void setUp() override {
     Mantid::API::AnalysisDataService::Instance().add(
-        "ToFilter", WorkspaceCreationHelper::CreateEventWorkspace(
+        "ToFilter", WorkspaceCreationHelper::createEventWorkspace(
                         5000, 1000, 8000, 0.0, 1.0, 3));
   }
 

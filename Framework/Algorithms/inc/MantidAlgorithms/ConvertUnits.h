@@ -1,11 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CONVERTUNITS_H_
 #define MANTID_ALGORITHMS_CONVERTUNITS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,8 +22,8 @@ namespace Algorithms {
    </LI>
     </UL>
 
-    Optional properties required for certain units (DeltaE &
-   DeltaE_inWavenumber):
+    Optional properties required for certain units (DeltaE,
+   DeltaE_inWavenumber, DeltaE_inFrequency):
     <UL>
     <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
    geometry) </LI>
@@ -70,8 +68,6 @@ class DLLExport ConvertUnits : public API::Algorithm {
 public:
   /// Default constructor
   ConvertUnits();
-  /// Virtual destructor
-  ~ConvertUnits() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }
   /// Summary of algorithms purpose
@@ -84,7 +80,15 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Units"; }
 
-private:
+protected:
+  /// Reverses the workspace if X values are in descending order
+  void reverse(API::MatrixWorkspace_sptr WS);
+
+  /// For conversions to energy transfer, removes bins corresponding to
+  /// inaccessible values
+  API::MatrixWorkspace_sptr
+  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
+
   const std::string workspaceMethodName() const override {
     return "convertUnits";
   }
@@ -97,31 +101,39 @@ private:
   void exec() override;
 
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
+  virtual void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
 
+  /// Executes the main part of the algorithm that handles the conversion of the
+  /// units
+  API::MatrixWorkspace_sptr
+  executeUnitConversion(const API::MatrixWorkspace_sptr inputWS);
+
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
-  void convertQuickly(API::MatrixWorkspace_sptr outputWS, const double &factor,
-                      const double &power);
+  API::MatrixWorkspace_sptr
+  convertQuickly(API::MatrixWorkspace_const_sptr inputWS, const double &factor,
+                 const double &power);
+
+  /// Internal function to gather detector specific L2, theta and efixed values
+  bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                         const Kernel::Unit &outputUnit, int emode,
+                         const API::MatrixWorkspace &ws, const bool signedTheta,
+                         int64_t wsIndex, double &efixed, double &l2,
+                         double &twoTheta);
+
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  void convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-                     API::MatrixWorkspace_sptr outputWS);
+  virtual API::MatrixWorkspace_sptr
+  convertViaTOF(Kernel::Unit_const_sptr fromUnit,
+                API::MatrixWorkspace_const_sptr inputWS);
 
   // Calls Rebin as a Child Algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr
   alignBins(const API::MatrixWorkspace_sptr workspace);
   const std::vector<double>
   calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
-
-  /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr WS);
-
-  /// For conversions to energy transfer, removes bins corresponding to
-  /// inaccessible values
-  API::MatrixWorkspace_sptr
-  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
   void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 

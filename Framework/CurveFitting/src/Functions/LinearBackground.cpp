@@ -83,6 +83,49 @@ void LinearBackground::fit(const std::vector<double> &X,
   setParameter("A1", a1);
 }
 
+/// Calculate histogram data for the given bin boundaries.
+/// @param out :: Output bin values (size == nBins) - integrals of the function
+///    inside each bin.
+/// @param left :: The left-most bin boundary.
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
+/// @param nBins :: Number of bins.
+void LinearBackground::histogram1D(double *out, double left,
+                                   const double *right,
+                                   const size_t nBins) const {
+
+  const double a0 = getParameter("A0");
+  const double a1 = getParameter("A1");
+
+  auto cumulFun = [a0, a1](double x) { return (a0 + 0.5 * a1 * x) * x; };
+
+  double cLeft = cumulFun(left);
+  for (size_t i = 0; i < nBins; ++i) {
+    double cRight = cumulFun(right[i]);
+    out[i] = cRight - cLeft;
+    cLeft = cRight;
+  }
+}
+
+/// Derivatives of the histogram.
+/// @param jacobian :: The output Jacobian.
+/// @param left :: The left-most bin boundary.
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
+/// @param nBins :: Number of bins.
+void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
+                                             const double *right,
+                                             const size_t nBins) const {
+
+  double xl = left;
+  for (size_t i = 0; i < nBins; ++i) {
+    double xr = right[i];
+    jacobian->set(i, 0, xr - xl);
+    jacobian->set(i, 1, 0.5 * (xr * xr - xl * xl));
+    xl = xr;
+  }
+}
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ImageSymbol.cpp
+        File                 : ImageSymbol.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-	Copyright            : (C) 2010 by Ion Vasilief
+        Copyright            : (C) 2010 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtSymbol displaying a custom images
+        Description          : A QwtSymbol displaying a custom images
 
  ***************************************************************************/
 
@@ -30,24 +30,21 @@
 #include <QPainter>
 #include <qwt_painter.h>
 
-ImageSymbol::ImageSymbol(const QString& fileName):
-        QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
-        d_image_path(fileName)
-{
+ImageSymbol::ImageSymbol(const QString &fileName)
+    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
+      d_image_path(fileName) {
   d_pixmap.load(fileName);
   setSize(d_pixmap.size());
 }
 
-ImageSymbol::ImageSymbol(const QPixmap& pixmap, const QString& fileName):
-        QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
-        d_image_path(fileName)
-{
+ImageSymbol::ImageSymbol(const QPixmap &pixmap, const QString &fileName)
+    : QwtSymbol(QwtSymbol::StyleCnt, QBrush(), QPen(Qt::NoPen), QSize()),
+      d_image_path(fileName) {
   d_pixmap = QPixmap(pixmap);
   setSize(d_pixmap.size());
 }
 
-ImageSymbol *ImageSymbol::clone() const
-{
+ImageSymbol *ImageSymbol::clone() const {
   ImageSymbol *other = new ImageSymbol(d_image_path);
   *other = *this;
 
@@ -59,7 +56,6 @@ ImageSymbol *ImageSymbol::clone() const
   \param painter Painter
   \param r Bounding rectangle
 */
-void ImageSymbol::draw(QPainter *p, const QRect& r) const
-{
+void ImageSymbol::draw(QPainter *p, const QRect &r) const {
   p->drawPixmap(r, d_pixmap);
 }

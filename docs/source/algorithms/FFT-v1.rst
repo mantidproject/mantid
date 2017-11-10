@@ -17,11 +17,13 @@ imaginary part is not set the data is considered real. The "Transform"
 property defines the direction of the transform: direct ("Forward") or
 inverse ("Backward").
 
-Note that the input data is shifted before the transform along the x
-axis to place the origin in the middle of the x-value range. It means
-that for the data defined on an interval [A,B] the output
-:math:`F(\xi_k)` must be multiplied by :math:`e^{-2\pi ix_0\xi_k}`,
-where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
+Note that it is assumed that the input data has the x origin in the
+middle of the x-value range. It means that for the data defined on
+an interval [A,B] the output :math:`F(\xi_k)` must be multiplied by 
+:math:`e^{-2\pi ix_0\xi_k}`, where :math:`x_0=\tfrac{1}{2}(A+B)` and
+:math:`\xi_k` is the frequency. This can be achieved by using the 
+input parameter *Shift*, which applies a phase shift to the transform,
+or by setting *AutoShift* on to do this automatically.
 
 Details
 -------
@@ -77,6 +79,15 @@ property, which will continue to process the data even if the spacings between
 different X values are unequal. Large differences in the bin widths will still
 produce a warning.
 
+If the X values are not centred on zero, the calculated phase will be wrong.
+The *Shift* property can be used to correct this - the value supplied is the value
+that should be added to the X values to centre the X axis. Setting the *AutoShift*
+property will automatically apply the correct shift (overriding any manually supplied
+*Shift*).
+
+The algorithm works internally with point data - if a histogram workspace is provided as input, the bin edges are converted to points automatically inside the algorithm.
+The output transform is always a point data workspace. (It can be subsequently converted back to a histogram workspace using :ref:`algm-ConvertToHistogram`, if required).
+
 Example 1
 #########
 
@@ -113,7 +124,7 @@ In this example the input data were calculated using function
 
 Because the :math:`x=0` is not in the middle of the data array the
 transform shown includes a shifting factor of :math:`\exp(2\pi i\xi)`.
-To remove it the output must be mulitplied by :math:`\exp(-2\pi i\xi)`.
+To remove it the output must be multiplied by :math:`\exp(-2\pi i\xi)`.
 The corrected transform will be:
 
 .. figure:: /images/FFTGaussian2FFT.png
@@ -194,20 +205,19 @@ Usage
    #Create Sample Workspace 
    ws = CreateSampleWorkspace(WorkspaceType = 'Event', NumBanks = 1, Function = 'Exp Decay', BankPixelWidth = 1, NumEvents = 100)
 
-   #apply the FFT algorithm 
+   #apply the FFT algorithm - note output is point data
    outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
 
-   #print statements
-   print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
-   print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
-   print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
-   print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
+   print("DataX(0)[1] equals DataX(0)[99]? : " + str((round(abs(outworkspace.dataX(0)[1]), 3)) == (round(outworkspace.dataX(0)[99], 3))))
+   print("DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3))))
+   print("DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0))
+   print("DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5))))
 
 Output:
 
 .. testoutput:: FFTBackwards
 	
-   DataX(0)[0] equals DataX(0)[100]? : True
+   DataX(0)[1] equals DataX(0)[99]? : True
    DataX(0)[10] equals DataX(0)[90]? : True
    DataX((0)[50] equals 0? : True
    DataY(0)[40] equals DataY(0)[60]? : True

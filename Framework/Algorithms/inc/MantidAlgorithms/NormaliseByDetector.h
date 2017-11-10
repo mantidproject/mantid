@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_NORMALISEBYDETECTOR_H_
 #define MANTID_ALGORITHMS_NORMALISEBYDETECTOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -47,7 +47,6 @@ namespace Algorithms {
 class DLLExport NormaliseByDetector : public API::Algorithm {
 public:
   NormaliseByDetector(bool parallelExecution = true);
-  ~NormaliseByDetector() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -65,15 +64,15 @@ private:
   /// parameter.
   const Mantid::Geometry::FitParameter
   tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter,
-                            Geometry::IDetector_const_sptr det);
+                            const Geometry::IDetector &det);
   /// Block to process histograms.
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> inWS);
   /// Process indivdual histogram.
   void processHistogram(
       size_t wsIndex,
-      boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS,
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS,
+      boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS,
       Mantid::API::Progress &prog);
 
   void init() override;

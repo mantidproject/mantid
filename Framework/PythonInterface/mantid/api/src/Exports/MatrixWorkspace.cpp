@@ -1,8 +1,14 @@
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
@@ -11,7 +17,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/implicit.hpp>
-#include <boost/python/numeric.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -21,7 +26,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
+namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
@@ -40,9 +48,13 @@ typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 // Overloads for binIndexOf function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -56,25 +68,26 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
-                             const size_t wsIndex, numeric::array values) {
-  boost::python::tuple shape(values.attr("shape"));
-  if (boost::python::len(shape) != 1) {
+                             const size_t wsIndex,
+                             const NumPy::NdArray &values) {
+  const auto pydim = values.get_nd();
+  if (pydim != 1) {
     throw std::invalid_argument(
         "Invalid shape for setting 1D spectrum array, array is " +
-        boost::lexical_cast<std::string>(boost::python::len(shape)) + "D");
+        std::to_string(values.get_nd()) + "D");
   }
-  const size_t pyArrayLength = boost::python::extract<size_t>(shape[0]);
-  Mantid::MantidVec &wsArrayRef = (self.*accessor)(wsIndex);
-  const size_t wsArrayLength = wsArrayRef.size();
+  const auto pylen = values.get_shape()[0];
+  Mantid::MantidVec &wsref = (self.*accessor)(wsIndex);
+  const int wslen = static_cast<int>(wsref.size());
 
-  if (pyArrayLength != wsArrayLength) {
+  if (pylen != wslen) {
     throw std::invalid_argument(
         "Length mismatch between workspace array & python array. ws=" +
-        boost::lexical_cast<std::string>(wsArrayLength) + ", python=" +
-        boost::lexical_cast<std::string>(pyArrayLength));
+        std::to_string(wslen) + ", python=" + std::to_string(pylen));
   }
-  for (size_t i = 0; i < wsArrayLength; ++i) {
-    wsArrayRef[i] = extract<double>(values[i]);
+  double *pydata = (double *)values.get_data();
+  for (int i = 0; i < wslen; ++i) {
+    wsref[i] = pydata[i];
   }
 }
 
@@ -116,7 +129,7 @@ void clearMonitorWorkspace(MatrixWorkspace &self) {
  * @param values :: A numpy array. The length must match the size of the
  */
 void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      numeric::array values) {
+                      const NumPy::NdArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataX, wsIndex, values);
 }
 
@@ -127,7 +140,7 @@ void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      numeric::array values) {
+                      const NumPy::NdArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataY, wsIndex, values);
 }
 
@@ -138,7 +151,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      numeric::array values) {
+                      const NumPy::NdArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 
@@ -149,7 +162,7 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                       numeric::array values) {
+                       const NumPy::NdArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 
@@ -161,7 +174,7 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  */
 size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getNumberBins' is deprecated, use 'blocksize' instead.");
+             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
   return self.blocksize();
 }
 
@@ -173,7 +186,7 @@ size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
  */
 Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getSampleDetails' is deprecated, use 'getRun' instead.");
+             "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
 }
@@ -182,8 +195,6 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
 void export_MatrixWorkspace() {
   /// Typedef to remove const qualifier on input detector shared_ptr. See
   /// Policies/RemoveConst.h for more details
-  typedef double (MatrixWorkspace::*getDetectorSignature)(
-      Mantid::Geometry::IDetector_sptr det) const;
 
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo, IMDWorkspace>,
          boost::noncopyable>("MatrixWorkspace", no_init)
@@ -198,15 +209,13 @@ void export_MatrixWorkspace() {
                (arg("self"), arg("xvalue"), arg("workspaceIndex")),
                "Returns the index of the bin containing the given xvalue. The "
                "workspace_index is optional [default=0]"))
-      .def("detectorTwoTheta",
-           (getDetectorSignature)&MatrixWorkspace::detectorTwoTheta,
+      .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta,
            (arg("self"), arg("det")),
            "Returns the two theta value for a given detector")
-      .def("detectorSignedTwoTheta",
-           (getDetectorSignature)&MatrixWorkspace::detectorSignedTwoTheta,
+      .def("detectorSignedTwoTheta", &MatrixWorkspace::detectorSignedTwoTheta,
            (arg("self"), arg("det")),
            "Returns the signed two theta value for given detector")
-      .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t)) &
+      .def("getSpectrum", (ISpectrum & (MatrixWorkspace::*)(const size_t)) &
                               MatrixWorkspace::getSpectrum,
            (arg("self"), arg("workspaceIndex")), return_internal_reference<>(),
            "Return the spectra at the given workspace index.")
@@ -218,35 +227,41 @@ void export_MatrixWorkspace() {
       .def("getDetector", &MatrixWorkspace::getDetector,
            return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
-           "Return the Detector or "
-           "DetectorGroup that is linked to "
+           "Return the :class:`~mantid.geometry.Detector` or "
+           ":class:`~mantid.geometry.DetectorGroup` that is linked to "
            "the given workspace index")
       .def("getRun", &MatrixWorkspace::mutableRun, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace")
+           "Return the :class:`~mantid.api.Run` object for this workspace")
       .def("axes", &MatrixWorkspace::axes, arg("self"),
            "Returns the number of axes attached to the workspace")
       .def("getAxis", &MatrixWorkspace::getAxis,
            (arg("self"), arg("axis_index")), return_internal_reference<>(),
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
-           "Returns True if this is considered to be binned data.")
-      .def("isDistribution", (const bool &(MatrixWorkspace::*)() const) &
+           "Returns ``True`` if this is considered to be binned data.")
+      .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
-           arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns the status of the distribution flag")
+           arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
 
+      .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
+           return_value_policy<reference_existing_object>(), args("self"),
+           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
+           "object.")
+
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use blocksize "
+           "Returns size of the Y data array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
            "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace (deprecated, use getRun "
+           "Return the Run object for this workspace (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
 
       //--------------------------------------- Setters
@@ -257,9 +272,8 @@ void export_MatrixWorkspace() {
       .def("setYUnit", &MatrixWorkspace::setYUnit,
            (arg("self"), arg("newUnit")),
            "Sets a new unit for the data (Y axis) in the workspace")
-      .def("setDistribution", (bool &(MatrixWorkspace::*)(const bool)) &
-                                  MatrixWorkspace::isDistribution,
-           (arg("self"), arg("newVal")), return_value_policy<return_by_value>(),
+      .def("setDistribution", &MatrixWorkspace::setDistribution,
+           (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
       .def("replaceAxis", &MatrixWorkspace::replaceAxis,

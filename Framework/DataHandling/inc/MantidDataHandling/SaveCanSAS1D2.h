@@ -78,10 +78,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
-  /// default constructor
-  SaveCanSAS1D2();
-  ~SaveCanSAS1D2() override;
-
   int version() const override { return 2; }
 
 protected:

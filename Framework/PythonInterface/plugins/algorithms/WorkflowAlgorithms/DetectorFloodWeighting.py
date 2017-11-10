@@ -1,9 +1,12 @@
+from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
+
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
-PropertyMode, Progress
+    PropertyMode, Progress
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
 
-import numpy as np
 
 class DetectorFloodWeighting(DataProcessorAlgorithm):
 
@@ -13,20 +16,18 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\SANS'
 
-
     def summary(self):
         return 'Generates a Detector flood weighting, or sensitivity workspace'
-
 
     def PyInit(self):
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
-                                                     doc='Flood weighting measurement')
+                             doc='Flood weighting measurement')
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
                                                      direction=Direction.Input, optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator("Wavelength")),
-                                                     doc='Flood weighting measurement')
+                             doc='Flood weighting measurement')
 
         validator = FloatArrayBoundedValidator()
         validator.setLower(0.)
@@ -38,7 +39,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
                              doc='Normalized flood weighting measurement')
 
         self.declareProperty("SolidAngleCorrection", True, direction=Direction.Input, doc="Perform final solid angle correction")
-
 
     def validateInputs(self):
         """
@@ -112,7 +112,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
                 # First band
                 accumulated_output = integrated
         return accumulated_output
-
 
     def PyExec(self):
 

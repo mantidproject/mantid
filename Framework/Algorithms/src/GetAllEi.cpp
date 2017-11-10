@@ -1,10 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/HistoWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -13,6 +14,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -22,6 +25,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace HistogramData;
 DECLARE_ALGORITHM(GetAllEi)
 
 /// Empty default constructor
@@ -223,8 +227,8 @@ void GetAllEi::exec() {
   auto monitorWS = buildWorkspaceToFit(inputWS, det1WSIndex);
 
   // recalculate delay time from chopper position to monitor position
-  auto detector1 = inputWS->getDetector(det1WSIndex);
-  double mon1Distance = detector1->getDistance(*moderator);
+  const auto &detector1 = inputWS->spectrumInfo().detector(det1WSIndex);
+  double mon1Distance = detector1.getDistance(*moderator);
   double TOF0 = mon1Distance / velocity;
 
   //--->> below is reserved until full chopper's implementation is available;
@@ -237,8 +241,8 @@ void GetAllEi::exec() {
   auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
   ///<---------------------------------------------------
   */
-  auto baseSpectrum = inputWS->getSpectrum(det1WSIndex);
-  std::pair<double, double> TOF_range = baseSpectrum->getXDataRange();
+  auto &baseSpectrum = inputWS->getSpectrum(det1WSIndex);
+  std::pair<double, double> TOF_range = baseSpectrum.getXDataRange();
 
   double Period =
       (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
@@ -262,9 +266,9 @@ void GetAllEi::exec() {
     printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
-      monitorWS->getSpectrum(0)->getXDataRange();
+      monitorWS->getSpectrum(0).getXDataRange();
   std::pair<double, double> Mon2_Erange =
-      monitorWS->getSpectrum(1)->getXDataRange();
+      monitorWS->getSpectrum(1).getXDataRange();
   double eMin = std::max(Mon1_Erange.first, Mon2_Erange.first);
   double eMax = std::min(Mon1_Erange.second, Mon2_Erange.second);
   g_log.debug() << boost::str(
@@ -285,13 +289,13 @@ void GetAllEi::exec() {
     }
   }
   g_log.debug() << "*From all chopper opening only: " +
-                       boost::lexical_cast<std::string>(guess_ei.size()) +
+                       std::to_string(guess_ei.size()) +
                        " fell within both monitor's recording energy range\n";
   g_log.debug() << " Guess Energies are:\n";
   for (double ei : guess_ei) {
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 
   std::sort(guess_ei.begin(), guess_ei.end());
 
@@ -299,8 +303,8 @@ void GetAllEi::exec() {
   std::vector<bool> guessValid;
   // preprocess first monitors peaks;
   g_log.debug() << "*Looking for real energy peaks on first monitor\n";
-  findBinRanges(monitorWS->readX(0), monitorWS->readY(0), guess_ei,
-                this->m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.))),
+  findBinRanges(monitorWS->x(0), monitorWS->y(0), guess_ei,
+                this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                 irange_min, irange_max, guessValid);
 
   // remove invalid guess values
@@ -310,8 +314,8 @@ void GetAllEi::exec() {
   std::vector<size_t> irange1_min, irange1_max;
   if (!this->getProperty("IgnoreSecondMonitor")) {
     g_log.debug() << "*Looking for real energy peaks on second monitor\n";
-    findBinRanges(monitorWS->readX(1), monitorWS->readY(1), guess_ei,
-                  this->m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.))),
+    findBinRanges(monitorWS->x(1), monitorWS->y(1), guess_ei,
+                  this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                   irange1_min, irange1_max, guessValid);
     removeInvalidValues<double>(guessValid, guess_ei);
     removeInvalidValues<size_t>(guessValid, irange_min);
@@ -323,7 +327,7 @@ void GetAllEi::exec() {
     irange1_max.assign(irange_max.begin(), irange_max.end());
   }
   g_log.debug()
-      << "*Identified: " + boost::lexical_cast<std::string>(guess_ei.size()) +
+      << "*Identified: " + std::to_string(guess_ei.size()) +
              " peaks with sufficient signal around guess chopper opening\n";
 
   std::vector<peakKeeper> peaks;
@@ -340,7 +344,7 @@ void GetAllEi::exec() {
     bool found = findMonitorPeak(monitorWS, guess_ei[i], monsRangeMin,
                                  monsRangeMax, energy, height, twoSigma);
     if (found) {
-      peaks.push_back(peakKeeper(energy, height, 0.5 * twoSigma));
+      peaks.emplace_back(energy, height, 0.5 * twoSigma);
       if (peaks.back().energy > maxPeakEnergy)
         maxPeakEnergy = peaks.back().energy;
     }
@@ -376,15 +380,18 @@ void GetAllEi::exec() {
   auto result_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                             nPeaks, nPeaks);
 
-  MantidVec peaks_positions;
-  MantidVec &Signal = result_ws->dataY(0);
-  MantidVec &Error = result_ws->dataE(0);
-  for (size_t i = 0; i < nPeaks; i++) {
-    peaks_positions.push_back(peaks[i].position);
-    Signal[i] = peaks[i].height;
-    Error[i] = peaks[i].sigma;
-  }
-  result_ws->setX(0, peaks_positions);
+  HistogramX peaks_positions(peaks.size());
+  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
+                 [](peakKeeper peak) { return peak.position; });
+  auto &Signal = result_ws->mutableY(0);
+  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(),
+                 [](peakKeeper peak) { return peak.height; });
+
+  auto &Error = result_ws->mutableE(0);
+  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(),
+                 [](peakKeeper peak) { return peak.sigma; });
+
+  result_ws->setPoints(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
 }
@@ -403,18 +410,18 @@ void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
 
   g_log.debug() << "*Found : " << guess_opening.size()
                 << " chopper prospective opening within time frame: "
-                << TOF_range.first << " to: " << TOF_range.second << std::endl;
+                << TOF_range.first << " to: " << TOF_range.second << '\n';
   g_log.debug() << " Timings are:\n";
   for (double time : guess_opening) {
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % time);
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
   g_log.debug() << " Corresponding to energies:\n";
   for (double time : guess_opening) {
     double ei = destUnit->singleFromTOF(time);
     g_log.debug() << boost::str(boost::format(" %8.2f; ") % ei);
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 }
 
 // unnamed namespace for auxiliary file-based functions, converted from lambda
@@ -471,15 +478,15 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
                          double &peakTwoSigma) {
 
   // calculate sigma from half-width parameters
-  double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+  double maxSigma = Ei * m_min_Eresolution / (2. * std::sqrt(2. * M_LN2));
 
   double sMin(std::numeric_limits<double>::max());
   double sMax(-sMin);
   double xOfMax(0), dXmax(0);
   double Intensity(0);
 
-  auto X = inputWS->readX(index);
-  auto S = inputWS->readY(index);
+  const auto &X = inputWS->x(index);
+  const auto &S = inputWS->y(index);
   size_t ind_min = monsRangeMin[index];
   size_t ind_max = monsRangeMax[index];
   // interval too small -- not interested in a peak there
@@ -512,8 +519,9 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   double SmoothRange = 2 * maxSigma;
 
   std::vector<double> SAvrg, binsAvrg;
-  Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, &X, ind_min,
-                                      ind_max, &binsAvrg);
+  Kernel::VectorHelper::smoothInRange(S.rawData(), SAvrg, SmoothRange,
+                                      &X.rawData(), ind_min, ind_max,
+                                      &binsAvrg);
 
   double realPeakPos(xOfMax); // this position is less shifted
   // due to the skew in averaging formula
@@ -557,21 +565,17 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   }
   if (iterations_fail) {
     g_log.information() << "*No peak search convergence after " +
-                               boost::lexical_cast<std::string>(ic) +
+                               std::to_string(ic) +
                                " smoothing iterations at still_count: " +
-                               boost::lexical_cast<std::string>(
-                                   stay_still_count) +
+                               std::to_string(stay_still_count) +
                                " Wrong energy or noisy peak at Ei=" +
-                               boost::lexical_cast<std::string>(Ei)
-                        << std::endl;
+                               boost::lexical_cast<std::string>(Ei) << '\n';
   }
-  g_log.debug() << "*Performed: " + boost::lexical_cast<std::string>(ic) +
-                       " averages for spectra " +
-                       boost::lexical_cast<std::string>(index) +
+  g_log.debug() << "*Performed: " + std::to_string(ic) +
+                       " averages for spectra " + std::to_string(index) +
                        " at energy: " + boost::lexical_cast<std::string>(Ei) +
-                       "\n and found: " +
-                       boost::lexical_cast<std::string>(nPeaks) + "peaks and " +
-                       boost::lexical_cast<std::string>(nHills) + " hills\n";
+                       "\n and found: " + std::to_string(nPeaks) +
+                       "peaks and " + std::to_string(nHills) + " hills\n";
   if (nPeaks != 1) {
     g_log.debug() << "*Peak rejected as n-peaks !=1 after averaging\n";
     return false;
@@ -586,10 +590,8 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       peakTwoSigma = hillsPos[1] - hillsPos[0];
     } else {
       g_log.debug() << "*Peak rejected as averaging gives: " +
-                           boost::lexical_cast<std::string>(nPeaks) +
-                           " peaks and " +
-                           boost::lexical_cast<std::string>(nHills) +
-                           " heals\n";
+                           std::to_string(nPeaks) + " peaks and " +
+                           std::to_string(nHills) + " heals\n";
 
       return false;
     }
@@ -621,8 +623,8 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                                double &position, double &height,
                                double &twoSigma) {
   // calculate sigma from half-width parameters
-  double maxSigma = Ei * m_min_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
-  double minSigma = Ei * m_max_Eresolution / (2 * std::sqrt(2 * std::log(2.)));
+  double maxSigma = Ei * m_min_Eresolution / (2. * std::sqrt(2. * M_LN2));
+  double minSigma = Ei * m_max_Eresolution / (2. * std::sqrt(2. * M_LN2));
   //--------------------------------------------------------------------
   double peak1Pos, peak1TwoSigma, peak1Height;
   if (!peakGuess(inputWS, 0, Ei, monsRangeMin, monsRangeMax, peak1Pos,
@@ -635,7 +637,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                          boost::lexical_cast<std::string>(peak1Height) +
                          " and 2*Sigma: " +
                          boost::lexical_cast<std::string>(peak1TwoSigma)
-                  << std::endl;
+                  << '\n';
     return false;
   }
 
@@ -661,7 +663,7 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                  boost::lexical_cast<std::string>(peak1TwoSigma) +
                  "\n and Peak at mon2: Ei= " +
                  boost::lexical_cast<std::string>(peak2Pos) + "and height: " +
-                 boost::lexical_cast<std::string>(peak1Height) << std::endl;
+                 boost::lexical_cast<std::string>(peak1Height) << '\n';
 
       return false;
     }
@@ -742,27 +744,28 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 }
 namespace { // for lambda extracted from findBinRanges
 // get bin range corresponding to the energy range
-void getBinRange(const MantidVec &eBins, double eMin, double eMax,
-                 size_t &index_min, size_t &index_max) {
+void getBinRange(const HistogramData::HistogramX &eBins, double eMin,
+                 double eMax, size_t &index_min, size_t &index_max) {
 
-  size_t nBins = eBins.size();
-  if (eMin <= eBins[0]) {
+  auto &bins = eBins.rawData();
+  size_t nBins = bins.size();
+  if (eMin <= bins[0]) {
     index_min = 0;
   } else {
-    index_min = Kernel::VectorHelper::getBinIndex(eBins, eMin);
+    index_min = Kernel::VectorHelper::getBinIndex(bins, eMin);
   }
 
   if (eMax >= eBins[nBins - 1]) {
     index_max = nBins - 1;
   } else {
-    index_max = Kernel::VectorHelper::getBinIndex(eBins, eMax) + 1;
+    index_max = Kernel::VectorHelper::getBinIndex(bins, eMax) + 1;
     if (index_max >= nBins)
       index_max = nBins - 1; // last bin range anyway. Should not happen
   }
 }
 
 // refine bin range. May need better procedure for this.
-bool refineEGuess(const MantidVec &eBins, const MantidVec &signal,
+bool refineEGuess(const HistogramX &eBins, const HistogramY &signal,
                   double &eGuess, size_t index_min, size_t index_max) {
 
   size_t ind_Emax = index_min;
@@ -802,7 +805,7 @@ struct peakKeeper2 {
 *@param guessValid -- output boolean vector, which specifies if guess energies
 *                     in guess_energy vector are valid or not
 */
-void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
+void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
                              const std::vector<double> &guess_energy,
                              double eResolution, std::vector<size_t> &irangeMin,
                              std::vector<size_t> &irangeMax,
@@ -883,42 +886,22 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-  auto pSpectr1 = inputWS->getSpectrum(wsIndex0);
-  auto pSpectr2 = inputWS->getSpectrum(wsIndex1);
+
   // assuming equally binned ws.
-  // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1->dataX();
-  size_t XLength = bins.size();
-  size_t YLength = inputWS->dataY(wsIndex0).size();
-  auto working_ws =
-      API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
-  // copy data --> very bad as implicitly assigns pointer
-  // to bins array and bins array have to exist out of this routine
-  // scope.
-  // This does not matter in this case as below we convert units
-  // which should decouple cow_pointer but very scary operation in
-  // general.
-  working_ws->setX(0, bins);
-  working_ws->setX(1, bins);
-  MantidVec &Signal1 = working_ws->dataY(0);
-  MantidVec &Error1 = working_ws->dataE(0);
-  MantidVec &Signal2 = working_ws->dataY(1);
-  MantidVec &Error2 = working_ws->dataE(1);
-  for (size_t i = 0; i < YLength; i++) {
-    Signal1[i] = inputWS->dataY(wsIndex0)[i];
-    Error1[i] = inputWS->dataE(wsIndex0)[i];
-    Signal2[i] = inputWS->dataY(wsIndex1)[i];
-    Error2[i] = inputWS->dataE(wsIndex1)[i];
-  }
-  // copy detector mapping
-  API::ISpectrum *spectrum = working_ws->getSpectrum(0);
-  spectrum->setSpectrumNo(specNum1);
-  spectrum->clearDetectorIDs();
-  spectrum->addDetectorIDs(pSpectr1->getDetectorIDs());
-  spectrum = working_ws->getSpectrum(1);
-  spectrum->setSpectrumNo(specNum2);
-  spectrum->clearDetectorIDs();
-  spectrum->addDetectorIDs(pSpectr2->getDetectorIDs());
+  boost::shared_ptr<API::HistoWorkspace> working_ws =
+      DataObjects::create<API::HistoWorkspace>(
+          *inputWS, Indexing::extract(inputWS->indexInfo(),
+                                      std::vector<size_t>{wsIndex0, wsIndex1}),
+          inputWS->histogram(wsIndex0));
+
+  // signal 1
+  working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));
+  // signal 2
+  working_ws->setSharedY(1, inputWS->sharedY(wsIndex1));
+  // error 1
+  working_ws->setSharedE(0, inputWS->sharedE(wsIndex0));
+  // error 2
+  working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
 
   if (inputWS->getAxis(0)->unit()->caption() != "Energy") {
     API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");
@@ -1053,10 +1036,10 @@ namespace { // former lambda function for findChopSpeedAndDelay
 *@return true if selection interval is completed
 *        (current interval is not selected) and false otherwise
 */
-bool SelectInterval(const Kernel::DateAndTime &t_beg,
-                    const Kernel::DateAndTime &t_end, double value,
-                    bool &inSelection, Kernel::DateAndTime &startTime,
-                    Kernel::DateAndTime &endTime) {
+bool SelectInterval(const Types::Core::DateAndTime &t_beg,
+                    const Types::Core::DateAndTime &t_end, double value,
+                    bool &inSelection, Types::Core::DateAndTime &startTime,
+                    Types::Core::DateAndTime &endTime) {
 
   if (value > 0) {
     if (!inSelection) {
@@ -1091,14 +1074,14 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
     // Define selecting function
     bool inSelection(false);
     // time interval to select (start-end)
-    Kernel::DateAndTime startTime, endTime;
+    Types::Core::DateAndTime startTime, endTime;
     //
     // Analyze filtering log
     auto dateAndTimes = m_pFilterLog->valueAsCorrectMap();
     auto it = dateAndTimes.begin();
     auto next = it;
     next++;
-    std::map<Kernel::DateAndTime, double> derivMap;
+    std::map<Types::Core::DateAndTime, double> derivMap;
     auto itder = it;
     if (m_FilterWithDerivative) {
       pDerivative = m_pFilterLog->getDerivative();
@@ -1249,7 +1232,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   } catch (std::runtime_error &) {
     result["Monitor1SpecID"] =
         "Input workspace does not contain spectra with ID: " +
-        boost::lexical_cast<std::string>(specNum1);
+        std::to_string(specNum1);
   }
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   try {
@@ -1257,7 +1240,7 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
   } catch (std::runtime_error &) {
     result["Monitor2SpecID"] =
         "Input workspace does not contain spectra with ID: " +
-        boost::lexical_cast<std::string>(specNum2);
+        std::to_string(specNum2);
   }
   // check chopper and initiate it if present (for debugging)
   m_chopper = inputWS->getInstrument()->getComponentByName("chopper-position");

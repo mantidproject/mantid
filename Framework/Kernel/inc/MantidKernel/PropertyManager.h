@@ -62,8 +62,8 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByTime(const Kernel::DateAndTime &start,
-                    const Kernel::DateAndTime &stop) override;
+  void filterByTime(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop) override;
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter) override;
@@ -88,7 +88,7 @@ public:
                      IPropertyManager *targetPropertyManager,
                      const std::unordered_set<std::string> &ignoreProperties =
                          std::unordered_set<std::string>());
-  void setPropertiesWithSimpleString(
+  void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) override;
@@ -127,6 +127,12 @@ protected:
 private:
   /// Transform the given string to a key for the property index
   const std::string createKey(const std::string &text) const;
+  void setPropertiesWithSimpleString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties);
+  void setPropertiesWithJSONString(
+      const std::string &propertiesString,
+      const std::unordered_set<std::string> &ignoreProperties);
 
   /// typedef for the map holding the properties
   typedef std::map<std::string, std::unique_ptr<Property>> PropertyMap;

@@ -82,9 +82,9 @@ public:
     TS_ASSERT_DELTA(result->readY(0).back(), flatws->readY(0).back(), 0.00001);
     TS_ASSERT_DELTA(result->readY(0)[8], flatws->readY(0)[8], 0.00001);
     // Check a few actual numbers as well
-    TS_ASSERT_DELTA(result->readY(0).front(), 0.4303, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0160, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[4], 0.0996, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).front(), 0.4953, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.0318, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0)[4], 0.1463, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(flatWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);

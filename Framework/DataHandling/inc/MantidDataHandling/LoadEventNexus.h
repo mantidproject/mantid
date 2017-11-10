@@ -5,56 +5,34 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-#include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
+
+#ifdef _WIN32 // fixing windows issue causing conflict between
+// winnt char and nexus char
+#undef CHAR
+#endif
+
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_array.hpp>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <boost/lexical_cast.hpp>
+#include <numeric>
 
 namespace Mantid {
 
 namespace DataHandling {
-
-/** This class defines the pulse times for a specific bank.
- * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
- * this means that some banks have different lists of pulse times.
- */
-class BankPulseTimes {
-public:
-  /// Starting number for assigning periods.
-  static const unsigned int FirstPeriod;
-
-  /// Constructor with NeXus::File
-  BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers);
-
-  /// Constructor with vector of DateAndTime
-  BankPulseTimes(const std::vector<Kernel::DateAndTime> &times);
-
-  /// Destructor
-  ~BankPulseTimes();
-
-  /// Equals
-  bool equals(size_t otherNumPulse, std::string otherStartTime);
-
-  /// String describing the start time
-  std::string startTime;
-
-  /// Size of the array of pulse times
-  size_t numPulses;
-
-  /// Array of the pulse times
-  Kernel::DateAndTime *pulseTimes;
-
-  /// Vector of period numbers corresponding to each pulse
-  std::vector<int> periodNumbers;
-};
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -172,9 +150,9 @@ public:
   int32_t m_specMax;
 
   /// Filter by start time
-  Kernel::DateAndTime filter_time_start;
+  Mantid::Types::Core::DateAndTime filter_time_start;
   /// Filter by stop time
-  Kernel::DateAndTime filter_time_stop;
+  Mantid::Types::Core::DateAndTime filter_time_stop;
   /// chunk number
   int chunk;
   /// number of chunks
@@ -205,7 +183,7 @@ public:
   double compressTolerance;
 
   /// Pointer to the vector of events
-  typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
+  typedef std::vector<Mantid::Types::Event::TofEvent> *EventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
@@ -326,7 +304,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
                                        const std::string &top_entry_name,
                                        Algorithm *alg) {
-  std::string instrument = "";
+  std::string instrument;
 
   // Get the instrument name
   ::NeXus::File nxfile(nexusfilename);
@@ -338,7 +316,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
     nxfile.openData("name");
     instrument = nxfile.getStrData();
     alg->getLogger().debug() << "Instrument name read from NeXus file is "
-                             << instrument << std::endl;
+                             << instrument << '\n';
   } catch (::NeXus::Exception &) {
     // Try to fall back to isis compatibility options
     nxfile.closeGroup();
@@ -356,10 +334,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
       }
     }
   }
-  if (instrument.compare("POWGEN3") ==
-      0) // hack for powgen b/c of bad long name
+  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
     instrument = "POWGEN";
-  if (instrument.compare("NOM") == 0) // hack for nomad
+  if (instrument == "NOM") // hack for nomad
     instrument = "NOMAD";
 
   if (instrument.empty())
@@ -391,7 +368,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   } catch (std::invalid_argument &e) {
     alg->getLogger().information()
         << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
+        << '\n';
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
     alg->getLogger().information(
@@ -408,7 +385,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 
   // Ticket #2049: Cleanup all loadinstrument members to a single instance
   // If requested update the instrument to positions in the data file
-  const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+  const auto &pmap = localWorkspace->constInstrumentParameters();
   if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                      "det-pos-source"))
     return executionSuccessful;
@@ -476,7 +453,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
   // Get the run number
   file.openData("run_number");
-  std::string run("");
+  std::string run;
   if (file.getInfo().type == ::NeXus::CHAR) {
     run = file.getStrData();
   } else if (file.isDataInt()) {
@@ -484,7 +461,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     std::vector<int> value;
     file.getData(value);
     if (!value.empty())
-      run = boost::lexical_cast<std::string>(value[0]);
+      run = std::to_string(value[0]);
   }
   if (!run.empty()) {
     WS->mutableRun().addProperty("run_number", run);
@@ -494,7 +471,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   // get the experiment identifier
   try {
     file.openData("experiment_identifier");
-    std::string expId("");
+    std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
       expId = file.getStrData();
     }
@@ -506,18 +483,35 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // let it drop on floor
   }
 
-  // get the sample name
+  // get the sample name - nested try/catch to leave the handle in an
+  // appropriate state
   try {
     file.openGroup("sample", "NXsample");
-    file.openData("name");
-    std::string name("");
-    if (file.getInfo().type == ::NeXus::CHAR) {
-      name = file.getStrData();
+    try {
+      file.openData("name");
+      const auto info = file.getInfo();
+      std::string name;
+      if (info.type == ::NeXus::CHAR) {
+        if (info.dims.size() == 1) {
+          name = file.getStrData();
+        } else { // something special for 2-d array
+          const int64_t total_length = std::accumulate(
+              info.dims.begin(), info.dims.end(), static_cast<int64_t>(1),
+              std::multiplies<int64_t>());
+          boost::scoped_array<char> val_array(new char[total_length]);
+          file.getData(val_array.get());
+          file.closeData();
+          name = std::string(val_array.get(), total_length);
+        }
+      }
+      file.closeData();
+
+      if (!name.empty()) {
+        WS->mutableSample().setName(name);
+      }
+    } catch (::NeXus::Exception &) {
+      // let it drop on floor
     }
-    if (!name.empty()) {
-      WS->mutableSample().setName(name);
-    }
-    file.closeData();
     file.closeGroup();
   } catch (::NeXus::Exception &) {
     // let it drop on floor
@@ -531,10 +525,10 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // get the units
     // clang-format off
     std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
-    std::string units("");
+    std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
-      if (it->name.compare("units") == 0) {
+      if (it->name == "units") {
         units = file.getStrAttr(*it);
         break;
       }

@@ -1,5 +1,6 @@
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -27,9 +28,6 @@ using namespace DataObjects;
 OptimizeExtinctionParameters::OptimizeExtinctionParameters() {
   m_pointGroups = getAllPointGroups();
 }
-
-/// Destructor
-OptimizeExtinctionParameters::~OptimizeExtinctionParameters() {}
 
 static double gsl_costFunction(const gsl_vector *v, void *params) {
   std::string *p = reinterpret_cast<std::string *>(params);

@@ -49,7 +49,6 @@ namespace MDAlgorithms {
 class DLLExport SlicingAlgorithm : public API::Algorithm {
 public:
   SlicingAlgorithm();
-  ~SlicingAlgorithm() override;
 
   ///@return a string with the character that identifies each dimension in order
   ///(01234)
@@ -164,6 +163,8 @@ private:
   Mantid::Geometry::MDFrame_uptr
   extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
                                   std::string units) const;
+  void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame,
+                      const std::string &units) const;
 };
 
 } // namespace DataObjects

@@ -91,6 +91,12 @@ public:
     UNUSED_ARG(index);
   }
 
+  /// Read in from stream and set the value at the given index
+  virtual void read(const size_t index, std::istringstream &in) {
+    UNUSED_ARG(index)
+    UNUSED_ARG(in)
+  }
+
   /// Specialized type check
   virtual bool isBool() const = 0;
 
@@ -157,13 +163,16 @@ public:
 
   /**
    * Fills a std vector with values from the column if the types are compatible.
-   * @param vec :: The vector to fill in.
+   * @param maxSize :: Set size to less than the full column.
    */
-  template <class T> void numeric_fill(std::vector<T> &vec) const {
-    vec.resize(size());
+  template <class T = double>
+  std::vector<T>
+  numeric_fill(size_t maxSize = std::numeric_limits<size_t>::max()) const {
+    std::vector<T> vec(std::min(size(), maxSize));
     for (size_t i = 0; i < vec.size(); ++i) {
       vec[i] = static_cast<T>(toDouble(i));
     }
+    return vec;
   }
 
 protected:

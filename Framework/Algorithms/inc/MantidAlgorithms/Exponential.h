@@ -48,8 +48,6 @@ class DLLExport Exponential : public UnaryOperation {
 public:
   /// Default constructor
   Exponential();
-  /// Destructor
-  ~Exponential() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Exponential"; }
   /// Summary of algorithms purpose

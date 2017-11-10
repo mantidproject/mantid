@@ -1,15 +1,16 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <gmock/gmock.h>
 #include <boost/algorithm/string/replace.hpp>
@@ -21,7 +22,7 @@ using namespace testing;
 using ScopedFileHelper::ScopedFile;
 
 class InstrumentDefinitionParserTest : public CxxTest::TestSuite {
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
@@ -39,7 +40,7 @@ private:
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
   };
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
   /**
   Helper type to pass around related IDF environment information in a
   collection.
@@ -134,7 +135,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
     boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
@@ -145,6 +146,24 @@ public:
     TS_ASSERT_EQUALS(Y, frame->pointingUp());
     TS_ASSERT_EQUALS(Z, frame->pointingAlongBeam());
     TS_ASSERT(frame->origin().empty());
+  }
+
+  void test_extract_ref_info_theta_sign() {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
+                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING6.xml";
+    std::string xmlText = Strings::loadFile(filename);
+    boost::shared_ptr<const Instrument> i;
+
+    // Parse the XML
+    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
+
+    // Extract the reference frame object
+    boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
+
+    // Test that values have been populated with expected values (those from
+    // file).
+    TS_ASSERT_EQUALS(V3D(1., 0., 0.), frame->vecThetaSign());
   }
 
   void
@@ -167,7 +186,7 @@ public:
     } catch (Poco::FileNotFoundException &) {
     }
 
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
     try {
       Poco::File vtpFile(vtpFilename);
       vtpFile.remove();
@@ -461,7 +480,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
     TS_ASSERT_EQUALS(ptrDetShape->getID(), 1100);
@@ -523,7 +542,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "RectangularUnitTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Now the XY detector in bank1
     boost::shared_ptr<const RectangularDetector> bank1 =
@@ -576,7 +595,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "AdjustTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // None rotated cuboid
     boost::shared_ptr<const IDetector> ptrNoneRot = i->getDetector(1400);
@@ -689,7 +708,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::ReadFallBack,
                      parser.getAppliedCachingOption()); // Check that the
@@ -736,7 +755,7 @@ public:
                                       instrumentEnv._xmlText);
     RemoveFallbackVTPFile(parser);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteGeomCache,
                      parser.getAppliedCachingOption()); // Check that the
@@ -779,7 +798,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteCacheTemp,
                      parser.getAppliedCachingOption()); // Check that the TEMP
@@ -833,7 +852,7 @@ public:
 
     std::string errorMsg("");
     try {
-      parser.parseXML(NULL);
+      parser.parseXML(nullptr);
       errorMsg = "Exception not thrown";
     } catch (Kernel::Exception::InstrumentDefinitionError &e) {
       errorMsg = e.what();
@@ -861,9 +880,9 @@ public:
     Instrument_sptr instr;
 
     if (rethrow)
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
     else
-      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
 
@@ -1020,7 +1039,7 @@ public:
 
     boost::shared_ptr<const Instrument> instrument;
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(nullptr));
 
     // Clean up VTP file
     const std::string vtpFilename = parser.createVTPFileName();

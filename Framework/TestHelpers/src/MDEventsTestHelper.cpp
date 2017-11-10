@@ -44,7 +44,7 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::Geometry::InstrumentDefinitionParser;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 namespace Strings = Mantid::Kernel::Strings;
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -81,16 +81,15 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getEventList(pix) += Mantid::DataObjects::TofEvent(
-          (i + 0.5) * binDelta, run_start + double(i));
+      retVal->getSpectrum(pix) +=
+          Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
     }
-    retVal->getEventList(pix).addDetectorID(pix);
+    retVal->getSpectrum(pix).addDetectorID(pix);
   }
 
   // Create the x-axis for histogramming.
-  Mantid::MantidVecPtr x1;
-  Mantid::MantidVec &xRef = x1.access();
-  xRef.resize(numBins);
+  HistogramData::BinEdges x1(numBins);
+  auto &xRef = x1.mutableData();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = i * binDelta;
   }
@@ -101,8 +100,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   retVal->getAxis(0)->setUnit("TOF");
 
   // Give it a crystal and goniometer
-  WorkspaceCreationHelper::SetGoniometer(retVal, 0., 0., 0.);
-  WorkspaceCreationHelper::SetOrientedLattice(retVal, 1., 1., 1.);
+  WorkspaceCreationHelper::setGoniometer(retVal, 0., 0., 0.);
+  WorkspaceCreationHelper::setOrientedLattice(retVal, 1., 1., 1.);
 
   // Some sanity checks
   if (retVal->getInstrument()->getName() != "MINITOPAZ")
@@ -194,9 +193,10 @@ MDBox<MDLeanEvent<3>, 3> *makeMDBox3() {
  */
 std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
   std::vector<MDLeanEvent<1>> out;
-  for (std::size_t i = 0; i < num; i++) {
-    double coords[1] = {static_cast<double>(i) * 1.0 + 0.5};
-    out.push_back(MDLeanEvent<1>(1.0, 1.0, coords));
+  out.reserve(num);
+  for (std::size_t i = 0; i < num; ++i) {
+    float coords[1] = {static_cast<float>(i) + 0.5f};
+    out.emplace_back(1.0f, 1.0f, coords);
   }
   return out;
 }
@@ -216,8 +216,8 @@ std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
  */
 Mantid::DataObjects::MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-                         coord_t max, double errorSquared, std::string name,
-                         double numEvents) {
+                         coord_t max, double errorSquared,
+                         const std::string &name, double numEvents) {
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");

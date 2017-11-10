@@ -26,7 +26,6 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <boost/python/object.hpp>
 
@@ -41,6 +40,12 @@ public:
   /// A constructor that looks like a Python __init__ method
   IFunctionAdapter(PyObject *self);
 
+  /// The PyObject must be supplied to construct the object
+  IFunctionAdapter(const IFunctionAdapter &) = delete;
+
+  /// Disable assignment operator
+  IFunctionAdapter &operator=(const IFunctionAdapter &) = delete;
+
   /// Returns the name of the function
   std::string name() const override;
   /// Specify a category for the function
@@ -52,15 +57,18 @@ public:
   void declareAttribute(const std::string &name,
                         const boost::python::object &defaultValue);
   /// Get a named attribute value
-  PyObject *getAttributeValue(const std::string &name);
+  static PyObject *getAttributeValue(IFunction &self, const std::string &name);
   /// Returns the attribute's value as a Python object
-  PyObject *getAttributeValue(const API::IFunction::Attribute &attr);
+  static PyObject *getAttributeValue(IFunction &self,
+                                     const API::IFunction::Attribute &attr);
+  /// Set the attribute's value
+  static void setAttributePythonValue(IFunction &self, const std::string &name,
+                                      const boost::python::object &value);
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName,
                     const API::IFunction::Attribute &attr) override;
-  /// Store the attribute's value in the default IFunction's cache
-  void storeAttributePythonValue(const std::string &name,
-                                 const boost::python::object &value);
+  /// Split this function (if needed) into a list of independent functions
+  static boost::python::object createPythonEquivalentFunctions(IFunction &self);
 
   // Each overload of declareParameter requires a different name as we
   // can't use a function pointer with a virtual base class
@@ -108,9 +116,6 @@ protected:
   inline PyObject *getSelf() const { return m_self; }
 
 private:
-  /// The PyObject must be supplied to construct the object
-  DISABLE_COPY_AND_ASSIGN(IFunctionAdapter)
-
   /// The name of the function
   std::string m_name;
   /// The Python portion of the object

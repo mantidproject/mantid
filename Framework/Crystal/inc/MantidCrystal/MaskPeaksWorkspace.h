@@ -41,8 +41,6 @@ class DLLExport MaskPeaksWorkspace : public API::Algorithm {
 public:
   /// Default constructor
   MaskPeaksWorkspace();
-  /// Destructor
-  ~MaskPeaksWorkspace() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskPeaksWorkspace"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -65,7 +63,7 @@ private:
                            Geometry::IComponent_const_sptr comp, const int x,
                            const int y);
   void getTofRange(double &tofMin, double &tofMax, const double tofPeak,
-                   const MantidVec &tof);
+                   const HistogramData::HistogramX &tof);
   int findPixelID(std::string bankName, int col, int row);
 
   /// Read in all the input parameters

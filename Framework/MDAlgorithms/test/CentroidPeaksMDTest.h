@@ -16,7 +16,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -148,7 +147,7 @@ public:
     if (CoordinatesToUse == "Q (lab frame)")
       result = p.getQLabFrame();
     else if (CoordinatesToUse == "Q (sample frame)") {
-      std::cerr << p.getGoniometerMatrix() << std::endl;
+      std::cerr << p.getGoniometerMatrix() << '\n';
       result = p.getQSampleFrame();
     } else if (CoordinatesToUse == "HKL")
       result = p.getHKL();

@@ -2,12 +2,17 @@
 """
     Base class for instrument-specific user interface
 """
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui
 import sys
 import os
 import traceback
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
+if six.PY3:
+    unicode = str
+
 
 class InstrumentInterface(object):
     """
@@ -80,7 +85,7 @@ class InstrumentInterface(object):
             else:
                 self.reset()
         except:
-            print "Could not load last reduction\n  %s" % str(traceback.format_exc())
+            print("Could not load last reduction\n  %s" % str(traceback.format_exc()))
             self.reset()
 
     def load_file(self, file_name):
@@ -114,7 +119,7 @@ class InstrumentInterface(object):
         self.scripter.update()
         try:
             return self.scripter.to_script(file_name)
-        except RuntimeError, e:
+        except RuntimeError as e:
             if self._settings.debug:
                 msg = "The following error was encountered:\n\n%s" % unicode(traceback.format_exc())
             else:
@@ -147,7 +152,7 @@ class InstrumentInterface(object):
             if "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True):
                 config = ConfigService.Instance()
                 if config.hasProperty("cluster.submission") \
-                and config.getString("cluster.submission").lower()=='on':
+                        and config.getString("cluster.submission").lower()=='on':
                     return True
 
             return False
@@ -169,7 +174,7 @@ class InstrumentInterface(object):
 
                 self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
             except:
-                msg = "The following error was encountered:\n\n%s" % sys.exc_value
+                msg = "The following error was encountered:\n\n%s" % sys.exc_info()[1]
                 msg += "\n\nPlease check your reduction parameters\n"
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
                 msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
@@ -186,7 +191,7 @@ class InstrumentInterface(object):
         try:
             self.scripter.update()
         except:
-            print "Error in the user interface\n  %s" % str(traceback.format_exc())
+            print("Error in the user interface\n  %s" % str(traceback.format_exc()))
             self.scripter.push_state()
             return
 
@@ -195,7 +200,7 @@ class InstrumentInterface(object):
             red_path = os.path.join(self.ERROR_REPORT_DIR, self.LAST_REDUCTION_NAME)
             self.save_file(red_path)
         except:
-            print "Could not save last reduction\n  %s" % str(traceback.format_exc())
+            print("Could not save last reduction\n  %s" % str(traceback.format_exc()))
 
         try:
             self.set_running(True)
@@ -206,17 +211,17 @@ class InstrumentInterface(object):
                 # Otherwise take the 'normal' path
                 self.scripter.apply()
             self.set_running(False)
-        except RuntimeError, e:
+        except RuntimeError:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
-                msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
+                msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[1]
                 log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
                 msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         except:
-            msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
+            msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[1]
             msg += "\n\nPlease check your reduction parameters\n"
             log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
             msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
@@ -236,7 +241,7 @@ class InstrumentInterface(object):
         f = open(log_path, 'w')
         reduction = self.scripter.to_xml()
         f.write("<Report>\n")
-        f.write(reduction)
+        f.write(str(reduction))
         f.write("<ErrorReport>")
         f.write(trace)
         f.write("</ErrorReport>")
@@ -299,4 +304,3 @@ class InstrumentInterface(object):
         """
         self.scripter.reset()
         self.scripter.push_state()
-

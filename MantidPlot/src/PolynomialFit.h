@@ -31,72 +31,75 @@
 
 #include "Fit.h"
 
-class PolynomialFit : public Fit
-{
-	Q_OBJECT
+class PolynomialFit : public Fit {
+  Q_OBJECT
 
-	public:
-		PolynomialFit(ApplicationWindow *parent, Graph *g, int order = 2, bool legend = false);
-		PolynomialFit(ApplicationWindow *parent, Graph *g, QString& curveTitle, int order = 2, bool legend = false);
-		PolynomialFit(ApplicationWindow *parent, Graph *g, QString& curveTitle, double start, double end, int order = 2, bool legend = false);
-		PolynomialFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1, int order = 2, bool legend = false);
+public:
+  PolynomialFit(ApplicationWindow *parent, Graph *g, int order = 2,
+                bool legend = false);
+  PolynomialFit(ApplicationWindow *parent, Graph *g, QString &curveTitle,
+                int order = 2, bool legend = false);
+  PolynomialFit(ApplicationWindow *parent, Graph *g, QString &curveTitle,
+                double start, double end, int order = 2, bool legend = false);
+  PolynomialFit(ApplicationWindow *parent, Table *t, const QString &xCol,
+                const QString &yCol, int startRow = 1, int endRow = -1,
+                int order = 2, bool legend = false);
 
-                QString legendInfo() override;
-                void fit() override;
+  QString legendInfo() override;
+  void fit() override;
 
-                int order(){return d_order;};
-		void setOrder(int order);
+  int order() { return d_order; };
+  void setOrder(int order);
 
-		static QString generateFormula(int order);
-		static QStringList generateParameterList(int order);
+  static QString generateFormula(int order);
+  static QStringList generateParameterList(int order);
 
-                double eval(double *par, double x) override;
+  double eval(double *par, double x) override;
 
-        private:
-		void init();
-                void calculateFitCurveData(double *X, double *Y) override;
+private:
+  void init();
+  void calculateFitCurveData(double *X, double *Y) override;
 
-                int d_order;
-		bool show_legend;
+  int d_order;
+  bool show_legend;
 };
 
-class LinearFit : public Fit
-{
-	Q_OBJECT
+class LinearFit : public Fit {
+  Q_OBJECT
 
-	public:
-		LinearFit(ApplicationWindow *parent, Graph *g);
-		LinearFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle);
-		LinearFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
-		LinearFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
+public:
+  LinearFit(ApplicationWindow *parent, Graph *g);
+  LinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
+  LinearFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+            double start, double end);
+  LinearFit(ApplicationWindow *parent, Table *t, const QString &xCol,
+            const QString &yCol, int startRow = 1, int endRow = -1);
 
-                void fit() override;
-                double eval(double *par, double x) override {
-                  return par[0] + par[1] * x;
-                };
+  void fit() override;
+  double eval(double *par, double x) override { return par[0] + par[1] * x; };
 
-        private:
-		void init();
-                void calculateFitCurveData(double *X, double *Y) override;
+private:
+  void init();
+  void calculateFitCurveData(double *X, double *Y) override;
 };
 
-class LinearSlopeFit : public Fit
-{
-	Q_OBJECT
+class LinearSlopeFit : public Fit {
+  Q_OBJECT
 
-	public:
-		LinearSlopeFit(ApplicationWindow *parent, Graph *g);
-		LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle);
-		LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
-		LinearSlopeFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
+public:
+  LinearSlopeFit(ApplicationWindow *parent, Graph *g);
+  LinearSlopeFit(ApplicationWindow *parent, Graph *g,
+                 const QString &curveTitle);
+  LinearSlopeFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+                 double start, double end);
+  LinearSlopeFit(ApplicationWindow *parent, Table *t, const QString &xCol,
+                 const QString &yCol, int startRow = 1, int endRow = -1);
 
-                void fit() override;
-                double eval(double *par, double x) override {
-                  return par[0] * x;
-                };
+  void fit() override;
+  double eval(double *par, double x) override { return par[0] * x; };
 
-        private:
-		void init();
-                void calculateFitCurveData(double *X, double *Y) override;
+private:
+  void init();
+  void calculateFitCurveData(double *X, double *Y) override;
 };
 #endif

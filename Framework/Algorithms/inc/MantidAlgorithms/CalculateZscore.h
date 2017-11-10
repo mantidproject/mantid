@@ -32,9 +32,6 @@ namespace Algorithms {
 */
 class DLLExport CalculateZscore : public API::Algorithm {
 public:
-  CalculateZscore();
-  ~CalculateZscore() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateZscore"; }
   /// Summary of algorithms purpose

@@ -35,24 +35,24 @@
 /**
  * It must be used in connection with another "source" QTextEdit.
  */
-class LineNumberDisplay: public QTextEdit
-{
+class LineNumberDisplay : public QTextEdit {
   Q_OBJECT
 
 public:
   //! Constructor
   /**
-   * \param te the "source" QTextEdit for which we want to display the line numbers
+   * \param te the "source" QTextEdit for which we want to display the line
+   * numbers
    * \param parent parent widget (only affects placement of the dialog)
    */
-  LineNumberDisplay(QTextEdit *te, QWidget *parent = 0);
+  LineNumberDisplay(QTextEdit *te, QWidget *parent = nullptr);
 
 public slots:
   void updateLineNumbers(bool force = false);
   void updateDocumentSelection();
 
 private slots:
-  void changeCharFormat (const QTextCharFormat &);
+  void changeCharFormat(const QTextCharFormat &);
 
 private:
   void showEvent(QShowEvent *) override;

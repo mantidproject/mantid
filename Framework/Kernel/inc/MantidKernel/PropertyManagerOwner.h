@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include <map>
 
 #include "MantidKernel/IPropertyManager.h"
 
@@ -70,7 +69,7 @@ public:
                          std::unordered_set<std::string>()) override;
 
   // sets all the declared properties using a simple string format
-  void setPropertiesWithSimpleString(
+  void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) override;
@@ -112,8 +111,8 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void filterByTime(const DateAndTime & /*start*/,
-                    const DateAndTime & /*stop*/) override {
+  void filterByTime(const Types::Core::DateAndTime & /*start*/,
+                    const Types::Core::DateAndTime & /*stop*/) override {
     throw(std::runtime_error("Not yet implmented"));
   }
   void splitByTime(std::vector<SplittingInterval> & /*splitter*/,

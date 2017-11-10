@@ -16,18 +16,6 @@ using namespace Mantid::DataObjects;
 using std::size_t;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ChangePulsetime::ChangePulsetime() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ChangePulsetime::~ChangePulsetime() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime::init() {
@@ -53,7 +41,7 @@ void ChangePulsetime::exec() {
   EventWorkspace_const_sptr in_ws = getProperty("InputWorkspace");
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {
-    out_ws = EventWorkspace_sptr(in_ws->clone().release());
+    out_ws = in_ws->clone();
   }
 
   // Either use the given list or use all spectra
@@ -78,7 +66,7 @@ void ChangePulsetime::exec() {
       wi = workspaceIndices[i];
 
     // Call the method on the event list
-    out_ws->getEventList(wi).addPulsetime(timeOffset);
+    out_ws->getSpectrum(wi).addPulsetime(timeOffset);
 
     prog.report(name());
   }

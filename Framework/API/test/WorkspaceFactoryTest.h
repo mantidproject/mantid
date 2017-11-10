@@ -5,9 +5,10 @@
 #include <vector>
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
@@ -33,6 +34,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
       size.push_back(YLength);
       WorkspaceTester::init(NVectors, XLength, YLength);
     }
+    using WorkspaceTester::init;
     std::vector<size_t> size;
   };
 
@@ -68,9 +70,9 @@ public:
   void testCreateFromParent() {
     MatrixWorkspace_sptr ws_child(new Workspace1DTest);
     ws_child->initialize(3, 1, 1);
-    ws_child->getSpectrum(0)->setSpectrumNo(123);
-    ws_child->getSpectrum(1)->setDetectorID(456);
-    ws_child->getSpectrum(2)->dataY()[0] = 789;
+    ws_child->getSpectrum(0).setSpectrumNo(123);
+    ws_child->getSpectrum(1).setDetectorID(456);
+    ws_child->getSpectrum(2).dataY()[0] = 789;
 
     ws_child->mutableRun().addProperty("Ei", 12.0);
     ws_child->mutableSample().setName("MySample");
@@ -81,9 +83,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(child =
                                  WorkspaceFactory::Instance().create(ws_child));
     TS_ASSERT_EQUALS(child->id(), "Workspace1DTest");
-    TS_ASSERT_EQUALS(child->getSpectrum(0)->getSpectrumNo(), 123);
-    TS_ASSERT_EQUALS(*child->getSpectrum(1)->getDetectorIDs().begin(), 456);
-    TS_ASSERT_DIFFERS(child->getSpectrum(2)->dataY()[0], 789);
+    TS_ASSERT_EQUALS(child->getSpectrum(0).getSpectrumNo(), 123);
+    TS_ASSERT_EQUALS(*child->getSpectrum(1).getDetectorIDs().begin(), 456);
+    TS_ASSERT_DIFFERS(child->getSpectrum(2).dataY()[0], 789);
 
     // run/logs
     double ei(0.0);
@@ -129,12 +131,12 @@ public:
   void testAccordingToSize() {
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 2, 3));
+        ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 3, 2));
     TS_ASSERT(!ws->id().compare("Workspace2DTest"));
     Workspace2DTest &space = dynamic_cast<Workspace2DTest &>(*ws);
     TS_ASSERT_EQUALS(space.size[0], 1);
-    TS_ASSERT_EQUALS(space.size[1], 2);
-    TS_ASSERT_EQUALS(space.size[2], 3);
+    TS_ASSERT_EQUALS(space.size[1], 3);
+    TS_ASSERT_EQUALS(space.size[2], 2);
 
     TS_ASSERT_THROWS_NOTHING(
         ws = WorkspaceFactory::Instance().create("Workspace1DTest", 1, 1, 1));

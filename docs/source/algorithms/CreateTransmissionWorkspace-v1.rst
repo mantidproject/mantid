@@ -9,20 +9,27 @@
 Description
 -----------
 
-Creates a transmission run workspace given one or two TOF workspaces,
-and the original run workspace. If two workspaces are provided, then the
-first workspace is considered a low wavelength transmission run, and the
-second workspace is considered a high wavelength transmission run.
+Creates a transmission run workspace given one or two TOF workspaces.
+If two workspaces are provided, then the first workspace is considered
+a low wavelength transmission run, and the second workspace is considered
+a high wavelength transmission run.
 
-The two transmission run workspaces are converted to IvQ workspaces and
-then stitched together using :ref:`algm-Stitch1D`.
-Both input workspaces must have x-units of TOF.
+Both input workspaces must have X-units of TOF. They are first converted
+to units of wavelength and then stitched together using :ref:`algm-Stitch1D`.
 
-A single output workspace is generated with x-units of Wavelength in angstroms.
+A single output workspace is generated with X-units of Wavelength in angstroms.
 
 In most cases you will want to use :ref:`algm-CreateTransmissionWorkspaceAuto`,
 which is a facade over this algorithm that correctly configures the input
 properties for you.
+
+.. diagram:: CreateTransmissionWorkspace_HighLvl-v1_wkflw.dot
+
+The diagram above illustrates the main steps in the algorithm. Below is a more
+detailed diagram describing how transmission workspaces are converted to units
+of wavelength and normalized by monitors.
+
+.. diagram:: CreateTransmissionWorkspace_ConvertToWavelength-v1_wkflw.dot
 
 Usage
 -----
@@ -43,21 +50,22 @@ Usage
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
 .. testoutput:: ExCreateTransWSSimple
 
     The first four transWS Y values are:
-    0.0223
-    0.0602
-    0.1020
-    0.1207
+    0.0255
+    0.0758
+    0.1322
+    0.1422
 
 **Example - Create a transmission run from two runs**
 
@@ -78,21 +86,22 @@ Output:
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
 .. testoutput:: ExCreateTransWSTwo
 
     The first four transWS Y values are:
-    0.0567
-    0.0575
-    0.0577
-    0.0580
+    0.0572
+    0.0574
+    0.0584
+    0.0584
 
 .. categories::
 

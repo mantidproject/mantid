@@ -37,9 +37,6 @@ namespace DataHandling {
 */
 class DLLExport SaveParameterFile : public API::Algorithm {
 public:
-  SaveParameterFile();
-  ~SaveParameterFile() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

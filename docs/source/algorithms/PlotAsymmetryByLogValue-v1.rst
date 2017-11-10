@@ -10,10 +10,15 @@ Description
 -----------
 
 This algorithm calculates asymmetry for a series of Muon workspaces. The
-input workspaces must be in Muon Nexus files which names follow the
+input workspaces must be in Muon Nexus files, the names of which follow the
 rule: the filename must begin with at least 1 letter and followed by a
 number. The input property FirstRun must be set to the file name with
-the smalest number and the LastRun to the one with the highest number.
+the smallest number and the LastRun to the one with the highest number.
+
+The output workspace contains asymmetry as the Y values, and the selected
+log values for X. The log values can be chosen as the mean, minimum, maximum,
+first or last if they are a time series. For start/end times, the values are
+in seconds relative to the start time of the first run.
 
 If the "Green" property is not set the output workspace will contain a
 single spectrum with asymmetry values. If the "Green" is set the output
@@ -40,7 +45,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculating assymetry for a series of MUSR runs:**
+**Example - Calculating asymmetry for a series of MUSR runs:**
 
 .. testcode:: ExSimple
 
@@ -50,8 +55,8 @@ Usage
                                 TimeMin = 0.55,
                                 TimeMax = 12.0);
 
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -60,7 +65,7 @@ Output:
    Y values (asymmetry): [ 0.14500665  0.136374    0.11987909]
    X values (sample magn. field): [ 1350.  1360.  1370.]
 
-**Example - Using both Red and Green period:**
+**Example - Using both Red and Green periods:**
 
 .. testcode:: ExRedGreen
 
@@ -72,11 +77,11 @@ Output:
                                 Red = 1,
                                 Green = 2);
 
-   print "Y values (difference):", ws.readY(0)
-   print "Y values (red):", ws.readY(1)
-   print "Y values (green):", ws.readY(2)
-   print "Y values (sum):", ws.readY(3)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (difference): {}".format(ws.readY(0)))
+   print("Y values (red): {}".format(ws.readY(1)))
+   print("Y values (green): {}".format(ws.readY(2)))
+   print("Y values (sum): {}".format(ws.readY(3)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -93,8 +98,8 @@ Output:
 .. testcode:: ExCustomGrouping
 
    # Skip spectra 35
-   fwd_spectra = range(33,35) + range(36,65)
-
+   fwd_spectra = [x for x in range(33, 65) if x != 35]
+   
    # Skip spectra 1 and 2
    bwd_spectra = range(3, 33)
 
@@ -106,10 +111,10 @@ Output:
                                 ForwardSpectra = fwd_spectra,
                                 BackwardSpectra = bwd_spectra)
 
-   print "No of forward spectra used:", len(fwd_spectra)
-   print "No of backward spectra used:", len(bwd_spectra)
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("No of forward spectra used: {}".format(len(fwd_spectra)))
+   print("No of backward spectra used: {}".format(len(bwd_spectra)))
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -131,8 +136,8 @@ Output:
                                 TimeMax = 12.0,
                                 DeadTimeCorrType = 'FromRunData');
 
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -149,8 +154,8 @@ Output:
                                 LastRun="MUSR00015191",
                                 LogValue="sample_temp",
                                 Function="Mean")
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 

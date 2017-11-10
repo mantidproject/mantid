@@ -18,9 +18,6 @@ namespace Crystal {
  */
 class DLLExport LoadHKL : public API::Algorithm {
 public:
-  LoadHKL();
-  ~LoadHKL() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadHKL"; };
   /// Summary of algorithms purpose

@@ -36,9 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport MultiplyMD : public BinaryOperationMD {
 public:
-  MultiplyMD();
-  ~MultiplyMD() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

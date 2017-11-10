@@ -38,7 +38,6 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using namespace Kernel;
 
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector {
 public:
@@ -81,7 +80,7 @@ protected:
   double m_efficiency;
 
   /* Parameters that are calibrated or depend on calibrated parameters */
-  V2D m_calibratedPosition;
+  Kernel::V2D m_calibratedPosition;
   double m_vectorAngle;
   double m_distanceFromSample;
 

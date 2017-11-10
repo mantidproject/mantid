@@ -6,9 +6,13 @@
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
+#include <boost/make_shared.hpp>
 
 class ModeratorChopperResolutionTest : public CxxTest::TestSuite {
 public:
@@ -18,7 +22,7 @@ public:
 
     boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo =
         createTestCachedExperimentInfo();
-    ModeratorChopperResolution *modChop(NULL);
+    ModeratorChopperResolution *modChop(nullptr);
 
     TS_ASSERT_THROWS_NOTHING(
         modChop = new ModeratorChopperResolution(*testCachedExperimentInfo));

@@ -7,6 +7,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -27,18 +28,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 /** Constructor
  */
 LoadSINQFocus::LoadSINQFocus()
-    : m_instrumentName(""), m_instrumentPath(), m_localWorkspace(),
-      m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_loader() {
-  m_supportedInstruments.emplace_back("FOCUS");
+    : m_supportedInstruments{"FOCUS"}, m_numberOfTubes{0},
+      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0} {
+
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSINQFocus::~LoadSINQFocus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -116,7 +112,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
 
-  if (m_instrumentPath == "") {
+  if (m_instrumentPath.empty()) {
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
   }
@@ -139,10 +135,9 @@ void LoadSINQFocus::initWorkSpace(NeXus::NXEntry &entry) {
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   // Might need to get this value from the number of monitors in the Nexus file
@@ -167,28 +162,30 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 
   std::vector<double> timeBinning =
       m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
-  m_localWorkspace->dataX(0).assign(timeBinning.begin(), timeBinning.end());
+  auto &x = m_localWorkspace->mutableX(0);
+  x.assign(timeBinning.begin(), timeBinning.end());
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > 0) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
+        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(0));
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec)
+          .assign(data_p, data_p + m_numberOfChannels);
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadSINQFocus::calculateError);
       ++spec;
       progress.report();
     }
   }
-  g_log.debug() << "Data loading into WS done...." << std::endl;
+  g_log.debug() << "Data loading into WS done....\n";
 }
 
 void LoadSINQFocus::loadRunDetails(NXEntry &entry) {

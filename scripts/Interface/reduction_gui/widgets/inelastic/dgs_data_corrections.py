@@ -1,10 +1,11 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from __future__ import (absolute_import, division, print_function)
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_data_corrections_script import DataCorrectionsScript
 import reduction_gui.widgets.util as util
 import ui.inelastic.ui_dgs_data_corrections
+
 
 class DataCorrectionsWidget(BaseWidget):
     """

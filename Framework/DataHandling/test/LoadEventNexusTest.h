@@ -5,6 +5,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Property.h"
@@ -17,6 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -85,12 +89,12 @@ public:
     TS_ASSERT_DELTA((*WS->refX(0))[0], 44162.6, 0.05);
     TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
-    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(WS->getSpectrum(0)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(*WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(*WS->getSpectrum(0).getDetectorIDs().begin(), 0);
 
     // Check one event from one pixel - does it have a reasonable pulse time
-    TS_ASSERT(WS->getEventListPtr(1000)->getEvents()[0].pulseTime() >
+    TS_ASSERT(WS->getSpectrum(1000).getEvents()[0].pulseTime() >
               DateAndTime(int64_t(1e9 * 365 * 10)));
 
     // Check filename
@@ -166,11 +170,10 @@ public:
 
       int pixelID = 2000;
 
-      std::vector<TofEvent> events1 = WS->getEventListPtr(pixelID)->getEvents();
-      std::vector<TofEvent> events2 =
-          WS2->getEventListPtr(pixelID)->getEvents();
+      std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
+      std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
 
-      // std::cout << events1.size() << std::endl;
+      // std::cout << events1.size() << '\n';
       TS_ASSERT_EQUALS(events1.size(), events2.size());
       if (events1.size() == events2.size()) {
         for (size_t i = 0; i < events1.size(); i++) {
@@ -204,7 +207,7 @@ public:
     auto outWs =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
 
-    auto eventList = outWs->getEventList(4348);
+    auto eventList = outWs->getSpectrum(4348);
     auto events = eventList.getEvents();
 
     double max = events.begin()->tof();
@@ -246,13 +249,13 @@ public:
                "spectra filtered",
                outWs->getNumberHistograms() == specList.size());
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0)->getSpectrumNo() == 13);
+               outWs->getSpectrum(0).getSpectrumNo() == 13);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(1)->getSpectrumNo() == 16);
+               outWs->getSpectrum(1).getSpectrumNo() == 16);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(2)->getSpectrumNo() == 21);
+               outWs->getSpectrum(2).getSpectrumNo() == 21);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(3)->getSpectrumNo() == 28);
+               outWs->getSpectrum(3).getSpectrumNo() == 28);
 
     // B) test SpectrumMin and SpectrumMax
     wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
@@ -274,7 +277,7 @@ public:
     const size_t numSpecs = specMax - specMin + 1;
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
     for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx)->getSpectrumNo(),
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(),
                        static_cast<int>(specMin + specIdx));
     }
 
@@ -310,10 +313,10 @@ public:
     const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
     // 17 should come from SpectrumList
-    TS_ASSERT_EQUALS(outWs->getSpectrum(0)->getSpectrumNo(), 17);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 17);
     // and then sMin(20)...sMax(22)
     for (size_t specIdx = 0; specIdx < n; specIdx++) {
-      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1)->getSpectrumNo(),
+      TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(),
                        static_cast<int>(sMin + specIdx));
     }
   }
@@ -364,12 +367,12 @@ public:
                       outWs->getNumberEvents(), outWs2->getNumberEvents());
 
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0)->getSpectrumNo() == 10);
+               outWs->getSpectrum(0).getSpectrumNo() == 10);
 
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(10)->getSpectrumNo() == 20);
+               outWs->getSpectrum(10).getSpectrumNo() == 20);
     TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(11)->getSpectrumNo() == 45);
+               outWs->getSpectrum(11).getSpectrumNo() == 45);
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsName2);
@@ -404,7 +407,7 @@ public:
 
     TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
     TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(monWS->readX(0)[1], 0, 1e-6);
+    TS_ASSERT_DELTA(monWS->readX(0)[1], 1, 1e-6);
     TS_ASSERT_EQUALS(monWS->readY(0).size(), 1);
     TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6);
     TS_ASSERT_EQUALS(monWS->readE(0).size(), 1);
@@ -439,8 +442,8 @@ public:
                      111274); // There are (slightly) fewer events
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Pixels with at least one event will have switched
-      if (WS->getEventList(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED_NOTIME)
+      if (WS->getSpectrum(wi).getNumberEvents() > 0)
+        TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
     }
   }
 
@@ -464,12 +467,11 @@ public:
     TS_ASSERT_EQUALS(WS->dataE(0).size(), 200001);
     TS_ASSERT_DELTA(WS->dataE(0)[12], 0.0, 1e-6);
     // Check geometry for a monitor
-    IDetector_const_sptr mon = WS->getDetector(2);
-    TS_ASSERT(mon->isMonitor());
-    TS_ASSERT_EQUALS(mon->getID(), -3);
-    boost::shared_ptr<const IComponent> sample =
-        WS->getInstrument()->getSample();
-    TS_ASSERT_DELTA(mon->getDistance(*sample), 1.426, 1e-6);
+    const auto &specInfo = WS->spectrumInfo();
+    TS_ASSERT(specInfo.isMonitor(2));
+    TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
+    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)),
+                    1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")
@@ -557,9 +559,18 @@ public:
     TS_ASSERT_EQUALS(inst->getValidFromDate(),
                      std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->numMonitors(), 3);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
     auto params = inst->getParameterMap();
-    TS_ASSERT_EQUALS(params->size(), 49);
+    // Previously this was 49. Position/rotations are now stored in
+    // ComponentInfo and DetectorInfo so the following four parameters are no
+    // longer in the map:
+    // HYSPECA/Tank;double;rotz;0
+    // HYSPECA/Tank;double;rotx;0
+    // HYSPECA/Tank;Quat;rot;[1,0,0,0]
+    // HYSPECA/Tank;V3D;pos;[0,0,0]
+    TS_ASSERT_EQUALS(params->size(), 45);
+    std::cout << params->asString();
+
     TS_ASSERT_EQUALS(params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
@@ -580,7 +591,7 @@ public:
                                              // file
     TS_ASSERT_EQUALS(inst->getName(), "CNCS");
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 51203);
-    TS_ASSERT_EQUALS(inst->baseInstrument()->numMonitors(), 3);
+    TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);
 
     // check that CNCS_Parameters.xml has been loaded
     auto params = inst->getParameterMap();
@@ -619,12 +630,12 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
       // Times are NON-zero for ALL pixels.
-      if (WS->getEventList(wi).getNumberEvents() > 0) {
+      if (WS->getSpectrum(wi).getNumberEvents() > 0) {
         int64_t nanosec =
-            WS->getEventList(wi).getEvents()[0].pulseTime().totalNanoseconds();
+            WS->getSpectrum(wi).getEvents()[0].pulseTime().totalNanoseconds();
         TS_ASSERT_DIFFERS(nanosec, 0)
         if (nanosec == 0) {
-          std::cout << "Failure at WI " << wi << std::endl;
+          std::cout << "Failure at WI " << wi << '\n';
           return;
         }
       }
@@ -666,12 +677,12 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
     for (size_t wi = 0; wi < numHist; wi += 5000) {
       // All events should be weighted events for simulated data
-      TS_ASSERT_EQUALS(WS->getEventList(wi).getEventType(), WEIGHTED);
+      TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED);
     }
     // Check one event
-    TS_ASSERT_DELTA(WS->getEventList(26798).getWeightedEvents()[0].weight(),
+    TS_ASSERT_DELTA(WS->getSpectrum(26798).getWeightedEvents()[0].weight(),
                     1.8124e-11, 1.0e-4);
-    TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(),
+    TS_ASSERT_EQUALS(WS->getSpectrum(26798).getWeightedEvents()[0].tof(),
                      1476.0);
   }
 
@@ -727,11 +738,11 @@ public:
       }
       for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
         if (isFirstChildWorkspace) {
-          specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
+          specids.push_back(ws->getSpectrum(index).getSpectrumNo());
         } else {
           TSM_ASSERT_EQUALS(
               "The spectrNo should be the same for all child workspaces.",
-              specids[index], ws->getSpectrum(index)->getSpectrumNo());
+              specids[index], ws->getSpectrum(index).getSpectrumNo());
         }
       }
 

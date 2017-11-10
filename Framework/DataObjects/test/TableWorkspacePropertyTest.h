@@ -8,6 +8,7 @@
 
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ColumnFactory.h"

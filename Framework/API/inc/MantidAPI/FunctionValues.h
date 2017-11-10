@@ -40,10 +40,10 @@ namespace API {
 */
 class MANTID_API_DLL FunctionValues {
 public:
-  /// Default constructor.
-  FunctionValues() = default;
   /// Constructor.
-  FunctionValues(const FunctionDomain &domain);
+  explicit FunctionValues(size_t n = 0);
+  /// Constructor.
+  explicit FunctionValues(const FunctionDomain &domain);
   /// Return the number of values
   size_t size() const { return m_calculated.size(); }
   /// Expand values to a new size, preserve stored values.
@@ -112,11 +112,12 @@ protected:
   /// buffer
   /// @param to :: Pointer to the buffer, it must be large enough
   void multiply(double *to) const;
-
-  std::vector<double> m_calculated; ///< buffer for calculated values
-  std::vector<double> m_data;       ///< buffer for fit data
-  std::vector<double>
-      m_weights; ///< buffer for fitting weights (reciprocal errors)
+  /// buffer for calculated values
+  std::vector<double> m_calculated;
+  /// buffer for fit data
+  std::vector<double> m_data;
+  /// buffer for fitting weights (reciprocal errors)
+  std::vector<double> m_weights;
 };
 
 /// typedef for a shared pointer

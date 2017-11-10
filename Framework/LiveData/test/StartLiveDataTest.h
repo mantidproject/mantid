@@ -102,7 +102,7 @@ public:
 
     // Make an existing output workspace "fake" that should be overwritten
     AnalysisDataService::Instance().addOrReplace(
-        "fake", WorkspaceCreationHelper::Create2DWorkspace(23, 12));
+        "fake", WorkspaceCreationHelper::create2DWorkspace(23, 12));
 
     EventWorkspace_sptr ws;
     ws = doExecEvent("Add", 0, "", "");

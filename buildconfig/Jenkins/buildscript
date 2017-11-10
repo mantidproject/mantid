@@ -10,11 +10,25 @@
 # PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
-# Package by default
-BUILDPKG=true
 
 ###############################################################################
-# All node currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
+# System discovery
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  ON_RHEL6=true
+fi
+if [[ ${NODE_LABELS} == *rhel7* ]]; then
+  ON_RHEL7=true
+fi
+if [[ ${NODE_LABELS} == *ubuntu* ]]; then
+  ON_UBUNTU=true
+fi
+if [[ ${NODE_LABELS} == *osx* ]]; then
+  ON_MACOS=true
+fi
+
+###############################################################################
+# All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
 ###############################################################################
 export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 
@@ -24,10 +38,14 @@ export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 cmake --version
 
 ###############################################################################
-# Check job requirements from the name
+# Check job requirements from the name and changes
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
+fi
+
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+  PRBUILD=true
 fi
 
 if [[ ${JOB_NAME} == *debug* ]]; then
@@ -36,6 +54,24 @@ elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
   BUILD_CONFIG="RelWithDbg"
 else
   BUILD_CONFIG="Release"
+fi
+
+# For pull requests decide on what to build based on changeset and Jenkins
+# parameters.
+BUILDPKG=true
+SYSTEMTESTS=false
+if [[ ${PRBUILD} == true ]]; then
+  if [[ -n ${BUILD_PACKAGE} ]]; then
+    BUILDPKG=${BUILD_PACKAGE}
+  fi
+  if [[ ${ON_RHEL7} == true ]]; then
+    if ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
+      SYSTEMTESTS=false
+    else
+      BUILDPKG=true
+      SYSTEMTESTS=true
+    fi
+  fi
 fi
 
 ###############################################################################
@@ -59,6 +95,11 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+  if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
+      rm -rf $BUILD_DIR/eigen-*
+      rm -rf $BUILD_DIR/googletest-*
+      rm -fr $BUILD_DIR/python-xmlrunner-*
+  fi
 else
   mkdir $BUILD_DIR
 fi
@@ -68,7 +109,7 @@ fi
 ###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
   USE_CLANG=true
-elif [[ $(uname) == 'Darwin' ]] ; then
+elif [[ ${ON_MACOS} == true ]] ; then
   if [[ ! $(command -v icpc) ]] ; then
     USE_CLANG=true
   fi
@@ -80,6 +121,10 @@ if [[ $USE_CLANG ]]; then
   clang --version
   export CC=clang
   export CXX=clang++
+  # check if this is also a clang-tidy build
+  if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+      CLANGTIDYVAR="-DENABLE_CLANG_TIDY=ON"
+  fi
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
   #only needed with incremental builds. Clean builds delete this directory in a later step.
   if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
@@ -91,22 +136,14 @@ if [[ $USE_CLANG ]]; then
   fi
 fi
 
-###############################################################################
-# OS X 10.8 setup steps
-###############################################################################
-if [[ $(uname) == 'Darwin' ]] && [[ ! $USE_CLANG ]]; then
-  # Assuming we are using the Intel compiler
-  cd $WORKSPACE
-  ./fetch_Third_Party.sh
-  cd $WORKSPACE
-  # Setup environment variables
-  source /opt/intel/bin/iccvars.sh intel64
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Third_Party/lib/mac64:/Library/Frameworks
-  # Make sure we pick up the Intel compiler
-  export CC=icc
-  export CXX=icpc
-  echo "Using Intel compiler."
-  icpc --version
+#for openmp support on OS X run
+# `brew install llvm`
+# `ln -s /usr/local/opt/llvm/lib/libomp.dylib /usr/local/lib/libomp.dylib`
+if [[ ${ON_MACOS} == true ]] ; then
+  if [[ ${JOB_NAME} == *openmp* ]]; then
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+  fi
 fi
 
 ###############################################################################
@@ -123,19 +160,24 @@ fi
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
 DIST_FLAGS="-DSTATIC_LIBSTDCXX=OFF"
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
+if [[ "${ON_RHEL6}" == true ]]; then
   SCL_ON_RHEL6="scl enable mantidlibs34 devtoolset-2"
-  ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"
 fi
 
-if [[ ${NODE_LABELS} == *rhel7* ]]; then
-  ON_RHEL7=true
-fi
-
-if [[ ${NODE_LABELS} == *ubuntu* ]]; then
-  ON_UBUNTU=true
+###############################################################################
+# Check if this is a Python 3 build and set CMake arguments.
+###############################################################################
+PY2_BUILD=false
+PY3_BUILD=false
+if [[ ${JOB_NAME} == *python3* ]]; then
+  PY3_BUILD=true
+  PYTHON3_EXECUTABLE=`which python3`
+  DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
+  PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+else
+  PY2_BUILD=true
 fi
 
 ###############################################################################
@@ -144,10 +186,10 @@ fi
 if [[ "$BUILDPKG" == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
-  if [[ $(uname) != 'Darwin' ]]; then
+  if [[ ${ON_MACOS} != true ]]; then
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      echo "Performing release build" # do nothing
+       PACKAGE_SUFFIX=""
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
@@ -156,14 +198,16 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
-    # Only unsuffixed release builds create envvars scripts
-    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
-    else
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
+    if [[ ${PY3_BUILD} == true ]]; then
+      # Add '-python3' to package name and install path
+      PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    if [ ! -z "$PACKAGE_SUFFIX" ]; then
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
+      # No suffix and traditional install path for python 2 release build
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
+    else
+      # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
   fi
@@ -195,13 +239,13 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON ${DIST_FLAGS} ${PACKAGINGVARS} .."
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs34 "make -j${BUILD_THREADS}"
+  ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . -- -j ${BUILD_THREADS}
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
@@ -222,6 +266,14 @@ $SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
 $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 
 ###############################################################################
+# static analysis builds stop here
+###############################################################################
+if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
+  exit 0
+fi
+
+
+###############################################################################
 # Run the unit tests
 ###############################################################################
 # Remove any Mantid.user.properties file
@@ -230,9 +282,9 @@ rm -f $userprops
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
-# Run the documentation tests on Ubuntu when doing a pull request build.
+# Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
 ###############################################################################
-if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then
@@ -245,20 +297,20 @@ fi
 # Create the install kit if required. This includes building the Qt help
 # documentation
 ###############################################################################
-if [[ "$BUILDPKG" == true ]]; then
+if [[ ${BUILDPKG} == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
-  if [[ $(uname) == 'Darwin' ]]; then
+  if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
   $SCL_ON_RHEL6 "cpack"
 
-  # Source tarball on clean build (arbitrarily choose rhel6)
+  # Source tarball on clean build (arbitrarily choose rhel7)
   # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
-  if [[ "$CLEANBUILD" == true && "$ON_RHEL6" == true ]]; then
+  if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
     $SCL_ON_RHEL6 "cmake --build . --target docs-html"
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
@@ -267,9 +319,13 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
-# Run the system tests on RHEL7 when doing a pull request build. Run
-# from a package to have at least one Linux checks it install okay
+# Run the system tests if required. Run from a package to have at least one
+# Linux checks it install okay
 ###############################################################################
-if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
-  $SCRIPT_DIR/systemtests
-	fi
+if [[ ${SYSTEMTESTS} == true ]]; then
+  if [[ ${PRBUILD} == true ]]; then
+    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+  else
+    $SCRIPT_DIR/systemtests
+  fi
+fi

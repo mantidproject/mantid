@@ -2,28 +2,29 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <fstream>
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/System.h"
 #include <Poco/Path.h>
-
-#include <sstream>
 #include <fstream>
 
-#include <boost/algorithm/string/trim.hpp>
+#include <fstream>
+#include <sstream>
+
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-
-using namespace std;
 
 namespace Mantid {
 namespace DataHandling {
@@ -35,20 +36,6 @@ const size_t NUMBERDETECTORPERMODULE = 1232;
 // Number of reserved detectors per module/bank
 const size_t NUMBERRESERVEDPERMODULE = 1250;
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadVulcanCalFile::LoadVulcanCalFile()
-    : m_instrument(), m_groupingType(VULCAN_OFFSET_BANK), m_offsetFilename(""),
-      m_badPixFilename(""), m_tofOffsetsWS(), m_offsetsWS(), m_groupWS(),
-      m_maskWS(), m_doAlignEventWS(false), m_eventWS(), m_effLTheta() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadVulcanCalFile::~LoadVulcanCalFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadVulcanCalFile::init() {
@@ -58,11 +45,11 @@ void LoadVulcanCalFile::init() {
                                                     FileProperty::Load, ".dat"),
                   "Path to the VULCAN offset file. ");
 
-  vector<string> groupoptions{"6Modules", "2Banks", "1Bank"};
+  std::array<std::string, 3> groupoptions = {{"6Modules", "2Banks", "1Bank"}};
 
   declareProperty(
       "Grouping", "6Modules",
-      boost::make_shared<ListValidator<string>>(groupoptions),
+      boost::make_shared<ListValidator<std::string>>(groupoptions),
       "Choices to output group workspace for 1 bank, 2 banks or 6 modules. ");
 
   declareProperty(Kernel::make_unique<FileProperty>("BadPixelFilename", "",
@@ -98,7 +85,6 @@ void LoadVulcanCalFile::init() {
       "It serves as a verifying tool, and will be removed after test. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadVulcanCalFile::exec() {
@@ -119,7 +105,6 @@ void LoadVulcanCalFile::exec() {
     setProperty("EventWorkspace", m_eventWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process input and output
   */
 void LoadVulcanCalFile::processInOutProperites() {
@@ -127,7 +112,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   m_offsetFilename = getPropertyValue("OffsetFilename");
   m_badPixFilename = getPropertyValue("BadPixelFilename");
 
-  string WorkspaceName = getPropertyValue("WorkspaceName");
+  std::string WorkspaceName = getPropertyValue("WorkspaceName");
   if (WorkspaceName.empty())
     throw std::invalid_argument("Must specify WorkspaceName.");
 
@@ -135,24 +120,24 @@ void LoadVulcanCalFile::processInOutProperites() {
   m_instrument = getInstrument();
 
   // Grouping
-  string grouptypestr = getPropertyValue("Grouping");
+  std::string grouptypestr = getPropertyValue("Grouping");
   size_t numeffbanks = 6;
-  if (grouptypestr.compare("6Modules") == 0) {
+  if (grouptypestr == "6Modules") {
     m_groupingType = VULCAN_OFFSET_BANK;
-  } else if (grouptypestr.compare("2Banks") == 0) {
+  } else if (grouptypestr == "2Banks") {
     m_groupingType = VULCAN_OFFSET_MODULE;
-  } else if (grouptypestr.compare("1Bank") == 0) {
+  } else if (grouptypestr == "1Bank") {
     m_groupingType = VULCAN_OFFSET_STACK;
   } else {
-    stringstream ess;
+    std::stringstream ess;
     ess << "Group type " << grouptypestr << " is not supported. ";
-    throw runtime_error(ess.str());
+    throw std::runtime_error(ess.str());
   }
 
   // Effective L and 2thetas
-  vector<int> vec_bankids = getProperty("BankIDs");
-  vector<double> vec_difcs = getProperty("EffectiveDIFCs");
-  vector<double> vec_2thetas = getProperty("Effective2Thetas");
+  std::vector<int> vec_bankids = getProperty("BankIDs");
+  std::vector<double> vec_difcs = getProperty("EffectiveDIFCs");
+  std::vector<double> vec_2thetas = getProperty("Effective2Thetas");
   if (vec_bankids.size() != numeffbanks || vec_difcs.size() != numeffbanks ||
       vec_2thetas.size() != numeffbanks) {
     std::stringstream ess;
@@ -160,7 +145,7 @@ void LoadVulcanCalFile::processInOutProperites() {
         << "), EffectiveDIFCs (" << vec_difcs.size()
         << ") and Effective2Thetas (" << vec_2thetas.size() << ") must be "
         << numeffbanks << " in mode '" << grouptypestr << "'! ";
-    throw runtime_error(ess.str());
+    throw std::runtime_error(ess.str());
   }
 
   for (size_t i = 0; i < numeffbanks; ++i) {
@@ -169,7 +154,7 @@ void LoadVulcanCalFile::processInOutProperites() {
     double theta = 0.5 * vec_2thetas[i];
     double effl = difc / (252.777 * 2.0 * sin(theta / 180. * M_PI));
 
-    m_effLTheta.emplace(bankid, make_pair(effl, theta));
+    m_effLTheta.emplace(bankid, std::make_pair(effl, theta));
   }
 
   // Create offset workspace
@@ -213,16 +198,13 @@ void LoadVulcanCalFile::processInOutProperites() {
     m_doAlignEventWS = true;
   else
     m_doAlignEventWS = false;
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up grouping workspace
   */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
   // Get the right group option for CreateGroupingWorkspace
-  string groupdetby = "";
+  std::string groupdetby;
   switch (m_groupingType) {
   case VULCAN_OFFSET_BANK:
     groupdetby = "bank";
@@ -237,7 +219,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
     break;
 
   default:
-    throw runtime_error("Grouping type is not supported. ");
+    throw std::runtime_error("Grouping type is not supported. ");
     break;
   }
 
@@ -251,7 +233,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 
   creategroupws->execute();
   if (!creategroupws->isExecuted())
-    throw runtime_error("Unable to create grouping workspace.");
+    throw std::runtime_error("Unable to create grouping workspace.");
 
   m_groupWS = creategroupws->getProperty("OutputWorkspace");
 
@@ -259,24 +241,21 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
   m_groupWS->setTitle(groupdetby);
 
   // Output
-  string WorkspaceName = getPropertyValue("WorkspaceName");
+  std::string WorkspaceName = getPropertyValue("WorkspaceName");
   declareProperty(Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputGroupingWorkspace", WorkspaceName + "_group",
                       Direction::Output),
                   "Set the output GroupingWorkspace. ");
   m_groupWS->mutableRun().addProperty("Filename", m_offsetFilename);
   setProperty("OutputGroupingWorkspace", m_groupWS);
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up masking workspace
   */
 void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Skip if bad pixel file is not given
-  if (m_badPixFilename.size() == 0)
+  if (m_badPixFilename.empty())
     return;
 
   // Open file
@@ -286,12 +265,12 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
     return;
   }
 
-  string line;
+  std::string line;
   while (std::getline(maskss, line)) {
     boost::algorithm::trim(line);
     if (!line.empty()) {
       // Get the bad pixel's detector ID.  One per line
-      stringstream liness(line);
+      std::stringstream liness(line);
       try {
         int pixelid;
         liness >> pixelid;
@@ -309,24 +288,23 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
 
   // Mask workspace index
   std::ostringstream msg;
+  auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i) {
-    if (m_maskWS->readY(i)[0] > 0.5) {
-      m_maskWS->maskWorkspaceIndex(i);
-      m_maskWS->dataY(i)[0] = 1.0;
-      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0]
+    if (m_maskWS->y(i)[0] > 0.5) {
+      m_maskWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
+      m_maskWS->mutableY(i)[0] = 1.0;
+      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->y(i)[0]
           << "\n";
     }
   }
   g_log.information(msg.str());
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Generate offset workspace
   */
 void LoadVulcanCalFile::generateOffsetsWorkspace() {
-  map<detid_t, double> map_detoffset;
+  std::map<detid_t, double> map_detoffset;
 
   // Read offset file
   readOffsetFile(map_detoffset);
@@ -340,24 +318,21 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 
   // Convert to Mantid offset values
   convertOffsets();
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Read VULCAN's offset file
   */
 void LoadVulcanCalFile::readOffsetFile(
     std::map<detid_t, double> &map_detoffset) {
   // Read file
-  ifstream infile(m_offsetFilename.c_str());
+  std::ifstream infile(m_offsetFilename.c_str());
   if (!infile.is_open()) {
-    stringstream errss;
+    std::stringstream errss;
     errss << "Input offset file " << m_offsetFilename << " cannot be opened.";
-    throw runtime_error(errss.str());
+    throw std::runtime_error(errss.str());
   }
 
-  string line;
+  std::string line;
   while (std::getline(infile, line)) {
     std::istringstream iss(line);
     int pid;
@@ -367,11 +342,8 @@ void LoadVulcanCalFile::readOffsetFile(
     detid_t detid = static_cast<detid_t>(pid);
     map_detoffset.emplace(detid, offset);
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process offsets by generating maps
   * Output: Offset workspace : 10^(xi_0 + xi_1 + xi_2)
   */
@@ -379,11 +351,12 @@ void LoadVulcanCalFile::processOffsets(
     std::map<detid_t, double> map_detoffset) {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
+
   // Map from Mantid instrument to VULCAN offset
-  map<detid_t, size_t> map_det2index;
+  std::map<detid_t, size_t> map_det2index;
   for (size_t i = 0; i < numspec; ++i) {
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(i);
-    detid_t tmpid = det->getID();
+    detid_t tmpid = spectrumInfo.detector(i).getID();
 
     // Map between detector ID and workspace index
     map_det2index.emplace(tmpid, i);
@@ -391,34 +364,34 @@ void LoadVulcanCalFile::processOffsets(
 
   // Map from VULCAN offset to Mantid instrument: Validate
   std::set<int> set_bankID;
-  map<detid_t, pair<bool, int>>
+  std::map<detid_t, std::pair<bool, int>>
       map_verify; // key: detector ID, value: flag to have a match, bank ID
   for (auto &miter : map_detoffset) {
     detid_t pid = miter.first;
     auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {
-      map_verify.emplace(pid, make_pair(false, -1));
+      map_verify.emplace(pid, std::make_pair(false, -1));
     } else {
       size_t wsindex = fiter->second;
       // Get bank ID from instrument tree
-      Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(wsindex);
-      Geometry::IComponent_const_sptr parent = det->getParent();
-      string pname = parent->getName();
+      const auto &det = spectrumInfo.detector(wsindex);
+      Geometry::IComponent_const_sptr parent = det.getParent();
+      std::string pname = parent->getName();
 
-      vector<string> terms;
+      std::vector<std::string> terms;
       boost::split(terms, pname, boost::is_any_of("("));
-      vector<string> terms2;
+      std::vector<std::string> terms2;
       boost::split(terms2, terms[0], boost::is_any_of("bank"));
-      int bank = atoi(terms2.back().c_str());
+      int bank = std::stoi(terms2.back());
       set_bankID.insert(bank);
 
-      map_verify.emplace(pid, make_pair(true, bank));
+      map_verify.emplace(pid, std::make_pair(true, bank));
     }
   }
 
   // Verify
   static const size_t arr[] = {21, 22, 23, 26, 27, 28};
-  vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
+  std::vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
   for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
@@ -426,21 +399,21 @@ void LoadVulcanCalFile::processOffsets(
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
       auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       bool exist = miter->second.first;
       int tmpbank = miter->second.second;
       if (!exist)
-        throw runtime_error(
+        throw std::runtime_error(
             "Define VULCAN offset pixel is not defined in Mantid.");
       if (tmpbank != static_cast<int>(bankindex))
-        throw runtime_error("Bank ID does not match!");
+        throw std::runtime_error("Bank ID does not match!");
     }
   }
 
   // Get the global correction
   g_log.information() << "Number of bankds to process = " << set_bankID.size()
                       << "\n";
-  map<int, double> map_bankLogCorr;
+  std::map<int, double> map_bankLogCorr;
   for (const auto bankid : set_bankID) {
     // Locate inter bank and inter pack correction (log)
     double globalfactor = 0.;
@@ -455,7 +428,7 @@ void LoadVulcanCalFile::processOffsets(
 
       const auto offsetiter = map_detoffset.find(interbank_detid);
       if (offsetiter == map_detoffset.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       double interbanklogcorr = offsetiter->second;
 
       globalfactor += interbanklogcorr;
@@ -470,7 +443,7 @@ void LoadVulcanCalFile::processOffsets(
           static_cast<detid_t>((bankid + 1) * NUMBERRESERVEDPERMODULE) - 1;
       const auto offsetiter = map_detoffset.find(intermodule_detid);
       if (offsetiter == map_detoffset.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       double intermodulelogcorr = offsetiter->second;
 
       globalfactor += intermodulelogcorr;
@@ -480,28 +453,25 @@ void LoadVulcanCalFile::processOffsets(
   }
 
   // Calcualte the offset for each detector (log now still)
-  map<detid_t, double>::iterator offsetiter;
-  map<int, double>::iterator bankcorriter;
+  std::map<detid_t, double>::iterator offsetiter;
+  std::map<int, double>::iterator bankcorriter;
   for (size_t iws = 0; iws < numspec; ++iws) {
-    detid_t detid = m_tofOffsetsWS->getDetector(iws)->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     offsetiter = map_detoffset.find(detid);
     if (offsetiter == map_detoffset.end())
-      throw runtime_error("It cannot happen!");
+      throw std::runtime_error("It cannot happen!");
 
     int bankid =
         static_cast<int>(detid) / static_cast<int>(NUMBERRESERVEDPERMODULE);
     bankcorriter = map_bankLogCorr.find(bankid);
     if (bankcorriter == map_bankLogCorr.end())
-      throw runtime_error("It cannot happen!");
+      throw std::runtime_error("It cannot happen!");
 
     double offset = offsetiter->second + bankcorriter->second;
-    m_tofOffsetsWS->dataY(iws)[0] = pow(10., offset);
+    m_tofOffsetsWS->mutableY(iws)[0] = pow(10., offset);
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Align the input EventWorkspace
   */
 void LoadVulcanCalFile::alignEventWorkspace() {
@@ -509,26 +479,23 @@ void LoadVulcanCalFile::alignEventWorkspace() {
 
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   if (numberOfSpectra != m_tofOffsetsWS->getNumberHistograms())
-    throw runtime_error("Number of histograms are different!");
+    throw std::runtime_error("Number of histograms are different!");
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // Compute the conversion factor
-    double factor = m_tofOffsetsWS->readY(i)[0];
+    double factor = m_tofOffsetsWS->y(i)[0];
 
     // Perform the multiplication on all events
-    m_eventWS->getEventList(i).convertTof(1. / factor);
+    m_eventWS->getSpectrum(i).convertTof(1. / factor);
 
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Translate the VULCAN's offset to Mantid
   * Input Offset workspace : 10^(xi_0 + xi_1 + xi_2)
   *
@@ -547,62 +514,39 @@ void LoadVulcanCalFile::convertOffsets() {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
   // Instrument parameters
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
+  double l1 = spectrumInfo.l1();
 
-  m_instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-  g_log.debug() << "Beam line = " << beamline.X() << ", " << beamline.Y()
-                << ", " << beamline.Z() << "\n";
-
-  // FIXME - The simple version of the algorithm to calculate 2theta is used
-  // here.
-  //         A check will be made to raise exception if the condition is not met
-  //         to use the simple version.
-  double s_r, s_2theta, s_phi;
-  s_r = s_2theta = s_phi = 0.;
-  samplePos.spherical(s_r, s_2theta, s_phi);
-  if (fabs(beamline.X()) > 1.0E-20 || fabs(beamline.Y()) > 1.0E-20 ||
-      s_r > 1.0E-20)
-    throw runtime_error(
-        "Source is not at (0, 0, Z) or sample is not at (0, 0, 0).  "
-        "The simple version to calcualte detector's 2theta fails on this "
-        "situation.");
-
-  map<int, pair<double, double>>::iterator mfiter;
+  std::map<int, std::pair<double, double>>::iterator mfiter;
   for (size_t iws = 0; iws < numspec; ++iws) {
     // Get detector's information including bank belonged to and geometry
     // parameters
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(iws);
-    V3D detPos = det->getPos();
 
-    detid_t detid = det->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     int bankid = detid / static_cast<int>(NUMBERRESERVEDPERMODULE);
 
-    double l2, twotheta, phi;
-    detPos.getSpherical(l2, twotheta, phi);
+    double l2 = spectrumInfo.l2(iws);
+    double twotheta = spectrumInfo.twoTheta(iws);
 
     // Get effective
     mfiter = m_effLTheta.find(bankid);
     if (mfiter == m_effLTheta.end())
-      throw runtime_error("Effective DIFC and 2theta information is missed. ");
+      throw std::runtime_error(
+          "Effective DIFC and 2theta information is missed. ");
 
     double effL = mfiter->second.first;
     double effTheta = mfiter->second.second;
     double totL = l1 + l2;
 
     // Calcualte converted offset
-    double vuloffset = m_tofOffsetsWS->readY(iws)[0];
-    double manoffset = (totL * sin(twotheta * 0.5 * M_PI / 180.)) /
+    double vuloffset = m_tofOffsetsWS->y(iws)[0];
+    double manoffset = (totL * sin(twotheta * 0.5)) /
                            (effL * sin(effTheta * M_PI / 180.)) / vuloffset -
                        1.;
-    m_offsetsWS->dataY(iws)[0] = manoffset;
+    m_offsetsWS->mutableY(iws)[0] = manoffset;
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
   */
@@ -625,7 +569,6 @@ Geometry::Instrument_const_sptr LoadVulcanCalFile::getInstrument() {
   return inst;
 }
 
-//-----------------------------------------------------------------------
 /** Reads the calibration file.
  *
  * @param calFileName :: path to the old .cal file
@@ -668,6 +611,9 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
   int n, udet, select, group;
   double n_d, udet_d, offset, select_d, group_d;
 
+  SpectrumInfo *maskSpectrumInfo{nullptr};
+  if (maskWS)
+    maskSpectrumInfo = &maskWS->mutableSpectrumInfo();
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -714,11 +660,12 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
 
         if (select <= 0) {
           // Not selected, then mask this detector
-          maskWS->maskWorkspaceIndex(wi);
-          maskWS->dataY(wi)[0] = 1.0;
+          maskWS->getSpectrum(wi).clearData();
+          maskSpectrumInfo->setMasked(wi, true);
+          maskWS->mutableY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
-          maskWS->dataY(wi)[0] = 0.0;
+          maskWS->mutableY(wi)[0] = 0.0;
           if (!hasUnmasked)
             hasUnmasked = true;
         }

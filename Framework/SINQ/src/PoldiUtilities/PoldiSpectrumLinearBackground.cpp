@@ -1,4 +1,5 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -20,7 +21,7 @@ void PoldiSpectrumLinearBackground::setWorkspace(
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (matrixWs && matrixWs->getNumberHistograms() > 0) {
-    m_timeBinCount = matrixWs->readX(0).size();
+    m_timeBinCount = matrixWs->x(0).size();
   }
 }
 

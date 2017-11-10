@@ -1,21 +1,23 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <boost/scoped_array.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
+#include <boost/scoped_array.hpp>
 #include <limits>
 
 namespace Mantid {
@@ -81,7 +83,7 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error("The input workspace must have common bins");
     throw std::invalid_argument("The input workspace must have common bins");
   }
@@ -185,8 +187,8 @@ void SaveNXSPE::exec() {
   // Energy bins
   // Get the Energy Axis (X) of the first spectra (they are all the same -
   // checked above)
-  const MantidVec &X = inputWS->readX(0);
-  nxFile.writeData("energy", X);
+  const auto &X = inputWS->x(0);
+  nxFile.writeData("energy", X.rawData());
   nxFile.openData("energy");
   nxFile.putAttr("units", "meV");
   nxFile.closeData();
@@ -225,26 +227,21 @@ void SaveNXSPE::exec() {
   Buffer errorBuffer(new double[bufferSize]);
 
   // Write the data
-  Progress progress(this, 0, 1, nHist);
+  Progress progress(this, 0.0, 1.0, nHist);
   int64_t bufferCounter(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int64_t i = 0; i < nHist; ++i) {
     progress.report();
 
-    Geometry::IDetector_const_sptr det;
-    try { // detector exist
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-    }
-
     double *signalBufferStart = signalBuffer.get() + bufferCounter * nBins;
     double *errorBufferStart = errorBuffer.get() + bufferCounter * nBins;
-    if (det && !det->isMonitor()) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
-      if (!det->isMasked()) {
-        const auto &inY = inputWS->readY(i);
-        std::copy(inY.begin(), inY.end(), signalBufferStart);
-        const auto &inE = inputWS->readE(i);
-        std::copy(inE.begin(), inE.end(), errorBufferStart);
+      if (!spectrumInfo.isMasked(i)) {
+        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(),
+                  signalBufferStart);
+        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(),
+                  errorBufferStart);
       } else {
         std::fill_n(signalBufferStart, nBins, MASK_FLAG);
         std::fill_n(errorBufferStart, nBins, MASK_ERROR);

@@ -59,8 +59,8 @@
 #  endif
 #endif
 
-#ifndef WIN32 /* unlink already in stdio.h for WIN32 */
-  extern int unlink OF((const char *));
+#ifndef _WIN32 /* unlink already in stdio.h for _WIN32 */
+extern int unlink OF((const char *));
 #else
 #pragma warning(disable: 4996)
 #endif

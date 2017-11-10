@@ -31,10 +31,10 @@ public:
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
     boost::shared_ptr<Instrument> testInst =
         boost::make_shared<Instrument>("empty");
-    ObjComponent *source = new ObjComponent("moderator", NULL);
+    ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
-    InstrumentRayTracer *rayTracker(NULL);
+    InstrumentRayTracer *rayTracker(nullptr);
     TS_ASSERT_THROWS_NOTHING(rayTracker = new InstrumentRayTracer(testInst));
     delete rayTracker;
   }
@@ -61,7 +61,7 @@ public:
     // Check they are actually what we expect: 1 with the sample and 1 with the
     // central detector
     IComponent_const_sptr centralPixel =
-        testInst->getComponentByName("pixel-(0,0)");
+        testInst->getComponentByName("pixel-(0;0)");
     IComponent_const_sptr sampleComp = testInst->getSample();
 
     if (!sampleComp) {
@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(results.size(), 1);
 
     const IComponent *interceptedPixel =
-        testInst->getComponentByName("pixel-(1,0)").get();
+        testInst->getComponentByName("pixel-(1;0)").get();
 
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
@@ -150,7 +150,7 @@ public:
    */
   void doTestRectangularDetector(std::string message, Instrument_sptr inst,
                                  V3D testDir, int expectX, int expectY) {
-    //    std::cout << message << std::endl;
+    //    std::cout << message << '\n';
     InstrumentRayTracer tracker(inst);
     testDir.normalize(); // Force to be unit vector
     tracker.traceFromSample(testDir);

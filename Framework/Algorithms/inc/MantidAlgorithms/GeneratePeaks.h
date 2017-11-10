@@ -42,7 +42,6 @@ namespace Algorithms {
 class DLLExport GeneratePeaks : public API::Algorithm {
 public:
   GeneratePeaks();
-  ~GeneratePeaks() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GeneratePeaks"; }

@@ -1,4 +1,4 @@
-﻿"""============================================================================
+"""============================================================================
 New Python command line interface for plotting in Mantid (a la matplotlib)
 ============================================================================
 
@@ -337,7 +337,8 @@ possible) meaning as in matplotlib.
 +------------+---------------------------------------------------------+
 |linestyle   | '-', '--', '-.' '.'                                     |
 +------------+---------------------------------------------------------+
-|marker      |  'o', 'v', '^', '<', '>', 's', '*', 'h', '|', '_'       |
+|marker      | None/"None" 'o', 'v', '^', '<', '>', 's', '*',          |
+|            | 'h', '|', '_'                                           |
 +------------+---------------------------------------------------------+
 |color       |  color character or string ('b', 'blue', 'g', 'green',  |
 |            |  'k', 'black', 'y', 'yellow', 'c', 'cyan', 'r', 'red'.  |
@@ -447,6 +448,8 @@ included in this module.
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+from __future__ import (absolute_import, division,
+                        print_function)
 
 try:
     import _qti
@@ -458,9 +461,15 @@ from PyQt4 import Qt, QtGui, QtCore
 from mantid.api import (IMDWorkspace as IMDWorkspace, MatrixWorkspace as MatrixWorkspace, AlgorithmManager as AlgorithmManager, AnalysisDataService as ADS)
 from mantid.api import mtd
 #    return __is_workspace(arg) or (mantid.api.mtd.doesExist(arg) and isinstance(mantid.api.mtd[arg], mantid.api.IMDWorkspace))
-from mantid.simpleapi import CreateWorkspace as CreateWorkspace
-import mantidplot  
+try:
+    from mantid.simpleapi import CreateWorkspace
+except ImportError:
+    def CreateWorkspace(*args, **kwargs):
+        raise RuntimeError("CreateWorkspace function not available")
+
+import mantidplot
 import mantidqtpython
+from six import string_types
 
 class Line2D():
     """
@@ -753,10 +762,10 @@ def __is_array(arg):
     """
         Is the argument a python or numpy list?
         @param arg :: argument
-        
+
         Returns :: True if the argument is a python or numpy list
     """
-    return isinstance(arg, list) or isinstance(arg, np.ndarray) 
+    return isinstance(arg, list) or isinstance(arg, np.ndarray)
 
 def __is_array_or_int(arg):
     """
@@ -777,7 +786,7 @@ def __is_registered_workspace_name(arg):
 
         Returns :: True if arg is a correct workspace name
     """
-    return (isinstance(arg, basestring) and mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
+    return (isinstance(arg, string_types) and mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
 
 def __is_valid_single_workspace_arg(arg):
     """"
@@ -832,7 +841,7 @@ def __is_workspace(arg):
     """
         Is the argument a Mantid MatrixWorkspace?
         @param arg :: argument
-        
+
         Returns :: True if the argument a MatrixWorkspace
     """
     return isinstance(arg, MatrixWorkspace)
@@ -841,7 +850,7 @@ def __is_array_of_workspaces(arg):
     """
         Is the argument a sequence of Mantid MatrixWorkspaces?
         @param arg :: argument
-        
+
         Returns :: True if the argument is a sequence of  MatrixWorkspace
     """
     return __is_array(arg) and len(arg) > 0 and __is_workspace(arg[0])
@@ -853,11 +862,11 @@ def __create_workspace(x, y, name="__array_dummy_workspace"):
         @param x :: x array
         @param y :: y array
         @param name :: workspace name
-        
+
         Returns :: Workspace
-    """    
+    """
     alg = AlgorithmManager.create("CreateWorkspace")
-    alg.setChild(True) 
+    alg.setChild(True)
     alg.initialize()
     # fake empty workspace (when doing plot([]), cause setProperty needs non-empty data)
     if [] == x:
@@ -867,7 +876,7 @@ def __create_workspace(x, y, name="__array_dummy_workspace"):
     alg.setProperty("DataX", x)
     alg.setProperty("DataY", y)
     name = name + "_" + str(Figure.fig_seq())
-    alg.setPropertyValue("OutputWorkspace", name) 
+    alg.setPropertyValue("OutputWorkspace", name)
     alg.execute()
     ws = alg.getProperty("OutputWorkspace").value
     ADS.addOrReplace(name, ws) # Cannot plot a workspace that is not in the ADS
@@ -923,6 +932,7 @@ def __matplotlib_defaults(l):
     l.setYTitle(' ')
 
 __marker_to_plotsymbol = {
+    None: _qti.PlotSymbol.NoSymbol, "None": _qti.PlotSymbol.NoSymbol,
     'o': _qti.PlotSymbol.Ellipse, 'v': _qti.PlotSymbol.DTriangle, '^': _qti.PlotSymbol.UTriangle,
     '<': _qti.PlotSymbol.LTriangle, '>': _qti.PlotSymbol.RTriangle, 's': _qti.PlotSymbol.Rect,
     '*': _qti.PlotSymbol.Star1, 'h': _qti.PlotSymbol.Hexagon, '|': _qti.PlotSymbol.VLine,
@@ -1054,7 +1064,7 @@ def __apply_plot_args(graph, first_line, *args):
         return
 
     for a in args:
-        if isinstance(a, basestring):
+        if isinstance(a, string_types):
             # this will eat characters as they come, without minding much the past/previous characters
             # users can chain as many modifiers as they wish. It could be modified to be more strict/picky
             i = 0
@@ -1129,7 +1139,7 @@ def __is_multiplot_command(*args, **kwargs):
             else:
                 return (False, []);
             # can have style string, but don't get confused with single workspace name strings!
-            if (not __is_registered_workspace_name(args[i])) and isinstance(args[i], basestring):
+            if (not __is_registered_workspace_name(args[i])) and isinstance(args[i], string_types):
                 style = args[i]
                 i += 1
             plots_seq.append((a,b,style))
@@ -1169,13 +1179,13 @@ def __process_multiplot_command(plots_seq, **kwargs):
 
 def __translate_hold_kwarg(**kwargs):
     """
-    Helper function to translate from hold='on'/'off' kwarg to a True/False value for the 
+    Helper function to translate from hold='on'/'off' kwarg to a True/False value for the
     mantidplot window and window error_bars
 
     @param kwargs :: keyword arguments passed to a plot function, this function only cares about hold. Any
                      value different from 'on' will be considered as 'off'
 
-    Returns :: tuple with a couple of values: True/False value for window, and True/False for clearWindow, 
+    Returns :: tuple with a couple of values: True/False value for window, and True/False for clearWindow,
                to be used with plotSpectrum, plotBin, etc.
     """
     # window and clearWindow
@@ -1195,7 +1205,7 @@ def __translate_hold_kwarg(**kwargs):
 
 def __translate_error_bars_kwarg(**kwargs):
     """
-    Helper function to translate from error_bars=True/False kwarg to a True/False value for the 
+    Helper function to translate from error_bars=True/False kwarg to a True/False value for the
     mantidplot error_bars argument
 
     @param kwargs :: keyword arguments passed to a plot function. This function only cares about 'error_bars'.
@@ -1252,7 +1262,7 @@ def __plot_as_workspaces_list(*args, **kwargs):
         Plot a series of workspaces
         @param args :: curve data and options.
         @param kwargs :: plot line options
-        
+
         Returns :: List of line objects
     """
     # mantidplot.plotSpectrum can already handle 1 or more input workspaces.
@@ -1264,7 +1274,7 @@ def __plot_as_array(*args, **kwargs):
         Plot from an array
         @param args :: curve data and options.
         @param kwargs :: plot line options
-        
+
         Returns :: the list of curves (1) included in the plot
     """
     y = args[0]
@@ -1273,15 +1283,15 @@ def __plot_as_array(*args, **kwargs):
         if __is_array(args[1]):
             ws = __create_workspace(y, args[1])
             idx_style = 2
-        elif isinstance(args[1], basestring):
-            x = range(0, len(y), 1) # 0 to n, incremented by 1.
+        elif isinstance(args[1], string_types):
+            x = list(range(0, len(y), 1)) # 0 to n, incremented by 1.
             ws = __create_workspace(x, y)
             # have to assume that args[1] is a style string
             idx_style = 1
         else:
             raise ValueError("Inputs are of type: " + str(type(args)) + ". Not plottable." )
     else:
-        x = range(0, len(y), 1)
+        x = list(range(0, len(y), 1))
         ws = __create_workspace(x, y)
 
     lines = __plot_as_workspace(ws, [0], *args[idx_style:], **kwargs)
@@ -1333,7 +1343,7 @@ def plot_bin(workspaces, indices, *args, **kwargs):
     """
     X-Y plot of the bin counts in a workspace.
 
-    Plots one or more bin, selected by indices, using spectra numbers as x-axis and bin counts for 
+    Plots one or more bin, selected by indices, using spectra numbers as x-axis and bin counts for
     each spectrum as y-axis.
 
     @param workspaces :: workspace or list of workspaces (both workspace objects and names accepted)
@@ -1559,7 +1569,7 @@ def grid(opt='on'):
         l.showGrid()
     elif 'off' == opt:
         # TODO is there support for a 'hideGrid' in qti? Apparently not.
-        print "Sorry, hiding/disabling grids is currenlty not supported"
+        print("Sorry, hiding/disabling grids is currenlty not supported")
 
 def figure(num=None):
     """

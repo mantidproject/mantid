@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include <stdexcept>
 #include <vector>
@@ -79,6 +80,7 @@ public:
   // Override method so we can manipulate whether it appears to be running
   bool isRunning() const override { return isRunningFlag; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
+  void cancel() override { isRunningFlag = false; }
 };
 
 DECLARE_ALGORITHM(AlgTest)
@@ -279,6 +281,7 @@ public:
     TSM_ASSERT("The third algorithm (is still running) so it is still there",
                AlgorithmManager::Instance().getAlgorithm(
                    third->getAlgorithmID()) == third);
+    AlgorithmManager::Instance().cancelAll();
   }
 
   void testDroppingOldOnes_extremeCase() {
@@ -292,6 +295,7 @@ public:
     // Create another that takes it past the normal max size (of 5)
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
+    AlgorithmManager::Instance().cancelAll();
   }
 
   void testThreadSafety() {
@@ -369,6 +373,7 @@ public:
     TS_ASSERT(
         AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 3);
+    AlgorithmManager::Instance().cancelAll();
   }
 
   void test_cancelAll() {
@@ -383,9 +388,11 @@ public:
     }
 
     AlgorithmManager::Instance().cancelAll();
-    for (size_t i = 0; i < 5; i++) {
-      TS_ASSERT(algs[i]->getCancel());
-    }
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance()
+                         .runningInstancesOf("AlgRunsForever")
+                         .size(),
+                     0);
+    AlgorithmManager::Instance().clear();
   }
 
   int m_notificationValue;

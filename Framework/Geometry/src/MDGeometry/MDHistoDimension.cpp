@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -95,7 +96,7 @@ std::string MDHistoDimension::toXMLString() const {
   DOMWriter writer;
   writer.writeNode(xmlstream, pDoc);
 
-  return xmlstream.str().c_str();
+  return xmlstream.str();
 }
 }
 }

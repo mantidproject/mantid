@@ -12,16 +12,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(SortTableWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SortTableWorkspace::SortTableWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SortTableWorkspace::~SortTableWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SortTableWorkspace::version() const { return 1; }
@@ -90,7 +80,7 @@ void SortTableWorkspace::exec() {
     crt->second = (*asc) != 0;
   }
 
-  API::ITableWorkspace_sptr outputWS(ws->clone().release());
+  API::ITableWorkspace_sptr outputWS(ws->clone());
   outputWS->sort(criteria);
   setProperty("OutputWorkspace", outputWS);
 }

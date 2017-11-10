@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -36,9 +36,6 @@ namespace Crystal {
   */
 class DLLExport FindUBUsingLatticeParameters : public API::Algorithm {
 public:
-  FindUBUsingLatticeParameters();
-  ~FindUBUsingLatticeParameters() override;
-
   /// Algorithm's name for identification
   const std::string name() const override {
     return "FindUBUsingLatticeParameters";

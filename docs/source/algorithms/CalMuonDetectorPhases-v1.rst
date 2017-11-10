@@ -13,7 +13,7 @@ Description
 Calculates detector asymmetries and phases from a reference dataset. The algorithm fits each of
 the spectra in the input workspace to:
 
-.. math:: f_i(t) = A_i \sin\left(\omega t + \phi_i\right)
+.. math:: f_i(t) = A_i \cos\left(\omega t + \phi_i\right)
 
 where :math:`\omega` is shared across spectra and :math:`A_i` and :math:`\phi_i` are
 detector-dependent.
@@ -22,9 +22,12 @@ Before the spectra are fitted, :math:`\omega` is determined by grouping the dete
 calculating the asymmetry and fitting this to get the frequency. This value of :math:`\omega`
 is then treated as a fixed constant when fitting the spectra to the function above.
 
-The algorithm outputs a table workspace containing the detector ID, the asymmetry and the phase.
+The algorithm outputs a table workspace containing the spectrum number, the asymmetry and the phase.
 This table is intended to be used as the input
-*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. In addition, the fitting results are returned
+*PhaseTable* to :ref:`PhaseQuad <algm-PhaseQuad>`. 
+Usually for muon instruments, each spectrum will correspond to one detector (spectrum number = detector ID).
+
+In addition, the fitting results are returned
 in a workspace group, where each of the items stores the original data (after removing the
 exponential decay), the data simulated with the fitting function and the difference between data
 and fit as spectra 0, 1 and 2 respectively.
@@ -50,23 +53,21 @@ Usage
 
    # Load four spectra from a muon nexus file
    ws = Load(Filename='MUSR00022725.nxs', SpectrumMin=1, SpectrumMax=4)
-   # Calibrate the phases and amplituds
+   # Calibrate the phases and amplitudes
    detectorTable, fittingResults = CalMuonDetectorPhases(InputWorkspace='ws', LastGoodData=4, ForwardSpectra="1,2", BackwardSpectra="3,4")
 
    # Print the result
-   print "Detector 1 has phase %f and amplitude %f" % (detectorTable.cell(0,2), detectorTable.cell(0,1))
-   print "Detector 2 has phase %f and amplitude %f" % (detectorTable.cell(1,2), detectorTable.cell(1,1))
-   print "Detector 3 has phase %f and amplitude %f" % (detectorTable.cell(2,2), detectorTable.cell(2,1))
-   print "Detector 4 has phase %f and amplitude %f" % (detectorTable.cell(3,2), detectorTable.cell(3,1))
+   for i in range(0,4):
+     print("Detector {} has phase {:.6f} and amplitude {:.6f}".format(detectorTable.cell(i,0), detectorTable.cell(i,2), detectorTable.cell(i,1)))
 
 Output:
 
 .. testoutput:: CalMuonDetectorPhasesExample
 
-  Detector 1 has phase 0.620299 and amplitude 0.133113
-  Detector 2 has phase 0.399003 and amplitude 0.134679
-  Detector 3 has phase 0.214079 and amplitude 0.149431
-  Detector 4 has phase 0.086315 and amplitude 0.152870
+  Detector 1 has phase 5.332568 and amplitude 0.133112
+  Detector 2 has phase 5.111274 and amplitude 0.134679
+  Detector 3 has phase 4.926346 and amplitude 0.149430
+  Detector 4 has phase 4.798584 and amplitude 0.152869
 
 .. categories::
 

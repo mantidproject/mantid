@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport IntegrateMDHistoWorkspace : public API::Algorithm {
 public:
-  IntegrateMDHistoWorkspace();
-  ~IntegrateMDHistoWorkspace() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

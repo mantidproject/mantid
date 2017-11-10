@@ -3,6 +3,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,18 +15,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Constructor
  */
 FindUBUsingMinMaxD::FindUBUsingMinMaxD() {
   useAlgorithm("FindUBUsingFFT");
   deprecatedDate("2013-06-03");
 }
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingMinMaxD::~FindUBUsingMinMaxD() {}
 
 const std::string FindUBUsingMinMaxD::name() const {
   return "FindUBUsingMinMaxD";
@@ -37,7 +32,6 @@ const std::string FindUBUsingMinMaxD::category() const {
   return "Crystal\\UBMatrix";
 }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingMinMaxD::init() {
@@ -100,8 +94,8 @@ void FindUBUsingMinMaxD::exec() {
       IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance, base_index,
                              num_initial, degrees_per_step);
 
-  std::cout << "Error = " << error << std::endl;
-  std::cout << "UB = " << UB << std::endl;
+  std::cout << "Error = " << error << '\n';
+  std::cout << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {

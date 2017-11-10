@@ -11,25 +11,26 @@
 class ApplicationWindow;
 
 /**
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
- * 
+ * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ *National Laboratory & European Spallation Source
+ *
  * This file is part of Mantid.
- * 
+ *
  * Mantid is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Mantid is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * File change history is stored at: <https://github.com/mantidproject/mantid>
- * Code Documentation is available at: <http://doxygen.mantidproject.org>    
+ * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 /**
@@ -37,13 +38,12 @@ class ApplicationWindow;
  * with the user's preferences about which categories to display.  It
  * interacts with the View in the ManageInterfaceCategories dialog, and
  * persists its data using the user preferences file via the ConfigService.
- 
+
  * See the Qt documentation for more information on how this class fits in to
  * their implementation of Model-View programming.
  */
-class InterfaceCategoryModel : public QAbstractListModel
-{
-	Q_OBJECT
+class InterfaceCategoryModel : public QAbstractListModel {
+  Q_OBJECT
 
 public:
   /// Constructor.
@@ -76,21 +76,21 @@ private:
 
   /// The set of all categories to be hidden.
   QSet<QString> m_hiddenCategories;
-  /// A list of all categories.  (Effectively a set, but implemented as a list so it can be sorted.
+  /// A list of all categories.  (Effectively a set, but implemented as a list
+  /// so it can be sorted.
   QList<QString> m_allCategories;
 };
 
 /**
- * This class handles the "Manage Interface Categories" dialog in MantidPlot, in 
+ * This class handles the "Manage Interface Categories" dialog in MantidPlot, in
  * which users can add or remove the various interface categories listed in the
  * "Interface" menu.
  */
-class ManageInterfaceCategories : public QDialog
-{
-	Q_OBJECT
+class ManageInterfaceCategories : public QDialog {
+  Q_OBJECT
 
 public:
-	/// Only constructor.  We insist on seeing the ApplicationWindow.
+  /// Only constructor.  We insist on seeing the ApplicationWindow.
   explicit ManageInterfaceCategories(ApplicationWindow *parent);
 
 private slots:

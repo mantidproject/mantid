@@ -64,6 +64,22 @@ public:
 
   /// Sets the parameters such that height == h
   virtual void setHeight(const double h) = 0;
+
+  /// Fix a parameter or set up a tie such that value returned
+  /// by centre() is constant during fitting.
+  /// @param isDefault :: If true fix centre by default:
+  ///    don't show it in ties
+  virtual void fixCentre(bool isDefault = false) {
+    UNUSED_ARG(isDefault);
+    throw std::runtime_error(
+        "Generic centre fixing isn't implemented for this function.");
+  }
+
+  /// Free the centre parameter.
+  virtual void unfixCentre() {
+    throw std::runtime_error(
+        "Generic centre fixing isn't implemented for this function.");
+  }
 };
 
 } // namespace API

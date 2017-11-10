@@ -1,11 +1,9 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
 
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -13,8 +11,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidIndexing/IndexInfo.h"
 
 #include <Poco/File.h>
 
@@ -95,39 +92,9 @@ void LoadQKK::exec() {
   size_t nx = hmm.dim2(); // third dimension
   size_t nHist = ny * nx; // number of spectra in the dataset
   if (nHist == 0) {
-    throw std::runtime_error("Error in data dimensions: " +
-                             boost::lexical_cast<std::string>(ny) + " X " +
-                             boost::lexical_cast<std::string>(nx));
+    throw std::runtime_error("Error in data dimensions: " + std::to_string(ny) +
+                             " X " + std::to_string(nx));
   }
-
-  // Set the workspace structure. The workspace will contain nHist spectra each
-  // having a single wavelength bin.
-  const size_t xWidth = 2; // number of wavelength bin boundaries
-  const size_t yWidth = 1; // number of bins
-
-  // Create a workspace with nHist spectra and a single y bin.
-  MatrixWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", nHist, xWidth,
-                                              yWidth));
-  // Set the units of the x axis as Wavelength
-  outputWorkspace->getAxis(0)->unit() =
-      UnitFactory::Instance().create("Wavelength");
-  // Set the units of the data as Counts
-  outputWorkspace->setYUnitLabel("Counts");
-
-  //  Put the data into outputWorkspace
-  size_t count = 0;
-  for (size_t i = 0; i < ny; ++i)
-    for (size_t j = 0; j < nx; ++j) {
-      // Move data across
-      double c = hmm(0, int(i), int(j));
-      outputWorkspace->dataX(count)[0] = wavelength0;
-      outputWorkspace->dataX(count)[1] = wavelength1;
-      outputWorkspace->dataY(count)[0] = c;
-      outputWorkspace->dataE(count)[0] = sqrt(c);
-      ++count;
-    }
 
   // Build instrument geometry
 
@@ -135,7 +102,6 @@ void LoadQKK::exec() {
   std::string instrumentname = "QUOKKA";
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(instrumentname));
-  outputWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
 
@@ -213,12 +179,28 @@ void LoadQKK::exec() {
   // Position the detector so the z axis goes through its centre
   bank->setPos(-width / 2, -height / 2, 0);
 
-  // Set the workspace title
+  // Create a workspace with nHist spectra and a single y bin.
+  auto outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+      instrument, Indexing::IndexInfo(nHist), HistogramData::BinEdges(2));
+  // Set the units of the x axis as Wavelength
+  outputWorkspace->getAxis(0)->unit() =
+      UnitFactory::Instance().create("Wavelength");
+  // Set the units of the data as Counts
+  outputWorkspace->setYUnitLabel("Counts");
+
+  using namespace HistogramData;
+  const BinEdges binEdges = {wavelength0, wavelength1};
+  for (size_t index = 0; index < nHist; ++index) {
+    auto x = static_cast<int>(index % nx);
+    auto y = static_cast<int>(index / nx);
+    auto c = hmm(0, x, y);
+
+    Counts yValue = {static_cast<double>(c)};
+    outputWorkspace->setHistogram(index, binEdges, yValue);
+  }
+
   outputWorkspace->setTitle(entry.getString("experiment/title"));
-  // Attach the created workspace to the OutputWorkspace property. The workspace
-  // will also be saved in AnalysisDataService
-  // and can be retrieved by its name.
-  setProperty("OutputWorkspace", outputWorkspace);
+  setProperty("OutputWorkspace", std::move(outputWorkspace));
 }
 
 } // namespace

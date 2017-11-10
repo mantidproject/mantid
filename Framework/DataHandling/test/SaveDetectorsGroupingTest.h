@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
@@ -72,10 +74,10 @@ public:
         boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
-    TS_ASSERT_DELTA(gws2->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(7000)[0], 2.0, 1.0E-5);
 
     // 5. Clear
     Poco::File file(file1);

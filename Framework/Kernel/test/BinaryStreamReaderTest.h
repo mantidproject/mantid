@@ -25,7 +25,7 @@ public:
     createTestStream();
   }
 
-  void setUp() { resetStreamToStart(); }
+  void setUp() override { resetStreamToStart(); }
 
   //----------------------------------------------------------------------------
   // Successes cases

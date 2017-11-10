@@ -1,12 +1,10 @@
 #ifndef MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 #define MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <map>
 
@@ -109,9 +107,6 @@ namespace DataHandling {
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
-  GroupDetectors2();
-  ~GroupDetectors2() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupDetectors"; };
   /// Summary of algorithms purpose
@@ -141,7 +136,7 @@ private:
   private:
     /// this class can't be constructed it is just a holder for some static
     /// things
-    RangeHelper(){};
+    RangeHelper() = default;
     /// give an enum from poco a better name here
     enum {
       IGNORE_SPACES =
@@ -158,7 +153,7 @@ private:
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
-  double m_FracCompl;
+  double m_FracCompl = 0.0;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
   storage_map m_GroupWsInds;
@@ -171,9 +166,6 @@ private:
   /// read in the input parameters and see what findout what will be to grouped
   void getGroups(API::MatrixWorkspace_const_sptr workspace,
                  std::vector<int64_t> &unUsedSpec);
-  /// read in a list of instructions and output commands in .map file format
-  void translateInstructions(const std::string &instructions,
-                             std::stringstream &commands);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
   void processFile(std::string fname, API::MatrixWorkspace_const_sptr workspace,
@@ -213,24 +205,23 @@ private:
   /// Copy the and combine the histograms that the user requested from the input
   /// into the output workspace
   size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
-                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
+                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy,
+                    const bool keepAll, const std::set<int64_t> &unGroupedSet,
+                    Indexing::IndexInfo &indexInfo);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
   size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
 
-  /// Copy the data data in ungrouped histograms from the input workspace to the
-  /// output
-  void moveOthers(const std::set<int64_t> &unGroupedSet,
-                  API::MatrixWorkspace_const_sptr inputWS,
-                  API::MatrixWorkspace_sptr outputWS, size_t outIndex);
-  /// Copy the data data in ungrouped event lists from the input workspace to
-  /// the output
-  void moveOthersEvent(const std::set<int64_t> &unGroupedSet,
-                       DataObjects::EventWorkspace_const_sptr inputWS,
-                       DataObjects::EventWorkspace_sptr outputWS,
-                       size_t outIndex);
+  /// Returns true if detectors exists and is masked
+  bool isMaskedDetector(const API::SpectrumInfo &detector,
+                        const size_t index) const;
+
+  /// Copy the ungrouped spectra from the input workspace to the output
+  template <class TIn, class TOut>
+  void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS,
+                  TOut &outputWS, size_t outIndex);
 
   /// flag values
   enum {
@@ -259,6 +250,49 @@ private:
                                    /// for an algorithm notification and update
                                    /// the progress bar
 };
+
+/**
+*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
+* were not selected
+*  to be in a group to the end of the output spectrum
+*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+* group
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param outIndex :: the next spectra index available after the grouped spectra
+*/
+template <class TIn, class TOut>
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
+                                 const TIn &inputWS, TOut &outputWS,
+                                 size_t outIndex) {
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
+  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
+                     static_cast<double>(unGroupedSet.size());
+
+  // go thorugh all the spectra in the input workspace
+  for (auto copyFrIt : unGroupedSet) {
+    if (copyFrIt == USED)
+      continue; // Marked as not to be used
+    size_t sourceIndex = static_cast<size_t>(copyFrIt);
+
+    outputWS.getSpectrum(outIndex) = inputWS.getSpectrum(sourceIndex);
+
+    // go to the next free index in the output workspace
+    outIndex++;
+    // make regular progress reports and check for cancelling the algorithm
+    if (outIndex % INTERVAL == 0) {
+      m_FracCompl += INTERVAL * prog4Copy;
+      if (m_FracCompl > 1.0) {
+        m_FracCompl = 1.0;
+      }
+      progress(m_FracCompl);
+      interruption_point();
+    }
+  }
+
+  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
+                << " ungrouped spectra\n";
+}
 
 } // namespace DataHandling
 } // namespace Mantid

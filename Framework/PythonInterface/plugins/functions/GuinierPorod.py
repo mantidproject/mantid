@@ -23,10 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
-from mantid.api import IFunction1D, FunctionFactory
+from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
+from mantid.api import IFunction1D, FunctionFactory
+
 
 class GuinierPorod(IFunction1D):
     """
@@ -34,6 +35,7 @@ class GuinierPorod(IFunction1D):
 
         See Hammouda, J. Appl. Cryst. (2010) 43, 716-719
     """
+
     def category(self):
         return "SANS"
 
@@ -100,7 +102,6 @@ class GuinierPorod(IFunction1D):
             result += math.log(Rg) + math.log(2.0) + 1.0
             return result * math.pow(qval,-m) * math.pow(Rg,s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0,(m-s)/2.0)
 
-
     def _first_derivative_m(self, qval):
         """
             Compute the first derivative dI/dM
@@ -139,8 +140,8 @@ class GuinierPorod(IFunction1D):
         if qval < q1:
             return -2.0*Rg*math.pow(qval,-s)*math.exp(-qrg/n)*qval*qval/n
         else:
-            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),\
-                ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
+            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
+                                                                  ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
 
     def function1D(self, xvals):
         """
@@ -152,8 +153,8 @@ class GuinierPorod(IFunction1D):
         bgd = self.getParameterValue('Background')
 
         output = np.zeros(len(xvals), dtype=float)
-        for i in range(len(xvals)):
-            output[i] = scale * self._guinier_porod_core(xvals[i]) + bgd
+        for i,x in enumerate(xvals):
+            output[i] = scale * self._guinier_porod_core(x) + bgd
         return output
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -170,6 +171,7 @@ class GuinierPorod(IFunction1D):
             jacobian.set(i,3, self._first_derivative_m(x))
             jacobian.set(i,4, 1.0)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(GuinierPorod)

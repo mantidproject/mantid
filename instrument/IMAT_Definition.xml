@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File
 see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
-name="IMAT" valid-from ="1900-01-31 23:59:59"
-valid-to ="2015-07-31 23:59:59"
-last-modified="2015-07-31 12:49:00">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="IMAT" valid-from="2017-02-24 23:59:59"
+            valid-to="2018-08-25 23:59:59"
+            last-modified="2017-08-01 18:46:01">
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -26,51 +28,100 @@ last-modified="2015-07-31 12:49:00">
   <!-- source and sample-position components -->
 
   <component type="source">
-    <location />
+    <location z="-56.0"/>
   </component>
   <type name="source" is="Source" />
 
-  <component type="some-sample-holder">
-    <location z="19.281"/>
+  <component type="default-sample-holder">
+    <location />
   </component>
-  <type name="some-sample-holder" is="SamplePos" />
 
-  <!-- detector components (including monitors) -->
+  <!-- Place detector components (including monitors) -->
+
+  <!-- Monitors -->
   <component type="monitors" idlist="monitors">
     <location />
   </component>
 
-  <component type="detector-bank" idstart="0" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
-    <location z="23.281" x="-0.7" name="detector"/>
+<!--
+Place both banks. We fill along the X axis first (the rows).
+-->
+  <!-- This places a prototype bank with 200 elements on the right of the sample -->
+  <component type="prototype-bank" idstart="15" idfillbyfirst="x" idstep="1" idstepbyrow="100">
+  	<location x="+1.915" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="North Bank"/>
   </component>
-  <type name="detector-bank" is="rectangular_detector" type="pixel"
-  xpixels="512" xstart="-0.48705" xstep="+0.0051"
-  ypixels="512" ystart="-0.48705" ystep="+0.0051" >
-  </type>
-  <type name="pixel" is="detector">
+
+  <!-- This places a prototype bank with 200 elements on the left of the sample -->
+  <component type="prototype-bank" idstart="250" idfillbyfirst="x" idstep="1" idstepbyrow="100">
+  	<location x="-1.915" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="South Bank"/>
+  </component>
+
+  <!-- A cuboid sample holder -->
+  <!-- <type name="default-sample-holder" is="SamplePos" /> -->
+  <type name="default-sample-holder" is="SamplePos">
     <cuboid id="shape">
-      <left-front-bottom-point x="0.005104167" y="-0.005104167" z="0.0" />
-      <left-front-top-point x="0.005104167" y="-0.005104167" z="0.000005" />
-      <left-back-bottom-point x="-0.005104167" y="-0.005104167" z="0.0" />
-      <right-front-bottom-point x="0.005104167" y="0.005104167" z="0.0" />
+      <left-front-bottom-point  x="0.02"  y="-0.02" z="0.0"  />
+      <left-front-top-point     x="0.02"  y="-0.02" z="0.001" />
+      <left-back-bottom-point   x="-0.02" y="-0.02" z="0.0"  />
+      <right-front-bottom-point x="0.02"  y="0.02"  z="0.0"  />
     </cuboid>
     <algebra val="shape" />
   </type>
 
-  <!-- DEFINITION OF TYPES -->
+  <!-- Matrix structure of the "200 elements" detector
+  We start off the Y axis (ystart) at 0.05 so that the centre of the detector bank intersects
+  the line in the instrument view. This means the sample would be directly in front of the middle
+  of the detector, which is the case in IMAT
+   -->
+  <type name="prototype-bank" is="RectangularDetector" type="pixel-200-elements"
+  xpixels="100" xstart="-0.2" xstep="+0.004"
+  ypixels="2" ystart="+0.05" ystep="-0.1" >
+  </type>
 
+  <!--
+    Prototype pixel types, we seem to need those or Mantid crashes while parsing.
+    Pixel shape of current detectors is 
+    100mm height: from y=-0.05 on the bottom to y=0.05 on the top
+    4mm width: the x=0.004
+    Depth is 0.001, if we set it to 0.0 Mantid will crash
+  -->
+  <!-- <type name="pixel-200-elements" is="detector">
+   <cuboid id="pixel-shape">
+     <left-front-bottom-point x="0.0" y="-0.05" z="0.0" />
+     <left-front-top-point   x="0.0" y="0.05" z="0.0" />
+     <right-front-bottom-point  x="0.004" y="-0.05" z="0.001" />
+   </cuboid>
+  <algebra val="pixel-shape"/>
+  </type> -->
+
+  <type name="pixel-200-elements" is="detector">
+  <cuboid id="shape">
+    <left-front-bottom-point x="-0.002" y="-0.05" z="0.0"  />
+    <left-front-top-point  x="-0.002" y="0.05" z="0.0"  />
+    <left-back-bottom-point  x="-0.002" y="-0.05" z="0.001"  />
+    <right-front-bottom-point  x="0.002" y="-0.05" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+  <!-- DEFINITION OF MONITOR TYPES -->
   <type name="monitors">
     <component type="monitor-cylinder">
-      <!-- the original theoretical positions of the 4 monitors to the center,
-           in mm were:
-           M1: 11653.4, M2: 19814.4, M3: 20894.4, M4: 46177.4
-           which were " taken the CAD dimensions from a datum plane running
-           through the EPB axis – datum 4"
-      -->
-      <location z="11.6534" name="monitor1"/>
-      <location z="19.8144" name="monitor2"/>
-      <location z="20.8944" name="monitor3"/>
-      <location z="46.1774" name="monitor4"/>
+      <!-- Example, first monitor is at 11.6534 m from the source, in the direction towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
+      <location z="-44.3466" name="monitor1a"/> <!-- 11.6534 - 56 -->
+      <location z="-44.3466" name="monitor1b"/>
+      <location z="-36.1856" name="monitor2a"/> <!-- 19.8144 - 56 -->
+      <location z="-36.1856" name="monitor2b"/>
+      <location z="-35.1056" name="monitor3a"/> <!-- 20.8944 - 56 -->
+      <location z="-35.1056" name="monitor3b"/>
+      <location z="-9.8226" name="monitor4a"/> <!-- 46.1774 - 56 -->
+      <location z="-9.8226" name="monitor4b"/>
+      <location z="-7" name="monitor5a"/> <!-- 49.0 - 56 -->
+      <location z="-7" name="monitor5b"/>
+      <location z="0.0" name="CalMon"/> <!-- 56 - 56 -->
+      <location z="4.0" name="He_in"/>  <!-- 60 - 56-->
+      <location z="4.0" name="He_out"/>
+	  <location z="0"/> <!-- dummy monitor (off) -->
     </component>
   </type>
 
@@ -98,7 +149,9 @@ last-modified="2015-07-31 12:49:00">
 
   <!-- DETECTOR and MONITOR ID LISTS -->
   <idlist idname="monitors">
-    <id start="1" end="4" />
+    <id start="0" end="13" />
   </idlist>
+
+  <!-- do not use idlist for the rectangular detectors, they're ignored! -->
 
 </instrument>

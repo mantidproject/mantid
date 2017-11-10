@@ -44,10 +44,6 @@ namespace Crystal {
  */
 class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
 public:
-  /// Default constructorMatrix
-  OptimizeLatticeForCellType();
-  /// Destructor
-  ~OptimizeLatticeForCellType() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "OptimizeLatticeForCellType";
@@ -70,9 +66,6 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  /// Function to find peaks near detector edge
-  bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
-                 int col, int row, int Edge);
 };
 
 } // namespace Algorithm

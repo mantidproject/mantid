@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -58,8 +59,7 @@ void DownloadRemoteFile2::exec() {
   const std::string local = getPropertyValue("LocalFileName");
   jobManager->downloadRemoteFile(tid, remote, local);
 
-  g_log.information() << "Downloaded '" << remote << "' to '" << local << "'"
-                      << std::endl;
+  g_log.information() << "Downloaded '" << remote << "' to '" << local << "'\n";
 }
 
 } // end namespace RemoteAlgorithms

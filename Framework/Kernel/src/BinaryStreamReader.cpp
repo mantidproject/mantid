@@ -2,11 +2,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/BinaryStreamReader.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 
 #include <cassert>
 #include <istream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -96,13 +96,6 @@ BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
         "BinaryStreamReader: Input stream is in a bad state. Cannot continue.");
   }
 }
-
-/**
- * Destructor
- * The stream state is left as it was in the last call to a read operation.
- * It is up to the caller to close it.
- */
-BinaryStreamReader::~BinaryStreamReader() {}
 
 /**
  * Read a int32_t from the stream

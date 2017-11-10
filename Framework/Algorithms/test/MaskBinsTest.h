@@ -1,11 +1,10 @@
 #ifndef MASKBINSTEST_H_
 #define MASKBINSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaskBins.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -34,7 +33,7 @@ public:
     const std::string resultWorkspaceName("masked");
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     ads.add(workspaceName,
-            WorkspaceCreationHelper::Create2DWorkspaceBinned(5, 25, 0.0));
+            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
     TS_ASSERT_THROWS_NOTHING(
         masker.setPropertyValue("InputWorkspace", workspaceName));
@@ -66,15 +65,16 @@ public:
         TS_ASSERT_EQUALS((*it).second, 1.0);
       }
 
-      for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+      const size_t numBins = outputWS->blocksize();
+      for (size_t j = 0; j < numBins; ++j) {
         if (j >= 20 && j < 23) {
-          TS_ASSERT_EQUALS(outputWS->readY(i)[j], 0.0);
-          TS_ASSERT_EQUALS(outputWS->readE(i)[j], 0.0);
+          TS_ASSERT_EQUALS(outputWS->y(i)[j], 0.0);
+          TS_ASSERT_EQUALS(outputWS->e(i)[j], 0.0);
         } else {
-          TS_ASSERT_EQUALS(outputWS->readY(i)[j], 2.0);
-          TS_ASSERT_DELTA(outputWS->readE(i)[j], sqrt(2.0), 0.0001);
+          TS_ASSERT_EQUALS(outputWS->y(i)[j], 2.0);
+          TS_ASSERT_DELTA(outputWS->e(i)[j], M_SQRT2, 0.0001);
         }
-        TS_ASSERT_EQUALS(outputWS->readX(i)[j], j);
+        TS_ASSERT_EQUALS(outputWS->x(i)[j], j);
       }
     }
 
@@ -90,12 +90,9 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0);
     // Now change one set of bin boundaries so that the don't match the others
-    Mantid::MantidVec &X = WS->dataX(1);
-    std::transform(X.begin(), X.end(), X.begin(),
-                   std::bind2nd(std::minus<double>(), 10.0));
-
+    WS->mutableX(1) += -10;
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     TS_ASSERT_THROWS_NOTHING(
@@ -114,8 +111,8 @@ public:
 
     const MatrixWorkspace::MaskList &mask = WS->maskedBins(1);
     TS_ASSERT_EQUALS(mask.size(), 2);
-    const Mantid::MantidVec &Y = WS->readY(1);
-    const Mantid::MantidVec &E = WS->readE(1);
+    auto &Y = WS->y(1);
+    auto &E = WS->e(1);
     MatrixWorkspace::MaskList::const_iterator it;
     int k = 0;
     for (it = mask.begin(); it != mask.end(); ++it, ++k) {
@@ -132,7 +129,7 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("raggedMask");
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 10, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -153,7 +150,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -169,8 +166,7 @@ public:
 
     for (int wi = 1; wi <= 3; wi++)
       for (int bin = 3; bin < 6; bin++) {
-        // std::cout << wi << ":" << bin << "\n";
-        TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
+        TS_ASSERT_EQUALS(WS->y(wi)[bin], 0.0);
       }
 
     AnalysisDataService::Instance().remove(workspaceName);
@@ -186,7 +182,7 @@ public:
 
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -211,9 +207,9 @@ public:
     for (size_t wi = 0; wi < 5; ++wi) {
       for (size_t bin = 0; bin < size_t(nBins); ++bin) {
         if (wi >= 1 && wi <= 3 && bin >= 3 && bin < 6) {
-          TS_ASSERT_EQUALS(outWS->dataY(wi)[bin], 0.0);
+          TS_ASSERT_EQUALS(outWS->y(wi)[bin], 0.0);
         } else {
-          TS_ASSERT_EQUALS(outWS->dataY(wi)[bin], WS->dataY(wi)[bin]);
+          TS_ASSERT_EQUALS(outWS->y(wi)[bin], WS->y(wi)[bin]);
         }
       }
     } // ENDFOR wi
@@ -228,7 +224,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -246,9 +242,7 @@ public:
         boost::dynamic_pointer_cast<const EventWorkspace>(WS);
     for (int wi = 1; wi <= 3; wi++)
       for (int bin = 3; bin < 6; bin++) {
-        // std::cout << wi << ":" << bin << "\n";
-        const MantidVec &Y = constWS->dataY(wi);
-        TS_ASSERT_EQUALS(Y[bin], 0.0);
+        TS_ASSERT_EQUALS(constWS->y(wi)[bin], 0.0);
       }
 
     AnalysisDataService::Instance().remove(workspaceName);
@@ -265,7 +259,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     Mantid::Algorithms::MaskBins masker2;
@@ -285,8 +279,8 @@ public:
 
     for (size_t wi = 0; wi < 5; ++wi) {
       for (size_t bin = 0; bin < size_t(nBins); ++bin) {
-        const MantidVec &Y = constWS->readY(wi);
-        const MantidVec &oY = WS->readY(wi);
+        auto &Y = constWS->y(wi);
+        auto &oY = WS->y(wi);
         if (wi >= 1 && wi <= 3 && bin >= 3 && bin < 6) {
           TS_ASSERT_EQUALS(Y[bin], 0.0);
         } else {
@@ -305,7 +299,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 
@@ -326,9 +320,7 @@ public:
 
     for (int wi = 0; wi < numHist; wi++)
       for (int bin = 3; bin < 6; bin++) {
-        // std::cout << wi << ":" << bin << "\n";
-        const MantidVec &Y = constWS->dataY(wi);
-        TS_ASSERT_EQUALS(Y[bin], 0.0);
+        TS_ASSERT_EQUALS(constWS->y(wi)[bin], 0.0);
       }
     // Fewer events now; I won't go through all of them
     TS_ASSERT_LESS_THAN(events_after, events_before);
@@ -342,7 +334,7 @@ public:
     int nBins = 10;
     int numHist = 5;
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateEventWorkspace(numHist, nBins);
+        WorkspaceCreationHelper::createEventWorkspace(numHist, nBins);
     AnalysisDataService::Instance().add(workspaceName, WS);
     std::size_t events_before = WS->getNumberEvents();
 
@@ -364,9 +356,7 @@ public:
 
     for (int wi = 0; wi < numHist; wi++)
       for (int bin = 3; bin < 6; bin++) {
-        // std::cout << wi << ":" << bin << "\n";
-        const MantidVec &Y = constWS->dataY(wi);
-        TS_ASSERT_EQUALS(Y[bin], 0.0);
+        TS_ASSERT_EQUALS(constWS->y(wi)[bin], 0.0);
       }
     // Fewer events now; I won't go through all of them
     TS_ASSERT_LESS_THAN(events_after, events_before);

@@ -88,14 +88,15 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
 void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                             const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
-  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+  if (rhs->YUnit().empty() ||
+      !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     // Do nothing
   }
   // If the Y units match, then the output will be a distribution and will be
   // dimensionless
   else if (lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1) {
     out->setYUnit("");
-    out->isDistribution(true);
+    out->setDistribution(true);
   }
   // Else we need to set the unit that results from the division
   else {
@@ -118,8 +119,8 @@ void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
                                          const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to divide.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.constDataX(), rhsY, rhsE);
-  lhs.divide(rhs.constDataX(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.readX(), rhsY, rhsE);
+  lhs.divide(rhs.readX(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -209,7 +210,7 @@ std::string Divide::checkSizeCompatibility(
   // If RHS only has one value (1D vertical), the number of histograms needs to
   // match.
   // Each lhs spectrum will be divided by that scalar
-  // std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
+  // std::cout << "rhs->blocksize() " << rhs->blocksize() << '\n';
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||
@@ -221,7 +222,7 @@ std::string Divide::checkSizeCompatibility(
   if (m_matchXSize) {
     // Past this point, for a 2D WS operation, we require the X arrays to match.
     // Note this only checks the first spectrum
-    if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+    if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
       return "X arrays must match when dividing 2D workspaces.";
     }
   }

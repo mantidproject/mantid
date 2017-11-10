@@ -2,10 +2,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <mutex>
 
@@ -16,8 +19,9 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
-using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+
+GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
 
 namespace {
 ///@cond
@@ -32,32 +36,32 @@ namespace {
  * AlgorithmFactory class
  * @param includeHidden :: If true hidden algorithms are included
  */
-PyObject *getRegisteredAlgorithms(AlgorithmFactoryImpl &self,
-                                  bool includeHidden) {
-  // A list of strings AlgorithmName|version
+dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
   std::vector<std::string> keys = self.getKeys(includeHidden);
   const size_t nkeys = keys.size();
-  PyObject *registered = PyDict_New();
+  dict inventory;
   for (size_t i = 0; i < nkeys; ++i) {
-    std::pair<std::string, int> algInfo = self.decodeName(keys[i]);
-    PyObject *name = PyString_FromString(algInfo.first.c_str());
-    PyObject *vers = PyInt_FromLong(algInfo.second);
-    if (PyDict_Contains(registered, name) == 1) {
-      // A list already exists, create a copy and add this version
-      PyObject *versions = PyDict_GetItem(registered, name);
-      PyList_Append(versions, vers);
+    auto algInfo = self.decodeName(keys[i]);
+    object name(
+        handle<>(to_python_value<const std::string &>()(algInfo.first)));
+    object ver(handle<>(to_python_value<const int &>()(algInfo.second)));
+    // There seems to be no way to "promote" the return of .get to a list
+    // without copying it
+    object versions;
+    if (inventory.has_key(name)) {
+      versions = inventory.get(name);
     } else {
-      // No entry exists, create a key and tuple
-      PyObject *versions = PyList_New(1);
-      PyList_SetItem(versions, 0, vers);
-      PyDict_SetItem(registered, name, versions);
+      versions = list();
+      inventory[name] = versions;
     }
+    versions.attr("append")(ver);
   }
-  return registered;
+  return inventory;
 }
 
-//--------------------------------------------- Python algorithm subscription
-//------------------------------------------------
+//------------------------------------------------------------------------------
+// Python algorithm subscription
+//------------------------------------------------------------------------------
 
 // Python algorithm registration mutex in anonymous namespace (aka static)
 std::recursive_mutex PYALG_REGISTER_MUTEX;
@@ -104,7 +108,11 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

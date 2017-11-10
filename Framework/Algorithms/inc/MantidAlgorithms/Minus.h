@@ -46,10 +46,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport Minus : public BinaryOperation {
 public:
-  /// Default constructor
-  Minus() : BinaryOperation(){};
-  /// Destructor
-  ~Minus() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Minus"; }
   /// Summary of algorithms purpose

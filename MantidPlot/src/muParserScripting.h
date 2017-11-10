@@ -37,98 +37,84 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "math.h"
 #include <gsl/gsl_sf.h>
-#include <q3asciidict.h>
 
-//Mantid - follows changes to ScriptingEnv
+// Mantid - follows changes to ScriptingEnv
 class QsciLexer;
 
 //! TODO
-class muParserScripting: public ScriptingEnv
-{
+class muParserScripting : public ScriptingEnv {
   Q_OBJECT
 
-  public:
-    static const char *langName;
-    explicit muParserScripting(ApplicationWindow *parent)
-        : ScriptingEnv(parent, langName) {
-      d_initialized = true;
-    }
-    static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
+public:
+  static const char *langName;
+  explicit muParserScripting(ApplicationWindow *parent)
+      : ScriptingEnv(parent, langName) {
+    d_initialized = true;
+  }
+  static ScriptingEnv *constructor(ApplicationWindow *parent) {
+    return new muParserScripting(parent);
+  }
 
-    /// Set the system arguments. Throws an exception as it is not supported
-    void setSysArgs(const QStringList &args) override;
+  /// Set the system arguments. Throws an exception as it is not supported
+  void setSysArgs(const QStringList &args) override;
 
-    Script *newScript(const QString &name, QObject *context,
-                      const Script::InteractionType) const override {
-      return new muParserScript(const_cast<muParserScripting*>(this), name, context);
-    }
+  Script *newScript(const QString &name, QObject *context,
+                    const Script::InteractionType) const override {
+    return new muParserScript(const_cast<muParserScripting *>(this), name,
+                              context);
+  }
 
-    bool supportsEvaluation() override { return true; }
+  bool supportsEvaluation() override { return true; }
 
-    // we do not support global variables
-    bool setQObject(QObject *, const char *) override { return false; }
-    bool setInt(int, const char *) override { return false; }
-    bool setDouble(double, const char *) override { return false; }
+  // we do not support global variables
+  bool setQObject(QObject *, const char *) override { return false; }
+  bool setInt(int, const char *) override { return false; }
+  bool setDouble(double, const char *) override { return false; }
 
-    const QStringList mathFunctions() const override;
-    const QString mathFunctionDoc(const QString &name) const override;
+  const QStringList mathFunctions() const override;
+  const QString mathFunctionDoc(const QString &name) const override;
 
-    struct mathFunction
-    {
-      const char *name;
-      int numargs;
-      double (*fun1)(double);
-      double (*fun2)(double,double);
-      double (*fun3)(double,double,double);
-      const char *description;
-    };
-    static const mathFunction math_functions[];
+  struct mathFunction {
+    const char *name;
+    int numargs;
+    double (*fun1)(double);
+    double (*fun2)(double, double);
+    double (*fun3)(double, double, double);
+    const char *description;
+  };
+  static const mathFunction math_functions[];
 
-  private:
-    static double mod(double x, double y)
-      { return fmod(x,y); }
-    static double mypow(double x, double y)
-      { return pow(x,y); }
-    static double bessel_J0(double x)
-      { return gsl_sf_bessel_J0 (x); }
-    static double bessel_J1(double x)
-      { return gsl_sf_bessel_J1 (x); }
-    static double bessel_Jn(double x, double n)
-      { return gsl_sf_bessel_Jn ((int)n, x); }
-    static double bessel_Yn(double x, double n)
-      { return gsl_sf_bessel_Yn ((int)n, x); }
-    static double bessel_Jn_zero(double n, double s)
-      { return gsl_sf_bessel_zero_Jnu(n, (unsigned int) s); }
-    static double bessel_Y0(double x)
-      { return gsl_sf_bessel_Y0 (x); }
-    static double bessel_Y1(double x)
-      { return gsl_sf_bessel_Y1 (x); }
-    static double beta(double a, double b)
-      { return gsl_sf_beta (a,b); }
-    static double erf(double x)
-      { return gsl_sf_erf (x); }
-    static double erfc(double x)
-      { return gsl_sf_erfc (x); }
-    static double erf_Z(double x)
-      { return gsl_sf_erf_Z (x); }
-    static double erf_Q(double x)
-      { return gsl_sf_erf_Q (x); }
-    static double gamma(double x)
-      { return gsl_sf_gamma (x); }
-    static double lngamma(double x)
-      { return gsl_sf_lngamma (x); }
-    static double hazard(double x)
-      { return gsl_sf_hazard (x); }
-	 static double lambert_W0(double x)
-	   { return gsl_sf_lambert_W0(x); }
-	 static double lambert_Wm1(double x)
-	   { return gsl_sf_lambert_Wm1(x); }
+private:
+  static double mod(double x, double y) { return fmod(x, y); }
+  static double mypow(double x, double y) { return pow(x, y); }
+  static double bessel_J0(double x) { return gsl_sf_bessel_J0(x); }
+  static double bessel_J1(double x) { return gsl_sf_bessel_J1(x); }
+  static double bessel_Jn(double x, double n) {
+    return gsl_sf_bessel_Jn((int)n, x);
+  }
+  static double bessel_Yn(double x, double n) {
+    return gsl_sf_bessel_Yn((int)n, x);
+  }
+  static double bessel_Jn_zero(double n, double s) {
+    return gsl_sf_bessel_zero_Jnu(n, (unsigned int)s);
+  }
+  static double bessel_Y0(double x) { return gsl_sf_bessel_Y0(x); }
+  static double bessel_Y1(double x) { return gsl_sf_bessel_Y1(x); }
+  static double beta(double a, double b) { return gsl_sf_beta(a, b); }
+  static double erf(double x) { return gsl_sf_erf(x); }
+  static double erfc(double x) { return gsl_sf_erfc(x); }
+  static double erf_Z(double x) { return gsl_sf_erf_Z(x); }
+  static double erf_Q(double x) { return gsl_sf_erf_Q(x); }
+  static double gamma(double x) { return gsl_sf_gamma(x); }
+  static double lngamma(double x) { return gsl_sf_lngamma(x); }
+  static double hazard(double x) { return gsl_sf_hazard(x); }
+  static double lambert_W0(double x) { return gsl_sf_lambert_W0(x); }
+  static double lambert_Wm1(double x) { return gsl_sf_lambert_Wm1(x); }
 };
 
-class EmptySourceError : public mu::ParserError
-{
-	public:
-		EmptySourceError() {}
+class EmptySourceError : public mu::ParserError {
+public:
+  EmptySourceError() {}
 };
 
 #endif

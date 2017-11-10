@@ -94,7 +94,7 @@ public:
       for (i = 0; i < 3; i++) {
         testfile >> d1 >> d2;
         TS_ASSERT_EQUALS(d1, 2);
-        TS_ASSERT_DELTA(d2, std::sqrt(2.0), 0.0001);
+        TS_ASSERT_DELTA(d2, M_SQRT2, 0.0001);
       }
       getline(testfile, line);
       getline(testfile, line);
@@ -102,7 +102,7 @@ public:
       for (i = 0; i < 3; i++) {
         testfile >> d1 >> d2;
         TS_ASSERT_EQUALS(d1, 2);
-        TS_ASSERT_DELTA(d2, std::sqrt(2.0), 0.0001);
+        TS_ASSERT_DELTA(d2, M_SQRT2, 0.0001);
       }
       testfile.close();
     }
@@ -267,7 +267,7 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 1.0);
     inputWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(input, inputWS);

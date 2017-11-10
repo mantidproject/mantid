@@ -57,8 +57,9 @@ private:
   /// Returns the indices of the intensity parameters
   std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
-  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                              const std::vector<double> &errors) const override;
+  size_t
+  fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                       const HistogramData::HistogramE &errors) const override;
   /// Compute the sum for all Hermite polynomial coefficents
   void massProfile(double *result, const size_t nData) const override;
   /// Compute the contribution to mass profile nth Hermite polynomial
@@ -75,8 +76,7 @@ private:
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
                      size_t wi, double startX, double endX) override;
   /// Pre-calculate the Y-space values
-  void cacheYSpaceValues(const std::vector<double> &tseconds,
-                         const bool isHistogram,
+  void cacheYSpaceValues(const HistogramData::Points &tseconds,
                          const Algorithms::DetectorParams &detpar) override;
 
   /// The active hermite coefficents

@@ -34,9 +34,6 @@ namespace MDAlgorithms {
 */
 class DLLExport SaveMD2 : public API::Algorithm {
 public:
-  SaveMD2();
-  ~SaveMD2() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMD"; };
   /// Summary of algorithms purpose

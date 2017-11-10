@@ -8,14 +8,19 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/NexusTestHelper.cpp ../../TestHelpers/src/LoggingCleaner.cpp )
 
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  target_link_libraries( KernelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+
+  target_link_libraries( KernelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            Types
             Kernel
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES}
-            ${JSONCPP_LIBRARIES} )
+            ${JSONCPP_LIBRARIES}
+            ${TBB_LIBRARIES}
+            ${TBB_MALLOC_LIBRARIES}
+)
   add_dependencies ( FrameworkTests KernelTest )
   # Test data
   add_dependencies ( KernelTest StandardTestData )
@@ -23,14 +28,13 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )
 
-  add_custom_command ( TARGET KernelTest POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+  add_custom_command ( TARGET KernelTest POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                          ${CMAKE_CURRENT_SOURCE_DIR}/../../Properties/MantidTest.properties
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                          ${CMAKE_CURRENT_SOURCE_DIR}/../../Properties/MantidTest.user.properties
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
   )
 
 endif ()
-

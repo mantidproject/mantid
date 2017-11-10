@@ -1,5 +1,6 @@
 #include "MantidRemoteAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
@@ -120,7 +121,7 @@ void SubmitRemoteJob::exec() {
     resp["JobID"].getValue(jobId);
     setPropertyValue("JobID", jobId);
     g_log.information() << "Job submitted.  Job ID =  "
-                        << getPropertyValue("JobID") << std::endl;
+                        << getPropertyValue("JobID") << '\n';
   } else {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);

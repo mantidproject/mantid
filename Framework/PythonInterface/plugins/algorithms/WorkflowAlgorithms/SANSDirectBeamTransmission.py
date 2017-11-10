@@ -1,7 +1,10 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import os
+
 
 class SANSDirectBeamTransmission(PythonAlgorithm):
 
@@ -111,5 +114,6 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         self.setPropertyValue("OutputMessage", output_msg)
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(SANSDirectBeamTransmission)

@@ -27,7 +27,6 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidKernel/ClassMacros.h"
 #include <boost/python/wrapper.hpp>
 #include <map>
 
@@ -49,30 +48,34 @@ public:
   /// A constructor that looks like a Python __init__ method
   AlgorithmAdapter(PyObject *self);
 
+  /// Disable default constructor - The PyObject must be supplied to construct
+  /// the object
+  AlgorithmAdapter() = delete;
+
+  /// Disable copy operator
+  AlgorithmAdapter(const AlgorithmAdapter &) = delete;
+
+  /// Disable assignment operator
+  AlgorithmAdapter &operator=(const AlgorithmAdapter &) = delete;
+
   /** @name Algorithm virtual methods */
   ///@{
   /// Returns the name of the algorithm
   const std::string name() const override;
   /// Returns a version of the algorithm
   int version() const override;
-  /// A default version, chosen if there is no override
-  int defaultVersion() const;
   /// Returns the summary for the algorithm
   const std::string summary() const override;
-  /// Returns the summary for the algorithm
-  std::string defaultSummary() const;
   /// Returns a category of the algorithm.
   const std::string category() const override;
-  /// A default category, chosen if there is no override
-  std::string defaultCategory() const;
+  /// Returns optional documentation URL of the algorithm
+  const std::string helpURL() const override;
   /// Allow the isRunning method to be overridden
   bool isRunning() const override;
   /// Allow the cancel method to be overridden
   void cancel() override;
   /// A return of false will allow processing workspace groups as a whole
   bool checkGroups() override;
-  /// A default value for checkGroups, chosen if there is no override
-  bool checkGroupsDefault();
   /// Returns the validateInputs result of the algorithm.
   std::map<std::string, std::string> validateInputs() override;
   ///@}
@@ -122,10 +125,6 @@ protected:
   inline PyObject *getSelf() const { return m_self; }
 
 private:
-  /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(AlgorithmAdapter)
-  DISABLE_COPY_AND_ASSIGN(AlgorithmAdapter)
-
   /// Private init for this algorithm
   void init() override;
   /// Private exec for this algorithm

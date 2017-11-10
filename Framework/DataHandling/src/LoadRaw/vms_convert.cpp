@@ -73,7 +73,6 @@ void local_to_vax_shorts(unsigned short *sa, const int *n) {
 #endif /* WORDS_BIGENDIAN */
   (void)sa;
   (void)n; // Avoid compiler warning
-  return;
 }
 
 void vax_to_local_shorts(unsigned short *sa, const int *n) {
@@ -85,7 +84,6 @@ void vax_to_local_shorts(unsigned short *sa, const int *n) {
 #endif /* WORDS_BIGENDIAN */
   (void)sa;
   (void)n; // Avoid compiler warning
-  return;
 }
 
 void local_to_vax_ints(fort_int *ia, const fort_int *n) {
@@ -98,7 +96,6 @@ void local_to_vax_ints(fort_int *ia, const fort_int *n) {
 #endif /* WORDS_BIGENDIAN */
   (void)ia;
   (void)n; // Avoid compiler warning
-  return;
 }
 
 void vax_to_local_ints(fort_int *ia, const fort_int *n) {
@@ -111,7 +108,6 @@ void vax_to_local_ints(fort_int *ia, const fort_int *n) {
 #endif /* WORDS_BIGENDIAN */
   (void)ia;
   (void)n; // Avoid compiler warning
-  return;
 }
 
 /*
@@ -371,7 +367,6 @@ void vaxf_to_local(float *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 void local_to_vaxf(float *val, const int *n, int *errcode) {
@@ -387,7 +382,6 @@ void local_to_vaxf(float *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 void ieee_float_to_local(float *val, const int *n, int *errcode) {
@@ -409,7 +403,6 @@ void ieee_float_to_local(float *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 void ieee_double_to_local(double *val, const int *n, int *errcode) {
@@ -432,7 +425,6 @@ void ieee_double_to_local(double *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 void local_to_ieee_float(float *val, const int *n, int *errcode) {
@@ -455,7 +447,6 @@ void local_to_ieee_float(float *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 void local_to_ieee_double(double *val, const int *n, int *errcode) {
@@ -476,7 +467,6 @@ void local_to_ieee_double(double *val, const int *n, int *errcode) {
 #else
 #error Unknown floating point format
 #endif
-  return;
 }
 
 #if 0

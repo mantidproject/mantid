@@ -180,6 +180,23 @@ public:
                       (Matrix<double>(data)), std::invalid_argument);
   }
 
+  void testFromVectorAndDimensions() {
+    std::vector<int> data{1, 2, 3, 4, 5, 6};
+    TSM_ASSERT_THROWS("building matrix with worng dimension should fail",
+                      (Matrix<int>(data, 4, 5)), std::invalid_argument);
+    Matrix<int> myMat;
+    TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
+                              "with correct number of elements should not "
+                              "throw",
+                              myMat = Matrix<int>(data, 2, 3));
+    TS_ASSERT_EQUALS(1, myMat[0][0]);
+    TS_ASSERT_EQUALS(2, myMat[0][1]);
+    TS_ASSERT_EQUALS(3, myMat[0][2]);
+    TS_ASSERT_EQUALS(4, myMat[1][0]);
+    TS_ASSERT_EQUALS(5, myMat[1][1]);
+    TS_ASSERT_EQUALS(6, myMat[1][2]);
+  }
+
   void test_Transpose_On_Square_Matrix_Matches_TPrime() {
     Matrix<double> A(2, 2);
     A[0][0] = 1.0;
@@ -226,7 +243,7 @@ public:
       data[i] = i;
     }
     Matrix<int> myMat;
-    TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
+    TSM_ASSERT_THROWS_NOTHING("building matrix by this constructor and data "
                               "with correct number of elements should not "
                               "throw",
                               myMat = Matrix<int>(data));
@@ -275,8 +292,8 @@ public:
     TS_ASSERT_DELTA(d[1][0], -sqrt(0.5), 1e-7);
     TS_ASSERT_DELTA(d[1][1], sqrt(0.5), 1e-7);
     TS_ASSERT_DELTA(d[2][2], -1., 1e-7);
-    TS_ASSERT_DELTA(v[0], -sqrt(2.), 1e-7);
-    TS_ASSERT_DELTA(v[1], sqrt(2.), 1e-7);
+    TS_ASSERT_DELTA(v[0], -M_SQRT2, 1e-7);
+    TS_ASSERT_DELTA(v[1], M_SQRT2, 1e-7);
     TS_ASSERT_DELTA(v[2], 3., 1e-7);
   }
 
@@ -412,6 +429,8 @@ public:
 
     V3D nv = M * v;
     std::vector<double> stdNewVec = M * stdvec;
+    std::vector<double> otherStdNewVec;
+    M.multiplyPoint(stdvec, otherStdNewVec);
 
     // Results from octave.
     TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
@@ -420,20 +439,27 @@ public:
     TS_ASSERT_DELTA(stdNewVec[0], -0.403000000000000, 1e-15);
     TS_ASSERT_DELTA(stdNewVec[1], 25.663000000000000, 1e-15);
     TS_ASSERT_DELTA(stdNewVec[2], 11.715100000000003, 1e-15);
+    TS_ASSERT_DELTA(otherStdNewVec[0], -0.403000000000000, 1e-15);
+    TS_ASSERT_DELTA(otherStdNewVec[1], 25.663000000000000, 1e-15);
+    TS_ASSERT_DELTA(otherStdNewVec[2], 11.715100000000003, 1e-15);
 
     DblMatrix M4(4, 4, true);
     TS_ASSERT_THROWS(M4.operator*(v),
                      Mantid::Kernel::Exception::MisMatch<size_t>);
     TS_ASSERT_THROWS(M4.operator*(stdvec),
                      Mantid::Kernel::Exception::MisMatch<size_t>);
+    TS_ASSERT_THROWS(M4.multiplyPoint(stdvec, otherStdNewVec),
+                     Mantid::Kernel::Exception::MisMatch<size_t>);
 
     DblMatrix M23 = boost::lexical_cast<DblMatrix>(
         "Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
     TS_ASSERT_THROWS_NOTHING(M23.operator*(v));
     TS_ASSERT_THROWS_NOTHING(M23.operator*(stdvec));
+    TS_ASSERT_THROWS_NOTHING(M23.multiplyPoint(stdvec, otherStdNewVec));
 
     nv = M23 * v;
     stdNewVec = M23 * stdvec;
+    M23.multiplyPoint(stdvec, otherStdNewVec);
 
     TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
     TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
@@ -441,6 +467,9 @@ public:
     TS_ASSERT_DELTA(stdNewVec[0], -0.403000000000000, 1e-15);
     TS_ASSERT_DELTA(stdNewVec[1], 25.663000000000000, 1e-15);
     TS_ASSERT_EQUALS(stdNewVec.size(), 2);
+    TS_ASSERT_DELTA(otherStdNewVec[0], -0.403000000000000, 1e-15);
+    TS_ASSERT_DELTA(otherStdNewVec[1], 25.663000000000000, 1e-15);
+    TS_ASSERT_EQUALS(otherStdNewVec.size(), 2);
 
     DblMatrix M43 = boost::lexical_cast<DblMatrix>(
         "Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");

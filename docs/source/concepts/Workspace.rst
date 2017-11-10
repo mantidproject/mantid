@@ -16,7 +16,7 @@ the verbs). Workspaces hold the data in Mantid.
 They come in several forms, but the most common by far is the
 :ref:`MatrixWorkspace <MatrixWorkspace>` which contains measured or derived
 data with associated errors. Matrix Workspaces are typically created
-initially by executing one of Mantid's 'Load' algorithms, for example
+initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example
 :ref:`LoadRaw <algm-LoadRaw>`
 or
 :ref:`LoadNexus <algm-LoadNexus>`,
@@ -29,9 +29,8 @@ This stores data of (somewhat) arbitrary type in rows and columns, much
 like a spreadsheet. These typically are created as the output of certain
 specialized algorithms (e.g. curve fitting).
 
-In addition to data, workspaces hold a `workspace
-history <WorkspaceHistory>`__, which details the algorithms which have
-been run on this workspace.
+In addition to data, workspaces hold a :ref:`workspace  history <Workspace-Workspace_History>`,
+which details the algorithms which have been run on this workspace.
 
 In software engineering terms, the 'abstract' concept of a workspace is
 an 'interface', in that it defines common properties that are
@@ -77,15 +76,15 @@ You can access workspaces using the ``mtd["worskpace_name"]`` command for a spec
 
     # You can get a python variable pointing to the workspace with the command
     myWS = mtd["MyNewWorkspace"]
-    print "The variable myWS now points to the workspace called ", myWS
+    print("The variable myWS now points to the workspace called " + str(myWS))
 
     # You can also ask Mantid to create matching python variables for all of it's workspaces
     mtd.importAll()
-    print "MyNewWorkspace has been created that also points to the workspace called ", MyNewWorkspace 
+    print("MyNewWorkspace has been created that also points to the workspace called " + str(MyNewWorkspace))
 
     # You can assign a python variable when calling an algorithm and the workspace will match the variable name
     myOtherWS = CreateSampleWorkspace()
-    print "myOtherWS now points to the workspace called ", myOtherWS
+    print("myOtherWS now points to the workspace called " + str(myOtherWS))
 
 Output:
 
@@ -104,17 +103,17 @@ You can look at the :ref:`Workspace API reference <mantid.api.Workspace>` for a 
 .. testcode:: WorkspaceProperties
 
     myWS = CreateSampleWorkspace()
-    print "name = " + myWS.getName()
+    print("name = " + myWS.name())
 
     myWS.setTitle("This is my Title")
-    print "getTitle = " + myWS.getTitle()
+    print("getTitle = " + myWS.getTitle())
 
     myWS.setComment("This is my comment")
-    print "comment = " + myWS.getComment()
+    print("comment = " + myWS.getComment())
 
-    print "id = " + myWS.id()
+    print("id = " + myWS.id())
 
-    print "getMemorySize = " + str(myWS.getMemorySize())
+    print("getMemorySize = " + str(myWS.getMemorySize()))
 
 Output:
 
@@ -167,6 +166,7 @@ createWorkspace if you are writing C++ or Python algorithms.
 | "MDHistoWorkspace"            | :ref:`MDHistoWorkspace <MDHistoWorkspace>`|
 +-------------------------------+-------------------------------------------+
 
+.. _Workspace-Workspace_History:
 
 Workspace History
 #################
@@ -183,10 +183,10 @@ Workspaces keep a track of all of the algorithms used on them, so you can ask a 
     # You can access the history using getHistory()
     history = myWS.getHistory()
     for algHistory in history.getAlgorithmHistories():
-        print algHistory.name()
+        print(algHistory.name())
         for property in algHistory.getProperties():
             if not property.isDefault():
-                print "\t" + property.name() + " = " + property.value()
+                print("\t" + property.name() + " = " + property.value())
 
 Output:
 
@@ -203,6 +203,8 @@ Output:
         InputWorkspace = myWS
         OutputWorkspace = myWS
         Params = 200
+        
+The full documentation for workspace history can be found at the :class:`~mantid.api.WorkspaceHistory` api.
 
 Writing you own workspace
 -------------------------

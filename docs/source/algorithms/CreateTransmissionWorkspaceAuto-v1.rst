@@ -31,11 +31,11 @@ Usage
 
     trans = Load(Filename='INTER00013463.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 
 Output:
@@ -43,10 +43,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoSimple
 
     The first four transWS Y values are:
-    0.0223
-    0.0602
-    0.1020
-    0.1207
+    0.1647
+    0.1683
+    0.1761
+    0.1836
 
     
 **Example - Create a transmission run, overloading default parameters**
@@ -55,21 +55,21 @@ Output:
 
     trans = Load(Filename='INTER00013463.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoOverload
 
     The first four transWS Y values are:
-    0.0221
-    0.0598
-    0.1013
-    0.1198
+    0.1647
+    0.1683
+    0.1761
+    0.1836
 
     
 **Example - Create a transmission run from two runs**
@@ -79,21 +79,21 @@ Output:
     trans1 = Load(Filename='INTER00013463.nxs')
     trans2 = Load(Filename='INTER00013464.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0, Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoTwo
 
     The first four transWS Y values are:
-    0.0567
-    0.0575
-    0.0577
-    0.0580
+    0.0000
+    0.0126
+    0.0579
+    0.0579
 
 
 .. categories::

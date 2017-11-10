@@ -4,20 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/FullprofPolynomial.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/Workspace2D.h"
 
-using Mantid::CurveFitting::Functions::FullprofPolynomial;
+#include <array>
 
-using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Algorithms;
-using namespace Mantid::CurveFitting::Functions;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
+using Mantid::CurveFitting::Functions::FullprofPolynomial;
 
 class FullprofPolynomialTest : public CxxTest::TestSuite {
 public:
@@ -28,91 +19,58 @@ public:
   }
   static void destroySuite(FullprofPolynomialTest *suite) { delete suite; }
 
-  void testForCategories() {
-    FullprofPolynomial forCat;
-    const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
+  void test_category() {
+    FullprofPolynomial cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
   }
 
-  /** Test function on a Fullprof polynomial function
-    */
-  void test_FPPolynomial() {
-    // Create a workspace
-    std::string wsName = "TOFPolybackgroundBackgroundTest";
-    int histogramNumber = 1;
-    int timechannels = 1000;
-    DataObjects::Workspace2D_sptr ws2D =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            API::WorkspaceFactory::Instance().create(
-                "Workspace2D", histogramNumber, timechannels, timechannels));
+  void test_negative() {
+    FullprofPolynomial tofbkgd;
+    tofbkgd.initialize();
+    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", -3), std::invalid_argument);
+  }
 
-    AnalysisDataService::Instance().add(wsName, ws2D);
+  void test_zero() {
+    FullprofPolynomial tofbkgd;
+    tofbkgd.initialize();
+    TS_ASSERT_THROWS(tofbkgd.setAttributeValue("n", 0), std::runtime_error);
+  }
 
-    double tof0 = 8000.;
-    double dtof = 5.;
+  void test_calculate() {
+    FullprofPolynomial tofbkgd;
+    tofbkgd.initialize();
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setAttributeValue("n", 6));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setAttributeValue("Bkpos", 10000.));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setParameter("A0", 0.3));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setParameter("A1", 1.0));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setParameter("A2", -0.5));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setParameter("A3", 0.05));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd.setParameter("A4", -0.02));
 
-    for (int i = 0; i < timechannels; i++) {
-      ws2D->dataX(0)[i] = static_cast<double>(i) * dtof + tof0;
+    const int timeChannels = 1000;
+    std::array<double, timeChannels> xvals;
+    const double tof0 = 8000.;
+    const double dtof = 5.;
+
+    for (int i = 0; i < timeChannels; i++) {
+      xvals[i] = static_cast<double>(i) * dtof + tof0;
     }
 
-    // Create a function
-    IFunction_sptr tofbkgd = boost::dynamic_pointer_cast<IFunction>(
-        boost::make_shared<FullprofPolynomial>());
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("n", 6));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("Bkpos", 10000.));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A0", 0.3));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A1", 1.0));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A2", -0.5));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A3", 0.05));
-    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A4", -0.02));
-
-    // Calculate function
-    FunctionDomain1DVector domain(ws2D->readX(0));
-    FunctionValues values(domain);
-    tofbkgd->function(domain, values);
+    std::array<double, timeChannels> yValues;
+    tofbkgd.function1D(yValues.data(), xvals.data(), timeChannels);
 
     // Test result
-    TS_ASSERT_DELTA(values[400], 0.3, 1.0E-10); // Y[10000] = B0
-    TS_ASSERT_DELTA(values[0], 0.079568, 1.0E-5);
-    TS_ASSERT_DELTA(values[605], 0.39730, 1.0E-5);
-    TS_ASSERT_DELTA(values[999], 0.55583, 1.0E-5);
-
-    // Set the workspace
-    for (size_t i = 0; i < ws2D->readY(0).size(); ++i) {
-      ws2D->dataY(0)[i] = values[i];
-      ws2D->dataE(0)[i] = sqrt(fabs(values[i]));
-    }
-
-    // Make function a little bit off
-    tofbkgd->setParameter("A0", 0.5);
-    tofbkgd->setParameter("A3", 0.0);
-
-    // Set up fit
-    CurveFitting::Algorithms::Fit fitalg;
-    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
-    TS_ASSERT(fitalg.isInitialized());
-
-    fitalg.setProperty("Function", tofbkgd);
-    fitalg.setPropertyValue("InputWorkspace", wsName);
-    fitalg.setPropertyValue("WorkspaceIndex", "0");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
-    TS_ASSERT(fitalg.isExecuted());
-
-    // test the output from fit is what you expect
-    double chi2 = fitalg.getProperty("OutputChi2overDoF");
-
-    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
-    TS_ASSERT_DELTA(tofbkgd->getParameter("A0"), 0.3, 0.01);
-    TS_ASSERT_DELTA(tofbkgd->getParameter("A1"), 1.0, 0.0003);
-    TS_ASSERT_DELTA(tofbkgd->getParameter("A3"), 0.05, 0.01);
-
-    // Clean
-    AnalysisDataService::Instance().remove(wsName);
-
-    return;
+    TS_ASSERT_DELTA(yValues[400], 0.3, 1.0E-10); // Y[10000] = B0
+    TS_ASSERT_DELTA(yValues[0], 0.079568, 1.0E-5);
+    TS_ASSERT_DELTA(yValues[605], 0.39730, 1.0E-5);
+    TS_ASSERT_DELTA(yValues[999], 0.55583, 1.0E-5);
   }
 };
 

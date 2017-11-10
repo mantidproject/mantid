@@ -1,9 +1,11 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 import numpy
 import sys
+
 
 class FilterLogByTime(PythonAlgorithm):
 
@@ -75,5 +77,6 @@ class FilterLogByTime(PythonAlgorithm):
     def __statistics(self, values, operation):
         op = getattr(numpy, operation)
         return op(values)
+
 
 AlgorithmFactory.subscribe(FilterLogByTime)

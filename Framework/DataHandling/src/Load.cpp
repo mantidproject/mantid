@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -10,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -51,7 +49,7 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
  *names.
  */
 std::string generateWsNameFromFileNames(std::vector<std::string> filenames) {
-  std::string wsName("");
+  std::string wsName;
 
   for (auto &filename : filenames) {
     if (!wsName.empty())
@@ -245,7 +243,7 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // THIS IS A COPY as the properties are mutated as we move through them
   const std::vector<Property *> existingProps = this->getProperties();
   for (auto existingProp : existingProps) {
-    const std::string name = existingProp->name();
+    const std::string &name = existingProp->name();
     // Wipe all properties except the Load native ones
     if (m_baseProps.find(name) == m_baseProps.end()) {
       this->removeProperty(name);
@@ -414,7 +412,7 @@ void Load::loadMultipleFiles() {
       for (; childWsName != childWsNames.end(); ++childWsName, ++count) {
         Workspace_sptr childWs = group->getItem(*childWsName);
         const std::string childName =
-            group->getName() + "_" + boost::lexical_cast<std::string>(count);
+            group->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, childWs);
         // childWs->setName(group->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
@@ -444,7 +442,7 @@ void Load::loadMultipleFiles() {
         // child->setName(child->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
         const std::string childName =
-            child->getName() + "_" + boost::lexical_cast<std::string>(count);
+            child->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, child);
         count++;
       }
@@ -454,8 +452,7 @@ void Load::loadMultipleFiles() {
     count = 1;
     for (auto &childWsName : childWsNames) {
       Workspace_sptr childWs = group->getItem(childWsName);
-      std::string outWsPropName =
-          "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
+      std::string outWsPropName = "OutputWorkspace_" + std::to_string(count);
       ++count;
       declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           outWsPropName, childWsName, Direction::Output));
@@ -615,7 +612,7 @@ Load::getOutputWorkspace(const std::string &propName,
 
   g_log.debug() << "Workspace property " << propName
                 << " did not return to MatrixWorkspace, EventWorkspace, "
-                   "IMDEventWorkspace, IMDWorkspace" << std::endl;
+                   "IMDEventWorkspace, IMDWorkspace\n";
   return Workspace_sptr();
 }
 

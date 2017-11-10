@@ -1,7 +1,10 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
-from mantid.api import *
 from mantid.simpleapi import *
+from mantid.api import *
+
 
 import os.path
 
@@ -16,14 +19,11 @@ class IndirectCalibration(DataProcessorAlgorithm):
     _intensity_scale = None
     _run_numbers = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
-
     def summary(self):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -47,10 +47,12 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor by which to scale the result.')
 
+        self.declareProperty(name='LoadLogFiles', defaultValue=False,
+                             doc = 'Option to load log files.' )
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output workspace for calibration data.')
-
 
     def validateInputs(self):
         """
@@ -63,7 +65,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
-
 
     def _validate_range(self, property_name):
         """
@@ -82,7 +83,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
         return None
 
-
     def PyExec(self):
         from IndirectCommon import get_run_number
 
@@ -99,7 +99,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                      OutputWorkspace=root,
                      SpectrumMin=int(self._spec_range[0]),
                      SpectrumMax=int(self._spec_range[1]),
-                     LoadLogFiles=False)
+                     LoadLogFiles=self.getProperty('LoadLogFiles').value)
 
                 runs.append(root)
                 self._run_numbers.append(get_run_number(root))
@@ -167,7 +167,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._add_logs()
         self.setProperty('OutputWorkspace', self._out_ws)
 
-
     def _setup(self):
         """
         Gets properties.
@@ -183,7 +182,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._intensity_scale = self.getProperty('ScaleFactor').value
         if self._intensity_scale == 1.0:
             self._intensity_scale = None
-
 
     def _add_logs(self):
         """

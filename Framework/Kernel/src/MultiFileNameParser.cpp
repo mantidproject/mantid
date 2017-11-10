@@ -5,6 +5,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Strings.h"
 
 #include <numeric>
 #include <sstream>
@@ -175,7 +176,7 @@ std::string suggestWorkspaceName(const std::vector<std::string> &fileNames) {
  * overkill.
  */
 bool ReverseCaselessCompare::operator()(const std::string &a,
-                                        const std::string &b) {
+                                        const std::string &b) const {
   std::string lowerA(a);
   std::string lowerB(b);
 
@@ -481,7 +482,7 @@ parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
   }
 
   // We should always end up with at least 1 unsigned int here.
-  assert(1 <= rangeDetails.size());
+  assert(!rangeDetails.empty());
 
   std::vector<std::vector<unsigned int>> runs;
 
@@ -546,11 +547,11 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
     throw std::runtime_error(
         "Unable to generate a range with a step size of zero.");
 
-  size_t limit = 100;
-  int success =
-      ConfigService::Instance().getValue("loading.multifilelimit", limit);
-  if (!success) {
-    limit = 100;
+  size_t limit;
+  std::string limitStr;
+  ConfigService::Instance().getValue("loading.multifilelimit", limitStr);
+  if (!Strings::convert(limitStr, limit)) {
+    limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 
   unsigned int orderedTo = from > to ? from : to;
@@ -559,9 +560,9 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
   if (numberOfFiles > limit) {
     std::stringstream sstream;
     sstream << "The range from " << orderedFrom << " to " << orderedTo
-            << " step " << stepSize << ", would genetate " << numberOfFiles
+            << " with step " << stepSize << " would generate " << numberOfFiles
             << " files.  "
-            << "This is greater then the current limit of " << limit << ".  "
+            << "This is greater than the current limit of " << limit << ".  "
             << "This limit can be configured in the Mantid.user.properties "
                "file using the key loading.multifilelimit=200.";
     throw std::range_error(sstream.str());
@@ -618,7 +619,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
  */
 void validateToken(const std::string &token) {
   // Each token must be non-empty.
-  if (token.size() == 0)
+  if (token.empty())
     throw std::runtime_error("A comma-separated token is empty.");
 
   // Each token must begin and end with a numeric character.
@@ -692,16 +693,18 @@ std::string getMatchingString(const std::string &regexString,
  */
 std::string pad(unsigned int run, const std::string &instString) {
   InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
-  std::string prefix = instInfo.filePrefix(run) + instInfo.delimiter();
+  std::string prefix;
+  if (!instInfo.facility().noFilePrefix())
+    prefix = instInfo.filePrefix(run) + instInfo.delimiter();
   unsigned int padLength = instInfo.zeroPadding(run);
-  std::string runStr = boost::lexical_cast<std::string>(run);
+  std::string runStr = std::to_string(run);
   if (runStr.size() < padLength)
     runStr.insert(0, padLength - runStr.size(), '0');
   else if (padLength > 0 && runStr.size() > padLength)
     throw std::runtime_error(
         "Could not parse run number \"" + runStr +
         "\" since the instrument run number length required is " +
-        boost::lexical_cast<std::string>(padLength));
+        std::to_string(padLength));
   runStr.insert(0, prefix);
   return runStr;
 }
@@ -773,10 +776,10 @@ std::string &accumulateString(std::string &output,
     output += "_and_";
 
   if (runRange.first == runRange.second)
-    output += boost::lexical_cast<std::string>(runRange.first);
+    output += std::to_string(runRange.first);
   else
-    output += boost::lexical_cast<std::string>(runRange.first) + "_to_" +
-              boost::lexical_cast<std::string>(runRange.second);
+    output += std::to_string(runRange.first) + "_to_" +
+              std::to_string(runRange.second);
 
   return output;
 }

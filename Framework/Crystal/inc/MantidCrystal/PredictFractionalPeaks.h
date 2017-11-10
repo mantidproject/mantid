@@ -37,9 +37,6 @@ namespace Crystal {
   */
 class DLLExport PredictFractionalPeaks : public API::Algorithm {
 public:
-  PredictFractionalPeaks();
-  ~PredictFractionalPeaks() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "PredictFractionalPeaks"; };
   /// Summary of algorithms purpose

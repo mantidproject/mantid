@@ -1,8 +1,11 @@
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -13,7 +16,6 @@
 
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidAPI/FileProperty.h"
@@ -33,17 +35,6 @@ using namespace Mantid::Geometry;
 
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWSDMDtoHKL::ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
@@ -75,7 +66,6 @@ void ConvertCWSDMDtoHKL::init() {
                   "Name of file for HKL.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertCWSDMDtoHKL::exec() {
@@ -91,7 +81,7 @@ void ConvertCWSDMDtoHKL::exec() {
   getUBMatrix();
 
   // Test indexing.  Will be delete soon
-  if (true) {
+  if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
     qsample.setX(1.36639);
     qsample.setY(-2.52888);
@@ -115,7 +105,7 @@ void ConvertCWSDMDtoHKL::exec() {
 
   std::string qsamplefilename = getPropertyValue("QSampleFileName");
   // Abort with an empty string
-  if (qsamplefilename.size() > 0)
+  if (!qsamplefilename.empty())
     saveEventsToFile(qsamplefilename, vec_event_qsample, vec_event_signal,
                      vec_event_det);
 
@@ -126,20 +116,27 @@ void ConvertCWSDMDtoHKL::exec() {
   // Get file name
   std::string hklfilename = getPropertyValue("HKLFileName");
   // Abort mission if no file name is given
-  if (hklfilename.size() > 0)
+  if (!hklfilename.empty())
     saveEventsToFile(hklfilename, vec_event_hkl, vec_event_signal,
                      vec_event_det);
 
   // Create output workspace
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
+  // Experiment info
+  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
+  expinfo->mutableRun().setGoniometer(
+      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().addProperty("run_number", 1);
+  m_outputWS->addExperimentInfo(expinfo);
 
   setProperty("OutputWorkspace", m_outputWS);
 }
 
 void ConvertCWSDMDtoHKL::getUBMatrix() {
   std::string peakwsname = getPropertyValue("PeaksWorkspace");
-  if (peakwsname.size() > 0 &&
+  if (!peakwsname.empty() &&
       AnalysisDataService::Instance().doesExist(peakwsname)) {
     // Get from peak works
     DataObjects::PeaksWorkspace_sptr peakws = getProperty("PeaksWorkspace");
@@ -158,8 +155,6 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
       }
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -214,8 +209,6 @@ void ConvertCWSDMDtoHKL::exportEvents(
       scancell = false;
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -228,7 +221,7 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
   std::string filename = getPropertyValue("QSampleFileName");
 
   // Abort with an empty string
-  if (filename.size() == 0)
+  if (filename.empty())
     return;
   if (vec_event_qsample.size() != vec_event_signal.size())
     throw std::runtime_error(
@@ -244,8 +237,6 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
           << vec_event_qsample[i][2] << ", " << vec_event_signal[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -271,8 +262,6 @@ void ConvertCWSDMDtoHKL::saveEventsToFile(
           << vec_event_detid[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -291,8 +280,6 @@ void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
 
   g_log.notice() << "[DB] " << original_indexed << " peaks are indexed."
                  << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -399,8 +386,6 @@ void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> vec_hkl,
     extentMins[i] = minvalue;
     extentMaxs[i] = maxvalue;
   }
-
-  return;
 }
 
 } // namespace MDAlgorithms

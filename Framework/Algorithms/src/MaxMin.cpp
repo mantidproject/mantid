@@ -87,19 +87,19 @@ void MaxMin::exec() {
       API::WorkspaceFactory::Instance().create(localworkspace,
                                                MaxSpec - MinSpec + 1, 2, 1);
 
-  Progress progress(this, 0, 1, (MaxSpec - MinSpec + 1));
-  PARALLEL_FOR2(localworkspace, outputWorkspace)
+  Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   // Loop over spectra
   for (int i = MinSpec; i <= MaxSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
     outputWorkspace->getSpectrum(newindex)
-        ->copyInfoFrom(*localworkspace->getSpectrum(i));
+        .copyInfoFrom(localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
-    const MantidVec &X = localworkspace->readX(i);
-    const MantidVec &Y = localworkspace->readY(i);
+    auto &X = localworkspace->x(i);
+    auto &Y = localworkspace->y(i);
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
@@ -133,10 +133,10 @@ void MaxMin::exec() {
     }
     MantidVec::difference_type d = std::distance(Y.begin(), maxY);
     // X boundaries for the max/min element
-    outputWorkspace->dataX(newindex)[0] = *(X.begin() + d);
-    outputWorkspace->dataX(newindex)[1] =
+    outputWorkspace->mutableX(newindex)[0] = *(X.begin() + d);
+    outputWorkspace->mutableX(newindex)[1] =
         *(X.begin() + d + 1); // This is safe since X is of dimension Y+1
-    outputWorkspace->dataY(newindex)[0] = *maxY;
+    outputWorkspace->mutableY(newindex)[0] = *maxY;
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -144,8 +144,6 @@ void MaxMin::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 } // namespace Algorithms

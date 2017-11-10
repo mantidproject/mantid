@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -96,30 +94,22 @@ void HRPDSlabCanAbsorption::exec() {
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();
-  const bool isHist = workspace->isHistogramData();
+
+  const auto &spectrumInfo = workspace->spectrumInfo();
   //
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    const MantidVec &X = workspace->readX(i);
     MantidVec &Y = workspace->dataY(i);
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch when a spectrum doesn't have an attached detector and go to next
-      // one
+    if (!spectrumInfo.hasDetectors(i)) {
+      // If a spectrum doesn't have an attached detector go to next one instead
       continue;
     }
 
-    V3D detectorPos;
-    detectorPos.spherical(
-        det->getDistance(Component("dummy", V3D(0.0, 0.0, 0.0))),
-        det->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) * 180.0 / M_PI,
-        det->getPhi() * 180.0 / M_PI);
+    // Get detector position
+    V3D detectorPos = spectrumInfo.position(i);
 
-    const int detID = det->getID();
+    const int detID = spectrumInfo.detector(i).getID();
     double angleFactor;
     // If the low angle or backscattering bank, want angle wrt beamline
     if (detID < 900000) {
@@ -132,8 +122,9 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
+    const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
 
       // Front vanadium window - 0.5-1% effect, increasing with lambda
       Y[j] *= exp(vanWinThickness * ((vanRefAtten * lambda) + vanScat));

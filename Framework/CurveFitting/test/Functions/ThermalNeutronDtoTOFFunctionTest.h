@@ -52,7 +52,7 @@ public:
     // 4. Check result
     for (size_t i = 0; i < domain.size(); ++i) {
       std::cout << "d = " << domain[i] << ", TOF = " << values[i]
-                << "  vs.  observed TOF = " << vec_tof[i] << std::endl;
+                << "  vs.  observed TOF = " << vec_tof[i] << '\n';
       TS_ASSERT_DELTA(values[i], vec_tof[i], 10.0);
     }
 
@@ -73,7 +73,7 @@ public:
       xvec.push_back(x);
       erfcy.push_back(a);
       derfc.push_back(da);
-      outss << x <<"\t\t" << a << endl;
+      outss << x <<"\t\t" << a << '\n';
     }
 
     // numerical derivative for erfc
@@ -91,7 +91,7 @@ public:
 
     outfile.open("deriv_erfc.dat");
     for (size_t i = 0; i < xvec.size(); ++i)
-      outfile << xvec[i] << "\t\t" << derfc[i] << "\t\t" << nderfc[i] << endl;
+      outfile << xvec[i] << "\t\t" << derfc[i] << "\t\t" << nderfc[i] << '\n';
     outfile.close();
 
     // 2. d~n, width~n, tcross~n: using old Bank 7 data
@@ -103,7 +103,7 @@ public:
     for (double d = 0.4; d < 2.5; d+=0.01)
     {
       double n = 0.5*erfc(width*(tcross-1/d));
-      outfile << d << "\t\t" << n << endl;
+      outfile << d << "\t\t" << n << '\n';
     }
     outfile.close();
 
@@ -113,7 +113,7 @@ public:
     for (width = 0.5; width < 10.0; width += 0.05)
     {
       double n = 0.5*erfc(width*(tcross-1/d));
-      outfile << width << "\t\t" << n << endl;
+      outfile << width << "\t\t" << n << '\n';
     }
     outfile.close();
 
@@ -122,7 +122,7 @@ public:
     for (tcross = -0.1; tcross < 2.0; tcross += 0.05)
     {
       double n = 0.5*erfc(width*(tcross-1/d));
-      outfile << tcross << "\t\t" << n << endl;
+      outfile << tcross << "\t\t" << n << '\n';
     }
     outfile.close();
 

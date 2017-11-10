@@ -1,5 +1,7 @@
 
-from ReflectometerCors import *
+from __future__ import (absolute_import, division, print_function)
+from .ReflectometerCors import *
+
 
 def quick(run):
     '''Mantid version of quick:lam'''
@@ -12,7 +14,8 @@ def quick(run):
     # Load a data set. single period
     LoadRaw(Filename=run,OutputWorkspace="W",SpectrumMax="4",LoadMonitors="Separate")
     ConvertUnits(InputWorkspace="W_Monitors",OutputWorkspace="M",Target="Wavelength",AlignBins="1")
-    CalculateFlatBackground(InputWorkspace="M",OutputWorkspace="M",WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
+    CalculateFlatBackground(InputWorkspace="M",OutputWorkspace="M",WorkspaceIndexList=MonitorsToCorrect,
+                            StartX=MonitorBackground[0],EndX=MonitorBackground[1])
     ConvertUnits(InputWorkspace="W",OutputWorkspace="D",Target="Wavelength",AlignBins="1")
 
     heliumDetectorEff('D')
@@ -25,6 +28,3 @@ def quick(run):
 
 #quick("D:/data/cycle_09_4/POLREF00003015.raw")
 quick("D:/data/cycle_09_4/POLREF00003014.raw")
-
-
-

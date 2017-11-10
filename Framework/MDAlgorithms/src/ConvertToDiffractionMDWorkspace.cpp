@@ -2,8 +2,10 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -19,6 +21,7 @@
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -28,6 +31,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -37,7 +41,6 @@ bool DODEBUG = true;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
@@ -50,9 +53,6 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
       m_extentsMax(nullptr) // will be allocated in exec using nDims
 {}
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertToDiffractionMDWorkspace::init() {
@@ -127,30 +127,31 @@ void ConvertToDiffractionMDWorkspace::init() {
 /// Our MDLeanEvent dimension
 typedef DataObjects::MDLeanEvent<3> MDE;
 
-//----------------------------------------------------------------------------------------------
 /** Convert one spectrum to DataObjects.
  * Depending on options, it uses the histogram view or the
  * pure event view.
  * Then another method converts to 3D q-space and adds it to the
- *MDEventWorkspace
+ * MDEventWorkspace
  *
+ * @param specInfo :: input workspace spectrum info
  * @param workspaceIndex :: index into the workspace
  */
-void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
+void ConvertToDiffractionMDWorkspace::convertSpectrum(
+    const API::SpectrumInfo &specInfo, int workspaceIndex) {
   if (m_inEventWS && !OneEventPerBin) {
     // ---------- Convert events directly -------------------------
-    EventList &el = m_inEventWS->getEventList(workspaceIndex);
+    EventList &el = m_inEventWS->getSpectrum(workspaceIndex);
 
     // Call the right templated function
     switch (el.getEventType()) {
     case TOF:
-      this->convertEventList<TofEvent>(workspaceIndex, el);
+      this->convertEventList<TofEvent>(workspaceIndex, specInfo, el);
       break;
     case WEIGHTED:
-      this->convertEventList<WeightedEvent>(workspaceIndex, el);
+      this->convertEventList<WeightedEvent>(workspaceIndex, specInfo, el);
       break;
     case WEIGHTED_NOTIME:
-      this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+      this->convertEventList<WeightedEventNoTime>(workspaceIndex, specInfo, el);
       break;
     default:
       throw std::runtime_error("EventList had an unexpected data type!");
@@ -162,16 +163,16 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
     EventList el;
 
     // Create the events using the bins
-    const ISpectrum *inSpec = m_inWS->getSpectrum(workspaceIndex);
+    const auto &inSpec = m_inWS->getSpectrum(workspaceIndex);
     // If OneEventPerBin, generate exactly 1 event per bin, including zeros.
     // If !OneEventPerBin, generate up to 10 events per bin, excluding zeros
     el.createFromHistogram(
-        inSpec, OneEventPerBin /* Generate zeros */,
+        &inSpec, OneEventPerBin /* Generate zeros */,
         !OneEventPerBin /* Multiple events */,
         (OneEventPerBin ? 1 : 10) /* Max of this many events per bin */);
 
     // Perform the conversion on this temporary event list
-    this->convertEventList<WeightedEventNoTime>(workspaceIndex, el);
+    this->convertEventList<WeightedEventNoTime>(workspaceIndex, specInfo, el);
   }
 }
 
@@ -179,38 +180,35 @@ void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex) {
 /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
  *
  * @tparam T :: the type of event in the input EventList (TofEvent,
- *WeightedEvent, etc.)
+ * WeightedEvent, etc.)
  * @param workspaceIndex :: the workspace index
+ * @param specInfo :: input workspace spectrum info
  * @param el :: reference to the event list
  */
 template <class T>
-void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
-                                                       EventList &el) {
+void ConvertToDiffractionMDWorkspace::convertEventList(
+    int workspaceIndex, const API::SpectrumInfo &specInfo, EventList &el) {
   size_t numEvents = el.getNumberEvents();
   DataObjects::MDBoxBase<DataObjects::MDLeanEvent<3>, 3> *box = ws->getBox();
 
   // Get the position of the detector there.
   const auto &detectors = el.getDetectorIDs();
   if (!detectors.empty()) {
-    // Get the detector (might be a detectorGroup for multiple detectors)
-    // or might return an exception if the detector is not in the instrument
-    // definition
-    IDetector_const_sptr det;
-    try {
-      det = m_inWS->getDetector(workspaceIndex);
-    } catch (Exception::NotFoundError &) {
+    // Check if a detector is located at this workspace index, returns
+    // immediately if one is not found.
+    if (!specInfo.hasDetectors(workspaceIndex)) {
       this->failedDetectorLookupCount++;
       return;
     }
 
-    // Vector between the sample and the detector
-    V3D detPos = det->getPos() - samplePos;
-
     // Neutron's total travelled distance
-    double distance = detPos.norm() + l1;
+    double distance = l1 + specInfo.l2(workspaceIndex);
+
+    // Vector between the sample and the detector
+    const V3D detPos = specInfo.position(workspaceIndex);
 
     // Detector direction normalized to 1
-    V3D detDir = detPos / detPos.norm();
+    const V3D detDir = detPos / detPos.norm();
 
     // The direction of momentum transfer in the inelastic convention ki-kf
     //  = input beam direction (normalized to 1) - output beam direction
@@ -226,7 +224,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     // Multiply by the rotation matrix to convert to Q in the sample frame (take
     // out goniometer rotation)
     // (or to HKL, if that's what the matrix is)
-    V3D Q_dir = mat * Q_dir_lab_frame;
+    const V3D Q_dir = mat * Q_dir_lab_frame;
 
     // For speed we extract the components.
     coord_t Q_dir_x = coord_t(Q_dir.X());
@@ -240,7 +238,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
       // the detector (scattering) direction
       // The formula for Lorentz Correction is sin(theta), i.e. sin(half the
       // scattering angle)
-      double theta = detDir.angle(beamDir) / 2.0;
+      double theta = specInfo.twoTheta(workspaceIndex) / 2.0;
       sin_theta_squared = sin(theta);
       sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
     }
@@ -251,15 +249,6 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     const double wavenumber_in_angstrom_times_tof_in_microsec =
         (PhysicalConstants::NeutronMass * distance * 1e-10) /
         (1e-6 * PhysicalConstants::h_bar);
-
-    // PARALLEL_CRITICAL( convert_tester_output ) { std::cout << "Spectrum " <<
-    // el.getSpectrumNo() << " beamDir = " << beamDir << " detDir = " << detDir
-    // << " Q_dir = " << Q_dir << " conversion factor " <<
-    // wavenumber_in_angstrom_times_tof_in_microsec << std::endl;  }
-
-    // g_log.information() << wi << " : " << el.getNumberEvents() << " events.
-    // Pos is " << detPos << std::endl;
-    // g_log.information() << Q_dir.norm() << " Qdir norm" << std::endl;
 
     // This little dance makes the getting vector of events more general (since
     // you can't overload by return type).
@@ -306,16 +295,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
     }
 
     // Clear out the EventList to save memory
-    if (ClearInputWorkspace) {
-      // Track how much memory you cleared
-      size_t memoryCleared = el.getMemorySize();
-      // Clear it now
+    if (ClearInputWorkspace)
       el.clear();
-      // For Linux with tcmalloc, make sure memory goes back, if you've cleared
-      // 200 Megs
-      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(
-          memoryCleared, static_cast<size_t>(2e8));
-    }
   }
   prog->reportIncrement(numEvents, "Adding Events");
 }
@@ -346,9 +327,9 @@ void ConvertToDiffractionMDWorkspace::exec() {
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
         LorentzCorrection = false;
-        g_log.warning() << "Lorentz Correction was already done for this "
-                           "workspace.  LorentzCorrection was changed to false."
-                        << std::endl;
+        g_log.warning()
+            << "Lorentz Correction was already done for this "
+               "workspace.  LorentzCorrection was changed to false.\n";
       }
     }
   }
@@ -506,17 +487,11 @@ void ConvertToDiffractionMDWorkspace::exec() {
   beamline_norm = beamline.norm();
   beamDir = beamline / beamline.norm();
 
-  // To get all the detector ID's
-  m_inWS->getInstrument()->getDetectors(allDetectors);
-
   // Estimate the number of events in the final workspace
   size_t totalEvents = m_inWS->size();
   if (m_inEventWS && !OneEventPerBin)
     totalEvents = m_inEventWS->getNumberEvents();
-  prog = boost::make_shared<Progress>(this, 0, 1.0, totalEvents);
-
-  // Is the addition of events thread-safe?
-  bool MultiThreadedAdding = m_inWS->threadSafe();
+  prog = boost::make_shared<Progress>(this, 0.0, 1.0, totalEvents);
 
   // Create the thread pool that will run all of these.
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
@@ -531,82 +506,70 @@ void ConvertToDiffractionMDWorkspace::exec() {
     g_log.information() << cputim << ": initial setup. There are "
                         << lastNumBoxes << " MDBoxes.\n";
 
-  for (size_t wi = 0; wi < m_inWS->getNumberHistograms(); wi++) {
-    // Get an idea of how many events we'll be adding
-    size_t eventsAdding = m_inWS->blocksize();
-    if (m_inEventWS && !OneEventPerBin)
-      eventsAdding = m_inEventWS->getEventList(wi).getNumberEvents();
+  const auto &specInfo = m_inWS->spectrumInfo();
+  for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
+    // 1. Determine next chunk of spectra to process
+    int start = static_cast<int>(wi);
+    for (; wi < m_inWS->getNumberHistograms(); ++wi) {
+      // Get an idea of how many events we'll be adding
+      size_t eventsAdding = m_inWS->blocksize();
+      if (m_inEventWS && !OneEventPerBin)
+        eventsAdding = m_inEventWS->getSpectrum(wi).getNumberEvents();
 
-    if (MultiThreadedAdding) {
-      // Equivalent to calling "this->convertSpectrum(wi)"
-      boost::function<void()> func =
-          boost::bind(&ConvertToDiffractionMDWorkspace::convertSpectrum, &*this,
-                      static_cast<int>(wi));
-      // Give this task to the scheduler
-      double cost = static_cast<double>(eventsAdding);
-      ts->push(new FunctionTask(func, cost));
-    } else {
-      // Not thread-safe. Just add right now
-      this->convertSpectrum(static_cast<int>(wi));
+      // Keep a running total of how many events we've added
+      eventsAdded += eventsAdding;
+      approxEventsInOutput += eventsAdding;
+
+      if (bc->shouldSplitBoxes(approxEventsInOutput, eventsAdded, lastNumBoxes))
+        break;
     }
 
-    // Keep a running total of how many events we've added
-    eventsAdded += eventsAdding;
-    approxEventsInOutput += eventsAdding;
-
-    if (bc->shouldSplitBoxes(approxEventsInOutput, eventsAdded, lastNumBoxes)) {
-      if (DODEBUG)
-        g_log.information() << cputim << ": Added tasks worth " << eventsAdded
-                            << " events. WorkspaceIndex " << wi << std::endl;
-      // Do all the adding tasks
-      tp.joinAll();
-      if (DODEBUG)
-        g_log.information() << cputim
-                            << ": Performing the addition of these events.\n";
-
-      // Now do all the splitting tasks
-      ws->splitAllIfNeeded(ts);
-      if (ts->size() > 0)
-        prog->doReport("Splitting Boxes");
-      tp.joinAll();
-
-      // Count the new # of boxes.
-      lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-      if (DODEBUG)
-        g_log.information() << cputim
-                            << ": Performing the splitting. There are now "
-                            << lastNumBoxes << " boxes.\n";
-      eventsAdded = 0;
+    // 2. Process next chunk of spectra (threaded)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_inWS))
+    for (int i = start; i < static_cast<int>(wi); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      this->convertSpectrum(specInfo, static_cast<int>(i));
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    // 3. Split boxes
+    if (DODEBUG)
+      g_log.information() << cputim << ": Added tasks worth " << eventsAdded
+                          << " events. WorkspaceIndex " << wi << std::endl;
+    // Do all the adding tasks
+    if (DODEBUG)
+      g_log.information() << cputim
+                          << ": Performing the addition of these events.\n";
+
+    // Now do all the splitting tasks
+    ws->splitAllIfNeeded(ts);
+    if (ts->size() > 0)
+      prog->doReport("Splitting Boxes");
+    // Note: For some reason removing this joinAll() increases the runtime
+    // significantly. Does it somehow affect threads in "ts" created by
+    // splitAllIfNeeded()?
+    tp.joinAll();
+
+    // Count the new # of boxes.
+    lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+    if (DODEBUG)
+      g_log.information() << cputim
+                          << ": Performing the splitting. There are now "
+                          << lastNumBoxes << " boxes.\n";
+    eventsAdded = 0;
   }
 
   if (this->failedDetectorLookupCount > 0) {
     if (this->failedDetectorLookupCount == 1)
       g_log.warning() << "Unable to find a detector for "
                       << this->failedDetectorLookupCount
-                      << " spectrum. It has been skipped." << std::endl;
+                      << " spectrum. It has been skipped.\n";
     else
       g_log.warning() << "Unable to find detectors for "
                       << this->failedDetectorLookupCount
-                      << " spectra. They have been skipped." << std::endl;
+                      << " spectra. They have been skipped.\n";
   }
-
-  if (DODEBUG)
-    g_log.information() << cputim << ": We've added tasks worth " << eventsAdded
-                        << " events.\n";
-
-  tp.joinAll();
-  if (DODEBUG)
-    g_log.information() << cputim
-                        << ": Performing the FINAL addition of these events.\n";
-
-  // Do a final splitting of everything
-  ws->splitAllIfNeeded(ts);
-  tp.joinAll();
-  if (DODEBUG)
-    g_log.information()
-        << cputim << ": Performing the FINAL splitting of boxes. There are now "
-        << ws->getBoxController()->getTotalNumMDBoxes() << " boxes\n";
 
   // Recount totals at the end.
   cputim.reset();
@@ -626,7 +589,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     std::vector<std::string> stats = ws->getBoxControllerStats();
     for (auto &stat : stats)
       g_log.information() << stat << "\n";
-    g_log.information() << std::endl;
+    g_log.information() << '\n';
   }
 
   // Set the special coordinate system.

@@ -5,7 +5,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
@@ -38,7 +38,7 @@ void ComputeSensitivity::init() {
 }
 
 void ComputeSensitivity::exec() {
-  std::string outputMessage = "";
+  std::string outputMessage;
   progress(0.1, "Setting up sensitivity calculation");
 
   // Reduction property manager
@@ -66,7 +66,7 @@ void ComputeSensitivity::exec() {
   // Set patch information so that the SANS sensitivity algorithm can
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
-  if (patchWSName.size() > 0) {
+  if (!patchWSName.empty()) {
     IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {
@@ -91,7 +91,7 @@ void ComputeSensitivity::exec() {
     outputMessage += outMsg2;
     setProperty("OutputMessage", outputMessage);
   } else {
-    g_log.error() << "Could not find sensitivity algorithm" << std::endl;
+    g_log.error() << "Could not find sensitivity algorithm\n";
   }
 }
 

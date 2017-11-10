@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_SMOOTHDATA_H_
 #define MANTID_ALGORITHMS_SMOOTHDATA_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
+namespace HistogramData {
+class Histogram;
+}
 namespace Algorithms {
 /** Smooths the data of the input workspace by making each point the mean
    average of itself and
@@ -54,10 +54,6 @@ namespace Algorithms {
 */
 class DLLExport SmoothData : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SmoothData() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SmoothData() override {}
   /// Algorithm's name
   const std::string name() const override { return "SmoothData"; }
   /// Summary of algorithms purpose
@@ -84,6 +80,9 @@ private:
   std::vector<int> udet2group;
   API::MatrixWorkspace_const_sptr inputWorkspace;
 };
+
+HistogramData::Histogram smooth(const HistogramData::Histogram &histogram,
+                                int npts);
 
 } // namespace Algorithms
 } // namespace Mantid

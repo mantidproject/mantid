@@ -1,14 +1,17 @@
 #ifndef CONVERTSPECTRUMAXISTEST_H_
 #define CONVERTSPECTRUMAXISTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite {
 private:
@@ -67,7 +70,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -78,12 +81,12 @@ public:
     TS_ASSERT_THROWS((*thetaAxis)(2), Mantid::Kernel::Exception::IndexError);
 
     // Data should be swapped over
-    TS_ASSERT_EQUALS(input->readX(0), output->readX(1));
-    TS_ASSERT_EQUALS(input->readY(0), output->readY(1));
-    TS_ASSERT_EQUALS(input->readE(0), output->readE(1));
-    TS_ASSERT_EQUALS(input->readX(1), output->readX(0));
-    TS_ASSERT_EQUALS(input->readY(1), output->readY(0));
-    TS_ASSERT_EQUALS(input->readE(1), output->readE(0));
+    TS_ASSERT_EQUALS(input->x(0), output->x(1));
+    TS_ASSERT_EQUALS(input->y(0), output->y(1));
+    TS_ASSERT_EQUALS(input->e(0), output->e(1));
+    TS_ASSERT_EQUALS(input->x(1), output->x(0));
+    TS_ASSERT_EQUALS(input->y(1), output->y(0));
+    TS_ASSERT_EQUALS(input->e(1), output->e(0));
 
     // Clean up
     AnalysisDataService::Instance().remove(inputWS);
@@ -103,7 +106,7 @@ public:
                 outputSignedThetaAxisWS));
 
     // Check the signed theta axis
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = outputSignedTheta->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -149,7 +152,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Energy transfer");
@@ -162,6 +165,42 @@ public:
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
+  }
+};
+
+class ConvertSpectrumAxisTestPerformance : public CxxTest::TestSuite {
+private:
+  Workspace_sptr m_inputWorkspace;
+
+public:
+  static ConvertSpectrumAxisTestPerformance *createSuite() {
+    return new ConvertSpectrumAxisTestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxisTestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvertSpectrumAxisTestPerformance() {
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48127.raw");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+    m_inputWorkspace = loader.getProperty("OutputWorkspace");
+  }
+  void test_exec_performance() {
+
+    Mantid::Algorithms::ConvertSpectrumAxis alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_inputWorkspace);
+    alg.setProperty("Target", "theta");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    for (int i = 0; i < 1000; ++i) {
+      alg.execute();
+    }
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
   }
 };
 

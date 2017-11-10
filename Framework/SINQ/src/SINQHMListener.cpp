@@ -18,6 +18,8 @@
 #include <Poco/Net/HTTPBasicCredentials.h>
 #include <Poco/StreamCopier.h>
 
+#include <boost/algorithm/string/trim.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -28,7 +30,7 @@ using namespace Poco::XML;
 DECLARE_LISTENER(SINQHMListener)
 
 SINQHMListener::SINQHMListener()
-    : ILiveListener(), httpcon(), response(), oldStatus() {
+    : LiveListener(), httpcon(), response(), oldStatus() {
   connected = false;
   dimDirty = true;
   rank = 0;
@@ -121,7 +123,7 @@ void SINQHMListener::setSpectra(
    */
 }
 
-void SINQHMListener::start(Mantid::Kernel::DateAndTime /*startTime */) {
+void SINQHMListener::start(Mantid::Types::Core::DateAndTime /*startTime */) {
   // Nothing to do here
 }
 
@@ -145,13 +147,13 @@ void SINQHMListener::loadDimensions() {
    */
   Element *bank = dynamic_cast<Element *>(bankList->item(0));
   std::string rankt = bank->getAttribute("rank");
-  rank = atoi(rankt.c_str());
+  rank = std::stoi(rankt);
 
   Poco::AutoPtr<NodeList> axisList = bank->getElementsByTagName("axis");
   for (unsigned int i = 0; i < axisList->length(); i++) {
     Element *axis = dynamic_cast<Element *>(axisList->item(i));
     std::string sdim = axis->getAttribute("length");
-    dim[i] = atoi(sdim.c_str());
+    dim[i] = std::stoi(sdim);
   }
 
   doSpecialDim();
@@ -235,8 +237,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
   }
   istr.read(reinterpret_cast<char *>(data), length * sizeof(int));
   if (!istr.good()) {
-    std::cout << "Encountered Problem before reading all SINQHM data"
-              << std::endl;
+    std::cout << "Encountered Problem before reading all SINQHM data\n";
   }
   for (int i = 0; i < length; i++) {
     data[i] = ntohl(data[i]);

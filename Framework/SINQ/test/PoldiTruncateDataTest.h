@@ -8,13 +8,16 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 
 using ::testing::Return;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::LinearGenerator;
 
 class PoldiTruncateDataTest : public CxxTest::TestSuite {
 public:
@@ -70,7 +73,7 @@ public:
   void testSetTimeBinWidthFromWorkspace() {
     // workspace with delta x = 1.0, 3 bins (= 4 boundaries)
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
 
     TestablePoldiTruncateData truncate;
     TS_ASSERT_THROWS_NOTHING(truncate.setTimeBinWidthFromWorkspace(matrixWs));
@@ -83,7 +86,7 @@ public:
 
     // matrix workspace with one bin
     MatrixWorkspace_sptr invalidBins =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
 
     TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidBins),
                      std::invalid_argument);
@@ -174,7 +177,7 @@ public:
     // number of histograms does not change
     TS_ASSERT_EQUALS(cropped->getNumberHistograms(), 1);
 
-    const std::vector<double> &xData = cropped->readX(0);
+    const auto &xData = cropped->x(0);
 
     TS_ASSERT_EQUALS(xData.size(), 500);
 
@@ -204,7 +207,7 @@ public:
     // number of histograms does not change
     TS_ASSERT_EQUALS(cropped->getNumberHistograms(), 1);
 
-    const std::vector<double> &xData = cropped->readX(0);
+    const auto &xData = cropped->x(0);
 
     TS_ASSERT_EQUALS(xData.size(), 100);
 
@@ -223,7 +226,7 @@ public:
 
     MatrixWorkspace_sptr below = truncate.getWorkspaceBelowX(workspace, 1497.0);
 
-    const std::vector<double> &x = below->readX(0);
+    const auto &x = below->x(0);
 
     TS_ASSERT_EQUALS(x.size(), 500);
     TS_ASSERT_EQUALS(x.front(), 0.0);
@@ -236,7 +239,7 @@ public:
 
     MatrixWorkspace_sptr above = truncate.getWorkspaceAboveX(workspace, 1500.0);
 
-    const std::vector<double> &x = above->readX(0);
+    const auto &x = above->x(0);
 
     TS_ASSERT_EQUALS(x.size(), 100);
     TS_ASSERT_EQUALS(x.front(), 1500.0);
@@ -252,8 +255,8 @@ public:
     TS_ASSERT_EQUALS(summed->getNumberHistograms(), 1);
 
     // since all y-values are 2.0, the sum should be 10 * 2.0
-    TS_ASSERT_EQUALS(summed->readY(0).front(), 20.0);
-    TS_ASSERT_EQUALS(summed->readY(0).back(), 20.0);
+    TS_ASSERT_EQUALS(summed->y(0).front(), 20.0);
+    TS_ASSERT_EQUALS(summed->y(0).back(), 20.0);
   }
 
   void testGetCropAlgorithmForWorkspace() {
@@ -287,18 +290,13 @@ private:
   MatrixWorkspace_sptr getProperWorkspaceWithXValues(size_t histograms,
                                                      size_t binCount,
                                                      double spacing) {
-    std::vector<double> xValues(binCount);
-    for (size_t i = 0; i < binCount; ++i) {
-      xValues[i] = static_cast<double>(i) * spacing;
-    }
+    Points xValues(binCount, LinearGenerator(0, spacing));
 
     MatrixWorkspace_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspace123(histograms, binCount);
+        WorkspaceCreationHelper::create2DWorkspace123(histograms, binCount);
 
-    for (size_t i = 0; i < histograms; ++i) {
-      std::vector<double> &xData = workspace->dataX(i);
-      xData.assign(xValues.begin(), xValues.end());
-    }
+    for (size_t i = 0; i < histograms; ++i)
+      workspace->setPoints(i, xValues);
 
     return workspace;
   }

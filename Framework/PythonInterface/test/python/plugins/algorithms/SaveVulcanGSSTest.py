@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import unittest
 import numpy
 import mantid.simpleapi as api
@@ -40,6 +43,35 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
         return
 
+    def test_saveGSS_no_binning(self):
+        """ Test to Save a GSAS file without rebin to Vdrive's standard binning
+        """
+        # Create a test data file and workspace
+        binfilename = "testbin.dat"
+        self._createBinFile(binfilename)
+
+        datawsname = "TestInputWorkspace"
+        self._createDataWorkspace(datawsname)
+
+        # Execute
+        alg_test = run_algorithm("SaveVulcanGSS", 
+                InputWorkspace = datawsname,
+                OutputWorkspace = datawsname+"_rebinned",
+                GSSFilename = "tempout.gda")
+
+        self.assertTrue(alg_test.isExecuted())
+
+        # Verify ....
+        outputws = AnalysisDataService.retrieve(datawsname+"_rebinned")
+        #self.assertEqual(4, tablews.rowCount())
+
+        # Delete the test hkl file
+        os.remove(binfilename)
+        AnalysisDataService.remove("InputWorkspace")
+        AnalysisDataService.remove(datawsname+"_rebinned")
+
+        return
+
     def _createBinFile(self, binfilename):
         """ Create a bin file
         """
@@ -51,7 +83,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
         wbuf = ""
         tof = tof0
-        for n in xrange(numpts):
+        for n in range(numpts):
             wbuf += "%.4f " % (math.log(tof)/math.log(10.))
             tof = tof * (1 + delta)
        
@@ -75,7 +107,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         vece = []
 
         tof = tof0
-        for n in xrange(numpts):
+        for n in range(numpts):
             vecx.append(tof)
             vecy.append(math.sin(tof0))
             vece.append(1.)

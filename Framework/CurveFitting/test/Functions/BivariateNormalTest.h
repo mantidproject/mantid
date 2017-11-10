@@ -9,6 +9,7 @@
 #define BIVARIATENORMALTEST_H_
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/Jacobian.h"
@@ -16,15 +17,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/cow_ptr.h"
-/*#include "MantidAPI/IFunction.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidKernel/UnitFactory.h"
-*/
+
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <exception>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,6 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using Mantid::HistogramData::LinearGenerator;
 /**
  * Used for testing only
  */
@@ -40,28 +39,36 @@ private:
   Matrix<double> M;
 
 public:
-  Jacob(int nparams, int npoints) { M = Matrix<double>(nparams, npoints); }
+  Jacob(const int nparams, const int npoints) {
+    M = Matrix<double>(nparams, npoints);
+  }
 
   ~Jacob() override {}
-  void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
+  void set(const size_t iY, const size_t iP, const double value) override {
+    M[iP][iY] = value;
+  }
 
-  double get(size_t iY, size_t iP) override { return M[iP][iY]; }
+  double get(const size_t iY, const size_t iP) override { return M[iP][iY]; }
+
+  void zero() override { M.zeroMatrix(); }
 };
 
 class BivariateNormalTest : public CxxTest::TestSuite {
 public:
-  double NormVal(double Background, double Intensity, double Mcol, double Mrow,
-                 double Vx, double Vy, double Vxy, double row, double col) {
+  double NormVal(const double Background, const double Intensity,
+                 const double Mcol, const double Mrow, const double Vx,
+                 const double Vy, const double Vxy, const double row,
+                 const double col) {
 
-    double uu = Vx * Vy - Vxy * Vxy;
+    const double uu = Vx * Vy - Vxy * Vxy;
 
-    double coefNorm = .5 / M_PI / sqrt(uu);
+    const double coefNorm = .5 / M_PI / sqrt(uu);
 
-    double expCoeffx2 = -Vy / 2 / uu;
-    double expCoeffxy = Vxy / uu;
-    double expCoeffy2 = -Vx / 2 / uu;
-    double dx = col - Mcol;
-    double dy = row - Mrow;
+    const double expCoeffx2 = -Vy / 2 / uu;
+    const double expCoeffxy = Vxy / uu;
+    const double expCoeffy2 = -Vx / 2 / uu;
+    const double dx = col - Mcol;
+    const double dy = row - Mrow;
     return Background +
            coefNorm * Intensity *
                exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy +
@@ -80,22 +87,20 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", 3, nCells, nCells);
     Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(ws1);
 
-    double background = 0.05;
-    double intensity = 562.95;
-    double Mcol = 195.698196998;
-    double Mrow = 44.252065014;
-    double Vx = 5.2438470;
-    double Vy = 3.3671409085;
-    double Vxy = 2.243584414;
+    const double background = 0.05;
+    const double intensity = 562.95;
+    const double Mcol = 195.698196998;
+    const double Mrow = 44.252065014;
+    const double Vx = 5.2438470;
+    const double Vy = 3.3671409085;
+    const double Vxy = 2.243584414;
 
-    bool CalcVariances = 0;
-
-    Mantid::MantidVecPtr xvals, yvals, data;
+    std::vector<double> xvals, yvals, data;
     int sgn1 = 1;
     int sgn2 = 1;
     for (int i = 0; i < nCells; i++) {
-      double x = 195 + sgn1;
-      double y = 44 + sgn2;
+      const double x = 195 + sgn1;
+      const double y = 44 + sgn2;
       if (sgn1 > 0)
         if (sgn2 > 0)
           sgn2 = -sgn2;
@@ -109,26 +114,26 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.access().push_back(x);
-      yvals.access().push_back(y);
-      double val =
+      xvals.push_back(x);
+      yvals.push_back(y);
+      const double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.access().push_back(val);
+      data.push_back(val);
     }
 
-    Mantid::MantidVecPtr x_vec_ptr;
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back(static_cast<double>(i));
     }
+
+    const bool CalcVariances = 0;
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->setX(0, x_vec_ptr);
-    ws->setData(0, data);
-    ws->setData(1, xvals);
-    ws->setData(2, yvals);
+    ws->setPoints(0, nCells, LinearGenerator(0.0, 1.0));
+    ws->mutableY(0) = std::move(data);
+    ws->mutableY(1) = xvals;
+    ws->mutableY(2) = yvals;
 
     NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0);
 
@@ -151,18 +156,17 @@ public:
 
     NormalFit.function1D(out.data(), xx, nCells);
 
-    //  std::cout<<"-------------------------------------"<<std::endl;
     for (int i = 0; i < nCells; i++) {
 
-      double x = xvals.access()[i];
-      double y = yvals.access()[i];
-      double d = NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
+      const double x = xvals[i];
+      const double y = yvals[i];
+      const double d =
+          NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
       TS_ASSERT_DELTA(d, out[i], .001);
     }
-    // std::cout<<"\n-------------------------------------"<<std::endl;
 
-    double Res[5][7] = {
+    const double Res[5][7] = {
         {1, 0.0410131, -1.21055, 5.93517, -3.04761, -4.03279, 3.79245},
         {1, 0.00388945, -2.25613, 2.63994, 0.870333, 1.13668, -2.33103},
         {1, 0.00510336, 0.616511, 2.78705, -0.31702, 0.75513, 1.10871},
@@ -171,13 +175,11 @@ public:
         {1, 3.35644e-05, 0.00910018, 0.0318031, -0.000328676, 0.02284,
          0.0186753}};
 
-    for (int i = 0; i < nCells; i += 6) // points
-    {
+    for (int i = 0; i < nCells; i += 6) { // points
+      for (int j = 0; j < 7; j++) {       // params
 
-      for (int j = 0; j < 7; j++) // params
-      {
-        double u = Res[i / 6][j];
-        double v = Jac->get(i, j);
+        const double u = Res[i / 6][j];
+        const double v = Jac->get(i, j);
 
         TS_ASSERT_DELTA(v, u, .001);
       }

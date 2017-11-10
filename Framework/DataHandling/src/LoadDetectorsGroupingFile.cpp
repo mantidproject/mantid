@@ -1,15 +1,17 @@
 #include <sstream>
 
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -29,18 +31,6 @@ namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDetectorsGroupingFile::LoadDetectorsGroupingFile()
-    : m_groupWS(), m_instrument(), m_pDoc(nullptr), m_pRootElem(nullptr),
-      m_groupComponentsMap(), m_groupDetectorsMap(), m_groupSpectraMap() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile() {}
 
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
@@ -64,7 +54,7 @@ void LoadDetectorsGroupingFile::exec() {
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment
-  Progress progress(this, 0, 1, 0);
+  Progress progress(this, 0.0, 1.0, 0);
 
   if (ext == "xml") {
     // Deal with file as xml
@@ -80,7 +70,7 @@ void LoadDetectorsGroupingFile::exec() {
     if (loader.isGivenInstrumentName()) {
       const std::string instrumentName = loader.getInstrumentName();
 
-      std::string date("");
+      std::string date;
 
       if (loader.isGivenDate())
         date = loader.getDate();
@@ -131,7 +121,7 @@ void LoadDetectorsGroupingFile::exec() {
     // 4. Translate and set geometry
     this->setByComponents();
     this->setByDetectors();
-    this->setBySpectrumIDs();
+    this->setBySpectrumNos();
 
     progress.report("Checking grouping description");
 
@@ -147,7 +137,7 @@ void LoadDetectorsGroupingFile::exec() {
     std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
 
     for (auto &group : groupNamesMap) {
-      std::string groupIdStr = boost::lexical_cast<std::string>(group.first);
+      std::string groupIdStr = std::to_string(group.first);
       m_groupWS->mutableRun().addProperty("GroupName_" + groupIdStr,
                                           group.second);
     }
@@ -174,7 +164,7 @@ void LoadDetectorsGroupingFile::exec() {
     m_groupWS->mutableRun().addProperty("Filename", inputFile.toString());
     setProperty("OutputWorkspace", m_groupWS);
 
-    this->setBySpectrumIDs();
+    this->setBySpectrumNos();
   } else {
     // Unknown file type
     throw std::invalid_argument("File type is not supported: " + ext);
@@ -195,7 +185,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       if (!mapiter->second.empty()) {
         g_log.error() << "Instrument is not specified in XML file.  "
                       << "But tag 'component' is used in XML file for Group "
-                      << mapiter->first << " It is not allowed" << std::endl;
+                      << mapiter->first << " It is not allowed\n";
         norecord = false;
         break;
       }
@@ -212,7 +202,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
   // 2. Set
   for (auto &componentMap : m_groupComponentsMap) {
     g_log.debug() << "Group ID = " << componentMap.first << " With "
-                  << componentMap.second.size() << " Components" << std::endl;
+                  << componentMap.second.size() << " Components\n";
 
     for (auto &name : componentMap.second) {
 
@@ -228,7 +218,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
 
       g_log.debug() << "Component Name = " << name
                     << "  Component ID = " << component->getComponentID()
-                    << "Number of Children = " << children.size() << std::endl;
+                    << "Number of Children = " << children.size() << '\n';
 
       for (const auto &child : children) {
         // c) convert component to detector
@@ -241,10 +231,10 @@ void LoadDetectorsGroupingFile::setByComponents() {
           auto itx = indexmap.find(detid);
           if (itx != indexmap.end()) {
             size_t wsindex = itx->second;
-            m_groupWS->dataY(wsindex)[0] = componentMap.first;
+            m_groupWS->mutableY(wsindex)[0] = componentMap.first;
           } else {
-            g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
-                          << std::endl;
+            g_log.error() << "Pixel w/ ID = " << detid
+                          << " Cannot Be Located\n";
           }
         } // ENDIF Detector
 
@@ -252,8 +242,6 @@ void LoadDetectorsGroupingFile::setByComponents() {
     }   // ENDFOR (component)
 
   } // ENDFOR GroupID
-
-  return;
 }
 
 /* Set workspace->group ID map by detectors (range)
@@ -271,7 +259,7 @@ void LoadDetectorsGroupingFile::setByDetectors() {
         norecord = false;
         g_log.error() << "Instrument is not specified in XML file. "
                       << "But tag 'detid' is used in XML file for Group "
-                      << mapiter->first << ". It is not allowed. " << std::endl;
+                      << mapiter->first << ". It is not allowed. \n";
         break;
       }
 
@@ -286,28 +274,25 @@ void LoadDetectorsGroupingFile::setByDetectors() {
 
   // 2. Set GroupingWorkspace
   for (auto &detectorMap : m_groupDetectorsMap) {
-    g_log.debug() << "Group ID = " << detectorMap.first << std::endl;
+    g_log.debug() << "Group ID = " << detectorMap.first << '\n';
 
     for (auto detid : detectorMap.second) {
       auto itx = indexmap.find(detid);
 
       if (itx != indexmap.end()) {
         size_t wsindex = itx->second;
-        m_groupWS->dataY(wsindex)[0] = detectorMap.first;
+        m_groupWS->mutableY(wsindex)[0] = detectorMap.first;
       } else {
-        g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
-                      << std::endl;
+        g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
       }
     } // ENDFOR detid (in range)
   }   // ENDFOR each group ID
-
-  return;
 }
 
 /*
- * Set workspace index/group id by spectrum IDs
+ * Set workspace index/group id by spectrum Nos
  */
-void LoadDetectorsGroupingFile::setBySpectrumIDs() {
+void LoadDetectorsGroupingFile::setBySpectrumNos() {
   // 1. Get map
   const spec2index_map s2imap = m_groupWS->getSpectrumToWorkspaceIndexMap();
   spec2index_map::const_iterator s2iter;
@@ -318,31 +303,28 @@ void LoadDetectorsGroupingFile::setBySpectrumIDs() {
   for (gsiter = m_groupSpectraMap.begin(); gsiter != m_groupSpectraMap.end();
        ++gsiter) {
     int groupid = gsiter->first;
-    for (auto specid : gsiter->second) {
-      s2iter = s2imap.find(specid);
+    for (auto specNo : gsiter->second) {
+      s2iter = s2imap.find(specNo);
       if (s2iter == s2imap.end()) {
         g_log.error()
-            << "Spectrum " << specid
-            << " does not have an entry in GroupWorkspace's spec2index map"
-            << std::endl;
+            << "Spectrum " << specNo
+            << " does not have an entry in GroupWorkspace's spec2index map\n";
         throw std::runtime_error("Logic error");
       } else {
         size_t wsindex = s2iter->second;
         if (wsindex >= m_groupWS->getNumberHistograms()) {
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
-                        << " for spectrum ID " << specid
+                        << " for spectrum No " << specNo
                         << " with workspace size = "
-                        << m_groupWS->getNumberHistograms() << std::endl;
+                        << m_groupWS->getNumberHistograms() << '\n';
         } else {
           // Finally set the group workspace
-          m_groupWS->dataY(wsindex)[0] = groupid;
+          m_groupWS->mutableY(wsindex)[0] = groupid;
         } // IF-ELSE: ws index out of range
-      }   // IF-ELSE: spectrum ID has an entry
-    }     // FOR: each spectrum ID
+      }   // IF-ELSE: spectrum No has an entry
+    }     // FOR: each spectrum No
   }       // FOR: each group ID
-
-  return;
 }
 
 /* Initialize a GroupingWorkspace
@@ -358,8 +340,6 @@ void LoadDetectorsGroupingFile::intializeGroupingWorkspace() {
     // 1b. Create GroupingWorkspace w/o instrument
     generateNoInstrumentGroupWorkspace();
   }
-
-  return;
 }
 
 /*
@@ -382,8 +362,7 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
   std::sort(specids.begin(), specids.end());
 
   if (specids.size() != spectrumidgroupmap.size()) {
-    g_log.warning() << "Duplicate spectrum ID is defined in input XML file!"
-                    << std::endl;
+    g_log.warning() << "Duplicate spectrum No is defined in input XML file!\n";
   }
 
   // 2. Initialize group workspace and set the spectrum workspace map
@@ -392,10 +371,8 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
       new DataObjects::GroupingWorkspace(numvectors));
 
   for (size_t i = 0; i < m_groupWS->getNumberHistograms(); i++) {
-    m_groupWS->getSpectrum(i)->setSpectrumNo(specids[i]);
+    m_groupWS->getSpectrum(i).setSpectrumNo(specids[i]);
   }
-
-  return;
 }
 
 /*
@@ -408,17 +385,10 @@ LoadGroupXMLFile::LoadGroupXMLFile()
       m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
       m_groupNamesMap() {}
 
-/*
- * Initialization
- */
-LoadGroupXMLFile::~LoadGroupXMLFile() { return; }
-
 void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
 
   this->initializeXMLParser(xmlfilename);
   this->parseXML();
-
-  return;
 }
 
 /*
@@ -469,7 +439,7 @@ void LoadGroupXMLFile::parseXML() {
 
     const Poco::XML::XMLString value = pNode->innerText();
 
-    if (pNode->nodeName().compare("detector-grouping") == 0) {
+    if (pNode->nodeName() == "detector-grouping") {
       // Node "detector-grouping" (first level)
 
       // Optional instrument name
@@ -484,7 +454,7 @@ void LoadGroupXMLFile::parseXML() {
           getAttributeValueByName(pNode, "description", m_userGiveDescription);
 
     } // "detector-grouping"
-    else if (pNode->nodeName().compare("group") == 0) {
+    else if (pNode->nodeName() == "group") {
       // Group Node:  get ID, set map
       // a) Find group ID
       bool foundid;
@@ -502,7 +472,7 @@ void LoadGroupXMLFile::parseXML() {
       if (autogroupid) {
         curgroupid++;
       } else {
-        curgroupid = atoi(idstr.c_str());
+        curgroupid = std::stoi(idstr);
       }
 
       // b) Set in map
@@ -511,7 +481,7 @@ void LoadGroupXMLFile::parseXML() {
         // Error! Duplicate Group ID defined in XML
         std::stringstream ss;
         ss << "Map (group ID, components) has group ID " << curgroupid
-           << " already.  Duplicate Group ID error!" << std::endl;
+           << " already.  Duplicate Group ID error!\n";
         throw std::invalid_argument(ss.str());
       } else {
         // When group ID is sorted, check if user has specified a group name
@@ -529,22 +499,22 @@ void LoadGroupXMLFile::parseXML() {
         m_groupSpectraMap[curgroupid] = tempspectrumids;
       }
     } // "group"
-    else if (pNode->nodeName().compare("component") == 0) {
+    else if (pNode->nodeName() == "component") {
       // Node "component" = value
       auto it = m_groupComponentsMap.find(curgroupid);
       if (it == m_groupComponentsMap.end()) {
         std::stringstream ss;
         ss << "XML File (component) heirachial error!"
-           << "  Inner Text = " << pNode->innerText() << std::endl;
+           << "  Inner Text = " << pNode->innerText() << '\n';
         throw std::invalid_argument(ss.str());
       } else {
         bool valfound;
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -552,22 +522,22 @@ void LoadGroupXMLFile::parseXML() {
       }
 
     } // Component
-    else if (pNode->nodeName().compare("detids") == 0) {
+    else if (pNode->nodeName() == "detids") {
       // Node "detids"
       auto it = m_groupDetectorsMap.find(curgroupid);
       if (it == m_groupDetectorsMap.end()) {
         std::stringstream ss;
         ss << "XML File (detids) hierarchal error!"
-           << "  Inner Text = " << pNode->innerText() << std::endl;
+           << "  Inner Text = " << pNode->innerText() << '\n';
         throw std::invalid_argument(ss.str());
       } else {
         bool valfound;
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -577,22 +547,22 @@ void LoadGroupXMLFile::parseXML() {
                           parsedRange.end());
       }
     } // "detids"
-    else if (pNode->nodeName().compare("ids") == 0) {
+    else if (pNode->nodeName() == "ids") {
       // Node ids: for spectrum number
       auto it = m_groupSpectraMap.find(curgroupid);
       if (it == m_groupSpectraMap.end()) {
         std::stringstream ss;
         ss << "XML File (ids) hierarchal error! "
-           << "  Inner Text = " << pNode->innerText() << std::endl;
+           << "  Inner Text = " << pNode->innerText() << '\n';
         throw std::invalid_argument(ss.str());
       } else {
         bool valfound;
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -607,8 +577,6 @@ void LoadGroupXMLFile::parseXML() {
     pNode = it.nextNode();
 
   } // ENDWHILE
-
-  return;
 }
 
 /*
@@ -620,12 +588,12 @@ std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
   // 1. Init
   Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
   found = false;
-  std::string value = "";
+  std::string value;
 
   // 2. Loop to find
   for (unsigned long i = 0; i < att->length(); ++i) {
     Poco::XML::Node *cNode = att->item(i);
-    if (cNode->localName().compare(attributename) == 0) {
+    if (cNode->localName() == attributename) {
       value = cNode->getNodeValue();
       found = true;
       break;
@@ -725,7 +693,7 @@ void LoadGroupMapFile::parseFile() {
     if (m_groupSpectraMap.size() != givenNoOfGroups) {
       m_log.warning() << "The input file header states there are "
                       << givenNoOfGroups << ", but the file contains "
-                      << m_groupSpectraMap.size() << " groups" << std::endl;
+                      << m_groupSpectraMap.size() << " groups\n";
     }
   } catch (std::invalid_argument &e) {
     throw Exception::ParseError(e.what(), m_fileName, m_lastLineRead);

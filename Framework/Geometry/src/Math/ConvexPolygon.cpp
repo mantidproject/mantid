@@ -7,6 +7,7 @@
 #include "MantidKernel/V2D.h"
 #include <cfloat>
 #include <sstream>
+#include <algorithm>
 
 namespace Mantid {
 namespace Geometry {
@@ -20,32 +21,14 @@ using Kernel::V2D;
   * Constructs a 'null' polygon with no points
   */
 ConvexPolygon::ConvexPolygon()
-    : m_vertices(), m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_MAX),
-      m_maxY(-DBL_MAX) {}
+    : m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_MAX), m_maxY(-DBL_MAX),
+      m_vertices() {}
 
 /**
  * @param vertices A list of points that form the polygon
  */
 ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) {
   setup();
-}
-
-/**
- * Copy constructor
- * @param rhs :: The object to copy from
- */
-ConvexPolygon::ConvexPolygon(const ConvexPolygon &rhs) { *this = rhs; }
-
-/**
- * Copy-assignment operator
- * @param rhs Source object to copy from
- */
-ConvexPolygon &ConvexPolygon::operator=(const ConvexPolygon &rhs) {
-  if (this != &rhs) {
-    m_vertices = rhs.m_vertices;
-    setup();
-  }
-  return *this;
 }
 
 /// @return True if polygon has 3 or more points
@@ -67,22 +50,17 @@ void ConvexPolygon::clear() {
 void ConvexPolygon::insert(const V2D &pt) {
   m_vertices.push_back(pt);
   // Update extrema
-  if (pt.X() < m_minX)
-    m_minX = pt.X();
-  if (pt.X() > m_maxX)
-    m_maxX = pt.X();
-
-  if (pt.Y() < m_minY)
-    m_minY = pt.Y();
-  if (pt.Y() > m_maxY)
-    m_maxY = pt.Y();
+  m_minX = std::min(m_minX, pt.X());
+  m_maxX = std::max(m_maxX, pt.X());
+  m_minY = std::min(m_minY, pt.Y());
+  m_maxY = std::max(m_maxY, pt.Y());
 }
 
 /**
  * @param x X coordinate
  * @param y Y coordinate
  */
-void ConvexPolygon::insert(double x, double y) { insert(V2D(x, y)); }
+void ConvexPolygon::insert(double x, double y) { this->insert(V2D(x, y)); }
 
 /**
  * Return the vertex at the given index. The index is assumed to be valid. See
@@ -220,18 +198,12 @@ void ConvexPolygon::setup() {
   m_minY = DBL_MAX;
   m_maxY = -DBL_MAX;
 
-  auto iend = m_vertices.end();
-  for (auto iter = m_vertices.begin(); iter != iend; ++iter) {
-    double x(iter->X()), y(iter->Y());
-    if (x < m_minX)
-      m_minX = x;
-    else if (x > m_maxX)
-      m_maxX = x;
-
-    if (y < m_minY)
-      m_minY = y;
-    else if (y > m_maxY)
-      m_maxY = y;
+  for (const auto &vertex : m_vertices) {
+    double x{vertex.X()}, y{vertex.Y()};
+    m_minX = std::min(m_minX, x);
+    m_maxX = std::max(m_maxX, x);
+    m_minY = std::min(m_minY, y);
+    m_maxY = std::max(m_maxY, y);
   }
 }
 

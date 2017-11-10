@@ -3,8 +3,10 @@ import stresstesting
 from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
+from reduction_workflow.command_interface import AppendDataFile, Reduce
 
 import os
+
 
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
@@ -16,6 +18,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class HFIRReductionAPIv2(stresstesting.MantidStressTest):
     """
@@ -31,6 +34,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -45,6 +49,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRReduction.nxs"
 
+
 class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
@@ -58,6 +63,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
         AzimuthalAverage(binning="0.01,0.001,0.2")
@@ -74,6 +80,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
 
+
 class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
@@ -87,6 +94,7 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
         AzimuthalAverage(binning="0.01,0.001,0.2")
@@ -102,4 +110,3 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
-

@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -42,7 +43,7 @@ void Logout2::exec() {
 
   g_log.information() << "Logged out from the compute resource " << comp
                       << ". You will need to authenticate before interacting "
-                         "again with the resource. " << std::endl;
+                         "again with the resource. \n";
 }
 
 } // end namespace RemoteAlgorithms

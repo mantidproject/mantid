@@ -27,23 +27,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "PlotCurve.h"
-#include "Grid.h"
-#include "ScaleDraw.h"
-#include "SymbolBox.h"
 #include "Graph.h"
-#include "PatternBox.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "Grid.h"
 #include "Mantid/ErrorBarSettings.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
-#include "MantidQtAPI/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "PatternBox.h"
+#include "ScaleDraw.h"
+#include "SymbolBox.h"
 #include <QDateTime>
 #include <QMessageBox>
 #include <QPainter>
-#include <qwt_symbol.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_symbol.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -66,9 +66,9 @@ QString PlotCurve::saveCurveLayout() {
   int style = g->curveType(index);
   QString s = "<Style>" + QString::number(style) + "</Style>\n";
 
-  if (style == Graph::Spline)
+  if (style == GraphOptions::Spline)
     s += "<LineStyle>5</LineStyle>\n";
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     s += "<LineStyle>6</LineStyle>\n";
   else
     s += "<LineStyle>" + QString::number(this->style()) + "</LineStyle>\n";
@@ -128,7 +128,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     if (s == "<Pen>") {
       QPen pen;
       while (s != "</Pen>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Color>"))
           pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
@@ -141,7 +141,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     } else if (s == "<Brush>") {
       QBrush brush;
       while (s != "</Brush>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Color>"))
           brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
         else if (s.contains("<Style>"))
@@ -152,7 +152,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
     } else if (s == "<Symbol>") {
       QwtSymbol symbol;
       while (s != "</Symbol>") {
-        s = (*(++line)).stripWhiteSpace();
+        s = (*(++line)).trimmed();
         if (s.contains("<Style>"))
           symbol.setStyle(
               SymbolBox::style(s.remove("<Style>").remove("</Style>").toInt()));
@@ -162,7 +162,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         else if (s == "<SymbolPen>") {
           QPen pen;
           while (s != "</SymbolPen>") {
-            s = (*(++line)).stripWhiteSpace();
+            s = (*(++line)).trimmed();
             if (s.contains("<Color>"))
               pen.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
@@ -175,7 +175,7 @@ void PlotCurve::restoreCurveLayout(const QStringList &lst) {
         } else if (s == "<SymbolBrush>") {
           QBrush brush;
           while (s != "</SymbolBrush>") {
-            s = (*(++line)).stripWhiteSpace();
+            s = (*(++line)).trimmed();
             if (s.contains("<Color>"))
               brush.setColor(QColor(s.remove("<Color>").remove("</Color>")));
             else if (s.contains("<Style>"))
@@ -279,11 +279,18 @@ void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap,
   p->restore();
 }
 
-void PlotCurve::computeWaterfallOffsets() {
+/// Compute curve offsets for a curve in a waterfall plot.
+/// @param xDataOffset :: Output value of an x-offset that should be applied to
+///   the data's bounding rect to fit to a waterfall plot.
+/// @param yDataOffset :: Output value of an y-offset that should be applied to
+///   the data's bounding rect to fit to a waterfall plot.
+void PlotCurve::computeWaterfallOffsets(double &xDataOffset,
+                                        double &yDataOffset) {
   Plot *plot = static_cast<Plot *>(this->plot());
   Graph *g = static_cast<Graph *>(plot->parent());
 
-  // reset the offsets
+  // Reset the offsets
+  // These are offsets of the curve in pixels on the screen.
   d_x_offset = 0.0;
   d_y_offset = 0.0;
 
@@ -296,18 +303,53 @@ void PlotCurve::computeWaterfallOffsets() {
     PlotCurve *c = dynamic_cast<PlotCurve *>(g->curve(0));
     if (index > 0 && c) {
       // Compute offsets based on the maximum value for the curve
-      d_x_offset = index * g->waterfallXOffset() * 0.01 *
-                   g->curve(0)->maxXValue() / (double)(curves - 1);
-      d_y_offset = index * g->waterfallYOffset() * 0.01 *
-                   g->curve(0)->maxYValue() / (double)(curves - 1);
+      double xRange = plot->axisScaleDiv(Plot::xBottom)->range();
+      double yRange = plot->axisScaleDiv(Plot::yLeft)->range();
 
+      // First compute offsets in a linear scale
+      xDataOffset =
+          index * g->waterfallXOffset() * 0.01 * xRange / (double)(curves - 1);
+      yDataOffset =
+          index * g->waterfallYOffset() * 0.01 * yRange / (double)(curves - 1);
+
+      // Corresponding offset on the screen in pixels
+      d_x_offset = plot->canvas()->width() * xDataOffset / xRange;
+      d_y_offset = plot->canvas()->height() * yDataOffset / yRange;
+
+      // Correct the data offsets using actual axis scales. If the scales are
+      // non-linear the offsets will change.
+      { // x-offset
+        auto trans = plot->axisScaleEngine(Plot::xBottom)->transformation();
+        auto a =
+            trans->xForm(g->curve(0)->maxXValue(),
+                         plot->axisScaleDiv(Plot::xBottom)->lowerBound(),
+                         g->curve(0)->maxXValue(), 0, plot->canvas()->width());
+        auto b = trans->invXForm(a + d_x_offset, 0, plot->canvas()->width(), 1,
+                                 g->curve(0)->maxXValue());
+        xDataOffset = b - g->curve(0)->maxXValue();
+      }
+
+      { // y-offset
+        auto trans = plot->axisScaleEngine(Plot::yLeft)->transformation();
+        auto a =
+            trans->xForm(g->curve(0)->maxYValue(),
+                         plot->axisScaleDiv(Plot::yLeft)->lowerBound(),
+                         g->curve(0)->maxYValue(), 0, plot->canvas()->height());
+        auto b = trans->invXForm(a + d_y_offset, 0, plot->canvas()->height(), 1,
+                                 g->curve(0)->maxYValue());
+        yDataOffset = b - g->curve(0)->maxYValue();
+      }
+      // Set the z-order of the curves such that the first curve is on top.
       setZ(-index);
-      setBaseline(ymin -
-                  d_y_offset); // Fill down to minimum value of first curve
+      // Fill down to minimum value of first curve
+      setBaseline(ymin - yDataOffset);
 
     } else {
+      // First curve - no offset.
       setZ(0);
       setBaseline(ymin); // This is for when 'fill under curve' is turn on
+      xDataOffset = 0.0;
+      yDataOffset = 0.0;
     }
     if (g->grid())
       g->grid()->setZ(-g->curves() /*Count()*/ - 1);
@@ -323,7 +365,7 @@ DataCurve::DataCurve(Table *t, const QString &xColName, const QString &name,
       d_click_pos_y(0.0), d_labels_color(Qt::black), d_labels_font(QFont()),
       d_labels_angle(0.0), d_white_out_labels(false),
       d_labels_align(Qt::AlignHCenter), d_labels_x_offset(0),
-      d_labels_y_offset(50), d_selected_label(NULL) {
+      d_labels_y_offset(50), d_selected_label(nullptr) {
   if (t && d_end_row < 0)
     d_end_row = t->numRows() - 1;
 }
@@ -404,7 +446,8 @@ bool DataCurve::updateData(Table *t, const QString &colName) {
                        colName != d_labels_column))
     return false;
 
-  loadData();
+  // Update data with all rows in table
+  setFullRange();
   return true;
 }
 
@@ -430,7 +473,7 @@ void DataCurve::loadData() {
   QStringList xLabels, yLabels; // store text labels
 
   //  int xAxis = QwtPlot::xBottom;
-  //  if (d_type == Graph::HorizontalBars)
+  //  if (d_type == GraphOptions::HorizontalBars)
   //    xAxis = QwtPlot::yLeft;
 
   QTime time0;
@@ -495,7 +538,8 @@ void DataCurve::loadData() {
   // PlotCurve so that MantidCurve can access it as well.
   if (g->isWaterfallPlot()) {
     // Calculate the offsets
-    computeWaterfallOffsets();
+    double a, b;
+    computeWaterfallOffsets(a, b);
   }
   // End re-jigged waterfall offset code
 
@@ -503,7 +547,7 @@ void DataCurve::loadData() {
     remove();
     return;
   } else {
-    if (d_type == Graph::HorizontalBars) {
+    if (d_type == GraphOptions::HorizontalBars) {
       setData(Y.data(), X.data(), size);
       foreach (DataCurve *c, d_error_bars)
         c->setData(Y.data(), X.data(), size);
@@ -514,7 +558,7 @@ void DataCurve::loadData() {
     }
 
     if (xColType == Table::Text) {
-      if (d_type == Graph::HorizontalBars)
+      if (d_type == GraphOptions::HorizontalBars)
         g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, d_x_column,
                                xLabels);
       else
@@ -522,7 +566,7 @@ void DataCurve::loadData() {
                                xLabels);
     } else if (xColType == Table::Time || xColType == Table::Date) {
       int axis = QwtPlot::xBottom;
-      if (d_type == Graph::HorizontalBars)
+      if (d_type == GraphOptions::HorizontalBars)
         axis = QwtPlot::yLeft;
       ScaleDraw *old_sd = static_cast<ScaleDraw *>(plot->axisScaleDraw(axis));
       ScaleDraw *sd = new ScaleDraw(plot, old_sd);
@@ -602,8 +646,8 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QDate d = QDate::fromString(d_table->text(i, xcol), format);
       if (d.isValid()) {
-        if (d_type == Graph::HorizontalBars && date0.daysTo(d) == y(point) &&
-            d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars &&
+            date0.daysTo(d) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
         else if (date0.daysTo(d) == x(point) &&
                  d_table->cell(i, ycol) == y(point))
@@ -616,8 +660,8 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QTime t = QTime::fromString(d_table->text(i, xcol), format);
       if (t.isValid()) {
-        if (d_type == Graph::HorizontalBars && t0.msecsTo(t) == y(point) &&
-            d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars &&
+            t0.msecsTo(t) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
         if (t0.msecsTo(t) == x(point) && d_table->cell(i, ycol) == y(point))
           return i;
@@ -866,8 +910,8 @@ QString DataCurve::saveToString() {
   if (d_skip_symbols > 1)
     s += "<SkipPoints>" + QString::number(d_skip_symbols) + "</SkipPoints>\n";
 
-  if (d_labels_list.isEmpty() || type() == Graph::Function ||
-      type() == Graph::Box)
+  if (d_labels_list.isEmpty() || type() == GraphOptions::Function ||
+      type() == GraphOptions::Box)
     return s;
 
   s = "<CurveLabels>\n";
@@ -897,7 +941,7 @@ bool DataCurve::selectedLabels(const QPoint &pos) {
     return false;
 
   bool selected = false;
-  d_selected_label = NULL;
+  d_selected_label = nullptr;
   foreach (PlotMarker *m, d_labels_list) {
     int x = d_plot->transform(xAxis(), m->xValue());
     int y = d_plot->transform(yAxis(), m->yValue());
@@ -955,10 +999,11 @@ void DataCurve::setLabelsSelected(bool on) {
 bool DataCurve::validCurveType() const {
   int style = type();
 
-  return !(style == Graph::Function || style == Graph::Box ||
-           style == Graph::Pie || style == Graph::ErrorBars ||
-           style == Graph::ColorMap || style == Graph::GrayScale ||
-           style == Graph::Contour || style == Graph::ImagePlot);
+  return !(style == GraphOptions::Function || style == GraphOptions::Box ||
+           style == GraphOptions::Pie || style == GraphOptions::ErrorBars ||
+           style == GraphOptions::ColorMap ||
+           style == GraphOptions::GrayScale || style == GraphOptions::Contour ||
+           style == GraphOptions::ImagePlot);
 }
 
 void DataCurve::moveLabels(const QPoint &pos) {
@@ -999,10 +1044,10 @@ PlotMarker::PlotMarker(int index, double angle)
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
                       const QwtScaleMap &yMap, const QRect &) const {
   p->save();
+  int x = xMap.transform(xValue());
+  int y = yMap.transform(yValue());
 
-  xMap.transform(xValue());
-  yMap.transform(yValue());
-
+  p->translate(x, y);
   p->rotate(-d_angle);
 
   QwtText text = label();

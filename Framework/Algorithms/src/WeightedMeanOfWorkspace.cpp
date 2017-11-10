@@ -1,9 +1,8 @@
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 using namespace API;
@@ -15,17 +14,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(WeightedMeanOfWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedMeanOfWorkspace::WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string WeightedMeanOfWorkspace::name() const {
   return "WeightedMeanOfWorkspace";
@@ -39,9 +27,6 @@ const std::string WeightedMeanOfWorkspace::category() const {
   return "Arithmetic";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void WeightedMeanOfWorkspace::init() {
@@ -53,7 +38,6 @@ void WeightedMeanOfWorkspace::init() {
                         "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void WeightedMeanOfWorkspace::exec() {
@@ -72,31 +56,25 @@ void WeightedMeanOfWorkspace::exec() {
   std::size_t numHists = inputWS->getNumberHistograms();
   double averageValue = 0.0;
   double weightSum = 0.0;
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (std::size_t i = 0; i < numHists; ++i) {
-    try {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      if (det->isMonitor() || det->isMasked()) {
+    if (spectrumInfo.hasDetectors(i))
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
-      }
-    } catch (...) {
-      // Swallow these if no instrument is found
-      ;
-    }
-    MantidVec y = inputWS->dataY(i);
-    MantidVec e = inputWS->dataE(i);
+    auto &y = inputWS->y(i);
+    auto &e = inputWS->e(i);
     double weight = 0.0;
     for (std::size_t j = 0; j < y.size(); ++j) {
-      if (!boost::math::isnan(y[j]) && !boost::math::isinf(y[j]) &&
-          !boost::math::isnan(e[j]) && !boost::math::isinf(e[j])) {
+      if (std::isfinite(y[j]) && std::isfinite(e[j])) {
         weight = 1.0 / (e[j] * e[j]);
         averageValue += (y[j] * weight);
         weightSum += weight;
       }
     }
   }
-  singleValued->dataX(0)[0] = 0.0;
-  singleValued->dataY(0)[0] = averageValue / weightSum;
-  singleValued->dataE(0)[0] = std::sqrt(weightSum);
+  singleValued->mutableX(0)[0] = 0.0;
+  singleValued->mutableY(0)[0] = averageValue / weightSum;
+  singleValued->mutableE(0)[0] = std::sqrt(weightSum);
   this->setProperty("OutputWorkspace", singleValued);
 }
 

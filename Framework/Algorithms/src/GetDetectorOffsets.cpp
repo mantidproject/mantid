@@ -3,14 +3,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,14 +20,6 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 using namespace DataObjects;
-
-/// Constructor
-GetDetectorOffsets::GetDetectorOffsets()
-    : API::Algorithm(), m_Xmin(DBL_MAX), m_Xmax(-DBL_MIN), m_maxOffset(0.),
-      m_dreference(0.), m_dideal(0.), m_step(0.) {}
-
-/// Destructor
-GetDetectorOffsets::~GetDetectorOffsets() {}
 
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -118,9 +108,10 @@ void GetDetectorOffsets::exec() {
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
-  Progress prog(this, 0, 1.0, nspec);
-  PARALLEL_FOR1(inputW)
-  for (int wi = 0; wi < nspec; ++wi) {
+  Progress prog(this, 0.0, 1.0, nspec);
+  auto &spectrumInfo = maskWS->mutableSpectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
+  for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
     double offset = fitSpectra(wi, isAbsolute);
@@ -131,7 +122,7 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const auto &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.
@@ -145,11 +136,12 @@ void GetDetectorOffsets::exec() {
         const size_t workspaceIndex = mapEntry->second;
         if (mask == 1.) {
           // Being masked
-          maskWS->maskWorkspaceIndex(workspaceIndex);
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->getSpectrum(workspaceIndex).clearData();
+          spectrumInfo.setMasked(workspaceIndex, true);
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         } else {
           // Using the detector
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         }
       }
     }
@@ -183,13 +175,13 @@ void GetDetectorOffsets::exec() {
  */
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
-  const MantidVec &yValues = inputW->readY(s);
+  const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
   const double peakHeight = *it;
-  const double peakLoc = inputW->readX(s)[it - yValues.begin()];
+  const double peakLoc = inputW->x(s)[it - yValues.begin()];
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
-  if (boost::math::isnan(peakHeight))
+  if (std::isnan(peakHeight))
     return (1000.);
 
   IAlgorithm_sptr fit_alg;
@@ -249,7 +241,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);
-  peak->setFwhm(2.0 * std::sqrt(2.0 * std::log(2.0)) * sigma);
+  peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);

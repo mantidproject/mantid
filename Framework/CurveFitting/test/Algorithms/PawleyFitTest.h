@@ -133,7 +133,7 @@ public:
     // Error of 'c' should also be small
     TS_ASSERT_LESS_THAN(fabs(cellWs->cell<double>(2, 2)), 1e-4);
     // b should be almost equal to 4.06
-    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 2e-3);
+    TS_ASSERT_DELTA(cellWs->cell<double>(2, 1), 4.06, 3e-3);
 
     // Check number of peak parameters.
     ITableWorkspace_sptr peakWs =
@@ -223,7 +223,7 @@ private:
       double center = useQ ? (2.0 * M_PI) / d : d;
       double fwhmAbs = row.Double(2) * center;
       fn << "name=Gaussian,PeakCentre=" << center
-         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * log(2.0)))
+         << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
       functionStrings.push_back(fn.str());
@@ -246,16 +246,10 @@ private:
 
     siFn->function(xValues, yValues);
 
-    std::vector<double> &xData = ws->dataX(0);
-    std::vector<double> &yData = ws->dataY(0);
-    std::vector<double> &eData = ws->dataE(0);
-
-    for (size_t i = 0; i < n; ++i) {
-      xData[i] = xValues[i];
-      yData[i] = yValues[i] + bg;
-      eData[i] = eValues[i];
-    }
-
+    ws->mutableX(0) = xValues.toVector();
+    ws->mutableY(0) = yValues.toVector();
+    ws->mutableY(0) += bg;
+    ws->mutableE(0) = eValues;
     WorkspaceCreationHelper::addNoise(ws, 0, -0.5, 0.5);
 
     ws->getAxis(0)->setUnit(unit);

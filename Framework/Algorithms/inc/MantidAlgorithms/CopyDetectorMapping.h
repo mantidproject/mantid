@@ -38,10 +38,6 @@ namespace Algorithms {
 */
 class DLLExport CopyDetectorMapping : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CopyDetectorMapping() : API::Algorithm() {}
-  /// Virtual destructor
-  ~CopyDetectorMapping() override {}
   /// Algorithm's name
   const std::string name() const override { return "CopyDetectorMapping"; }
   /// Summary of algorithms purpose

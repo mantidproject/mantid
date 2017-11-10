@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/AddLogDerivative.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -8,22 +9,13 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddLogDerivative)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-AddLogDerivative::AddLogDerivative() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-AddLogDerivative::~AddLogDerivative() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -142,7 +134,7 @@ void AddLogDerivative::exec() {
                                                    ") so we can't perform its "
                                                    "derivative.");
 
-  Progress progress(this, 0, 1, Derivative);
+  Progress progress(this, 0.0, 1.0, Derivative);
 
   // Perform derivative
   TimeSeriesProperty<double> *output =
@@ -150,7 +142,7 @@ void AddLogDerivative::exec() {
   // Add the log
   run.addProperty(output, true);
 
-  g_log.notice() << "Added log named " << NewLogName << std::endl;
+  g_log.notice() << "Added log named " << NewLogName << '\n';
 }
 
 } // namespace Mantid

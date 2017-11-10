@@ -2,35 +2,43 @@
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
+#include "ApplicationWindow.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MultiTabScriptInterpreter.h"
-#include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "pixmaps.h"
+#include "ScriptingEnv.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "ApplicationWindow.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 // MantidQt
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
-#include <QTextEdit>
-#include <QMenuBar>
-#include <QMenu>
 #include <QAction>
-#include <QSettings>
+#include <QApplication>
+#include <QCloseEvent>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QList>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QDateTime>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QApplication>
+#include <QSettings>
+#include <QTextEdit>
 #include <QTextStream>
-#include <QList>
 #include <QUrl>
+
+using namespace Mantid;
+using namespace MantidQt::API;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 namespace {
 /// static logger
@@ -64,6 +72,18 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  flags |= Qt::Tool;
+  flags |= Qt::Dialog;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
 }
 
 /**
@@ -195,18 +215,18 @@ void ScriptingWindow::populateFileMenu() {
 
   if (scriptsOpen) {
     m_fileMenu->addAction(m_openInCurTab);
-    m_fileMenu->insertSeparator();
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_save);
     m_fileMenu->addAction(m_saveAs);
     m_fileMenu->addAction(m_print);
   }
 
-  m_fileMenu->insertSeparator();
+  m_fileMenu->addSeparator();
   m_fileMenu->addMenu(m_recentScripts);
   m_recentScripts->setEnabled(m_manager->recentScripts().count() > 0);
 
   if (scriptsOpen) {
-    m_fileMenu->insertSeparator();
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_closeTab);
   }
 }
@@ -230,15 +250,15 @@ void ScriptingWindow::populateEditMenu() {
   m_editMenu->addAction(m_copy);
   m_editMenu->addAction(m_paste);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_comment);
   m_editMenu->addAction(m_uncomment);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_tabsToSpaces);
   m_editMenu->addAction(m_spacesToTabs);
 
-  m_editMenu->insertSeparator();
+  m_editMenu->addSeparator();
   m_editMenu->addAction(m_find);
 }
 
@@ -268,19 +288,19 @@ void ScriptingWindow::populateWindowMenu() {
   m_windowMenu->addAction(m_hide);
 
   if (scriptsOpen) {
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_zoomIn);
     m_windowMenu->addAction(m_zoomOut);
     m_windowMenu->addAction(m_resetZoom);
     m_windowMenu->addAction(m_selectFont);
 
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_toggleProgress);
     m_windowMenu->addAction(m_toggleFolding);
     m_windowMenu->addAction(m_toggleWrapping);
     m_windowMenu->addAction(m_toggleWhitespace);
 
-    m_windowMenu->insertSeparator();
+    m_windowMenu->addSeparator();
     m_windowMenu->addAction(m_openConfigTabs);
   }
 }
@@ -299,6 +319,16 @@ void ScriptingWindow::updateWindowFlags() {
   if (m_alwaysOnTop->isChecked()) {
     flags |= Qt::WindowStaysOnTopHint;
   }
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
   setWindowFlags(flags);
   // This is necessary due to the setWindowFlags function reparenting the window
   // and causing is
@@ -324,7 +354,7 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 void ScriptingWindow::setEditActionsDisabled(bool off) {
   auto actions = m_editMenu->actions();
   foreach (QAction *action, actions) {
-    if (strcmp("Find", action->name()) != 0) {
+    if (strcmp("Find", action->objectName().toAscii().constData()) != 0) {
       action->setDisabled(off);
     }
   }
@@ -394,8 +424,8 @@ void ScriptingWindow::clearScriptVariables() {
  * Opens the Qt help windows for the scripting window.
  */
 void ScriptingWindow::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL,
-                                                 QString("ScriptingWindow"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Scripting Window"));
 }
 
 /**
@@ -403,14 +433,59 @@ void ScriptingWindow::showHelp() {
  */
 void ScriptingWindow::showPythonHelp() {
   MantidQt::API::HelpWindow::showPage(
-      NULL, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
+      nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
 }
 
 /**
- * calls MultiTabScriptInterpreter saveToString and
- *  saves the currently opened script file names to a string
+  * Calls MultiTabScriptInterpreter to save the currently opened
+  * script file names to a string.
+  *
+  * @param app :: the current application window instance
+  * @return script file names in the matid project format
+  */
+std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
+  (void)app; // suppress unused variable warnings
+  return m_manager->saveToString().toStdString();
+}
+
+/**
+ * Load script files from the project file
+ *
+ * @param lines :: raw lines from the project file
+ * @param app :: the current application window instance
+ * @param fileVersion :: the file version used when saved
  */
-QString ScriptingWindow::saveToString() { return m_manager->saveToString(); }
+void ScriptingWindow::loadFromProject(const std::string &lines,
+                                      ApplicationWindow *app,
+                                      const int fileVersion) {
+  Q_UNUSED(fileVersion);
+
+  MantidQt::API::TSVSerialiser sTSV(lines);
+  QStringList files;
+
+  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +
+                 " Window");
+
+  auto scriptNames = sTSV.values("ScriptNames");
+
+  // Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+  for (size_t i = 1; i < scriptNames.size(); ++i)
+    files.append(QString::fromStdString(scriptNames[i]));
+
+  loadFromFileList(files);
+}
+
+/**
+ * Load script files from a list of file names
+ * @param files :: List of file names to oepn
+ */
+void ScriptingWindow::loadFromFileList(const QStringList &files) {
+  for (auto file = files.begin(); file != files.end(); ++file) {
+    if (file->isEmpty())
+      continue;
+    openUnique(*file);
+  }
+}
 
 /**
  * Saves scripts file names to a string
@@ -443,7 +518,8 @@ void ScriptingWindow::customEvent(QEvent *event) {
 void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->acceptProposedAction();
     }
   }
@@ -456,7 +532,8 @@ void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
 void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->accept();
     }
   }
@@ -469,11 +546,11 @@ void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
 void ScriptingWindow::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    QStringList filenames = extractPyFiles(mimeData->urls());
+    const auto filenames = DropEventHelper::extractPythonFiles(de);
     de->acceptProposedAction();
 
-    for (int i = 0; i < filenames.size(); ++i) {
-      m_manager->openInNewTab(filenames[i]);
+    for (const auto &name : filenames) {
+      m_manager->openInNewTab(name);
     }
   }
 }
@@ -773,7 +850,7 @@ void ScriptingWindow::openUnique(QString filename) {
   auto openFiles = m_manager->fileNamesToQStringList();
   // The list of open files contains absolute paths so make sure we have one
   // here
-  filename = QFileInfo(filename).absFilePath();
+  filename = QFileInfo(filename).absoluteFilePath();
   auto position = openFiles.indexOf(filename);
   if (position < 0) {
     m_manager->newTab(openFiles.size(), filename);
@@ -820,19 +897,4 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Asynchronous;
   else
     return Script::Serialised;
-}
-
-QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().upper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
 }

@@ -17,4 +17,5 @@
    :maxdepth: 1
 
    *
+   MuonAnalysis_test_guides/index
 

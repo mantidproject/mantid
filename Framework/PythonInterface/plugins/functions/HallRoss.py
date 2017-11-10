@@ -23,9 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
+from __future__ import (absolute_import, division, print_function)
+import math
+import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
-import math, numpy as np
+
 
 class HallRoss(IFunction1D):
 
@@ -59,6 +61,7 @@ class HallRoss(IFunction1D):
             jacobian.set(i,0,-h/tau)
             jacobian.set(i,1,x*x*ex/tau)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(HallRoss)

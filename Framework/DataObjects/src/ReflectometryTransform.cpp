@@ -3,6 +3,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
@@ -10,10 +11,15 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/VectorHelper.h"
@@ -46,33 +52,32 @@ void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
 *  Adds the column headings to a table
 *  @param vertexes : Table to which the columns are written to.
 */
-void addColumnHeadings(
-    boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-    std::string outputDimensions) {
+void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes,
+                       const std::string &outputDimensions) {
 
   if (outputDimensions == "Q (lab frame)") {
-    vertexes->addColumn("double", "Qx");
-    vertexes->addColumn("double", "Qy");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Qx");
+    vertexes.addColumn("double", "Qy");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "P (lab frame)") {
-    vertexes->addColumn("double", "Pi+Pf");
-    vertexes->addColumn("double", "Pi-Pf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Pi+Pf");
+    vertexes.addColumn("double", "Pi-Pf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "K (incident, final)") {
-    vertexes->addColumn("double", "Ki");
-    vertexes->addColumn("double", "Kf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Ki");
+    vertexes.addColumn("double", "Kf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
 }
 }
@@ -190,8 +195,9 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
   verticalAxis->unit() = verticalUnit;
   verticalUnit->setLabel(caption, units);
   verticalAxis->title() = caption;
+  auto xAxis = Kernel::make_cow<HistogramData::HistogramX>(xAxisVec);
   for (size_t i = 0; i < nBins; ++i) {
-    ws->setX(i, xAxisVec);
+    ws->setX(i, xAxis);
     double qzIncrement =
         ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
     verticalAxis->setValue(i, qzIncrement);
@@ -213,29 +219,20 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
   std::vector<double> detectorHeights(nhist);
 
   auto inst = workspace->getInstrument();
-  const auto samplePos = inst->getSample()->getPos();
   const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
 
-  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
-  {
-    IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det || det->isMonitor()) {
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  const auto &detectorInfo = workspace->detectorInfo();
+  for (size_t i = 0; i < nhist; ++i) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      // If no detector found, skip onto the next spectrum
       thetas[i] = -1.0; // Indicates a detector to skip
       thetaWidths[i] = -1.0;
       continue;
     }
+
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
+    const double theta = spectrumInfo.signedTwoTheta(i) * rad2deg;
     thetas[i] = theta;
     /**
      * Determine width from shape geometry. A group is assumed to contain
@@ -243,17 +240,15 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
      * The shape is retrieved and rotated to match the rotation of the detector.
      * The angular width is computed using the l2 distance from the sample
      */
-    if (auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det)) {
-      // assume they all have same shape and same r,theta
-      auto dets = group->getDetectors();
-      det = dets[0];
-    }
-    const auto pos = det->getPos() - samplePos;
-    double l2(0.0), t(0.0), p(0.0);
-    pos.getSpherical(l2, t, p);
+    // If the spectrum is based on a group of detectors assume they all have
+    // same shape and same r,theta
+    // DetectorGroup::getID gives ID of first detector.
+    size_t detIndex = detectorInfo.indexOf(spectrumInfo.detector(i).getID());
+    double l2 = detectorInfo.l2(detIndex);
     // Get the shape
     auto shape =
-        det->shape(); // Defined in its own reference frame with centre at 0,0,0
+        detectorInfo.detector(detIndex)
+            .shape(); // Defined in its own reference frame with centre at 0,0,0
     BoundingBox bbox = shape->getBoundingBox();
     auto maxPoint(bbox.maxPoint());
     auto minPoint(bbox.minPoint());
@@ -405,8 +400,9 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
     const MantidVec Y = inputWs->readY(nHistoIndex);
     const MantidVec E = inputWs->readE(nHistoIndex);
 
-    for (size_t nBinIndex = 0; nBinIndex < inputWs->blocksize(); ++nBinIndex) {
-      auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
+    const size_t numBins = Y.size();
+    for (size_t nBinIndex = 0; nBinIndex < numBins; ++nBinIndex) {
+      const auto value_index = outWs->getLinearIndex(nBinIndex, nHistoIndex);
       outWs->setSignalAt(value_index, Y[nBinIndex]);
       outWs->setErrorSquaredAt(value_index, E[nBinIndex] * E[nBinIndex]);
     }
@@ -427,7 +423,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
     bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
+      "RebinnedOutput", m_d1NumBins, m_d0NumBins + 1, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
 
   const double widthD0 = (m_d0Max - m_d0Min) / double(m_d0NumBins);
@@ -443,8 +439,9 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = new BinEdgeAxis(zBinsVec);
   outWS->replaceAxis(1, verticalAxis);
+  HistogramData::BinEdges binEdges(xBinsVec);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
-    outWS->setX(i, xBinsVec);
+    outWS->setBinEdges(i, binEdges);
 
   verticalAxis->title() = m_d1Label;
 
@@ -460,12 +457,14 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
-  addColumnHeadings(vertexes, outputDimensions);
+  addColumnHeadings(*vertexes, outputDimensions);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHistos; ++i) {
-    IDetector_const_sptr detector = inputWS->getDetector(i);
-    if (!detector || detector->isMasked() || detector->isMonitor()) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) ||
+        spectrumInfo.isMonitor(i)) {
       continue;
     }
+    const auto &detector = spectrumInfo.detector(i);
 
     // Compute polygon points
     const double theta = m_theta[i];
@@ -494,8 +493,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
         specNumberMapping.push_back(
-            outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
-        detIDMapping.push_back(detector->getID());
+            outWS->getSpectrum(qIndex - 1).getSpectrumNo());
+        detIDMapping.push_back(detector.getID());
       }
       // Debugging
       if (dumpVertexes) {

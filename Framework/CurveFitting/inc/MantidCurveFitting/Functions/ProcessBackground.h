@@ -17,9 +17,6 @@ namespace Functions {
 
 class RemovePeaks {
 public:
-  RemovePeaks();
-  ~RemovePeaks();
-
   void setup(DataObjects::TableWorkspace_sptr peaktablews);
 
   DataObjects::Workspace2D_sptr
@@ -67,7 +64,6 @@ private:
 class DLLExport ProcessBackground : public API::Algorithm {
 public:
   ProcessBackground();
-  ~ProcessBackground() override;
 
   const std::string category() const override { return "Diffraction\\Utility"; }
 

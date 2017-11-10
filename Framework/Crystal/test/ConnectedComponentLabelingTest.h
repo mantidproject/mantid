@@ -450,7 +450,8 @@ public:
         std::stringstream stream;
         stream << "Linear index: " << i
                << " should be labeled. Actually labeled with: " << actualValue;
-        TSM_ASSERT(stream.str(), outWS->getSignalAt(i) >= labelingId)
+        TSM_ASSERT(stream.str(),
+                   outWS->getSignalAt(i) >= static_cast<double>(labelingId))
         // Background is marked as -1.
       } else {
         TSM_ASSERT_EQUALS("Should not be labeled", outWS->getSignalAt(i),

@@ -2,15 +2,10 @@
 #define MANTID_CURVEFITTING_FLATBACKGROUNDTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 
-using namespace Mantid;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Functions;
-using namespace Mantid::API;
+using Mantid::CurveFitting::Functions::FlatBackground;
 
 class FlatBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -19,27 +14,35 @@ public:
   static FlatBackgroundTest *createSuite() { return new FlatBackgroundTest(); }
   static void destroySuite(FlatBackgroundTest *suite) { delete suite; }
 
-  void testFunctionMW() {
-    std::size_t numPoints = 100;
-    double expValue = 10.;
-    std::vector<double> yValues(numPoints);
+  void test_category() {
+    FlatBackground cfn;
+    cfn.initialize();
 
-    FlatBackground *bkgd = new FlatBackground();
-    bkgd->initialize();
-    bkgd->setParameter("A0", expValue);
-    bkgd->function1D(yValues.data(), NULL, numPoints); // don't need x-values
-    delete bkgd;
-
-    for (std::size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_EQUALS(yValues[i], expValue);
-    }
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
   }
 
-  void testForCategories() {
-    FlatBackground forCat;
-    const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
+  void testZero() { checkFunctionValue(0); }
+
+  void testFunctionMW() { checkFunctionValue(100); }
+
+private:
+  void checkFunctionValue(double val) {
+    std::size_t numPoints = 100;
+    std::vector<double> yValues(numPoints);
+
+    FlatBackground bkgd;
+    bkgd.initialize();
+    bkgd.setParameter("A0", val);
+    bkgd.function1D(yValues.data(), nullptr, numPoints); // don't need x-values
+
+    for (size_t i = 0; i < numPoints; i++) {
+      TS_ASSERT_EQUALS(yValues[i], val);
+    }
   }
 };
 

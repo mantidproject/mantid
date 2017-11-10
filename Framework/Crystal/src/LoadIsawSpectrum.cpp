@@ -4,11 +4,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Utils.h"
 
 #include <fstream>
 
@@ -24,19 +26,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadIsawSpectrum)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawSpectrum::LoadIsawSpectrum() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawSpectrum::~LoadIsawSpectrum() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
@@ -51,7 +40,6 @@ void LoadIsawSpectrum::init() {
   getInstrument3WaysInit(this);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadIsawSpectrum::exec() {
@@ -140,20 +128,20 @@ void LoadIsawSpectrum::exec() {
   outWS->setInstrument(inst);
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
-  outWS->isDistribution(true);
+  outWS->setDistribution(true);
   outWS->rebuildSpectraMapping(false);
 
   // Go through each point at this run / bank
   for (size_t i = 0; i < spectra.size(); i++) {
-    ISpectrum *outSpec = outWS->getSpectrum(i);
-    outSpec->clearDetectorIDs();
+    auto &outSpec = outWS->getSpectrum(i);
+    outSpec.clearDetectorIDs();
     for (int j = 0; j < detList[i]->xpixels(); j++)
       for (int k = 0; k < detList[i]->ypixels(); k++)
-        outSpec->addDetectorID(
+        outSpec.addDetectorID(
             static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
-    MantidVec &outY = outSpec->dataY();
-    MantidVec &outE = outSpec->dataE();
-    MantidVec &outX = outSpec->dataX();
+    auto &outX = outSpec.mutableX();
+    auto &outY = outSpec.mutableY();
+    auto &outE = outSpec.mutableE();
     // This is the scattered beam direction
     V3D dir = detList[i]->getPos() - samplePos;
 

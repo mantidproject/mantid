@@ -39,7 +39,7 @@ PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
     }
 
     return pointGroup;
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     if (spaceGroup.getCoordinateSystem() !=
         Group::CoordinateSystem::Hexagonal) {
       pointGroupSymbol.append(" r");

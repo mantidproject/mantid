@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/PropertyHistory.h"
 
 #include <boost/python/class.hpp>
@@ -8,6 +9,8 @@
 
 using Mantid::Kernel::PropertyHistory;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(PropertyHistory)
 
 void export_PropertyHistory() {
   register_ptr_to_python<Mantid::Kernel::PropertyHistory_sptr>();

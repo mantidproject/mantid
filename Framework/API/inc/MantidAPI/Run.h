@@ -4,7 +4,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <vector>
 
@@ -13,6 +12,14 @@ class File;
 }
 
 namespace Mantid {
+
+namespace Kernel {
+template <class T> class Matrix;
+}
+
+namespace Geometry {
+class Goniometer;
+}
 
 namespace API {
 
@@ -46,12 +53,20 @@ namespace API {
 */
 class MANTID_API_DLL Run : public LogManager {
 public:
+  Run();
+  Run(const Run &other);
+  ~Run();
+  Run &operator=(const Run &other);
+
+  /// Clone
+  boost::shared_ptr<Run> clone();
+
   /// Addition
   Run &operator+=(const Run &rhs);
 
   /// Filter the logs by time
-  void filterByTime(const Kernel::DateAndTime start,
-                    const Kernel::DateAndTime stop) override;
+  void filterByTime(const Types::Core::DateAndTime start,
+                    const Types::Core::DateAndTime stop) override;
   /// Split the logs based on the given intervals
   void splitByTime(Kernel::TimeSplitterType &splitter,
                    std::vector<LogManager *> outputs) const override;
@@ -80,13 +95,13 @@ public:
                      const bool useLogValues);
   /** @return A reference to the const Goniometer object for this run */
   inline const Geometry::Goniometer &getGoniometer() const {
-    return m_goniometer;
+    return *m_goniometer;
   }
   /** @return A reference to the non-const Goniometer object for this run */
-  inline Geometry::Goniometer &mutableGoniometer() { return m_goniometer; }
+  inline Geometry::Goniometer &mutableGoniometer() { return *m_goniometer; }
 
   // Retrieve the goniometer rotation matrix
-  const Kernel::DblMatrix &getGoniometerMatrix() const;
+  const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,
@@ -100,7 +115,7 @@ private:
   void calculateGoniometerMatrix();
 
   /// Goniometer for this run
-  Mantid::Geometry::Goniometer m_goniometer;
+  std::unique_ptr<Geometry::Goniometer> m_goniometer;
   /// A set of histograms that can be stored here for future reference
   std::vector<double> m_histoBins;
 

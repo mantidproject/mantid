@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid;

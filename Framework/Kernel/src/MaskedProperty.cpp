@@ -1,6 +1,9 @@
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/PropertyHistory.h"
 
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
+
 namespace Mantid {
 namespace Kernel {
 
@@ -77,7 +80,7 @@ template <typename TYPE> void MaskedProperty<TYPE>::doMasking() const {
 //---------------------------------------------------------------------------
 
 ///@cond TEMPLATE
-template MANTID_KERNEL_DLL class Mantid::Kernel::MaskedProperty<std::string>;
+template class MANTID_KERNEL_DLL Mantid::Kernel::MaskedProperty<std::string>;
 ///@endcond TEMPLATE
 
 } // namespace API

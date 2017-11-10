@@ -23,7 +23,7 @@ that happens to have the same pattern, it will be deleted.
 
 The algorithm also take parameter "AgeInDays", which allow
 users to preserve cache files that are newer.
-For example, if AgeInDays is 5, the latest 5 days of cache files will 
+For example, if AgeInDays is 5, the latest 5 days of cache files will
 be preserved.
 By default, AgeInDays is 14 days or two weeks.
 
@@ -40,6 +40,12 @@ Usage
       CacheDir = "/path/to/mycache",
       AgeInDays = 5,
       )
+
+Related Algorithms
+------------------
+
+:ref:`CreateCacheFilename <algm-CreateCacheFilename>` will create
+filenames that this will delete.
 
 .. categories::
 

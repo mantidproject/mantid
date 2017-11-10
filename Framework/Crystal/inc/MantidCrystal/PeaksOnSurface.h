@@ -33,7 +33,6 @@ namespace Crystal {
 class DLLExport PeaksOnSurface : public PeaksIntersection {
 public:
   PeaksOnSurface();
-  ~PeaksOnSurface() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

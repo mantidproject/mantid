@@ -35,9 +35,6 @@ namespace DataHandling {
 */
 class DLLExport SaveIsawDetCal : public API::Algorithm {
 public:
-  SaveIsawDetCal();
-  ~SaveIsawDetCal() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawDetCal"; };
   /// Summary of algorithms purpose

@@ -1,14 +1,13 @@
 #ifndef MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 #define MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <boost/tuple/tuple.hpp>
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
+
+#include <iterator>
 #include <set>
 
 namespace Mantid {
@@ -153,10 +152,6 @@ private:
 
 class DLLExport IndexSXPeaks : public API::Algorithm {
 public:
-  /// Default constructor
-  IndexSXPeaks() : API::Algorithm(){};
-  /// Destructor
-  ~IndexSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "IndexSXPeaks"; }
   /// Summary of algorithms purpose

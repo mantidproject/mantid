@@ -36,9 +36,6 @@ namespace DataHandling {
 */
 class DLLExport PDLoadCharacterizations : public API::Algorithm {
 public:
-  PDLoadCharacterizations();
-  ~PDLoadCharacterizations() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -50,8 +47,13 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::vector<std::string> getFilenames();
   void readFocusInfo(std::ifstream &file);
   void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp);
+  void readVersion0(const std::string &filename,
+                    API::ITableWorkspace_sptr &wksp);
+  void readVersion1(const std::string &filename,
+                    API::ITableWorkspace_sptr &wksp);
   void readExpIni(const std::string &filename, API::ITableWorkspace_sptr &wksp);
 };
 

@@ -243,6 +243,7 @@
 
   <type name="bank_single_detectors">
     <component type="single_tube">
+      <!-- Note, that thetas of single detectors will be read from nexus files and moved correspondingly -->
       <location r="4.100000" t="10.000000" p="0.0" rot="100.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_1" />
       <location r="4.100000" t="25.714286" p="0.0" rot="115.714286" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_2" />
       <location r="4.100000" t="41.428571" p="0.0" rot="131.428571" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_3" />
@@ -251,12 +252,13 @@
       <location r="4.100000" t="88.571429" p="0.0" rot="178.571429" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_6" />
       <location r="4.100000" t="104.285714" p="0.0" rot="194.285714" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_7" />
       <location r="4.100000" t="120.000000" p="0.0" rot="210.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_8" />
+
     </component>
   </type>
 
   <!-- Definition of single_tube -->
 
-  <type name="single_tube" outline="yes">
+  <type name="single_tube">
     <component type="single_pixel">
       <location />
     </component>

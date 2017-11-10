@@ -2,11 +2,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <sstream>
 
@@ -15,24 +15,14 @@ namespace Algorithms {
 using namespace API;
 using namespace DataObjects;
 using namespace Kernel;
+using HistogramData::BinEdges;
 using std::map;
-using std::pair;
 using std::string;
 using std::stringstream;
 using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResampleX)
-
-//----------------------------------------------------------------------------------------------
-/// Constructor
-ResampleX::ResampleX()
-    : m_useLogBinning(true), m_preserveEvents(true), m_numBins(0),
-      m_isDistribution(false), m_isHistogram(true) {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ResampleX::~ResampleX() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -92,7 +82,7 @@ map<string, string> ResampleX::validateInputs() {
       stringstream msg;
       msg << "XMin and XMax do not define same number of spectra ("
           << xmins.size() << " != " << xmaxs.size() << ")";
-      errors.insert(pair<string, string>("XMax", msg.str()));
+      errors.emplace("XMax", msg.str());
     } else {
       size_t size = xmins.size();
       for (size_t i = 0; i < size; ++i) {
@@ -100,7 +90,7 @@ map<string, string> ResampleX::validateInputs() {
           stringstream msg;
           msg << "XMin (" << xmins[i] << ") cannot be greater than XMax ("
               << xmaxs[i] << ")";
-          errors.insert(pair<string, string>("XMax", msg.str()));
+          errors.emplace("XMax", msg.str());
         }
       }
     }
@@ -123,8 +113,21 @@ map<string, string> ResampleX::validateInputs() {
  */
 string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
                         vector<double> &xmaxs) {
-  bool updateXMins = xmins.empty(); // they weren't set
-  bool updateXMaxs = xmaxs.empty(); // they weren't set
+  const size_t numSpectra = inputWS->getNumberHistograms();
+
+  // pad out the ranges by copying the first value to the rest that are needed
+  if (xmins.size() == 1 && numSpectra > xmins.size()) {
+    const double value = xmins.front();
+    xmins.insert(xmins.end(), numSpectra - xmins.size(), value);
+  }
+  if (xmaxs.size() == 1 && numSpectra > xmaxs.size()) {
+    const double value = xmaxs.front();
+    xmaxs.insert(xmaxs.end(), numSpectra - xmaxs.size(), value);
+  }
+
+  // should the individiual values be calculated?
+  const bool updateXMins = xmins.empty(); // they weren't set
+  const bool updateXMaxs = xmaxs.empty(); // they weren't set
 
   stringstream msg;
 
@@ -133,28 +136,29 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != nullptr) {
+  if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
   }
 
-  size_t numSpectra = inputWS->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const MantidVec &xvalues = inputWS->getSpectrum(i)->dataX();
+      const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
-        if (boost::math::isnan(xvalues.front())) {
+        const auto minimum = xvalues.front();
+        if (std::isnan(minimum) || minimum >= xmax_wksp) {
           xmins.push_back(xmin_wksp);
         } else {
-          xmins.push_back(xvalues.front());
+          xmins.push_back(minimum);
         }
       }
       if (updateXMaxs) {
-        if (boost::math::isnan(xvalues.back())) {
+        const auto maximum = xvalues.back();
+        if (std::isnan(maximum) || maximum <= xmin_wksp) {
           xmaxs.push_back(xmax_wksp);
         } else {
-          xmaxs.push_back(xvalues.back());
+          xmaxs.push_back(maximum);
         }
       }
     }
@@ -218,6 +222,12 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
       throw std::invalid_argument("Cannot calculate log of xmin=0");
     if (xmax == 0)
       throw std::invalid_argument("Cannot calculate log of xmax=0");
+    if (xmin < 0. && xmax > 0.) {
+      std::stringstream msg;
+      msg << "Cannot calculate logorithmic binning that changes sign (xmin="
+          << xmin << ", xmax=" << xmax << ")";
+      throw std::invalid_argument(msg.str());
+    }
 
     const int MAX_ITER(100); // things went wrong if we get this far
 
@@ -266,7 +276,8 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
   if (numBoundaries != expNumBoundaries) {
     g_log.warning()
         << "Did not generate the requested number of bins: generated "
-        << numBoundaries << " requested " << expNumBoundaries << "\n";
+        << numBoundaries << " requested " << expNumBoundaries
+        << "(xmin=" << xmin << ", xmax=" << xmax << ")\n";
   }
 
   // return the delta value so the caller can do debug printing
@@ -283,7 +294,7 @@ void ResampleX::exec() {
   bool inPlace = (inputWS == outputWS); // Rebinning in-place
   m_isDistribution = inputWS->isDistribution();
   m_isHistogram = inputWS->isHistogramData();
-  int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // the easy parameters
   m_useLogBinning = getProperty("LogBinning");
@@ -327,16 +338,16 @@ void ResampleX::exec() {
         g_log.debug() << "Rebinning event workspace in place\n";
       } else {
         g_log.debug() << "Rebinning event workspace out of place\n";
-        outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        outputWS = inputWS->clone();
       }
       auto outputEventWS =
           boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same
-        MantidVecPtr xValues;
-        double delta =
-            this->determineBinning(xValues.access(), xmins[0], xmaxs[0]);
+        BinEdges xValues(0);
+        const double delta = this->determineBinning(xValues.mutableRawData(),
+                                                    xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -344,16 +355,16 @@ void ResampleX::exec() {
         Progress prog(this, 0.0, 1.0, numSpectra);
 
         // do the rebinning
-        PARALLEL_FOR2(inputEventWS, outputWS)
+        PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
-          MantidVec xValues;
-          double delta = this->determineBinning(xValues, xmins[wkspIndex],
-                                                xmaxs[wkspIndex]);
+          BinEdges xValues(0);
+          const double delta = this->determineBinning(
+              xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
-          outputEventWS->getSpectrum(wkspIndex)->setX(xValues);
+          outputEventWS->setHistogram(wkspIndex, xValues);
           prog.report(name()); // Report progress
           PARALLEL_END_INTERUPT_REGION
         }
@@ -363,43 +374,36 @@ void ResampleX::exec() {
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
+      outputWS = create<DataObjects::Workspace2D>(
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins));
 
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
-                                                     m_numBins, m_numBins - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR2(inputEventWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
       for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
         PARALLEL_START_INTERUPT_REGION
 
         // Set the X axis for each output histogram
         MantidVec xValues;
-        double delta =
+        const double delta =
             this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
         g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                       << "\n";
-        outputWS->setX(wkspIndex, xValues);
+        outputWS->setBinEdges(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
-        const EventList &el = inputEventWS->getEventList(wkspIndex);
+        const EventList &el = inputEventWS->getSpectrum(wkspIndex);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(xValues, y_data, e_data);
 
         // Copy the data over.
-        outputWS->dataY(wkspIndex).assign(y_data.begin(), y_data.end());
-        outputWS->dataE(wkspIndex).assign(e_data.begin(), e_data.end());
+        outputWS->mutableY(wkspIndex) = std::move(y_data);
+        outputWS->mutableE(wkspIndex) = std::move(e_data);
 
         // Report progress
         prog.report(name());
@@ -414,8 +418,9 @@ void ResampleX::exec() {
       }
 
       // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
+      for (int i = 0; i < outputWS->axes(); ++i) {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      }
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
     }
@@ -448,46 +453,44 @@ void ResampleX::exec() {
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)
+      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       const MantidVec &XValues = inputWS->readX(wkspIndex);
       const MantidVec &YValues = inputWS->readY(wkspIndex);
       const MantidVec &YErrors = inputWS->readE(wkspIndex);
 
       // get references to output workspace data (no copying)
+      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       MantidVec &YValues_new = outputWS->dataY(wkspIndex);
       MantidVec &YErrors_new = outputWS->dataE(wkspIndex);
 
       // create new output X axis
       MantidVec XValues_new;
-      double delta = this->determineBinning(XValues_new, xmins[wkspIndex],
-                                            xmaxs[wkspIndex]);
+      const double delta = this->determineBinning(XValues_new, xmins[wkspIndex],
+                                                  xmaxs[wkspIndex]);
       g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                     << "\n";
-      //        outputWS->setX(wkspIndex, xValues);
-      //        const int ntcnew =
-      //        VectorHelper::createAxisFromRebinParams(rb_params,
-      //        XValues_new.access());
 
       // output data arrays are implicitly filled by function
       try {
         VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new,
                             YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 
       // Populate the output workspace X values
-      outputWS->setX(wkspIndex, XValues_new);
+      outputWS->setBinEdges(wkspIndex, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    outputWS->isDistribution(m_isDistribution);
+    outputWS->setDistribution(m_isDistribution);
 
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because

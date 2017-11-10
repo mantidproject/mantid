@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "POWGEN" valid-from = "2006-04-27T00:00:00">
+  <component-link name = "POWGEN">
+    <parameter name="nonsense">
+      <value val="42"/>
+    </parameter>
+  </component-link>
+</parameter-file>

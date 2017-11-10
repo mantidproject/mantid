@@ -2,6 +2,7 @@
 // Includes
 //------------------------------
 #include "MantidAlgorithms/RebinToWorkspace.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
@@ -19,11 +20,17 @@ DECLARE_ALGORITHM(RebinToWorkspace)
 void RebinToWorkspace::init() {
   //  using namespace Mantid::DataObjects;
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "WorkspaceToRebin", "", Kernel::Direction::Input),
-                  "The workspace on which to perform the algorithm");
+                      "WorkspaceToRebin", "", Kernel::Direction::Input,
+                      Kernel::make_unique<API::HistogramValidator>()),
+                  "The workspace on which to perform the algorithm "
+                  "This must be a Histogram workspace, not Point data. "
+                  "If this is a problem try ConvertToHistogram.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "WorkspaceToMatch", "", Kernel::Direction::Input),
-                  "The workspace to match the bin boundaries against");
+                      "WorkspaceToMatch", "", Kernel::Direction::Input,
+                      Kernel::make_unique<API::HistogramValidator>()),
+                  "The workspace to match the bin boundaries against. "
+                  "This must be a Histogram workspace, not Point data. "
+                  "If this is a problem try ConvertToHistogram.");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                Kernel::Direction::Output),
@@ -55,6 +62,7 @@ void RebinToWorkspace::exec() {
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
   runRebin->setProperty("params", rb_params);
   runRebin->setProperty("PreserveEvents", PreserveEvents);
+  runRebin->setProperty("IgnoreBinErrors", true);
   runRebin->executeAsChildAlg();
   progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");
@@ -71,7 +79,7 @@ std::vector<double> RebinToWorkspace::createRebinParameters(
     Mantid::API::MatrixWorkspace_sptr toMatch) {
   using namespace Mantid::API;
 
-  const MantidVec &matchXdata = toMatch->readX(0);
+  auto &matchXdata = toMatch->x(0);
   // params vector should have the form [x_1, delta_1,x_2, ...
   // ,x_n-1,delta_n-1,x_n), see Rebin.cpp
   std::vector<double> rb_params;

@@ -12,16 +12,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateFlatEventWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateFlatEventWorkspace::CreateFlatEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateFlatEventWorkspace::~CreateFlatEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateFlatEventWorkspace::name() const {
   return "CreateFlatEventWorkspace";
@@ -70,14 +60,13 @@ void CreateFlatEventWorkspace::exec() {
   double end = getProperty("RangeEnd");
 
   double sampleRange = end - start;
-  g_log.debug() << "Total Range = " << sampleRange << std::endl;
+  g_log.debug() << "Total Range = " << sampleRange << '\n';
 
   // What are the min/max values for the experimental data ?
   double dataMin, dataMax;
   inputWS->getEventXMinMax(dataMin, dataMax);
 
-  g_log.debug() << "Data Range (" << dataMin << " < x < " << dataMax << ")"
-                << std::endl;
+  g_log.debug() << "Data Range (" << dataMin << " < x < " << dataMax << ")\n";
 
   // How many times do we need to replicate the extracted background region in
   // order to fill up
@@ -85,7 +74,7 @@ void CreateFlatEventWorkspace::exec() {
   int nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
 
   g_log.debug() << "We will need to replicate the selected region " << nRegions
-                << " times." << std::endl;
+                << " times.\n";
 
   // Extract the region we are using for the background
   IAlgorithm_sptr crop_alg = this->createChildAlgorithm("CropWorkspace");
@@ -112,7 +101,7 @@ void CreateFlatEventWorkspace::exec() {
   MatrixWorkspace_sptr tmpChunkWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
-  Progress progress(this, 0, 1, nRegions);
+  Progress progress(this, 0.0, 1.0, nRegions);
 
   for (int i = 0; i < nRegions; ++i) {
 
@@ -149,11 +138,8 @@ void CreateFlatEventWorkspace::exec() {
 
   // Need to reset the matrixworkspace/histogram representation to be the
   // whole xrange (rather than just the extracted chunk).
-  MantidVecPtr xnew;
   outputEWS->getEventXMinMax(dataMin, dataMax);
-  xnew.access().push_back(dataMin);
-  xnew.access().push_back(dataMax);
-  outputEWS->setAllX(xnew);
+  outputEWS->setAllX(HistogramData::BinEdges{dataMin, dataMax});
 
   this->setProperty("OutputWorkspace", outputWS);
 }

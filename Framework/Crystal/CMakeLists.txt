@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
+	src/CalibrationHelpers.cpp
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/Cluster.cpp
@@ -11,11 +12,13 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
+	src/CountReflections.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindClusterFaces.cpp
 	src/FindSXPeaks.cpp
+	src/FindSXPeaksHelper.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
@@ -42,6 +45,7 @@ set ( SRC_FILES
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PeakStatisticsTools.cpp
 	src/PeaksInRegion.cpp
 	src/PeaksIntersection.cpp
 	src/PeaksOnSurface.cpp
@@ -75,6 +79,7 @@ set ( INC_FILES
 	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
+	inc/MantidCrystal/CalibrationHelpers.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/Cluster.h
@@ -82,11 +87,13 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
+	inc/MantidCrystal/CountReflections.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindClusterFaces.h
 	inc/MantidCrystal/FindSXPeaks.h
+	inc/MantidCrystal/FindSXPeaksHelper.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
@@ -115,6 +122,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PeakStatisticsTools.h
 	inc/MantidCrystal/PeaksInRegion.h
 	inc/MantidCrystal/PeaksIntersection.h
 	inc/MantidCrystal/PeaksOnSurface.h
@@ -146,6 +154,7 @@ set ( TEST_FILES
 	AnvredCorrectionTest.h
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
+	CalibrationHelpersTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	ClusterRegisterTest.h
@@ -157,6 +166,7 @@ set ( TEST_FILES
 	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindClusterFacesTest.h
+	FindSXPeaksHelperTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h
@@ -183,12 +193,12 @@ set ( TEST_FILES
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PeakStatisticsToolsTest.h
 	PeaksInRegionTest.h
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
 	SCDCalibratePanelsTest.h
-	SCDPanelErrorsTest.h
 	SaveHKLTest.h
 	SaveIsawPeaksTest.h
 	SaveIsawUBTest.h
@@ -221,8 +231,9 @@ endif()
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal 
-                                           INSTALL_RPATH "@loader_path/../Contents/MacOS/")
+set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal
+  INSTALL_RPATH "@loader_path/../Contents/MacOS/"
+)
 # Add to the 'Framework' group in VS
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 

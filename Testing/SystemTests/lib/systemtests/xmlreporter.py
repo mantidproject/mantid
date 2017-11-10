@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 from xml.dom.minidom import getDOMImplementation
@@ -20,15 +21,15 @@ class XmlResultReporter(stresstesting.ResultReporter):
 		# print the command line summary version of the results
 		self._failures.sort()
 		self._skipped.sort()
-		print
+		print()
 		if self._show_skipped and len(self._skipped) > 0:
-			print "SKIPPED:"
+			print("SKIPPED:")
 			for test in self._skipped:
-				print test.name
+				print(test.name)
 		if len(self._failures) > 0:
-			print "FAILED:"
+			print("FAILED:")
 			for test in self._failures:
-				print test.name
+				print(test.name)
 
 		# return the xml document version
 		docEl = self._doc.documentElement

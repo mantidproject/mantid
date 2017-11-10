@@ -180,8 +180,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  // doesn't work
-  void xtest_Gaussian_tied_with_formula() {
+  void test_Gaussian_tied_with_formula() {
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
@@ -204,7 +203,6 @@ public:
     fun->setParameter("h", 3.);
     fun->setParameter("s", 0.1);
     fun->tie("b", "2*a+0.1");
-    // fun->tie("b","2*a");
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
@@ -243,10 +241,8 @@ public:
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
 
-    BoundaryConstraint *constraint =
-        new BoundaryConstraint(fun.get(), "a", 0, 0.5);
-
-    fun->addConstraint(constraint);
+    fun->addConstraint(
+        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
@@ -283,9 +279,8 @@ public:
 
     // lower bound is made > 0 because function's derivative over "a" at a=0 is
     // 0
-    BoundaryConstraint *constraint =
-        new BoundaryConstraint(fun.get(), "a", 0.001, 2.0);
-    fun->addConstraint(constraint);
+    fun->addConstraint(
+        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
@@ -296,13 +291,40 @@ public:
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
-    // std::cerr << "a=" << fun->getParameter("a") << std::endl;
-    // std::cerr << "b=" << fun->getParameter("b") << std::endl;
+    // std::cerr << "a=" << fun->getParameter("a") << '\n';
+    // std::cerr << "b=" << fun->getParameter("b") << '\n';
 
     TS_ASSERT_DELTA(costFun->val(), 0.00, 0.0001);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
+  }
+
+  void test_cannot_reach_tolerance() {
+    API::FunctionDomain1D_sptr domain(
+        new API::FunctionDomain1DVector(0.0, 1.0, 10));
+    API::FunctionValues mockData(*domain);
+    UserFunction dataMaker;
+    dataMaker.setAttributeValue("Formula", "a*x");
+    dataMaker.setParameter("a", 1.0);
+    dataMaker.function(*domain, mockData);
+
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(mockData);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
+    fun->setAttributeValue("Formula", "a+b+0*x");
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(fun, domain, values);
+
+    LevenbergMarquardtMinimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(!s.minimize());
+
+    TS_ASSERT_EQUALS(s.getError(), "cannot reach the specified tolerance in F");
   }
 };
 

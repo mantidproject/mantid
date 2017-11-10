@@ -125,6 +125,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
   for (const auto &searchPath : searchPaths) {
+    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
@@ -133,9 +134,8 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
     if (fName.find("*") != std::string::npos) {
 #endif
       Poco::Path path(searchPath, fName);
-      Poco::Path pathPattern(path);
       std::set<std::string> files;
-      Kernel::Glob::glob(pathPattern, files, m_globOption);
+      Kernel::Glob::glob(path, files, m_globOption);
       if (!files.empty()) {
         Poco::File matchPath(*files.begin());
         if (ignoreDirs && matchPath.isDirectory()) {
@@ -422,6 +422,54 @@ FileFinderImpl::getExtension(const std::string &filename,
   return "";
 }
 
+std::vector<IArchiveSearch_sptr>
+FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
+  std::vector<IArchiveSearch_sptr> archs;
+
+  // get the searchive option from config service and format it
+  std::string archiveOpt =
+      Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
+  std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(),
+                 tolower);
+
+  // if it is turned off, not specified, or the facility doesn't have
+  // IArchiveSearch defined, return an empty vector
+  if (archiveOpt.empty() || archiveOpt == "off" ||
+      facility.archiveSearch().empty())
+    return archs;
+
+  // determine if the user wants archive search for this facility
+  bool createArchiveSearch = bool(archiveOpt == "all");
+
+  // then see if the facility name appears in the list or if we just want the
+  // default facility
+  if (!createArchiveSearch) {
+    std::string faciltyName = facility.name();
+    std::transform(faciltyName.begin(), faciltyName.end(), faciltyName.begin(),
+                   tolower);
+    if (archiveOpt == "on") { // only default facilty
+      std::string defaultFacility =
+          Kernel::ConfigService::Instance().getString("default.facility");
+      std::transform(defaultFacility.begin(), defaultFacility.end(),
+                     defaultFacility.begin(), tolower);
+      createArchiveSearch = bool(faciltyName == defaultFacility);
+    } else { // everything in the list
+      createArchiveSearch =
+          bool(archiveOpt.find(faciltyName) != std::string::npos);
+    }
+  }
+
+  // put together the list of IArchiveSearch to use
+  if (createArchiveSearch) {
+    for (const auto &facilityname : facility.archiveSearch()) {
+      g_log.debug() << "get archive search for the facility..." << facilityname
+                    << "\n";
+      archs.push_back(ArchiveSearchFactory::Instance().create(facilityname));
+    }
+  }
+  return archs;
+}
+
 std::string
 FileFinderImpl::findRun(const std::string &hintstr,
                         const std::vector<std::string> &exts) const {
@@ -457,7 +505,7 @@ FileFinderImpl::findRun(const std::string &hintstr,
 
   // get instrument and facility
   const Kernel::InstrumentInfo instrument = this->getInstrument(hint);
-  const Kernel::FacilityInfo facility = instrument.facility();
+  const Kernel::FacilityInfo &facility = instrument.facility();
   // get facility extensions
   const std::vector<std::string> facility_extensions = facility.extensions();
   // select allowed extensions
@@ -467,23 +515,6 @@ FileFinderImpl::findRun(const std::string &hintstr,
                 << "\n";
   extensions.assign(facility_extensions.begin(), facility_extensions.end());
 
-  // initialize the archive searcher
-  std::vector<IArchiveSearch_sptr> archs;
-  { // hide in a local namespace so things fall out of scope
-    std::string archiveOpt =
-        Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
-    std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(),
-                   tolower);
-    if (!archiveOpt.empty() && archiveOpt != "off" &&
-        !facility.archiveSearch().empty()) {
-      for (const auto &facilityname : facility.archiveSearch()) {
-        g_log.debug() << "get archive search for the facility..."
-                      << facilityname << "\n";
-        archs.push_back(ArchiveSearchFactory::Instance().create(facilityname));
-      }
-    }
-  }
-
   // Do we need to try and form a filename from our preset rules
   std::string filename(hint);
   std::string extension = getExtension(hint, extensions);
@@ -491,7 +522,9 @@ FileFinderImpl::findRun(const std::string &hintstr,
     filename = hint.substr(0, hint.rfind(extension));
   if (hintPath.depth() == 0) {
     try {
-      filename = makeFileName(filename, instrument);
+      if (!facility.noFilePrefix()) {
+        filename = makeFileName(filename, instrument);
+      }
     } catch (std::invalid_argument &) {
       if (filename.length() >= hint.length()) {
         g_log.information() << "Could not form filename from standard rules '"
@@ -566,6 +599,9 @@ FileFinderImpl::findRun(const std::string &hintstr,
         uniqueExts.push_back(*cit);
     }
   }
+
+  // determine which archive search facilities to use
+  std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
 
   std::string path = getPath(archs, filenames, uniqueExts);
   if (!path.empty()) {
@@ -643,7 +679,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }
       for (int irun = runNumber; irun <= runEndNumber; ++irun) {
-        run = boost::lexical_cast<std::string>(irun);
+        run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
         std::string path = findRun(p1.first + run);
@@ -680,9 +716,18 @@ std::string
 FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
-  std::string path = "";
+  g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
+  for (const auto &iter : filenames)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "], [ ";
+  for (const auto &iter : exts)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "])\n";
+
+  std::string path;
   for (const auto &arch : archs) {
     try {
+      g_log.debug() << "Getting archive path for requested files\n";
       path = arch->getArchivePath(filenames, exts);
       if (!path.empty()) {
         return path;

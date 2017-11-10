@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import run_algorithm
 from testhelpers.mlzhelpers import create_fake_dns_workspace
@@ -29,8 +31,8 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
 
     def test_DNSVanadiumCorrection(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test1"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         alg_test = run_algorithm("DNSComputeDetEffCorrCoefs", VanadiumWorkspaces=vanalist,
                                  BackgroundWorkspaces=bglist, OutputWorkspace=outputWorkspaceName)
 
@@ -44,22 +46,22 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
         for i in range(24):
-            self.assertAlmostEqual(refdata[i], ws.readY(i))
+            self.assertAlmostEqual(refdata[i], ws.readY(i)[0])
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
     def test_NegativeValues(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test2"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         self.assertRaises(RuntimeError, DNSComputeDetEffCorrCoefs, VanadiumWorkspaces=bglist,
                           BackgroundWorkspaces=vanalist, OutputWorkspace=outputWorkspaceName)
         return
 
     def test_DNSVanadiumCorrection_Masked(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test3"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         MaskDetectors(self.sfvanaws, DetectorList=[1])
         MaskDetectors(self.nsfvanaws, DetectorList=[1])
 
@@ -113,8 +115,8 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
         for i in range(24):
-            self.assertAlmostEqual(refdata[i], res1.readY(i))
-            self.assertAlmostEqual(refdata[i], res2.readY(i))
+            self.assertAlmostEqual(refdata[i], res1.readY(i)[0])
+            self.assertAlmostEqual(refdata[i], res2.readY(i)[0])
         wslist = [outputWorkspaceName, 'sfvana2', 'nsfvana2', 'sfbg2', 'nsfbg2']
         for wsname in wslist:
             run_algorithm("DeleteWorkspace", Workspace=wsname)

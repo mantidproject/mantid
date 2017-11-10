@@ -1,5 +1,7 @@
 #pylint: disable=invalid-name
-from scripter import BaseScriptElement
+from __future__ import (absolute_import, division, print_function)
+import sys
+from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
@@ -9,6 +11,7 @@ try:
     from mantid.api import AnalysisDataService
 except:
     pass
+
 
 class Output(BaseScriptElement):
     log_text = ''
@@ -23,7 +26,7 @@ class Output(BaseScriptElement):
             self.log_text = ReductionSingleton().log_text
             try:
                 if hasattr(ReductionSingleton(), "output_workspaces") \
-                and len(ReductionSingleton().output_workspaces)>0:
+                        and len(ReductionSingleton().output_workspaces)>0:
                     for item in ReductionSingleton().output_workspaces:
                         mantidplot.plotSpectrum(item, 0, True)
                 else:
@@ -35,4 +38,4 @@ class Output(BaseScriptElement):
                     if len(iq_plots)>0:
                         mantidplot.plotSpectrum(iq_plots, 0, True)
             except:
-                raise RuntimeError, "Could not plot resulting output\n  %s" % sys.exc_value
+                raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_info()[1])

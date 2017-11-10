@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByTime.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,16 +18,8 @@ using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using Types::Core::DateAndTime;
 
-//========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterByTime::FilterByTime() {}
-
-/// Destructor
-FilterByTime::~FilterByTime() {}
-
-//-----------------------------------------------------------------------
 void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
                          "start/stop times, not both.");
@@ -72,7 +62,6 @@ void FilterByTime::init() {
           absoluteHelp);
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm
  */
 void FilterByTime::exec() {
@@ -104,7 +93,7 @@ void FilterByTime::exec() {
       stop = first + stop_dbl;
     } else {
       this->getLogger().debug()
-          << "No end filter time specified - assuming last pulse" << std::endl;
+          << "No end filter time specified - assuming last pulse\n";
       stop =
           last + 10000.0; // so we get all events - needs to be past last pulse
     }
@@ -120,16 +109,7 @@ void FilterByTime::exec() {
     throw std::invalid_argument(
         "The stop time should be larger than the start time.");
 
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                         false);
-  // But we don't copy the data.
-
-  setProperty("OutputWorkspace", outputWS);
+  auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
@@ -142,9 +122,9 @@ void FilterByTime::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Get the output event list (should be empty)
-    EventList &output_el = outputWS->getEventList(i);
+    EventList &output_el = outputWS->getSpectrum(i);
     // and this is the input event list
-    const EventList &input_el = inputWS->getEventList(i);
+    const EventList &input_el = inputWS->getSpectrum(i);
 
     // Perform the filtering
     input_el.filterByPulseTime(start, stop, output_el);
@@ -156,6 +136,7 @@ void FilterByTime::exec() {
 
   // Now filter out the run, using the DateAndTime type.
   outputWS->mutableRun().filterByTime(start, stop);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 } // namespace Algorithms

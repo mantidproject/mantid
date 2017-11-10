@@ -12,8 +12,6 @@
 #include <boost/python/self.hpp>
 
 using Mantid::API::AlgorithmHistory;
-using Mantid::Kernel::PropertyHistory;
-using Mantid::API::IAlgorithm;
 using namespace boost::python;
 
 namespace Policies = Mantid::PythonInterface::Policies;
@@ -42,7 +40,7 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
  */
 boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
-  const auto histories = self.getProperties();
+  const auto &histories = self.getProperties();
   for (const auto &historie : histories) {
     names.append(historie);
   }
@@ -86,6 +84,11 @@ void export_AlgorithmHistory() {
 
       .def("getProperties", &getPropertiesAsList, arg("self"),
            "Returns properties for this algorithm history.")
+
+      .def("getPropertyValue", &AlgorithmHistory::getPropertyValue,
+           (arg("self"), arg("index")),
+           return_value_policy<copy_const_reference>(),
+           "Returns the string representation of a specified property.")
 
       .def("getChildAlgorithm", &AlgorithmHistory::getChildAlgorithm,
            (arg("self"), arg("index")),

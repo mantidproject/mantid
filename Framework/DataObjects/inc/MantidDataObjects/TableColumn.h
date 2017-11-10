@@ -1,32 +1,16 @@
 #ifndef MANTID_DATAOBJECTS_TABLECOLUMN_H_
 #define MANTID_DATAOBJECTS_TABLECOLUMN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
-#include "MantidAPI/Column.h"
-#include "MantidKernel/Logger.h"
-
-#include <vector>
-#include <typeinfo>
-#include <stdexcept>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <limits>
-#include <boost/lexical_cast.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
-#include <boost/numeric/conversion/cast.hpp>
+#include <sstream>
+#include <vector>
+
+#include "MantidAPI/Column.h"
 
 namespace Mantid {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-
 namespace DataObjects {
-
-template <class T> class TableVector;
 
 /** \class TableColumn
 
@@ -138,6 +122,8 @@ public:
   }
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
+  /// Read in from stream and set the value at the given index
+  void read(const size_t index, std::istringstream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   /// Memory used by the column
@@ -145,12 +131,7 @@ public:
     return static_cast<long int>(m_data.size() * sizeof(Type));
   }
   /// Clone
-  TableColumn *clone() const override {
-    TableColumn *temp = new TableColumn();
-    temp->m_data = this->m_data;
-    temp->setName(this->m_name);
-    return temp;
-  }
+  TableColumn *clone() const override { return new TableColumn(*this); }
 
   /**
    * Cast an element to double if possible. If it's impossible
@@ -158,14 +139,30 @@ public:
    * is throw. In case of an overflow boost::numeric::positive_overflow or
    * boost::numeric::negative_overflow
    * is throw.
-   * @param i :: The index to an element.
+   * @param value :: The value of the element.
    */
-  double toDouble(size_t i) const override {
+  template <typename T> double convertToDouble(const T &value) const {
     typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
-    return boost::numeric_cast<double, DoubleType>(m_data[i]);
+        typename std::conditional<std::is_convertible<double, T>::value, T,
+                                  InconvertibleToDoubleType>::type DoubleType;
+    return boost::numeric_cast<double, DoubleType>(value);
+  }
+
+  /**
+   * Cast an string to double if possible. If it's impossible
+   * std::invalid_argument
+   * is throw. In case of an overflow boost::numeric::positive_overflow or
+   * boost::numeric::negative_overflow
+   * is throw.
+   * @param value :: The value of the element.
+   */
+
+  double convertToDouble(const std::string &value) const {
+    return std::stod(value);
+  }
+
+  double toDouble(size_t i) const override {
+    return convertToDouble(m_data[i]);
   }
 
   /**
@@ -178,10 +175,9 @@ public:
    * @param value: cast this value
    */
   void fromDouble(size_t i, double value) override {
-    typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
+    typedef typename std::conditional<std::is_convertible<double, Type>::value,
+                                      Type, InconvertibleToDoubleType>::type
+        DoubleType;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }
@@ -197,7 +193,7 @@ public:
   /// that the casting is possible
   double operator[](size_t i) const override {
     try {
-      return boost::lexical_cast<double>(m_data[i]);
+      return convertToDouble(m_data[i]);
     } catch (...) {
       return std::numeric_limits<double>::quiet_NaN();
     }
@@ -221,7 +217,7 @@ protected:
     if (index < m_data.size())
       m_data.insert(m_data.begin() + index, Type());
     else
-      m_data.push_back(Type());
+      m_data.emplace_back();
   }
   /// Removes an item at index.
   void remove(size_t index) override { m_data.erase(m_data.begin() + index); }
@@ -238,11 +234,41 @@ private:
   friend class TableWorkspace;
 };
 
+/// Template specialization for strings so they can contain spaces
+template <>
+inline void TableColumn<std::string>::read(size_t index,
+                                           const std::string &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text;
+}
+
+/// Template specialization for strings so they can contain spaces
+template <>
+inline void TableColumn<std::string>::read(size_t index,
+                                           std::istringstream &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text.str();
+}
+
 /// Read in a string and set the value at the given index
 template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+/// Read in from stream and set the value at the given index
+template <typename Type>
+void TableColumn<Type>::read(size_t index, std::istringstream &in) {
+  Type t;
+  in >> t;
+  m_data[index] = t;
 }
 
 namespace {

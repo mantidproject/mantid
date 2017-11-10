@@ -1,10 +1,12 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
-from mantid import logger, config
+from mantid import config
 import os
-from itertools import ifilterfalse
+from six.moves import filterfalse
+
 
 class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us
@@ -85,10 +87,12 @@ class Intervals(object):
 
 # Given a list of workspaces, will sum them together into a single new workspace, with the given name.
 # If no name is given, then one is constructed from the names of the given workspaces.
+
+
 def sumWsList(wsList, summedWsName = None):
     if len(wsList) == 1:
         if summedWsName is not None:
-            CloneWorkspace(InputWorkspace=wsList[0].getName(), OutputWorkspace=summedWsName)
+            CloneWorkspace(InputWorkspace=wsList[0].name(), OutputWorkspace=summedWsName)
             return mtd[summedWsName]
         return wsList[0]
 
@@ -99,17 +103,20 @@ def sumWsList(wsList, summedWsName = None):
             sumws += wsList[i]
 
     if summedWsName is None:
-        summedWsName = "_PLUS_".join([ws.getName() for ws in wsList])
+        summedWsName = "_PLUS_".join([ws.name() for ws in wsList])
 
-    RenameWorkspace(InputWorkspace=sumws.getName(), OutputWorkspace=summedWsName)
+    RenameWorkspace(InputWorkspace=sumws.name(), OutputWorkspace=summedWsName)
 
     return mtd[summedWsName]
 
 #pylint: disable=too-few-public-methods
+
+
 class FileBackedWsIterator(object):
     ''' An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
     yielded, and then deleted from memory. '''
+
     def __init__(self, filenames):
         ''' Constructor, takes in the list of filenames to load, who's
         workspaces will be iterated over. '''
@@ -124,10 +131,10 @@ class FileBackedWsIterator(object):
         # In the general case, we may or may not have checked for the existance
         # of the files previously, so before we even start iterating throw if
         # any are missing.
-        missing_files = list(ifilterfalse(os.path.exists, filenames))
+        missing_files = list(filterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
-            raise ValueError("One or more files are missing: " +\
-                str(missing_files))
+            raise ValueError("One or more files are missing: " +
+                             str(missing_files))
 
         self._filenames = filenames
         self._loaded_ws = None
@@ -175,6 +182,7 @@ class FileBackedWsIterator(object):
         if self._loaded_ws:
             DeleteWorkspace(Workspace=self._loaded_ws)
 
+
 class RetrieveRunInfo(PythonAlgorithm):
     def category(self):
         return 'DataHandling\\Catalog'
@@ -190,12 +198,13 @@ class RetrieveRunInfo(PythonAlgorithm):
             '',
             StringMandatoryValidator(),
             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
-            doc= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+                             doc= """The name of the TableWorkspace that will be created.
+                                     '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
-        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",\
-            "hd_dur"]
+        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",
+                      "hd_dur"]
 
         # Not all ISIS run files have the relevant prop_names, but we may as
         # well limit to ISIS only runs at this stage.
@@ -205,8 +214,8 @@ class RetrieveRunInfo(PythonAlgorithm):
         # Ensure workspace does not already exist.
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         if mtd.doesExist(output_ws_name):
-            raise ValueError("Workspace \"" + output_ws_name + "\" already "\
-                "exists. Either delete it, or choose another workspace name.")
+            raise ValueError("Workspace \"" + output_ws_name + "\" already "
+                             "exists. Either delete it, or choose another workspace name.")
 
         # Check that all run files are available.
         run_string = self.getPropertyValue("Runs")
@@ -227,9 +236,9 @@ class RetrieveRunInfo(PythonAlgorithm):
         ws_iter = FileBackedWsIterator(filenames)
         for ws in ws_iter:
             # Create a single row table for each file.
-            temp_table_name = ws.getName() + "_INFO"
+            temp_table_name = ws.name() + "_INFO"
             CreateLogPropertyTable(
-                InputWorkspaces=ws.getName(),
+                InputWorkspaces=ws.name(),
                 LogPropertyNames=', '.join(PROP_NAMES),
                 GroupPolicy="First", # Include only the 1st child of any groups.
                 OutputWorkspace=temp_table_name)
@@ -239,6 +248,7 @@ class RetrieveRunInfo(PythonAlgorithm):
             DeleteWorkspace(Workspace=temp_table_name)
 
         self.setPropertyValue('OutputWorkspace', output_ws_name)
+
 
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(RetrieveRunInfo)

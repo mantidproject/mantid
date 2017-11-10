@@ -1,5 +1,6 @@
 #pylint: disable=no-init
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -23,6 +24,7 @@ SLICE_2D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)[A-z]*,\s+([0-9]+)[A-z]*\]
 
 #------------------------------------------------------------------------------
 
+
 class LoadNMoldyn4Ascii(PythonAlgorithm):
 
     _axis_cache = None
@@ -32,7 +34,6 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
     def category(self):
         return 'Inelastic\\DataHandling;Simulation'
-
 
     def summary(self):
         return 'Imports functions from .dat files output by nMOLDYN 4.'
@@ -104,7 +105,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
                 loaded_function_workspaces.append(func_name)
 
-            except ValueError, rerr:
+            except ValueError as rerr:
                 logger.warning('Failed to load function {0}. Error was: {1}'.format(func_name, str(rerr)))
 
         # Process the loaded workspaces
@@ -304,5 +305,6 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         return (data, unit, name)
 
 #------------------------------------------------------------------------------
+
 
 AlgorithmFactory.subscribe(LoadNMoldyn4Ascii)

@@ -30,9 +30,6 @@ CheckWorkspacesMatch::CheckWorkspacesMatch()
   deprecatedDate("2015-10-27");
 }
 
-/// Virtual destructor
-CheckWorkspacesMatch::~CheckWorkspacesMatch() {}
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -94,7 +91,7 @@ void CheckWorkspacesMatch::exec() {
 
   // Output as per previous behaviour
   if (result != successString()) {
-    g_log.notice() << "The workspaces did not match: " << result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << result << '\n';
   }
 
   setProperty("Result", result);
@@ -117,10 +114,6 @@ bool CheckWorkspacesMatch::processGroups() {
   }
 
   setProperty("Result", result);
-
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
 
   return true;
 }

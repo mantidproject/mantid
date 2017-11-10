@@ -13,16 +13,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(PeaksInRegion)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeaksInRegion::PeaksInRegion() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeaksInRegion::~PeaksInRegion() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeaksInRegion::name() const { return "PeaksInRegion"; }
 

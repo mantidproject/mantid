@@ -2,6 +2,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <iostream>
+#include <limits>
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -184,7 +185,6 @@ void Cylinder::setNvec()
       return;
     }
   }
-  return;
 }
 
 void Cylinder::rotate(const Kernel::Matrix<double> &MA)
@@ -199,7 +199,6 @@ void Cylinder::rotate(const Kernel::Matrix<double> &MA)
   Normal.normalize();
   setNvec();
   Quadratic::rotate(MA);
-  return;
 }
 
 void Cylinder::displace(const Kernel::V3D &Pt)
@@ -214,7 +213,6 @@ void Cylinder::displace(const Kernel::V3D &Pt)
   } else
     Centre += Pt;
   Quadratic::displace(Pt);
-  return;
 }
 
 void Cylinder::setCentre(const Kernel::V3D &A)
@@ -225,7 +223,6 @@ void Cylinder::setCentre(const Kernel::V3D &A)
 {
   Centre = A;
   setBaseEqn();
-  return;
 }
 
 void Cylinder::setNorm(const Kernel::V3D &A)
@@ -239,7 +236,6 @@ void Cylinder::setNorm(const Kernel::V3D &A)
   Normal.normalize();
   setBaseEqn();
   setNvec();
-  return;
 }
 
 void Cylinder::setBaseEqn()
@@ -260,7 +256,6 @@ void Cylinder::setBaseEqn()
   BaseEqn[8] = 2.0 * (Normal[2] * CdotN - Centre[2]); // J z
   BaseEqn[9] =
       Centre.scalar_prod(Centre) - CdotN * CdotN - Radius * Radius; // K const
-  return;
 }
 
 double Cylinder::distance(const Kernel::V3D &A) const
@@ -323,7 +318,6 @@ void Cylinder::write(std::ostream &OX) const
   }
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 double Cylinder::lineIntersect(const Kernel::V3D &Pt,
@@ -350,8 +344,7 @@ void Cylinder::print() const
   Quadratic::print();
   std::cout << "Axis ==" << Normal << " ";
   std::cout << "Centre == " << Centre << " ";
-  std::cout << "Radius == " << Radius << std::endl;
-  return;
+  std::cout << "Radius == " << Radius << '\n';
 }
 
 void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
@@ -405,11 +398,11 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     listOfPoints.push_back(zmaxPoint);
   }
   if (!listOfPoints.empty()) {
-    xmin = ymin = zmin = DBL_MAX;
-    xmax = ymax = zmax = DBL_MIN;
+    xmin = ymin = zmin = std::numeric_limits<double>::max();
+    xmax = ymax = zmax = std::numeric_limits<double>::min();
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

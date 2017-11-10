@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import UnitFactory, UnitFactoryImpl, Unit
 
@@ -22,7 +24,8 @@ class UnitFactoryTest(unittest.TestCase):
         # but allow for others to be added
         core_units = ['Empty', 'Label', 'TOF', 'Wavelength','Energy',
                       'Energy_inWavenumber', 'dSpacing', 'MomentumTransfer',
-                      'QSquared', 'DeltaE', 'DeltaE_inWavenumber', 'Momentum']
+                      'QSquared', 'DeltaE', 'DeltaE_inWavenumber',
+                      'DeltaE_inFrequency', 'Momentum', 'dSpacingPerpendicular']
         self.assertTrue(len(core_units) <= len(known_units))
 
         for unit in core_units:

@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadDspacemap.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -21,18 +22,6 @@ namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDspacemap)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDspacemap::LoadDspacemap() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDspacemap::~LoadDspacemap() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -103,16 +92,9 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     const std::string DFileName,
     Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = offsetsWS->getInstrument();
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
-  // To get all the detector ID's
-  detid2det_map allDetectors;
-  instrument->getDetectors(allDetectors);
-
+  const auto &detectorInfo = offsetsWS->detectorInfo();
+  const double l1 = detectorInfo.l1();
   // Read in the POWGEN-style Dspace mapping file
   const char *filename = DFileName.c_str();
   std::ifstream fin(filename, std::ios_base::in | std::ios_base::binary);
@@ -126,19 +108,23 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     dspace.push_back(read);
   }
 
-  detid2det_map::const_iterator it;
-  for (it = allDetectors.begin(); it != allDetectors.end(); ++it) {
-    detid_t detectorID = it->first;
-    Geometry::IDetector_const_sptr det = it->second;
+  const auto &detectorIds = detectorInfo.detectorIDs();
+
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
+       ++detectorIndex) {
+    const auto detectorId = detectorIds[detectorIndex];
 
     // Compute the factor
     double offset = 0.0;
-    double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
-                                               samplePos, det, offset);
-    offset = dspace[detectorID] / factor - 1.0;
+    if (!detectorInfo.isMonitor(detectorIndex)) {
+      double factor = Geometry::Conversion::tofToDSpacingFactor(
+          l1, detectorInfo.l2(detectorIndex),
+          detectorInfo.twoTheta(detectorIndex), offset);
+      offset = dspace[detectorId] / factor - 1.0;
+    }
     // Save in the map
     try {
-      offsetsWS->setValue(detectorID, offset);
+      offsetsWS->setValue(detectorId, offset);
     } catch (std::invalid_argument &) {
     }
   }
@@ -163,9 +149,8 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   // At this point, instrument VULCAN has been created?
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
 
-  g_log.notice() << "Name of instrument = " << instrument->getName()
-                 << std::endl;
-  g_log.notice() << "Input map (dict):  size = " << vulcan.size() << std::endl;
+  g_log.notice() << "Name of instrument = " << instrument->getName() << '\n';
+  g_log.notice() << "Input map (dict):  size = " << vulcan.size() << '\n';
 
   // To get all the detector ID's
   detid2det_map allDetectors;
@@ -174,7 +159,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   detid2det_map::const_iterator it;
   int numfinds = 0;
   g_log.notice() << "Input number of detectors = " << allDetectors.size()
-                 << std::endl;
+                 << '\n';
 
   // Get detector information
   double l1, beamline_norm;
@@ -191,7 +176,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
 
     std::string parentname =
   it->second->getParent()->getComponentID()->getName();
-    g_log.notice() << "Name = " << parentname << std::endl;
+    g_log.notice() << "Name = " << parentname << '\n';
     // parents.insert(parentid, true);
   }
   ***/
@@ -230,7 +215,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     }
 
     // g_log.notice() << "Selected Detector with ID = " << detectorID << "  ID2
-    // = " << id2 << std::endl; proved to be same
+    // = " << id2 << '\n'; proved to be same
 
     double intermoduleoffset = 0;
     double interstackoffset = 0;
@@ -239,7 +224,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     vulcan_iter = vulcan.find(intermoduleid);
     if (vulcan_iter == vulcan.end()) {
       g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << std::endl;
+                    << '\n';
     } else {
       intermoduleoffset = vulcan_iter->second;
     }
@@ -248,7 +233,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     vulcan_iter = vulcan.find(interstackid);
     if (vulcan_iter == vulcan.end()) {
       g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << std::endl;
+                    << '\n';
     } else {
       interstackoffset = vulcan_iter->second;
     }
@@ -302,16 +287,16 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
           intermoduleid != 29998 && intermoduleid != 33748 &&
           intermoduleid != 34998 && intermoduleid != 36248) {
         g_log.error() << "Detector ID = " << detectorID
-                      << "  Inter-Module ID = " << intermoduleid << std::endl;
+                      << "  Inter-Module ID = " << intermoduleid << '\n';
         throw std::invalid_argument("Indexing error!");
       }
 
     } catch (std::invalid_argument &) {
-      g_log.notice() << "Misses Detector ID = " << detectorID << std::endl;
+      g_log.notice() << "Misses Detector ID = " << detectorID << '\n';
     }
   } // for
 
-  g_log.notice() << "Number of matched detectors =" << numfinds << std::endl;
+  g_log.notice() << "Number of matched detectors =" << numfinds << '\n';
 }
 
 //-----------------------------------------------------------------------
@@ -329,7 +314,7 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
                                         std::map<detid_t, double> &vulcan) {
   std::ifstream grFile(fileName.c_str());
   if (!grFile) {
-    g_log.error() << "Unable to open vulcan file " << fileName << std::endl;
+    g_log.error() << "Unable to open vulcan file " << fileName << '\n';
     return;
   }
   vulcan.clear();
@@ -346,8 +331,7 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
     numentries++;
   }
 
-  g_log.notice() << "Read Vulcan ASCII File:  # Entry = " << numentries
-                 << std::endl;
+  g_log.notice() << "Read Vulcan ASCII File:  # Entry = " << numentries << '\n';
 }
 
 /** Structure of the vulcan binary file */
@@ -372,15 +356,10 @@ struct VulcanCorrectionFactor {
 void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
                                          std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
-  std::vector<VulcanCorrectionFactor> *results = file.loadAll();
-  if (results) {
-    for (auto &result : *results) {
-      // std::cout << it->pixelID << " :! " << it->factor << std::endl;
-      vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
-    }
+  std::vector<VulcanCorrectionFactor> results = file.loadAll();
+  for (auto &result : results) {
+    vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
   }
-
-  delete results;
 }
 
 } // namespace Mantid

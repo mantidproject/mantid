@@ -34,9 +34,6 @@ namespace DataHandling {
 */
 class DLLExport RenameLog : public API::Algorithm {
 public:
-  RenameLog();
-  ~RenameLog() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "RenameLog"; };
   /// Summary of algorithms purpose

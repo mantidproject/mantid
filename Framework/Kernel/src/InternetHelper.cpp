@@ -12,30 +12,35 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
-// Visual Studio complains with the inclusion of Poco/FileStream
-// disabling this warning.
-#if defined(_WIN32) || defined(_WIN64)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
-#include <Winhttp.h>
-#pragma warning(pop)
-#else
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
 
+#include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/FileStream.h>
+#include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPMessage.h>
+#include <Poco/Net/InvalidCertificateHandler.h>
+#include <Poco/SharedPtr.h>
+#include <Poco/Timespan.h>
+#include <Poco/Types.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <Winhttp.h>
 #endif
 
+#include <boost/lexical_cast.hpp>
+
 // std
+#include <mutex>
 #include <fstream>
+#include <utility>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 
 using namespace Poco::Net;
@@ -46,6 +51,33 @@ namespace {
 // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("InternetHelper");
+
+/// Flag to protect SSL initialization
+std::once_flag SSL_INIT_FLAG;
+
+/**
+ * Perform initialization of SSL context. Implementation
+ * designed to be called by std::call_once
+ */
+void doSSLInit() {
+  // initialize ssl
+  Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
+      new AcceptCertificateHandler(true);
+  // Currently do not use any means of authentication. This should be updated
+  // IDS has signed certificate.
+  const Context::Ptr context =
+      new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+  // Create a singleton for holding the default context.
+  // e.g. any future requests to publish are made to this certificate and
+  // context.
+  SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
+}
+
+/**
+ * Entry function to initialize SSL context for the process. It ensures the
+ * initialization only happens once per process.
+ */
+void initializeSSL() { std::call_once(SSL_INIT_FLAG, doSSLInit); }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -129,11 +161,12 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   std::istream &rs = session.receiveResponse(*m_response);
   int retStatus = m_response->getStatus();
   g_log.debug() << "Answer from web: " << retStatus << " "
-                << m_response->getReason() << std::endl;
+                << m_response->getReason() << '\n';
 
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
+    processResponseHeaders(*m_response);
     return retStatus;
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
@@ -239,18 +272,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
 
   Poco::URI uri(url);
   try {
-    // initialize ssl
-    Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
-        new AcceptCertificateHandler(true);
-    // Currently do not use any means of authentication. This should be updated
-    // IDS has signed certificate.
-    const Context::Ptr context =
-        new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
-    // Create a singleton for holding the default context.
-    // e.g. any future requests to publish are made to this certificate and
-    // context.
-    SSLManager::instance().initializeClient(nullptr, certificateHandler,
-                                            context);
+    initializeSSL();
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));
@@ -301,6 +323,11 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
   m_isProxySet = true;
 }
 
+/** Process any headers from the response stream
+Basic implementation does nothing.
+*/
+void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse &) {}
+
 /** Process any HTTP errors states.
 
 @param res : The http response
@@ -315,7 +342,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
                                        const std::string &url) {
   int retStatus = res.getStatus();
   g_log.debug() << "Answer from web: " << res.getStatus() << " "
-                << res.getReason() << std::endl;
+                << res.getReason() << '\n';
 
   // get github api rate limit information if available;
   int rateLimitRemaining;
@@ -349,7 +376,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
   } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
     throw Exception::InternetError(
         "The Github API rate limit has been reached, try again after " +
-            rateLimitReset.toSimpleString(),
+            rateLimitReset.toSimpleString() + " GMT",
         retStatus);
   } else {
     std::stringstream info;
@@ -393,7 +420,7 @@ int InternetHelper::downloadFile(const std::string &urlFile,
                                  const std::string &localFilePath) {
   int retStatus = 0;
   g_log.debug() << "DownloadFile : " << urlFile << " to file: " << localFilePath
-                << std::endl;
+                << '\n';
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());

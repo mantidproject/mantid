@@ -8,7 +8,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include <boost/python/object.hpp>
-#include <boost/python/numeric.hpp>
 
 // ---------- Test world initialization ---------------------------------
 
@@ -58,7 +57,7 @@ public:
 
 public:
   //
-  PythonObjectInstantiatorTest() : m_creator(NULL) {}
+  PythonObjectInstantiatorTest() : m_creator(nullptr) {}
 
   ~PythonObjectInstantiatorTest() override { delete m_creator; }
 

@@ -57,7 +57,7 @@ void advanceVertex(ConvexPolygon::Iterator &iter, ConvexPolygon &out,
     // Add an intersection as the point is inside the polygon
     out.insert(curPolyPt);
     VERBOSE(std::cout << "Advance adds cross pt: (" << curPolyPt.X() << ","
-                      << curPolyPt.Y() << ")" << std::endl);
+                      << curPolyPt.Y() << ")\n");
   }
 }
 
@@ -88,7 +88,7 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
   VERBOSE(std::cout << "Area of P (" << P.area() << "). Area of Q (" << Q.area()
                     << ")\n");
   if (P.area() < Q.area()) {
-    VERBOSE(std::cout << "Area of P < Area of Q. Swapping order." << std::endl);
+    VERBOSE(std::cout << "Area of P < Area of Q. Swapping order.\n");
     return intersection(Q, P, out);
   }
 
@@ -98,52 +98,45 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
   int phase = 1;
   size_t maxItns = 2 * (P.npoints() + Q.npoints());
   for (size_t i = 1; i <= maxItns; ++i) {
-    VERBOSE(std::cout << "Iteration " << i << " Phase = " << phase
-                      << std::endl);
+    VERBOSE(std::cout << "Iteration " << i << " Phase = " << phase << '\n');
     const PolygonEdge edgeP = pIter.edge();
     const PolygonEdge edgeQ = qIter.edge();
     PointClassification pclass = classify(edgeP.end(), edgeQ);
 
-    VERBOSE(std::cout << "Class P Pt" << std::endl);
+    VERBOSE(std::cout << "Class P Pt\n");
     VERBOSE(std::cout << "Class Pt: (" << edgeP.end().X() << ","
-                      << edgeP.end().Y() << ")");
-    VERBOSE(std::cout << std::endl);
+                      << edgeP.end().Y() << ")\n");
     VERBOSE(std::cout << "Edge Orig Pt (" << edgeQ.start().X() << ","
-                      << edgeQ.start().Y() << ")");
-    VERBOSE(std::cout << std::endl);
+                      << edgeQ.start().Y() << ")\n");
     VERBOSE(std::cout << "Edge Dest Pt (" << edgeQ.end().X() << ","
-                      << edgeQ.end().Y() << ")");
-    VERBOSE(std::cout << std::endl);
-    VERBOSE(std::cout << "P pt class: " << pclass << std::endl);
+                      << edgeQ.end().Y() << ")\n");
+    VERBOSE(std::cout << "P pt class: " << pclass << '\n');
 
     PointClassification qclass = classify(edgeQ.end(), edgeP);
-    VERBOSE(std::cout << "Class Q Pt" << std::endl);
+    VERBOSE(std::cout << "Class Q Pt\n");
     VERBOSE(std::cout << "Class Pt: (" << edgeQ.end().X() << ","
-                      << edgeQ.end().Y() << ")");
-    VERBOSE(std::cout << std::endl);
+                      << edgeQ.end().Y() << ")\n");
     VERBOSE(std::cout << "Edge Orig Pt (" << edgeP.start().X() << ","
-                      << edgeP.start().Y() << ")");
-    VERBOSE(std::cout << std::endl);
+                      << edgeP.start().Y() << ")\n");
     VERBOSE(std::cout << "Edge Dest Pt (" << edgeP.end().X() << ","
-                      << edgeP.end().Y() << ")");
-    VERBOSE(std::cout << std::endl);
-    VERBOSE(std::cout << "Q pt class: " << qclass << std::endl);
+                      << edgeP.end().Y() << ")\n");
+    VERBOSE(std::cout << "Q pt class: " << qclass << '\n');
 
     PolygonEdge::Orientation crossType = crossingPoint(edgeP, edgeQ, iPnt);
-    VERBOSE(std::cout << "PQ Orient: " << crossType << std::endl);
+    VERBOSE(std::cout << "PQ Orient: " << crossType << '\n');
 
     if (crossType == PolygonEdge::SkewCross) {
       if (phase == 1) {
         phase = 2;
         VERBOSE(std::cout << "Found a crossing pt: (" << iPnt.X() << ",");
-        VERBOSE(std::cout << iPnt.Y() << ")" << std::endl);
+        VERBOSE(std::cout << iPnt.Y() << ")\n");
 
         curIntersection = iPnt;
         out.insert(iPnt);
         startPnt = iPnt;
       } else if (iPnt != curIntersection) {
         VERBOSE(std::cout << "Found a crossing pt: (" << iPnt.X() << ",");
-        VERBOSE(std::cout << iPnt.Y() << ")" << std::endl);
+        VERBOSE(std::cout << iPnt.Y() << ")\n");
         if (iPnt != startPnt) {
           curIntersection = iPnt;
           out.insert(iPnt);
@@ -164,35 +157,35 @@ bool MANTID_GEOMETRY_DLL intersection(const ConvexPolygon &P,
                (qclass != Behind)) {
       inflag = Unknown;
     }
-    VERBOSE(std::cout << "Current in flag: " << inflag << std::endl);
+    VERBOSE(std::cout << "Current in flag: " << inflag << '\n');
 
     bool pAIMSq = edgeAimsAt(edgeP, edgeQ, pclass, crossType);
     bool qAIMSp = edgeAimsAt(edgeQ, edgeP, qclass, crossType);
 
-    VERBOSE(std::cout << "P aims at Q:" << pAIMSq << std::endl);
-    VERBOSE(std::cout << "Q aims at P:" << qAIMSp << std::endl);
+    VERBOSE(std::cout << "P aims at Q:" << pAIMSq << '\n');
+    VERBOSE(std::cout << "Q aims at P:" << qAIMSp << '\n');
     if (pAIMSq && qAIMSp) {
       if ((inflag == QIsInside) ||
           ((inflag == Unknown) && (pclass == OnLeft))) {
-        VERBOSE(std::cout << "Move edge on P" << std::endl);
+        VERBOSE(std::cout << "Move edge on P\n");
         advanceVertex(pIter, out, curIntersection, false);
       } else {
-        VERBOSE(std::cout << "Move edge on Q" << std::endl);
+        VERBOSE(std::cout << "Move edge on Q\n");
         advanceVertex(qIter, out, curIntersection, false);
       }
     } else if (pAIMSq) {
-      VERBOSE(std::cout << "Move edge on P" << std::endl);
+      VERBOSE(std::cout << "Move edge on P\n");
       advanceVertex(pIter, out, curIntersection, inflag == PIsInside);
     } else if (qAIMSp) {
-      VERBOSE(std::cout << "Move edge on Q" << std::endl);
+      VERBOSE(std::cout << "Move edge on Q\n");
       advanceVertex(qIter, out, curIntersection, inflag == QIsInside);
     } else {
       if ((inflag == QIsInside) ||
           ((inflag == Unknown) && (pclass == OnLeft))) {
-        VERBOSE(std::cout << "Move edge on P" << std::endl);
+        VERBOSE(std::cout << "Move edge on P\n");
         advanceVertex(pIter, out, curIntersection, false);
       } else {
-        VERBOSE(std::cout << "Move edge on Q" << std::endl);
+        VERBOSE(std::cout << "Move edge on Q\n");
         advanceVertex(qIter, out, curIntersection, false);
       }
     }

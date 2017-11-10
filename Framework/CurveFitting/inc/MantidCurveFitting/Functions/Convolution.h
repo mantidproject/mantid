@@ -124,6 +124,10 @@ public:
   /// enough to accept dataSize() values
   void function(const API::FunctionDomain &domain,
                 API::FunctionValues &values) const override;
+  void functionFFTMode(const API::FunctionDomain &domain,
+                       API::FunctionValues &values) const;
+  void functionDirectMode(const API::FunctionDomain &domain,
+                          API::FunctionValues &values) const;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const API::FunctionDomain &domain,
                      API::Jacobian &jacobian) override;
@@ -145,8 +149,9 @@ protected:
   void init() override;
 
 private:
-  /// To keep the Fourier transform of the resolution function (divided by the
-  /// step in xValues)
+  /// Keep the Fourier transform of the resolution function (divided by the
+  /// step in xValues) when in FFT mode, and the inverted resolution if in
+  /// Direct mode
   mutable std::vector<double> m_resolution;
 };
 

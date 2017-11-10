@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <fstream>
 #include <limits>
@@ -124,8 +122,7 @@ void DiffractionFocussing::exec() {
       ++discarded;
     }
   g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group"
-                  << std::endl;
+                  << " spectra that were not assigned to any group\n";
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
@@ -134,31 +131,24 @@ void DiffractionFocussing::exec() {
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
       tmpW, resultIndeces.size(), newSize + 1, newSize);
 
+  std::vector<Indexing::SpectrumNumber> specNums;
+  const auto &tmpIndices = tmpW->indexInfo();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];
-    MantidVec &tmpE = tmpW->dataE(i);
-    MantidVec &outE = outputW->dataE(hist);
-    MantidVec &tmpY = tmpW->dataY(i);
-    MantidVec &outY = outputW->dataY(hist);
-    MantidVec &tmpX = tmpW->dataX(i);
-    MantidVec &outX = outputW->dataX(hist);
-    outE.assign(tmpE.begin(), tmpE.end());
-    outY.assign(tmpY.begin(), tmpY.end());
-    outX.assign(tmpX.begin(), tmpX.end());
-    API::ISpectrum *inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
-    inSpec->setSpectrumNo(-1);
+    outputW->setHistogram(hist, tmpW->histogram(i));
+    specNums.push_back(tmpIndices.spectrumNumber(i));
   }
+  auto outputIndices = outputW->indexInfo();
+  outputIndices.setSpectrumNumbers(std::move(specNums));
+  outputW->setIndexInfo(outputIndices);
 
   progress(1.);
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /// Run ConvertUnits as a Child Algorithm to convert to dSpacing
@@ -218,15 +208,12 @@ void DiffractionFocussing::calculateRebinParams(
   // one
   int64_t length = workspace->getNumberHistograms();
   for (int64_t i = 0; i < length; i++) {
-    const MantidVec &xVec = workspace->readX(i);
-    const double &localMin = xVec[0];
-    const double &localMax = xVec[xVec.size() - 1];
-    if (localMin != std::numeric_limits<double>::infinity() &&
-        localMax != std::numeric_limits<double>::infinity()) {
-      if (localMin < min)
-        min = localMin;
-      if (localMax > max)
-        max = localMax;
+    auto &xVec = workspace->x(i);
+    const double &localMin = xVec.front();
+    const double &localMax = xVec.back();
+    if (std::isfinite(localMin) && std::isfinite(localMax)) {
+      min = std::min(min, localMin);
+      max = std::max(max, localMax);
     }
   }
 
@@ -249,7 +236,7 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << std::endl;
+                  << '\n';
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 

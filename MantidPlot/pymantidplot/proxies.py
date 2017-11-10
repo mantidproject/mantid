@@ -1,12 +1,18 @@
-﻿"""
+"""
 Module containing classes that act as proxies to the various MantidPlot gui objects that are
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
+from __future__ import (absolute_import, division,
+                        print_function)
+from six.moves import range
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
-import __builtin__
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 import mantid
 import mantidqtpython
 
@@ -60,7 +66,7 @@ class CrossThreadCall(QtCore.QObject):
         else:
             try:
                 self.__func_return = self.__callable(*self.__args, **self.__kwargs)
-            except Exception, exc:
+            except Exception as exc:
                 self.__exception = exc
 
         if self.__exception is not None:
@@ -74,11 +80,11 @@ class CrossThreadCall(QtCore.QObject):
 
             Most types pass okay, but enums don't so they have
             to be coerced to ints. An enum is currently detected
-            as a type that is not a bool and inherits from __builtin__.int
+            as a type that is not a bool and inherits from int
         """
         argtype = type(argument)
         return argtype
-        if isinstance(argument, __builtin__.int) and argtype != bool:
+        if isinstance(argument, builtins.int) and argtype != bool:
             argtype = int
         return argtype
 
@@ -179,7 +185,7 @@ class QtProxyObject(QtCore.QObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def _getHeldObject(self):
         """
@@ -298,7 +304,7 @@ class Layer(QtProxyObject):
         if isinstance(args[0],str):
             return threadsafe_call(self._getHeldObject().insertCurve, *args)
         elif hasattr(args[0], 'getName'):
-            return threadsafe_call(self._getHeldObject().insertCurve, args[0].getName(),*args[1:])
+            return threadsafe_call(self._getHeldObject().insertCurve, args[0].name(),*args[1:])
         else:
             return threadsafe_call(self._getHeldObject().insertCurve, args[0]._getHeldObject(),*args[1:])
 
@@ -669,7 +675,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def __dir__(self):
         """
@@ -729,11 +735,12 @@ class SliceViewerWindowProxy(QtProxyObject):
         # Set the width.
         if not width is None:
             liner.setThickness(width)
+            liner.setPlanarWidth(width*0.5)
         else:
-            liner.setPlanarWidth(planar_width)
+            liner.setPlanarWidth(planar_width*0.5)
             if not thicknesses is None:
-                for d in xrange(len(thicknesses)):
-                    liner.setThickness(d, thicknesses[i])
+                for d in range(len(thicknesses)):
+                    liner.setThickness(d, thicknesses[d])
         # Bins
         liner.setNumBins(num_bins)
         liner.apply()
@@ -758,7 +765,7 @@ def getWorkspaceNames(source):
         for w in source:
             names = getWorkspaceNames(w)
             ws_names += names
-    elif hasattr(source, 'getName'):
+    elif hasattr(source, 'name'):
         if hasattr(source, '_getHeldObject'):
             wspace = source._getHeldObject()
         else:
@@ -768,16 +775,16 @@ def getWorkspaceNames(source):
         if hasattr(wspace, 'getNames'):
             grp_names = wspace.getNames()
             for n in grp_names:
-                if n != wspace.getName():
+                if n != wspace.name():
                     ws_names.append(n)
         else:
-            ws_names.append(wspace.getName())
+            ws_names.append(wspace.name())
     elif isinstance(source,str):
         w = None
         try:
             # for non-existent names this raises a KeyError
             w = mantid.AnalysisDataService.Instance()[source]
-        except Exception, exc:
+        except Exception as exc:
             raise ValueError("Workspace '%s' not found!"%source)
 
         if w != None:
@@ -798,7 +805,7 @@ class ProxyCompositePeaksPresenter(QtProxyObject):
         if isinstance(source, str):
             to_present = source
         elif isinstance(source, mantid.api.Workspace):
-            to_present = source.getName()
+            to_present = source.name()
         else:
             raise ValueError("getPeaksPresenter expects a Workspace name or a Workspace object.")
         if not mantid.api.mtd.doesExist(to_present):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+from __future__ import (absolute_import, division, print_function)
 from compile_util import compile_ui
-from distutils.core import setup
 
 # Compile resource files for Diffraction instruments
 try:
@@ -10,4 +10,4 @@ try:
     compile_ui("ui/diffraction/diffraction_run_setup.ui")
     compile_ui("ui/diffraction/filter_info.ui")
 except:
-    print "Could not compile resource file"
+    print("Could not compile resource file")

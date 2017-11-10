@@ -1,13 +1,10 @@
 #ifndef MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
 #define MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
@@ -15,6 +12,7 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
+class IDetector;
 class Object;
 }
 
@@ -132,7 +130,7 @@ private:
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector_const_sptr &detector,
+  void calculateDistances(const Geometry::IDetector &detector,
                           std::vector<double> &L2s) const;
   inline double doIntegration(const double &lambda,
                               const std::vector<double> &L2s) const;

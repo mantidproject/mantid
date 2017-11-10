@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/ADSValidator.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -26,8 +27,10 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
+	src/EqualBinSizesValidator.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
@@ -38,16 +41,17 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
 	src/FunctionDomain1D.cpp
+	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+	src/FunctionGenerator.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
-	src/GeometryInfoFactory.cpp
-	src/GeometryInfo.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
+	src/HistoWorkspace.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -58,10 +62,10 @@ set ( SRC_FILES
 	src/IFunction.cpp
 	src/IFunction1D.cpp
 	src/IFunction1DSpectrum.cpp
+	src/IFunctionGeneral.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
-	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -78,20 +82,23 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/IndexProperty.cpp
+	src/IndexTypeProperty.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
+	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
+	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
-	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
+	src/MuParserUtils.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
 	src/MultiPeriodGroupWorker.cpp
@@ -108,23 +115,24 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyManagerDataService.cpp
-	src/PropertyNexus.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
+	src/ResizeRectangularDetectorHelper.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
+	src/SingleCountValidator.cpp
 	src/SpectraAxis.cpp
 	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
+	src/SpectrumInfo.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
@@ -132,6 +140,8 @@ set ( SRC_FILES
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
 	src/WorkspaceHistory.cpp
+	src/WorkspaceNearestNeighbourInfo.cpp
+	src/WorkspaceNearestNeighbours.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceUnitValidator.cpp
@@ -148,7 +158,9 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
+	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/Algorithm.tcc
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
@@ -178,9 +190,11 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
+	inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
+	inc/MantidAPI/EqualBinSizesValidator.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
@@ -192,16 +206,17 @@ set ( INC_FILES
 	inc/MantidAPI/FuncMinimizerFactory.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
+	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionGenerator.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
-	inc/MantidAPI/GeometryInfoFactory.h
-	inc/MantidAPI/GeometryInfo.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
+	inc/MantidAPI/HistoWorkspace.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -223,6 +238,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunction1DSpectrum.h
+	inc/MantidAPI/IFunctionGeneral.h
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
@@ -258,23 +274,26 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/IndexProperty.h
+	inc/MantidAPI/IndexTypeProperty.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
+	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
-	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
+	inc/MantidAPI/MuParserUtils.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
 	inc/MantidAPI/MultiPeriodGroupWorker.h
@@ -291,25 +310,25 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyManagerDataService.h
-	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
+	inc/MantidAPI/ResizeRectangularDetectorHelper.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
+	inc/MantidAPI/SingleCountValidator.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
+	inc/MantidAPI/SpectrumInfo.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -320,17 +339,22 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
+	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
+	inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	ADSValidatorTest.h
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
+	AlgorithmMPITest.h
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
@@ -344,7 +368,10 @@ set ( TEST_FILES
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
+	DetectorInfoTest.h
+	DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
+	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
@@ -354,14 +381,13 @@ set ( TEST_FILES
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
+	FunctionDomainGeneralTest.h
 	FunctionDomainTest.h
 	FunctionFactoryTest.h
 	FunctionParameterDecoratorTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
-	GeometryInfoFactoryTest.h
-	GeometryInfoTest.h
 	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h
@@ -370,23 +396,27 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IFunctionTest.h
 	ILatticeFunctionTest.h
-	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	IndexPropertyTest.h
+	IndexTypePropertyTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
+	LiveListenerTest.h
+	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
+	MuParserUtilsTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
 	MultiPeriodGroupWorkerTest.h
@@ -400,21 +430,22 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+	ProgressTest.h
 	ProjectionTest.h
-	PropertyManagerDataServiceTest.h
-	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
+	ResizeRectangularDetectorHelperTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
+	SingleCountValidatorTest.h
 	SpectraAxisTest.h
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h
+	SpectrumInfoTest.h
 	TextAxisTest.h
 	VectorParameterParserTest.h
 	VectorParameterTest.h
@@ -422,6 +453,8 @@ set ( TEST_FILES
 	WorkspaceGroupTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceNearestNeighbourInfoTest.h
+	WorkspaceNearestNeighboursTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 	WorkspaceUnitValidatorTest.h

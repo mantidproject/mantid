@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 
+
 class ReflectometryQuickPointDetector(stresstesting.MantidStressTest):
     """
     This is a system test for the top-level quick routines. Quick is the name given to the

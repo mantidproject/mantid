@@ -2,12 +2,14 @@
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 import ui.diffraction.ui_diffraction_adv_setup
 import ui.diffraction.ui_diffraction_info
+
 
 class AdvancedSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -23,6 +25,7 @@ class AdvancedSetupWidget(BaseWidget):
         class AdvancedSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_adv_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
+
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
@@ -80,8 +83,6 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.scaledata_edit.setValidator(dv7)
 
         # Default states
-        self._content.extension_combo.setCurrentIndex(1)
-
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
 
@@ -92,14 +93,12 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_edit.setValidator(dv8)
         self._content.filterbadpulses_edit.setText("95.")
 
-        # self._content.extension_combo.addItems(['.h5', '.hd5'])
-
         # Connections from action/event to function to handle
-        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._stripvanpeaks_clicked)
+        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._stripvanpeaks_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
-                self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
         # Hanlder for events
         # TODO - Need to add an event hanlder for the change of instrument and facility
 
@@ -128,7 +127,6 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
-        self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
 
         # range of wavelength
@@ -136,7 +134,6 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
         return
-
 
     def get_state(self):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
@@ -161,12 +158,10 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
 
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
-        s.extension = str(self._content.extension_combo.currentText())
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
 
         return s
-
 
     def _detinstrumentchange(self):
         """

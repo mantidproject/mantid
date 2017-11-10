@@ -21,16 +21,6 @@ using namespace Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-   */
-PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-   */
-PoldiCreatePeaksFromCell::~PoldiCreatePeaksFromCell() {}
-
 const std::string PoldiCreatePeaksFromCell::name() const {
   return "PoldiCreatePeaksFromCell";
 }
@@ -220,7 +210,7 @@ void PoldiCreatePeaksFromCell::exec() {
                                              pointGroup->getCoordinateSystem());
 
   g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
-                      << std::endl;
+                      << '\n';
 
   CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create(
       IsotropicAtomBraggScattererParser(getProperty("Atoms"))());

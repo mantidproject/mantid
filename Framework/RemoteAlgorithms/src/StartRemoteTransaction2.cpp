@@ -1,4 +1,5 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidRemoteAlgorithms/StartRemoteTransaction2.h"
@@ -38,7 +39,7 @@ void StartRemoteTransaction2::exec() {
   std::string tid = jm->startRemoteTransaction();
 
   setPropertyValue("TransactionID", tid);
-  g_log.information() << "Transaction ID " << tid << " started." << std::endl;
+  g_log.information() << "Transaction ID " << tid << " started.\n";
 }
 
 } // end namespace RemoteAlgorithms

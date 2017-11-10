@@ -1,7 +1,9 @@
-﻿# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
+# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
+
+from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
     EnabledWhenProperty, PropertyCriterion
 import numpy as np
@@ -67,7 +69,7 @@ class SANSStitch(DataProcessorAlgorithm):
             MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
             doc='Low angle bank normalization workspace in Q')
 
-        allowedModes = StringListValidator(self._make_mode_map().keys())
+        allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
         self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')
@@ -77,6 +79,12 @@ class SANSStitch(DataProcessorAlgorithm):
 
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
+
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
+                             doc='Optional minimum q for fit')
+
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
+                             doc='Optional maximum q for fit')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
@@ -159,7 +167,8 @@ class SANSStitch(DataProcessorAlgorithm):
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         shifted_norm_front = self._scale(nF, shift_factor)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
-        numerator = self._add(self._add(cF, shifted_norm_front), cR)
+        add_counts_and_shift = self._add(cF, shifted_norm_front)
+        numerator = self._add(add_counts_and_shift, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
         return merged_q
@@ -176,7 +185,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
         if ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
-            return
+            return ws
 
         y_vals = ws.readY(0)
         length = len(y_vals)
@@ -197,16 +206,21 @@ class SANSStitch(DataProcessorAlgorithm):
         x_vals = ws.readX(0)
         start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        end_x = x_vals[stop + 1]
+        if len(y_vals) == len(x_vals):
+            end_x = x_vals[stop]
+        else:
+            end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
-    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):
+    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max):
         fit_alg = self.createChildAlgorithm("SANSFitShiftScale")
         fit_alg.setProperty("HABWorkspace", q_high_angle)
         fit_alg.setProperty("LABWorkspace", q_low_angle)
         fit_alg.setProperty("Mode", self.getProperty('Mode').value)
         fit_alg.setProperty("ScaleFactor", scale_factor)
         fit_alg.setProperty("ShiftFactor", shift_factor)
+        fit_alg.setProperty("FitMin", fit_min)
+        fit_alg.setProperty("FitMax", fit_max)
         fit_alg.execute()
         scale_factor_fit = fit_alg.getProperty("OutScaleFactor").value
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
@@ -241,10 +255,12 @@ class SANSStitch(DataProcessorAlgorithm):
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
 
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
-                                                       scale_factor, shift_factor)
+                                                       scale_factor, shift_factor, fit_min, fit_max)
 
         min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
         max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
@@ -267,7 +283,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
-                                                    scale_factor=scale_factor)
+                                                        scale_factor=scale_factor)
 
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
@@ -298,7 +314,6 @@ class SANSStitch(DataProcessorAlgorithm):
 
     def validateInputs(self):
         errors = dict()
-
 
         # Mode compatibility checks
         scale_factor_property = self.getProperty('ScaleFactor')
@@ -359,25 +374,17 @@ class QErrorCorrectionForMergedWorkspaces(object):
         super(QErrorCorrectionForMergedWorkspaces, self).__init__()
 
     def _divide_q_resolution_by_counts(self, q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.divide(q_res[0:-1], counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.divide(q_res, counts)
         return q_res_buffer
 
     def _multiply_q_resolution_by_counts(self, q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.multiply(q_res[0:-1], counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.multiply(q_res, counts)
         return q_res_buffer
 
     def correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,
-                                            output_ws, scale):
+                                        output_ws, scale):
         """
         We need to transfer the DX error values from the original workspaces to the merged worksapce.
         We have:
@@ -439,6 +446,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         comment.setProperty('Workspace', ws)
         comment.setProperty('Text', message)
         comment.execute()
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSStitch)

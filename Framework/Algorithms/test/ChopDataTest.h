@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -28,10 +29,10 @@ public:
 
   void testExec() {
     Mantid::DataObjects::Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(149, 24974, 5, 4);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(149, 24974, 5, 4);
 
     for (int i = 0; i < 4995; i++) {
-      inputWS->dataX(140)[i + 19980] = 0.2;
+      inputWS->mutableX(140)[i + 19980] = 0.2;
     }
 
     inputWS->getAxis(0)->setUnit("TOF");
@@ -86,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(output1->blocksize(), 4998);
     TS_ASSERT_EQUALS(output4->blocksize(), 9975);
 
-    TS_ASSERT(output1->readX(0)[4997] < output4->readX(0)[9975]);
+    TS_ASSERT(output1->x(0)[4997] < output4->x(0)[9975]);
 
     delete alg;
 

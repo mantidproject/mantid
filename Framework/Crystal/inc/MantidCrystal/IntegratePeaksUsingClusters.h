@@ -33,9 +33,6 @@ namespace Crystal {
 */
 class DLLExport IntegratePeaksUsingClusters : public API::Algorithm {
 public:
-  IntegratePeaksUsingClusters();
-  ~IntegratePeaksUsingClusters() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

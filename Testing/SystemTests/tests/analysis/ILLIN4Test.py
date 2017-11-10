@@ -9,6 +9,7 @@ import unittest
 
 DIFF_PLACES = 12
 
+
 class ILLIN4Tests(unittest.TestCase):
 
     ws_name = "in4_ws"
@@ -43,12 +44,11 @@ class ILLIN4Tests(unittest.TestCase):
 
     # TODO
 
-
     def _run_load(self, dataFile):
         """
         ILL Loader
         """
-        ms.LoadILL(Filename=dataFile,OutputWorkspace=self.ws_name)
+        ms.LoadILLTOF(Filename=dataFile,OutputWorkspace=self.ws_name)
         self._do_ads_check(self.ws_name)
 
     def _do_ads_check(self, name):
@@ -56,6 +56,7 @@ class ILLIN4Tests(unittest.TestCase):
         self.assertTrue(isinstance(mtd[name], MatrixWorkspace))
 
 #====================================================================================
+
 
 class LoadILLIN4Test(stresstesting.MantidStressTest):
 

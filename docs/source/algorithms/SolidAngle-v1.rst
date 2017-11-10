@@ -16,8 +16,8 @@ detectors will be summed to provide the solid angle for the spectrum.
 The solid angle of a detector that has been masked or marked as dead is
 considered to be 0 steradians.
 
-This algorithms can happily accept `ragged
-workspaces <http://www.mantidproject.org/Ragged_Workspace>`__ as an input workspace. The result would
+This algorithms can happily accept :ref:`ragged workspace <Ragged_Workspace>`
+as an input workspace. The result would
 be a ragged output workspace whose X axis values match the lowest and
 highest of each the input spectra.
 
@@ -36,8 +36,8 @@ Usage
     ws = CreateSampleWorkspace()
     wsOut = SolidAngle(ws)
 
-    print "Solid angle of Spectra 1 in Bank 1: %.2e" % wsOut.readY(0)[0]
-    print "Solid angle of Spectra 101 in Bank 2: %.2e" % wsOut.readY(100)[0]
+    print("Solid angle of Spectra 1 in Bank 1: %.2e" % wsOut.readY(0)[0])
+    print("Solid angle of Spectra 101 in Bank 2: %.2e" % wsOut.readY(100)[0])
 
 
 Output:

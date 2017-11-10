@@ -5,27 +5,28 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Material.h"
 
 #include "BoundingBox.h"
 #include <map>
+#include <memory>
 
 namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
 namespace Kernel {
-class V3D;
+class PseudoRandomNumberGenerator;
 class Material;
+class V3D;
 }
 
 namespace Geometry {
-class Rule;
+class CacheGeometryHandler;
 class CompGrp;
+class GeometryHandler;
+class Rule;
 class Surface;
 class Track;
-class GeometryHandler;
-class CacheGeometryHandler;
 class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
@@ -74,12 +75,14 @@ public:
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
+  void setID(const std::string &id) { m_id = id; }
+  inline const std::string &id() const { return m_id; }
 
-  void setName(const int nx) { ObjName = nx; } ///< Set Name
-  int getName() const { return ObjName; }      ///< Get Name
+  void setName(const int nx) { ObjNum = nx; } ///< Set Name
+  int getName() const { return ObjNum; }      ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
-  const Kernel::Material &material() const;
+  const Kernel::Material material() const;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const;
@@ -135,6 +138,9 @@ public:
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
+  /// Calculates the volume of this object.
+  double volume() const;
+
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
@@ -150,6 +156,13 @@ public:
   void setNullBoundingBox();
   // find internal point to object
   int getPointInObject(Kernel::V3D &point) const;
+
+  /// Select a random point within the object
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const BoundingBox &activeRegion,
+                                    const size_t) const;
 
   // Rendering member functions
   void draw() const;
@@ -170,14 +183,10 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int ObjName;                   ///< Creation number
-  std::unique_ptr<Rule> TopRule; ///< Top rule [ Geometric scope of object]
-
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
                int &compUnit) const;
   std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
-  BoundingBox m_boundingBox; ///< Object's bounding box
 
   /// Calculate bounding box using Rule system
   void calcBoundingBoxByRule();
@@ -187,17 +196,6 @@ private:
 
   /// Calculate bounding box using object's geometric data
   void calcBoundingBoxByGeometry();
-
-  // -- DEPRECATED --
-  mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
-      AABByMax,             ///< ymax of Axis aligned bounding box cache
-      AABBzMax,             ///< zmax of Axis aligned bounding box cache
-      AABBxMin,             ///< xmin of Axis aligned bounding box cache
-      AABByMin,             ///< xmin of Axis aligned bounding box cache
-      AABBzMin;             ///< zmin of Axis Aligned Bounding Box Cache
-  mutable bool boolBounded; ///< flag true if a bounding box exists, either by
-  /// getBoundingBox or defineBoundingBox
-  // -- --
 
   int searchForObject(Kernel::V3D &) const;
   double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
@@ -217,6 +215,27 @@ private:
                         const Mantid::Kernel::V3D &axis, const double radius,
                         const double height) const;
 
+  /// Returns the volume.
+  double monteCarloVolume() const;
+  /// Returns the volume.
+  double singleShotMonteCarloVolume(const int shotSize,
+                                    const size_t seed) const;
+
+  /// Top rule [ Geometric scope of object]
+  std::unique_ptr<Rule> TopRule;
+  /// Object's bounding box
+  BoundingBox m_boundingBox;
+  // -- DEPRECATED --
+  mutable double AABBxMax,  ///< xmax of Axis aligned bounding box cache
+      AABByMax,             ///< ymax of Axis aligned bounding box cache
+      AABBzMax,             ///< zmax of Axis aligned bounding box cache
+      AABBxMin,             ///< xmin of Axis aligned bounding box cache
+      AABByMin,             ///< xmin of Axis aligned bounding box cache
+      AABBzMin;             ///< zmin of Axis Aligned Bounding Box Cache
+  mutable bool boolBounded; ///< flag true if a bounding box exists, either by
+
+  /// Creation number
+  int ObjNum;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class CacheGeometryHandler;
@@ -234,8 +253,10 @@ private:
   double *getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
+  /// Optional string identifier
+  std::string m_id;
   /// material composition
-  Kernel::Material m_material;
+  std::unique_ptr<Kernel::Material> m_material;
 
 protected:
   std::vector<const Surface *>

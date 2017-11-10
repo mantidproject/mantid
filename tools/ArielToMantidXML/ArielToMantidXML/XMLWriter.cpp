@@ -50,28 +50,25 @@ void XMLWriter::writeDetectors()
   while ( ! trav.empty() )
   {
     // Get the component from the front of the queue and then pop it off
-  	Component* current = trav.front();
+    Component *current = trav.front();
     trav.pop();
-	  std::vector<Component*> children = current->getChildren();
-    std::vector<Component*>::iterator it;
+    std::vector<Component *> children = current->getChildren();
     std::set<std::string> types;
     std::multimap<std::string, Component*> compsByType;
     // Go through the children of the current component
-    for (it = children.begin(); it != children.end(); ++it)
-	  {
+    for (const Component *child : children) {
       // A particular type can appear more than once in the tree - only want it once though
-      if ( done.find((*it)->type()) == done.end() )
-      {
+      if (done.find(child->type()) == done.end()) {
         // Push the child onto the queue
-        trav.push(*it);
+        trav.push(child);
         // And add it to the list of 'done' components
-        done.insert((*it)->type());
+        done.insert(child->type());
       }
 
       // Need to see if the type is the same for all children (in which case we can compactise the output)
-      types.insert( (*it)->type() );
-      compsByType.insert( std::pair<std::string, Component*>( (*it)->type(), *it ) );
-  	}
+      types.insert(child->type());
+      compsByType.emplace(child->type(), child);
+        }
 
     // Now do the output for the current component (if it has children)
     if ( current != m_startPoint )

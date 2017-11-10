@@ -23,6 +23,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 #include "MantidKernel/System.h"
+#include "MantidHistogramData/Histogram.h"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -50,26 +51,28 @@ public:
     double l1;        ///< Nominal distance from source to sample (m)
     double l2;        ///< Nominal distance from sample to detector (m)
     double twoTheta;  ///< Scattering angle of the detector (radians)
-    double phi;       ///< Azimuth angle of the detector (radians)
+    double azimuth;   ///< Azimuth angle of the detector (radians)
     double rho;       ///< Number density of scatters (angstroms^-3)
     double sigmaSc;   ///< Total scattering cross-section (barns)
     double sigmaAbs;  ///< Absorption cross-section at 2200m/s (barns)
     double cylRadius; ///< Radius of cylinder (m)
     double cylHeight; ///< Height of cylinder (m)
+    size_t msNEvents; ///< Number of second-order scatters per run
+    size_t msNRuns;   ///< Number of runs to average ms correction over
   };
 
   /// Constructor
   MayersSampleCorrectionStrategy(
       MayersSampleCorrectionStrategy::Parameters params,
-      const std::vector<double> &tof, const std::vector<double> &sigIn,
-      const std::vector<double> &errIn);
+      const Mantid::HistogramData::Histogram &inputHist);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
 
   /// Return the correction factors
-  void apply(std::vector<double> &sigOut, std::vector<double> &errOut);
-  /// Calculate the self-attentation factor for a single mu*r value
+  Mantid::HistogramData::Histogram getCorrectedHisto();
+
+  /// Calculate the self-attenuation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value &
   /// absorption value
@@ -84,19 +87,15 @@ private:
   double muR(const double flightPath, const double tof) const;
   double muR(const double sigt) const;
   double sigmaTotal(const double flightPath, const double tof) const;
-  double tof(const size_t i) const;
   void seedRNG(const size_t seed);
 
   /// A copy of the correction parameters
   const Parameters m_pars;
-  /// A reference to the tof vluaes
-  const std::vector<double> &m_tof;
-  /// A reference to the input signal values
-  const std::vector<double> &m_sigin;
-  /// A reference to the input error values
-  const std::vector<double> &m_errin;
-  // True if we have binned TOF values
-  const bool m_histogram;
+  // Holds histogram to process
+  const HistogramData::Histogram &m_histogram;
+  const HistogramData::Points m_tofVals;
+  /// Holds the number of Y vals to process
+  const size_t m_histoYSize;
   /// Limits for the range of mu*r values to cover
   const std::pair<double, double> m_muRrange;
   /// Random number generator

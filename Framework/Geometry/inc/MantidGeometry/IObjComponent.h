@@ -1,12 +1,8 @@
 #ifndef IMANTID_GEOMETRY_OBJCOMPONENT_H_
 #define IMANTID_GEOMETRY_OBJCOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid {
 
@@ -15,9 +11,7 @@ class Material;
 }
 
 namespace Geometry {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
+class Track;
 class Object;
 class GeometryHandler;
 
@@ -103,7 +97,7 @@ public:
   /// Returns the shape of the Object
   virtual const boost::shared_ptr<const Object> shape() const = 0;
   /// Returns the material of the Object
-  virtual const boost::shared_ptr<const Kernel::Material> material() const = 0;
+  virtual const Kernel::Material material() const = 0;
 
   /// Gets the GeometryHandler
   GeometryHandler *Handle() const { return handle; }

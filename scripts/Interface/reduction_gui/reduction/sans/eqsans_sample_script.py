@@ -1,9 +1,11 @@
 """
     Sample data options for EQSANS reduction
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData as BaseSampleData
+
 
 class SampleData(BaseSampleData):
 
@@ -69,11 +71,6 @@ class SampleData(BaseSampleData):
         self.reset()
         super(SampleData, self).from_setup_info(xml_str)
 
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.combine_transmission_frames = BaseScriptElement.getPropertyValue(alg, "FitFramesTogether",
                                                                               default=SampleData.combine_transmission_frames)

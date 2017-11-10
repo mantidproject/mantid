@@ -113,7 +113,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspace() {
     using Mantid::API::MatrixWorkspace_sptr;
-    return WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    return WorkspaceCreationHelper::create2DWorkspace(1, 10);
   }
 
   const std::string m_inputName;

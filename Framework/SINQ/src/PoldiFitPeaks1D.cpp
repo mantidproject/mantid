@@ -26,12 +26,6 @@ using namespace CurveFitting;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiFitPeaks1D)
 
-PoldiFitPeaks1D::PoldiFitPeaks1D()
-    : m_peaks(), m_profileTemplate(), m_backgroundTemplate(), m_profileTies(),
-      m_fwhmMultiples(1.0) {}
-
-PoldiFitPeaks1D::~PoldiFitPeaks1D() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D::name() const { return "PoldiFitPeaks1D"; }
 
@@ -149,7 +143,7 @@ void PoldiFitPeaks1D::exec() {
   TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");
   m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
-  g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
+  g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << '\n';
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 

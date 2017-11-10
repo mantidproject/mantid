@@ -4,6 +4,7 @@
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <boost/make_shared.hpp>
 

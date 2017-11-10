@@ -2,7 +2,6 @@
 #define MANTID_API_DOMAINCREATORFACTORY_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -58,8 +57,14 @@ private:
 
   /// Private Constructor for singleton class
   DomainCreatorFactoryImpl() = default;
+
+  /// Disable copy and assignment operator
+  DomainCreatorFactoryImpl(const DomainCreatorFactoryImpl &) = delete;
+
   /// No copying
-  DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
+  DomainCreatorFactoryImpl &
+  operator=(const DomainCreatorFactoryImpl &) = delete;
+
   /// Private Destructor for singleton
   ~DomainCreatorFactoryImpl() override = default;
 
@@ -68,18 +73,17 @@ private:
   using Kernel::DynamicFactory<IDomainCreator>::createUnwrapped;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// DomainCreatorFactoryImpl (needed for dllexport/dllimport) and a typedef for
-/// it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
     DomainCreatorFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
+}
+}
 
 #endif /* MANTID_API_DOMAINCREATORFACTORY_H_ */

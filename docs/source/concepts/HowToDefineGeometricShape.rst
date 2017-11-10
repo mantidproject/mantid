@@ -12,14 +12,18 @@ Primitive Shapes
 There is direct support for defining any of the following geometric
 shapes to add :ref:`Instrument Definition File <InstrumentDefinitionFile>`.
 
--  Sphere
--  Infinite Cylinder
--  Cylinder (finite height)
--  Slice of cylinder ring
--  Infinite Plane
--  Cuboid
--  Infinite Cone
--  Cone
+- Sphere_
+- `Cylinder (finite height) <Cylinder_>`_
+- `Hollow Cylinder (finite height) <Hollow Cylinder_>`_
+- `Infinite Cylinder`_
+- `Slice of Cylinder Ring`_
+- `Cone`_
+- `Infinite Cone`_
+- `Infinite Plane`_
+- Cuboid_
+- Hexahedron_
+- `Tapered Guide`_
+
 
 Combining Primitive shapes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,6 +136,7 @@ Sphere
         <radius val="3.2" />
       </sphere>
 
+
 Cylinder
 ~~~~~~~~
 
@@ -147,11 +152,33 @@ Cylinder
 
 .. figure:: ../images/XMLcylinderDescription.png
    :alt: XMLcylinderDescription.png‎
+   :align: center
 
-   XMLcylinderDescription.png‎
+   Schematic of a cylinder
 
 
-Infinite cylinder
+Hollow Cylinder
+~~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+      <hollow-cylinder id="A">
+        <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />  <!-- here position specified using spherical coordinates -->
+        <axis x="0.0" y="1.0" z="0" />
+        <inner-radius val="0.007" />
+        <outer-radius val="0.01" />
+        <height val="0.05" />
+      </hollow-cylinder>
+
+
+.. figure:: ../images/XMLHollowCylinderDescription.png
+   :alt: XMLHollowCylinderDescription.png
+   :align: center
+
+   Schematic of a hollow cylinder
+
+
+Infinite Cylinder
 ~~~~~~~~~~~~~~~~~
 
 .. code-block:: xml
@@ -163,7 +190,7 @@ Infinite cylinder
       </infinite-cylinder>
 
 
-Slice of cylinder ring
+Slice of Cylinder Ring
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: xml
@@ -202,7 +229,7 @@ Cone
    XMLconeDescription.png
 
 
-Infinite cone
+Infinite Cone
 ~~~~~~~~~~~~~
 
 .. code-block:: xml
@@ -213,7 +240,7 @@ Infinite cone
         <angle val="30.1"  />
       </infinite-cone>
 
-Infinite plane
+Infinite Plane
 ~~~~~~~~~~~~~~
 
 Is the 3D shape of all points on the plane and all points on one side of
@@ -321,21 +348,21 @@ the "axis" rotation.
 Bounding-Box
 ------------
 
-When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid 
-will attempt to automatically construct an axis-aligned bounding box for every 
-geometric shape that does not have one yet. Well-defined bounding boxes are 
-required by many features of Mantid, from correctly rendering the instrument 
+When a geometric shape is rendered in the MantidPlot instrument viewer, Mantid
+will attempt to automatically construct an axis-aligned bounding box for every
+geometric shape that does not have one yet. Well-defined bounding boxes are
+required by many features of Mantid, from correctly rendering the instrument
 to performing calculations in various algorithms.
 
-The automatically calculated bounding boxes can generally be relied upon and 
-are usually ideal. However, if the automatic calculation fails to produce a 
+The automatically calculated bounding boxes can generally be relied upon and
+are usually ideal. However, if the automatic calculation fails to produce a
 reasonable bounding box, or if performance becomes an issue with particularly
-complex shapes, you have the option of adding a manually pre-calculated 
+complex shapes, you have the option of adding a manually pre-calculated
 bounding box.
 
 A typical symptom of the automatic calculation creating an incorrect bounding
-box is your instrument appearing very small when viewed (forcing you to zoom 
-in for a long time to see it). In such cases, the axis visualizations also 
+box is your instrument appearing very small when viewed (forcing you to zoom
+in for a long time to see it). In such cases, the axis visualizations also
 tend to not display properly.
 
 A custom bounding-box can be added to shapes using the following notation:

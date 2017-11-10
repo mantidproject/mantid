@@ -13,7 +13,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/**
+/*
 Patches a Bilby data file. Implements API::Algorithm and its file check methods
 to recognise a file as the one containing Bilby data.
 
@@ -48,7 +48,7 @@ public:
   // description
   int version() const override { return 1; }
   const std::string name() const override { return "PatchBBY"; }
-  const std::string category() const override { return "DataHandling"; }
+  const std::string category() const override { return "DataHandling\\ANSTO"; }
   const std::string summary() const override {
     return "Patches a BilBy data file.";
   }

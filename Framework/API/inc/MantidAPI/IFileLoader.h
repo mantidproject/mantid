@@ -37,9 +37,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename DescriptorType>
 class MANTID_API_DLL IFileLoader : public Algorithm {
 public:
-  /// Virtual destructor (required by linker on some versions of OS X/Intel
-  /// compiler)
-  ~IFileLoader() override {}
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(DescriptorType &descriptor) const = 0;
   /// Returns a value indicating whether or not loader wants to load multiple

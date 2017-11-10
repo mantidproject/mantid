@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
@@ -16,6 +17,8 @@ namespace Geometry {
 using Kernel::DblMatrix;
 using Kernel::V3D;
 using Kernel::Quat;
+
+Mantid::Kernel::Logger g_log("Goniometer");
 
 void GoniometerAxis::saveNexus(::NeXus::File *file,
                                const std::string &group) const {
@@ -100,7 +103,7 @@ std::string Goniometer::axesInfo() {
                            ? ((*it).angle)
                            : ((*it).angle * rad2deg);
         info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense
-             << "\t" << angle << std::endl;
+             << "\t" << angle << '\n';
       }
     }
     return info.str();
@@ -122,10 +125,19 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
+    if (!std::isfinite(axisx) || !std::isfinite(axisy) ||
+        !std::isfinite(axisz) || !std::isfinite(angle)) {
+      g_log.warning() << "NaN encountered while trying to push axis to "
+                         "goniometer, Operation aborted"
+                      << "\naxis name" << name << "\naxisx" << axisx
+                      << "\naxisy" << axisx << "\naxisz" << axisz << "\nangle"
+                      << angle;
+      return;
+    }
     std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
     for (it = motors.begin(); it < motors.end(); ++it) {
-      if (name.compare((*it).name) == 0)
+      if (name == it->name)
         throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
@@ -142,8 +154,8 @@ void Goniometer::setRotationAngle(std::string name, double value) {
   bool changed = false;
   std::vector<GoniometerAxis>::iterator it;
   for (it = motors.begin(); it < motors.end(); ++it) {
-    if (name.compare((*it).name) == 0) {
-      (*it).angle = value;
+    if (name == it->name) {
+      it->angle = value;
       changed = true;
     }
   }
@@ -177,7 +189,7 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 /// @param axisname :: axis name
 const GoniometerAxis &Goniometer::getAxis(std::string axisname) const {
   for (auto it = motors.begin(); it < motors.end(); ++it) {
-    if (axisname.compare((*it).name) == 0) {
+    if (axisname == it->name) {
       return (*it);
     }
   }
@@ -236,7 +248,7 @@ void Goniometer::recalculateR() {
  */
 void Goniometer::saveNexus(::NeXus::File *file,
                            const std::string &group) const {
-  file->makeGroup(group, "NXpositioner", 1);
+  file->makeGroup(group, "NXpositioner", true);
   file->putAttr("version", 1);
   // Because the order of the axes is very important, they have to be written
   // and read out in the same order

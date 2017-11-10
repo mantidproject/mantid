@@ -3,14 +3,15 @@
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
-class ReflectometryISIS(stresstesting.MantidStressTest):
 
-    __metaclass__ = ABCMeta # Mark as an abstract class
+class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     @abstractmethod
     def get_workspace_name(self):
@@ -65,11 +66,11 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
 
         # MD transformations
         QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
+                                                       OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
         KiKf, _KiKF_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
+                                                       OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
         PiPf, _PiPf_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
+                                                       OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
 
         # Bin the outputs to histograms because observations are not important.
         BinMD(InputWorkspace=QxQy, AxisAligned='0',BasisVector0='Qx,(Ang^-1),1,0',BasisVector1='Qz,(Ang^-1),0,1',
@@ -100,6 +101,8 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
         return True
 
 # Specialisation for testing POLREF
+
+
 class POLREF_ReflectometryISIS(ReflectometryISIS):
     def get_workspace_name(self):
         return "POLREF4699"

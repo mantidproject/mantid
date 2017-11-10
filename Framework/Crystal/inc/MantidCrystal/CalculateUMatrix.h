@@ -36,9 +36,6 @@ namespace Crystal {
 */
 class DLLExport CalculateUMatrix : public API::Algorithm {
 public:
-  CalculateUMatrix();
-  ~CalculateUMatrix() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CalculateUMatrix"; };
   /// Summary of algorithms purpose

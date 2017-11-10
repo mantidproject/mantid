@@ -1,4 +1,6 @@
-#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+
+# pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
@@ -9,10 +11,12 @@ import sys
 
 # Check whether Mantid is available
 try:
-    import mantidplot
+    import mantidplot  # noqa
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False
+
 
 class REFLSFCalculatorScripter(BaseReductionScripter):
     """
@@ -31,7 +35,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         algo = 'sfCalculator.calculate'
 
         script_split = script_part2.split('\n')
-        new_script = ''
 
         run_number = []
         attenuator = []
@@ -41,14 +44,11 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         back_from = []
         back_to = []
 
-        tof_range = [0.0,200000.0]
+        tof_range = [0.0, 200000.0]
         incident_medium = ''
         incident_medium_index = -1
 
         scaling_factor_file = ''
-
-#        print 'in create_script'
-#        print script_split
 
         for _line in script_split:
             if _line != '':
@@ -56,69 +56,49 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                 _arg = _line_split[0]
                 _val = _line_split[1]
 
-                if _arg == 'Scaling factor file':
-                    if scaling_factor_file == '':
-                        scaling_factor_file = _val.strip()
+                if _arg == 'Scaling factor file' and scaling_factor_file == '':
+                    scaling_factor_file = _val.strip()
 
-                if _arg == 'Run number':
+                elif _arg == 'Run number':
                     run_number.append(_val)
-                    continue
 
-                if _arg == 'TOF from':
-                    if tof_range[0] == 0.0:
-                        tof_range[0] = float(_val)
-                    continue
+                elif _arg == 'TOF from' and tof_range[0] == 0.0:
+                    tof_range[0] = float(_val)
 
-                if _arg == 'TOF to':
-                    if tof_range[1] == 200000.0:
-                        tof_range[1] = float(_val)
-                    continue
+                elif _arg == 'TOF to' and tof_range[1] == 200000.0:
+                    tof_range[1] = float(_val)
 
-                if _arg == 'Incident medium':
+                elif _arg == 'Incident medium' and incident_medium.strip() == '':
+                    incident_medium = _val[4:-3]
 
-                    _val=_val[4:-3]
-                    if incident_medium.strip() == '':
-                        incident_medium = _val
-                    continue
+                elif _arg == 'Incident medium index' and incident_medium_index == -1:
+                    incident_medium_index = int(_val)
 
-                if _arg == 'Incident medium index':
-                    if incident_medium_index == -1:
-                        incident_medium_index = int(_val)
-
-                if _arg == 'Number of attenuator':
+                elif _arg == 'Number of attenuator':
                     attenuator.append(_val)
-                    continue
 
-                if _arg == 'Peak from pixel':
+                elif _arg == 'Peak from pixel':
                     peak_from.append(_val)
-                    continue
 
-                if _arg == 'Peak to pixel':
+                elif _arg == 'Peak to pixel':
                     peak_to.append(_val)
-                    continue
 
-                if _arg == 'Back from pixel':
+                elif _arg == 'Back from pixel':
                     back_from.append(_val)
-                    continue
 
-                if _arg == 'Back to pixel':
+                elif _arg == 'Back to pixel':
                     back_to.append(_val)
-                    continue
 
-        run_attenuator = []
-        for (run,att) in zip(run_number, attenuator):
-            run_attenuator.append(run.strip() + ':' + att.strip())
+        run_attenuator = [run.strip() + ":" + att.strip() for (run, att) in zip(run_number, attenuator)]
         join_string = ','
         script_run_attenuator = join_string.join(run_attenuator)
 
-        list_peak_back = []
-        for (_peak_from, _peak_to, _back_from, _back_to) in zip(peak_from, peak_to, back_from, back_to):
-            list_peak_back.append([int(_peak_from),int(_peak_to),int(_back_from),int(_back_to)])
+        list_peak_back = [[int(pixel) for pixel in line] for line in zip(peak_from, peak_to, back_from, back_to)]
 
         new_script = algo + '(string_runs="' + script_run_attenuator + '"'
         new_script += ',list_peak_back=' + str(list_peak_back)
 
-        #retrieve right incident medium
+        # retrieve right incident medium
 
         incident_medium_list = incident_medium.split(',')
         incident_medium = incident_medium_list[incident_medium_index]
@@ -155,7 +135,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
         _script = self.create_script(script_part2)
         if _script == '':
-            print 'Please define a Scaling Factor File Name'
+            print('Please define a Scaling Factor File Name')
             raise RuntimeError
 
         script += _script
@@ -174,14 +154,13 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
 
-            print script
+            print(script)
 
             try:
                 t0 = time.time()
-                exec script
-                delta_t = time.time()-t0
-                print REF_RED_OUTPUT_MESSAGE
-                print "SF calculation time: %5.2g sec" % delta_t
+                exec (script)
+                delta_t = time.time() - t0
+                print("SF calculation time: %5.2g sec" % delta_t)
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
@@ -195,8 +174,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                             item.state().update()
                         except:
                             pass
-                raise RuntimeError, sys.exc_value
+                raise RuntimeError(sys.exc_info()[1])
         else:
-            raise RuntimeError, "SF calculation could not be executed: Mantid could not be imported"
-
-
+            raise RuntimeError("SF calculation could not be executed: Mantid could not be imported")

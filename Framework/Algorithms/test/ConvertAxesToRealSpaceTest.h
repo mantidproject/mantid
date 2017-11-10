@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::ConvertAxesToRealSpace;
 using namespace Mantid::API;

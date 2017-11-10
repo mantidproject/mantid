@@ -1,9 +1,8 @@
 #ifndef DATAHANDLING_FIND_DETPAR_H_
 #define DATAHANDLING_FIND_DETPAR_H_
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+
 #include <fstream>
+#include <float.h>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
@@ -139,9 +138,6 @@ class DetParameters;
 
 class DLLExport FindDetectorsPar : public API::Algorithm {
 public:
-  FindDetectorsPar();
-  ~FindDetectorsPar() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose
@@ -177,10 +173,10 @@ private:
   /**  the variable defines if algorithm needs to calculate linear ranges for
    * the detectors (dX,dY)
    *    instead of azimuthal_width and polar_width */
-  bool m_SizesAreLinear;
+  bool m_SizesAreLinear = false;
 
   // numner of real(valid and non-monitor) detectors calculated by the alvorithm
-  size_t m_nDetectors;
+  size_t m_nDetectors = 0;
   // the vectors which represent detector's parameters as linear structure
   std::vector<double> azimuthal;
   std::vector<double> polar;
@@ -190,8 +186,8 @@ private:
   std::vector<size_t> detID;
 
   // calculate generic detectors parameters:
-  void calcDetPar(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &Observer, DetParameters &Detector);
+  void calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer,
+                  DetParameters &Detector);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -267,8 +263,7 @@ public:
         m_PolarBase(0), m_useSphericalSizes(false), m_AzimMin(FLT_MAX),
         m_PolarMin(FLT_MAX), m_AzimMax(-FLT_MAX), m_PolarMax(-FLT_MAX),
         m_nComponents(0) {}
-  void addDetInfo(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &Observer);
+  void addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &avrgDet);
 
   void setUseSpherical(bool shouldWe = true) { m_useSphericalSizes = shouldWe; }

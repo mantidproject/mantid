@@ -4,6 +4,7 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -15,8 +16,8 @@ def getBooleanElement(instrument_dom, keyname, default):
     (1) True/False
     (2) 1/0
     """
-    tempbool = BaseScriptElement.getStringElement(instrument_dom,\
-            keyname, default=default)
+    tempbool = BaseScriptElement.getStringElement(instrument_dom,
+                                                  keyname, default=default)
 
     if tempbool == "True":
         tempbool = 1
@@ -25,15 +26,17 @@ def getBooleanElement(instrument_dom, keyname, default):
 
     return bool(int(tempbool))
 
+
 def getFloatElement(instrument_dom, keyname, default):
     """Get a float from the xml document. Conversion errors
     return the default value.
     """
     try:
-        return BaseScriptElement.getFloatElement(instrument_dom,\
-                               keyname, default=default)
+        return BaseScriptElement.getFloatElement(instrument_dom,
+                                                 keyname, default=default)
     except ValueError:
         return default
+
 
 class AdvancedSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
@@ -88,7 +91,6 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("FilterBadPulses")
         self.parnamelist.append("BackgroundSmoothParams")
         self.parnamelist.append("PushDataPositive")
-        self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("OutputFilePrefix")
         self.parnamelist.append("ScaleData")
@@ -119,7 +121,6 @@ class AdvancedSetupScript(BaseScriptElement):
 
         return script
 
-
     def buildParameterDict(self):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
         """
@@ -138,7 +139,6 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
         pardict["VanadiumPeakTol"] = self.vanadiumpeaktol
         pardict["VanadiumSmoothParams"] = self.vanadiumsmoothparams
-        pardict["Extension"] = str(self.extension)
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
         pardict["ScaleData"] = self.scaledata
@@ -198,15 +198,14 @@ class AdvancedSetupScript(BaseScriptElement):
                                                    'filterbadpulses',
                                                    AdvancedSetupScript.filterbadpulses)
 
-            self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,\
-                "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
+            self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
+                                                                     "backgroundsmoothparams", default=AdvancedSetupScript.bkgdsmoothpars)
 
+            self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
+                                                                       "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
 
-            self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,\
-                    "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
-
-            self.stripvanadiumpeaks = getBooleanElement(instrument_dom,\
-                    "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
+            self.stripvanadiumpeaks = getBooleanElement(instrument_dom,
+                                                        "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
             self.vanadiumfwhm = getFloatElement(instrument_dom, "vanadiumfwhm",
                                                 AdvancedSetupScript.vanadiumfwhm)
@@ -214,17 +213,18 @@ class AdvancedSetupScript(BaseScriptElement):
             self.vanadiumpeaktol = getFloatElement(instrument_dom, "vanadiumpeaktol",
                                                    AdvancedSetupScript.vanadiumpeaktol)
 
-            self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,\
-                "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
+            self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
+                                                                           "vanadiumsmoothparams",
+                                                                           default=AdvancedSetupScript.vanadiumsmoothparams)
 
-            self.extension = BaseScriptElement.getStringElement(instrument_dom,\
-                    "extension", default=AdvancedSetupScript.extension)
+            self.extension = BaseScriptElement.getStringElement(instrument_dom,
+                                                                "extension", default=AdvancedSetupScript.extension)
 
             self.preserveevents = getBooleanElement(instrument_dom, "preserveevents",
                                                     default=AdvancedSetupScript.preserveevents)
 
-            self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,\
-                    "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
+            self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,
+                                                                       "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
 
             self.scaledata = getFloatElement(instrument_dom, "scaledata",
                                              AdvancedSetupScript.scaledata)
@@ -253,4 +253,3 @@ class AdvancedSetupScript(BaseScriptElement):
         self.scaledata              = AdvancedSetupScript.scaledata
 
         return
-

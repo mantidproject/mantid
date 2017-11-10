@@ -44,10 +44,6 @@ namespace DataHandling {
 */
 class DLLExport LoadSampleDetailsFromRaw : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  LoadSampleDetailsFromRaw() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~LoadSampleDetailsFromRaw() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadSampleDetailsFromRaw"; }
   /// Summary of algorithms purpose

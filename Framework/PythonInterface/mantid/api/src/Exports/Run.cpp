@@ -1,16 +1,22 @@
 #include "MantidAPI/Run.h"
-#include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/overloads.hpp>
-#include <boost/python/list.hpp>
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <boost/python/copy_const_reference.hpp>
-
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
+#include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+
 using Mantid::API::Run;
+using Mantid::Geometry::Goniometer;
 using Mantid::Kernel::Property;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Goniometer)
+GET_POINTER_SPECIALIZATION(Run)
 
 namespace {
 namespace bpl = boost::python;
@@ -41,7 +47,7 @@ void addPropertyWithUnit(Run &self, const std::string &name,
       Mantid::PythonInterface::Registry::PropertyWithValueFactory::create(
           name, value, Mantid::Kernel::Direction::Input);
   property->setUnits(units);
-  self.addProperty(property, replace);
+  self.addProperty(std::move(property), replace);
 }
 
 /**
@@ -114,8 +120,12 @@ bpl::list keys(Run &self) {
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
                                        integrateProtonCharge, 0, 1)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -189,10 +199,11 @@ void export_Run() {
       //--------------------------- Dictionary
       // access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
-           "Returns the value pointed to by the key or "
-           "None if it does not exist")
+           "Returns the value pointed to by the key or the default value "
+           "given.")
       .def("get", &get, (arg("self"), arg("key")),
-           "Returns the value pointed to by the key or the default value given")
+           "Returns the value pointed to by the key or "
+           "None if it does not exist.")
       .def("keys", &keys, arg("self"),
            "Returns the names of the properties as list")
       .def("__contains__", &Run::hasProperty, (arg("self"), arg("name")))

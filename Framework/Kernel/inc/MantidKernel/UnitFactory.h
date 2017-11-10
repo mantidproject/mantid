@@ -83,14 +83,9 @@ private:
   ~UnitFactoryImpl() override = default;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) .
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_KERNEL_DLL
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
-#endif /* _WIN32 */
-/// The specialisation of the SingletonHolder class that holds the UnitFactory
+
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
 
 } // namespace Kernel

@@ -15,8 +15,8 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
@@ -25,6 +25,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
 
 namespace Mantid {
 namespace DataHandling {
@@ -111,10 +114,10 @@ void LoadPreNexusMonitors::exec() {
       ++nMonitors;
 
       Poco::XML::Element *pE = static_cast<Poco::XML::Element *>(pNode);
-      g_log.debug() << "Beam Monitor " << pE->getAttribute("id") << std::endl;
-      g_log.debug() << "\tname: " << pE->getAttribute("name") << std::endl;
+      g_log.debug() << "Beam Monitor " << pE->getAttribute("id") << '\n';
+      g_log.debug() << "\tname: " << pE->getAttribute("name") << '\n';
       g_log.debug() << "\tdescription: " << pE->getAttribute("description")
-                    << std::endl;
+                    << '\n';
 
       // Now lets get the tof binning settings
       Poco::XML::Element *pTimeChannels =
@@ -161,10 +164,9 @@ void LoadPreNexusMonitors::exec() {
     pNode = it.nextNode();
   }
 
-  g_log.information() << "Found " << nMonitors << " beam monitors."
-                      << std::endl;
+  g_log.information() << "Found " << nMonitors << " beam monitors.\n";
 
-  g_log.information() << "Number of Time Channels = " << tchannels << std::endl;
+  g_log.information() << "Number of Time Channels = " << tchannels << '\n';
 
   // Now lets create the time of flight array.
   const int numberTimeBins = tchannels + 1;
@@ -177,34 +179,28 @@ void LoadPreNexusMonitors::exec() {
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nMonitors, numberTimeBins, tchannels);
 
+  BinEdges edges(time_bins);
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
 
     g_log.debug() << "Loading monitor file :" << pMonitorFilename.toString()
-                  << std::endl;
+                  << '\n';
 
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
     // temp buffer for file reading
     std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 
-    MantidVec intensity(buffer.begin(), buffer.end());
-    // Copy the same data into the error array
-    MantidVec error(buffer.begin(), buffer.end());
-    // Now take the sqrt()
-    std::transform(error.begin(), error.end(), error.begin(),
-                   static_cast<double (*)(double)>(sqrt));
+    localWorkspace->setHistogram(i, edges,
+                                 Counts(buffer.begin(), buffer.end()));
 
-    localWorkspace->dataX(i) = time_bins;
-    localWorkspace->dataY(i) = intensity;
-    localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    ISpectrum *spectrum = localWorkspace->getSpectrum(i);
-    spectrum->setSpectrumNo(monitorIDs[i]);
-    spectrum->setDetectorID(-monitorIDs[i]);
+    auto &spectrum = localWorkspace->getSpectrum(i);
+    spectrum.setSpectrumNo(monitorIDs[i]);
+    spectrum.setDetectorID(-monitorIDs[i]);
   }
 
-  g_log.debug() << "Setting axis zero to TOF" << std::endl;
+  g_log.debug() << "Setting axis zero to TOF\n";
 
   // Set the units
   localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -244,12 +240,12 @@ void LoadPreNexusMonitors::runLoadInstrument(
   } catch (std::invalid_argument &e) {
     g_log.information()
         << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
+        << '\n';
     executionSuccessful = false;
   } catch (std::runtime_error &e) {
     g_log.information()
         << "Unable to successfully run LoadInstrument Child Algorithm : "
-        << e.what() << std::endl;
+        << e.what() << '\n';
     executionSuccessful = false;
   }
 

@@ -182,7 +182,6 @@ void RotaryCounter::write(std::ostream &OX) const
   OX << " ";
   copy(RC.begin(), RC.end() - 1, std::ostream_iterator<int>(OX, ":"));
   OX << RC.back() << " ";
-  return;
 }
 }
 }

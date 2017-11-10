@@ -1,7 +1,9 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
 
 class LRSubtractAverageBackground(PythonAlgorithm):
 
@@ -120,5 +122,6 @@ class LRSubtractAverageBackground(PythonAlgorithm):
             AnalysisDataService.remove(average_name)
 
         self.setProperty('OutputWorkspace', workspace)
+
 
 AlgorithmFactory.subscribe(LRSubtractAverageBackground)

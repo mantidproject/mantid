@@ -1,28 +1,20 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Geometry;
 using namespace API;
 using Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ClearMaskFlag)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearMaskFlag::ClearMaskFlag() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearMaskFlag::~ClearMaskFlag() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearMaskFlag::name() const { return "ClearMaskFlag"; }
 
@@ -34,24 +26,35 @@ const std::string ClearMaskFlag::category() const {
   return "Transforms\\Masking";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ClearMaskFlag::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
                                                            Direction::InOut),
                   "Workspace to clear the mask flag of.");
+  declareProperty("ComponentName", "",
+                  "Specify the instrument component to clear the "
+                  "mask. If empty clears the mask flag for "
+                  "the whole instrument.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ClearMaskFlag::exec() {
   MatrixWorkspace_sptr ws = getProperty("Workspace");
+  std::string componentName = getPropertyValue("ComponentName");
+  auto &detectorInfo = ws->mutableDetectorInfo();
 
-  // Clear the mask flags
-  Geometry::ParameterMap &pmap = ws->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  if (!componentName.empty()) {
+    std::vector<IDetector_const_sptr> detectors;
+    ws->getInstrument()->getDetectorsInBank(detectors, componentName);
+    for (const auto &det : detectors) {
+      auto index = detectorInfo.indexOf(det->getID());
+      detectorInfo.setMasked(index, false);
+    }
+  } else {
+    detectorInfo.clearMaskFlags();
+  }
 }
 
 } // namespace Algorithms

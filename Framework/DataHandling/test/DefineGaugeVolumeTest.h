@@ -4,7 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/DefineGaugeVolume.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::API;

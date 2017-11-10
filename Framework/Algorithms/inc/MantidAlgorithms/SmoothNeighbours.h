@@ -82,8 +82,6 @@ class DLLExport SmoothNeighbours : public API::Algorithm {
 public:
   /// Default constructor
   SmoothNeighbours();
-  /// Destructor
-  ~SmoothNeighbours() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SmoothNeighbours"; }
   /// Summary of algorithms purpose
@@ -157,7 +155,7 @@ private:
   std::vector<std::vector<weightedNeighbour>> m_neighbours;
 
   /// Progress reporter
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithm

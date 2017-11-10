@@ -1,4 +1,7 @@
 #include "MantidKernel/BinFinder.h"
+#include <cmath>
+#include <cstddef>
+#include <stdexcept>
 
 using std::size_t;
 
@@ -98,7 +101,7 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
  */
 int BinFinder::lastBinIndex() {
   if (!endBinIndex.empty())
-    return endBinIndex[endBinIndex.size() - 1];
+    return endBinIndex.back();
   else
     return -1;
 }

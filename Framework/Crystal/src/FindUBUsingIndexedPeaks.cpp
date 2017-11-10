@@ -4,6 +4,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -15,17 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingIndexedPeaks::FindUBUsingIndexedPeaks() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingIndexedPeaks::~FindUBUsingIndexedPeaks() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
@@ -38,7 +28,6 @@ void FindUBUsingIndexedPeaks::init() {
                         "Indexing Tolerance (0.1)");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindUBUsingIndexedPeaks::exec() {

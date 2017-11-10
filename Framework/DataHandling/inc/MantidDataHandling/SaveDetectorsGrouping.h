@@ -35,8 +35,6 @@ namespace DataHandling {
 */
 class DLLExport SaveDetectorsGrouping : public API::Algorithm {
 public:
-  SaveDetectorsGrouping();
-  ~SaveDetectorsGrouping() override;
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDetectorsGrouping"; };
   /// Summary of algorithms purpose

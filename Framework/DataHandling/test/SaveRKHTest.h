@@ -2,17 +2,17 @@
 #define SAVERKHTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <fstream>
+#include <numeric>
 #include <Poco/File.h>
 using namespace Mantid::API;
-
-namespace {
-const size_t nSpec = 1;
-const size_t nBins = 10;
-}
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::PointStandardDeviations;
 
 class SaveRKHTest : public CxxTest::TestSuite {
 public:
@@ -45,8 +45,8 @@ public:
     TS_ASSERT_THROWS(testAlgorithm1.execute(), std::runtime_error);
     // Need a test workspace to use as input
     MatrixWorkspace_sptr inputWS1 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
-    inputWS1->isDistribution(true);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
+    inputWS1->setDistribution(true);
 
     // Register workspace
     AnalysisDataService::Instance().add("testInputOne", inputWS1);
@@ -114,8 +114,8 @@ public:
 
     using namespace Mantid::API;
     MatrixWorkspace_sptr inputWS2 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 1, 0.0);
-    inputWS2->isDistribution(true);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 1, 0.0);
+    inputWS2->setDistribution(true);
     // Register workspace
     AnalysisDataService::Instance().add("testInputTwo", inputWS2);
 
@@ -184,7 +184,7 @@ public:
     TS_ASSERT_THROWS(testAlgorithm3.execute(), std::runtime_error);
     // Need a test workspace to use as input
     auto inputWS3 = createInputWorkspaceHistoWithXerror();
-    inputWS3->isDistribution(false);
+    inputWS3->setDistribution(false);
 
     // Register workspace
     AnalysisDataService::Instance().add("testInputThree", inputWS3);
@@ -219,9 +219,9 @@ public:
 
     // Test values
     TSM_ASSERT_DELTA("Expecting mean of 0 and 1", x, 0.5, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", err, 1.0, 1e-06);
-    TSM_ASSERT_DELTA("Expecting mean of sqrt(0) and sqrt(1)", dx, 0.5, 1e-06);
+    TS_ASSERT_DELTA(y, 1.0, 1e-08);
+    TS_ASSERT_DELTA(err, 1.0, 1e-06);
+    TS_ASSERT_DELTA(dx, 0.1, 1e-06);
 
     // We are at the first data entry now. We step over
     // Three more entries
@@ -240,10 +240,9 @@ public:
 
     // Test values
     TSM_ASSERT_DELTA("Expecting mean of 3 and 4", x, 3.5, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", err, 1.0, 1e-06);
-    TSM_ASSERT_DELTA("Expecting mean of sqrt(3) and sqrt(4)", dx,
-                     (sqrt(3) + sqrt(4)) / 2, 1e-06);
+    TS_ASSERT_DELTA(y, 1.0, 1e-08);
+    TS_ASSERT_DELTA(err, 1.0, 1e-06);
+    TS_ASSERT_DELTA(dx, 3.1, 1e-06);
 
     file.close();
   }
@@ -256,23 +255,17 @@ private:
   std::string outputFile;
 
   /// Provides a workpace with a x error value
-  MatrixWorkspace_sptr
-  createInputWorkspaceHistoWithXerror(std::string type = "histo") const {
-    size_t x_length = 0;
-    size_t y_length = nBins;
-    if (type == "histo") {
-      x_length = nBins + 1;
-    } else {
-      x_length = nBins;
-    }
-    // Set up a small workspace for testing
+  MatrixWorkspace_sptr createInputWorkspaceHistoWithXerror() const {
+    size_t nSpec = 1;
+    const size_t x_length = 11;
+    const size_t y_length = x_length - 1;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, x_length, y_length);
+    BinEdges x(x_length, LinearGenerator(0.0, 1.0));
+    PointStandardDeviations dx(y_length, LinearGenerator(0.1, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k < x_length; ++k) {
-        ws->dataX(j)[k] = double(k);
-        ws->dataDx(j)[k] = sqrt(double(k));
-      }
+      ws->setBinEdges(j, x);
+      ws->setPointStandardDeviations(j, dx);
       ws->dataY(j).assign(y_length, double(1));
       ws->dataE(j).assign(y_length, double(1));
     }

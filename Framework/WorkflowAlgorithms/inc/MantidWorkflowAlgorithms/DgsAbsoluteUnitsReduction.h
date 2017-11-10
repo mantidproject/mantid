@@ -35,8 +35,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport DgsAbsoluteUnitsReduction : public API::Algorithm {
 public:
-  DgsAbsoluteUnitsReduction();
-  ~DgsAbsoluteUnitsReduction() override;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

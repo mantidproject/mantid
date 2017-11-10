@@ -13,8 +13,10 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include <cmath>
+#include <iostream>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDHistoToWorkspace2D)
@@ -24,6 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -44,16 +48,18 @@ void MDHistoToWorkspace2D::exec() {
 
   m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
-  std::cout << "nSpectra = " << nSpectra << std::endl;
+  std::cout << "nSpectra = " << nSpectra << '\n';
 
   boost::shared_ptr<const IMDDimension> lastDim =
       inWS->getDimension(m_rank - 1);
-  std::cout << "spectraLength = " << lastDim->getNBins() << std::endl;
+  std::cout << "spectraLength = " << lastDim->getNBins() << '\n';
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
   outWS = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create(
           "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
+  for (size_t i = 0; i < nSpectra; ++i)
+    outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outWS->setYUnit("Counts");
 
   coord_t *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
@@ -81,24 +87,24 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
                                        size_t currentDim, coord_t *pos) {
   boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(currentDim);
   if (currentDim == m_rank - 1) {
-    MantidVec &Y = outWS->dataY(m_currentSpectra);
+    Counts counts(dim->getNBins());
+    auto &Y = counts.mutableData();
+
     for (unsigned int j = 0; j < dim->getNBins(); j++) {
       pos[currentDim] = dim->getX(j);
       Y[j] = inWS->getSignalAtCoord(
           pos, static_cast<Mantid::API::MDNormalization>(0));
     }
-    MantidVec &E = outWS->dataE(m_currentSpectra);
-    // MSVC compiler can't figure out the correct overload with out the function
-    // cast on sqrt
-    std::transform(Y.begin(), Y.end(), E.begin(),
-                   (double (*)(double))std::sqrt);
-    std::vector<double> xData;
+
+    Points points(dim->getNBins());
+    auto &xData = points.mutableData();
     for (unsigned int i = 0; i < dim->getNBins(); i++) {
-      xData.push_back(dim->getX(i));
+      xData[i] = dim->getX(i);
     }
-    outWS->setX(m_currentSpectra, xData);
+
+    outWS->setHistogram(m_currentSpectra, std::move(points), std::move(counts));
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
+        .setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper
@@ -113,15 +119,14 @@ void MDHistoToWorkspace2D::checkW2D(
     Mantid::DataObjects::Workspace2D_sptr outWS) {
   size_t nSpectra = outWS->getNumberHistograms();
   size_t length = outWS->blocksize();
-  MantidVec x, y, e;
 
   g_log.information() << "W2D has " << nSpectra << " histograms of length "
                       << length;
   for (size_t i = 0; i < nSpectra; i++) {
-    ISpectrum *spec = outWS->getSpectrum(i);
-    x = spec->dataX();
-    y = spec->dataY();
-    e = spec->dataE();
+    auto &spec = outWS->getSpectrum(i);
+    auto &x = spec.x();
+    auto &y = spec.y();
+    auto &e = spec.e();
     if (x.size() != length) {
       g_log.information() << "Spectrum " << i << " x-size mismatch, is "
                           << x.size() << " should be " << length << "\n";

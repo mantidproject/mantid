@@ -27,6 +27,8 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -37,6 +39,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::Constraints;
+using namespace Mantid::HistogramData;
 
 using namespace std;
 
@@ -51,12 +54,9 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
  */
 RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
     : m_BestGSLChi2(0.0), m_MinSigma(0.0), m_MinNumFittedPeaks(0),
-      m_MaxNumberStoredParameters(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RefinePowderInstrumentParameters::~RefinePowderInstrumentParameters() {}
+      m_MaxNumberStoredParameters(0) {
+  this->useAlgorithm("RefinePowderInstrumentParameters", 3);
+}
 
 //----------------------------------------------------------------------------------------------
 /** Parameter declaration
@@ -131,8 +131,6 @@ void RefinePowderInstrumentParameters::init() {
 
   declareProperty("MonteCarloRandomSeed", 0,
                   "Random seed for Monte Carlo simulation. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -152,7 +150,7 @@ void RefinePowderInstrumentParameters::exec() {
   int tempint = getProperty("MinNumberFittedPeaks");
   if (tempint <= 1) {
     g_log.error() << "Input MinNumberFittedPeaks = " << tempint
-                  << " is too small. " << endl;
+                  << " is too small. \n";
     throw std::invalid_argument("Input MinNumberFittedPeaks is too small.");
   }
   m_MinNumFittedPeaks = static_cast<size_t>(tempint);
@@ -164,9 +162,9 @@ void RefinePowderInstrumentParameters::exec() {
   m_MaxNumberStoredParameters = static_cast<size_t>(tempint);
 
   string algoption = getProperty("RefinementAlgorithm");
-  if (algoption.compare("DirectFit") == 0)
+  if (algoption == "DirectFit")
     refinealgorithm = DirectFit;
-  else if (algoption.compare("MonteCarlo") == 0)
+  else if (algoption == "MonteCarlo")
     refinealgorithm = MonteCarlo;
   else
     throw runtime_error("RefinementAlgorithm other than DirectFit and "
@@ -216,8 +214,6 @@ void RefinePowderInstrumentParameters::exec() {
   DataObjects::TableWorkspace_sptr fitparamws =
       genOutputInstrumentParameterTable();
   this->setProperty("OutputInstrumentParameterWorkspace", fitparamws);
-
-  return;
 }
 
 //------- Related to Fitting Instrument Geometry Function  -------------------
@@ -225,18 +221,16 @@ void RefinePowderInstrumentParameters::exec() {
 /** Fit instrument parameters.  It is a straight forward fitting to
  */
 void RefinePowderInstrumentParameters::fitInstrumentParameters() {
-  cout << "=========== Method [FitInstrumentParameters] ==============="
-       << endl;
+  cout << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_Function->initialize();
 
-  API::FunctionDomain1DVector domain(m_dataWS->readX(1));
+  API::FunctionDomain1DVector domain(m_dataWS->x(1).rawData());
   API::FunctionValues values(domain);
-  const MantidVec &rawY = m_dataWS->readY(0);
-  const MantidVec &rawE = m_dataWS->readE(0);
+  const auto &rawY = m_dataWS->y(0);
+  const auto &rawE = m_dataWS->e(0);
 
   // 2. Set up parameters values
   std::vector<std::string> funparamnames = m_Function->getParameterNames();
@@ -245,7 +239,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   std::sort(paramtofit.begin(), paramtofit.end());
 
   stringstream msgss;
-  msgss << "Set Instrument Function Parameter : " << endl;
+  msgss << "Set Instrument Function Parameter : \n";
   std::map<std::string, double>::iterator paramiter;
   for (const auto &parname : funparamnames) {
     paramiter = m_FuncParameters.find(parname);
@@ -256,7 +250,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
     double parvalue = paramiter->second;
     m_Function->setParameter(parname, parvalue);
-    msgss << setw(10) << parname << " = " << parvalue << endl;
+    msgss << setw(10) << parname << " = " << parvalue << '\n';
   }
   cout << msgss.str();
 
@@ -265,7 +259,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   double homchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
   cout << "Fit Starting Value:  Chi^2 (GSL) = " << gslchi2
-       << ",  Chi2^2 (Home) = " << homchi2 << endl;
+       << ",  Chi2^2 (Home) = " << homchi2 << '\n';
 
   // 3. Fix parameters that are not listed in parameter-to-fit.  Unfix the rest
   size_t numparams = funparamnames.size();
@@ -286,18 +280,17 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   if (paramtofit.size() > 1) {
     minimizer = "Simplex";
   }
-  g_log.information() << "Fit use minizer: " << minimizer << endl;
+  g_log.information() << "Fit use minizer: " << minimizer << '\n';
 
   // 5. Create and setup fit algorithm
   g_log.information() << "Fit instrument geometry: " << m_Function->asString()
-                      << std::endl;
+                      << '\n';
 
   stringstream outss;
-  for (size_t i = 0; i < m_dataWS->readX(0).size(); ++i)
-    outss << m_dataWS->readX(0)[i] << "\t\t" << m_dataWS->readY(0)[i] << "\t\t"
-          << m_dataWS->readE(0)[i] << endl;
-  cout << "Input Peak Position Workspace To Fit: " << endl
-       << outss.str() << endl;
+  for (size_t i = 0; i < m_dataWS->x(0).size(); ++i)
+    outss << m_dataWS->x(0)[i] << "\t\t" << m_dataWS->y(0)[i] << "\t\t"
+          << m_dataWS->e(0)[i] << '\n';
+  cout << "Input Peak Position Workspace To Fit: \n" << outss.str() << '\n';
 
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -313,8 +306,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. "
-                  << std::endl;
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -322,7 +314,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
   cout << "Fit Result (GSL):  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << std::endl;
+       << "; Fit Status = " << fitstatus << '\n';
 
   API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
 
@@ -330,13 +322,13 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   m_Function->function(domain, values);
 
   for (size_t i = 0; i < domain.size(); ++i) {
-    m_dataWS->dataY(1)[i] = values[i];
-    m_dataWS->dataY(2)[i] = m_dataWS->readY(0)[i] - values[i];
+    m_dataWS->mutableY(1)[i] = values[i];
+    m_dataWS->mutableY(2)[i] = m_dataWS->y(0)[i] - values[i];
   }
 
   double selfchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
-  cout << "Homemade Chi^2 = " << selfchi2 << endl;
+  cout << "Homemade Chi^2 = " << selfchi2 << '\n';
 
   // 5. Update fitted parameters
   for (const auto &parname : funparamnames) {
@@ -346,7 +338,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
   // 6. Pretty screen output
   stringstream dbss;
-  dbss << "************ Fit Parameter Result *************" << std::endl;
+  dbss << "************ Fit Parameter Result *************\n";
   for (paramiter = m_FuncParameters.begin();
        paramiter != m_FuncParameters.end(); ++paramiter) {
     std::string parname = paramiter->first;
@@ -354,33 +346,30 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     double parvalue = paramiter->second;
     dbss << setw(20) << parname << " = " << setw(15) << setprecision(6)
          << parvalue << "\t\tFrom " << setw(15) << setprecision(6)
-         << inpparvalue << "\t\tDiff = " << inpparvalue - parvalue << endl;
+         << inpparvalue << "\t\tDiff = " << inpparvalue - parvalue << '\n';
   }
-  dbss << "*********************************************" << std::endl;
+  dbss << "*********************************************\n";
   cout << dbss.str();
 
   // 7. Play with Zscore:     template<typename TYPE>
   //    std::vector<double> getZscore(const std::vector<TYPE>& data, const bool
   //    sorted=false);
-  vector<double> z0 = Kernel::getZscore(m_dataWS->readY(0));
-  vector<double> z1 = Kernel::getZscore(m_dataWS->readY(1));
-  vector<double> z2 = Kernel::getZscore(m_dataWS->readY(2));
+  vector<double> z0 = Kernel::getZscore(m_dataWS->y(0).rawData());
+  vector<double> z1 = Kernel::getZscore(m_dataWS->y(1).rawData());
+  vector<double> z2 = Kernel::getZscore(m_dataWS->y(2).rawData());
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY"
-      << setw(20) << "Z DiffY" << setw(20) << "DiffY" << endl;
+      << setw(20) << "Z DiffY" << setw(20) << "DiffY\n";
   for (size_t i = 0; i < z0.size(); ++i) {
-    double d_h = m_dataWS->readX(0)[i];
+    double d_h = m_dataWS->x(0)[i];
     double zdatay = z0[i];
     double zmodely = z1[i];
     double zdiffy = z2[i];
-    double diffy = m_dataWS->readY(2)[i];
+    double diffy = m_dataWS->y(2)[i];
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
-        << setw(20) << zdiffy << setw(20) << diffy << endl;
+        << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
-  cout << "Zscore Survey: " << endl
-       << zss.str();
-
-  return;
+  cout << "Zscore Survey: \b" << zss.str();
 }
 
 /** Fit function to data
@@ -401,8 +390,7 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. "
-                  << std::endl;
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -410,9 +398,9 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
   g_log.debug() << "Function Fit:  Chi^2 = " << gslchi2
-                << "; Fit Status = " << fitstatus << std::endl;
+                << "; Fit Status = " << fitstatus << '\n';
 
-  bool fitgood = (fitstatus.compare("success") == 0);
+  bool fitgood = (fitstatus == "success");
 
   return fitgood;
 }
@@ -443,8 +431,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   bool successfulfit = fitalg->execute();
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
-    g_log.error() << "Fitting to instrument geometry function failed. "
-                  << std::endl;
+    g_log.error() << "Fitting to instrument geometry function failed. \n";
     throw std::runtime_error("Fitting failed.");
   }
 
@@ -452,7 +439,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
   cout << "Function calculation [L.M]:  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << std::endl;
+       << "; Fit Status = " << fitstatus << '\n';
 
   return chi2;
 }
@@ -475,10 +462,9 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
          << ": Min = " << setw(15) << setprecision(6) << lowerbounds[i]
          << ", Max = " << setw(15) << setprecision(6) << upperbounds[i]
          << ", Step Size = " << setw(15) << setprecision(6) << stepsizes[i]
-         << endl;
+         << '\n';
   }
-  g_log.notice() << "Monte Carlo Parameters: " << endl
-                 << dbss.str();
+  g_log.notice() << "Monte Carlo Parameters: \n" << dbss.str();
 
   // 3. Maximum step size
   size_t maxsteps;
@@ -500,10 +486,10 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
                              stepsizescalefactor, fit2);
 
   // 6. Record the result
-  const MantidVec &X = m_dataWS->readX(0);
-  const MantidVec &Y = m_dataWS->readY(0);
-  const MantidVec &E = m_dataWS->readE(0);
-  FunctionDomain1DVector domain(X);
+  const auto &X = m_dataWS->x(0);
+  const auto &Y = m_dataWS->y(0);
+  const auto &E = m_dataWS->e(0);
+  FunctionDomain1DVector domain(X.rawData());
   FunctionValues values(domain);
   for (size_t i = 0; i < m_BestFitParameters.size(); ++i) {
     // a. Set the function with the
@@ -519,17 +505,15 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
     calculateThermalNeutronSpecial(m_Function, X, vec_n);
 
     // c. Put the data to output workspace
-    MantidVec &newY = m_dataWS->dataY(3 * i + 1);
-    MantidVec &newD = m_dataWS->dataY(3 * i + 2);
-    MantidVec &newN = m_dataWS->dataY(3 * i + 3);
+    auto &newY = m_dataWS->mutableY(3 * i + 1);
+    auto &newD = m_dataWS->mutableY(3 * i + 2);
+    auto &newN = m_dataWS->mutableY(3 * i + 3);
     for (size_t j = 0; j < newY.size(); ++j) {
       newY[j] = values[j];
       newD[j] = Y[j] - values[j];
       newN[j] = vec_n[j];
     }
   }
-
-  return;
 }
 
 /** Core Monte Carlo random walk on parameter-space
@@ -543,15 +527,15 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
   /* Input Check
   stringstream inpinfo;
   inpinfo << "Input Instrument Parameter Information. Maximum Step = " <<
-  maxsteps << endl;
+  maxsteps << '\n';
   inpinfo << setw(20) << "Name" << setw(20) << "Value" << setw(20) << "Lower
   Boundary"
-          << setw(20) << "Upper Boundary" << setw(20) << "Step Size" << endl;
+          << setw(20) << "Upper Boundary" << setw(20) << "Step Size\n";
   for (size_t i = 0; i < parnames.size(); ++i)
     inpinfo << setw(20) << parnames[i] << setw(20) <<
   m_FuncParameters[parnames[i]]
             << setw(20) << lowerbounds[i]
-            << setw(20) << upperbounds[i] << setw(20) <<  stepsizes[i] << endl;
+            << setw(20) << upperbounds[i] << setw(20) <<  stepsizes[i] << '\n';
   cout << inpinfo.str();
   ------------*/
 
@@ -568,12 +552,12 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
   // Calcualte the function's initial statistic
   m_BestGSLChi2 = calculateFunctionStatistic(m_Function, m_dataWS, 0);
   cout << "Function with starting values has Chi2 = " << m_BestGSLChi2
-       << " (GSL L.M) " << endl;
+       << " (GSL L.M) \n";
 
-  const MantidVec &X = m_dataWS->readX(0);
-  const MantidVec &rawY = m_dataWS->readY(0);
-  const MantidVec &rawE = m_dataWS->readE(0);
-  FunctionDomain1DVector domain(X);
+  const auto &X = m_dataWS->x(0);
+  const auto &rawY = m_dataWS->y(0);
+  const auto &rawE = m_dataWS->e(0);
+  FunctionDomain1DVector domain(X.rawData());
   FunctionValues values(domain);
 
   // 2. Determine the parameters to fit
@@ -599,7 +583,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     string name = *setiter;
     dbss << setw(20) << name;
   }
-  g_log.notice() << "Parameters to refine: " << dbss.str() << endl;
+  g_log.notice() << "Parameters to refine: " << dbss.str() << '\n';
 
   // 3. Create a local function for fit and set the parameters unfixed
   ThermalNeutronDtoTOFFunction_sptr func4fit =
@@ -616,18 +600,18 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    BoundaryConstraint *newconstraint =
-        new BoundaryConstraint(func4fit.get(), parname, lowerb, upperb);
-    func4fit->addConstraint(newconstraint);
+    auto newconstraint = Kernel::make_unique<BoundaryConstraint>(
+        func4fit.get(), parname, lowerb, upperb);
+    func4fit->addConstraint(std::move(newconstraint));
   }
-  cout << "Function for fitting in MC: " << func4fit->asString() << endl;
+  cout << "Function for fitting in MC: " << func4fit->asString() << '\n';
 
   // 4. Do MC loops
   double curchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
 
   g_log.notice() << "Monte Carlo Random Walk Starting Chi^2 = " << curchi2
-                 << endl;
+                 << '\n';
 
   size_t paramindex = 0;
   size_t numacceptance = 0;
@@ -637,7 +621,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
       if (paramstofitset.count(parnames[paramindex]) == 0) {
         // This parameter is not to be refined...
         // cout << "MC Step " << istep << ":  Refine " << parnames[paramindex]
-        // << " Denied!" << endl;
+        // << " Denied!\n";
         ++paramindex;
         if (paramindex >= parnames.size())
           paramindex = 0;
@@ -710,7 +694,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
           m_BestFitChi2s.pop_back();
         }
 
-        // cout << "\tHomemade Chi^2 = " << homchi2 << endl;
+        // cout << "\tHomemade Chi^2 = " << homchi2 << '\n';
       }
     }
 
@@ -723,7 +707,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // cout << "MC Step " << istep << ": New Chi^2 = " << newchi2 << "; Old
     // Chi^2 = " << curchi2
     //      << ".  Acceptance Prob. = " << prob << "; Random = " << randnumber
-    //      << endl;
+    //      << '\n';
 
     accept = randnumber < prob;
 
@@ -771,27 +755,25 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
   // 3. Debug output
   stringstream mcresult;
   mcresult << "Monte Carlo Result for " << m_BestMCParameters.size()
-           << " Best Results" << endl;
+           << " Best Results\n";
   mcresult << "Number of acceptance = " << numacceptance << ", out of "
            << maxsteps << " MC steps."
            << "Accept ratio = "
            << static_cast<double>(numacceptance) / static_cast<double>(maxsteps)
-           << endl;
+           << '\n';
   mcresult << "Best " << m_BestMCParameters.size()
-           << " Monte Carlo (no fit) results: " << endl;
+           << " Monte Carlo (no fit) results: \n";
   for (size_t i = 0; i < m_BestMCParameters.size(); ++i) {
     mcresult << setw(3) << i << ":  Chi^2 = " << m_BestMCParameters[i].first
-             << endl;
+             << '\n';
   }
   mcresult << "Best " << m_BestMCParameters.size()
-           << " fitting results.  Best Chi^2 =  " << m_BestGSLChi2 << endl;
+           << " fitting results.  Best Chi^2 =  " << m_BestGSLChi2 << '\n';
   for (size_t i = 0; i < m_BestFitParameters.size(); ++i) {
     mcresult << setw(3) << i << ":  Chi^2 = " << m_BestFitParameters[i].first
-             << ", GSL Chi^2 = " << m_BestFitChi2s[i].second << endl;
+             << ", GSL Chi^2 = " << m_BestFitChi2s[i].second << '\n';
   }
   g_log.notice() << mcresult.str();
-
-  return;
 }
 
 /** Get the names of the parameters of D-TOF conversion function
@@ -802,23 +784,19 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
   parnames.clear();
 
   // 2. Get the parameter names from function
-  ThermalNeutronDtoTOFFunction d2toffunc;
-  d2toffunc.initialize();
-  std::vector<std::string> funparamnames = d2toffunc.getParameterNames();
-
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(d2toffunc);
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  std::vector<std::string> funparamnames = m_Function->getParameterNames();
 
   // 3. Copy
   parnames = funparamnames;
-
-  return;
 }
 
-/** Calcualte the function
+/** Calculate the function
   */
 double RefinePowderInstrumentParameters::calculateD2TOFFunction(
-    IFunction_sptr func, FunctionDomain1DVector domain, FunctionValues &values,
-    const MantidVec &rawY, const MantidVec &rawE) {
+    API::IFunction_sptr func, API::FunctionDomain1DVector domain,
+    API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
+    const Mantid::HistogramData::HistogramE &rawE) {
   // 1. Check validity
   if (!func) {
     throw std::runtime_error("m_Function has not been initialized!");
@@ -828,7 +806,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
     for (size_t i = 0; i < parnames.size(); ++i)
     {
       cout << "DBx1125  " << parnames[i] << " = " <<
-    m_Function->getParameter(parnames[i]) << endl;
+    m_Function->getParameter(parnames[i]) << '\n';
     }
     */
     ;
@@ -849,7 +827,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
     double temp = (values[i] - rawY[i]) / rawE[i];
     chi2 += temp * temp;
     // cout << "Peak " << i << ": Model = " << values[i] << ", Data = " <<
-    // rawY[i] << ".  Standard Error = " << rawE[i] << endl;
+    // rawY[i] << ".  Standard Error = " << rawE[i] << '\n';
   }
 
   return chi2;
@@ -864,8 +842,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     DataObjects::TableWorkspace_sptr peakparamws) {
   // 1. Check and clear input and output
   if (!peakparamws) {
-    g_log.error() << "Input tableworkspace for peak parameters is invalid!"
-                  << std::endl;
+    g_log.error() << "Input tableworkspace for peak parameters is invalid!\n";
     throw std::invalid_argument(
         "Invalid input table workspace for peak parameters");
   }
@@ -878,8 +855,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
   for (size_t ir = 0; ir < numrows; ++ir) {
     // a) Generate peak
-    BackToBackExponential newpeak;
-    newpeak.initialize();
+    BackToBackExponential_sptr newpeakptr =
+        boost::make_shared<BackToBackExponential>();
+    newpeakptr->initialize();
 
     // b) Parse parameters
     int h, k, l;
@@ -889,25 +867,25 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
     API::TableRow row = peakparamws->getRow(ir);
     for (auto &colname : colnames) {
-      if (colname.compare("H") == 0)
+      if (colname == "H")
         row >> h;
-      else if (colname.compare("K") == 0)
+      else if (colname == "K")
         row >> k;
-      else if (colname.compare("L") == 0)
+      else if (colname == "L")
         row >> l;
-      else if (colname.compare("Alpha") == 0)
+      else if (colname == "Alpha")
         row >> alpha;
-      else if (colname.compare("Beta") == 0)
+      else if (colname == "Beta")
         row >> beta;
-      else if (colname.compare("Sigma2") == 0)
+      else if (colname == "Sigma2")
         row >> sigma2;
-      else if (colname.compare("Sigma") == 0)
+      else if (colname == "Sigma")
         row >> sigma;
-      else if (colname.compare("Chi2") == 0)
+      else if (colname == "Chi2")
         row >> chi2;
-      else if (colname.compare("Height") == 0)
+      else if (colname == "Height")
         row >> height;
-      else if (colname.compare("TOF_h") == 0)
+      else if (colname == "TOF_h")
         row >> tof_h;
       else {
         try {
@@ -922,15 +900,11 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
       sigma = sqrt(sigma2);
 
     // c) Set peak parameters and etc.
-    newpeak.setParameter("A", alpha);
-    newpeak.setParameter("B", beta);
-    newpeak.setParameter("S", sigma);
-    newpeak.setParameter("X0", tof_h);
-    newpeak.setParameter("I", height);
-
-    // d) Make to share pointer and set to instance data structure (map)
-    BackToBackExponential_sptr newpeakptr =
-        boost::make_shared<BackToBackExponential>(newpeak);
+    newpeakptr->setParameter("A", alpha);
+    newpeakptr->setParameter("B", beta);
+    newpeakptr->setParameter("S", sigma);
+    newpeakptr->setParameter("X0", tof_h);
+    newpeakptr->setParameter("I", height);
 
     std::vector<int> hkl;
     hkl.push_back(h);
@@ -944,11 +918,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
                         << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
                         << "], Input Center = " << setw(10) << setprecision(6)
-                        << newpeak.centre() << endl;
+                        << newpeakptr->centre() << '\n';
 
   } // ENDFOR Each potential peak
-
-  return;
 }
 
 /** Import TableWorkspace containing the instrument parameters for fitting
@@ -963,14 +935,14 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     g_log.error() << "Input parameter table workspace does not have enough "
                      "number of columns. "
                   << " Number of columns = " << colnames.size()
-                  << " < 3 as required. " << std::endl;
+                  << " < 3 as required. \n";
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
 
-  if (colnames[0].compare("Name") != 0 || colnames[1].compare("Value") != 0) {
+  if (colnames[0] != "Name" || colnames[1] != "Value") {
     g_log.error() << "Input parameter table workspace does not have the "
                      "columns in order.  "
-                  << " It must be Name, Value, FitOrTie." << std::endl;
+                  << " It must be Name, Value, FitOrTie.\n";
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
 
@@ -986,15 +958,12 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
       trow >> parname >> value;
       parameters.emplace(parname, value);
     } catch (runtime_error &) {
-      g_log.error() << "Import table workspace " << parameterWS->name()
+      g_log.error() << "Import table workspace " << parameterWS->getName()
                     << " error in line " << ir << ".  "
-                    << " Requires [string, double] in the first 2 columns."
-                    << endl;
+                    << " Requires [string, double] in the first 2 columns.\n";
       throw;
     }
   }
-
-  return;
 }
 
 /** Import the Monte Carlo related parameters from table
@@ -1012,11 +981,11 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
   istep = imax;
 
   for (size_t i = 0; i < colnames.size(); ++i) {
-    if (colnames[i].compare("Max") == 0)
+    if (colnames[i] == "Max")
       imax = i;
-    else if (colnames[i].compare("Min") == 0)
+    else if (colnames[i] == "Min")
       imin = i;
-    else if (colnames[i].compare("StepSize") == 0)
+    else if (colnames[i] == "StepSize")
       istep = i;
   }
 
@@ -1051,9 +1020,9 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
       } catch (runtime_error &) {
         g_log.error() << "Import MC parameter " << colnames[ic]
                       << " error in row " << ir << " of workspace "
-                      << tablews->name() << endl;
+                      << tablews->getName() << '\n';
         row >> tmpstr;
-        g_log.error() << "Should be " << tmpstr << endl;
+        g_log.error() << "Should be " << tmpstr << '\n';
       }
 
       if (ic == imax)
@@ -1079,8 +1048,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
       stringstream errss;
       errss << "Input instrument parameter workspace does not have parameter "
             << parname
-            << ".  Information is incomplete for Monte Carlo simulation."
-            << endl;
+            << ".  Information is incomplete for Monte Carlo simulation.\n";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -1091,8 +1059,6 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     upperbounds.push_back(mcparvalues[1]);
     stepsizes.push_back(mcparvalues[2]);
   }
-
-  return;
 }
 
 /** Calculate thermal neutron's d-spacing
@@ -1110,27 +1076,25 @@ hkl, double lattice)
 }
 */
 
-/** Calcualte value n for thermal neutron peak profile
+/** Calculate value n for thermal neutron peak profile
   */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
-    IFunction_sptr m_Function, vector<double> vec_d, vector<double> &vec_n) {
-  if (m_Function->name().compare("ThermalNeutronDtoTOFFunction") != 0) {
+    IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
+  if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
     g_log.warning() << "Function (" << m_Function->name()
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "
-                       "required to calculate n." << endl;
-    for (size_t i = 0; i < vec_d.size(); ++i)
+                       "required to calculate n.\n";
+    for (size_t i = 0; i < xVals.size(); ++i)
       vec_n.push_back(0);
   }
 
   double width = m_Function->getParameter("Width");
   double tcross = m_Function->getParameter("Tcross");
 
-  for (double dh : vec_d) {
+  for (double dh : xVals) {
     double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));
     vec_n.push_back(n);
   }
-
-  return;
 }
 
 //------- Related to Algorith's Output
@@ -1153,9 +1117,9 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 
   string stdoption = getProperty("StandardError");
   enum { ConstantValue, InvertedPeakHeight } stderroroption;
-  if (stdoption.compare("ConstantValue") == 0) {
+  if (stdoption == "ConstantValue") {
     stderroroption = ConstantValue;
-  } else if (stdoption.compare("InvertedPeakHeight") == 0) {
+  } else if (stdoption == "InvertedPeakHeight") {
     stderroroption = InvertedPeakHeight;
   } else {
     stringstream errss;
@@ -1180,7 +1144,7 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
                           << hkl[2]
                           << ") has unphysically small Sigma = " << sigma
                           << ".  "
-                          << "It is thus excluded. " << endl;
+                          << "It is thus excluded. \n";
       continue;
     }
 
@@ -1224,13 +1188,11 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
   // 4. Put data to output workspace
   for (size_t i = 0; i < peakcenters.size(); ++i) {
     for (size_t j = 0; j < nspec; ++j) {
-      m_dataWS->dataX(j)[i] = peakcenters[i].first;
+      m_dataWS->mutableX(j)[i] = peakcenters[i].first;
     }
-    m_dataWS->dataY(0)[i] = peakcenters[i].second.first;
-    m_dataWS->dataE(0)[i] = peakcenters[i].second.second;
+    m_dataWS->mutableY(0)[i] = peakcenters[i].second.first;
+    m_dataWS->mutableE(0)[i] = peakcenters[i].second.second;
   }
-
-  return;
 }
 
 /** Generate a Monte Carlo result table containing the N best results

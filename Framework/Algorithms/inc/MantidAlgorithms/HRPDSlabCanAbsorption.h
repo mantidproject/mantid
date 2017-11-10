@@ -69,10 +69,6 @@ namespace Algorithms {
 */
 class DLLExport HRPDSlabCanAbsorption : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  HRPDSlabCanAbsorption() : API::Algorithm() {}
-  /// Virtual destructor
-  ~HRPDSlabCanAbsorption() override {}
   /// Algorithm's name
   const std::string name() const override { return "HRPDSlabCanAbsorption"; }
   /// Summary of algorithms purpose

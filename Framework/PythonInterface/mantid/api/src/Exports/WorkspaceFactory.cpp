@@ -1,8 +1,10 @@
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 
 #include <boost/python/class.hpp>
@@ -11,6 +13,8 @@
 using namespace boost::python;
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface::Policies;
+
+GET_POINTER_SPECIALIZATION(WorkspaceFactoryImpl)
 
 namespace {
 /**
@@ -47,10 +51,14 @@ Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr,
                                 2, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

@@ -71,7 +71,7 @@ public:
    * A dimension can be usually found by its ID and various
    * various method exist to manipulate set of dimensions by their names.
    */
-  std::string getDimensionId() const override { return m_dimensionId; }
+  const std::string &getDimensionId() const override { return m_dimensionId; }
 
   /// Returns the maximum extent of this dimension
   coord_t getMaximum() const override { return m_max; }
@@ -82,6 +82,9 @@ public:
   /// number of bins dimension have (an integrated has one). A axis directed
   /// along dimension would have getNBins+1 axis points.
   size_t getNBins() const override { return m_numBins; }
+
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override { return m_numBins + 1; }
 
   /// Dimensions must be xml serializable.
   std::string toXMLString() const override;

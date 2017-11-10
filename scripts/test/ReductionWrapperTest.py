@@ -1,4 +1,5 @@
-﻿import os,sys
+from __future__ import (absolute_import, division, print_function)
+import os,sys
 
 from mantid.simpleapi import *
 from mantid import api,config
@@ -9,6 +10,7 @@ import MariReduction as mr
 
 #
 import unittest
+import imp
 
 class test_helper(ReductionWrapper):
     def __init__(self,web_var=None):
@@ -102,7 +104,7 @@ class ReductionWrapperTest(unittest.TestCase):
         # see what have changed and what have changed as advanced properties. 
         all_changed_prop = red.reducer.prop_man.getChangedProperties()
 
-        self.assertEqual(set(main_prop.keys()+adv_prop.keys()),all_changed_prop)
+        self.assertEqual(set(list(main_prop.keys())+list(adv_prop.keys())),all_changed_prop)
 
         test_dir = config['defaultsave.directory']
         file = os.path.join(test_dir,'reduce_vars.py')
@@ -126,7 +128,7 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertEqual(rv.advanced_vars,adv_prop)
         self.assertTrue(hasattr(rv,'variable_help'))
 
-        reload(mr)
+        imp.reload(mr)
 
         # tis will run MARI reduction, which probably not work from unit tests
         # will move this to system tests
@@ -179,8 +181,8 @@ class ReductionWrapperTest(unittest.TestCase):
         red._wvs.advanced_vars={}
         ok,level,errors = red.validate_settings()
         if not ok:
-            print "Errors found at level",level
-            print errors
+            print("Errors found at level",level)
+            print(errors)
 
         self.assertTrue(ok)
         self.assertEqual(level,0)

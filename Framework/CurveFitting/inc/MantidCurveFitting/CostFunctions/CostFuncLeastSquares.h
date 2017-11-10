@@ -71,9 +71,6 @@ public:
   void pop();
   void drop();
 
-  void setParameters(const GSLVector &params);
-  void getParameters(GSLVector &params) const;
-
 protected:
   void calActiveCovarianceMatrix(GSLMatrix &covar,
                                  double epsrel = 1e-8) override;

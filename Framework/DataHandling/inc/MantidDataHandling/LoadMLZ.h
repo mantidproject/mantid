@@ -5,8 +5,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -37,7 +37,6 @@ namespace DataHandling {
 class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
-  ~LoadMLZ() override;
 
   const std::string name() const override;
   int version() const override;
@@ -55,20 +54,15 @@ private:
   void init() override;
   void exec() override;
 
-  // int getEPPFromVanadium(const std::string
-  // &,Mantid::API::MatrixWorkspace_sptr);
   void loadInstrumentDetails(NeXus::NXEntry &);
   void loadTimeDetails(NeXus::NXEntry &entry);
 
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
 
-  // void initWorkSpace(NeXus::NXEntry& entry, const
-  // std::vector<std::vector<int> >&);
   void initWorkSpace(NeXus::NXEntry &entry);
   void initInstrumentSpecific();
   void loadRunDetails(NeXus::NXEntry &entry);
   void loadExperimentDetails(NeXus::NXEntry &entry);
-  // int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void maskDetectors(NeXus::NXEntry &entry);
@@ -77,14 +71,7 @@ private:
 
   void runLoadInstrument();
 
-  /// Calculate error for y
-  static double calculateError(double in) { return sqrt(in); }
-  // int validateVanadium(const std::string &);
-
   API::MatrixWorkspace_sptr m_localWorkspace;
-
-  //	NeXus::NXRoot m_dataRoot;
-  //	NeXus::NXRoot m_vanaRoot;
 
   std::string m_instrumentName; ///< Name of the instrument
   std::string m_instrumentPath; ///< Name of the instrument path
@@ -106,6 +93,8 @@ private:
 
   double m_l1;
   double m_l2;
+
+  double m_t1; // time of flight from source to sample
 
   std::vector<std::string> m_supportedInstruments;
   LoadHelper m_mlzloader;

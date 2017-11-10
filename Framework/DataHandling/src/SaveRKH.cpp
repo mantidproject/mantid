@@ -1,16 +1,14 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveRKH.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/LocalDateTime.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -20,15 +18,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-/// Constructor
-SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
-
-/// Virtual destructor
-SaveRKH::~SaveRKH() {}
-
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /**
  * Initialise the algorithm
  */
@@ -150,37 +139,27 @@ void SaveRKH::write1D() {
   const size_t nbins = m_workspace->blocksize();
 
   for (size_t i = 0; i < nhist; ++i) {
-    const auto &xdata = m_workspace->readX(i);
-    const auto &ydata = m_workspace->readY(i);
-    const auto &edata = m_workspace->readE(i);
+    const auto &xdata = m_workspace->x(i);
+    const auto &ydata = m_workspace->y(i);
+    const auto &edata = m_workspace->e(i);
 
     specnum_t specid(0);
     try {
-      specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+      specid = m_workspace->getSpectrum(i).getSpectrumNo();
     } catch (...) {
       specid = static_cast<specnum_t>(i + 1);
     }
 
     auto hasDx = m_workspace->hasDx(i);
-    // hasDx = false;
-    // We only want to access the dx values if they exist. In case they don't
-    // exist
-    // set the dXData const reference to the X value. The value will not be used
-    // later on.
-    const auto &dXdata = hasDx ? m_workspace->readDx(i) : m_workspace->readX(i);
+    auto dXvals = m_workspace->pointStandardDeviations(i);
 
     for (size_t j = 0; j < nbins; ++j) {
       // Calculate/retrieve the value to go in the first column
       double xval(0.0);
-      double dXval(0.0);
       if (horizontal)
         xval = histogram ? 0.5 * (xdata[j] + xdata[j + 1]) : xdata[j];
       else {
         xval = static_cast<double>(specid);
-      }
-
-      if (hasDx) {
-        dXval = histogram ? 0.5 * (dXdata[j] + dXdata[j + 1]) : dXdata[j];
       }
 
       m_outRKH << std::fixed << std::setw(12) << std::setprecision(5) << xval
@@ -188,7 +167,7 @@ void SaveRKH::write1D() {
                << ydata[j] << std::setw(16) << edata[j];
 
       if (hasDx) {
-        m_outRKH << std::setw(16) << dXval;
+        m_outRKH << std::setw(16) << dXvals[j];
       }
 
       m_outRKH << "\n";
@@ -211,7 +190,7 @@ void SaveRKH::write2D() {
   }
   const Axis *const Y = m_workspace->getAxis(1);
   const size_t Ybins = Y->length();
-  m_outRKH << "\n  " << Ybins << std::endl;
+  m_outRKH << "\n  " << Ybins << '\n';
   for (size_t i = 0; i < Ybins; ++i) {
     m_outRKH << std::setw(14) << std::scientific << std::setprecision(6)
              << (*Y)(i);
@@ -220,20 +199,18 @@ void SaveRKH::write2D() {
   }
 
   // Now the data
-  const size_t xSize = m_workspace->blocksize();
-  const size_t ySize = m_workspace->getNumberHistograms();
-  m_outRKH << "\n   " << xSize << "   " << ySize << "  " << std::scientific
-           << std::setprecision(12) << 1.0 << "\n";
+  const size_t num_hist = m_workspace->getNumberHistograms();
+  m_outRKH << "\n   " << m_workspace->blocksize() << "   " << num_hist << "  "
+           << std::scientific << std::setprecision(12) << 1.0 << "\n";
   const int iflag = 3;
   m_outRKH << "  " << iflag << "(8E12.4)\n";
 
   bool requireNewLine = false;
   int itemCount(0);
-  for (size_t i = 0; i < ySize; ++i) {
-    const auto &ydata = m_workspace->readY(i);
-    for (size_t j = 0; j < xSize; ++j) {
+  for (size_t i = 0; i < num_hist; ++i) {
+    for (const auto &yVal : m_workspace->y(i)) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
-               << ydata[j];
+               << yVal;
       requireNewLine = true;
       if ((itemCount + 1) % LINE_LENGTH == 0) {
         m_outRKH << "\n";
@@ -242,6 +219,7 @@ void SaveRKH::write2D() {
       ++itemCount;
     }
   }
+
   // extra new line is required if number of data written out in last column is
   // less than LINE_LENGTH
   if (requireNewLine)
@@ -249,11 +227,10 @@ void SaveRKH::write2D() {
 
   // Then all the error values
   itemCount = 0;
-  for (size_t i = 0; i < ySize; ++i) {
-    const auto &edata = m_workspace->readE(i);
-    for (size_t j = 0; j < xSize; ++j) {
+  for (size_t i = 0; i < num_hist; ++i) {
+    for (const auto &eVal : m_workspace->e(i)) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
-               << edata[j];
+               << eVal;
       if ((itemCount + 1) % LINE_LENGTH == 0)
         m_outRKH << "\n";
       ++itemCount;

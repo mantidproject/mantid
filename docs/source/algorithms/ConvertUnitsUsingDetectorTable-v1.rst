@@ -10,8 +10,8 @@
 Description
 -----------
 
-This algorithm functions in the same basic way as :ref:`algm-ConvertUnits` but 
-instead of reading the geometric parameters from the instrument, it uses values 
+This algorithm functions in the same basic way as :ref:`algm-ConvertUnits` but
+instead of reading the geometric parameters from the instrument, it uses values
 that are specified in a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__
 
 Restrictions on the input workspace
@@ -54,8 +54,8 @@ Usage
 
    wsOut = ConvertUnitsUsingDetectorTable(ws,Target="Wavelength",DetectorParameters=detpars)
 
-   print "Input",  ws.readX(0)[ws.blocksize()-1]
-   print "Output",  wsOut.readX(0)[wsOut.blocksize()-1]
+   print("Input {}".format(ws.readX(0)[ws.blocksize()-1]))
+   print("Output {:.11f}".format(wsOut.readX(0)[wsOut.blocksize()-1]))
 
 Output:
 
@@ -67,4 +67,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

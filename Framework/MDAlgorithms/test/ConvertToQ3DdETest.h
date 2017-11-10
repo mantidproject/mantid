@@ -2,8 +2,10 @@
 #define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
@@ -38,7 +40,7 @@ public:
 
   void testExecThrow() {
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceCreationHelper::CreateGroupedWorkspace2DWithRingsAndBoxes();
+        WorkspaceCreationHelper::createGroupedWorkspace2DWithRingsAndBoxes();
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
@@ -60,14 +62,14 @@ public:
     if (!childAlg) {
       TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
                  false);
-      return NULL;
+      return nullptr;
     }
     childAlg->initialize();
     if (!childAlg->isInitialized()) {
       TSM_ASSERT(
           "Can not initialize child ChildAlgorithm to found min/max values",
           false);
-      return NULL;
+      return nullptr;
     }
     childAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
     childAlg->setPropertyValue("QDimensions", QMode);
@@ -79,7 +81,7 @@ public:
     if (!childAlg->isExecuted()) {
       TSM_ASSERT("Can not execute child ChildAlgorithm to found min/max values",
                  false);
-      return NULL;
+      return nullptr;
     }
     return childAlg;
   }
@@ -341,11 +343,11 @@ public:
     // std::vector<double>
     // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
     Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-    sample[0][0] = sqrt(2.) / 2;
-    sample[0][1] = sqrt(2.) / 2;
-    sample[1][0] = sqrt(2.) / 2;
-    sample[1][1] = -sqrt(2.) / 2;
-    sample[2][2] = -1;
+    sample[0][0] = 0.5 * M_SQRT2;
+    sample[0][1] = 0.5 * M_SQRT2;
+    sample[1][0] = 0.5 * M_SQRT2;
+    sample[1][1] = -0.5 * M_SQRT2;
+    sample[2][2] = -1.0;
     Kernel::Matrix<double> rez(rot);
     TS_ASSERT(sample.equals(rez, 1.e-4));
   }

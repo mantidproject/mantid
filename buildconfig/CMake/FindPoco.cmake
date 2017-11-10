@@ -47,9 +47,9 @@ set ( POCO_LIBRARIES ${POCO_LIB_FOUNDATION}
 
 endif()
 
-# Set a version string by examining either the Poco/Version.h header or 
+# Set a version string by examining either the Poco/Version.h header or
 # the Poco/Foundation.h header if Version.h does not exist
-if( POCO_INCLUDE_DIR ) 
+if( POCO_INCLUDE_DIR )
   if ( EXISTS ${POCO_INCLUDE_DIR}/Poco/Version.h )
     set ( VERSION_FILE ${POCO_INCLUDE_DIR}/Poco/Version.h )
   else ()
@@ -72,12 +72,22 @@ if( POCO_INCLUDE_DIR )
   set ( POCO_VERSION "${POCO_VERSION_MAJOR}.${POCO_VERSION_MINOR}.${POCO_VERSION_PATCH}" )
 endif()
 
+# Also set a shared libarary version number. This is different to the main version number
+# and can form part of the package name on some Linux systems
+if( POCO_LIB_FOUNDATION )
+  set ( POCO_SOLIB_VERSION "" )
+  # The library path is usually a symlink to the actually library
+  get_filename_component ( POCO_REAL_LIB_FOUNDATION ${POCO_LIB_FOUNDATION} REALPATH )
+  set ( _LIB_REGEX "^.*.so.([0-9]+)$" )
+  string( REGEX REPLACE ${_LIB_REGEX} "\\1" POCO_SOLIB_VERSION ${POCO_REAL_LIB_FOUNDATION} )
+endif()
 
-# handle the QUIETLY and REQUIRED arguments and set POCO_FOUND to TRUE if 
+
+# handle the QUIETLY and REQUIRED arguments and set POCO_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 if (POCO_VERSION)
-  find_package_handle_standard_args( Poco REQUIRED_VARS POCO_LIBRARIES POCO_INCLUDE_DIR 
+  find_package_handle_standard_args( Poco REQUIRED_VARS POCO_LIBRARIES POCO_INCLUDE_DIR
                                      VERSION_VAR POCO_VERSION )
 else ()
   message (status "Failed to determine Poco version: Ignoring requirement")

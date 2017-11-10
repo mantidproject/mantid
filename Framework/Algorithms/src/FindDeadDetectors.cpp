@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -74,7 +71,7 @@ void FindDeadDetectors::exec() {
 
   // Try and open the output file, if specified, and write a header
   std::ofstream file(getPropertyValue("OutputFile").c_str());
-  file << "Index Spectrum UDET(S)" << std::endl;
+  file << "Index Spectrum UDET(S)\n";
 
   // Get the integrated input workspace
   MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace();
@@ -83,7 +80,7 @@ void FindDeadDetectors::exec() {
   int countSpec = 0, countDets = 0;
 
   // iterate over the data values setting the live and dead values
-  g_log.information() << "Marking dead detectors" << std::endl;
+  g_log.information() << "Marking dead detectors\n";
   const int64_t numSpec = integratedWorkspace->getNumberHistograms();
   const double numSpec_d = static_cast<double>(numSpec);
   int64_t iprogress_step = numSpec / 100;
@@ -91,27 +88,24 @@ void FindDeadDetectors::exec() {
     iprogress_step = 1;
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
-    ISpectrum *spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec->dataY()[0];
+    double &y = integratedWorkspace->mutableY(i)[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = spec->getSpectrumNo();
+      const auto &spec = integratedWorkspace->getSpectrum(i);
       // Write the spectrum number to file
-      file << i << " " << specNo;
-      // Get the list of detectors for this spectrum and iterate over
-      const auto &dets = spec->getDetectorIDs();
-      for (const auto &det : dets) {
+      file << i << " " << spec.getSpectrumNo();
+      for (const auto &id : spec.getDetectorIDs()) {
         // Write the detector ID to file, log & the FoundDead output property
-        file << " " << det;
+        file << " " << id;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(det);
+        deadDets.push_back(id);
         ++countDets;
       }
-      file << std::endl;
+      file << '\n';
     }
     if (i % iprogress_step == 0) {
       progress(static_cast<double>(i) / numSpec_d);
@@ -121,7 +115,7 @@ void FindDeadDetectors::exec() {
 
   g_log.notice() << "Found a total of " << countDets
                  << " 'dead' detectors within " << countSpec
-                 << " 'dead' spectra." << std::endl;
+                 << " 'dead' spectra.\n";
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", integratedWorkspace);
@@ -129,12 +123,11 @@ void FindDeadDetectors::exec() {
 
   // Close the output file
   file.close();
-  return;
 }
 
 /// Run Integration as a Child Algorithm
 MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
-  g_log.information() << "Integrating input workspace" << std::endl;
+  g_log.information() << "Integrating input workspace\n";
 
   API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // Now execute integration.

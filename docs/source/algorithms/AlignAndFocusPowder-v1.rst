@@ -19,7 +19,7 @@ sub-algorithms as listed below.
 #. :ref:`algm-MaskDetectors`
 #. :ref:`algm-Rebin` or :ref:`algm-ResampleX` if not d-space binning
 #. :ref:`algm-AlignDetectors`
-#. If LRef, minwl, or DIFCref are specified:
+#. If ``LowResRef`` or ``CropWavelengthMin`` are specified:
 
    #. :ref:`algm-ConvertUnits` to time-of-flight
    #. :ref:`algm-UnwrapSNS`

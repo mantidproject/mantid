@@ -4,13 +4,18 @@
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadGSS.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::LoadGSS;
 using ScopedFileHelper::ScopedFile;
+using Mantid::Kernel::V3D;
 
 class LoadGSSTest : public CxxTest::TestSuite {
 public:
@@ -24,13 +29,14 @@ public:
   void test_load_gss_txt() {
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", "gss.txt");
-    TS_ASSERT(loader->execute())
+    loader->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
     // Check a few things in the workspace
     checkWorkspace(ws, 8, 816);
-    auto x1 = ws->readX(0)[99];
-    auto x2 = ws->readX(0)[100];
-    auto y = ws->readY(0)[99];
+    auto x1 = ws->x(0)[99];
+    auto x2 = ws->x(0)[100];
+    auto y = ws->y(0)[99];
     TS_ASSERT_DELTA((x1 + x2) / 2, 40844.0625, 1e-6);
     TS_ASSERT_DELTA(y, 145304004.625, 1e-6);
   }
@@ -52,23 +58,40 @@ public:
         "   115206.06310  1234567.00000003        0.00000000\n"
         "   115209.92877 12345678.00000004        0.00000000\n"
         "   115213.79731123456789.00000005        0.00000000\n"
-        "   115217.66873234567890.00000006        0.00000000";
+        "   115217.66873234567890.00000006        0.00000000\n"
+        "\n"
+        "# Total flight path 42.060 m, tth 154.257 deg, DIFC 10398.8\n"
+        "# Data for spectrum :1\n"
+        "BANK 2 4399 4399 RALF   166409      124   166409 0.00074 FXYE\n"
+        "   115202.20029        1.00000000        0.00000000\n"
+        "   115206.06310        1.00000000        0.00000000\n"
+        "   115209.92877        2.00000000        0.00000000\n"
+        "   115213.79731        3.00000000        0.00000000\n"
+        "   115217.66873        5.00000000        0.00000000\n";
     ScopedFile file(gss, "gss_large_x.txt");
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", file.getFileName());
-    TS_ASSERT(loader->execute())
+    TS_ASSERT(loader->execute());
+    TS_ASSERT_EQUALS(loader->isExecuted(), true);
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
-    auto x1 = ws->readX(0)[0];
-    auto x2 = ws->readX(0)[1];
+    auto x1 = ws->x(0)[0];
+    auto x2 = ws->x(0)[1];
     auto dx = x2 - x1;
-    auto y = ws->readY(0)[0] * dx;
+    auto y = ws->y(0)[0] * dx;
     TS_ASSERT_DELTA((x1 + x2) / 2, 115202.20029, 1e-6);
     TS_ASSERT_DELTA(y, 123456.00000002, 1e-10);
-    x1 = ws->readX(0)[3];
-    x2 = ws->readX(0)[4];
+    x1 = ws->x(0)[3];
+    x2 = ws->x(0)[4];
     dx = x2 - x1;
-    y = ws->readY(0)[3] * dx;
+    y = ws->y(0)[3] * dx;
     TS_ASSERT_DELTA(y, 123456789.00000005, 1e-10);
+
+    const auto &spectrumInfo = ws->spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.l1(), 40., 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.l2(0), 2.2222, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0) * 180. / M_PI, 58.308, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.l2(1), 2.060, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(1) * 180. / M_PI, 154.257, 1e-4);
   }
 
   void test_load_gss_ExtendedHeader_gsa() {
@@ -79,7 +102,7 @@ public:
     checkWorkspace(loader->getProperty("OutputWorkspace"), 1, 6);
   }
 
-  /** Test LoadGSS with setting spectrum ID as bank ID
+  /** Test LoadGSS with setting spectrum No as bank ID
     */
   void test_load_gss_use_spec() {
     // Set property and execute
@@ -104,9 +127,9 @@ public:
     if (outws->getNumberHistograms() != 3)
       return;
 
-    TS_ASSERT_EQUALS(outws->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(outws->getSpectrum(1)->getSpectrumNo(), 3);
-    TS_ASSERT_EQUALS(outws->getSpectrum(2)->getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS(outws->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outws->getSpectrum(1).getSpectrumNo(), 3);
+    TS_ASSERT_EQUALS(outws->getSpectrum(2).getSpectrumNo(), 5);
 
     API::AnalysisDataService::Instance().remove("TestWS");
   }
@@ -149,4 +172,43 @@ private:
   }
 };
 
+class LoadGSSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadGSSPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    API::AnalysisDataService::Instance().remove(outWsName);
+  }
+
+private:
+  std::vector<LoadGSS *> loadAlgPtrs;
+  const int numberOfIterations = 100;
+  const std::string outWsName = "TestWS";
+
+  LoadGSS *setupAlg() {
+    LoadGSS *loadAlg = new LoadGSS();
+    loadAlg->initialize();
+
+    loadAlg->setPropertyValue("Filename", "gss1.txt");
+    loadAlg->setProperty("OutputWorkspace", outWsName);
+    loadAlg->setProperty("UseBankIDasSpectrumNumber", true);
+
+    loadAlg->setRethrows(true);
+    return loadAlg;
+  }
+};
 #endif // LOADGSSTEST_H_

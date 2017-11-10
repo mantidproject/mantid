@@ -1,13 +1,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/ssize_t.hpp> //For Py_ssize_t. We can get rid of this when RHEL5 goes
 
 // See
@@ -21,6 +24,8 @@ using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(Axis)
+
 namespace {
 namespace bpl = boost::python;
 
@@ -30,10 +35,12 @@ namespace bpl = boost::python;
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
-
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 // Overloads for operator() function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
-
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -71,7 +78,7 @@ PyObject *extractAxisValues(Axis &self) {
                       reinterpret_cast<char *>(pos), value);
     } else {
       const std::string s = self.label(static_cast<size_t>(i));
-      PyObject *value = PyString_FromString(s.c_str());
+      PyObject *value = to_python_value<const std::string &>()(s);
       PyList_SetItem(array, (Py_ssize_t)i, value);
     }
   }
@@ -122,6 +129,28 @@ void export_Axis() {
 }
 
 // --------------------------------------------------------------------------------------------
+// SpectraAxis
+// --------------------------------------------------------------------------------------------
+/**
+* Creates a SpectraAxis referencing a given workspace
+* @param ws A pointer to the parent workspace
+* @return pointer to the axis object
+*/
+Axis *createSpectraAxis(const MatrixWorkspace *const ws) {
+  return new SpectraAxis(ws);
+}
+
+void export_SpectraAxis() {
+  /// Exported so that Boost.Python can give back a SpectraAxis class when an
+  /// Axis* is returned
+  class_<SpectraAxis, bases<Axis>, boost::noncopyable>("SpectraAxis", no_init)
+      .def("create", &createSpectraAxis, arg("workspace"),
+           return_internal_reference<>(),
+           "Creates a new SpectraAxis referencing the given workspace")
+      .staticmethod("create");
+}
+
+// --------------------------------------------------------------------------------------------
 // NumericAxis
 // --------------------------------------------------------------------------------------------
 /**
@@ -129,9 +158,7 @@ void export_Axis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createNumericAxis(int length) {
-  return new Mantid::API::NumericAxis(length);
-}
+Axis *createNumericAxis(int length) { return new NumericAxis(length); }
 
 void export_NumericAxis() {
   /// Exported so that Boost.Python can give back a NumericAxis class when an
@@ -152,9 +179,7 @@ void export_NumericAxis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createBinEdgeAxis(int length) {
-  return new Mantid::API::BinEdgeAxis(length);
-}
+Axis *createBinEdgeAxis(int length) { return new BinEdgeAxis(length); }
 
 void export_BinEdgeAxis() {
   /// Exported so that Boost.Python can give back a BinEdgeAxis class when an
@@ -176,7 +201,7 @@ void export_BinEdgeAxis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createTextAxis(int length) { return new Mantid::API::TextAxis(length); }
+Axis *createTextAxis(int length) { return new TextAxis(length); }
 
 void export_TextAxis() {
   class_<TextAxis, bases<Axis>, boost::noncopyable>("TextAxis", no_init)

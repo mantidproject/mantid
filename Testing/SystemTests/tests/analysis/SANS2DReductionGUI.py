@@ -13,12 +13,7 @@ The first 2 Tests ensures that the result provided by the GUI are the same for t
 Test was first created to apply to Mantid Release 3.0.
 """
 
-import sys
-
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
-
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import isis_reducer
@@ -30,12 +25,15 @@ import copy
 MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
+
 def s(obj):
-    print '!'+str(obj)+'!',type(obj)
+    print('!'+str(obj)+'!',type(obj))
+
 
 class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
     """Minimal script to perform full reduction in batch mode
   """
+
     def __init__(self):
         super(SANS2DMinimalBatchReduction, self).__init__()
         config['default.instrument'] = 'SANS2D'
@@ -46,16 +44,16 @@ class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
         import SANSBatchMode as batch
         i.SANS2D()
         i.MaskFile(MASKFILE)
-        fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
+        batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
 
     def validate(self):
         self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 
-
 class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
     """Minimal script to perform full reduction in single mode"""
+
     def runTest(self):
         i.SANS2D()
         i.MaskFile(MASKFILE)
@@ -65,8 +63,6 @@ class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
         i.TransmissionCan('22024', '22024')
         reduced = i.WavRangeReduction()
         RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
-
-
 
 
 class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
@@ -174,8 +170,6 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.checkFloat(fitdict['scale'], 1.0)
         self.checkFloat(fitdict['shift'], 0.0)
 
-
-
     def initialization(self):
         if i.ReductionSingleton().get_instrument() != 'SANS2D':
             i.ReductionSingleton.clean(isis_reducer.ISISReducer)
@@ -196,8 +190,6 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
 
         self.applyGUISettings()
 
-        _user_settings_copy = copy.deepcopy(i.ReductionSingleton().user_settings)
-
         fit_settings={'scale':1.0,'shift':0.0}
         fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', saveAlgs={}, reducer=i.ReductionSingleton().reference(),combineDet='rear')
 
@@ -208,6 +200,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
+
 
 class SANS2DGUIReduction(SANS2DGUIBatchReduction):
     """Script executed by SANS GUI Interface to perform reduction in single mode"""
@@ -225,15 +218,9 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
         i.SetCentre('155.45','-169.6','front')
         SCATTER_SAMPLE, logvalues = i.AssignSample(r'SANS2D00022048.nxs', reload = True, period = 1)
 
-        dummy_1 = SCATTER_SAMPLE
-        dummy_2 = logvalues
-
         i.SetCentre('155.45','-169.6','rear')
         i.SetCentre('155.45','-169.6','front')
         SCATTER_SAMPLE, logvalues = i.AssignCan(r'SANS2D00022023.nxs', reload = True, period = 1)
-
-        dummy_3 = SCATTER_SAMPLE
-        dummy_4 = logvalues
 
         t1, t2 = i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
 
@@ -245,12 +232,10 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
         i.ReductionSingleton().get_sample().geometry.width = 8
         i.ReductionSingleton().get_sample().geometry.thickness = 2
 
-
     def checkFittingSettings(self):
         settings = {'scale':i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale,
                     'shift':i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift}
         super(SANS2DGUIReduction,self).checkFittingSettings(settings)
-
 
     def cleanReduction(self, user_settings):
         i.ReductionSingleton.clean(isis_reducer.ISISReducer)
@@ -258,8 +243,6 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
     #i.ReductionSingleton().user_file_path=''
         i.ReductionSingleton().user_settings = user_settings
         i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())
-
-
 
     def singleModePrepare(self):
         self.initialization()
@@ -288,7 +271,6 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
         self.cleanReduction(_user_settings_copy)
 
         _user_settings_copy = copy.deepcopy(i.ReductionSingleton().user_settings)
-
 
 
 if __name__ == "__main__":

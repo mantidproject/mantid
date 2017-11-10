@@ -30,7 +30,7 @@ public:
   void test_string_unit_construction() {
     auto unit = make_unique<LabelUnit>(Units::Symbol::Metre);
     GeneralFrame frame("Distance", std::move(unit) /*sink transfer ownership*/);
-    TS_ASSERT(unit.get() == NULL);
+    TS_ASSERT(unit.get() == nullptr);
     TS_ASSERT_EQUALS(Units::Symbol::Metre, frame.getUnitLabel());
     TS_ASSERT_EQUALS("Distance", frame.name());
   }

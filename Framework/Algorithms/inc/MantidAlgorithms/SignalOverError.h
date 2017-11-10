@@ -36,7 +36,6 @@ namespace Algorithms {
 class DLLExport SignalOverError : public UnaryOperation {
 public:
   SignalOverError();
-  ~SignalOverError() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -8,13 +8,16 @@
 #ifndef MOCKOBJECTS_H_
 #define MOCKOBJECTS_H_
 
-#include <gmock/gmock.h>
-#include <stdexcept>
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ICluster.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Crystal {
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
@@ -45,6 +48,8 @@ public:
     return this->getLabel() == label;
   }
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 }
 }
 

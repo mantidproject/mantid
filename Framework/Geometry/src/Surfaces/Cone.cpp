@@ -165,7 +165,6 @@ void Cone::setBaseEqn()
   BaseEqn[7] = 2.0 * (Normal[1] * CdotN - Centre[1] * c2);      // H y
   BaseEqn[8] = 2.0 * (Normal[2] * CdotN - Centre[2] * c2);      // J z
   BaseEqn[9] = c2 * Centre.scalar_prod(Centre) - CdotN * CdotN; // K const
-  return;
 }
 
 void Cone::rotate(const Kernel::Matrix<double> &R)
@@ -177,7 +176,6 @@ void Cone::rotate(const Kernel::Matrix<double> &R)
   Centre.rotate(R);
   Normal.rotate(R);
   setBaseEqn();
-  return;
 }
 
 void Cone::displace(const Kernel::V3D &A)
@@ -189,7 +187,6 @@ void Cone::displace(const Kernel::V3D &A)
 {
   Centre += A;
   setBaseEqn();
-  return;
 }
 
 void Cone::setCentre(const Kernel::V3D &A)
@@ -200,7 +197,6 @@ void Cone::setCentre(const Kernel::V3D &A)
 {
   Centre = A;
   setBaseEqn();
-  return;
 }
 
 void Cone::setNorm(const Kernel::V3D &A)
@@ -214,7 +210,6 @@ void Cone::setNorm(const Kernel::V3D &A)
     Normal.normalize();
     setBaseEqn();
   }
-  return;
 }
 
 void Cone::setAngle(const double A)
@@ -227,7 +222,6 @@ void Cone::setAngle(const double A)
   alpha = A;
   cangle = cos(M_PI * alpha / 180.0);
   setBaseEqn();
-  return;
 }
 
 void Cone::setTanAngle(const double A)
@@ -240,7 +234,6 @@ void Cone::setTanAngle(const double A)
   cangle = 1.0 / sqrt(A * A + 1.0); // convert tan(theta) to cos(theta)
   alpha = acos(cangle) * 180.0 / M_PI;
   setBaseEqn();
-  return;
 }
 
 double Cone::distance(const Kernel::V3D &Pt) const
@@ -344,7 +337,6 @@ void Cone::write(std::ostream &OX) const
   const double TA = tan((M_PI * alpha) / 180.0); // tan^2(angle)
   cx << TA *TA;
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 void Cone::getBoundingBox(double &xmax, double &ymax, double &zmax,

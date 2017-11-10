@@ -12,7 +12,7 @@ OUTPUT_PATH = os.path.abspath("Contents/MacOS")
 # list of the python libraries to copy
 PYTHON_LIBRARIES = ['sphinx', 'sphinx_bootstrap_theme', 'IPython', 'zmq', 'pygments', \
                 '_markerlib', 'backports', 'certifi', 'tornado', 'markupsafe', \
-                'jinja2', 'psutil', 'nxs']
+                'jinja2', 'psutil', 'nxs', 'h5py']
 
 # path to the nxs
 # by default the nexus library installs it here

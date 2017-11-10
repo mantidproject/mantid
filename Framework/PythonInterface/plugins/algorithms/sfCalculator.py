@@ -1,9 +1,11 @@
 #pylint: disable=invalid-name,too-many-arguments,too-many-lines,too-many-instance-attributes, too-many-locals,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import numpy as np
 import os.path
 
 PRECISION = 0.020
+
 
 class sfCalculator(object):
 
@@ -72,7 +74,7 @@ class sfCalculator(object):
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
 
-        print '---> initialize calculation'
+        print('---> initialize calculation')
 
         if tof_range is None:
             self.tof_min = 10000
@@ -90,7 +92,7 @@ class sfCalculator(object):
 
     def setNumerator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set numerator (' + self.numerator + ')'
+        print('---> set numerator (' + self.numerator + ')')
 
         if minPeak != 0:
             self.n_peak_pixel_min = minPeak
@@ -103,7 +105,7 @@ class sfCalculator(object):
 
     def setDenominator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set denominator (' + self.denominator + ')'
+        print('---> set denominator (' + self.denominator + ')')
 
         if minPeak != 0:
             self.d_peak_pixel_min = minPeak
@@ -239,7 +241,7 @@ class sfCalculator(object):
             self.back_pixel_max = self.d_back_pixel_max
 
         nexus_file_numerator = filen
-        print '----> loading nexus file: ' + nexus_file_numerator
+        print('----> loading nexus file: ' + nexus_file_numerator)
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
 
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
@@ -252,9 +254,9 @@ class sfCalculator(object):
             self.beta_pixel_nbr = 304  #will be integrated over this dimension
 
         proton_charge = self._getProtonCharge(EventDataWks)
-        print '----> rebinning '
-        HistoDataWks = Rebin(InputWorkspace=EventDataWks,\
-              Params=self.rebin_parameters)
+        print('----> rebinning ')
+        HistoDataWks = Rebin(InputWorkspace=EventDataWks,
+                             Params=self.rebin_parameters)
 
 #        mt2 = mtd['HistoDataWks']
 #        x_axis = mt2.readX(0)[:]
@@ -262,10 +264,10 @@ class sfCalculator(object):
         x_axis = HistoDataWks.readX(0)[:]
         self.x_axis = x_axis
 
-        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,\
-                                        proton_charge=proton_charge,\
-                                        from_pixel=self.peak_pixel_min,\
-                                        to_pixel=self.peak_pixel_max)
+        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,
+                                                          proton_charge=proton_charge,
+                                                          from_pixel=self.peak_pixel_min,
+                                                          to_pixel=self.peak_pixel_max)
 
         DataWks = self._removeBackground(InputWorkspace=OutputWorkspace,
                                          from_peak=self.peak_pixel_min,
@@ -332,9 +334,9 @@ class sfCalculator(object):
 
 
 #        mt3 = mtd['DataWks']
-        self._calculateFinalAxis(Workspace=DataWks,\
-                           bNumerator=bNumerator)
-        print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
+        self._calculateFinalAxis(Workspace=DataWks,
+                                 bNumerator=bNumerator)
+        print('done with _calculateFinalAxis and back in calculatefinalaxis') #REMOVEME
 
         #cleanup workspaces
         DeleteWorkspace(EventDataWks)
@@ -346,7 +348,7 @@ class sfCalculator(object):
 #         DeleteWorkspace(TransposeHistoFlatDataWks_2)
         DeleteWorkspace(DataWks)
 
-        print 'done with cleaning workspaces in line 247'
+        print('done with cleaning workspaces in line 247')
 
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
@@ -354,7 +356,7 @@ class sfCalculator(object):
         and denominator
         """
 
-        print '----> calculate final axis'
+        print('----> calculate final axis')
         mt = Workspace
         x_axis = mt.readX(0)[:]
         self.x_axis = x_axis
@@ -397,7 +399,7 @@ class sfCalculator(object):
             self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
 
-        print 'done with _calculateFinalAxis'
+        print('done with _calculateFinalAxis')
 
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None,
@@ -411,7 +413,7 @@ class sfCalculator(object):
         returns the new workspace handle
         """
 
-        print '-----> Create Integrated workspace '
+        print('-----> Create Integrated workspace ')
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1
         y_axis = np.zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
@@ -432,8 +434,8 @@ class sfCalculator(object):
                     index = int(y+x*304)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
-                                            (InputWorkspace.readE(index)[:]))
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                                           (InputWorkspace.readE(index)[:]))
 
         else:
             for x in range(304):
@@ -441,8 +443,8 @@ class sfCalculator(object):
                     index = int(y+x*256)
     #                y_axis[y, :] += InputWorkspace.readY(index)[:]
                     y_axis[y, :] += InputWorkspace.readY(index)[:]
-                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *\
-                                            (InputWorkspace.readE(index)[:]))
+                    y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
+                                           (InputWorkspace.readE(index)[:]))
 
 #        #DEBUG
 #        f=open('/home/j35/myASCIIfromCode.txt','w')
@@ -470,10 +472,10 @@ class sfCalculator(object):
         y_axis /= (proton_charge * 1e-12)
         y_error_axis /= (proton_charge * 1e-12)
 
-        OutputWorkspace = CreateWorkspace(DataX=x_axis,\
-                        DataY=y_axis,\
-                        DataE=y_error_axis,\
-                        Nspec=self.alpha_pixel_nbr)
+        OutputWorkspace = CreateWorkspace(DataX=x_axis,
+                                          DataY=y_axis,
+                                          DataE=y_error_axis,
+                                          Nspec=self.alpha_pixel_nbr)
 
         return OutputWorkspace
 
@@ -623,15 +625,14 @@ class sfCalculator(object):
             peak_array[t] = final_value
             peak_array_error[t] = final_error
 
-
         # make new workspace
         y_axis = peak_array.flatten()
         y_error_axis = peak_array_error.flatten()
 
-        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],\
-                        DataY=y_axis,\
-                        DataE=y_error_axis,\
-                        Nspec=1)
+        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],
+                                  DataY=y_axis,
+                                  DataE=y_error_axis,
+                                  Nspec=1)
 
 #         import sys
 #         sys.exit("in _removeBackground... so far, so good!")
@@ -701,17 +702,17 @@ class sfCalculator(object):
         b coefficients (y=a+bx)
         """
 
-        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,\
-                        DataY=self.y_axis_ratio,\
-                        DataE=self.y_axis_error_ratio,\
-                        Nspec=1)
+        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,
+                                    DataY=self.y_axis_ratio,
+                                    DataE=self.y_axis_error_ratio,
+                                    Nspec=1)
 
-        print 'replaceSpecialValues'
-        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,\
-                             NaNValue=0,\
-                             NaNError=0,\
-                             InfinityValue=0,\
-                             InfinityError=0)
+        print('replaceSpecialValues')
+        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,
+                                         NaNValue=0,
+                                         NaNError=0,
+                                         InfinityValue=0,
+                                         InfinityError=0)
 
 #        ResetNegatives(InputWorkspace='DataToFit',
 #                       OutputWorkspace='DataToFit',
@@ -749,9 +750,9 @@ class sfCalculator(object):
             xmin = xaxis[0]
             xmax = xaxis[sz/2]
 
-            DataToFit = CropWorkspace(InputWorkspace=DataToFit,\
-                         XMin=xmin,\
-                         XMax=xmax)
+            DataToFit = CropWorkspace(InputWorkspace=DataToFit,
+                                      XMin=xmin,
+                                      XMax=xmax)
 
             Fit(InputWorkspace=DataToFit,
                 Function='name=UserFunction, Formula=a+b*x, a=1, b=2',
@@ -768,6 +769,7 @@ class sfCalculator(object):
 #        self.b = res.getDouble("Value", 1)
 #        self.error_a = res.getDouble("Error", 0)
 #        self.error_b = res.getDouble("Error", 1)
+
 
 def plotObject(instance):
 
@@ -797,12 +799,13 @@ def plotObject(instance):
     show()
     legend()
 
+
 def recordSettings(a, b, error_a, error_b, name, instance):
     """
     This function will record the various fitting parameters and the
     name of the ratio
     """
-    print '--> recoding settings'
+    print('--> recoding settings')
     a.append(instance.a)
     b.append(instance.b)
     error_a.append(instance.error_a)
@@ -821,6 +824,7 @@ def variable_value_splitter(variable_value):
     value = _split[1]
     return {'variable':variable, 'value':value}
 
+
 def isWithinRange(value1, value2):
     """
         This function checks if the two values and return true if their
@@ -831,6 +835,7 @@ def isWithinRange(value1, value2):
         return True
     else:
         return False
+
 
 def outputFittingParameters(a, b, error_a, error_b,
                             lambda_requested,
@@ -853,7 +858,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     9th column: error_b
     """
 
-    print '--> output fitting parameters'
+    print('--> output fitting parameters')
 
     bFileExist = False
     #First we need to check if the file already exist
@@ -899,7 +904,7 @@ def outputFittingParameters(a, b, error_a, error_b,
                                             _match = True
                                             break
 
-                if _match == False:
+                if not _match:
                     entry_list_to_add.append(i)
 
         except:
@@ -992,6 +997,7 @@ def outputFittingParameters(a, b, error_a, error_b,
         f.writelines(_content)
         f.close()
 
+
 def createIndividualList(string_list_files):
     """
     Using the list_files, will produce a dictionary of the run
@@ -1016,6 +1022,7 @@ def createIndividualList(string_list_files):
     return {'list_runs':list_runs,
             'list_attenuator':list_attenuator}
 
+
 def getLambdaValue(mt):
     """
     return the lambdaRequest value
@@ -1023,6 +1030,7 @@ def getLambdaValue(mt):
     mt_run = mt.getRun()
     _lambda = mt_run.getProperty('LambdaRequest').value
     return _lambda
+
 
 def getSh(mt, top_tag, bottom_tag):
     """
@@ -1034,6 +1042,7 @@ def getSh(mt, top_tag, bottom_tag):
     sh = float(sb[0]) - float(st[0])
     units = mt_run.getProperty(top_tag).units
     return sh, units
+
 
 def getSheight(mt, index):
     """
@@ -1053,21 +1062,23 @@ def getSheight(mt, index):
 
     return value[0]
 
+
 def getS1h(mt=None):
     """
         returns the height and units of the slit #1
     """
-    if mt != None:
+    if mt is not None:
 #        _h, units = getSh(mt, 's1t', 's1b')
         _h = getSheight(mt, '1')
         return _h
     return None
 
+
 def getS2h(mt=None):
     """
         returns the height and units of the slit #2
     """
-    if mt != None:
+    if mt is not None:
 #        _h, units = getSh(mt, 's2t', 's2b')
         _h = getSheight(mt, '2')
         return _h
@@ -1092,6 +1103,7 @@ def getSwidth(mt, index):
         value = mt_run.getProperty(tag).value
     return value[0]
 
+
 def getSw(mt, left_tag, right_tag):
     """
         returns the width and units of the given slits
@@ -1103,26 +1115,27 @@ def getSw(mt, left_tag, right_tag):
     units = mt_run.getProperty(left_tag).units
     return sw, units
 
+
 def getS1w(mt=None):
     """
         returns the width and units of the slit #1
     """
-    if mt != None:
+    if mt is not None:
 #        _w, units = getSw(mt, 's1l', 's1r')
         _w = getSwidth(mt, '1')
         return _w
     return None
 
+
 def getS2w(mt=None):
     """
         returns the width and units of the slit #2
     """
-    if mt != None:
+    if mt is not None:
 #        _w, units = getSh(mt, 's2l', 's2r')
         _w = getSwidth(mt, '2')
         return _w
     return None
-
 
 
 def getSlitsValueAndLambda(full_list_runs,
@@ -1136,12 +1149,12 @@ def getSlitsValueAndLambda(full_list_runs,
                  lambda requested values
     """
     _nbr_files = len(full_list_runs)
-    print '> Retrieving Slits and Lambda Requested for each file:'
+    print('> Retrieving Slits and Lambda Requested for each file:')
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
-        print '-> ' + _full_file_name
-        tmpWks = LoadEventNexus(Filename=_full_file_name,\
-                       MetaDataOnly='1')
+        print('-> ' + _full_file_name)
+        tmpWks = LoadEventNexus(Filename=_full_file_name,
+                                MetaDataOnly='1')
 #        mt1 = mtd['tmpWks']
         _s1h_value = getS1h(tmpWks)
         _s2h_value = getS2h(tmpWks)
@@ -1155,6 +1168,7 @@ def getSlitsValueAndLambda(full_list_runs,
 
         _lambda_value = getLambdaValue(tmpWks)
         lambdaRequest[i] = _lambda_value
+
 
 def isRunsSorted(dummy_list_runs, S1H, S2H):
     """
@@ -1178,15 +1192,16 @@ def isRunsSorted(dummy_list_runs, S1H, S2H):
 
     return True
 
+
 def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
                     list_peak_back_denominator=None,
                     list_objects=None,
                     tof_range=None):
-    if list_objects==None:
+    if list_objects is None:
         list_objects=[]
-    print '--> running calculate and fit algorithm'
+    print('--> running calculate and fit algorithm')
 
     cal1 = sfCalculator(numerator=numerator,
                         denominator=denominator,
@@ -1203,7 +1218,7 @@ def calculateAndFit(numerator='',
                         maxBack=list_peak_back_denominator[3])
 
     cal1.run()
-    print 'Done with cal1.run()'
+    print('Done with cal1.run()')
 
     if list_objects != [] and list_objects[-1] is not None:
         new_cal1 = cal1 * list_objects[-1]
@@ -1213,20 +1228,23 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
+
 def showhelp():
     """
         Here the user will have information about how the command line
         works
     """
-    print 'sfCalculator help:'
-    print
-    print 'example:'
-    print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
-    print '                          list_'
+    print('sfCalculator help:')
+    print()
+    print('example:')
+    print(' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",')
+    print('                          list_')
 
 #if __name__ == '__main__':
+
+
 def calculate(string_runs=None,\
-#              list_attenuator=None,
+              #              list_attenuator=None,
               list_peak_back=None,
               incident_medium=None,
               output_file_name=None,
@@ -1316,7 +1334,6 @@ def calculate(string_runs=None,\
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
-    _lr = lambdaRequest[0]
 
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
@@ -1336,7 +1353,6 @@ def calculate(string_runs=None,\
         error_a = []
         error_b = []
         name = []
-        _previous_cal = None
 
         finalS1H = []
         finalS2H = []
@@ -1362,7 +1378,7 @@ def calculate(string_runs=None,\
 
         for i in range(len(list_runs)):
 
-            print '> Working with index: ' + str(i)
+            print('> Working with index: ' + str(i))
             _attenuator = list_attenuator[i]
 
             if _attenuator == 0:
@@ -1376,15 +1392,15 @@ def calculate(string_runs=None,\
                     index_numerator = i
                     index_denominator = _index_first_A[_attenuator]
 
-                print '-> numerator  : ' + str(list_runs[index_numerator])
-                print '-> denominator: ' + str(list_runs[index_denominator])
+                print('-> numerator  : ' + str(list_runs[index_numerator]))
+                print('-> denominator: ' + str(list_runs[index_denominator]))
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                       denominator=list_runs[index_denominator],
                                       list_peak_back_numerator=list_peak_back[index_numerator],
                                       list_peak_back_denominator=list_peak_back[index_denominator],
                                       list_objects=list_objects,
                                       tof_range=tof_range)
-                print '-> Done with Calculate and Fit'
+                print('-> Done with Calculate and Fit')
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
@@ -1416,12 +1432,10 @@ def calculate(string_runs=None,\
                                 finalS1W, finalS2W,
                                 output_file_name)
 
-        print 'Done !'
+        print('Done !')
 
 #    else:
 #        """
 #        sort the files
 #        """
 #        pass
-
-

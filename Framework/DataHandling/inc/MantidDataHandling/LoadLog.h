@@ -76,9 +76,6 @@ class DLLExport LoadLog : public API::Algorithm {
 public:
   /// Default constructor
   LoadLog();
-
-  /// Destructor
-  ~LoadLog() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadLog"; };
   /// Summary of algorithms purpose

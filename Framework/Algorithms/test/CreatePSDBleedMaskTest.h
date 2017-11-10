@@ -6,9 +6,12 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::Instrument_sptr;
@@ -79,11 +82,11 @@ public:
     // Test masking
     int failedIndexStart(50), failedIndexEnd(99);
     for (int i = failedIndexStart; i <= failedIndexEnd; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(i)[0], 1.);
+      TS_ASSERT_EQUALS(outputWS->y(i)[0], 1.);
     }
 
     for (int i = 0; i <= 49; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(i)[0], 0.);
+      TS_ASSERT_EQUALS(outputWS->y(i)[0], 0.);
     }
 
     dataStore.remove(outputName);
@@ -91,19 +94,23 @@ public:
 
 private:
   Workspace2D_sptr createTestWorkspace() {
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Indexing;
     const int nTubes = 3;
     const int nPixelsPerTube = 50;
     const int nBins(5);
     // YLength = nTubes * nPixelsPerTube
     const int nSpectra(nTubes * nPixelsPerTube);
-    Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nSpectra, nBins);
-    testWS->setInstrument(createTestInstrument(nTubes, nPixelsPerTube));
+    auto testWS = create<Workspace2D>(
+        createTestInstrument(nTubes, nPixelsPerTube), IndexInfo(nSpectra),
+        Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
+                  Counts(nBins, 2.0)));
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate
-    testWS->dataY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
-    return testWS;
+    testWS->mutableY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
+    return std::move(testWS);
   }
 
   Mantid::Geometry::Instrument_sptr

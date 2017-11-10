@@ -1,11 +1,11 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
 #include <sstream>
 
-using Mantid::API::SpectraAxis;
 using std::set;
 using std::size_t;
 
@@ -29,7 +29,7 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
 SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                                        const bool includeMonitors) {
   // Init the Workspace2D with one spectrum per detector, in the same order.
-  this->init(inst->getNumberDetectors(!includeMonitors), 1, 1);
+  this->initialize(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
   // Copy the instrument
   this->setInstrument(inst);
@@ -39,8 +39,8 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
 
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
+    auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
@@ -54,13 +54,12 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
  * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
-  this->init(parent->getNumberHistograms(), 1, 1);
-  API::WorkspaceFactory::Instance().initializeFromParent(
-      parent, API::MatrixWorkspace_sptr(this, Mantid::NoDeleting()), false);
+  this->initialize(parent->getNumberHistograms(), 1, 1);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
+    auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
     }
@@ -81,6 +80,16 @@ void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
         "SpecialWorkspace2D must have 'spectra' of length 1 only.");
   // Continue with standard initialization
   Workspace2D::init(NVectors, XLength, YLength);
+}
+
+void SpecialWorkspace2D::init(const HistogramData::Histogram &histogram) {
+  if (histogram.xMode() != HistogramData::Histogram::XMode::Points)
+    throw std::runtime_error(
+        "SpecialWorkspace2D can only be initialized with XMode::Points");
+  if (histogram.x().size() != 1)
+    throw std::runtime_error(
+        "SpecialWorkspace2D can only be initialized with length 1");
+  Workspace2D::init(histogram);
 }
 
 /**
@@ -107,7 +116,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
     std::ostringstream os;
     os << "SpecialWorkspace2D: " << this->getName()
        << "  Detector ID = " << detectorID
-       << "  Size(Map) = " << this->detID_to_WI.size() << std::endl;
+       << "  Size(Map) = " << this->detID_to_WI.size() << '\n';
     throw std::invalid_argument(os.str());
   } else {
     return this->dataY(it->second)[0];
@@ -128,7 +137,8 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
-    if (it->second < m_noVectors) // don't let it generate an exception
+    if (it->second <
+        getNumberHistograms()) // don't let it generate an exception
     {
       return this->dataY(it->second)[0];
     } else {
@@ -190,7 +200,7 @@ SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
   if (size_t(workspaceIndex) > this->getNumberHistograms())
     throw std::invalid_argument(
         "SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
-  return this->getSpectrum(workspaceIndex)->getDetectorIDs();
+  return this->getSpectrum(workspaceIndex).getDetectorIDs();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -222,8 +232,6 @@ void SpecialWorkspace2D::binaryOperation(
     throw std::invalid_argument("Invalid Operator");
     break;
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -239,13 +247,10 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     break;
   default:
     g_log.error() << "Operator " << operatortype
-                  << " Is Not Valid In BinaryOperation(operatortype)"
-                  << std::endl;
+                  << " Is Not Valid In BinaryOperation(operatortype)\n";
     throw std::invalid_argument("Invalid Operator");
     break;
   }
-
-  return;
 }
 
 /** AND operator
@@ -264,8 +269,6 @@ void SpecialWorkspace2D::binaryAND(
       this->dataY(i)[0] += y2;
     }
   }
-
-  return;
 }
 
 /** OR operator
@@ -292,8 +295,6 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
 }
 */
   }
-
-  return;
 }
 
 /** Excluded Or operator
@@ -313,8 +314,6 @@ void SpecialWorkspace2D::binaryXOR(
       this->dataY(i)[0] = 1.0;
     }
   }
-
-  return;
 }
 
 /**
@@ -330,8 +329,6 @@ void SpecialWorkspace2D::binaryNOT() {
       this->dataY(i)[0] = 0.0;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -347,28 +344,28 @@ bool SpecialWorkspace2D::isCompatible(
   size_t numhist2 = ws->getNumberHistograms();
   if (numhist1 != numhist2) {
     g_log.debug() << "2 Workspaces have different number of histograms:  "
-                  << numhist1 << "  vs. " << numhist2 << std::endl;
+                  << numhist1 << "  vs. " << numhist2 << '\n';
     return false;
   }
 
   // 2. Check detector ID
   for (size_t ispec = 0; ispec < numhist1; ispec++) {
-    set<detid_t> ids1 = this->getSpectrum(ispec)->getDetectorIDs();
-    set<detid_t> ids2 = ws->getSpectrum(ispec)->getDetectorIDs();
+    set<detid_t> ids1 = this->getSpectrum(ispec).getDetectorIDs();
+    set<detid_t> ids2 = ws->getSpectrum(ispec).getDetectorIDs();
 
     if (ids1.size() != ids2.size()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different number of detectors "
-                    << ids1.size() << " vs. " << ids2.size() << std::endl;
+                    << ids1.size() << " vs. " << ids2.size() << '\n';
       return false;
     } else if (ids1.empty()) {
       g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces both have 0 detectors. " << std::endl;
+                    << ": 2 Workspaces both have 0 detectors. \n";
       return false;
     } else if (*ids1.begin() != *ids2.begin()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different Detector ID "
-                    << *ids1.begin() << " vs. " << *ids2.begin() << std::endl;
+                    << *ids1.begin() << " vs. " << *ids2.begin() << '\n';
       return false;
     }
   } // false
@@ -415,8 +412,6 @@ void SpecialWorkspace2D::copyFrom(
 
   // Copy detector map
   this->detID_to_WI = sourcews->detID_to_WI;
-
-  return;
 }
 
 } // namespace Mantid

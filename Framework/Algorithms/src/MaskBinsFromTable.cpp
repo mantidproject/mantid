@@ -29,13 +29,6 @@ MaskBinsFromTable::MaskBinsFromTable()
       m_useDetectorID(false), m_useSpectrumID(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MaskBinsFromTable::~MaskBinsFromTable() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
   this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,
@@ -49,8 +42,6 @@ void MaskBinsFromTable::init() {
           "MaskingInformation", "", Direction::Input),
       "Input TableWorkspace containing parameters, XMin and "
       "XMax and either SpectraList or DetectorIDsList");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -65,8 +56,6 @@ void MaskBinsFromTable::exec() {
 
   // Mask bins for all
   maskBins(inputWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -130,8 +119,6 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
   g_log.debug() << "About to set to output."
                 << "\n";
   setProperty("OutputWorkspace", outputws);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,7 +133,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
   g_log.debug() << "Lines of parameters workspace = " << masktblws->rowCount()
-                << std::endl;
+                << '\n';
 
   // Check column names type and sequence
   vector<std::string> colnames = masktblws->getColumnNames();
@@ -162,16 +149,16 @@ void MaskBinsFromTable::processMaskBinWorkspace(
   for (int i = 0; i < static_cast<int>(colnames.size()); ++i) {
     string colname = colnames[i];
     transform(colname.begin(), colname.end(), colname.begin(), ::tolower);
-    if (colname.compare("xmin") == 0)
+    if (colname == "xmin")
       id_xmin = i;
-    else if (colname.compare("xmax") == 0)
+    else if (colname == "xmax")
       id_xmax = i;
     else if (boost::algorithm::starts_with(colname, "spec")) {
       id_spec = i;
     } else if (boost::algorithm::starts_with(colname, "detectorid")) {
       id_dets = i;
     } else {
-      g_log.warning() << "In TableWorkspace " << masktblws->name()
+      g_log.warning() << "In TableWorkspace " << masktblws->getName()
                       << ", column " << i << " with name " << colname
                       << " is not used by MaskBinsFromTable.";
     }
@@ -210,8 +197,6 @@ void MaskBinsFromTable::processMaskBinWorkspace(
     m_xmaxVec.push_back(xmax);
     m_spectraVec.push_back(spectralist);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

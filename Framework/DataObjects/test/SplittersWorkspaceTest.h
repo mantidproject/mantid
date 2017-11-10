@@ -24,12 +24,12 @@ public:
   void testClone() {
     SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Kernel::DateAndTime(10000),
-                                 Kernel::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Kernel::DateAndTime(20000),
-                                 Kernel::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Kernel::DateAndTime(40000),
-                                 Kernel::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     splitterws.addSplitter(s1);
     splitterws.addSplitter(s2);
@@ -46,12 +46,12 @@ public:
   void test_Add() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Kernel::DateAndTime(10000),
-                                 Kernel::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Kernel::DateAndTime(20000),
-                                 Kernel::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Kernel::DateAndTime(40000),
-                                 Kernel::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s1));
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s2));
@@ -63,12 +63,12 @@ public:
   void test_AddGet() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Kernel::DateAndTime(10000),
-                                 Kernel::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Kernel::DateAndTime(20000),
-                                 Kernel::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Kernel::DateAndTime(40000),
-                                 Kernel::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     std::vector<Kernel::SplittingInterval> splitters;
     splitters.push_back(s1);
@@ -109,10 +109,10 @@ public:
     SplittersWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<SplittersWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<SplittersWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -120,9 +120,9 @@ public:
     SplittersWorkspace_const_sptr wsCastConst;
     SplittersWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (SplittersWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (SplittersWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

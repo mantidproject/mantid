@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid
 import mantid.api
 import mantid.simpleapi
@@ -24,7 +25,6 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         """ Mantid required
         """
         return "Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA."
-
 
     def PyInit(self):
         """ Python initialization:  Define input parameters
@@ -56,7 +56,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i=0
-        while __w.getDetector(i).isMonitor():
+        spectrumInfo = __w.spectrumInfo()
+        while spectrumInfo.isMonitor(i):
             i += 1
         #i is the index of the first true detector
         #now, crop the workspace of the monitors
@@ -68,18 +69,16 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         spectra = numpy.arange(numdet).reshape(-1,8,128)
 
-        banks = numdet/8/128
-
+        banks = numdet//8//128
 
         f = open(filename,'w')
 
         f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping instrument="'+instrument+'">\n')
 
-
         groupnum = 0
-        for i in numpy.arange(banks):
-            for j in numpy.arange(8/pixelsx)*pixelsx:
-                for k in numpy.arange(128/pixelsy)*pixelsy:
+        for i in range(banks):
+            for j in range(0,8,pixelsx):
+                for k in range(0,128,pixelsy):
 
                     groupname = str(groupnum)
                     ids = spectra[i, j:j+pixelsx, k:k+pixelsy].reshape(-1)
@@ -93,7 +92,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     groupnum += 1
         f.write('</detector-grouping>')
         f.close()
-        mantid.simpleapi.DeleteWorkspace(__w.getName())
+        mantid.simpleapi.DeleteWorkspace(__w.name())
         return
+
 
 mantid.api.AlgorithmFactory.subscribe(GenerateGroupingSNSInelastic)

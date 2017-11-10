@@ -31,7 +31,7 @@
  ***************************************************************************/
 #include "SetColValuesDialog.h"
 #include "Table.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
@@ -52,28 +52,30 @@
 SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
                                        Qt::WFlags fl)
     : QDialog(t, fl), Scripted(env) {
-  setName("SetColValuesDialog");
+  setObjectName("SetColValuesDialog");
   setWindowTitle(tr("MantidPlot - Set column values"));
   setSizeGripEnabled(true);
 
   QHBoxLayout *hbox1 = new QHBoxLayout();
   hbox1->addWidget(new QLabel(tr("For row (i)")));
   start = new QSpinBox();
-  start->setMinValue(1);
+  start->setMinimum(1);
   hbox1->addWidget(start);
 
   hbox1->addWidget(new QLabel(tr("to")));
 
   end = new QSpinBox();
-  end->setMinValue(1);
+  end->setMinimum(1);
   hbox1->addWidget(end);
 
+  // Ideally this would be checked at compile time. Until we have 'constexpr if`
+  // on all platforms, the added complexity and minimal cost isn't worthwhile.
   if (sizeof(int) == 2) { // 16 bit signed integer
-    start->setMaxValue(0x7fff);
-    end->setMaxValue(0x7fff);
+    start->setMaximum(0x7fff);
+    end->setMaximum(0x7fff);
   } else { // 32 bit signed integer
-    start->setMaxValue(0x7fffffff);
-    end->setMaxValue(0x7fffffff);
+    start->setMaximum(0x7fffffff);
+    end->setMaximum(0x7fffffff);
   }
 
   QGridLayout *gl1 = new QGridLayout();
@@ -222,7 +224,7 @@ void SetColValuesDialog::setTable(Table *w) {
   QStringList colNames = w->colNames();
   int cols = w->numCols();
   for (int i = 0; i < cols; i++)
-    boxColumn->insertItem("col(\"" + colNames[i] + "\")", i);
+    boxColumn->insertItem(i, "col(\"" + colNames[i] + "\")");
 
   if (w->hasSelection()) {
     w->setSelectedCol(w->leftSelectedColumn());

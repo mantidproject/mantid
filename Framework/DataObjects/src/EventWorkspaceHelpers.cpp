@@ -28,11 +28,11 @@ EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_sptr inputMatrixW) {
   MatrixWorkspace_sptr outputW;
   outputW = WorkspaceFactory::Instance().create(
       "Workspace2D", inputW->getNumberHistograms(), numBins + 1, numBins);
-  WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW, false);
 
   // Now let's set all the X bins and values
   for (size_t i = 0; i < inputW->getNumberHistograms(); i++) {
-    outputW->getSpectrum(i)->copyInfoFrom(*inputW->getSpectrum(i));
+    outputW->getSpectrum(i).copyInfoFrom(inputW->getSpectrum(i));
     outputW->setX(i, inputW->refX(i));
 
     MantidVec &Yout = outputW->dataY(i);

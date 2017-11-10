@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
+
 class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
     '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
 
@@ -32,8 +33,9 @@ class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
             calculatedData = mtd["%sCorr" % (dataFile)].dataY(0)
 
             self.assertEqual(calculatedData.shape[0], referenceData.shape[0],
-                             "Number of d-values does not match for %s (is: %i, should: %i)" % (dataFile,\
-                             calculatedData.shape[0], referenceData.shape[0]))
+                             "Number of d-values does not match for %s (is: %i, should: %i)" % (dataFile,
+                                                                                                calculatedData.shape[0],
+                                                                                                referenceData.shape[0]))
 
             CreateWorkspace(referenceData, calculatedData, OutputWorkspace=workspaceNameTemplate)
 
@@ -61,4 +63,3 @@ class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
             maxAbsoluteResidual = np.max(np.abs(residuals))
             self.assertLessThan(maxAbsoluteResidual, 1.0, "Maximum absolute residual is too large "
                                 "for %s (is: %d)" % (dataFile, maxAbsoluteResidual))
-

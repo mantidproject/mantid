@@ -5,20 +5,24 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
-#include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Unit.h"
+
+#include <boost/scoped_ptr.hpp>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-//==========================================================================================
 class EventListTest : public CxxTest::TestSuite {
 private:
   EventList el;
@@ -67,8 +71,8 @@ public:
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
-    el.setX(x);
-    el.setDx(x);
+    el.setX(make_cow<HistogramX>(x));
+    el.setPointVariances(2);
 
     EventList other;
     other = el;
@@ -78,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(other.getSpectrumNo(), el.getSpectrumNo());
     TS_ASSERT_EQUALS(other.getDetectorIDs(), el.getDetectorIDs());
     TS_ASSERT_EQUALS(other.readX(), el.readX());
-    TS_ASSERT_EQUALS(other.readDx(), el.readDx());
+    TS_ASSERT_EQUALS(other.sharedDx(), el.sharedDx());
   }
 
   //==================================================================================
@@ -301,13 +305,8 @@ public:
   //==================================================================================
 
   /// Make a big bin holding all events
-  MantidVecPtr one_big_bin() {
-    // Generate the histrogram bins
-    MantidVecPtr x;
-    MantidVec &shared_x = x.access();
-    shared_x.push_back(0);
-    shared_x.push_back(1e10);
-    return x;
+  cow_ptr<HistogramX> one_big_bin() {
+    return make_cow<HistogramX>(std::initializer_list<double>{0, 1e10});
   }
 
   void test_MinusOperator_all_9_possibilites() {
@@ -559,8 +558,8 @@ public:
           int bini = static_cast<int>(tof / step);
           if (bini == 7) {
             // That was zeros
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).weight()));
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).errorSquared()));
+            TS_ASSERT(std::isnan(el.getEvent(i).weight()));
+            TS_ASSERT(std::isnan(el.getEvent(i).errorSquared()));
           } else {
             // Same weight error as dividing by a scalar with error before,
             // since we divided by 2+-0.5 again
@@ -588,7 +587,7 @@ public:
 
       for (std::size_t i = 0; i < Y.size(); i++) {
         TSM_ASSERT_DELTA(this_type, Y[i], 1.0, 1e-5);
-        TS_ASSERT_DELTA(E[i], sqrt(2.0) / 2.0, 1e-5);
+        TS_ASSERT_DELTA(E[i], 0.5 * M_SQRT2, 1e-5);
       }
     }
   }
@@ -601,7 +600,7 @@ public:
       el.switchTo(static_cast<EventType>(this_type));
       // Divide by two with error sqrt(2) = result has less error than if you
       // had started from a histogram.
-      TS_ASSERT_THROWS_NOTHING(el.divide(2.0, sqrt(2.0)));
+      TS_ASSERT_THROWS_NOTHING(el.divide(2.0, M_SQRT2));
 
       // Make the histogram we are multiplying.
       MantidVec Y, E;
@@ -631,7 +630,7 @@ public:
 
       for (std::size_t i = 0; i < Y.size(); i++) {
         TS_ASSERT_DELTA(Y[i], 4.0, 1e-5);
-        TS_ASSERT_DELTA(E[i], 4.0 / sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA(E[i], 4.0 * M_SQRT1_2, 1e-5);
       }
     }
   }
@@ -643,7 +642,7 @@ public:
       this->fake_uniform_data();
       el.switchTo(static_cast<EventType>(this_type));
       // Multiply with an error
-      TS_ASSERT_THROWS_NOTHING(el.multiply(2.0, sqrt(2.0)));
+      TS_ASSERT_THROWS_NOTHING(el.multiply(2.0, M_SQRT2));
       MantidVec Y, E;
       MantidVec X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
@@ -766,10 +765,10 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.constDataX() == shared_x);
+    TS_ASSERT(el2.readX() == shared_x);
   }
 
   void test_dataX() {
@@ -789,10 +788,10 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.constDataX() == shared_x);
+    TS_ASSERT(el2.readX() == shared_x);
   }
 
   void test_empty_histogram() {
@@ -807,7 +806,7 @@ public:
     // Now do set up an X axis.
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y3(el3.makeDataY());
     // Histogram is 0, since I cleared all the events
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -834,7 +833,7 @@ public:
       this->test_setX();       // Set it up
       const EventList el3(el); // need to copy to a const method in order to
                                // access the data directly.
-      MantidVec X = el3.constDataX();
+      MantidVec X = el3.readX();
       boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
       boost::scoped_ptr<MantidVec> E(el3.makeDataE());
       TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -843,7 +842,7 @@ public:
       // i-1.
       for (std::size_t i = 0; i < Y->size(); i++) {
         TS_ASSERT_EQUALS((*Y)[i], 2.0);
-        TS_ASSERT_DELTA((*E)[i], sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA((*E)[i], M_SQRT2, 1e-5);
       }
     }
   }
@@ -859,11 +858,11 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -871,7 +870,15 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
+    }
+
+    // check uniform counts histogram.
+    size_t hist1 = Y.size();
+    MantidVec Y1(hist1, 0);
+    eList.generateCountsHistogramPulseTime(X[0], X[hist1], Y1);
+    for (std::size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(Y[i], Y1[i]);
     }
   }
 
@@ -885,11 +892,11 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -909,11 +916,11 @@ public:
       shared_x.push_back(time_at_sample);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -925,7 +932,7 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
   }
 
@@ -970,11 +977,11 @@ public:
                                                 // microseconds.
     }
 
-    this->el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(el.constDataX() == shared_x);
+    TS_ASSERT(el.readX() == shared_x);
 
-    MantidVec X = el.constDataX();
+    MantidVec X = el.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -986,7 +993,7 @@ public:
 
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
-      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+      TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
   }
 
@@ -1030,7 +1037,7 @@ public:
 
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1050,7 +1057,7 @@ public:
     this->test_setX();       // Set it up
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1073,12 +1080,12 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
 
     // Get them back
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
 
@@ -1097,10 +1104,10 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < Y->size(); i++) {
@@ -1112,7 +1119,7 @@ public:
     this->fake_data();
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -1528,7 +1535,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out = EventList();
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, out),
@@ -1545,6 +1554,8 @@ public:
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::PULSETIME_SORT,
+                         out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
@@ -1572,7 +1583,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out = EventList();
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(
@@ -1591,6 +1604,8 @@ public:
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::TIMEATSAMPLE_SORT,
+                         out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
@@ -1727,7 +1742,6 @@ public:
 
     for (int i = 1; i < 10; i++) {
       EventList *myOut = outputs[i];
-      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i % 2) == 0) {
         // Even
         TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
@@ -1766,13 +1780,7 @@ public:
     std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
                                         5000000, 6000000, 7000000, 8000000,
                                         9000000, 10000000};
-    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
-
-    for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
-      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
-                << ", " << vec_splitGroup[i] << "\n";
-    }
-
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      false, 1.0, 0.0);
@@ -1782,7 +1790,6 @@ public:
 
     for (int i = 1; i < 10; i++) {
       EventList *myOut = outputs[i];
-      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i % 2) == 0) {
         // Even
         TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
@@ -1971,22 +1978,6 @@ public:
         std::cout << "   - " << timer2.elapsed()
                   << " seconds to sortTof (original).\n";
       TS_ASSERT(checkSort("sortTof"));
-
-      // Reset
-      fake_data();
-      Timer timer3;
-      el.sortTof2();
-      if (verbose)
-        std::cout << "   - " << timer3.elapsed() << " seconds to sortTof2.\n";
-      TS_ASSERT(checkSort("sortTof2"));
-
-      // Reset
-      fake_data();
-      Timer timer4;
-      el.sortTof4();
-      if (verbose)
-        std::cout << "   - " << timer4.elapsed() << " seconds to sortTof4.\n";
-      TS_ASSERT(checkSort("sortTof4"));
     }
   }
 
@@ -2151,12 +2142,6 @@ public:
     fake_uniform_time_sns_data();
 
     el.sortPulseTimeTOF();
-    // for (size_t i = 0; i < el.getNumberEvents(); ++i)
-    // {
-    // std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
-    //         << ", " << el.getEvent(i).pulseTime().totalNanoseconds() +
-    //         static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
-    //}
 
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
@@ -2189,22 +2174,12 @@ public:
     vec_splitGroup[6] = 8;
     vec_splitGroup[8] = 1;
 
-    // for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
-    //{
-    //  std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] <<
-    //  ", "
-    //            << vec_splitGroup[i] << "\n";
-    //}
-
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      true, 0.0, 2.0E-4);
 
-    // Exam result
+    // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
-    for (std::map<int, EventList *>::iterator mit = outputs.begin();
-         mit != outputs.end(); ++mit)
-      std::cout << "Group index = " << mit->first << "\n";
 
     // group 2
     EventList *e2 = outputs[2];
@@ -2241,14 +2216,6 @@ public:
     fake_uniform_time_sns_data();
 
     el.sortPulseTimeTOF();
-    for (size_t i = 0; i < el.getNumberEvents(); ++i) {
-      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
-                << ", "
-                << el.getEvent(i).pulseTime().totalNanoseconds() +
-                       static_cast<int64_t>(el.getEvent(i).tof() * 1000.0)
-                << "\n";
-    }
-
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
@@ -2280,20 +2247,12 @@ public:
     vec_splitGroup[6] = 8;
     vec_splitGroup[8] = 1;
 
-    for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
-      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
-                << ", " << vec_splitGroup[i] << "\n";
-    }
-
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      true, 0.5, 2.0E-4);
 
-    // Exam result
+    // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
-    for (std::map<int, EventList *>::iterator mit = outputs.begin();
-         mit != outputs.end(); ++mit)
-      std::cout << "Group index = " << mit->first << "\n";
 
     // group 2
     EventList *e2 = outputs[2];
@@ -2419,7 +2378,7 @@ public:
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
       el += TofEvent(rand() % 1000,
-                     time); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     time); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 
@@ -2436,7 +2395,7 @@ public:
       // All pulse times from 0 to 999 in seconds
       DateAndTime pulsetime(static_cast<int64_t>(time * 1000000));
       el += TofEvent(rand() % 1000,
-                     pulsetime); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     pulsetime); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 
@@ -2468,6 +2427,148 @@ public:
     }
     return ret;
   }
+
+  void test_readYE_throws_without_MRU() {
+    const EventList el;
+    TS_ASSERT_THROWS(el.readY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.dataY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.readE(), std::runtime_error);
+    TS_ASSERT_THROWS(el.dataE(), std::runtime_error);
+  }
+
+  void test_counts_works_without_MRU() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.counts());
+    TS_ASSERT_THROWS_NOTHING(el.countStandardDeviations());
+  }
+
+  void test_setPoints_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
+    TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
+    // Uncertainties for X are always for Points, this must work.
+    TS_ASSERT_THROWS_NOTHING(el.setPointVariances(1));
+    TS_ASSERT_THROWS_NOTHING(el.setPointStandardDeviations(1));
+  }
+
+  void test_setCounts_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setCounts(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setFrequencies_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setFrequencies(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setShared_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.setSharedX(el.sharedX()));
+    TS_ASSERT_THROWS(el.setSharedY(el.sharedY()), std::runtime_error);
+    TS_ASSERT_THROWS(el.setSharedE(el.sharedE()), std::runtime_error);
+  }
+
+  void test_mutable_access_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.mutableX());
+    TS_ASSERT_THROWS(el.mutableY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.mutableE(), std::runtime_error);
+  }
+
+  void test_histogram() {
+    EventList el;
+    el += TofEvent(1);
+    el.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto histogram = el.histogram();
+    TS_ASSERT(histogram.sharedY());
+    TS_ASSERT(histogram.sharedE());
+    el += TofEvent(1);
+    el += TofEvent(3);
+    TS_ASSERT_EQUALS(histogram.y()[0], 1.0);
+    TS_ASSERT_EQUALS(histogram.y()[1], 0.0);
+    auto updated = el.histogram();
+    TS_ASSERT_EQUALS(updated.y()[0], 2.0);
+    TS_ASSERT_EQUALS(updated.y()[1], 1.0);
+    TS_ASSERT_EQUALS(updated.e()[0], M_SQRT2);
+    TS_ASSERT_EQUALS(updated.e()[1], 1.0);
+  }
+
+  void test_histogram_no_mru() {
+    EventList el;
+    auto hist1 = el.histogram();
+    auto hist2 = el.histogram();
+    TS_ASSERT_EQUALS(hist1.sharedX(), hist2.sharedX());
+    TS_ASSERT_DIFFERS(hist1.sharedY(), hist2.sharedY());
+    TS_ASSERT_DIFFERS(hist1.sharedE(), hist2.sharedE());
+  }
+
+  void test_setHistogram() {
+    EventList el;
+    HistogramData::Histogram histogram(HistogramData::BinEdges{0, 2, 4});
+    TS_ASSERT_THROWS_NOTHING(el.setHistogram(histogram));
+    TS_ASSERT_EQUALS(el.sharedX(), histogram.sharedX());
+    histogram.setCounts(2);
+    TS_ASSERT_THROWS(el.setHistogram(histogram), std::runtime_error);
+    HistogramData::Histogram points(HistogramData::Points{0, 2});
+    TS_ASSERT_THROWS(el.setHistogram(points), std::runtime_error);
+  }
+
+  void test_YMode() {
+    EventList e;
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_setHistogram_rejects_YMode_Frequencies() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    h.setYMode(HistogramData::Histogram::YMode::Counts);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    h.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_THROWS(e.setHistogram(h), std::runtime_error);
+  }
+
+  void test_setHistogram_preserves_YMode_when_setting_uninitialized() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    TS_ASSERT_EQUALS(h.yMode(), HistogramData::Histogram::YMode::Uninitialized);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_histogram_has_correct_YMode() {
+    EventList e;
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(e.histogram().yMode(),
+                     HistogramData::Histogram::YMode::Frequencies);
+  }
+
+  void test_YMode_affects_event_data_interpretation() {
+    // Data generated from the events is put into the histogram as Y and E.
+    // Depending on the YMode, this is interpreted as Counts or Frequencies. In
+    // particular, data generated from events is *not* forcibly intepreted as
+    // counts, i.e., internally we do not use Histogram.setCounts(), since the
+    // bin width may be absorbed into the event weight.
+    EventList e;
+    e += TofEvent(1);
+    e += TofEvent(1);
+    e += TofEvent(3);
+    e.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto countHist = e.histogram();
+    TS_ASSERT_EQUALS(countHist.counts()[0], 2.0);
+    TS_ASSERT_EQUALS(countHist.counts()[1], 1.0);
+    // Intepret events as if weighted by bin width, happens, e.g., in 'Divide'.
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    auto freqHist = e.histogram();
+    TS_ASSERT_EQUALS(freqHist.counts()[0], 4.0);
+    TS_ASSERT_EQUALS(freqHist.counts()[1], 2.0);
+  }
 };
 
 //==========================================================================================
@@ -2489,18 +2590,18 @@ public:
   EventListTestPerformance() {
     // Source for a randome event list
     el_random_source.clear();
-    for (size_t i = 0; i < 2e6; i++)
+    for (size_t i = 0; i < 2000000; i++)
       el_random_source += TofEvent((rand() % 200000) * 0.05, rand() % 1000);
 
     // 10 million events, up to 1e5 tof
     el_sorted_original.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_original +=
           TofEvent(static_cast<double>(i) / 100.0, rand() % 1000);
     el_sorted_original.setSortOrder(TOF_SORT);
 
     el_sorted_weighted.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_weighted += WeightedEvent(static_cast<double>(i) / 100.0,
                                           rand() % 1000, 2.34, 4.56);
     el_sorted_weighted.setSortOrder(TOF_SORT);
@@ -2532,24 +2633,14 @@ public:
 
   void test_sort_tof() { el_random.sortTof(); }
 
-  void test_sort_tof2() { el_random.sortTof2(); }
-
-  void test_sort_tof4() { el_random.sortTof4(); }
-
   void test_compressEvents() {
-    CPUTimer tim;
     EventList out_el;
     el_sorted.compressEvents(10.0, &out_el);
-    std::cout << std::endl
-              << tim << " to compress events. " << std::endl;
   }
 
   void test_compressEvents_Parallel() {
-    CPUTimer tim;
     EventList out_el;
-    el_sorted.compressEvents(10.0, &out_el, true);
-    std::cout << std::endl
-              << tim << " to compress events in parallel. " << std::endl;
+    el_sorted.compressEvents(10.0, &out_el);
   }
 
   void test_multiply() { el_random *= 2.345; }

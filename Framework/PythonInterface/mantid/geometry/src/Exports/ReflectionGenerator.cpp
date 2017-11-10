@@ -68,10 +68,14 @@ void export_ReflectionGenerator() {
   class_<ReflectionGenerator>("ReflectionGenerator", no_init)
       .def(init<const CrystalStructure &, optional<ReflectionConditionFilter>>(
           (arg("crystalStructure"), arg("defaultFilter"))))
-      .def("getHKLs", &getHKLsDefaultFilter)
-      .def("getHKLsUsingFilter", &getHKLsUsingFilter)
-      .def("getUniqueHKLs", &getUniqueHKLsDefaultFilter)
-      .def("getUniqueHKLsUsingFilter", &getUniqueHKLsUsingFilter)
-      .def("getDValues", &getDValues)
-      .def("getFsSquared", &getFsSquared);
+      .def("getHKLs", &getHKLsDefaultFilter,
+           (arg("self"), arg("dMin"), arg("dmax")))
+      .def("getHKLsUsingFilter", &getHKLsUsingFilter,
+           (arg("self"), arg("dMin"), arg("dmax"), arg("filter")))
+      .def("getUniqueHKLs", &getUniqueHKLsDefaultFilter,
+           (arg("self"), arg("dMin"), arg("dmax")))
+      .def("getUniqueHKLsUsingFilter", &getUniqueHKLsUsingFilter,
+           (arg("self"), arg("dMin"), arg("dmax"), arg("filter")))
+      .def("getDValues", &getDValues, (arg("self"), arg("hkls")))
+      .def("getFsSquared", &getFsSquared, (arg("self"), arg("hkls")));
 }

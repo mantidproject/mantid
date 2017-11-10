@@ -1,5 +1,6 @@
 #include "MantidRemoteAlgorithms/StopRemoteTransaction.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -56,8 +57,7 @@ void StopRemoteTransaction::exec() {
   std::istream &respStream = jobManager->httpGet(
       "/transaction", std::string("Action=Stop&TransID=") + transId);
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
-    g_log.information() << "Transaction ID " << transId << " stopped."
-                        << std::endl;
+    g_log.information() << "Transaction ID " << transId << " stopped.\n";
   } else {
     JSONObject resp;
     initFromStream(resp, respStream);

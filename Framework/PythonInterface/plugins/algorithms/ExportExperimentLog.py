@@ -1,12 +1,16 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid
 from mantid.api import *
 from mantid.kernel import *
 import datetime
 import time
 import os
+from six.moves import range
 
 #pylint: disable=too-many-instance-attributes
+
+
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
@@ -43,12 +47,12 @@ class ExportExperimentLog(PythonAlgorithm):
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")
 
-        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),\
-            "Output file of the experiment log.")
+        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),
+                             "Output file of the experiment log.")
 
         filemodes = ["append", "fastappend", "new"]
-        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),\
-            "Optional to create a new file or append to an existing file.")
+        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),
+                             "Optional to create a new file or append to an existing file.")
 
         lognameprop = StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input)
         self.declareProperty(lognameprop, "Sample log names.")
@@ -61,7 +65,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         fileformates = ["tab", "comma (csv)"]
         des = "Output file format.  'tab' format will insert a tab between 2 adjacent values; 'comma' will put a , instead. " + \
-                "With this option, the posfix of the output file is .csv automatically. "
+            "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
         self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.")
@@ -71,12 +75,11 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
-            "Europe/Paris", "Europe/Copenhagen"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+                     "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
         return
-
 
     def PyExec(self):
         """ Main execution body
@@ -132,7 +135,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if len(self._sampleLogNames) != len(ops):
             raise RuntimeError("Size of sample log names and sample operations are unequal!")
         self._sampleLogOperations = []
-        for i in xrange(len(self._sampleLogNames)):
+        for i in range(len(self._sampleLogNames)):
             value = ops[i]
             self._sampleLogOperations.append(value)
         # ENDFOR
@@ -197,7 +200,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if len(overridelist) % 2 != 0:
                 raise RuntimeError("Number of items in OverrideLogValue must be even.")
             self._ovrdTitleValueDict = {}
-            for i in xrange(len(overridelist)/2):
+            for i in range(int(len(overridelist)/2)):
                 title = overridelist[2*i]
                 if title in self._headerTitles:
                     self._ovrdTitleValueDict[title] = overridelist[2*i+1]
@@ -213,7 +216,7 @@ class ExportExperimentLog(PythonAlgorithm):
             raise RuntimeError("No header title specified. Unable to write a new file.")
 
         wbuf = ""
-        for ititle in xrange(len(self._headerTitles)):
+        for ititle in range(len(self._headerTitles)):
             title = self._headerTitles[ititle]
             wbuf += "%s" % (title)
             if ititle < len(self._headerTitles)-1:
@@ -259,7 +262,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 self._headerTitles = titles[:]
             else:
                 same = False
-        for ititle in xrange(len(titles)):
+        for ititle in range(len(titles)):
             title1 = titles[ititle]
             title2 = self._headerTitles[ititle]
             if title1 != title2:
@@ -269,7 +272,6 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         return same
-
 
     def _startNewFile(self):
         """ Start a new file is user wants and save the older one to a different name
@@ -291,7 +293,6 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
-
     def _appendExpLog(self, logvaluedict):
         """ Append experiment log values to log file
         """
@@ -309,7 +310,7 @@ class ExportExperimentLog(PythonAlgorithm):
             skip = False
 
         headertitle = None
-        for il in xrange(len(self._sampleLogNames)):
+        for il in range(len(self._sampleLogNames)):
             if skip is False:
                 headertitle = self._headerTitles[il]
             if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
@@ -370,7 +371,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
-                if linedict.has_key(keyvalue) is False:
+                if (keyvalue in linedict) is False:
                     linedict[keyvalue] = []
                 linedict[keyvalue].append(line)
                 totnumlines += 1
@@ -378,7 +379,9 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         # Check needs to re-order
-        if linedict.keys() != sorted(linedict.keys()):
+        # This test does not work with python 3, you can not assume the order of a dictionary
+        # if list(linedict.keys()) != sorted(linedict.keys()):
+        if True: # temporary hack to get it working with python 3, always write a new file!
             # Re-write file
             wbuf = ""
 
@@ -419,7 +422,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 wbuf = wbuf[0:-1]
 
             # Remove unsupported character which may cause importing error of GNUMERIC
-            wbuf = wbuf.translate(None, chr(0))
+            wbuf = wbuf.replace(chr(0),"")
 
             # Re-write file
             ofile = open(self._logfilename, "w")
@@ -430,12 +433,10 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
-
     def _reorderExistingFile(self):
         """ Re-order the columns of the existing experimental log file
         """
         raise RuntimeError("Too complicated")
-
 
     #pylint: disable=too-many-branches
     def _getSampleLogsValue(self):
@@ -451,7 +452,7 @@ class ExportExperimentLog(PythonAlgorithm):
             return None
 
         #for logname in self._sampleLogNames:
-        for il in xrange(len(self._sampleLogNames)):
+        for il in range(len(self._sampleLogNames)):
             logname = self._sampleLogNames[il]
             isexist = run.hasProperty(logname)
 
@@ -496,7 +497,6 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         return valuedict
-
 
     def _convertLocalTimeString(self, utctimestr, addtimezone=True):
         """ Convert a UTC time in string to the local time in string
@@ -556,6 +556,7 @@ class ExportExperimentLog(PythonAlgorithm):
             localtimestr = "%s-%s" % (localtimestr, tzn)
 
         return localtimestr
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ExportExperimentLog)

@@ -1,3 +1,6 @@
+#include <iomanip>
+#include <limits>
+
 #include "MantidTable.h"
 #include "../ApplicationWindow.h"
 #include "../Mantid/MantidUI.h"
@@ -9,7 +12,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QHash>
-
+#include <limits>
 #include <qfontmetrics.h>
 
 using namespace MantidQt::API;
@@ -88,9 +91,10 @@ void MantidTable::fillTable() {
     return;
   }
 
-  // temporarily allow resizing
+  // temporarily allow resizing and disable graph auto-update
   d_table->blockResizing(false);
   d_table->blockSignals(true);
+  applicationWindow()->setUpdateCurvesFromTable(this, false);
 
   setNumRows(0);
   setNumCols(0);
@@ -104,6 +108,9 @@ void MantidTable::fillTable() {
     Mantid::API::Column_sptr c = m_ws->getColumn(static_cast<int>(i));
     QString colName = QString::fromStdString(c->name());
     setColName(i, colName);
+    if (c->type() == "str" || c->type() == "V3D") {
+      setColumnType(i, ColType::Text);
+    }
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly());
 
@@ -132,6 +139,12 @@ void MantidTable::fillTable() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); j++) {
       std::ostringstream ostr;
+      std::locale systemLocale("");
+      ostr.imbue(systemLocale);
+      // Avoid losing precision for numeric data
+      if (c->type() == "double") {
+        ostr.precision(std::numeric_limits<double>::max_digits10);
+      }
       // This is the method on the Column object to convert to a string.
       c->print(static_cast<size_t>(j), ostr);
       QString qstr = QString::fromStdString(ostr.str());
@@ -151,9 +164,11 @@ void MantidTable::fillTable() {
     setColumnWidth(i, maxWidth);
   }
 
-  // block resizing
+  // block resizing and turn auto-update back on
   d_table->blockResizing(true);
   d_table->blockSignals(false);
+  applicationWindow()->setUpdateCurvesFromTable(this, true);
+  this->notifyChanges();
 }
 
 /**
@@ -192,6 +207,12 @@ void MantidTable::fillTableTransposed() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); ++j) {
       std::ostringstream ostr;
+      const std::locale systemLocale("");
+      ostr.imbue(systemLocale);
+      // Avoid losing precision for numeric data
+      if (c->type() == "double") {
+        ostr.precision(std::numeric_limits<double>::max_digits10);
+      }
       // This is the method on the Column object to convert to a string.
       c->print(static_cast<size_t>(j), ostr);
       QString qstr = QString::fromStdString(ostr.str());
@@ -267,19 +288,44 @@ void MantidTable::cellEdited(int row, int col) {
     return;
   }
 
-  std::string text =
-      d_table->text(row, col).remove(QRegExp("\\s")).toStdString();
-  Mantid::API::Column_sptr c = m_ws->getColumn(col);
+  const int index = row;
 
-  // Have the column convert the text to a value internally
-  int index = row;
-  c->read(index, text);
+  auto oldText = d_table->text(row, col);
+  auto c = m_ws->getColumn(col);
 
-  // Set the table view to be the same text after editing.
-  // That way, if the string was stupid, it will be reset to the old value.
-  std::ostringstream s;
-  c->print(index, s);
-  d_table->setText(row, col, QString(s.str().c_str()));
+  if (c->type() != "str") {
+    oldText.remove(QRegExp("\\s"));
+  }
+
+  if (c->type() == "str" || c->type() == "V3D") {
+    std::istringstream textStream(oldText.toStdString());
+    c->read(index, textStream);
+  } else {
+    // We must be dealing with numerical data. Since there semms to be no way
+    // convert between QLocale and std::locale, get the number out
+    // of the Qt locale and put it into default std::locale format.
+    // so we can pass it to the workspace.
+
+    // First convert locale formatted string to native type
+    QTextStream qstream(&oldText);
+    qstream.setLocale(locale());
+    double number;
+    qstream >> number;
+
+    // Put it back in the stream and let the column deduce the correct
+    // type of the number.
+    std::stringstream textStream;
+    textStream << std::setprecision(std::numeric_limits<long double>::digits10 +
+                                    1) << number;
+    std::istringstream stream(textStream.str());
+    c->read(index, stream);
+  }
+}
+
+void MantidTable::setPlotDesignation(Table::PlotDesignation pd,
+                                     bool rightColumns) {
+  Table::setPlotDesignation(pd, rightColumns);
+  setPlotTypeForSelectedColumns(pd);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -390,6 +436,19 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
   } else {
     // Fall-back to the default sorting of the table
     Table::sortColumns(s, type, order, leadCol);
+  }
+}
+
+/** Set the plot type on the workspace for each selected column
+ *
+ * @param plotType :: the plot type to set the selected columns to.
+ */
+void MantidTable::setPlotTypeForSelectedColumns(int plotType) {
+  const auto list = selectedColumns();
+  for (const auto &name : list) {
+    const auto col = colIndex(name);
+    const auto column = m_ws->getColumn(col);
+    column->setPlotType(plotType);
   }
 }
 

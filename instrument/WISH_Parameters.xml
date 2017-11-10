@@ -3,20 +3,25 @@
     
     <component-link name="WISH">
     
+        <!-- Specify the gap between the tubes for Peak::findDetector -->
+        <parameter name="tube-gap">
+            <value val="0.00017"/>
+        </parameter>
+
         <!-- SplitInto defaults for MDWorkspaces -->
-		<parameter name="SplitInto">
-		  <value val="2"/>
-		</parameter>
-		
-		<!-- SplitThreshold defaults for MDWorkspaces -->
-		<parameter name="SplitThreshold">
-		  <value val="30"/>
-		</parameter>
-		
-		 <!-- MaxRecursionDepth defaults for MDWorkspaces -->
-		<parameter name="MaxRecursionDepth">
-		  <value val="20"/>
-		</parameter>
+        <parameter name="SplitInto">
+            <value val="2"/>
+        </parameter>
+
+        <!-- SplitThreshold defaults for MDWorkspaces -->
+        <parameter name="SplitThreshold">
+            <value val="30"/>
+        </parameter>
+
+        <!-- MaxRecursionDepth defaults for MDWorkspaces -->
+        <parameter name="MaxRecursionDepth">
+            <value val="20"/>
+        </parameter>
         
          <!-- Offset the psi values in the mini-plot -->
          <parameter name="offset-phi" type="string">

@@ -30,34 +30,35 @@
  *                                                                         *
  ***************************************************************************/
 #include "Table.h"
-#include "SortDialog.h"
-#include "ImportASCIIDialog.h"
-#include "muParserScript.h"
 #include "ApplicationWindow.h"
-#include "pixmaps.h"
-#include "TSVSerialiser.h"
+#include "ImportASCIIDialog.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "SortDialog.h"
+#include "muParserScript.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include <QMessageBox>
-#include <QDateTime>
-#include <QTextStream>
-#include <QClipboard>
 #include <QApplication>
-#include <QPainter>
+#include <QClipboard>
+#include <QContextMenuEvent>
+#include <QDateTime>
 #include <QEvent>
-#include <QLayout>
-#include <QPrintDialog>
-#include <QLocale>
-#include <QShortcut>
-#include <QProgressDialog>
 #include <QFile>
 #include <QHeaderView>
+#include <QLayout>
+#include <QLocale>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QProgressDialog>
+#include <QShortcut>
+#include <QTextStream>
 
 #include <QVector>
 
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_vector.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -65,16 +66,17 @@
 
 #include <ctime>
 
-Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
-             ApplicationWindow *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env),
-      m_folder(parent->currentFolder()) {
-  init(r, c);
-}
+// Register the window into the WindowFactory
+DECLARE_WINDOW(Table)
 
-void Table::init(int rows, int cols) {
+using namespace Mantid;
+using namespace MantidQt::API;
+
+Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
+             QWidget *parent, const QString &name, Qt::WFlags f)
+    : MdiSubWindow(parent, label, name, f), Scripted(env) {
   selectedCol = -1;
-  d_saved_cells = 0;
+  d_saved_cells = nullptr;
   d_show_comments = false;
   d_numeric_precision = 13;
 
@@ -146,11 +148,15 @@ void Table::colWidthModified(int, int, int) {
 }
 
 void Table::setBackgroundColor(const QColor &col) {
-  d_table->setPaletteBackgroundColor(col);
+  QPalette palette;
+  palette.setColor(d_table->backgroundRole(), col);
+  d_table->setPalette(palette);
 }
 
 void Table::setTextColor(const QColor &col) {
-  d_table->setPaletteForegroundColor(col);
+  QPalette palette;
+  palette.setColor(d_table->foregroundRole(), col);
+  d_table->setPalette(palette);
 }
 
 void Table::setTextFont(const QFont &fnt) { d_table->setFont(fnt); }
@@ -158,7 +164,9 @@ void Table::setTextFont(const QFont &fnt) { d_table->setFont(fnt); }
 const QFont &Table::getTextFont() { return d_table->font(); }
 
 void Table::setHeaderColor(const QColor &col) {
-  d_table->horizontalHeader()->setPaletteForegroundColor(col);
+  QPalette palette;
+  palette.setColor(d_table->horizontalHeader()->backgroundRole(), col);
+  d_table->horizontalHeader()->setPalette(palette);
 }
 
 void Table::setHeaderFont(const QFont &fnt) {
@@ -202,7 +210,7 @@ void Table::print(const QString &fileName) {
   // print header
   p.setFont(hHeader->font());
   QRect br;
-  auto headerLabel = hHeader->model()->headerData(0, Qt::Horizontal).asString();
+  auto headerLabel = hHeader->model()->headerData(0, Qt::Horizontal).toString();
   br = p.boundingRect(br, Qt::AlignCenter, headerLabel);
   p.drawLine(right, height, right, height + br.height());
   QRect tr(br);
@@ -213,8 +221,8 @@ void Table::print(const QString &fileName) {
     tr.setWidth(w);
     tr.setHeight(br.height());
     auto headerLabel =
-        hHeader->model()->headerData(i, Qt::Horizontal).asString();
-    p.drawText(tr, Qt::AlignCenter, headerLabel, -1);
+        hHeader->model()->headerData(i, Qt::Horizontal).toString();
+    p.drawText(tr, Qt::AlignCenter, headerLabel.left(-1));
     right += w;
     p.drawLine(right, height, right, height + tr.height());
 
@@ -229,7 +237,7 @@ void Table::print(const QString &fileName) {
   // print table values
   for (i = 0; i < rows; i++) {
     right = margin;
-    auto headerLabel = vHeader->model()->headerData(i, Qt::Vertical).asString();
+    auto headerLabel = vHeader->model()->headerData(i, Qt::Vertical).toString();
     QString text = headerLabel + "\t";
     tr = p.boundingRect(tr, Qt::AlignCenter, text);
     p.drawLine(right, height, right, height + tr.height());
@@ -237,7 +245,7 @@ void Table::print(const QString &fileName) {
     br.setTopLeft(QPoint(right, height));
     br.setWidth(vertHeaderWidth);
     br.setHeight(tr.height());
-    p.drawText(br, Qt::AlignCenter, text, -1);
+    p.drawText(br, Qt::AlignCenter, text.left(-1));
     right += vertHeaderWidth;
     p.drawLine(right, height, right, height + tr.height());
 
@@ -248,7 +256,7 @@ void Table::print(const QString &fileName) {
       br.setTopLeft(QPoint(right, height));
       br.setWidth(w);
       br.setHeight(tr.height());
-      p.drawText(br, Qt::AlignCenter, text, -1);
+      p.drawText(br, Qt::AlignCenter, text.left(-1));
       right += w;
       p.drawLine(right, height, right, height + tr.height());
 
@@ -295,7 +303,7 @@ void Table::cellEdited(int row, int col) {
     if (ret.type() == QVariant::Int || ret.type() == QVariant::UInt ||
         ret.type() == QVariant::LongLong || ret.type() == QVariant::ULongLong)
       d_table->setText(row, col, ret.toString());
-    else if (ret.canCast(QVariant::Double))
+    else if (ret.canConvert(QVariant::Double))
       d_table->setText(row, col,
                        locale().toString(ret.toDouble(), f, precision));
     else
@@ -435,7 +443,7 @@ void Table::setColWidths(const QStringList &widths) {
 }
 
 void Table::setColumnTypes(const QStringList &ctl) {
-  int n = QMIN((int)ctl.count(), numCols());
+  int n = qMin((int)ctl.count(), numCols());
   for (int i = 0; i < n; i++) {
     QStringList l = ctl[i].split(";");
     colTypes[i] = l[0].toInt();
@@ -450,12 +458,12 @@ void Table::setColumnTypes(const QStringList &ctl) {
 void Table::setCommands(const QStringList &com) {
   commands.clear();
   for (int i = 0; i < (int)com.size() && i < numCols(); i++)
-    commands << com[i].stripWhiteSpace();
+    commands << com[i].trimmed();
 }
 
 void Table::setCommand(int col, const QString &com) {
   if (col < (int)commands.size())
-    commands[col] = com.stripWhiteSpace();
+    commands[col] = com.trimmed();
 }
 
 void Table::setCommands(const QString &com) {
@@ -466,9 +474,9 @@ void Table::setCommands(const QString &com) {
 
 bool Table::calculate() {
   bool success = true;
-  for (int col=leftSelectedColumn(); col<=rightSelectedColumn(); col++)
-   if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
-     success = false;
+  for (int col = leftSelectedColumn(); col <= rightSelectedColumn(); col++)
+    if (!calculate(col, topSelectedRow(), bottomSelectedRow()))
+      success = false;
   return success;
 }
 
@@ -498,7 +506,7 @@ bool Table::muParserCalculate(int col, int startRow, int endRow,
   connect(mup, SIGNAL(print(const QString &)), scriptingEnv(),
           SIGNAL(print(const QString &)));
 
-  double *r = mup->defineVariable("i");
+  double *r = mup->defineVariable("i", 1.0);
   mup->defineVariable("j", (double)col);
   mup->defineVariable("sr", startRow + 1.0);
   mup->defineVariable("er", endRow + 1.0);
@@ -551,7 +559,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser,
     return false;
   }
 
-  if (QString(scriptingEnv()->name()) == "muParser" || forceMuParser)
+  if (QString(scriptingEnv()->objectName()) == "muParser" || forceMuParser)
     return muParserCalculate(col, startRow, endRow, notifyChanges);
 
   if (startRow < 0)
@@ -631,7 +639,7 @@ void Table::updateValues(Table *t, const QString &columnName) {
 }
 
 std::string Table::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<table>");
   tsv.writeLine(objectName().toStdString())
@@ -746,11 +754,12 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
     if (enumerateRight)
       newLabel += QString::number(n);
 
-    if (col_label.contains(newLabel) > 0) {
-      QMessageBox::critical(0, tr("MantidPlot - Error"),
-                            tr("There is already a column called : <b>" +
-                               newLabel + "</b> in table <b>" + caption +
-                               "</b>!<p>Please choose another name!"));
+    if (col_label.contains(newLabel) > nullptr) {
+      auto msg = "There is already a column called : <b>" + newLabel +
+                 "</b> in table <b>" + caption +
+                 "</b>!<p>Please choose another name!";
+      QMessageBox::critical(nullptr, tr("MantidPlot - Error"),
+                            tr(msg.toAscii().constData()));
       return;
     }
     n++;
@@ -1023,8 +1032,8 @@ void Table::deleteRows(int startRow, int endRow) {
     }
   }
 
-  int start = QMIN(startRow, endRow);
-  int end = QMAX(startRow, endRow);
+  int start = qMin(startRow, endRow);
+  int end = qMax(startRow, endRow);
 
   start--;
   end--;
@@ -1596,9 +1605,8 @@ void Table::setText(int row, int col, const QString &text) {
   d_table->setText(row, col, text);
 }
 
-void Table::saveToMemory()
-{
-  // clear d_saved_cells
+void Table::saveToMemory() {
+  // clear d_saved_cells, if any
   freeMemory();
   d_saved_cells = new double *[d_table->columnCount()];
   for (int i = 0; i < d_table->columnCount(); ++i)
@@ -1709,12 +1717,17 @@ void Table::saveToMemory()
   }
 }
 
+/**
+ * Clears d_saved_cells. Does nothing if there are no saved cells.
+ */
 void Table::freeMemory() {
-  for (int i = 0; i < d_table->columnCount(); i++)
-    delete[] d_saved_cells[i];
+  if (d_saved_cells) {
+    for (int i = 0; i < d_table->columnCount(); i++)
+      delete[] d_saved_cells[i];
 
-  delete[] d_saved_cells;
-  d_saved_cells = 0;
+    delete[] d_saved_cells;
+    d_saved_cells = nullptr;
+  }
 }
 
 void Table::setTextFormat(int col) {
@@ -2005,7 +2018,7 @@ int Table::colIndex(const QString &name) {
     label = name;
   }
 
-  return col_label.findIndex(label);
+  return col_label.indexOf(label);
 }
 
 void Table::setHeaderColType() {
@@ -2142,9 +2155,9 @@ void Table::importASCII(const QString &fname, const QString &sep,
     QTextStream t(&f);
     QString s = t.readLine(); // read first line
     if (simplifySpaces)
-      s = s.simplifyWhiteSpace();
+      s = s.simplified();
     else if (stripSpaces)
-      s = s.stripWhiteSpace();
+      s = s.trimmed();
 
     QStringList line = s.split(sep);
     int cols = line.size();
@@ -2221,15 +2234,15 @@ void Table::importASCII(const QString &fname, const QString &sep,
       }
 
       if (importComments) { // import comments
-        s = t.readLine(); // read 2nd line
+        s = t.readLine();   // read 2nd line
         if (simplifySpaces)
-          s = s.simplifyWhiteSpace();
+          s = s.simplified();
         else if (stripSpaces)
-          s = s.stripWhiteSpace();
+          s = s.trimmed();
         line = s.split(sep, QString::SkipEmptyParts);
         for (int i = 0; i < line.size(); i++)
           comments[startCol + i] = line[i];
-        qApp->processEvents(QEventLoop::ExcludeUserInput);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
     } else if (rows > 0) { // put values in the first line of the table
       for (int i = 0; i < cols; i++)
@@ -2244,7 +2257,7 @@ void Table::importASCII(const QString &fname, const QString &sep,
     QProgressDialog progress(applicationWindow());
     progress.setWindowTitle(tr("MantidPlot") + " - " + tr("Reading file..."));
     progress.setLabelText(fname);
-    progress.setActiveWindow();
+    progress.activateWindow();
     progress.setAutoClose(true);
     progress.setAutoReset(true);
     progress.setRange(0, steps);
@@ -2261,9 +2274,9 @@ void Table::importASCII(const QString &fname, const QString &sep,
       }
       s = t.readLine();
       if (simplifySpaces)
-        s = s.simplifyWhiteSpace();
+        s = s.simplified();
       else if (stripSpaces)
-        s = s.stripWhiteSpace();
+        s = s.trimmed();
       line = s.split(sep);
       int lc = line.size();
       if (lc > cols) {
@@ -2307,11 +2320,11 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   QFile f(fname);
   if (!f.open(QIODevice::WriteOnly)) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
-                          tr("Could not write to file: <br><h4>" + fname +
-                             "</h4><p>Please verify that you have the right to "
-                             "write to this location!")
-                              .arg(fname));
+    auto msg = "Could not write to file: <br><h4>" + fname +
+               "</h4><p>Please verify that you have the right to "
+               "write to this location!";
+    QMessageBox::critical(nullptr, tr("MantidPlot - ASCII Export Error"),
+                          tr(msg.toAscii().constData()).arg(fname));
     return false;
   }
 
@@ -2321,7 +2334,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   int cols = d_table->columnCount();
   int selectedCols = 0;
   int topRow = 0, bottomRow = 0;
-  int *sCols = 0;
+  int *sCols = nullptr;
   if (exportSelection) {
     for (int i = 0; i < cols; i++) {
       if (d_table->isColumnSelected(i))
@@ -2355,7 +2368,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   int aux = selectedCols - 1;
   if (withLabels) {
     QStringList header = colNames();
-    QStringList ls = header.grep(QRegExp("\\D"));
+    QStringList ls = header.filter(QRegExp("\\D"));
     if (exportSelection) {
       for (int i = 0; i < aux; i++) {
         if (ls.count() > 0)
@@ -2487,11 +2500,11 @@ void Table::restore(QString &spec) {
       d_table->setText(i, j, "");
   }
 
-  t.readLine(); // table geometry useless info when restoring
+  t.readLine();     // table geometry useless info when restoring
   s = t.readLine(); // header line
 
   list = s.split("\t");
-  list.remove(list.first());
+  list.removeAll(list.first());
 
   if (col_label != list) {
     loadHeader(list);
@@ -2517,14 +2530,14 @@ void Table::restore(QString &spec) {
 
   s = t.readLine(); // colWidth line
   list = s.split("\t");
-  list.remove(list.first());
+  list.removeAll(list.first());
   if (columnWidths() != list)
     setColWidths(list);
 
   s = t.readLine();
   list = s.split("\t");
   if (list[0] == "com") { // commands line
-    list.remove(list.first());
+    list.removeAll(list.first());
     if (list != commands)
       commands = list;
   } else { // commands block
@@ -2546,7 +2559,7 @@ void Table::restore(QString &spec) {
   colTypes.clear();
   col_format.clear();
   if (s.contains("ColType")) {
-    list.remove(list.first());
+    list.removeAll(list.first());
     for (int i = 0; i < list.count(); i++) {
       colTypes << Numeric;
       col_format << "0/16";
@@ -2566,7 +2579,7 @@ void Table::restore(QString &spec) {
   s = t.readLine(); // read-only columns line
   list = s.split("\t");
   if (s.contains("ReadOnlyColumn")) {
-    list.remove(list.first());
+    list.removeAll(list.first());
     for (int i = 0; i < c; i++)
       d_table->setColumnReadOnly(i, list[i] == "1");
   }
@@ -2574,7 +2587,7 @@ void Table::restore(QString &spec) {
   s = t.readLine(); // hidden columns line
   list = s.split("\t");
   if (s.contains("HiddenColumn")) {
-    list.remove(list.first());
+    list.removeAll(list.first());
     for (int i = 0; i < c; i++) {
       if (list[i] == "1")
         d_table->hideColumn(i);
@@ -2586,7 +2599,7 @@ void Table::restore(QString &spec) {
   s = t.readLine(); // comments line ?
   list = s.split("\t");
   if (s.contains("Comments")) {
-    list.remove(list.first());
+    list.removeAll(list.first());
     comments = list;
   }
 
@@ -2675,7 +2688,7 @@ void Table::resizeRows(int newNumRows) {
     QString text = tr("Rows will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;
@@ -2694,7 +2707,7 @@ void Table::resizeCols(int newNumCols) {
     QString text = tr("Columns will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;
@@ -2736,7 +2749,7 @@ void Table::restore(const QStringList &lst) {
   QStringList::const_iterator i = lst.begin();
 
   l = (*i++).split("\t");
-  l.remove(l.first());
+  l.removeAll(l.first());
   loadHeader(l);
 
   setColWidths(
@@ -2745,7 +2758,7 @@ void Table::restore(const QStringList &lst) {
 
   l = (*i++).split("\t");
   if (l[0] == "com") {
-    l.remove(l.first());
+    l.removeAll(l.first());
     setCommands(l);
   } else if (l[0] == "<com>") {
     commands.clear();
@@ -2763,11 +2776,11 @@ void Table::restore(const QStringList &lst) {
   }
 
   l = (*i++).split("\t");
-  l.remove(l.first());
+  l.removeAll(l.first());
   setColumnTypes(l);
 
   l = (*i++).split("\t");
-  l.remove(l.first());
+  l.removeAll(l.first());
   setColComments(l);
 }
 
@@ -2989,26 +3002,57 @@ void Table::showAllColumns() {
   }
 }
 
-void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                            const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser tsv(lines);
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+  const std::string firstLine = lineVec.front();
+  boost::split(valVec, firstLine, boost::is_any_of("\t"));
+
+  if (valVec.size() < 4)
+    return nullptr;
+
+  QString caption = QString::fromStdString(valVec[0]);
+  QString date = QString::fromStdString(valVec[3]);
+  int rows = 1;
+  int cols = 1;
+  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
+  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
+
+  // create instance
+  auto table = new Table(app->scriptingEnv(), rows, cols, "", app);
+  app->initTable(table, caption);
+  if (table->objectName() != caption) { // the table was renamed
+    app->renamedTables << caption << table->objectName();
+    if (app->d_inform_rename_table) {
+      QMessageBox::warning(
+          app, app->tr("MantidPlot - Renamed Window"),
+          app->tr("The table '%1' already exists. It has been renamed '%2'.")
+              .arg(caption)
+              .arg(table->objectName()));
+    }
+  }
+
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+        app, table, QString::fromStdString(tsv.lineAsString("geometry")));
 
   if (tsv.selectLine("tgeometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("tgeometry")));
+        app, table, QString::fromStdString(tsv.lineAsString("tgeometry")));
 
   if (tsv.selectLine("header")) {
     const QString headerLine =
         QString::fromUtf8(tsv.lineAsString("header").c_str());
     QStringList sl = headerLine.split("\t");
     sl.pop_front();
-    loadHeader(sl);
+    table->loadHeader(sl);
   }
 
   if (tsv.selectLine("ColWidth")) {
@@ -3016,7 +3060,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ColWidth").c_str());
     QStringList sl = cwLine.split("\t");
     sl.pop_front();
-    setColWidths(sl);
+    table->setColWidths(sl);
   }
 
   if (tsv.hasSection("com")) {
@@ -3047,7 +3091,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
           formula += valVec[i];
         }
-        setCommand(col, QString::fromUtf8(formula.c_str()));
+        table->setCommand(col, QString::fromUtf8(formula.c_str()));
       }
     }
   }
@@ -3057,7 +3101,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ColType").c_str());
     QStringList sl = ctLine.split("\t");
     sl.pop_front();
-    setColumnTypes(sl);
+    table->setColumnTypes(sl);
   }
 
   if (tsv.selectLine("Comments")) {
@@ -3065,8 +3109,8 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("Comments").c_str());
     QStringList sl = cLine.split("\t");
     sl.pop_front();
-    setColComments(sl);
-    setHeaderColType();
+    table->setColComments(sl);
+    table->setHeaderColType();
   }
 
   if (tsv.selectLine("ReadOnlyColumn")) {
@@ -3074,8 +3118,8 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ReadOnlyColumn").c_str());
     QStringList sl = rocLine.split("\t");
     sl.pop_front();
-    for (int i = 0; i < numCols(); ++i)
-      setReadOnlyColumn(i, sl[i] == "1");
+    for (int i = 0; i < table->numCols(); ++i)
+      table->setReadOnlyColumn(i, sl[i] == "1");
   }
 
   if (tsv.selectLine("HiddenColumn")) {
@@ -3083,21 +3127,21 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("HiddenColumn").c_str());
     QStringList sl = hcLine.split("\t");
     sl.pop_front();
-    for (int i = 0; i < numCols(); ++i)
-      hideColumn(i, sl[i] == "1");
+    for (int i = 0; i < table->numCols(); ++i)
+      table->hideColumn(i, sl[i] == "1");
   }
 
   if (tsv.selectLine("WindowLabel")) {
     QString label;
     int policy;
     tsv >> label >> policy;
-    setWindowLabel(label);
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+    table->setWindowLabel(label);
+    table->setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
   if (tsv.selectSection("data")) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    table()->blockSignals(true);
+    table->table()->blockSignals(true);
 
     QString dataStr;
     tsv >> dataStr;
@@ -3106,29 +3150,36 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
     for (auto it = dataLines.begin(); it != dataLines.end(); ++it) {
       QStringList fields = it->split("\t");
       int row = fields[0].toInt();
-      for (int col = 0; col < numCols(); ++col) {
+      for (int col = 0; col < table->numCols(); ++col) {
         if (fields.count() >= col + 2) {
           QString cell = fields[col + 1];
 
           if (cell.isEmpty())
             continue;
 
-          if (columnType(col) == Table::Numeric)
-            setCell(row, col, cell.toDouble());
+          if (table->columnType(col) == Table::Numeric)
+            table->setCell(row, col, cell.toDouble());
           else
-            setText(row, col, cell);
+            table->setText(row, col, cell);
         }
       }
     }
 
-    QApplication::processEvents(QEventLoop::ExcludeUserInput);
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QApplication::restoreOverrideCursor();
-    table()->blockSignals(false);
+    table->table()->blockSignals(false);
   }
+
+  table->showNormal();
+  table->setBirthDate(date);
+  app->setListViewDate(caption, date);
+  return table;
 }
 
+std::vector<std::string> Table::getWorkspaceNames() { return {}; }
+
 std::string Table::saveTableMetadata() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");
   for (int j = 0; j < d_table->columnCount(); j++) {
     QString val = colLabel(j);
@@ -3204,6 +3255,25 @@ void Table::recordSelection() {
     setSelectedCol(-1);
   }
 }
+
+/**
+ * Set the text alignment of the given cell
+ * @param row :: [input] Row of the cell
+ * @param col :: [input] Column of the cell
+ * @param alignment :: [input] Alignment flags to give the cell
+ */
+void Table::setTextAlignment(int row, int col,
+                             QFlags<Qt::AlignmentFlag> alignment) {
+  auto *cell = d_table->item(row, col);
+  if (cell) {
+    cell->setTextAlignment(alignment);
+  }
+}
+
+/**
+ * Resizes column widths to their contents
+ */
+void Table::resizeColumnsToContents() { d_table->resizeColumnsToContents(); }
 
 /*****************************************************************************
  *

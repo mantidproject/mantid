@@ -1001,6 +1001,7 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
         string(REPLACE "\\" "/" libdir "${libdir}")
         list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT ${libdir})
         # This need to be done more cleanly - Needed for MPI Job 
+        list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT "/usr/lib64/openmpi/lib/boost157")
         list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT "/usr/lib64/openmpi/lib")
       endif()
     endforeach()

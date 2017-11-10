@@ -36,8 +36,6 @@ namespace MDAlgorithms {
 class MANTID_MDALGORITHMS_DLL SetMDFrame : public API::Algorithm {
 public:
   static const std::string mdFrameSpecifier;
-  SetMDFrame();
-  ~SetMDFrame() override;
 
   const std::string name() const override;
   int version() const override;

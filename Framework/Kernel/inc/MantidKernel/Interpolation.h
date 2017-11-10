@@ -4,16 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Property.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
-#include <map>
-#include <vector>
+#include <cstdlib>
 #include <sstream>
-#include <stdlib.h>
-#include <cctype>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

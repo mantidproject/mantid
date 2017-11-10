@@ -326,7 +326,7 @@ public:
     for (long i = 0; i < int(BIG_NUM); i++) {
       dbuf.toWrite(bigData[i]);
     }
-    // std::cout << ISaveableTester::fakeFile << std::endl;
+    // std::cout << ISaveableTester::fakeFile << '\n';
   }
 
   void test_addAndRemove() {
@@ -439,8 +439,7 @@ public:
       dbuf.toWrite(data[i]);
       data[i]->setBusy(false);
     }
-    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU."
-              << std::endl;
+    std::cout << " Elapsed : " << tim << " to load " << num << " into MRU.\n";
   }
   //
   void test_smallCache_no_writeBuffer() {
@@ -455,7 +454,7 @@ public:
       data[i]->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
-              << " into MRU (no write cache)." << std::endl;
+              << " into MRU (no write cache).\n";
   }
 
   void test_largeCache_writeBuffer() {
@@ -465,7 +464,7 @@ public:
       dbuf.toWrite(data[i]);
       data[i]->setBusy(false);
     }
-    std::cout << tim << " to load " << num << " into MRU." << std::endl;
+    std::cout << tim << " to load " << num << " into MRU.\n";
   }
 
   void test_largeCache_noWriteBuffer() {
@@ -476,7 +475,7 @@ public:
       data[i]->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
-              << " into MRU (no write buffer)." << std::endl;
+              << " into MRU (no write buffer).\n";
   }
 };
 

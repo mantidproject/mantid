@@ -3,6 +3,7 @@
 Holds an instrument class for VESUVIO
 """
 
+
 class VESUVIO(object):
     """
         Contains all the Vesuvio specific data

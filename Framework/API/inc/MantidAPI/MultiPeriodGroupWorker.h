@@ -48,10 +48,10 @@ public:
   /// Convenience typdef for workspace names.
   typedef std::vector<WorkspaceGroup_sptr> VecWSGroupType;
   /// Constructor
-  MultiPeriodGroupWorker();
-  /// Copy constructor
+  MultiPeriodGroupWorker() = default;
+  /// Constructor
   MultiPeriodGroupWorker(const std::string &workspacePropertyName);
-  virtual ~MultiPeriodGroupWorker();
+  virtual ~MultiPeriodGroupWorker() = default;
   /// Flag to indicate use of a custom workspace property
   bool useCustomWorkspaceProperty() const;
   /// Check groups
@@ -67,9 +67,9 @@ private:
   MultiPeriodGroupWorker &operator=(const MultiPeriodGroupWorker &);
 
   /// Try ot add a workspace to the group of input workspaces.
-  void
-  tryAddInputWorkspaceToInputGroups(Workspace_sptr ws,
-                                    VecWSGroupType &vecWorkspaceGroups) const;
+  void tryAddInputWorkspaceToInputGroups(
+      Workspace_sptr ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
+      VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.
   void copyInputWorkspaceProperties(IAlgorithm *targetAlg,

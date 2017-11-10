@@ -3,17 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/shared_array.hpp>
 #include "boost/tuple/tuple.hpp"
+#include <boost/shared_array.hpp>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
@@ -29,7 +30,7 @@ using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
 
-static const int THEMASKED = 2;
+static const int THEMASKED = 1;
 
 class SaveNXSPETest : public CxxTest::TestSuite {
 public:
@@ -73,7 +74,7 @@ public:
     TS_ASSERT_DELTA(9.0, signal[9], tolerance);
     TS_ASSERT_DELTA(18.0, error[9], tolerance);
     // element 1,2 in 2D flat buffer
-    TS_ASSERT(boost::math::isnan(signal[1 * dims[1] + 2]));
+    TS_ASSERT(std::isnan(signal[1 * dims[1] + 2]));
     TS_ASSERT_DELTA(0.0, error[1 * dims[1] + 2], tolerance);
     // final element
     TS_ASSERT_DELTA(29.0, signal[dims[0] * dims[1] - 1], tolerance);
@@ -99,7 +100,7 @@ public:
     TS_ASSERT_DELTA(99.0, signal[99], tolerance);
     TS_ASSERT_DELTA(198.0, error[99], tolerance);
     // element 1,2 in 2D flat buffer
-    TS_ASSERT(boost::math::isnan(signal[1 * dims[1] + 2]));
+    TS_ASSERT(std::isnan(signal[1 * dims[1] + 2]));
     TS_ASSERT_DELTA(0.0, error[1 * dims[1] + 2], tolerance);
     // final element
     TS_ASSERT_DELTA(524999.0, signal[dims[0] * dims[1] - 1], tolerance);
@@ -130,11 +131,11 @@ public:
 private:
   MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10) {
     auto testWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nx, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
     for (int i = 0; i < nhist; ++i) {
-      auto &outY = testWS->dataY(i);
-      auto &outE = testWS->dataE(i);
+      auto &outY = testWS->mutableY(i);
+      auto &outE = testWS->mutableE(i);
       for (int j = 0; j < nx; ++j) {
         outY[j] = i * nx + j;
         outE[j] = outY[j] * 2.0;
@@ -152,23 +153,14 @@ private:
         ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
-
-    // Associate detectors with the workspace
-    for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)
-          ->setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
-    }
+    inputWS->setIndexInfo(
+        Mantid::Indexing::IndexInfo(inputWS->getNumberHistograms()));
 
     // mask the detector
-    ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask);
-    m_Pmap->addBool(toMask.get(), "masked", true);
+    inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }

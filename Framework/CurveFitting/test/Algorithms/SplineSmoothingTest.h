@@ -5,6 +5,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::CurveFitting::Algorithms::SplineSmoothing;
 
@@ -36,7 +37,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, false);
 
     // setup algorithm
@@ -53,7 +54,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
@@ -69,7 +70,7 @@ public:
 
     // create a binned workspace
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 5, 0.02, true);
 
     SplineSmoothing alg;
@@ -87,10 +88,10 @@ public:
       MatrixWorkspace_const_sptr derivsWs =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(
               derivs->getItem(i));
-      const auto &xs = ows->readX(i);
-      const auto &ys = ows->readY(i);
-      const auto &d1 = derivsWs->readY(0);
-      const auto &d2 = derivsWs->readY(1);
+      const auto &xs = ows->x(i);
+      const auto &ys = ows->y(i);
+      const auto &d1 = derivsWs->y(0);
+      const auto &d2 = derivsWs->y(1);
 
       // check output for consistency
       for (size_t j = 0; j < ys.size(); ++j) {

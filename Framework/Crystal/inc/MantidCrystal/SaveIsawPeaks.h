@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 
@@ -20,9 +21,6 @@ namespace Crystal {
  */
 class DLLExport SaveIsawPeaks : public API::Algorithm {
 public:
-  SaveIsawPeaks();
-  ~SaveIsawPeaks() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawPeaks"; };
   /// Summary of algorithms purpose
@@ -46,6 +44,8 @@ private:
   Kernel::V3D findPixelPos(std::string bankName, int col, int row);
   void sizeBanks(std::string bankName, int &NCOLS, int &NROWS, double &xsize,
                  double &ysize);
+  bool bankMasked(Geometry::IComponent_const_sptr parent,
+                  const Geometry::DetectorInfo &detectorInfo);
   Geometry::Instrument_const_sptr inst;
 };
 

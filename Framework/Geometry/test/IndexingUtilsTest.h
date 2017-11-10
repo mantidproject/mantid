@@ -71,14 +71,14 @@ public:
     double alpha = b_dir.angle(c_dir) * 180 / M_PI;
     double beta = c_dir.angle(a_dir) * 180 / M_PI;
     double gamma = a_dir.angle(b_dir) * 180 / M_PI;
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << "a = " << a_dir << "   " << a_dir.norm() << std::endl;
-    std::cout << "b = " << b_dir << "   " << b_dir.norm() << std::endl;
-    std::cout << "c = " << c_dir << "   " << c_dir.norm() << std::endl;
-    std::cout << "alpha = " << alpha << std::endl;
-    std::cout << "beta  = " << beta << std::endl;
-    std::cout << "gamma = " << gamma << std::endl;
-    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------\n";
+    std::cout << "a = " << a_dir << "   " << a_dir.norm() << '\n';
+    std::cout << "b = " << b_dir << "   " << b_dir.norm() << '\n';
+    std::cout << "c = " << c_dir << "   " << c_dir.norm() << '\n';
+    std::cout << "alpha = " << alpha << '\n';
+    std::cout << "beta  = " << beta << '\n';
+    std::cout << "gamma = " << gamma << '\n';
+    std::cout << "-------------------------------------------\n";
   }
 
   static void ShowIndexingStats(Matrix<double> UB, std::vector<V3D> q_vectors,
@@ -89,17 +89,17 @@ public:
     IndexingUtils::GetIndexedPeaks(UB, q_vectors, required_tolerance,
                                    miller_indices, indexed_qs, ave_error);
 
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << "UB = " << UB << std::endl;
-    std::cout << "num indexed  = " << indexed_qs.size() << std::endl;
-    std::cout << "error = " << ave_error << std::endl;
-    std::cout << std::endl;
+    std::cout << "-------------------------------------------\n";
+    std::cout << "UB = " << UB << '\n';
+    std::cout << "num indexed  = " << indexed_qs.size() << '\n';
+    std::cout << "error = " << ave_error << '\n';
+    std::cout << '\n';
 
-    std::cout << "Indexed Qs" << std::endl;
+    std::cout << "Indexed Qs\n";
     for (size_t i = 0; i < indexed_qs.size(); i++)
       std::cout << "Q = " << indexed_qs[i] << " HKL = " << miller_indices[i]
-                << std::endl;
-    std::cout << "-------------------------------------------" << std::endl;
+                << '\n';
+    std::cout << "-------------------------------------------\n";
   }
 
   void test_Find_UB_given_lattice_parameters() {
@@ -111,12 +111,7 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double a = 6.6;
-    double b = 9.7;
-    double c = 9.9;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
+    OrientedLattice lattice(6.6, 9.7, 9.9, 84, 71, 70);
     // test both default case(-1) and
     // case with specified base index(4)
     for (int base_index = -1; base_index < 5; base_index += 5) {
@@ -124,11 +119,11 @@ public:
       size_t num_initial = 3;
       double degrees_per_step = 3;
 
-      double error = IndexingUtils::Find_UB(
-          UB, q_vectors, a, b, c, alpha, beta, gamma, required_tolerance,
-          base_index, num_initial, degrees_per_step);
+      double error =
+          IndexingUtils::Find_UB(UB, q_vectors, lattice, required_tolerance,
+                                 base_index, num_initial, degrees_per_step);
 
-      //      std::cout << std::endl << "USING LATTICE PARAMETERS" << std::endl;
+      //      std::cout << std::endl << "USING LATTICE PARAMETERS\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
       //      ShowLatticeParameters( UB );
 
@@ -170,7 +165,7 @@ public:
       int num_indexed =
           IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
 
-      //      std::cout << std::endl << "USING MIN-MAX-D" << std::endl;
+      //      std::cout << std::endl << "USING MIN-MAX-D\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
       //      ShowLatticeParameters( UB );
 
@@ -205,7 +200,7 @@ public:
     int num_indexed =
         IndexingUtils::NumberIndexed(UB, q_vectors, required_tolerance);
 
-    //  std::cout << std::endl << "USING FFT" << std::endl;
+    //  std::cout << std::endl << "USING FFT\n";
     //  ShowIndexingStats( UB, q_vectors, required_tolerance );
     //  ShowLatticeParameters( UB );
 
@@ -260,18 +255,12 @@ public:
     Matrix<double> UB(3, 3, false);
     int degrees_per_step = 3;
     double required_tolerance = 0.2;
-    double a = 6.6f;
-    double b = 9.7f;
-    double c = 9.9f;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
 
+    UnitCell cell(6.6f, 9.7f, 9.9f, 84, 71, 70);
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double error =
-        IndexingUtils::ScanFor_UB(UB, q_vectors, a, b, c, alpha, beta, gamma,
-                                  degrees_per_step, required_tolerance);
+    double error = IndexingUtils::ScanFor_UB(
+        UB, q_vectors, cell, degrees_per_step, required_tolerance);
 
     TS_ASSERT_DELTA(error, 0.147397, 1.e-5);
 
@@ -444,16 +433,22 @@ public:
     }
   }
 
-  void test_Make_c_dir() {
+  void test_make_c_dir() {
     V3D a_dir(1, 2, 3);
     V3D b_dir(-3, 2, 1);
 
-    double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
-    double alpha = 123;
-    double beta = 74;
-    double c_length = 10;
-    V3D result =
-        IndexingUtils::Make_c_dir(a_dir, b_dir, c_length, alpha, beta, gamma);
+    const double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
+    const double alpha = 123;
+    const double beta = 74;
+    const double c_length = 10;
+
+    const double cosAlpha = std::cos(alpha * M_PI / 180);
+    const double cosBeta = std::cos(beta * M_PI / 180);
+    const double cosGamma = std::cos(gamma * M_PI / 180);
+    const double sinGamma = std::sin(gamma * M_PI / 180);
+
+    V3D result = IndexingUtils::makeCDir(a_dir, b_dir, c_length, cosAlpha,
+                                         cosBeta, cosGamma, sinGamma);
 
     double alpha_calc = result.angle(b_dir) * 180 / M_PI;
     double beta_calc = result.angle(a_dir) * 180 / M_PI;

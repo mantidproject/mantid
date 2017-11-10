@@ -15,10 +15,11 @@ following:
 
 #. The calibration file is read and a map of corresponding udet-group is
    created.
-#. The algorithm determine the X boundaries for each group as the upper
-   and lower limits of all contributing detectors to this group and
-   determine a logarithmic step that will ensure preserving the number
-   of bins in the initial workspace.
+#. The algorithm determines the X boundaries for each group as the upper
+   and lower limits of all contributing detectors. It then calculates
+   a logarithmic step that preserves the number of bins in the initial workspace. 
+   It assumes that the entire data set uses logarithmic binning in the process 
+   (i.e. it does not check for constant width binning).
 #. All histograms are read and rebinned to the new grid for their group.
 #. A new workspace with N histograms is created.
 
@@ -29,9 +30,8 @@ included in the analysis.
 Since the new X boundaries depend on the group and not the entire
 workspace, this focusing algorithm does not create overestimated X
 ranges for multi-group instruments. However it is important to remember
-that this means that this algorithm outputs a `ragged
-workspace <http://www.mantidproject.org/Ragged_Workspace>`_. Some 2D and 3D plots will not display
-the data correctly.
+that this means that this algorithm outputs a :ref:`ragged workspace <Ragged_Workspace>`.
+Some 2D and 3D plots will not display the data correctly.
 
 The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file
@@ -89,8 +89,8 @@ Output:
    ws = DiffractionFocussing(InputWorkspace='ws', GroupingFileName="4detector_cal_example_file.cal" \
         , PreserveEvents=False)
 
-   print "Number of focussed spectra: " + str(ws.getNumberHistograms())
-   print "What type is the workspace after focussing: " + ws.id()
+   print("Number of focussed spectra: " + str(ws.getNumberHistograms()))
+   print("What type is the workspace after focussing: " + ws.id())
 
 Output:
 

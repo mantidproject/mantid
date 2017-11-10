@@ -54,8 +54,6 @@ public:
     m_slit_to_source[1] = 11156;
     m_slit_to_source[2] = 12150;
   }
-  /// Virtual destructor
-  ~EQSANSLoad() override {}
   /// Algorithm's name
   const std::string name() const override { return "EQSANSLoad"; }
   /// Summary of algorithms purpose

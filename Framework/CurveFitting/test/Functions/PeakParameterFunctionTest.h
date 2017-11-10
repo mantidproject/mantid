@@ -5,11 +5,9 @@
 
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IPeakFunction.h"
-
 #include "MantidCurveFitting/Jacobian.h"
 
 using namespace Mantid::CurveFitting;

@@ -49,7 +49,7 @@ public:
     IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::
         test_throws_if_SpectrumNumbersOfDetectors_less_than_zero(alg);
@@ -59,7 +59,7 @@ public:
     IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::
         test_throws_if_SpectrumNumbersOfDetectors_outside_range(alg);

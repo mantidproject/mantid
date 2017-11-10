@@ -8,9 +8,11 @@ It uses the so-called IPeakFunction that should be used when there is a sensible
 calculate the centre, height & fwhm of the function. If it does not make sense, for example a in linear background,
 where does not give a peak shape, then see the more general Example1DFunction that does not require these concepts.
 """
-from mantid.api import IPeakFunction, FunctionFactory
+from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
+from mantid.api import IPeakFunction, FunctionFactory
+
 
 class ExamplePeakFunction(IPeakFunction):
 
@@ -173,6 +175,7 @@ class ExamplePeakFunction(IPeakFunction):
         """
         sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
         self.setParameter("Sigma",sigma)
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ExamplePeakFunction)

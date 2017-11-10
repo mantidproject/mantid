@@ -305,7 +305,7 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
     // Exit condition is that nothing changed last time
     // or the tree is Empty.
     if (!TopRule->checkParents())
-      std::cerr << "Parents False" << std::endl;
+      std::cerr << "Parents False\n";
     while (!active && !TreeLine.empty()) {
       // Ok get and remvoe the top item from the stack.
       tmpA = TreeLine.top();
@@ -507,7 +507,6 @@ void Rule::makeParents()
       }
     }
   }
-  return;
 }
 
 int Rule::checkParents() const
@@ -620,7 +619,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
       if (SurX)
         IList.push_back(SurX->getKeyN());
       else {
-        std::cerr << "Error with surface List" << std::endl;
+        std::cerr << "Error with surface List\n";
         return static_cast<int>(IList.size());
       }
     }

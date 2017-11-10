@@ -1,8 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/DateValidator.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#include <ctime>
 
 namespace Mantid {
 namespace Kernel {

@@ -1,13 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 #include "Poco/DateTime.h"
@@ -24,20 +23,17 @@ Kernel::Logger g_log("WorkspaceHistory");
 }
 
 /// Default Constructor
-WorkspaceHistory::WorkspaceHistory()
-    : m_environment(),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {}
+WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
 /// Destructor
-WorkspaceHistory::~WorkspaceHistory() {}
+WorkspaceHistory::~WorkspaceHistory() = default;
 
 /**
   Standard Copy Constructor
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment),
-      m_algorithms(boost::bind(CompareHistory::compare, _1, _2)) {
+    : m_environment(A.m_environment) {
   m_algorithms = A.m_algorithms;
 }
 
@@ -67,7 +63,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
-  m_algorithms.insert(algHistory);
+  m_algorithms.insert(std::move(algHistory));
 }
 
 /*
@@ -98,9 +94,7 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
     throw std::out_of_range(
         "WorkspaceHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_algorithms.cbegin();
-  std::advance(start, index);
-  return *start;
+  return *std::next(m_algorithms.cbegin(), index);
 }
 
 /**
@@ -143,14 +137,14 @@ boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
  */
 void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
 
-  os << std::string(indent, ' ') << m_environment << std::endl;
+  os << std::string(indent, ' ') << m_environment << '\n';
 
   AlgorithmHistories::const_iterator it;
-  os << std::string(indent, ' ') << "Histories:" << std::endl;
+  os << std::string(indent, ' ') << "Histories:\n";
 
-  for (it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {
-    os << std::endl;
-    (*it)->printSelf(os, indent + 2);
+  for (const auto &algorithm : m_algorithms) {
+    os << '\n';
+    algorithm->printSelf(os, indent + 2);
   }
 }
 
@@ -365,12 +359,12 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   Poco::DateTime start_timedate;
   // This is needed by the Poco parsing function
   int tzdiff(-1);
-  Mantid::Kernel::DateAndTime utc_start;
+  Mantid::Types::Core::DateAndTime utc_start;
   if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
                                       start_timedate, tzdiff)) {
     g_log.warning() << "Error parsing start time in algorithm history entry."
                     << "\n";
-    utc_start = Kernel::DateAndTime::defaultTime();
+    utc_start = Types::Core::DateAndTime::defaultTime();
   }
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);

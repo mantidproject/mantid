@@ -4,10 +4,15 @@
 
     It is intended for internal use.
 """
-from mantid.kernel.funcreturns import lhs_info
-import _api
+from __future__ import (absolute_import, division,
+                        print_function)
+
+from ..kernel.funcinspect import lhs_info, customise_func
+from . import _api
 
 import inspect as _inspect
+from six import get_function_code, Iterator, iteritems
+import sys
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -32,15 +37,22 @@ def attach_binary_operators_to_workspace():
         "Plus":("__add__", "__radd__","__iadd__"),
         "Minus":("__sub__", "__rsub__","__isub__"),
         "Multiply":("__mul__", "__rmul__","__imul__"),
-        "Divide":("__div__", "__div__","__idiv__"),
         "LessThan":"__lt__",
         "GreaterThan":"__gt__",
         "Or":"__or__",
         "And":"__and__",
         "Xor":"__xor__"
     }
+    # The division operator changed in Python 3
+    divops = ["__truediv__", "__rtruediv__","__itruediv__"]
+    if sys.version_info[0] < 3:
+        # For Python 2 add the older methods so that modules without __future__
+        # still work
+        divops.extend(["__div__", "__rdiv__","__idiv__"])
+    operations["Divide"] = divops
+    
     # Loop through and add each one in turn
-    for alg, attributes in operations.iteritems():
+    for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
@@ -120,7 +132,7 @@ def attach_unary_operators_to_workspace():
         'NotMD':'__invert__'
     }
     # Loop through and add each one in turn
-    for alg, attributes in operations.iteritems():
+    for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)
@@ -172,12 +184,13 @@ def _do_unary_operation(op, self, lhs_vars):
 def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
     def __iter_method(self):
-        class ITableWorkspaceIter:
+        class ITableWorkspaceIter(Iterator):
             def __init__(self, wksp):
                 self.__wksp = wksp
                 self.__pos = 0
                 self.__max = wksp.rowCount()
-            def next(self):
+
+            def __next__(self):
                 if self.__pos + 1 > self.__max:
                     raise StopIteration
                 self.__pos += 1
@@ -210,15 +223,10 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         return func_obj(*args, **kwargs)
     #------------------------------------------------------------------
     # Add correct meta-properties for the method
-    _method_impl.__name__ = func_obj.__name__
-    _method_impl.__doc__ = func_obj.__doc__
-    f = _method_impl.func_code
     signature = ['self']
-    signature.extend(func_obj.func_code.co_varnames)
-    c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,
-                  tuple(signature), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
-    # Replace the code object of the wrapper function
-    _method_impl.func_code = c
+    signature.extend(get_function_code(func_obj).co_varnames)
+    customise_func(_method_impl, func_obj.__name__,
+                   tuple(signature), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
         for typename in workspace_types:

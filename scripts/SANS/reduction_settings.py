@@ -62,11 +62,13 @@ between reduction steps.  The benefits to this new method are as follows:
    passing settings to each other via PropertyManager objects.
 """
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 
 REDUCTION_SETTINGS_OBJ_NAME = "ISISSANSReductionSettings"
+
 
 def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
     """
@@ -90,12 +92,13 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
         Also take this opportunity to change typed property-getting to the
         simpler "[]" operator rather than getProperty().value.
         """
+
         def __init__(self, name):
             self.name = name
 
         def _get_prop_man(self, name):
             if not PropertyManagerDataService.doesExist(name):
-                logger.debug("Creating reduction settings PropertyManager "\
+                logger.debug("Creating reduction settings PropertyManager "
                              "object with name \"%s\"." % name)
                 PropertyManagerDataService.add(name, PropertyManager())
 
@@ -130,7 +133,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
 
         def clone(self, new_name):
             if new_name == self.name:
-                raise RuntimeError("Cannot clone the settings object with name \"%s\" "\
+                raise RuntimeError("Cannot clone the settings object with name \"%s\" "
                                    "into a new object with the same name." % new_name)
 
             if PropertyManagerDataService.doesExist(new_name):
@@ -138,7 +141,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
 
             new_prop_man = PropertyManagerPicklableWrapper(new_name)
             new_prop_man.clear()
-            for key, value in self.items():
+            for key, value in list(self.items()):
                 new_prop_man[key] = value
             return new_prop_man
 

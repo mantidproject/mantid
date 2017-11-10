@@ -1,6 +1,8 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
+
 
 class MergeCalFiles(PythonAlgorithm):
 
@@ -21,11 +23,11 @@ class MergeCalFiles(PythonAlgorithm):
         self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']),
                              doc="The file to contain the results")
 
-        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+\
+        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+
                              "to the master file. Default: False")
-        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+\
+        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+
                              "to the master file. Default: False")
-        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+\
+        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+
                              "the master file. Default: False")
 
     #pylint: disable=too-many-branches
@@ -37,7 +39,6 @@ class MergeCalFiles(PythonAlgorithm):
         updateFileName = self.getPropertyValue("UpdateFile")
         masterFileName = self.getPropertyValue("MasterFile")
         outputFileName = self.getPropertyValue("OutputFile")
-
 
         if masterFileName == outputFileName :
             raise RuntimeError('The output file must be different to the master file.')
@@ -62,7 +63,6 @@ class MergeCalFiles(PythonAlgorithm):
 
         updateFile.close()
         self.log().information(str(len(updateDict)) + " updates found in " + updateFileName)
-
 
         masterFile = open(masterFileName,"r")
         outputFile = open(outputFileName,"w")
@@ -96,7 +96,7 @@ class MergeCalFiles(PythonAlgorithm):
 
     #add any lines at the end
         for UDET in updateDict.keys():
-            (offset,select,group)=updateDict.pop(UDET)
+            (offset,select,group)=updateDict[UDET]
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
             linesAdded += 1
@@ -140,6 +140,7 @@ class MergeCalFiles(PythonAlgorithm):
     def FormatLine(self,number,UDET,offset,select,group):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(MergeCalFiles())

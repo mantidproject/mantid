@@ -75,8 +75,6 @@ class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   ModeratorTzero();
-  /// Virtual destructor
-  ~ModeratorTzero() override {}
   /// Algorithm's name
   const std::string name() const override { return "ModeratorTzero"; }
   /// Summary of algorithms purpose
@@ -98,8 +96,6 @@ public:
   double gett1min();
 
 private:
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
-
   // Initialisation code
   void init() override;
   /// Execution code for histogram workspace

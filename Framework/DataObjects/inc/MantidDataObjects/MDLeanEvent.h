@@ -252,10 +252,7 @@ public:
     totalErrSq = 0;
 
     size_t index(0);
-    typename std::vector<MDLeanEvent<nd>>::const_iterator it = events.begin();
-    typename std::vector<MDLeanEvent<nd>>::const_iterator it_end = events.end();
-    for (; it != it_end; ++it) {
-      const MDLeanEvent<nd> &event = *it;
+    for (const MDLeanEvent<nd> &event : events) {
       float signal = event.signal;
       float errorSquared = event.errorSquared;
       data[index++] = static_cast<coord_t>(signal);
@@ -300,8 +297,8 @@ public:
       const coord_t *centers = &(coord[ii + 2]);
 
       // Create the event with signal, error squared, and the centers
-      events.push_back(MDLeanEvent<nd>(signal_t(coord[ii]),
-                                       signal_t(coord[ii + 1]), centers));
+      events.emplace_back(static_cast<signal_t>(coord[ii]),
+                          static_cast<signal_t>(coord[ii + 1]), centers);
     }
   }
 };

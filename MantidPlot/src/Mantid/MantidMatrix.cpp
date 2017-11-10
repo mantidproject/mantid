@@ -1,64 +1,39 @@
-#include "MantidKernel/Logger.h"
-#include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
-#include "MantidMatrixFunction.h"
-#include "MantidKernel/Timer.h"
-#include "MantidUI.h"
-#include "../Graph3D.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 #include "../Spectrogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMatrixDialog.h"
+#include "MantidMatrixFunction.h"
+#include "MantidMatrixModel.h"
+#include "MantidUI.h"
 #include "Preferences.h"
-#include "../pixmaps.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include "TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/ReadLock.h"
 
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 
-#include <QtGlobal>
-#include <QTextStream>
-#include <QList>
-#include <QEvent>
-#include <QContextMenuEvent>
-#include <QVBoxLayout>
-#include <QMouseEvent>
-#include <QHeaderView>
 #include <QApplication>
-#include <QVarLengthArray>
 #include <QClipboard>
-#include <QShortcut>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QPainter>
-#include <QLocale>
-#include <QItemDelegate>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QImageWriter>
-#include <QSvgGenerator>
-#include <QFile>
-#include <QUndoStack>
-#include <QCheckBox>
-#include <QTabWidget>
+
 #include <QScrollBar>
 
-#include <stdlib.h>
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
-#include <boost/math/special_functions/fpclassify.hpp>
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MantidMatrix)
 
 namespace {
 Logger g_log("MantidMatrix");
@@ -111,13 +86,14 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-                           ApplicationWindow *parent, const QString &label,
+                           QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
-    : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
-      m_appWindow(parent), m_workspace(ws), y_start(0.0), y_end(0.0),
-      m_histogram(false), m_min(0), m_max(0), m_are_min_max_set(false),
-      m_boundingRect(), m_strName(name.toStdString()), m_selectedRows(),
-      m_selectedCols() {
+    : MdiSubWindow(parent, label, name, nullptr), WorkspaceObserver(),
+      m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
+      m_max(0), m_are_min_max_set(false), m_boundingRect(),
+      m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
+  m_workspace = ws;
+
   setup(ws, start, end);
   setWindowTitle(name);
   setName(name);
@@ -167,10 +143,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
   connect(m_tabs, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
 
   setGeometry(50, 50,
-              QMIN(5, numCols()) *
+              qMin(5, numCols()) *
                       m_table_viewY->horizontalHeader()->sectionSize(0) +
                   55,
-              (QMIN(10, numRows()) + 1) *
+              (qMin(10, numRows()) + 1) *
                       m_table_viewY->verticalHeader()->sectionSize(0) +
                   100);
 
@@ -231,11 +207,6 @@ void MantidMatrix::viewChanged(int index) {
   }
 }
 
-/// Checks if d is not infinity or a NaN
-bool isANumber(volatile const double &d) {
-  return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
-}
-
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
                          int end) {
   if (!ws) {
@@ -255,7 +226,16 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
                  ? m_workspaceTotalHist - 1
                  : end;
   m_rows = m_endRow - m_startRow + 1;
-  m_cols = static_cast<int>(ws->blocksize());
+  try {
+    // let the workspace do its thing
+    m_cols = static_cast<int>(ws->blocksize());
+  } catch (std::length_error &) {
+    // otherwise get the maximum
+    m_cols = static_cast<int>(ws->y(0).size());
+    for (int i = 0; i < m_workspaceTotalHist; ++i) {
+      m_cols = std::max(m_cols, static_cast<int>(ws->y(i).size()));
+    }
+  }
   if (ws->isHistogramData())
     m_histogram = true;
   connect(this, SIGNAL(needsUpdating()), this, SLOT(repaintAll()));
@@ -275,7 +255,7 @@ void MantidMatrix::connectTableView(QTableView *view,
   view->setFocusPolicy(Qt::StrongFocus);
 
   QPalette pal = view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::Base, m_bk_color);
   view->setPalette(pal);
 
   // set header properties
@@ -491,7 +471,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
     QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                  tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
-    return NULL;
+    return nullptr;
   }
 
   for (int i = 0; i < rows; ++i) {
@@ -504,7 +484,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
       QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                    tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
-      return NULL;
+      return nullptr;
     }
   }
   return data;
@@ -534,7 +514,7 @@ void MantidMatrix::goToRow(int row) {
     return;
 
   //	activeView()->selectRow(row - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(row - 1, 0),
                      activeModel()->index(row - 1, numCols() - 1)),
@@ -549,7 +529,7 @@ void MantidMatrix::goToColumn(int col) {
     return;
 
   //	activeView()->selectColumn(col - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(0, col - 1),
                      activeModel()->index(numRows() - 1, col - 1)),
@@ -559,32 +539,39 @@ void MantidMatrix::goToColumn(int col) {
 }
 
 double MantidMatrix::dataX(int row, int col) const {
-  if (!m_workspace || row >= numRows() ||
-      col >= static_cast<int>(m_workspace->readX(row + m_startRow).size()))
+  if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readX(row + m_startRow)[col];
-  return res;
+  const auto &x = m_workspace->x(row + m_startRow);
+  if (col >= static_cast<int>(x.size()))
+    return 0.;
+  return x[col];
 }
 
 double MantidMatrix::dataY(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readY(row + m_startRow)[col];
-  return res;
+  const auto &y = m_workspace->y(row + m_startRow);
+  if (col >= static_cast<int>(y.size()))
+    return 0.;
+  return y[col];
 }
 
 double MantidMatrix::dataE(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readE(row + m_startRow)[col];
-  return res;
+  const auto &e = m_workspace->e(row + m_startRow);
+  if (col >= static_cast<int>(e.size()))
+    return 0.;
+  return e[col];
 }
 
 double MantidMatrix::dataDx(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readDx(row + m_startRow)[col];
-  return res;
+  const auto &dx = m_workspace->dx(row + m_startRow);
+  if (col >= static_cast<int>(dx.size()))
+    return 0.;
+  return dx[col];
 }
 
 QString MantidMatrix::workspaceName() const {
@@ -592,8 +579,12 @@ QString MantidMatrix::workspaceName() const {
 }
 
 QwtDoubleRect MantidMatrix::boundingRect() {
+  const int defaultNumberSpectroGramRows = 700;
+  const int defaultNumberSpectroGramColumns = 700;
   if (m_boundingRect.isNull()) {
-    m_spectrogramRows = numRows() > 100 ? numRows() : 100;
+    m_spectrogramRows = numRows() > defaultNumberSpectroGramRows
+                            ? numRows()
+                            : defaultNumberSpectroGramRows;
 
     // This is only meaningful if a 2D (or greater) workspace
     if (m_workspace->axes() > 1) {
@@ -607,13 +598,14 @@ QwtDoubleRect MantidMatrix::boundingRect() {
     int i0 = m_startRow;
     x_start = x_end = 0;
     while (x_start == x_end && i0 <= m_endRow) {
-      const Mantid::MantidVec &X = m_workspace->readX(i0);
+      const auto &X = m_workspace->x(i0);
       x_start = X[0];
-      if (X.size() != m_workspace->readY(i0).size())
-        x_end = X[m_workspace->blocksize()];
+      const size_t y_size = m_workspace->y(i0).size();
+      if (X.size() != y_size)
+        x_end = X[y_size];
       else
-        x_end = X[m_workspace->blocksize() - 1];
-      if (!isANumber(x_start) || !isANumber(x_end)) {
+        x_end = X[y_size - 1];
+      if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
       i0++;
@@ -625,8 +617,8 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       bool theSame = true;
       double dx = 0.;
       for (int i = i0; i <= m_endRow; ++i) {
-        if (m_workspace->readX(i).front() != x_start ||
-            m_workspace->readX(i).back() != x_end) {
+        const auto &X = m_workspace->x(i);
+        if (X.front() != x_start || X.back() != x_end) {
           theSame = false;
           break;
         }
@@ -639,16 +631,16 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         // that can be plotted from this matrix
         double ddx = dx;
         for (int i = m_startRow + 1; i <= m_endRow; ++i) {
-          const Mantid::MantidVec &X = m_workspace->readX(i);
+          const auto &X = m_workspace->x(i);
           if (X.front() < x_start) {
             double xs = X.front();
-            if (!isANumber(xs))
+            if (!std::isfinite(xs))
               continue;
             x_start = xs;
           }
           if (X.back() > x_end) {
             double xe = X.back();
-            if (!isANumber(xe))
+            if (!std::isfinite(xe))
               continue;
             x_end = xe;
           }
@@ -660,22 +652,22 @@ QwtDoubleRect MantidMatrix::boundingRect() {
           }
         }
         m_spectrogramCols = static_cast<int>((x_end - x_start) / ddx);
-        if (m_spectrogramCols < 100)
-          m_spectrogramCols = 100;
+        if (m_spectrogramCols < defaultNumberSpectroGramColumns)
+          m_spectrogramCols = defaultNumberSpectroGramColumns;
       } else {
-        m_spectrogramCols = numCols() > 100 ? numCols() : 100;
+        m_spectrogramCols = numCols() > defaultNumberSpectroGramColumns
+                                ? numCols()
+                                : defaultNumberSpectroGramColumns;
       }
-      m_boundingRect =
-          QwtDoubleRect(QMIN(x_start, x_end) - 0.5 * dx,
-                        QMIN(y_start, y_end) - 0.5 * dy,
-                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-              .normalized();
+      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                                     qMin(y_start, y_end) - 0.5 * dy,
+                                     fabs(x_end - x_start) + dx,
+                                     fabs(y_end - y_start) + dy).normalized();
 
     } else {
       m_spectrogramCols = 0;
-      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy)
-                           .normalized();
+      m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
+                                     fabs(y_end - y_start) + dy).normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -742,11 +734,11 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 @param type :: The "curve" type.
 @return Pointer to the created graph.
 */
-MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
+MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
-    return NULL;
+    return nullptr;
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -755,17 +747,18 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
   MultiLayer *g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
   attachMultilayer(g);
   //#799 fix for  multiple dialog creation on double clicking/ on right click
-  //menu scale on  2d plot
+  // menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph *plot = g->activeGraph();
-  plotSpectrogram(plot, a, type, false, NULL);
+  plotSpectrogram(plot, a, type, false, nullptr);
   // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;
 }
 
 Spectrogram *MantidMatrix::plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                                           Graph::CurveType type, bool project,
+                                           GraphOptions::CurveType type,
+                                           bool project,
                                            const ProjectData *const prjData) {
   app->setPreferences(plot);
 
@@ -873,7 +866,7 @@ bool MantidMatrix::setSelectedColumns() {
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow *w) {
-  if (w->isA("Table")) {
+  if (strcmp(w->metaObject()->className(), "Table") == 0) {
     QMap<MultiLayer *, Table *>::iterator itr;
     for (itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr) {
       if (itr.value() == dynamic_cast<Table *>(w)) {
@@ -881,7 +874,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow *w) {
         break;
       }
     }
-  } else if (w->isA("MultiLayer")) {
+  } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
     int i = m_plots2D.indexOf(dynamic_cast<MultiLayer *>(w));
     if (i >= 0)
       m_plots2D.remove(i);
@@ -992,8 +985,8 @@ void MantidMatrix::afterReplaceHandle(
 }
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
-  if (m_cols != static_cast<int>(ws->blocksize()) ||
-      m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms())) {
+  if (m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()) ||
+      m_cols != static_cast<int>(ws->blocksize())) {
     closeDependants();
   }
 
@@ -1007,14 +1000,20 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   m_modelY = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::Y);
   connectTableView(m_table_viewY, m_modelY);
+  setNumberFormat(0, MantidPreferences::MantidMatrixNumberFormatY(),
+                  MantidPreferences::MantidMatrixNumberPrecisionY());
 
   m_modelX = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::X);
   connectTableView(m_table_viewX, m_modelX);
+  setNumberFormat(1, MantidPreferences::MantidMatrixNumberFormatX(),
+                  MantidPreferences::MantidMatrixNumberPrecisionX());
 
   m_modelE = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::E);
   connectTableView(m_table_viewE, m_modelE);
+  setNumberFormat(2, MantidPreferences::MantidMatrixNumberFormatE(),
+                  MantidPreferences::MantidMatrixNumberPrecisionE());
 
   // Update the extensions
   updateExtensions(ws);
@@ -1110,7 +1109,8 @@ QChar MantidMatrix::numberFormat() { return activeModel()->format(); }
 int MantidMatrix::precision() { return activeModel()->precision(); }
 
 void MantidMatrix::setMatrixProperties() {
-  MantidMatrixDialog dlg(m_appWindow);
+  QWidget *parent = parentWidget();
+  MantidMatrixDialog dlg(parent);
   dlg.setMatrix(this);
   dlg.exec();
 }
@@ -1161,21 +1161,21 @@ const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // this is here to fill m_min and m_max with numbers that aren't nan
   miny = std::numeric_limits<double>::max();
-  maxy = -std::numeric_limits<double>::max();
+  maxy = std::numeric_limits<double>::lowest();
 
   if (ws) {
 
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
       double local_min, local_max;
-      const Mantid::MantidVec &Y = ws->readY(wi);
+      const auto &Y = ws->y(wi);
 
       local_min = std::numeric_limits<double>::max();
-      local_max = -std::numeric_limits<double>::max();
+      local_max = std::numeric_limits<double>::lowest();
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        if (!std::isfinite(aux))
           continue;
         if (aux < local_min)
           local_min = aux;
@@ -1198,7 +1198,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // Make up some reasonable values if nothing was found
   if (miny == std::numeric_limits<double>::max())
     miny = 0;
-  if (maxy == -std::numeric_limits<double>::max())
+  if (maxy == std::numeric_limits<double>::lowest())
     maxy = miny + 1e6;
 
   if (maxy == miny) {
@@ -1209,14 +1209,51 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-void MantidMatrix::loadFromProject(const std::string &lines,
-                                   ApplicationWindow *app,
-                                   const int fileVersion) {
-  Q_UNUSED(lines);
-  Q_UNUSED(app);
+MantidQt::API::IProjectSerialisable *
+MantidMatrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(fileVersion);
-  // We don't actually need to do any loading. It's all taken care of by
-  // ApplicationWindow.
+  TSVSerialiser tsv(lines);
+
+  MantidMatrix *matrix = nullptr;
+  if (tsv.selectLine("WorkspaceName")) {
+    const std::string wsName = tsv.asString(1);
+    MatrixWorkspace_sptr ws;
+
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+    if (!ws)
+      return nullptr;
+
+    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName),
+                              -1, -1);
+  }
+
+  if (!matrix)
+    return nullptr;
+
+  // Append to the list of mantid matrix apps
+  app->addMantidMatrixWindow(matrix);
+  app->addMdiSubWindow(matrix);
+
+  if (tsv.selectLine("geometry")) {
+    const std::string geometry = tsv.lineAsString("geometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("tgeometry")) {
+    const std::string geometry = tsv.lineAsString("tgeometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("SelectedTab")) {
+    int index;
+    tsv >> index;
+    matrix->m_tabs->setCurrentIndex(index);
+  }
+
+  return matrix;
 }
 
 std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
@@ -1225,9 +1262,14 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("<mantidmatrix>");
   tsv.writeLine("WorkspaceName") << m_strName;
   tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeLine("SelectedTab") << m_tabs->currentIndex();
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();
+}
+
+std::vector<std::string> MantidMatrix::getWorkspaceNames() {
+  return {m_strName};
 }
 
 /**
@@ -1250,39 +1292,44 @@ void MantidMatrix::addMantidMatrixTabExtension(MantidMatrixModel::Type type) {
  * Hook up the MantidMatrixExtension to the new tab etc
  */
 void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
-  // Provide an extension
-  auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
+  switch (type) {
+  case MantidMatrixModel::DX: {
+    // Provide an extension
+    auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
 
-  // We need to hook up the extension
-  extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
-                                          m_cols, m_startRow, type);
-  extension.tableView = new QTableView();
+    // We need to hook up the extension
+    extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
+                                            m_cols, m_startRow, type);
+    extension.tableView = Mantid::Kernel::make_unique<QTableView>();
 
-  // Add it to the extension collection, so we can set it up in place
-  m_extensions.emplace(type, extension);
-  auto mapped_extension = m_extensions[type];
+    // Add a new tab
+    m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),
+                      extension.label);
 
-  // Add a new tab
-  m_tabs->insertTab(modelTypeToInt(type), mapped_extension.tableView,
-                    mapped_extension.label);
+    // Install the eventfilter
+    extension.tableView->installEventFilter(this);
 
-  // Install the eventfilter
-  mapped_extension.tableView->installEventFilter(this);
+    // Connect Table View
+    connectTableView(extension.tableView.get(), extension.model);
 
-  // Connect Table View
-  connectTableView(mapped_extension.tableView, mapped_extension.model);
+    m_extensions.emplace(type, std::move(extension));
 
-  // Set the column width
-  auto columnWidth = m_extensionRequest.getColumnWidthPreference(
-      type, m_extensions, MantidPreferences::MantidMatrixColumnWidthY());
-  setColumnsWidth(modelTypeToInt(type), columnWidth);
+    // Set the column width
+    auto columnWidth = m_extensionRequest.getColumnWidthPreference(
+        type, m_extensions, MantidPreferences::MantidMatrixColumnWidthDx());
+    setColumnsWidth(modelTypeToInt(type), columnWidth);
 
-  // Set the number format
-  auto format = m_extensionRequest.getFormat(
-      type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
-  auto precision = m_extensionRequest.getPrecision(
-      type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
-  setNumberFormat(modelTypeToInt(type), format, precision);
+    // Set the number format
+    auto format = m_extensionRequest.getFormat(
+        type, m_extensions, MantidPreferences::MantidMatrixNumberFormatDx());
+    auto precision = m_extensionRequest.getPrecision(
+        type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionDx());
+    setNumberFormat(modelTypeToInt(type), format, precision);
+    break;
+  }
+  default:
+    throw std::runtime_error("Unknown MantidMatrix extension.");
+  }
 }
 
 /**
@@ -1290,11 +1337,32 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
  * @param ws: the new workspace
  */
 void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
-  // Remove the tabs
-  for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it) {
-    auto &extension = it->second;
-    extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
-                                            m_startRow, it->first);
-    connectTableView(extension.tableView, extension.model);
+  auto it = m_extensions.begin();
+  while (it != m_extensions.cend()) {
+    auto type = it->first;
+    switch (type) {
+    case MantidMatrixModel::DX:
+      if (ws->hasDx(0)) {
+        auto &extension = it->second;
+        extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
+                                                m_startRow, type);
+        connectTableView(extension.tableView.get(), extension.model);
+        auto format = m_extensionRequest.getFormat(
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberFormatDx());
+        auto precision = m_extensionRequest.getPrecision(
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberPrecisionDx());
+        setNumberFormat(modelTypeToInt(type), format, precision);
+        ++it;
+      } else {
+        closeDependants();
+        m_tabs->removeTab(modelTypeToInt(type));
+        it = m_extensions.erase(it);
+      }
+      break;
+    default:
+      throw std::runtime_error("Unknown MantidMatrix extension.");
+    }
   }
 }

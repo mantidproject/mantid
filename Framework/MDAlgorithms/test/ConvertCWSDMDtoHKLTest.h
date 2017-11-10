@@ -43,7 +43,7 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_qsampleWS->name()));
+        alg.setPropertyValue("InputWorkspace", m_qsampleWS->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "UBMatrix", "1.0, 0.5, 0., -0.2, 2.0, 0.4, 0., 1.11, 3.9"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "HKLMD"));

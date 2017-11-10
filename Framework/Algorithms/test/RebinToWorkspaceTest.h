@@ -4,15 +4,44 @@
 //-------------------
 // Includes
 //--------------------
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/RebinToWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+
+#include <numeric>
 
 class RebinToWorkspaceTest : public CxxTest::TestSuite {
 public:
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(rebinToWS.initialize());
     TS_ASSERT(rebinToWS.isInitialized());
+  }
+
+  void testPointDataWorkspacesAreRejected() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using Mantid::HistogramData::Points;
+
+    Mantid::Algorithms::RebinToWorkspace alg;
+    alg.initialize();
+
+    // Creates a workspace with 10 points
+    const int numYPoints(10);
+    const int numSpectra(2);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
+        numSpectra, numYPoints, false);
+    // Reset the X data to something reasonable
+    Points x(numYPoints);
+    std::iota(begin(x), end(x), 0.0);
+    for (int i = 0; i < numSpectra; ++i) {
+      testWS->setPoints(i, x);
+    }
+
+    TS_ASSERT_EQUALS(testWS->isHistogramData(), false);
+    TS_ASSERT_THROWS_ANYTHING(
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
+    TS_ASSERT_THROWS_ANYTHING(
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
   }
 
   void testExec() {
@@ -25,9 +54,9 @@ public:
     // Need to input workspaces to test this
     using namespace Mantid::DataObjects;
     Workspace2D_sptr rebinThis =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 50, 5.0, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 50, 5.0, 1.0);
     Workspace2D_sptr matchToThis =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(15, 30, 3.0, 2.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(15, 30, 3.0, 2.5);
     // Register them with the DataService
     using namespace Mantid::API;
     TS_ASSERT_THROWS_NOTHING(
@@ -67,11 +96,11 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(workspace);
 
     // Test x-vectors from this and "matchToThis" are the same
-    TS_ASSERT_EQUALS(output2D->dataX(0).size(), matchToThis->dataX(0).size());
-    TS_ASSERT_DIFFERS(output2D->dataX(0).size(), rebinThis->dataX(0).size());
+    TS_ASSERT_EQUALS(output2D->x(0).size(), matchToThis->x(0).size());
+    TS_ASSERT_DIFFERS(output2D->x(0).size(), rebinThis->x(0).size());
 
     // Test a random x bin for matching value
-    TS_ASSERT_EQUALS(output2D->dataX(0)[22], matchToThis->dataX(0)[22]);
+    TS_ASSERT_EQUALS(output2D->x(0)[22], matchToThis->x(0)[22]);
   }
 
 private:

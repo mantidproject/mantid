@@ -1,5 +1,5 @@
-#ifndef MANTID_SUPPORTTEST_H_
-#define MANTID_SUPPORTTEST_H_
+#ifndef MANTID_STRINGTOKENIZERTEST_H_
+#define MANTID_STRINGTOKENIZERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <random>
@@ -195,6 +195,15 @@ private:
   std::size_t m_length = 50000000;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static StringTokenizerTestPerformance *createSuite() {
+    return new StringTokenizerTestPerformance();
+  }
+  static void destroySuite(StringTokenizerTestPerformance *suite) {
+    delete suite;
+  }
+
   StringTokenizerTestPerformance() {
     m_bigString = randomString(m_length);
     for (size_t i = 2; i < m_length; i += 10) {
@@ -224,4 +233,4 @@ public:
   }
 };
 
-#endif // MANTID_SUPPORTTEST_H_
+#endif // MANTID_STRINGTOKENZIERTEST_H_

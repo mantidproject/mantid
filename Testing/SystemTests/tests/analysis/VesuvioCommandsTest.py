@@ -4,28 +4,45 @@ and that mantid can be imported
 """
 import stresstesting
 import platform
+import numpy as np
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
+from vesuvio.instrument import *
 
 
-#=====================================Helper Function=================================
+# =====================================Helper Function=================================
 
-def _create_test_flags(background):
+def _is_old_boost_version():
+    # It appears that a difference in boost version is causing different
+    # random number generation. As such an OS check is used.
+    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
+    dist = platform.linux_distribution()
+    if any(dist):
+        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
+            return True
+        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
+            return True
+
+    return False
+
+
+def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
-    flags['spectra'] = '135'
-
-    mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-             'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
+    if multivariate:
+        mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5}
+    else:
+        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
+                 'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
     mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
     mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
     mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
     flags['masses'] = [mass1, mass2, mass3, mass4]
     flags['intensity_constraints'] = [0, 1, 0, -4]
     if background:
-        flags['background'] = {'function': 'Polynomial', 'order':3}
+        flags['background'] = {'function': 'Polynomial', 'order': 3}
     else:
         flags['background'] = None
     flags['ip_file'] = 'Vesuvio_IP_file_test.par'
@@ -40,23 +57,95 @@ def _create_test_flags(background):
 
     return flags
 
-def _equal_within_tolerance(expected, actual, tolerance=0.05):
+
+def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     Checks the expected value is equal to the actual value with in a percentage of tolerance
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    return abs_difference <= abs(tolerance_value)
+    self.assertTrue(abs_difference <= abs(tolerance_value))
 
-#====================================================================================
+
+def _get_peak_height_and_index(workspace, ws_index):
+    """
+    returns the maximum height in y of a given spectrum of a workspace
+    workspace is assumed to be a matrix workspace
+    """
+    y_data = workspace.readY(ws_index)
+    peak_height = np.amax(y_data)
+    peak_bin = np.argmax(y_data)
+
+    return peak_height, peak_bin
+
+
+def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
+                       fit_mode='spectra', rebin_params=None):
+    """
+    @param runs The string giving the runs to load
+    @param spectra A list of spectra to load
+    @param ip_file A string denoting the IP file
+    @param diff_mode Either 'double' or 'single'
+    @param fit_mode If bank then the loading is changed to summing each bank to a separate spectrum
+    @param rebin_params Rebin parameter string to rebin data by (no rebin if None)
+    """
+    instrument = VESUVIO()
+    load_banks = (fit_mode == 'bank')
+    output_name = runs + "_" + spectra + "_tof"
+
+    if load_banks:
+        sum_spectra = True
+        if spectra == "forward":
+            bank_ranges = instrument.forward_banks
+        elif spectra == "backward":
+            bank_ranges = instrument.backward_banks
+        else:
+            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
+                             "for the spectra to load")
+        bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
+        spectra = ";".join(bank_ranges)
+    else:
+        sum_spectra = False
+        if spectra == "forward":
+            spectra = "{0}-{1}".format(*instrument.forward_spectra)
+        elif spectra == "backward":
+            spectra = "{0}-{1}".format(*instrument.backward_spectra)
+
+    if diff_mode == "double":
+        diff_mode = "DoubleDifference"
+    else:
+        diff_mode = "SingleDifference"
+
+    kwargs = {"Filename": runs,
+              "Mode": diff_mode, "InstrumentParFile": ip_file,
+              "SpectrumList": spectra, "SumSpectra": sum_spectra,
+              "OutputWorkspace": output_name, "StoreInADS": False}
+    full_range = LoadVesuvio(**kwargs)
+    tof_data = CropWorkspace(InputWorkspace=full_range,
+                             XMin=instrument.tof_range[0],
+                             XMax=instrument.tof_range[1],
+                             OutputWorkspace=output_name,
+                             StoreInADS=False)
+
+    if rebin_params is not None:
+        tof_data = Rebin(InputWorkspace=tof_data,
+                         OutputWorkspace=output_name,
+                         Params=rebin_params,
+                         StoreInADS=False)
+
+    return tof_data
+
+
+# ====================================================================================
+
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
-
     _fit_results = None
 
     def runTest(self):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
+        flags['spectra'] = '135'
         self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
@@ -65,7 +154,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
         fitted_wsg = self._fit_results[0]
         self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
-        self.assertEqual(2, len(fitted_wsg))
+        self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
@@ -74,18 +163,17 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.016289703
-        index_one_last = 0.0072029933
-        index_two_first = 1.057476742e-05
-        index_two_last = 7.023179770e-05
-        dist = platform.linux_distribution()
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
-            index_one_first = 7.798020e-04
+        index_one_first = -0.013011414483
+        index_one_last = 0.00720741862173
+        index_two_first = 1.12713408816e-05
+        index_two_last = 6.90222280789e-05
+        if _is_old_boost_version():
+            index_one_first = 0.000631295911554
 
-        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
+        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
+        _equal_within_tolerance(self, index_two_first, fitted_ws.readY(1)[0])
+        _equal_within_tolerance(self, index_two_last, fitted_ws.readY(1)[-1])
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -98,14 +186,44 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-#====================================================================================
+
+# ====================================================================================
+
+
+class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest):
+    """
+    Test ensures that internal ties for mass profiles work correctly
+    This test ties SigmaX to SigmaY making the multivariate gaussian
+    a Bivariate Gaussian
+    """
+
+    def excludeInPullRequests(self):
+        return True
+
+    def runTest(self):
+        flags = _create_test_flags(background=False, multivariate=True)
+        flags['spectra'] = '135'
+        flags['masses'][0]['ties'] = 'SigmaX=SigmaY'
+        runs = "15039-15045"
+        self._fit_results = fit_tof(runs, flags)
+
+    def validate(self):
+        # Get fit workspace
+        fit_params = mtd['15039-15045_params_iteration_1']
+        f0_sigma_x = fit_params.readY(2)[0]
+        f0_sigma_y = fit_params.readY(3)[0]
+        self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
+
+
+# ====================================================================================
+
 
 class SingleSpectrumBackground(stresstesting.MantidStressTest):
-
     _fit_results = None
 
     def runTest(self):
         flags = _create_test_flags(background=True)
+        flags['spectra'] = '135'
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -115,7 +233,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         fitted_wsg = self._fit_results[0]
         self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
-        self.assertEqual(2, len(fitted_wsg))
+        self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
@@ -124,21 +242,19 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.0221362198069
-        index_one_last = 0.00720728978699
-        index_two_first = 0.00571520523979
-        index_two_last = -0.00211277263055
-        dist = platform.linux_distribution()
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
-            index_one_first = 6.809169e-04
-            index_one_last = 7.206634e-03
-            index_two_first = 3.360576e-03
-            index_two_last = -1.431954e-03
+        index_one_first = -0.00553133541138
+        index_one_last = 0.00722053823154
+        calc_data_height_expected = 0.13302098172
+        calc_data_bin_expected = 635
+        if _is_old_boost_version():
+            index_one_first = 0.000605572768745
 
-        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
+        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
+
+        calc_data_height_actual, calc_data_bin_actual = _get_peak_height_and_index(fitted_ws, 1)
+        _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
+        self.assertTrue(abs(calc_data_bin_expected - calc_data_bin_actual) <= 1)
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -151,10 +267,11 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-#====================================================================================
+
+# ====================================================================================
+
 
 class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
-
     _fit_results = None
 
     def runTest(self):
@@ -169,32 +286,26 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertEquals(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, list))
+        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup))
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
-        self.assertTrue(isinstance(bank1, WorkspaceGroup))
+        self.assertTrue(isinstance(bank1, MatrixWorkspace))
 
-        bank1_data = bank1[0]
-        self.assertTrue(isinstance(bank1_data, MatrixWorkspace))
+        self.assertAlmostEqual(50.0, bank1.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank1.readX(0)[-1])
 
-        self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1.readY(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1.readY(1)[-1])
 
-        self.assertTrue(_equal_within_tolerance(8.03245852426e-05, bank1_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(0.000559789299755, bank1_data.readY(1)[-1]))
+        bank8 = fitted_banks[7]
+        self.assertTrue(isinstance(bank8, MatrixWorkspace))
 
-        bank8 = fitted_banks[-1]
-        self.assertTrue(isinstance(bank8, WorkspaceGroup))
+        self.assertAlmostEqual(50.0, bank8.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank8.readX(0)[-1])
 
-        bank8_data = bank8[0]
-        self.assertTrue(isinstance(bank8_data, MatrixWorkspace))
-
-        self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
-
-        self.assertTrue(_equal_within_tolerance(0.000279169151321, bank8_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(0.000505355349359, bank8_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 0.00025454613205, bank8.readY(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -203,10 +314,11 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-#====================================================================================
+
+# ====================================================================================
+
 
 class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
-
     _fit_results = None
 
     def runTest(self):
@@ -221,32 +333,26 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertEquals(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_spec, list))
+        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup))
         self.assertEqual(2, len(fitted_spec))
 
         spec143 = fitted_spec[0]
-        self.assertTrue(isinstance(spec143, WorkspaceGroup))
+        self.assertTrue(isinstance(spec143, MatrixWorkspace))
 
-        spec143_data = spec143[0]
-        self.assertTrue(isinstance(spec143_data, MatrixWorkspace))
+        self.assertAlmostEqual(50.0, spec143.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec143.readX(0)[-1])
 
-        self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143.readY(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143.readY(1)[-1])
 
-        self.assertTrue(_equal_within_tolerance(2.3090594752e-06, spec143_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(3.51960367895e-05, spec143_data.readY(1)[-1]))
+        spec144 = fitted_spec[1]
+        self.assertTrue(isinstance(spec144, MatrixWorkspace))
 
-        spec144 = fitted_spec[-1]
-        self.assertTrue(isinstance(spec144, WorkspaceGroup))
+        self.assertAlmostEqual(50.0, spec144.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec144.readX(0)[-1])
 
-        spec144_data = spec144[0]
-        self.assertTrue(isinstance(spec144_data, MatrixWorkspace))
-
-        self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
-
-        self.assertTrue(_equal_within_tolerance(7.79185212491e-06, spec144_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(4.79448882168e-05, spec144_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144.readY(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -255,4 +361,47 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-#====================================================================================
+
+# ====================================================================================
+
+
+class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
+    _fit_results = None
+
+    def runTest(self):
+        flags = _create_test_flags(background=False)
+        runs_ws = load_and_crop_data('15039-15045', '143-144', flags['ip_file'])
+        self._fit_results = fit_tof(runs_ws, flags)
+
+    def validate(self):
+        self.assertTrue(isinstance(self._fit_results, tuple))
+        self.assertEquals(4, len(self._fit_results))
+
+        fitted_spec = self._fit_results[0]
+        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup))
+        self.assertEqual(2, len(fitted_spec))
+
+        spec143 = fitted_spec[0]
+        self.assertTrue(isinstance(spec143, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, spec143.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec143.readX(0)[-1])
+
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143.readY(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143.readY(1)[-1])
+
+        spec144 = fitted_spec[1]
+        self.assertTrue(isinstance(spec144, MatrixWorkspace))
+
+        self.assertAlmostEqual(50.0, spec144.readX(0)[0])
+        self.assertAlmostEqual(562.0, spec144.readX(0)[-1])
+
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144.readY(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
+
+        chisq_values = self._fit_results[2]
+        self.assertTrue(isinstance(chisq_values, list))
+        self.assertEqual(2, len(chisq_values))
+
+        exit_iteration = self._fit_results[3]
+        self.assertTrue(isinstance(exit_iteration, int))

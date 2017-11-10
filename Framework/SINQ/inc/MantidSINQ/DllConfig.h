@@ -30,8 +30,10 @@
 
 #ifdef IN_MANTID_SINQ
 #define MANTID_SINQ_DLL DLLExport
+#define EXTERN_MANTID_SINQ
 #else
 #define MANTID_SINQ_DLL DLLImport
+#define EXTERN_MANTID_SINQ EXTERN_IMPORT
 #endif /* IN_MANTID_SINQ */
 
 #endif // MANTID_SINQ_DLLCONFIG_H_

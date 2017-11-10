@@ -1,13 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMDFILES_H_
 #define MANTID_MDALGORITHMS_MERGEMDFILES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 #include <mutex>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -80,6 +80,10 @@ private:
   std::vector<DataObjects::MDBoxFlatTree> m_fileComponentsStructure;
 
 protected:
+  /// Set to true if the output is cloned of the first one
+  // bool clonedFirst;
+  void clearEventLoaders();
+
   /// number of workspace dimensions
   int m_nDims;
   /// string describes type of the event, stored in the workspaces.
@@ -97,23 +101,19 @@ protected:
   Mantid::API::IMDEventWorkspace_sptr m_OutIWS;
 
   /// # of events from ALL input files
-  uint64_t totalEvents;
+  uint64_t m_totalEvents;
 
   /// # of events loaded from all tasks
-  uint64_t totalLoaded;
+  uint64_t m_totalLoaded;
 
   /// Mutex for file access
-  std::mutex fileMutex;
+  std::mutex m_fileMutex;
 
   /// Mutex for modifying stats
-  std::mutex statsMutex;
+  std::mutex m_statsMutex;
 
   /// Progress reporter
-  Mantid::API::Progress *prog;
-
-  /// Set to true if the output is cloned of the first one
-  // bool clonedFirst;
-  void clearEventLoaders();
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };
 
 } // namespace MDAlgorithms

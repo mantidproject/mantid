@@ -37,9 +37,6 @@ namespace Algorithms {
 */
 class DLLExport AddLogDerivative : public API::Algorithm {
 public:
-  AddLogDerivative();
-  ~AddLogDerivative() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "AddLogDerivative"; };
   /// Summary of algorithms purpose

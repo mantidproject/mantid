@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
+
 class POLDIAnalyseResidualsTest(stresstesting.MantidStressTest):
     '''This test checks that the residual analysis algorithm for POLDI works correctly.'''
 

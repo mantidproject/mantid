@@ -1,14 +1,14 @@
 #ifndef FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 #define FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/BinaryFile.h"
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -141,7 +141,7 @@ private:
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        std::vector<Types::Event::TofEvent> **arrayOfVectors,
                         DasEvent *event_buffer,
                         size_t current_event_buffer_size, size_t fileOffset);
 
@@ -161,7 +161,7 @@ private:
   void filterEvents();
   ///
   void filterEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                          std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                          std::vector<Types::Event::TofEvent> **arrayOfVectors,
                           DasEvent *event_buffer,
                           size_t current_event_buffer_size, size_t fileOffset);
 
@@ -177,13 +177,13 @@ private:
   /// Perform statistics to event (wrong pixel ID) logs
   void doStatToEventLog(size_t mindex);
 
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> m_spectraList;                ///<the list of Spectra
 
   /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
+  std::vector<Types::Core::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> m_vecEventIndex;
   /// The proton charge on a pulse by pulse basis.
@@ -212,7 +212,7 @@ private:
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only

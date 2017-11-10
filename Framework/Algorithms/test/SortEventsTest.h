@@ -15,6 +15,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Event::TofEvent;
 
 class SortEventsTest : public CxxTest::TestSuite {
 public:
@@ -35,11 +36,11 @@ public:
   void testSortByTof() {
     std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     Workspace2D_sptr test_in_ws2d =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
 
     SortEvents sort;
@@ -58,7 +59,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
 
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].tof(), ve[i + 1].tof());
@@ -70,7 +71,7 @@ public:
   void testSortByPulseTime() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;
@@ -83,7 +84,7 @@ public:
     EventWorkspace_const_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++)
       TS_ASSERT_LESS_THAN_EQUALS(ve[i].pulseTime(), ve[i + 1].pulseTime());
@@ -94,7 +95,7 @@ public:
   void testSortByPulseTimeTOF() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;
@@ -107,7 +108,7 @@ public:
     EventWorkspace_const_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(
             wsName);
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
     TS_ASSERT_EQUALS(ve.size(), NUMBINS);
     for (size_t i = 0; i < ve.size() - 1; i++) {
       bool less = true;
@@ -118,10 +119,9 @@ public:
         less = false;
       }
       if (!less) {
-        std::cout << "Event " << i << "  is later than Event " << i + 1
-                  << std::endl;
+        std::cout << "Event " << i << "  is later than Event " << i + 1 << '\n';
         std::cout << "Event " << i << ": " << ve[i].pulseTime() << " + "
-                  << ve[i].tof() << std::endl;
+                  << ve[i].tof() << '\n';
       }
       TS_ASSERT(less);
     }

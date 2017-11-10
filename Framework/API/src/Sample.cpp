@@ -2,11 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 
 #include <nexus/NeXusException.hpp>
@@ -17,6 +18,7 @@ namespace API {
 using namespace Mantid::Kernel;
 using Geometry::Object;
 using Geometry::OrientedLattice;
+using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
 
 /**
@@ -110,7 +112,7 @@ void Sample::setShape(const Object &shape) { m_shape = shape; }
 /** Return the material.
  * @return A reference to the material the sample is composed of
  */
-const Material &Sample::getMaterial() const { return m_shape.material(); }
+const Material Sample::getMaterial() const { return m_shape.material(); }
 
 /**
  * Return a reference to the sample environment that this sample is attached to
@@ -286,7 +288,7 @@ void Sample::addSample(boost::shared_ptr<Sample> childSample) {
  * @param group :: name of the group to create
  */
 void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
-  file->makeGroup(group, "NXsample", 1);
+  file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   file->putAttr("version", 1);
   file->putAttr("shape_xml", m_shape.getShapeXML());

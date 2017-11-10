@@ -2,7 +2,8 @@
     File                 : FunctionCurve.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Function curve class
 
@@ -33,76 +34,79 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Mantid
-{
-  namespace API
-  {
-    class IFunction;
-    class MatrixWorkspace;
-  }
+namespace Mantid {
+namespace API {
+class IFunction;
+class MatrixWorkspace;
+}
 }
 
 // Function curve class
-class FunctionCurve: public PlotCurve
-{
+class FunctionCurve : public PlotCurve {
 public:
-	enum FunctionType{Normal = 0, Parametric = 1, Polar = 2};
+  enum FunctionType { Normal = 0, Parametric = 1, Polar = 2 };
 
-	FunctionCurve(const FunctionType& t, const QString& name = QString());
-        explicit FunctionCurve(const QString &name = QString());
-  FunctionCurve(const Mantid::API::IFunction* fun, 
-    const QString& wsName, int wsIndex = 0, const QString& name = QString());
-	FunctionCurve(const FunctionCurve& c);
-        ~FunctionCurve() override;
+  FunctionCurve(const FunctionType &t, const QString &name = QString());
+  explicit FunctionCurve(const QString &name = QString());
+  FunctionCurve(const Mantid::API::IFunction *fun, const QString &wsName,
+                int wsIndex = 0, const QString &name = QString());
+  FunctionCurve(const FunctionCurve &c);
+  ~FunctionCurve() override;
 
-        PlotCurve *clone(const Graph *) const override {
-          return new FunctionCurve(*this);
-        }
+  FunctionCurve &operator=(const FunctionCurve &rhs) = delete;
 
-        double startRange(){return d_from;};
-	double endRange(){return d_to;};
-	void setRange(double from, double to);
+  PlotCurve *clone(const Graph *) const override {
+    return new FunctionCurve(*this);
+  }
 
-	QStringList formulas(){return d_formulas;};
-	void setFormulas(const QStringList& lst){d_formulas = lst;};
+  double startRange() { return d_from; };
+  double endRange() { return d_to; };
+  void setRange(double from, double to);
 
-	//! Provided for convenience when dealing with normal functions
-	void setFormula(const QString& s){d_formulas = QStringList() << s;};
+  QStringList formulas() { return d_formulas; };
+  void setFormulas(const QStringList &lst) { d_formulas = lst; };
 
-	QString variable(){return d_variable;};
-	void setVariable(const QString& s){d_variable = s;};
+  //! Provided for convenience when dealing with normal functions
+  void setFormula(const QString &s) { d_formulas = {s}; };
 
-	FunctionType functionType(){return d_function_type;};
-	void setFunctionType(const FunctionType& t){d_function_type = t;};
+  QString variable() { return d_variable; };
+  void setVariable(const QString &s) { d_variable = s; };
 
-	void copy(FunctionCurve *f);
+  FunctionType functionType() { return d_function_type; };
+  void setFunctionType(const FunctionType &t) { d_function_type = t; };
 
-	//! Returns a string used when saving to a project file
-	QString saveToString();
+  void copy(FunctionCurve *f);
 
-	//! Returns a string that can be displayed in a plot legend
-	QString legend();
+  //! Returns a string used when saving to a project file
+  QString saveToString();
 
-	void loadData(int points = 0);
+  //! Returns a string that can be displayed in a plot legend
+  QString legend();
 
-  void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, size_t wi);
- 
+  void loadData(int points = 0);
+
+  void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
+                      size_t wi, int peakRadius = 0);
+
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const override {
     return QList<ErrorBarSettings *>();
   }
 
   /// returns identifier where this curve plots a IFunction
-  const Mantid::API::IFunction* getIFunctionIdentifier() const {return m_identifier;};
+  const Mantid::API::IFunction *getIFunctionIdentifier() const {
+    return m_identifier;
+  };
+
 private:
-	FunctionType d_function_type;
-	QString d_variable;
-	QStringList d_formulas;
-	double d_from, d_to;
-  
+  FunctionType d_function_type;
+  QString d_variable;
+  QStringList d_formulas;
+  double d_from, d_to;
+
   /// Used to identify which IFunction it is plotting
   /// Equal null where the curve is not plotting an IFunction
-  const Mantid::API::IFunction* m_identifier;
+  const Mantid::API::IFunction *m_identifier;
 };
 
 #endif

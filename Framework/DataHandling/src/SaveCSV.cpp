@@ -19,14 +19,12 @@
  File change history is stored at: <https://github.com/mantidproject/mantid>
  */
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCSV.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream> // used to get ofstream
+#include <iomanip>
 
 /* @class SaveCSV
 
@@ -66,9 +64,11 @@ void SaveCSV::init() {
       "Separator", ",",
       "The separator that will go between the numbers on a line in the\n"
       "output file (default ',')");
+  getPointerToProperty("Separator")->setAutoTrim(false);
   declareProperty("LineSeparator", "\n",
                   "The string to place at the end of lines (default new line\n"
                   "character)");
+  getPointerToProperty("LineSeparator")->setAutoTrim(false);
   declareProperty(
       make_unique<PropertyWithValue<bool>>("SaveXerrors", false,
                                            Direction::Input),
@@ -98,7 +98,7 @@ void SaveCSV::exec() {
   m_lineSeparator = getPropertyValue("LineSeparator");
   g_log.debug() << "Parameters: Filename='" << m_filename << "' "
                 << "Seperator='" << m_separator << "' "
-                << "LineSeparator='" << m_lineSeparator << "' " << std::endl;
+                << "LineSeparator='" << m_lineSeparator << "' \n";
 
   // prepare to save to file
 
@@ -126,7 +126,7 @@ void SaveCSV::exec() {
 
     // Add first x-axis line to output file
     {
-      const MantidVec &xValue = localworkspace->readX(0);
+      auto &xValue = localworkspace->x(0);
 
       outCSV_File << "A";
 
@@ -142,10 +142,10 @@ void SaveCSV::exec() {
       // check if x-axis has changed. If yes print out new x-axis line
 
       if (i > 0) {
-        const MantidVec &xValue = localworkspace->readX(i);
-        const MantidVec &xValuePrevious = localworkspace->readX(i - 1);
+        auto &xValue = localworkspace->x(i);
+        auto &xValuePrevious = localworkspace->x(i - 1);
 
-        if (xValue != xValuePrevious) {
+        if (xValue.rawData() != xValuePrevious.rawData()) {
           outCSV_File << "A";
 
           for (double j : xValue) {
@@ -158,7 +158,7 @@ void SaveCSV::exec() {
 
       // add y-axis line for histogram (detector) i
 
-      const MantidVec &yValue = localworkspace->dataY(i);
+      auto &yValue = localworkspace->y(i);
 
       outCSV_File << i;
 
@@ -174,7 +174,7 @@ void SaveCSV::exec() {
     outCSV_File << "\nERRORS\n";
 
     for (size_t i = 0; i < numberOfHist; i++) {
-      const MantidVec &eValue = localworkspace->dataE(i);
+      auto &eValue = localworkspace->e(i);
 
       outCSV_File << i;
 
@@ -196,8 +196,6 @@ void SaveCSV::exec() {
         "SaveCSV currently only works for 2D workspaces.");
   }
   outCSV_File.close();
-  // only gets here if everything happened normally
-  return;
 }
 
 void SaveCSV::saveXerrors(std::ofstream &stream,
@@ -210,11 +208,9 @@ void SaveCSV::saveXerrors(std::ofstream &stream,
   Progress p(this, 0.0, 1.0, numberOfHist);
   stream << "\nXERRORS\n";
   for (size_t i = 0; i < numberOfHist; i++) {
-    const MantidVec &dXvalue = workspace->dataDx(i);
-
     stream << i;
 
-    for (double j : dXvalue) {
+    for (double j : workspace->dx(i)) {
       stream << std::setw(15) << j << m_separator;
     }
     stream << m_lineSeparator;

@@ -172,9 +172,11 @@ public:
   void calculateCentroid(coord_t *centroid, const int runindex) const override;
   coord_t *getCentroid() const override;
   void calculateDimensionStats(MDDimensionStats *stats) const;
-  void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                       const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const override;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override;
@@ -247,8 +249,8 @@ public:
        const std::vector<coord_t> &Coord, const std::vector<uint16_t> &runIndex,
        const std::vector<uint32_t> &detectorId, size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++) {
-      data.push_back(MDE(sigErrSq[2 * i], sigErrSq[2 * i + 1], runIndex[i],
-                         detectorId[i], &Coord[i * nd]));
+      data.emplace_back(sigErrSq[2 * i], sigErrSq[2 * i + 1], runIndex[i],
+                        detectorId[i], &Coord[i * nd]);
     }
   }
   // create single generic event from event's data
@@ -269,8 +271,7 @@ public:
                           const std::vector<uint32_t> & /*detectorId*/,
                           size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++) {
-      data.push_back(MDLeanEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1],
-                                     &Coord[i * nd]));
+      data.emplace_back(sigErrSq[2 * i], sigErrSq[2 * i + 1], &Coord[i * nd]);
     }
   }
   // create single lean event from event's data
@@ -280,7 +281,6 @@ public:
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }
 };
-
 } // namespace DataObjects
 
 } // namespace Mantid

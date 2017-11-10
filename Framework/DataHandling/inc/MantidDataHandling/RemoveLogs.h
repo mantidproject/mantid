@@ -77,8 +77,6 @@ public:
   /// Default constructor
   RemoveLogs();
 
-  /// Destructor
-  ~RemoveLogs() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveLogs"; };
   /// Summary of algorithms purpose

@@ -101,10 +101,6 @@ inline double calculate2Theta(const Kernel::V3D &detpos,
 */
 class DLLExport ConvertCWPDMDToSpectra : public API::Algorithm {
 public:
-  ConvertCWPDMDToSpectra();
-
-  ~ConvertCWPDMDToSpectra() override;
-
   /// Algorithm's name
   const std::string name() const override { return "ConvertCWPDMDToSpectra"; }
 
@@ -174,7 +170,7 @@ private:
                   const detid_t detid);
 
   /// Infinitesimal value
-  double m_infitesimal;
+  double m_infitesimal = 1.0E-10;
 };
 
 } // namespace MDAlgorithms

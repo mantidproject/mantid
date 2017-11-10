@@ -1,14 +1,16 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <stdexcept>
-#include <ostream>
 #include <iostream>
+#include <ostream>
+#include <stdexcept>
 
 namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
@@ -266,7 +268,7 @@ void ObjCompAssembly::printChildren(std::ostream &os) const {
   // std::vector<IComponent*>::const_iterator it;
   int i = 0;
   for (i = 0; i < this->nelements(); i++) {
-    os << "Component " << i << " : **********" << std::endl;
+    os << "Component " << i << " : **********\n";
     this->operator[](i)->printSelf(os);
   }
 }
@@ -285,11 +287,11 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
         boost::dynamic_pointer_cast<const ObjCompAssembly>(this->operator[](i));
     os << "Element " << i << " in the assembly : ";
     if (test) {
-      os << test->getName() << std::endl;
-      os << "Children :******** " << std::endl;
+      os << test->getName() << '\n';
+      os << "Children :******** \n";
       test->printTree(os);
     } else
-      os << this->operator[](i)->getName() << std::endl;
+      os << this->operator[](i)->getName() << '\n';
   }
 }
 
@@ -299,7 +301,7 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D ObjCompAssembly::getPos() const {
-  if (m_map) {
+  if (m_map && !hasComponentInfo()) {
     V3D pos;
     if (!m_map->getCachedLocation(m_base, pos)) {
       pos = Component::getPos();
@@ -315,8 +317,8 @@ V3D ObjCompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat ObjCompAssembly::getRotation() const {
-  if (m_map) {
+Quat ObjCompAssembly::getRotation() const {
+  if (m_map && !hasComponentInfo()) {
     Quat rot;
     if (!m_map->getCachedRotation(m_base, rot)) {
       rot = Component::getRotation();
@@ -353,6 +355,11 @@ void ObjCompAssembly::testIntersectionWithChildren(
   }
 }
 
+size_t ObjCompAssembly::registerContents(
+    Mantid::Geometry::ComponentVisitor &visitor) const {
+  return visitor.registerComponentAssembly(*this);
+}
+
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to
  * it.
  *  All child components must be detectors and positioned along a straight line
@@ -383,7 +390,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   obj->GetObjectGeom(otype, vectors, radius, height);
   if (otype == 1) {
     type = "box";
-  } else if (otype == 3) {
+  } else if (otype == 4) {
     type = "cylinder";
   } else {
     throw std::runtime_error(
@@ -615,8 +622,8 @@ void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj) {
  */
 std::ostream &operator<<(std::ostream &os, const ObjCompAssembly &ass) {
   ass.printSelf(os);
-  os << "************************" << std::endl;
-  os << "Number of children :" << ass.nelements() << std::endl;
+  os << "************************\n";
+  os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
 }

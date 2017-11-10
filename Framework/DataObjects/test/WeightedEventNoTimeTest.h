@@ -5,11 +5,11 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 using std::runtime_error;
 using std::size_t;

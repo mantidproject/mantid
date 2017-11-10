@@ -1,5 +1,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Sample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -16,17 +18,6 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveZODS)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveZODS::SaveZODS() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveZODS::~SaveZODS() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveZODS::name() const { return "SaveZODS"; }
 
@@ -38,9 +29,6 @@ const std::string SaveZODS::category() const {
   return "MDAlgorithms\\DataHandling";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveZODS::init() {
@@ -53,7 +41,6 @@ void SaveZODS::init() {
       "The name of the HDF5 file to write, as a full or relative path.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveZODS::exec() {
@@ -68,9 +55,8 @@ void SaveZODS::exec() {
                              "one bin in the 3rd dimension is OK).");
 
   if (ws->getDimension(0)->getName() != "[H,0,0]")
-    g_log.warning()
-        << "SaveZODS expects the workspace to be in HKL space! Saving anyway..."
-        << std::endl;
+    g_log.warning() << "SaveZODS expects the workspace to be in HKL space! "
+                       "Saving anyway...\n";
 
   // Create a HDF5 file
   auto file = new ::NeXus::File(Filename, NXACC_CREATE5);

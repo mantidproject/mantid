@@ -2,6 +2,8 @@ import stresstesting
 import os
 from mantid.simpleapi import *
 #pylint: disable=too-many-instance-attributes
+
+
 class GEMTest(stresstesting.MantidStressTest):
     validate=None
 
@@ -19,7 +21,7 @@ class GEMTest(stresstesting.MantidStressTest):
         self.new_cal_file = ''
 
     def runTest(self):
-		# do something
+                # do something
         LoadRaw(Filename=r'GEM59378.raw',OutputWorkspace='Vanadium',LoadLogFiles='0')
         CreateSingleValuedWorkspace(OutputWorkspace='totuamps',DataValue='450.02215576200001')
         Divide(LHSWorkspace='Vanadium',RHSWorkspace='totuamps',OutputWorkspace='Vanadium')
@@ -36,14 +38,14 @@ class GEMTest(stresstesting.MantidStressTest):
 
         self.new_cal_file = os.path.join(config['defaultsave.directory'],'offsets_2011_cycle111b_new.cal')
         MaskDetectorsIf(InputWorkspace='Corr',Mode='DeselectIf',InputCalFile=r'offsets_2011_cycle111b.cal',OutputCalFile=self.new_cal_file)
-		# load precompiled vanadium files
+                # load precompiled vanadium files
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-0.nxs',OutputWorkspace='Vanadium-1')
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-1.nxs',OutputWorkspace='Vanadium-2')
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-2.nxs',OutputWorkspace='Vanadium-3')
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-3.nxs',OutputWorkspace='Vanadium-4')
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-4.nxs',OutputWorkspace='Vanadium-5')
         LoadNexusProcessed(Filename=r'van_gem59378_benchmark-5.nxs',OutputWorkspace='Vanadium-6')
-		# load data
+                # load data
         LoadRaw(Filename=r'GEM58654.raw',OutputWorkspace='sample',LoadLogFiles='0')
         LoadRaw(Filename=r'GEM58654.raw',OutputWorkspace='sampleadd',LoadLogFiles='0')
         Plus(LHSWorkspace='sampleadd',RHSWorkspace='sample',OutputWorkspace='sample')
@@ -119,7 +121,7 @@ class GEMTest(stresstesting.MantidStressTest):
         ReplaceSpecialValues(InputWorkspace='ResultTOF-6',OutputWorkspace='ResultTOF-6',NaNValue='0',
                              InfinityValue='0',BigNumberThreshold='99999999.999999985')
 
-		# group and save
+                # group and save
         GroupWorkspaces(InputWorkspaces='ResultTOF-1,ResultTOF-2,ResultTOF-3,ResultTOF-4,ResultTOF-5,ResultTOF-6',
                         OutputWorkspace='ResultTOFgrp')
 
@@ -154,30 +156,30 @@ class GEMTest(stresstesting.MantidStressTest):
     def doValidation(self):
         '''Override doValidation to vaildate two things at the same time'''
         self.disableChecking.append('Instrument')
-		# reset validate() method to call validateNexus() instead
+                # reset validate() method to call validateNexus() instead
         self.validate = self.validateNexus
         res = self.validateWorkspaceToNeXus()
         if not res:
             return False
-		# reset validate() method to call validateGSS()
+                # reset validate() method to call validateGSS()
         self.validate = self.validateGSS
         res = self.validateASCII()
         if not res:
             return False
-		# reset validate() method to call validateTOFXYE()
+                # reset validate() method to call validateTOFXYE()
         self.validate = self.validateTOFXYE
         self.file_index = 0
-		# file_index is incremented after each call to validateASCII()
+                # file_index is incremented after each call to validateASCII()
         res = self.validateASCII() and self.validateASCII() and self.validateASCII() and \
-              self.validateASCII() and self.validateASCII() and self.validateASCII()
+            self.validateASCII() and self.validateASCII() and self.validateASCII()
         if not res:
             return False
-		# reset validate() method to call validateTOFXYE()
+                # reset validate() method to call validateTOFXYE()
         self.validate = self.validateDXYE
         self.file_index = 0
-		# file_index is incremented after each call to validateASCII()
+                # file_index is incremented after each call to validateASCII()
         res = self.validateASCII() and self.validateASCII() and self.validateASCII() and \
-              self.validateASCII() and self.validateASCII() and self.validateASCII()
+            self.validateASCII() and self.validateASCII() and self.validateASCII()
         return res
 
     def validateNexus(self):
@@ -199,4 +201,3 @@ class GEMTest(stresstesting.MantidStressTest):
         i = self.file_index
         self.file_index += 1
         return self.xye_d_files[i], FileFinder.getFullPath(self.ref_xye_d_files[i])
-

@@ -83,9 +83,17 @@ public:
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
 
+  /// Returns the number of attributes associated with the function
+  size_t nAttributes() const override;
+  /// Returns a list of attribute names
+  std::vector<std::string> getAttributeNames() const override;
+  /// Return a value of attribute attName
+  Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName,
                     const IFunction::Attribute &value) override;
+  /// Check if attribute attName exists
+  bool hasAttribute(const std::string &attName) const override;
 
 private:
   /// Call the appropriate load function
@@ -124,6 +132,9 @@ private:
 
   /// Flag of completing data setup
   mutable bool m_setupFinished;
+
+  /// Flag of explicit x-y data setup
+  mutable bool m_explicitXY;
 };
 
 } // namespace Functions

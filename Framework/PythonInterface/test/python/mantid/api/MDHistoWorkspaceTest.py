@@ -1,8 +1,17 @@
+from __future__ import (absolute_import, print_function)
+
 import unittest
 from testhelpers import run_algorithm
 from mantid import mtd
 
 import numpy
+
+try:
+    long
+except NameError:
+    # Defined for backwards compatability with Python 2
+    def long(x): return x
+
 
 class MDHistoWorkspaceTest(unittest.TestCase):
     """
@@ -53,6 +62,16 @@ class MDHistoWorkspaceTest(unittest.TestCase):
 
         mtd.remove('demo')
 
+    def test_setSignalAt_throws_if_index_is_invalid(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        index = testWS.getLinearIndex(3, 3)
+        self.assertRaises(ValueError, testWS.setSignalAt, index, 1.0)
+        index = testWS.getLinearIndex(0, 3)
+        self.assertRaises(ValueError, testWS.setSignalAt, index, 1.0)
+        mtd.remove('demo')
+
     def test_set_signal_array_throws_if_input_array_is_of_incorrect_size(self):
         run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
                       Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
@@ -69,7 +88,6 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         testWS.setSignalArray(signal)
         new_signal = testWS.getSignalArray()
         self._verify_numpy_data(new_signal, signal)
-
 
     def test_set_error_array_passes_numpy_values_to_workspace(self):
         run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
@@ -88,7 +106,6 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self.assertTrue(len(expected.shape), len(test_array.shape))
         self.assertTrue(not numpy.all(test_array.flags.writeable))
         self.assertTrue(numpy.all(numpy.equal(expected, test_array)))
-
 
     """ Note: Look at each test for PlusMD MinusMD, and MDHistoWorkspaceTest for detailed tests including checking results.
     These tests only check that they do run. """
@@ -208,7 +225,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                       AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(20L, 1L, 30L)
+        expected =(long(20), long(1), long(30))
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
@@ -218,11 +235,10 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                        IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(20L, 1L)
+        expected = (long(20), long(1))
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
-
 
     def test_heterogeneous_bin(self):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='10',
@@ -238,13 +254,13 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         nEvents = BH.getNEvents();
         self.assertEqual(nEvents,1000);
         signal = BH.getSignalArray()
-        expected =(20L,5L,40L)
+        expected =(long(20), long(5), long(40))
         shape = signal.shape
         self.assertEqual(shape,expected)
 
         for i in range(0,expected[1]):
-    		self.assertEqual(signal[1,i,2],2)
-    		self.assertEqual(signal[2,i,1],0)
+            self.assertEqual(signal[1,i,2],2)
+            self.assertEqual(signal[2,i,1],0)
 
 
         self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])

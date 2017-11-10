@@ -2,6 +2,7 @@
 #define Cone_h
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {

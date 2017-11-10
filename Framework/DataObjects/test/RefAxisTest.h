@@ -8,6 +8,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RefAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -68,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(clonedAxis->title(), "test axis")
     TS_ASSERT_EQUALS(clonedAxis->unit()->unitID(), "TOF")
     TS_ASSERT(clonedAxis->isNumeric())
-    TS_ASSERT_EQUALS((*clonedAxis)(0, 0), 0.0)
+    TS_ASSERT_EQUALS((*clonedAxis)(0, 0), 1.0)
     TS_ASSERT_THROWS((*clonedAxis)(0, 1), std::range_error)
     delete clonedAxis;
   }
@@ -101,12 +102,12 @@ public:
   }
 
   void testGetMin() {
-    boost::scoped_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
+    std::unique_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
     TS_ASSERT_THROWS(newRefAxis->getMin(), std::runtime_error)
   }
 
   void testGetMax() {
-    boost::scoped_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
+    std::unique_ptr<Axis> newRefAxis(refAxis->clone(5, space2));
     TS_ASSERT_THROWS(newRefAxis->getMax(), std::runtime_error)
   }
 

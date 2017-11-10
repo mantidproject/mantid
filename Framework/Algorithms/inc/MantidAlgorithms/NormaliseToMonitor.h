@@ -1,12 +1,18 @@
 #ifndef MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+
+namespace Mantid {
+namespace HistogramData {
+class BinEdges;
+class CountStandardDeviations;
+class Counts;
+}
+}
 
 namespace Mantid {
 namespace Algorithms {
@@ -71,8 +77,6 @@ namespace Algorithms {
 */
 class DLLExport NormaliseToMonitor : public API::Algorithm {
 public:
-  NormaliseToMonitor();
-  ~NormaliseToMonitor() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseToMonitor"; }
   /// Summary of algorithms purpose
@@ -93,38 +97,45 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace,
-                         int &spectra_num);
+  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace);
+  size_t getInWSMonitorIndex(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace,
-                      int &wsID);
+  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
-                         std::size_t index);
-  bool setIntegrationProps();
+  extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
+                        const std::vector<size_t> &workspaceIndexes);
+  bool setIntegrationProps(const bool isSingleCountWorkspace);
 
   void
   normaliseByIntegratedCount(const API::MatrixWorkspace_sptr &inputWorkspace,
-                             API::MatrixWorkspace_sptr &outputWorkspace);
+                             API::MatrixWorkspace_sptr &outputWorkspace,
+                             const bool isSingleCountWorkspace);
+
+  void performHistogramDivision(const API::MatrixWorkspace_sptr &inputWorkspace,
+                                API::MatrixWorkspace_sptr &outputWorkspace);
 
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);
-  void normalisationFactor(const MantidVec &X, MantidVec *Y, MantidVec *E);
-  //
+  void normalisationFactor(const HistogramData::BinEdges &X,
+                           HistogramData::Counts &Y,
+                           HistogramData::CountStandardDeviations &E);
 
 private:
   /// A single spectrum workspace containing the monitor
   API::MatrixWorkspace_sptr m_monitor;
   /// Whether the input workspace has common bins
-  bool m_commonBins;
+  bool m_commonBins = false;
   /// The lower bound of the integration range
-  double m_integrationMin;
+  double m_integrationMin = EMPTY_DBL();
   /// The upper bound of the integration range
-  double m_integrationMax;
+  double m_integrationMax = EMPTY_DBL();
+  bool m_syncScanInput;
+  std::vector<size_t> m_workspaceIndexes;
 };
 
 // the internal class to verify and modify interconnected properties affecting
@@ -147,10 +158,9 @@ public:
                     Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new MonIDPropChanger(hostWSname, SpectraNum, MonitorWorkspaceProp);
   }
-  ~MonIDPropChanger() override{};
 
 private:
   // the name of the property, which specifies the workspace which has to be

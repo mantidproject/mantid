@@ -13,16 +13,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsRemap)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsRemap::DgsRemap() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsRemap::~DgsRemap() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsRemap::name() const { return "DgsRemap"; }
 

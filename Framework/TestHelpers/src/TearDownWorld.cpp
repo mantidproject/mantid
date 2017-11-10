@@ -4,7 +4,7 @@
 #include "MantidTestHelpers/TearDownWorld.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 
 // On MSVC all workspaces must be deleted by the time main() exits as the
 // Workspace destruction can call to an OpenMP loop which is not allowed
@@ -45,6 +45,6 @@ bool ClearADS::tearDownWorld() {
 
 /// @return True to indicate success of the tear down process
 bool ClearPropertyManagerDataService::tearDownWorld() {
-  Mantid::API::PropertyManagerDataService::Instance().clear();
+  Mantid::Kernel::PropertyManagerDataService::Instance().clear();
   return true;
 }

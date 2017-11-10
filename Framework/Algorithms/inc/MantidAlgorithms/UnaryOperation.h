@@ -51,8 +51,6 @@ class DLLExport UnaryOperation : public API::Algorithm {
 public:
   /// Default constructor
   UnaryOperation();
-  /// Destructor
-  ~UnaryOperation() override;
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose

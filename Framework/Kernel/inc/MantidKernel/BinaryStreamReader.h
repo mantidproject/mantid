@@ -6,7 +6,6 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <cstdint>
-#include <cfloat>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -50,7 +49,6 @@ public:
   enum class MatrixOrdering { RowMajor, ColumnMajor };
 
   BinaryStreamReader(std::istream &istrm);
-  ~BinaryStreamReader();
 
   ///@name Single-value stream operators
   /// @{

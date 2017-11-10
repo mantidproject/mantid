@@ -1,5 +1,6 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -97,7 +98,7 @@ void SubmitRemoteJob2::exec() {
                              e.what());
   }
   g_log.information() << "Job submitted.  Job ID =  " << jid
-                      << " on (remote) compute resource " << comp << std::endl;
+                      << " on (remote) compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

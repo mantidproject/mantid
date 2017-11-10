@@ -125,7 +125,7 @@ std::pair<Algebra, Algebra> Algebra::algDiv(const Algebra &D) const
   Algebra Q;
   Algebra R;
   Acomp Tf = F;
-  // std::cerr<<"AlgDiv:"<<std::endl;
+  // std::cerr<<"AlgDiv:"<<'\n';
   std::pair<Acomp, Acomp> QR = Tf.algDiv(D.F);
   if (!QR.first.isNull() && !QR.second.isNull()) {
     Q.setFunction(QR.first);
@@ -155,7 +155,7 @@ std::string Algebra::writeMCNPX() const
           SurfMap.cbegin(), SurfMap.cend(),
           MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
       if (vc == SurfMap.end()) {
-        std::cout << "SurfMap size == " << SurfMap.size() << std::endl;
+        std::cout << "SurfMap size == " << SurfMap.size() << '\n';
         for_each(SurfMap.begin(), SurfMap.end(),
                  MapSupport::mapWrite<int, std::string>());
         throw Kernel::Exception::NotFoundError("Algebra::writeMCNPX",
@@ -182,8 +182,8 @@ std::ostream &Algebra::write(std::ostream &Out) const
   @return Out
 */
 {
-  Out << "F == " << F.display() << std::endl;
-  //  Out<<F.displayDepth(0)<<std::endl;
+  Out << "F == " << F.display() << '\n';
+  //  Out<<F.displayDepth(0)<<'\n';
   return Out;
 }
 
@@ -247,8 +247,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
         // Add to the number
         ipt += nCount;
       } else {
-        std::cout << "Algebra::setFunction: ncount==0" << std::endl;
-        exit(1);
+        throw std::invalid_argument("Algebra::setFunction: ncount==0");
       }
     } else if (A[ipt] == ':') {
       cx << "+";
@@ -280,7 +279,7 @@ int Algebra::setFunction(const std::string &A)
   try {
     F.setString(Ln);
   } catch (...) {
-    std::cerr << "Algebra String Error" << A << std::endl;
+    std::cerr << "Algebra String Error" << A << '\n';
     return 1;
   }
   return 0;

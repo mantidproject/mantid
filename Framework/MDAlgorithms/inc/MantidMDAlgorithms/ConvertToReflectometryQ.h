@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 class DLLExport ConvertToReflectometryQ
     : public BoxControllerSettingsAlgorithm {
 public:
-  ConvertToReflectometryQ();
-  ~ConvertToReflectometryQ() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -51,6 +48,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  Mantid::API::MatrixWorkspace_sptr
+  correctDetectors(Mantid::API::MatrixWorkspace_sptr inputWs, double theta);
 };
 
 } // namespace MDAlgorithms

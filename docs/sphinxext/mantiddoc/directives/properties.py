@@ -1,6 +1,11 @@
-#pylint: disable=invalid-name
-from mantiddoc.directives.base import AlgorithmBaseDirective
-import string
+#pylint: disable=invalid-name,deprecated-module
+from __future__ import (absolute_import, division, print_function)
+from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
+import re
+from string import punctuation
+from six.moves import range
+
+SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
 class PropertiesDirective(AlgorithmBaseDirective):
 
@@ -32,11 +37,11 @@ class PropertiesDirective(AlgorithmBaseDirective):
             # names for the table headers.
             header = ('Name', 'Default', 'Description')
 
-            for i in xrange(ifunc.numParams()):
+            for i in range(ifunc.numParams()):
                 properties.append((ifunc.parameterName(i),
                                    str(ifunc.getParameterValue(i)),
                                    ifunc.paramDescription(i)
-                ))
+                                  ))
             self.add_rst(self.make_header("Properties (fitting parameters)"))
         else: # this is an Algorithm
             alg = self.create_mantid_algorithm(self.algorithm_name(),
@@ -165,14 +170,14 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 defaultstr = "*Optional*"
             else:
                 defaultstr = str(val)
-        except:
+        except ValueError:
             try:
                 val = float(default)
                 if val >= 1e+307:
                     defaultstr = "*Optional*"
                 else:
                     defaultstr = str(val)
-            except:
+            except ValueError:
                 # Fall-back default for anything
                 defaultstr = str(default)
 
@@ -183,8 +188,12 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
         # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
         # want them to be interpreted as list items.
-        if len(defaultstr) == 1 and defaultstr in string.punctuation:
+        if len(defaultstr) == 1 and defaultstr in punctuation:
             defaultstr = "\\" + defaultstr
+
+        # Values ending with underscores should just be literals
+        if defaultstr.endswith('_'):
+            defaultstr = defaultstr[:-1] + '\\_'
 
         # Replace the ugly default values with "Optional"
         if (defaultstr == "8.9884656743115785e+307") or \
@@ -235,7 +244,16 @@ class PropertiesDirective(AlgorithmBaseDirective):
             allowedValueString = allowedValueString.replace("','","', '")
             desc += prefixString + allowedValueString
 
-        return desc
+        return self._escape_subsitution_refs(desc)
+
+    def _escape_subsitution_refs(self, desc):
+        """
+        Find occurrences of text surrounded by vertical bars and assume they
+        are not docutils subsitution referencess by esacping them
+        """
+        def repl(match):
+            return r'\|' + match.group(1) + r'\|'
+        return SUBSTITUTE_REF_RE.sub(repl, desc)
 
 
 def setup(app):

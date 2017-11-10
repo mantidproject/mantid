@@ -1,6 +1,23 @@
 #ifndef MANTID_TESTOBJECT__
 #define MANTID_TESTOBJECT__
 
+#include "MantidGeometry/Objects/Object.h"
+
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <ostream>
@@ -11,23 +28,34 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
 
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Math/Algebra.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-
-#include "MantidKernel/Material.h"
-
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <gmock/gmock.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
+
+namespace {
+// -----------------------------------------------------------------------------
+// Mock Random Number Generator
+// -----------------------------------------------------------------------------
+class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
+public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD0(nextValue, double());
+  MOCK_METHOD2(nextValue, double(double, double));
+  MOCK_METHOD2(nextInt, int(int, int));
+  MOCK_METHOD0(restart, void());
+  MOCK_METHOD0(save, void());
+  MOCK_METHOD0(restore, void());
+  MOCK_METHOD1(setSeed, void(size_t));
+  MOCK_METHOD2(setRange, void(const double, const double));
+  MOCK_CONST_METHOD0(min, double());
+  MOCK_CONST_METHOD0(max, double());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
+};
+}
 
 class ObjectTest : public CxxTest::TestSuite {
 
@@ -52,13 +80,13 @@ public:
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
-    Object_sptr original =
-        ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -67,7 +95,8 @@ public:
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS("sp-1", copy.id());
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original->getName());
@@ -77,13 +106,13 @@ public:
   }
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
-    Object_sptr original =
-        ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -93,7 +122,8 @@ public:
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS("sp-1", lhs.id());
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         lhs.getGeometryHandler()));
   }
@@ -101,7 +131,7 @@ public:
   void testCreateUnitCube() {
     Object_sptr geom_obj = createUnitCube();
 
-    TS_ASSERT_EQUALS(geom_obj->str(), "68 -6 5 -4 3 -2 1");
+    TS_ASSERT_EQUALS(geom_obj->str(), "68 1 -2 3 -4 5 -6");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
@@ -176,7 +206,7 @@ public:
   }
 
   void testIsOnSideSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 4.0, 0)), false);
@@ -197,7 +227,7 @@ public:
   }
 
   void testIsValidSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 4.0, 0)), true);
@@ -218,7 +248,7 @@ public:
   }
 
   void testCalcValidTypeSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)),
@@ -241,7 +271,7 @@ public:
   }
 
   void testGetBoundingBoxForSphere() {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     const double tolerance(1e-10);
 
     double xmax, ymax, zmax, xmin, ymin, zmin;
@@ -317,7 +347,7 @@ public:
 
   void testInterceptSurfaceSphereY() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -329,7 +359,7 @@ public:
 
   void testInterceptSurfaceSphereX() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -392,7 +422,7 @@ public:
     checkTrackIntercept(track, expectedResults);
   }
 
-  void xtestTrackTwoIsolatedCubes()
+  void testTrackTwoIsolatedCubes()
   /**
   Test a track going through an object
   */
@@ -549,6 +579,48 @@ public:
     checkTrackIntercept(TL, expectedResults);
   }
 
+  void testComplementWithTwoPrimitives() {
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+
+    TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
+
+    // Are the rules correct?
+    const Rule *headRule = shell->topRule();
+    TS_ASSERT_EQUALS("Intersection", headRule->className());
+    const Rule *leaf1 = headRule->leaf(0);
+    TS_ASSERT_EQUALS("SurfPoint", leaf1->className());
+    auto surfPt1 = dynamic_cast<const SurfPoint *>(leaf1);
+    TS_ASSERT(surfPt1);
+    TS_ASSERT_EQUALS(2, surfPt1->getKeyN());
+    auto outer = dynamic_cast<const Sphere *>(surfPt1->getKey());
+    TS_ASSERT(outer);
+    TS_ASSERT_DELTA(1.0, outer->getRadius(), 1e-10);
+
+    const Rule *leaf2 = headRule->leaf(1);
+    TS_ASSERT_EQUALS("CompGrp", leaf2->className());
+    auto compRule = dynamic_cast<const CompGrp *>(leaf2);
+    TS_ASSERT(compRule);
+    TS_ASSERT_EQUALS("SurfPoint", compRule->leaf(0)->className());
+    auto surfPt2 = dynamic_cast<const SurfPoint *>(compRule->leaf(0));
+    TS_ASSERT_EQUALS(1, surfPt2->getKeyN());
+    auto inner = dynamic_cast<const Sphere *>(surfPt2->getKey());
+    TS_ASSERT(inner);
+    TS_ASSERT_DELTA(0.5, inner->getRadius(), 1e-10);
+
+    TS_ASSERT_EQUALS(false, shell->isValid(V3D(0, 0, 0)));
+
+    Track p1(V3D(-2, 0, 0), V3D(1, 0, 0));
+    int nsegments = shell->interceptSurface(p1);
+    TS_ASSERT_EQUALS(2, nsegments);
+    // total traversed distance -> 2*(r2-r1)
+    double distanceInside(0.0);
+    std::for_each(p1.cbegin(), p1.cend(),
+                  [&distanceInside](const Link &segment) {
+                    distanceInside += segment.distInsideObject;
+                  });
+    TS_ASSERT_DELTA(1.0, distanceInside, 1e-10);
+  }
+
   void testFindPointInCube()
   /**
   Test find point in cube
@@ -610,13 +682,79 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
-                         -0.5, -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)),
-                         -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)));
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
-    Object_sptr S = createSphere();
+    Object_sptr S = ComponentCreationHelper::createSphere(4.1);
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0.0, 0.0, 0));
+  }
+
+  void testGeneratePointInside() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.70));
+
+    // inner radius=0.5, outer=1. Random sequence set up so as to give point
+    // inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    size_t maxAttempts(1);
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = shell->generatePointInObject(rng, maxAttempts));
+
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideRespectsMaxAttempts() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.1));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.2));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.3));
+
+    // inner radius=0.5, outer=1. Random sequence set up so as to give point
+    // inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    size_t maxAttempts(1);
+    TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
+                     std::runtime_error);
+  }
+
+  void testGeneratePointInsideRespectsActiveRegion() {
+    using namespace ::testing;
+
+    // Generate "random" sequence.
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.01));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.02));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.03));
+
+    // Radius=0.5
+    auto ball = ComponentCreationHelper::createSphere(0.5);
+    // Create a thin infinite rectangular region to restrict point generation
+    BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    size_t maxAttempts(1);
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(-0.1 + 0.01 * 0.2, point.X(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.02 * 0.2, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-0.1 + 0.03 * 0.2, point.Z(), tolerance);
   }
 
   void testSolidAngleSphere()
@@ -624,7 +762,7 @@ public:
   Test solid angle calculation for a sphere
   */
   {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     double satol = 2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -725,6 +863,99 @@ public:
                     expected, satol);
   }
 
+  void testExactVolumeCuboid() {
+    using namespace Poco::XML;
+    const double width = 1.23;
+    const double height = 4.98;
+    const double thickness = 8.14;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testCuboid");
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "cuboid-shape", width, height, thickness, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "cuboid-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cuboidVolume = width * height * thickness;
+    TS_ASSERT_DELTA(cuboid->volume(), cuboidVolume, 1e-6)
+  }
+
+  void testExactVolumeSphere() {
+    using namespace Poco::XML;
+    const double radius = 99.9;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testSphere");
+    AutoPtr<Element> shapeElement =
+        createSphereTypeElement("sphere-shape", radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "sphere-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double sphereVolume = 4.0 / 3.0 * M_PI * radius * radius * radius;
+    TS_ASSERT_DELTA(cuboid->volume(), sphereVolume, 1e-6)
+  }
+
+  void testExactVolumeCylinder() {
+    using namespace Poco::XML;
+    const double radius = 0.99;
+    const double height = 88;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testCylinder");
+    AutoPtr<Element> shapeElement = createCylinderTypeElement(
+        "cylinder-shape", height, radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "cylinder-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cylinderVolume = height * M_PI * radius * radius;
+    TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
+  }
+
+  void testMonteCarloVolume() {
+    // We use a cuboid with spherical void here.
+    using namespace Poco::XML;
+    const double width = 71.99;
+    const double height = 11.87;
+    const double thickness = 74.1;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testShape");
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "solid-cuboid", width, height, thickness, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    const double radius = 0.47 * std::min(std::min(width, height), thickness);
+    shapeElement =
+        createSphereTypeElement("void-sphere", radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "solid-cuboid (# void-sphere)");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cuboidVolume = width * height * thickness;
+    const double sphereVolume = 4.0 / 3.0 * M_PI * radius * radius * radius;
+    const double correctVolume = cuboidVolume - sphereVolume;
+    TS_ASSERT_DELTA(cuboid->volume(), correctVolume, 1e-3 * correctVolume)
+  }
+
+  void testVolumeThrowsWhenBoundingBoxIsInvalid() {
+    Object shape("This text gives an invalid Object.");
+    TS_ASSERT_THROWS(shape.volume(), std::runtime_error);
+  }
+
   void testGetBoundingBoxForCylinder()
   /**
   Test bounding box for a object capped cylinder
@@ -741,6 +972,48 @@ public:
     TS_ASSERT_DELTA(xmin, -3.2, 0.0001);
     TS_ASSERT_DELTA(ymin, -3.0, 0.0001);
     TS_ASSERT_DELTA(zmin, -3.0, 0.0001);
+  }
+
+  void testGetBoundingBoxForCuboid() {
+    Object_sptr cuboid = createUnitCube();
+    double xmax, ymax, zmax, xmin, ymin, zmin;
+    xmax = ymax = zmax = 100;
+    xmin = ymin = zmin = -100;
+
+    cuboid->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+
+    TS_ASSERT_DELTA(xmax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(ymax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(zmax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(xmin, -0.5, 0.0001);
+    TS_ASSERT_DELTA(ymin, -0.5, 0.0001);
+    TS_ASSERT_DELTA(zmin, -0.5, 0.0001);
+  }
+
+  void testGetBoundingBoxForHexahedron() {
+    // For information on how the hexahedron is constructed
+    // See
+    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
+    Hexahedron hex;
+    hex.lbb = V3D(0, 0, -2);
+    hex.lfb = V3D(1, 0, 0);
+    hex.rfb = V3D(1, 1, 0);
+    hex.rbb = V3D(0, 1, 0);
+    hex.lbt = V3D(0, 0, 2);
+    hex.lft = V3D(0.5, 0, 2);
+    hex.rft = V3D(0.5, 0.5, 2);
+    hex.rbt = V3D(0, 0.5, 2);
+
+    Object_sptr hexahedron = createHexahedron(hex);
+
+    auto bb = hexahedron->getBoundingBox();
+
+    TS_ASSERT_DELTA(bb.xMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.yMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
+    TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.zMin(), -2, 0.0001);
   }
 
   void testdefineBoundingBox()
@@ -806,7 +1079,7 @@ public:
     //      int endtime=clock();
     //      std::cout << std::endl << "Cyl tri time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //      iter=50;
     //      starttime=clock();
     //      for (int i=0;i<iter;i++)
@@ -814,7 +1087,7 @@ public:
     //      endtime=clock();
     //      std::cout << "Cyl ray time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //    }
 
     saTri = geom_obj->triangleSolidAngle(observer);
@@ -847,7 +1120,7 @@ public:
   Test solid angle calculation for a sphere from triangulation
   */
   {
-    Object_sptr geom_obj = createSphere();
+    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
     double satol = 1e-3; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -937,25 +1210,6 @@ private:
     return retVal;
   }
 
-  Object_sptr createSphere() {
-    std::string S41 = "so 4.1"; // Sphere at origin radius 4.1
-
-    // First create some surfaces
-    std::map<int, boost::shared_ptr<Surface>> SphSurMap;
-    SphSurMap[41] = boost::make_shared<Sphere>();
-    SphSurMap[41]->setSurface(S41);
-    SphSurMap[41]->setName(41);
-
-    // A sphere
-    std::string ObjSphere = "-41";
-
-    Object_sptr retVal = Object_sptr(new Object);
-    retVal->setObject(41, ObjSphere);
-    retVal->populate(SphSurMap);
-
-    return retVal;
-  }
-
   void clearSurfMap()
   /**
   Clears the surface map for a new test
@@ -1006,10 +1260,7 @@ private:
     // Note that the testObject now manages the "new Plane"
     for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
-      if (!A) {
-        std::cerr << "Failed to process line " << vc->second << std::endl;
-        exit(1);
-      }
+      TSM_ASSERT("Expected a non-null surface from the factory", A);
       A->setName(vc->first);
       SMap.insert(STYPE::value_type(vc->first,
                                     boost::shared_ptr<Surface>(A.release())));
@@ -1099,6 +1350,206 @@ private:
 
     return retVal;
   }
+
+  Object_sptr createHexahedron(Hexahedron &hex) {
+    // Create surfaces
+    std::map<int, boost::shared_ptr<Surface>> HexSurMap;
+    HexSurMap[1] = boost::make_shared<Plane>();
+    HexSurMap[2] = boost::make_shared<Plane>();
+    HexSurMap[3] = boost::make_shared<Plane>();
+    HexSurMap[4] = boost::make_shared<Plane>();
+    HexSurMap[5] = boost::make_shared<Plane>();
+    HexSurMap[6] = boost::make_shared<Plane>();
+
+    V3D normal;
+
+    // add front face
+    auto pPlaneFrontCutoff = boost::make_shared<Plane>();
+
+    // calculate surface normal
+    normal = (hex.rfb - hex.lfb).cross_prod(hex.lft - hex.lfb);
+    // Ensure surfacenormal is pointing in the correct direction
+    if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
+      normal *= -1.0;
+    pPlaneFrontCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[1] = pPlaneFrontCutoff;
+
+    // add back face
+    auto pPlaneBackCutoff = boost::make_shared<Plane>();
+    normal = (hex.rbb - hex.lbb).cross_prod(hex.lbt - hex.lbb);
+    if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
+      normal *= -1.0;
+    pPlaneBackCutoff->setPlane(hex.lbb, normal);
+    HexSurMap[2] = pPlaneBackCutoff;
+
+    // add left face
+    auto pPlaneLeftCutoff = boost::make_shared<Plane>();
+    normal = (hex.lbb - hex.lfb).cross_prod(hex.lft - hex.lfb);
+    if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
+      normal *= -1.0;
+    pPlaneLeftCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[3] = pPlaneLeftCutoff;
+
+    // add right face
+    auto pPlaneRightCutoff = boost::make_shared<Plane>();
+    normal = (hex.rbb - hex.rfb).cross_prod(hex.rft - hex.rfb);
+    if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
+      normal *= -1.0;
+    pPlaneRightCutoff->setPlane(hex.rfb, normal);
+    HexSurMap[4] = pPlaneRightCutoff;
+
+    // add top face
+    auto pPlaneTopCutoff = boost::make_shared<Plane>();
+    normal = (hex.rft - hex.lft).cross_prod(hex.lbt - hex.lft);
+    if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
+      normal *= -1.0;
+    pPlaneTopCutoff->setPlane(hex.lft, normal);
+    HexSurMap[5] = pPlaneTopCutoff;
+
+    // add bottom face
+    auto pPlaneBottomCutoff = boost::make_shared<Plane>();
+    normal = (hex.rfb - hex.lfb).cross_prod(hex.lbb - hex.lfb);
+    if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
+      normal *= -1.0;
+    pPlaneBottomCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[6] = pPlaneBottomCutoff;
+
+    // using surface ids:  1-6
+    HexSurMap[1]->setName(1);
+    HexSurMap[2]->setName(2);
+    HexSurMap[3]->setName(3);
+    HexSurMap[4]->setName(4);
+    HexSurMap[5]->setName(5);
+    HexSurMap[6]->setName(6);
+
+    std::string ObjHex = "-1 2 3 -4 -5 6";
+
+    Object_sptr retVal = Object_sptr(new Object);
+
+    // Explicitly setting the GluGeometryHanler hexahedron allows
+    // for the correct bounding box calculation.
+    auto handler = boost::make_shared<GluGeometryHandler>(retVal);
+    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
+                           hex.rft, hex.rbt);
+    retVal->setGeometryHandler(handler);
+
+    retVal->setObject(68, ObjHex);
+    retVal->populate(HexSurMap);
+    return retVal;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCuboidTypeElement(const std::string &id, const double width,
+                          const double height, const double thickness,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("cuboid");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element =
+        document->createElement("left-front-bottom-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("left-front-top-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("left-back-bottom-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(-thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("right-front-bottom-point");
+    element->setAttribute("x", std::to_string(width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createSphereTypeElement(const std::string &id, const double radius,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("sphere");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre");
+    element->setAttribute("x", "0.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCylinderTypeElement(const std::string &id, const double height,
+                            const double radius,
+                            Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("cylinder");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
+    element->setAttribute("x", std::to_string(-height / 2));
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("axis");
+    element->setAttribute("x", "1.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("height");
+    element->setAttribute("val", std::to_string(height));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// Performance tests
+// -----------------------------------------------------------------------------
+class ObjectTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ObjectTestPerformance *createSuite() {
+    return new ObjectTestPerformance();
+  }
+  static void destroySuite(ObjectTestPerformance *suite) { delete suite; }
+
+  ObjectTestPerformance()
+      : rng(200000), solid(ComponentCreationHelper::createSphere(0.1)),
+        shell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
+
+  void test_generatePointInside_Solid_Primitive() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = solid->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+  void test_Point_Inside_Solid_Composite_With_Hole() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = shell->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+private:
+  const size_t npoints = 20000;
+  Mantid::Kernel::MersenneTwister rng;
+  Object_sptr solid;
+  Object_sptr shell;
 };
 
 #endif // MANTID_TESTOBJECT__

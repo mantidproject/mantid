@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class UnGroupWorkspaceTest : public CxxTest::TestSuite {
@@ -111,7 +112,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ads.add(name, ws);
     return ws;
   }

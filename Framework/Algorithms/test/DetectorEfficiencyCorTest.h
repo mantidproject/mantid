@@ -4,11 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using namespace Mantid::HistogramData;
 
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
@@ -49,6 +52,7 @@ public:
   void testDataWithUngroupedDetectors() {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspace();
+    inputWS->getSpectrum(0).setDetectorID(1);
 
     Mantid::Algorithms::DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
@@ -65,8 +69,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07373656, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07373656, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
   void testDataWithGroupedDetectors() {
@@ -76,10 +80,10 @@ public:
     auto inputWS = createTestWorkspace();
 
     // Make it point to both detectors
-    auto *spec0 = inputWS->getSpectrum(0);
-    spec0->clearDetectorIDs();
-    spec0->addDetectorID(1);
-    spec0->addDetectorID(2);
+    auto &spec0 = inputWS->getSpectrum(0);
+    spec0.clearDetectorIDs();
+    spec0.addDetectorID(1);
+    spec0.addDetectorID(2);
 
     Mantid::Algorithms::DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING(grouper.initialize());
@@ -96,8 +100,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07367566, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
 private:
@@ -106,33 +110,6 @@ private:
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
     using namespace Mantid::DataObjects;
-    using Mantid::MantidVecPtr;
-
-    const int nspecs(1);
-    const int nbins(4);
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nspecs, nbins + 1, nbins);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1, 0.0);
-    y.access().resize(nbins, 0.0);
-    e.access().resize(nbins, 0.0);
-    for (int i = 0; i < nbins; ++i) {
-      x.access()[i] = static_cast<double>((1 + i) / 100);
-      y.access()[i] = 10 + i;
-      e.access()[i] = sqrt(5.0);
-    }
-    x.access()[nbins] = static_cast<double>(nbins);
-    // Fill a couple of zeros just as a check that it doesn't get changed
-    y.access()[nbins - 1] = 0.0;
-    e.access()[nbins - 1] = 0.0;
-
-    for (int i = 0; i < nspecs; i++) {
-      space2D->setX(i, x);
-      space2D->setData(i, y, e);
-    }
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
@@ -148,22 +125,32 @@ private:
         ShapeFactory().createShape(xmlShape, addTypeTag);
 
     boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
-    space2D->setInstrument(instrument);
+    const int ndets(2);
+    std::vector<Detector *> detectors;
+    for (int i = 0; i < ndets; ++i) {
+      Detector *detector = new Detector("det", i + 1, shape, NULL);
+      detector->setPos(i * 0.2, i * 0.2, 5);
+      instrument->add(detector);
+      instrument->markAsDetector(detector);
+      detectors.push_back(detector);
+    }
     ObjComponent *sample = new ObjComponent("sample", shape, NULL);
     sample->setPos(0, 0, 0);
     instrument->markAsSamplePos(sample);
 
+    const int nspecs(1);
+    auto space2D = create<Workspace2D>(
+        instrument, nspecs,
+        Histogram(BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
+                  Counts{10, 11, 12, 0}, CountVariances{5.0, 5.0, 5.0, 0.0}));
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+
     ParameterMap &pmap = space2D->instrumentParameters();
-    // Detector info
-    const int ndets(2);
-    for (int i = 0; i < ndets; ++i) {
-      Detector *detector = new Detector("det", i + 1, shape, NULL);
-      detector->setPos(i * 0.2, i * 0.2, 5);
+    for (const auto detector : detectors) {
       pmap.add("double", detector, "TubePressure", 10.0);
       pmap.add("double", detector, "TubeThickness", 0.0008);
-      instrument->markAsDetector(detector);
     }
-    return space2D;
+    return std::move(space2D);
   }
 };
 

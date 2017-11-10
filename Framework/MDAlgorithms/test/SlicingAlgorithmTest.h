@@ -326,7 +326,7 @@ public:
 
     // The "reverse" transform does NOT exist
     CoordTransform *transTo = alg->m_transformToOriginal;
-    TS_ASSERT(transTo == NULL);
+    TS_ASSERT(transTo == nullptr);
   }
 
   void test_aligned_ImplicitFunction() {
@@ -755,7 +755,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -776,7 +776,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -795,7 +795,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -813,7 +813,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -834,7 +834,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -853,7 +853,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -872,7 +872,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1025,7 +1025,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1047,7 +1047,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1061,6 +1061,49 @@ public:
     TS_ASSERT(func->isPointContained(VMD(
         12., 3.,
         0.))); // This point would NOT be contained if using orthogonal bases
+  }
+
+  void test_createGeneralTransform_4D_to_4D_nonOrthogonal() {
+    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+        ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0",
+        "OutE,m, 0,0,0,1", VMD(0., 0., 0., 0.), "0,10,0,10,0,10,0,10",
+        "5,5,5,5");
+    TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
+
+    // The implicit function
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(func =
+                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS(func->getNumPlanes(), 8);
+    TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
+    TS_ASSERT(!func->isPointContained(VMD(8., 7.5, 0., 0.)));
+    TS_ASSERT(!func->isPointContained(VMD(0., 1., 0., 0.)));
+    // This point would be contained if using orthogonal bases
+    TS_ASSERT(!func->isPointContained(VMD(5., 6., 0., 0.)));
+    // This point would be contained if using orthogonal bases
+    TS_ASSERT(func->isPointContained(VMD(12., 3., 0., 0.)));
+  }
+
+  void test_createGeneralTransform_4D_to_3D_nonOrthogonal() {
+    SlicingAlgorithmImpl *alg = do_createGeneralTransform(
+        ws4, "OutX,m, 1,0,0,0", "OutY,m, 1,1,0,0", "OutZ,m, 0,0,1,0", "",
+        VMD(0., 0., 0., 0.), "0,10,0,10,0,10", "5,5,5");
+    TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
+
+    // The implicit function
+    MDImplicitFunction *func(nullptr);
+    TS_ASSERT_THROWS_NOTHING(func =
+                                 alg->getImplicitFunctionForChunk(NULL, NULL));
+    TS_ASSERT(func);
+    TS_ASSERT_EQUALS(func->getNumPlanes(), 6);
+    TS_ASSERT(func->isPointContained(VMD(2., 1., 0., 0.)));
+    TS_ASSERT(!func->isPointContained(VMD(8., 7.5, 0., 0.)));
+    TS_ASSERT(!func->isPointContained(VMD(0., 1., 0., 0.)));
+    // This point would be contained if using orthogonal bases
+    TS_ASSERT(!func->isPointContained(VMD(5., 6., 0., 0.)));
+    // This point would NOT be contained if using orthogonal bases
+    TS_ASSERT(func->isPointContained(VMD(12., 3., 0., 0.)));
   }
 
   void test_createGeneralTransform_4D_to_1D() {

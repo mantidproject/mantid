@@ -35,10 +35,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport EQSANSPatchSensitivity : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  EQSANSPatchSensitivity() : API::Algorithm() {}
-  /// Virtual destructor
-  ~EQSANSPatchSensitivity() override {}
   /// Algorithm's name
   const std::string name() const override { return "EQSANSPatchSensitivity"; }
   /// Summary of algorithms purpose

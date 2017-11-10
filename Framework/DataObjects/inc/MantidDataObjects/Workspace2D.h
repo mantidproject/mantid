@@ -4,9 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid {
 
@@ -41,7 +40,7 @@ namespace DataObjects {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace2D : public API::MatrixWorkspace {
+class DLLExport Workspace2D : public API::HistoWorkspace {
 public:
   /**
   Gets the name of the workspace type
@@ -49,13 +48,19 @@ public:
    */
   const std::string id() const override { return "Workspace2D"; }
 
-  Workspace2D();
+  Workspace2D(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<Workspace2D> clone() const {
     return std::unique_ptr<Workspace2D>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<Workspace2D> cloneEmpty() const {
+    return std::unique_ptr<Workspace2D>(doCloneEmpty());
   }
 
   /// Returns the histogram number
@@ -65,12 +70,8 @@ public:
   std::size_t size() const override;
   std::size_t blocksize() const override;
 
-  /// Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  /// Return the underlying ISpectrum ptr (const version) at the given workspace
-  /// index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  Histogram1D &getSpectrum(const size_t index) override;
+  const Histogram1D &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
   void generateHistogram(const std::size_t index, const MantidVec &X,
@@ -101,18 +102,17 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// a vector holding workspace index of monitors in the workspace
   std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
-  std::vector<Mantid::API::ISpectrum *> data;
+  std::vector<Histogram1D *> data;
 
 private:
-  Workspace2D *doClone() const override { return new Workspace2D(*this); }
+  Workspace2D *doClone() const override;
+  Workspace2D *doCloneEmpty() const override;
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

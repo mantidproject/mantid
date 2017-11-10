@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +22,7 @@ MoveInstrumentComponent::MoveInstrumentComponent() {}
 void MoveInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
@@ -50,8 +49,32 @@ void MoveInstrumentComponent::init() {
  *  @throw std::runtime_error Thrown with Workspace problems
  */
 void MoveInstrumentComponent::exec() {
-  // Get the workspace
-  MatrixWorkspace_sptr WS = getProperty("Workspace");
+  // Get the input workspace
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+
+  // Get some stuff from the input workspace
+  Instrument_const_sptr inst;
+  if (inputW) {
+    inst = inputW->getInstrument();
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
+  } else if (inputP) {
+    inst = inputP->getInstrument();
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
+  } else {
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "workspace and it does not seem to be valid as "
+                               "input (must be either MatrixWorkspace or "
+                               "PeaksWorkspace");
+  }
   const std::string ComponentName = getProperty("ComponentName");
   const int DetID = getProperty("DetectorID");
   const double X = getProperty("X");
@@ -59,12 +82,7 @@ void MoveInstrumentComponent::exec() {
   const double Z = getProperty("Z");
   const bool relativePosition = getProperty("RelativePosition");
 
-  // Get the ParameterMap reference before the instrument so that
-  // we avoid a copy
-  Geometry::ParameterMap &pmap = WS->instrumentParameters();
-  Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
-
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);
@@ -87,15 +105,27 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  // Do the move
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  if (relativePosition)
-    positionType = Relative;
-  Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                           positionType);
+  if (dynamic_cast<const Geometry::RectangularDetectorPixel *>(comp.get())) {
+    // DetectorInfo makes changing positions possible but we keep the old
+    // behavior of ignoring position changes for RectangularDetectorPixel.
+    g_log.warning("Component is a RectangularDetectorPixel, moving is not "
+                  "possible, doing nothing.");
+    return;
+  }
 
-  return;
+  // Do the move
+  V3D position(X, Y, Z);
+  if (relativePosition)
+    position += comp->getPos();
+
+  const auto componentId = comp->getComponentID();
+  if (inputW) {
+    auto &componentInfo = inputW->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
+  } else if (inputP) {
+    auto &componentInfo = inputP->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
+  }
 }
 
 } // namespace DataHandling

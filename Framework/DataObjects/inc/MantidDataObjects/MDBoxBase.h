@@ -127,9 +127,11 @@ public:
              Mantid::Geometry::MDImplicitFunction &function) const = 0;
 
   /** Sphere (peak) integration */
-  void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                       const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const override = 0;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override = 0;
 
   /** Find the centroid around a sphere */
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
@@ -202,7 +204,7 @@ public:
   //-----------------------------------------------------------------------------------------------
   /** Returns the extents as a string, for convenience */
   std::string getExtentsStr() const {
-    std::string mess("");
+    std::string mess;
     size_t ndm1 = nd - 1;
     if (ndm1 > 32)
       return mess;

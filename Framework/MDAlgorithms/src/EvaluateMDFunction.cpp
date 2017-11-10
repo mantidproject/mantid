@@ -21,11 +21,6 @@ DECLARE_ALGORITHM(EvaluateMDFunction)
 EvaluateMDFunction::EvaluateMDFunction() { useAlgorithm("EvaluateFunction"); }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EvaluateMDFunction::~EvaluateMDFunction() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int EvaluateMDFunction::version() const { return 1; }

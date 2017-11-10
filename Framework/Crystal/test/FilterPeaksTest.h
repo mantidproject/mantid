@@ -2,6 +2,7 @@
 #define MANTID_CRYSTAL_FILTERPEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <iostream>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FilterPeaks.h"
@@ -118,6 +119,9 @@ public:
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -127,8 +131,8 @@ public:
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_hkl_sq_sum() {
@@ -144,6 +148,9 @@ public:
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -153,8 +160,8 @@ public:
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_intensity() {
@@ -171,6 +178,9 @@ public:
     outWS = runAlgorithm(inWS, "Intensity", intensity, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "Intensity", intensity, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "Intensity", intensity, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -180,8 +190,98 @@ public:
     outWS = runAlgorithm(inWS, "Intensity", intensity, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_wavelength() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+
+    auto inWS = createInputWorkspace(h, k, l);
+    const auto wavelength = inWS->getPeak(0).getWavelength();
+
+    auto outWS = runAlgorithm(inWS, "Wavelength", wavelength, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, ">=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_tof() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+
+    auto inWS = createInputWorkspace(h, k, l);
+    const auto tof = inWS->getPeak(0).getTOF();
+
+    auto outWS = runAlgorithm(inWS, "TOF", tof, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "TOF", tof, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "TOF", tof, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "TOF", tof, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "TOF", tof, ">=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "TOF", tof, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_d_spacing() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+
+    auto inWS = createInputWorkspace(h, k, l);
+    const auto dspacing = inWS->getPeak(0).getDSpacing();
+
+    auto outWS = runAlgorithm(inWS, "DSpacing", dspacing, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, ">=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_signal_to_noise() {
@@ -200,6 +300,9 @@ public:
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -209,8 +312,8 @@ public:
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 };
 

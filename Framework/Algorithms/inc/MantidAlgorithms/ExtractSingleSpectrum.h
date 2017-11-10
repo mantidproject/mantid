@@ -45,10 +45,6 @@ namespace Algorithms {
 */
 class DLLExport ExtractSingleSpectrum : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ExtractSingleSpectrum() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ExtractSingleSpectrum() override {}
   /// Algorithm's name
   const std::string name() const override { return "ExtractSingleSpectrum"; }
   /// Summary of algorithms purpose

@@ -37,9 +37,6 @@ namespace MDAlgorithms {
 */
 class DLLExport CompareMDWorkspaces : public API::Algorithm {
 public:
-  CompareMDWorkspaces();
-  ~CompareMDWorkspaces() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -73,12 +70,12 @@ private:
   std::string m_result;
 
   /// Tolerance
-  double m_tolerance;
+  double m_tolerance = 0.0;
 
   /// Is CheckEvents true
-  bool m_CheckEvents;
+  bool m_CheckEvents = true;
 
-  bool m_CompareBoxID;
+  bool m_CompareBoxID = true;
 };
 
 } // namespace MDAlgorithms

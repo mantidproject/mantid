@@ -1,13 +1,13 @@
 #ifndef LOADEVENTPRENEXUS_H_
 #define LOADEVENTPRENEXUS_H_
 
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/BinaryFile.h"
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -118,13 +118,13 @@ private:
   /// Execution code
   void exec() override;
 
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> prog = nullptr;
 
   DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> spectra_list;               ///<the list of Spectra
 
   /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
+  std::vector<Types::Core::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
   /// The proton charge on a pulse by pulse basis.
@@ -153,7 +153,7 @@ private:
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only
@@ -207,7 +207,7 @@ private:
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        std::vector<Types::Event::TofEvent> **arrayOfVectors,
                         DasEvent *event_buffer,
                         size_t current_event_buffer_size, size_t fileOffset,
                         bool dbprint);

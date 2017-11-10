@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Quat.h"
 
@@ -8,6 +9,8 @@
 
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IComponent)
 
 namespace {
 /**
@@ -42,6 +45,5 @@ void export_IComponent() {
       .def("type", &IComponent::type, arg("self"),
            "Returns the type of the component represented as a string")
       .def("getRelativeRot", &IComponent::getRelativeRot, arg("self"),
-           return_value_policy<copy_const_reference>(),
            "Returns the relative rotation as a Quat");
 }

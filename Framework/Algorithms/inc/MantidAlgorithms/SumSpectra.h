@@ -5,8 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-
+#include "MantidGeometry/IDTypes.h"
 #include <set>
 
 namespace Mantid {
@@ -34,7 +33,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+    Copyright &copy; 2007-2016 ISIS Rutherford Appleton Laboratory, NScD Oak
    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
@@ -59,8 +58,6 @@ class DLLExport SumSpectra : public API::Algorithm {
 public:
   /// Default constructor
   SumSpectra();
-  /// Destructor
-  ~SumSpectra() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }
   /// Summary of algorithms purpose
@@ -78,37 +75,40 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace,
-                        API::Progress &progress, size_t &numSpectra,
-                        size_t &numMasked, size_t &numZeros);
+  void doFractionalSum(API::MatrixWorkspace_sptr outputWorkspace,
+                       API::Progress &progress, size_t &numSpectra,
+                       size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum *outSpec, API::Progress &progress,
-                     size_t &numSpectra, size_t &numMasked, size_t &numZeros);
+  void doSimpleSum(API::MatrixWorkspace_sptr outputWorkspace,
+                   API::Progress &progress, size_t &numSpectra,
+                   size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
-                 std::set<int> &indices);
-  specnum_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
+  void execEvent(API::MatrixWorkspace_sptr outputWorkspace,
+                 API::Progress &progress, size_t &numSpectra, size_t &numMasked,
+                 size_t &numZeros);
+  specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
-  /// The output spectrum id
-  specnum_t m_outSpecId;
-  /// The spectrum to start the integration from
-  int m_minWsInd;
-  /// The spectrum to finish the integration at
-  int m_maxWsInd;
+  API::MatrixWorkspace_sptr replaceSpecialValues();
+  void determineIndices(const size_t numberOfSpectra);
+
+  /// The output spectrum number
+  specnum_t m_outSpecNum;
   /// Set true to keep monitors
   bool m_keepMonitors;
+  /// Set true to remove special values before processing
+  bool m_replaceSpecialValues;
   /// numberOfSpectra in the input
-  int m_numberOfSpectra;
+  size_t m_numberOfSpectra;
   /// Blocksize of the input workspace
-  int m_yLength;
-  /// Set of indicies to sum
-  std::set<int> m_indices;
+  size_t m_yLength;
+  /// Set of indices to sum
+  std::set<size_t> m_indices;
 
-  // if calculateing additional workspace with specially weighted averages is
+  // if calculating additional workspace with specially weighted averages is
   // necessary
   bool m_calculateWeightedSum;
 };

@@ -6,6 +6,7 @@ import mantid.simpleapi as ms
 
 import unittest
 
+
 class ILLD33SANSTest(unittest.TestCase):
 
     prefix = "D33"
@@ -81,8 +82,6 @@ class ILLD33SANSTest(unittest.TestCase):
         self.assertEqual(wsOut.getNumberHistograms(), 65538)
         wsOut = mtd[self.prefix + 'final']
         self.assertEqual(wsOut.getNumberHistograms(), 1)
-
-
 
     #================== Failure cases ================================
 

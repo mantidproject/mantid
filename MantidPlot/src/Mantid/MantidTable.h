@@ -2,23 +2,22 @@
 #define MANTIDTABLE_H
 
 #include "../Table.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-
 
 /** A MantidTable appears to be a MantidPlot "Table" object
  * that shows the data from an ITableWorkspace.
  *
  */
-class MantidTable: public Table, public MantidQt::API::WorkspaceObserver
-{
+class MantidTable : public Table, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
-    ApplicationWindow* parent, bool transpose = false);
+  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws,
+              const QString &label, ApplicationWindow *parent,
+              bool transpose = false);
 
   /// returns the workspace name
-  const std::string & getWorkspaceName() {return m_wsName; }
+  const std::string &getWorkspaceName() { return m_wsName; }
 
   //! is this table editable
   bool isEditable() override;
@@ -36,6 +35,8 @@ signals:
 public slots:
   void deleteRows(int startRow, int endRow) override;
   void cellEdited(int, int col) override;
+  void setPlotDesignation(PlotDesignation pd,
+                          bool rightColumns = false) override;
 
 protected slots:
   void closeTable();
@@ -58,13 +59,15 @@ protected:
                    const QString &leadCol = QString()) override;
 
 private:
+  /// Set the plot type on the workspace for each selected column
+  void setPlotTypeForSelectedColumns(int plotType);
+
   /// ITableWorkspace being displayed
   Mantid::API::ITableWorkspace_sptr m_ws;
   /// Name of the TableWorkspace being displayed
   const std::string m_wsName;
   /// Show the table workspace transposed
   bool m_transposed;
-
 };
 
 #endif /* MANTIDTABLE_H */

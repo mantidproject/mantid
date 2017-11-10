@@ -83,11 +83,7 @@ public:
   }
 
   void testGetEquivalentsR3m9e() {
-    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
-        "-y,x-y,z; y,x,-z; -x,-y,-z");
-    Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
-
-    SpaceGroup spaceGroup(166, "R-3m", *(group * centering));
+    SpaceGroup spaceGroup = getSpaceGroupR3m();
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.5, 0.0, 0.0);
     for (size_t i = 0; i < byOperator.size(); ++i) {
@@ -112,11 +108,7 @@ public:
      *
      * This test uses space group 166, R-3m, like above.
      */
-    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
-        "-y,x-y,z; y,x,-z; -x,-y,-z");
-    Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
-
-    SpaceGroup spaceGroup(166, "R-3m", *(group * centering));
+    SpaceGroup spaceGroup = getSpaceGroupR3m();
 
     // Reflections hkl: -h + k + l = 3n
     V3D goodHKL(1, 4, 3); // -1 + 4 + 3 = 6 = 3 * 2
@@ -153,6 +145,16 @@ public:
     V3D badHH0(4, -4, 0);
     TS_ASSERT(spaceGroup.isAllowedReflection(goodHH0));
     TS_ASSERT(!spaceGroup.isAllowedReflection(badHH0));
+  }
+
+  void test_isAllowedUnitCell_R3m() {
+    UnitCell cell(6, 6, 10, 90, 90, 120);
+    UnitCell invalid(6, 7, 10, 90, 90, 120);
+
+    SpaceGroup sg = getSpaceGroupR3m();
+
+    TS_ASSERT(sg.isAllowedUnitCell(cell));
+    TS_ASSERT(!sg.isAllowedUnitCell(invalid));
   }
 
   void testSiteSymmetryGroupR3c() {
@@ -214,6 +216,16 @@ public:
   }
 
 private:
+  SpaceGroup getSpaceGroupR3m() {
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
+        "-y,x-y,z; y,x,-z; -x,-y,-z");
+    Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
+
+    SpaceGroup sg(166, "R-3m", *(group * centering));
+
+    return sg;
+  }
+
   void checkSiteSymmetryGroupPositions(const V3D &position,
                                        const Group_const_sptr &siteSymmGroup,
                                        const std::string &wPosName,

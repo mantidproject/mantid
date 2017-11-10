@@ -1,29 +1,21 @@
 #ifndef MANTID_API_WORKSPACE_H_
 #define MANTID_API_WORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
+#include "MantidParallel/StorageMode.h"
 
 namespace Mantid {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 namespace Kernel {
 class Logger;
 }
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 class AnalysisDataServiceImpl;
+class WorkspaceHistory;
 
 /** Base Workspace Abstract Class.
 
@@ -53,7 +45,9 @@ class AnalysisDataServiceImpl;
  */
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
-  Workspace() = default;
+  Workspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  ~Workspace();
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
    * derived classes.
@@ -75,10 +69,12 @@ public:
    *   clone() is not virtual this is a non-issue.
    */
   Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
+
+  /// Returns a default-initialized clone of the workspace
+  Workspace_uptr cloneEmpty() const { return Workspace_uptr(doCloneEmpty()); }
+
   Workspace &operator=(const Workspace &other) = delete;
   // DataItem interface
-  /// Name
-  const std::string name() const override { return this->getName(); }
   /** Marks the workspace as safe for multiple threads to edit data
    * simutaneously.
    * Workspace creation is always considered to be a single threaded operation.
@@ -91,7 +87,7 @@ public:
   void setComment(const std::string &);
   virtual const std::string getTitle() const;
   const std::string &getComment() const;
-  const std::string &getName() const;
+  const std::string &getName() const override;
   bool isDirty(const int n = 1) const;
   /// Get the footprint in memory in bytes.
   virtual size_t getMemorySize() const = 0;
@@ -99,13 +95,16 @@ public:
   std::string getMemorySizeAsStr() const;
 
   /// Returns a reference to the WorkspaceHistory
-  WorkspaceHistory &history() { return m_history; }
+  WorkspaceHistory &history() { return *m_history; }
   /// Returns a reference to the WorkspaceHistory const
-  const WorkspaceHistory &getHistory() const { return m_history; }
+  const WorkspaceHistory &getHistory() const { return *m_history; }
+
+  Parallel::StorageMode storageMode() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  Workspace(const Workspace &) = default;
+  Workspace(const Workspace &);
+  void setStorageMode(Parallel::StorageMode mode);
 
 private:
   void setName(const std::string &);
@@ -117,10 +116,15 @@ private:
   /// workspace algebra
   std::string m_name;
   /// The history of the workspace, algorithm and environment
-  WorkspaceHistory m_history;
+  std::unique_ptr<WorkspaceHistory> m_history;
+  /// Storage mode of the Workspace (used for MPI runs)
+  Parallel::StorageMode m_storageMode;
 
-  /// Virtual clone method. Not implemented to force implementation in childs.
+  /// Virtual clone method. Not implemented to force implementation in children.
   virtual Workspace *doClone() const = 0;
+  /// Virtual cloneEmpty method. Not implemented to force implementation in
+  /// children.
+  virtual Workspace *doCloneEmpty() const = 0;
 
   friend class AnalysisDataServiceImpl;
 };

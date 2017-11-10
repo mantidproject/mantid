@@ -9,24 +9,13 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCalFile)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveCalFile::SaveCalFile() : m_precision(7) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveCalFile::~SaveCalFile() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -107,7 +96,7 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
     doMask = true;
     inst = maskWS->getInstrument();
     if (!inst)
-      g_log.warning() << "Mask workspace " << maskWS->name()
+      g_log.warning() << "Mask workspace " << maskWS->getName()
                       << " has no instrument associated with."
                       << "\n";
   }

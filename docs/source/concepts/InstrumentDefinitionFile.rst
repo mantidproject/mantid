@@ -155,26 +155,35 @@ using the following python:
     currentIDF = ExperimentInfo.getInstrumentFilename("ARCS")
     otherIDF = ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30T00:00:00")
 
+.. _InstrumentDefinitionFile_Directories:
 
-Downloaded Instrument File Definitions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Instrument Definition Directories
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As well as the instrument definitions that ship with Mantid, mantid can also download updates
-or new instrument definitions when it is started.  This is a great way of keeping the files
-current without needing a new release of Mantid for each instrument change.
+Mantid ships with many instrument definition files within the installation but
+also has the capability of fetching new instrument definitions by running the
+:ref:`DownloadInstrument <algm-DownloadInstrument>` algorithm (this is run
+automatically on startup). Downloaded definitions are written to a different
+directory to the shipped versions so that they do not overwrite them. The default list
+of directories searched (in the this order) for an IDF for a given instrument are:
 
-Mantid does not overwrite files in the MantidInstall instrument directory when downloading files,
-it writes to another location that is a little different on windows and linux.
+For Windows:
 
-For windows:
-    %appdata%\\mantidproject\\instrument
+- %APPDATA%\\mantidproject\\instrument: location of downloaded files
+- [INSTALLDIR]\\instrument: location of shipped files
 
-For Linux:
-    ~/.mantid/instrument
+For Linux/OSX:
 
-You should not edit files there, or add new ones as the may be deleted or overwritten.
+- $HOME/.mantid/instrument: location of downloaded files
+- /etc/mantid/instrument: system-wide location for all users of a machine
+- [INSTALLDIR]/instrument: location of shipped files
+
+Editing Downloaded Definitions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You should not edit files in the downloaded location, or add new ones as the may be deleted or overwritten.
 If you have a change to an instrument definition you wish to use then edit a copy in the
-MantidInstall instrument directory, but updated the valid-from date so mantid will pick that one
+[INSTALLDIR] instrument directory, but update the valid-from date so mantid will pick that one
 up in preference.  Or if you just wish to force a particular instrument definition for a particular
 workspace just run :ref:`LoadInstrument <algm-LoadInstrument>` for that workspace.
 
@@ -288,6 +297,9 @@ types recognised are:
 #. :ref:`RectangularDetector <Creating Rectangular Area Detectors>`
    (or rectangularDetector, rectangulardetector, or
    rectangular\_detector)
+#. :ref:`StructuredDetector <Creating Structured Detectors>`
+   (or structuredDetector, structureddetector, or
+   structured\_detector)
 #. Source (or source)
 #. SamplePos (or samplePos)
 #. ChopperPos (or chopperPos)
@@ -308,10 +320,10 @@ example of specifying a Source and SamplePos is shown below
 
 
 Using detector/monitor IDs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
-unique detector/monitor ID numbers (note this is *not* spectrum ID
+unique detector/monitor ID numbers (note this is *not* spectrum
 numbers but detector/monitor ID numbers). There are at least two
 important reason to insist on this.
 
@@ -338,6 +350,8 @@ important reason to insist on this.
    trying to remember a sequence of IDs. Note the counts in a histogram
    spectrum may be the sum of counts from a number of detectors and
    Mantid, behind the scene, use the IDs to keep track of this.
+
+.. warning:: As of version 3.12 of Mantid, Instruments in Mantid will no longer silently discard detectors defined with duplicate IDs. Detector IDs (including Monitors) must be unique across the Instrument. IDFs cannot be loaded if they violate this.
 
 The <idlist> element and the idlist attribute of the elements is used to assign
 detector IDs. The notation for using idlist is
@@ -456,6 +470,108 @@ an example of how to do it:
 
    -  Must have constant pixel spacing in each direction.
    -  Must be rectangular shape.
+
+.. _Creating Structured Detectors:
+
+Creating Structured (Irregular Geometry) Detectors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the previous example, we saw that Rectangular Detectors provide a simple way 
+of producing detectors with regular topology and geometry. The StructuredDetector
+provides a way of producing detectors with regular topology and irregular geometry. It
+can be thought of as a warped RectangularDetector:
+
+.. code-block:: xml
+
+    <component name="DetectorBank" type="fan" idstart="0" idfillfirst="y" idstepbyrow="100" idstep="1">
+      <location />
+    </component>
+
+    <type name="fan" is="StructuredDetector" xpixels="4" ypixels="5" type="pixel">
+       <vertex x="-0.0" y="0.0" z="0.0" />
+       <vertex x="-0.0" y="0.0" z="0.0" />
+       <vertex x="0.0" y="0.0" z="0.0" />
+       <vertex x="0.0" y="0.0" z="0.0" />
+       <vertex x="0.0" y="0.0" z="0.0" />
+       <vertex x="-0.00138071187457" y="0.00333333333333" z="0.0" />
+       <vertex x="-0.000663041224598" y="0.00333333333333" z="0.0" />
+       <vertex x="0.0" y="0.00333333333333" z="0.0" />
+       <vertex x="0.000663041224597" y="0.00333333333333" z="0.0" />
+       <vertex x="0.00138071187457" y="0.00333333333333" z="0.0" />
+       <vertex x="-0.00276142374915" y="0.00666666666667" z="0.0" />
+       <vertex x="-0.0013260824492" y="0.00666666666667" z="0.0" />
+       <vertex x="0.0" y="0.00666666666667" z="0.0" />
+       <vertex x="0.00132608244919" y="0.00666666666667" z="0.0" />
+       <vertex x="0.00276142374915" y="0.00666666666667" z="0.0" />
+       <vertex x="-0.00414213562372" y="0.01" z="0.0" />
+       <vertex x="-0.00198912367379" y="0.01" z="0.0" />
+       <vertex x="0.0" y="0.01" z="0.0" />
+       <vertex x="0.00198912367379" y="0.01" z="0.0" />
+       <vertex x="0.00414213562372" y="0.01" z="0.0" />
+       <vertex x="-0.0055228474983" y="0.0133333333333" z="0.0" />
+       <vertex x="-0.00265216489839" y="0.0133333333333" z="0.0" />
+       <vertex x="0.0" y="0.0133333333333" z="0.0" />
+       <vertex x="0.00265216489839" y="0.0133333333333" z="0.0" />
+       <vertex x="0.00552284749829" y="0.0133333333333" z="0.0" />
+       <vertex x="-0.00690355937287" y="0.0166666666667" z="0.0" />
+       <vertex x="-0.00331520612299" y="0.0166666666667" z="0.0" />
+       <vertex x="0.0" y="0.0166666666667" z="0.0" />
+       <vertex x="0.00331520612299" y="0.0166666666667" z="0.0" />
+       <vertex x="0.00690355937287" y="0.0166666666667" z="0.0" />
+    </type>
+
+    <type is="detector" name="pixel"/>
+
+
+-  The "DetectorBank" type defined above has the special "is" tag of
+   "StructuredDetector". The same type definition then needs these
+   attributes specified:
+
+   -  type: point to another type defining your pixel shape and size.
+   -  xpixels: number of pixels in X.
+   -  ypixels: number of pixels in Y.
+
+-  The StrucuredDetector type contains special <vertex> tags enclosed by this type. 
+   There are some useful points to note about this type of definition:
+
+   -  All vertices for a single detector panel must be defined.
+   -  Detector panels can be duplicated and repositioned using <component> and <location> tags.
+   -  Vertices appear in a particular winding order increasing in x then y then z e.g
+      (1, 0, 0) (2, 0, 0) / (1, 1, 0) (2, 1, 0)/ (1, 2, 0) (2, 2, 0) etc. Z 
+      is assumed to be fixed.
+   -  The total number of vertices are strictly (xpixels + 1) * (ypixels + 1)
+
+-  Detectors of the type specified ("pixel" in the example) will be
+   replicated at the X Y coordinates given. Shapes do not need to be
+   provided for the structured detector, hexahedra are assumed. Any
+   shape provided will be ignored.
+-  Each instance of a "DetectorBank" needs to set these attributes, at the <component> tag,
+   in order to specify the Pixel IDs of the 2D array.
+
+   -  idstart: detector ID of the first pixel
+   -  idfillbyfirst: set to true if ID numbers increase with Y indices
+      first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on. Default is
+      idfillbyfirst="y".
+   -  idstepbyrow: amount to increase the ID number on each row. e.g, if
+      you fill by Y first,and set idstepbyrow = 100, and have 50 Y
+      pixels, you would get: (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100;
+      (1,1)=101; etc.
+   -  idstep. Default to 1. Set the ID increment within a row.
+
+-  DO NOT also specify an "idlist" attribute for structured detectors,
+   as it will not be used.
+
+-  Advantages of using a Structured Detector tag instead of defining
+   every single pixel:
+
+   -  Smaller IDF and faster instrument loading times.
+   -  Can be used to produced any desired irregular shape once the winding order is correct.
+
+-  Disadvantages/Limitations:
+
+   -  Must define every vertex in one panel although significantly simpler than defining every detector in the IDF.
+   -  Mistakes in the vertex winding order can lead to unpredictable geometries.
+   -  Vertices will most likely need to be generated using a script for complex geometries.
 
 .. _Using location:
 
@@ -1131,7 +1247,7 @@ below:
 
 .. code-block:: xml
 
-    <component type="adjusted cuboid"
+    <component type="adjusted cuboid">
       <location />
     </component>
 
@@ -1291,6 +1407,8 @@ this component relative to its parent component.
 Reference frame in which instrument is described. The author/reader of
 an IDF can chose the reference coordinate system in which the instrument
 is described. The default reference system is the one shown below.
+The direction here means the direction of the beam if it was not
+modified by any mirrors etc.
 
 .. code-block:: xml
 
@@ -1305,8 +1423,16 @@ is described. The default reference system is the one shown below.
 
 This reference frame is e.g. used when a signed theta detector values
 are calculated where it is needed to know which direction is defined as
-up. The direction here means the direction of the beam if it was not
-modified by any mirrors etc.
+up. By default, the axis defining the sign of the scattering angle is the one pointing up.
+Optionally this can be customized by inserting the following line into the reference-frame node:
+
+.. code-block:: xml
+
+      <theta-sign axis="x"/>
+
+In this case, negative x will correspond to negative theta.
+Note that both the pointing-up and theta-sign axes cannot be the same as the along-beam axis.
+
 
 .. _default-view:
 

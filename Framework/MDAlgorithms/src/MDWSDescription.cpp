@@ -3,12 +3,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Strings.h"
 
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -21,10 +24,9 @@ namespace MDAlgorithms {
 */
 void MDWSDescription::setDimName(unsigned int nDim, const std::string &Name) {
   if (nDim >= m_NDims) {
-    std::string ERR = "setDimName::Dimension index: " +
-                      boost::lexical_cast<std::string>(nDim) +
+    std::string ERR = "setDimName::Dimension index: " + std::to_string(nDim) +
                       " out of total dimensions range: " +
-                      boost::lexical_cast<std::string>(m_NDims);
+                      std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimNames[nDim] = Name;
@@ -35,10 +37,9 @@ void MDWSDescription::setDimName(unsigned int nDim, const std::string &Name) {
 *along axis and have nothing in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim, const std::string &Unit) {
   if (nDim >= m_NDims) {
-    std::string ERR = "setDimUnit::Dimension index: " +
-                      boost::lexical_cast<std::string>(nDim) +
+    std::string ERR = "setDimUnit::Dimension index: " + std::to_string(nDim) +
                       " out of total dimensions range: " +
-                      boost::lexical_cast<std::string>(m_NDims);
+                      std::to_string(m_NDims);
     throw(std::invalid_argument(ERR));
   }
   m_DimUnits[nDim] = Unit;
@@ -210,9 +211,8 @@ void MDWSDescription::checkWSCorresponsMDWorkspace(
   if (m_NDims != NewMDWorkspaceD.m_NDims) {
     std::string ERR =
         "Dimension numbers are inconsistent: this workspace has " +
-        boost::lexical_cast<std::string>(m_NDims) +
-        " dimensions and target one: " +
-        boost::lexical_cast<std::string>(NewMDWorkspaceD.m_NDims);
+        std::to_string(m_NDims) + " dimensions and target one: " +
+        std::to_string(NewMDWorkspaceD.m_NDims);
     throw(std::invalid_argument(ERR));
   }
 
@@ -264,8 +264,8 @@ void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions,
   m_NBins.assign(m_NDims, nBins);
 
   for (size_t i = 0; i < m_NDims; i++) {
-    m_DimIDs[i] = m_DimIDs[i] + boost::lexical_cast<std::string>(i);
-    m_DimNames[i] = m_DimNames[i] + boost::lexical_cast<std::string>(i);
+    m_DimIDs[i] = m_DimIDs[i] + std::to_string(i);
+    m_DimNames[i] = m_DimNames[i] + std::to_string(i);
   }
 }
 /**function sets number of bins each dimension become split
@@ -278,11 +278,10 @@ void MDWSDescription::setNumBins(const std::vector<int> &nBins_toSplit) {
 
   if (!(nBins_toSplit.size() == 1 || nBins_toSplit.size() == this->m_NDims))
     throw std::invalid_argument(
-        " Number of dimensions: " +
-        boost::lexical_cast<std::string>(nBins_toSplit.size()) +
+        " Number of dimensions: " + std::to_string(nBins_toSplit.size()) +
         " defining number of bins to split into is not equal to total number "
         "of dimensions: " +
-        boost::lexical_cast<std::string>(this->m_NDims));
+        std::to_string(this->m_NDims));
 
   this->m_NBins.resize(this->m_NDims);
 
@@ -323,7 +322,7 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
   return (this->AlgID == "|Q|") ||
-         (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice());
+         (this->AlgID.empty() && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */
@@ -383,20 +382,19 @@ void MDWSDescription::checkMinMaxNdimConsistent(
     const std::vector<double> &minVal, const std::vector<double> &maxVal) {
   if (minVal.size() != maxVal.size()) {
     std::string ERR = " number of specified min dimension values: " +
-                      boost::lexical_cast<std::string>(minVal.size()) +
+                      std::to_string(minVal.size()) +
                       " and number of max values: " +
-                      boost::lexical_cast<std::string>(maxVal.size()) +
-                      " are not consistent\n";
+                      std::to_string(maxVal.size()) + " are not consistent\n";
     throw(std::invalid_argument(ERR));
   }
 
   for (size_t i = 0; i < minVal.size(); i++) {
     if (maxVal[i] <= minVal[i]) {
-      std::string ERR =
-          " min value " + boost::lexical_cast<std::string>(minVal[i]) +
-          " not less then max value" +
-          boost::lexical_cast<std::string>(maxVal[i]) + " in direction: " +
-          boost::lexical_cast<std::string>(i) + "\n";
+      std::string ERR = " min value " +
+                        boost::lexical_cast<std::string>(minVal[i]) +
+                        " not less then max value" +
+                        boost::lexical_cast<std::string>(maxVal[i]) +
+                        " in direction: " + std::to_string(i) + "\n";
       throw(std::invalid_argument(ERR));
     }
   }
@@ -451,8 +449,10 @@ MDWSDescription::getCoordinateSystem() const {
  * Is the algorithm running in Q3D mode?
  * @return True only if in Q3D mode
  */
-bool MDWSDescription::isQ3DMode() const {
-  return this->AlgID.compare("Q3D") == 0;
+bool MDWSDescription::isQ3DMode() const { return this->AlgID == "Q3D"; }
+
+bool MDWSDescription::hasLattice() const {
+  return m_InWS->sample().hasOrientedLattice();
 }
 
 } // end namespace MDAlgorithms

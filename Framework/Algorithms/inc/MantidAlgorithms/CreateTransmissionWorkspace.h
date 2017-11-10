@@ -33,9 +33,6 @@ namespace Algorithms {
  */
 class DLLExport CreateTransmissionWorkspace : public ReflectometryWorkflowBase {
 public:
-  CreateTransmissionWorkspace();
-  ~CreateTransmissionWorkspace() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -50,14 +47,15 @@ private:
   /// Make a transmission correction workspace
   API::MatrixWorkspace_sptr makeTransmissionCorrection(
       const std::string &processingCommands, const MinMax &wavelengthInterval,
-      const MinMax &wavelengthMonitorBackgroundInterval,
-      const MinMax &wavelengthMonitorIntegrationInterval,
-      const int &i0MonitorIndex, API::MatrixWorkspace_sptr firstTransmissionRun,
+      const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+      const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+      const OptionalInteger &i0MonitorIndex,
+      API::MatrixWorkspace_sptr firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStart,
       const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
       const OptionalDouble &stitchingStartOverlap,
-      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep);
+      const OptionalDouble &stitchingEndOverlap);
 
   void init() override;
   void exec() override;

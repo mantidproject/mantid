@@ -9,7 +9,7 @@ from mantid.geometry import CrystalStructure
 
 # The WISH test has a data mismatch which might be caused by the 'old' code having a bug (issue #14105).
 # The difference is that peaks may have different d-values because they are assigned to a different detector.
-# Instead of using the CheckWorkspacesMatch, only H, K and L are compared.
+# Instead of using the CompareWorkspaces, only H, K and L are compared.
 class PredictPeaksTestWISH(stresstesting.MantidStressTest):
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
@@ -53,7 +53,9 @@ class PredictPeaksTestWISH(stresstesting.MantidStressTest):
 
 class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
     def runTest(self):
-        simulationWorkspace = CreateSimulationWorkspace(Instrument='TOPAZ',
+        direc = config['instrumentDefinition.directory']
+        xmlFile =  os.path.join(direc,'TOPAZ_Definition_2015-01-01.xml')
+        simulationWorkspace = CreateSimulationWorkspace(Instrument=xmlFile,
                                                         BinParams='0,1,2',
                                                         UnitX='TOF')
 
@@ -64,12 +66,14 @@ class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
 
         reference = LoadNexus('predict_peaks_test_random_ub_topaz.nxs')
 
-        simulationWorkspaceMatch = CheckWorkspacesMatch(peaks, reference)
+        simulationWorkspaceMatch = CompareWorkspaces(peaks, reference)
 
-        self.assertEquals(simulationWorkspaceMatch, 'Success!')
+        self.assertTrue(simulationWorkspaceMatch[0])
 
 
 class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
+    expected_num_peaks = 546
+
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
                                                         BinParams='0,1,2',
@@ -87,9 +91,9 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                              MinDSpacing=0.5, MaxDSpacing=10,
                              CalculateStructureFactors=True)
 
-        self.assertEquals(peaks.getNumberPeaks(), 540)
+        self.assertEquals(peaks.getNumberPeaks(), self.expected_num_peaks)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks.getPeak(i)
             self.assertLessThan(0.0, peak.getIntensity())
 
@@ -98,6 +102,6 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                                    MinDSpacing=0.5, MaxDSpacing=10,
                                    CalculateStructureFactors=False)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks_no_sf.getPeak(i)
             self.assertEquals(0.0, peak.getIntensity())

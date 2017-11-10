@@ -31,7 +31,14 @@ using Kernel::IntMatrix;
  * @return :: std::vector containing all equivalent hkls.
  */
 std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
-  return getEquivalentSet(hkl);
+  auto equivalents = getAllEquivalents(hkl);
+
+  std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
+
+  equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
+                    equivalents.end());
+
+  return equivalents;
 }
 
 /**
@@ -48,7 +55,9 @@ std::vector<V3D> PointGroup::getEquivalents(const V3D &hkl) const {
  * @return :: hkl specific to a family of index-triplets
  */
 V3D PointGroup::getReflectionFamily(const Kernel::V3D &hkl) const {
-  return *getEquivalentSet(hkl).begin();
+  auto equivalents = getAllEquivalents(hkl);
+
+  return *std::max_element(equivalents.begin(), equivalents.end());
 }
 
 /// Protected constructor - can not be used directly.
@@ -65,9 +74,9 @@ std::string PointGroup::getSymbol() const { return m_symbolHM; }
 
 bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
                               const Kernel::V3D &hkl2) const {
-  std::vector<V3D> hklEquivalents = getEquivalentSet(hkl);
+  auto hklEquivalents = getAllEquivalents(hkl);
 
-  return (std::find(hklEquivalents.begin(), hklEquivalents.end(), hkl2) !=
+  return (std::find(hklEquivalents.cbegin(), hklEquivalents.cend(), hkl2) !=
           hklEquivalents.end());
 }
 
@@ -75,28 +84,23 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
  * Generates a set of hkls
  *
  * This method applies all transformation matrices to the supplied hkl and puts
- * it into a set, which is returned in the end. Using a set ensures that each
- * hkl occurs once and only once. This set is the set of equivalent hkls,
- * specific to a concrete point group.
+ * them into a vector, which is returned in the end. For special reflections
+ * such as 100 or 110 or 111, the vector may contain duplicates that need to
+ * be filtered out.
  *
  * The symmetry operations need to be set prior to calling this method by a call
  * to PointGroup::setTransformationMatrices.
  *
  * @param hkl :: Arbitrary hkl
- * @return :: set of hkls.
+ * @return :: vector of hkls.
  */
-std::vector<V3D> PointGroup::getEquivalentSet(const Kernel::V3D &hkl) const {
+std::vector<V3D> PointGroup::getAllEquivalents(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
 
   for (const auto &operation : m_allOperations) {
-    equivalents.push_back(operation.transformHKL(hkl));
+    equivalents.emplace_back(operation.transformHKL(hkl));
   }
-
-  std::sort(equivalents.begin(), equivalents.end(), std::greater<V3D>());
-
-  equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
-                    equivalents.end());
 
   return equivalents;
 }
@@ -318,6 +322,17 @@ bool CrystalSystemComparator::
 operator()(const PointGroup::CrystalSystem &lhs,
            const PointGroup::CrystalSystem &rhs) const {
   return static_cast<int>(lhs) < static_cast<int>(rhs);
+}
+
+/// Returns a streamed representation of the PointGroup object
+std::ostream &operator<<(std::ostream &stream, const PointGroup &self) {
+  stream << "Point group with:\n"
+         << "Lattice system: " << getLatticeSystemAsString(self.latticeSystem())
+         << "\n"
+         << "Crystal system: " << getCrystalSystemAsString(self.crystalSystem())
+         << "\n"
+         << "Symbol: " << self.getSymbol();
+  return stream;
 }
 
 } // namespace Mantid

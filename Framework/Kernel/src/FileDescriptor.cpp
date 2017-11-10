@@ -1,8 +1,9 @@
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/Exception.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

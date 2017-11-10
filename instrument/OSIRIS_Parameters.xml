@@ -88,6 +88,7 @@
 
 <parameter name="Workflow.Diffraction.Correction" type="string">
     <value val="Vanadium" />
+    <value val="Calibration" />
 </parameter>
 
 </component-link>

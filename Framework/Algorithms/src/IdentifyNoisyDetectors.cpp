@@ -43,7 +43,7 @@ void IdentifyNoisyDetectors::exec() {
         "It does not seem to make sense and the calculations done here will "
         "will cause a division by zero.");
 
-  Progress progress(this, 0, 1, (nHist * 7) + 6);
+  Progress progress(this, 0.0, 1.0, (nHist * 7) + 6);
 
   // Create the output workspace a single value for each spectra.
   MatrixWorkspace_sptr outputWs;

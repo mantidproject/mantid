@@ -2,6 +2,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -48,8 +49,7 @@ void ChopData::exec() {
   std::map<int, double> intMap;
   int prelow = -1;
   std::vector<MatrixWorkspace_sptr> workspaces;
-
-  boost::shared_ptr<Progress> progress;
+  std::unique_ptr<Progress> progress;
 
   if (maxX < step) {
     throw std::invalid_argument(
@@ -59,16 +59,14 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-    progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
     // This will generally be the monitor spectrum.
     MatrixWorkspace_sptr monitorWS;
     monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
-    monitorWS->dataX(0) = inputWS->dataX(monitorWi);
-    monitorWS->dataY(0) = inputWS->dataY(monitorWi);
-    monitorWS->dataE(0) = inputWS->dataE(monitorWi);
+    monitorWS->setHistogram(0, inputWS->histogram(monitorWi));
 
     int lowest = 0;
 
@@ -82,7 +80,7 @@ void ChopData::exec() {
       integ->setProperty<double>("RangeUpper", i * step + rUpper);
       integ->execute();
       MatrixWorkspace_sptr integR = integ->getProperty("OutputWorkspace");
-      intMap[i] = integR->dataY(0)[0];
+      intMap[i] = integR->y(0)[0];
 
       if (intMap[i] < intMap[lowest]) {
         lowest = i;
@@ -95,10 +93,11 @@ void ChopData::exec() {
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
-  } else
-    progress = boost::make_shared<Progress>(this, 0, 1, chops);
+  } else {
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops);
+  }
 
-  int wsCounter(1);
+  int wsCounter{1};
 
   for (int i = 0; i < chops; i++) {
     const double stepDiff = (i * step);
@@ -131,18 +130,23 @@ void ChopData::exec() {
                                                          nbins + 1, nbins);
 
     // Copy over X, Y and E data
-    PARALLEL_FOR2(inputWS, workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))
     for (int j = 0; j < nHist; j++) {
-      PARALLEL_START_INTERUPT_REGION;
-      for (size_t k = 0; k < nbins; k++) {
-        size_t oldbin = indexLow + k;
-        workspace->dataY(j)[k] = inputWS->readY(j)[oldbin];
-        workspace->dataE(j)[k] = inputWS->readE(j)[oldbin];
-        workspace->dataX(j)[k] = inputWS->readX(j)[oldbin] - stepDiff;
-      }
-      workspace->dataX(j)[nbins] =
-          inputWS->readX(j)[indexLow + nbins] - stepDiff;
 
+      auto edges = inputWS->binEdges(j);
+
+      PARALLEL_START_INTERUPT_REGION;
+
+      workspace->mutableX(j).assign(edges.cbegin() + indexLow,
+                                    edges.cbegin() + indexLow + nbins + 1);
+
+      workspace->mutableX(j) += -stepDiff;
+
+      workspace->mutableY(j).assign(inputWS->y(j).cbegin() + indexLow,
+                                    inputWS->y(j).cbegin() + indexLow + nbins);
+
+      workspace->mutableE(j).assign(inputWS->e(j).cbegin() + indexLow,
+                                    inputWS->e(j).cbegin() + indexLow + nbins);
       PARALLEL_END_INTERUPT_REGION;
     }
     PARALLEL_CHECK_INTERUPT_REGION;

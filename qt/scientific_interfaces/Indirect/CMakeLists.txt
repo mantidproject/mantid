@@ -1,0 +1,201 @@
+set ( SRC_FILES
+	AbsorptionCorrections.cpp
+	ApplyPaalmanPings.cpp
+	CalculatePaalmanPings.cpp
+	ContainerSubtraction.cpp
+	ConvFit.cpp
+	CorrectionsTab.cpp
+	DensityOfStates.cpp
+        Elwin.cpp
+	ILLEnergyTransfer.cpp
+	ISISCalibration.cpp
+	ISISDiagnostics.cpp
+	ISISEnergyTransfer.cpp
+	IndirectBayes.cpp
+	IndirectBayesTab.cpp
+	IndirectCorrections.cpp
+	IndirectDataAnalysis.cpp
+	IndirectDataAnalysisTab.cpp
+	IndirectDataReduction.cpp
+	IndirectDataReductionTab.cpp
+	IndirectDiffractionReduction.cpp
+	IndirectLoadILL.cpp
+	IndirectMolDyn.cpp
+	IndirectMoments.cpp
+	IndirectSassena.cpp
+	IndirectSimulation.cpp
+	IndirectSimulationTab.cpp
+	IndirectSqw.cpp
+	IndirectSymmetrise.cpp
+	IndirectTab.cpp
+	IndirectTools.cpp
+	IndirectToolsTab.cpp
+	IndirectTransmission.cpp
+	IndirectTransmissionCalc.cpp
+	Iqt.cpp
+	IqtFit.cpp
+	JumpFit.cpp
+	MSDFit.cpp
+	Quasi.cpp
+	ResNorm.cpp
+	Stretch.cpp
+)
+
+# Include files aren't required, but this makes them appear in Visual Studio
+# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
+set ( INC_FILES
+    DllConfig.h
+	AbsorptionCorrections.h
+	ApplyPaalmanPings.h
+	CalculatePaalmanPings.h
+	ContainerSubtraction.h
+	ConvFit.h
+	CorrectionsTab.h
+	DensityOfStates.h
+        Elwin.h
+	ILLEnergyTransfer.h
+	ISISCalibration.h
+	ISISDiagnostics.h
+	ISISEnergyTransfer.h
+	IndirectBayes.h
+	IndirectBayesTab.h
+	IndirectCorrections.h
+	IndirectDataAnalysis.h
+	IndirectDataAnalysisTab.h
+	IndirectDataReduction.h
+	IndirectDataReductionTab.h
+	IndirectDiffractionReduction.h
+	IndirectLoadILL.h
+	IndirectMolDyn.h
+	IndirectMoments.h
+	IndirectSassena.h
+	IndirectSimulation.h
+	IndirectSimulationTab.h
+	IndirectSqw.h
+	IndirectSymmetrise.h
+	IndirectTab.h
+	IndirectTools.h
+	IndirectToolsTab.h
+	IndirectTransmission.h
+	IndirectTransmissionCalc.h
+	Iqt.h
+	IqtFit.h
+	JumpFit.h
+	MSDFit.h
+	Quasi.h
+	ResNorm.h
+	Stretch.h
+)
+
+set ( MOC_FILES
+    AbsorptionCorrections.h
+    ApplyPaalmanPings.h
+    CalculatePaalmanPings.h
+    ContainerSubtraction.h
+    ConvFit.h
+    CorrectionsTab.h
+    DensityOfStates.h
+    Elwin.h
+    ILLEnergyTransfer.h
+    IndirectBayes.h
+    IndirectBayesTab.h
+    IndirectCorrections.h
+    IndirectDataAnalysis.h
+    IndirectDataAnalysisTab.h
+    IndirectDataReduction.h
+    IndirectDataReductionTab.h
+    IndirectDiffractionReduction.h
+    IndirectLoadILL.h
+    IndirectMolDyn.h
+    IndirectMoments.h
+    IndirectSassena.h
+    IndirectSimulation.h
+    IndirectSimulationTab.h
+    IndirectSqw.h
+    IndirectSymmetrise.h
+    IndirectTransmission.h
+    IndirectTransmissionCalc.h
+    IndirectTools.h
+    IndirectToolsTab.h
+    IndirectTab.h
+    Iqt.h
+    IqtFit.h
+    JumpFit.h
+    MSDFit.h
+    Quasi.h
+    ResNorm.h
+    Stretch.h
+    ISISCalibration.h
+    ISISDiagnostics.h
+    ISISEnergyTransfer.h
+)
+
+set ( UI_FILES
+   AbsorptionCorrections.ui
+   ApplyPaalmanPings.ui
+   CalculatePaalmanPings.ui
+   ContainerSubtraction.ui
+   ConvFit.ui
+   DensityOfStates.ui
+   Elwin.ui
+   ILLEnergyTransfer.ui
+   IndirectBayes.ui
+   IndirectCorrections.ui
+   IndirectDataAnalysis.ui
+   IndirectDataReduction.ui
+   IndirectDiffractionReduction.ui
+   IndirectLoadILL.ui
+   IndirectMolDyn.ui
+   IndirectMoments.ui
+   IndirectSassena.ui
+   IndirectSimulation.ui
+   IndirectSqw.ui
+   IndirectSymmetrise.ui
+   IndirectTools.ui
+   IndirectTransmission.ui
+   IndirectTransmissionCalc.ui
+   Iqt.ui
+   IqtFit.ui
+   JumpFit.ui
+   MSDFit.ui
+   Quasi.ui
+   ResNorm.ui
+   Stretch.ui
+   ISISCalibration.ui
+   ISISDiagnostics.ui
+   ISISEnergyTransfer.ui
+)
+
+mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_INDIRECT
+  PRECOMPILED PrecompiledHeader.h
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
+    MantidScientificInterfacesGeneral
+  INSTALL_DIR_BASE
+    ${PLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/MacOS
+    @loader_path/../../plugins/qt4
+)
+
+if ( MSVC_IDE )
+#  # Add to the 'ScientificInterfaces' group in VS
+  set_property ( TARGET MantidScientificInterfacesIndirectQt4 PROPERTY FOLDER "ScientificInterfaces" )
+endif()

@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -24,8 +23,6 @@ using namespace Mantid::Geometry;
 SofQWPolygon::SofQWPolygon()
     : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
-//----------------------------------------------------------------------------------------------
-
 /**
  * Initialize the algorithm
  */
@@ -37,7 +34,7 @@ void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
 void SofQWPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     throw std::invalid_argument(
         "The input workspace must have common binning across all spectra");
   }
@@ -57,7 +54,7 @@ void SofQWPolygon::exec() {
   this->initCachedValues(inputWS);
 
   const size_t nTheta = m_thetaPts.size();
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;
@@ -74,7 +71,7 @@ void SofQWPolygon::exec() {
     qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
   {
@@ -86,7 +83,8 @@ void SofQWPolygon::exec() {
       continue;
     }
 
-    IDetector_const_sptr det = inputWS->getDetector(i);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det = spectrumInfo.detector(i);
     double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
@@ -118,8 +116,8 @@ void SofQWPolygon::exec() {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
           specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
-          detIDMapping.push_back(det->getID());
+              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
+          detIDMapping.push_back(det.getID());
         }
       }
     }
@@ -134,6 +132,19 @@ void SofQWPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**
@@ -180,9 +191,9 @@ double SofQWPolygon::calculateIndirectQ(const double efixed,
  * @param workspace :: Workspace pointer
  */
 void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
-  m_EmodeProperties.initCachedValues(workspace, this);
+  m_EmodeProperties.initCachedValues(*workspace, this);
   // Index theta cache
-  initThetaCache(workspace);
+  initThetaCache(*workspace);
 }
 
 /**
@@ -193,45 +204,29 @@ void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
  * values are required very frequently so the total time is more than
  * offset by this precaching step
  */
-void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
-  const size_t nhist = workspace->getNumberHistograms();
+void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
+  const size_t nhist = workspace.getNumberHistograms();
   m_thetaPts = std::vector<double>(nhist);
   size_t ndets(0);
   double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
 
-  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) // signed for OpenMP
-  {
-
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     m_progress->report("Calculating detector angles");
-    IDetector_const_sptr det;
+    m_thetaPts[i] = -1.0; // Indicates a detector to skip
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
+      continue;
+    // Check to see if there is an EFixed, if not skip it
     try {
-      det = workspace->getDetector(i);
-      // Check to see if there is an EFixed, if not skip it
-      try {
-        m_EmodeProperties.getEFixed(det);
-      } catch (std::runtime_error &) {
-        det.reset();
-      }
-    } catch (Kernel::Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
+    } catch (std::runtime_error &) {
+      continue;
     }
-    // If no detector found, skip onto the next spectrum
-    if (!det || det->isMonitor()) {
-      m_thetaPts[i] = -1.0; // Indicates a detector to skip
-    } else {
-      ++ndets;
-      const double theta = workspace->detectorTwoTheta(det);
-      m_thetaPts[i] = theta;
-      if (theta < minTheta) {
-        minTheta = theta;
-      } else if (theta > maxTheta) {
-        maxTheta = theta;
-      }
-    }
+    ++ndets;
+    const double theta = spectrumInfo.twoTheta(i);
+    m_thetaPts[i] = theta;
+    minTheta = std::min(minTheta, theta);
+    maxTheta = std::max(maxTheta, theta);
   }
 
   if (0 == ndets)

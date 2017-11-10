@@ -5,12 +5,15 @@
 #include "MantidAlgorithms/ChangeLogTime.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 using std::string;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class ChangeLogTimeTest : public CxxTest::TestSuite {
 public:

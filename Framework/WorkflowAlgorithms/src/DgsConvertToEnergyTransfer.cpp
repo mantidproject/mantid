@@ -1,22 +1,17 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
@@ -30,17 +25,6 @@ namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsConvertToEnergyTransfer::DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsConvertToEnergyTransfer::~DgsConvertToEnergyTransfer() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
@@ -54,9 +38,6 @@ const std::string DgsConvertToEnergyTransfer::category() const {
   return "Workflow\\Inelastic\\UsesPropertyManager";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DgsConvertToEnergyTransfer::init() {
@@ -97,22 +78,20 @@ void DgsConvertToEnergyTransfer::init() {
                         Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DgsConvertToEnergyTransfer::exec() {
-  g_log.notice() << "Starting DgsConvertToEnergyTransfer" << std::endl;
+  g_log.notice() << "Starting DgsConvertToEnergyTransfer\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  } else {
+  else
     throw std::runtime_error("DgsConvertToEnergyTransfer cannot run without a "
                              "reduction PropertyManager.");
-  }
 
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
@@ -124,7 +103,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
   // Calculate the initial energy and time zero
   const std::string facility = ConfigService::Instance().getFacility().name();
-  g_log.notice() << "Processing for " << facility << std::endl;
+  g_log.notice() << "Processing for " << facility << '\n';
   double eiGuess = this->getProperty("IncidentEnergyGuess");
   if (EMPTY_DBL() == eiGuess) {
     // SNS has a log called EnergyRequest that can be used to get the
@@ -166,31 +145,29 @@ void DgsConvertToEnergyTransfer::exec() {
     double tZero = 0.0;
     if (useEiGuess) {
       incidentEnergy = eiGuess;
-      if (EMPTY_DBL() != tZeroGuess) {
+      if (EMPTY_DBL() != tZeroGuess)
         tZero = tZeroGuess;
-      }
     } else {
       if (!monWS) {
-        g_log.notice() << "Trying to determine file name" << std::endl;
+        g_log.notice() << "Trying to determine file name\n";
         std::string runFileName =
             inputWS->run().getProperty("Filename")->value();
-        if (runFileName.empty()) {
+        if (runFileName.empty())
           throw std::runtime_error("Cannot find run filename, therefore cannot "
                                    "find the initial energy");
-        }
 
-        std::string loadAlgName("");
-        std::string fileProp("");
+        std::string loadAlgName;
+        std::string fileProp;
         if (boost::ends_with(runFileName, "_event.nxs") ||
             boost::ends_with(runFileName, ".nxs.h5") ||
             boost::ends_with(runFileName, ".nxs")) {
-          g_log.notice() << "Loading NeXus monitors" << std::endl;
+          g_log.notice() << "Loading NeXus monitors\n";
           loadAlgName = "LoadNexusMonitors";
           fileProp = "Filename";
         }
 
         if (boost::ends_with(runFileName, "_neutron_event.dat")) {
-          g_log.notice() << "Loading PreNeXus monitors" << std::endl;
+          g_log.notice() << "Loading PreNeXus monitors\n";
           loadAlgName = "LoadPreNexusMonitors";
           boost::replace_first(runFileName, "_neutron_event.dat",
                                "_runinfo.xml");
@@ -206,13 +183,12 @@ void DgsConvertToEnergyTransfer::exec() {
         // the algorithm can return a group workspace if the file is multi
         // period
         monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-        if ((monWSOutput) && (!monWS)) {
+        if ((monWSOutput) && (!monWS))
           // this was a group workspace - DGSReduction does not support multi
           // period data yet
           throw Exception::NotImplementedError(
               "The file contains multi period data, support for this is not "
               "implemented in DGSReduction yet");
-        }
       }
 
       // Calculate Ei
@@ -226,7 +202,7 @@ void DgsConvertToEnergyTransfer::exec() {
       tZero = getei->getProperty("Tzero");
     }
 
-    g_log.notice() << "Adjusting for T0" << std::endl;
+    g_log.notice() << "Adjusting for T0\n";
     IAlgorithm_sptr alg = this->createChildAlgorithm("ChangeBinOffset");
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("OutputWorkspace", outputWS);
@@ -264,8 +240,8 @@ void DgsConvertToEnergyTransfer::exec() {
     cbo->executeAsChildAlg();
     outputWS = cbo->getProperty("OutputWorkspace");
 
-    IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
-    V3D monPos = monDet->getPos();
+    const auto &specInfo = inputWS->spectrumInfo();
+    const V3D &monPos = specInfo.position(monIndex);
     std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
     IAlgorithm_sptr moveInstComp =
@@ -277,20 +253,17 @@ void DgsConvertToEnergyTransfer::exec() {
     moveInstComp->setProperty("Z", monPos.Z());
     moveInstComp->setProperty("RelativePosition", false);
     moveInstComp->executeAsChildAlg();
-    outputWS = moveInstComp->getProperty("Workspace");
   }
 
   const double binOffset = -monPeak;
 
   if ("ISIS" == facility) {
-    std::string detcalFile("");
-    if (reductionManager->existsProperty("SampleDetCalFilename")) {
+    std::string detcalFile;
+    if (reductionManager->existsProperty("SampleDetCalFilename"))
       detcalFile = reductionManager->getPropertyValue("SampleDetCalFilename");
-    }
     // Try to get it from run object.
-    else {
+    else
       detcalFile = inputWS->run().getProperty("Filename")->value();
-    }
     if (!detcalFile.empty()) {
       const bool relocateDets =
           reductionManager->getProperty("RelocateDetectors");
@@ -363,6 +336,7 @@ void DgsConvertToEnergyTransfer::exec() {
         rebin->setProperty("OutputWorkspace", origBkgWsName);
         rebin->setProperty("Params", params);
         rebin->setProperty("PreserveEvents", false);
+        rebin->setProperty("IgnoreBinErrors", true);
         rebin->executeAsChildAlg();
         MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
@@ -465,7 +439,7 @@ void DgsConvertToEnergyTransfer::exec() {
   outputWS = norm->getProperty("OutputWorkspace");
 
   // Convert to energy transfer
-  g_log.notice() << "Converting to energy transfer." << std::endl;
+  g_log.notice() << "Converting to energy transfer.\n";
   IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
   cnvun->setProperty("InputWorkspace", outputWS);
   cnvun->setProperty("OutputWorkspace", outputWS);
@@ -475,11 +449,12 @@ void DgsConvertToEnergyTransfer::exec() {
   cnvun->executeAsChildAlg();
   outputWS = cnvun->getProperty("OutputWorkspace");
 
-  g_log.notice() << "Rebinning data" << std::endl;
+  g_log.notice() << "Rebinning data\n";
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("Params", etBinning);
+  rebin->setProperty("IgnoreBinErrors", true);
   rebin->setProperty("PreserveEvents", preserveEvents);
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
@@ -531,17 +506,17 @@ void DgsConvertToEnergyTransfer::exec() {
   const bool sofphieIsDistribution =
       reductionManager->getProperty("SofPhiEIsDistribution");
 
-  g_log.notice() << "Rebinning data" << std::endl;
+  g_log.notice() << "Rebinning data\n";
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
-  if (sofphieIsDistribution) {
+  rebin->setProperty("IgnoreBinErrors", true);
+  if (sofphieIsDistribution)
     rebin->setProperty("PreserveEvents", false);
-  }
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
 
   if (sofphieIsDistribution) {
-    g_log.notice() << "Making distribution" << std::endl;
+    g_log.notice() << "Making distribution\n";
     IAlgorithm_sptr distrib =
         this->createChildAlgorithm("ConvertToDistribution");
     distrib->setProperty("Workspace", outputWS);
@@ -573,12 +548,11 @@ void DgsConvertToEnergyTransfer::exec() {
   // Mask and group workspace if necessary.
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-  std::string oldGroupFile("");
+  std::string oldGroupFile;
   std::string filePropMod = this->getProperty("AlternateGroupingTag");
   std::string fileProp = filePropMod + "OldGroupingFilename";
-  if (reductionManager->existsProperty(fileProp)) {
+  if (reductionManager->existsProperty(fileProp))
     oldGroupFile = reductionManager->getPropertyValue(fileProp);
-  }
   IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);

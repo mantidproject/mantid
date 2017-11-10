@@ -8,12 +8,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
@@ -22,6 +24,8 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 /**
@@ -48,7 +52,7 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
           uint64_t(((double)i + 0.5) * binWidth); // Stick an event with a
                                                   // pulse_time in the middle of
                                                   // each pulse_time bin.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 
@@ -68,6 +72,8 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
   return retVal;
 }
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 /*
  This type is an IEventWorkspace, but not an EventWorkspace.
  */
@@ -81,7 +87,6 @@ public:
   MOCK_CONST_METHOD1(getTimeAtSampleMax, DateAndTime(double));
   MOCK_CONST_METHOD1(getTimeAtSampleMin, DateAndTime(double));
   MOCK_CONST_METHOD0(getEventType, EventType());
-  MOCK_METHOD1(getEventListPtr, IEventList *(const std::size_t));
   MOCK_CONST_METHOD5(generateHistogram,
                      void(const std::size_t, const Mantid::MantidVec &,
                           Mantid::MantidVec &, Mantid::MantidVec &, bool));
@@ -90,21 +95,28 @@ public:
   MOCK_CONST_METHOD0(blocksize, std::size_t());
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
-  MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum *(const std::size_t));
+  MOCK_METHOD1(getSpectrum, Mantid::API::IEventList &(const std::size_t));
   MOCK_CONST_METHOD1(getSpectrum,
-                     const Mantid::API::ISpectrum *(const std::size_t));
+                     const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
+  MOCK_METHOD1(init, void(const Mantid::HistogramData::Histogram &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  ~MockIEventWorkspace() override {}
 
 private:
   MockIEventWorkspace *doClone() const override {
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }
+  MockIEventWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error(
+        "Cloning of MockIEventWorkspace is not implemented.");
+  }
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
@@ -158,7 +170,7 @@ private:
     for (int i = 0; i < nSpectra; ++i) {
       // Check that the x-axis has been set-up properly. It should mirror the
       // original rebin parameters.
-      const Mantid::MantidVec &X = outWS->readX(i);
+      auto &X = outWS->x(i);
       TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
       for (uint64_t j = 0; j < X.size(); ++j) {
         TS_ASSERT_EQUALS(static_cast<int>(step * j), static_cast<int>(X[j]));
@@ -166,7 +178,7 @@ private:
 
       // Check that the y-axis has been set-up properly.
 
-      const Mantid::MantidVec &Y = outWS->readY(i);
+      auto &Y = outWS->y(i);
       TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
       for (uint64_t j = 0; j < Y.size(); ++j) {
         TS_ASSERT_EQUALS(nUniformDistributedEvents / nBinsToBinTo, Y[j]);
@@ -401,7 +413,7 @@ public:
 
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    const Mantid::MantidVec &X = outWS->readX(0);
+    auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
@@ -455,14 +467,14 @@ public:
 
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    const Mantid::MantidVec &X = outWS->readX(0);
+    auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
     TS_ASSERT_EQUALS(pulseTimeMin, X.front());
     TS_ASSERT_EQUALS(pulseTimeMax, X.back());
 
-    const Mantid::MantidVec &Y = outWS->readY(0);
+    auto &Y = outWS->y(0);
     TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
 
     TS_ASSERT_EQUALS(nUniformDistributedEvents / nBinsToBinTo, Y[0]);

@@ -139,8 +139,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 36)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 36)
 
         self.clearAnalysisDataService()
 
@@ -150,8 +150,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 49)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 49)
 
         self.clearAnalysisDataService()
 
@@ -160,8 +160,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 12)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals( len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
 
         self.clearAnalysisDataService()
 
@@ -174,8 +174,6 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.assertTrue(ws2015.run().hasProperty('chopperspeed'))
 
         self.clearAnalysisDataService()
-
-
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):

@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
-//#include "MantidKernel/LogParser.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include <cctype>
+#include "MantidAPI/Run.h"
+#include <locale>
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -27,9 +25,10 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::FileProperty;
 using std::size_t;
+using Types::Core::DateAndTime;
 
+// Anonymous namespace
 namespace {
-
 /**
  * @brief loadAndApplyMeasurementInfo
  * @param file : Nexus::File pointer
@@ -44,7 +43,7 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
     file->openGroup("measurement", "NXcollection");
 
     // If we can open the measurement group. We assume that the following will
-    // be avaliable.
+    // be available.
     file->openData("id");
     workspace.mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id",
@@ -72,7 +71,58 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
   }
   return successfullyApplied;
 }
+
+/**
+* @brief loadAndApplyRunTitle
+* @param file : Nexus::File pointer
+* @param workspace : Pointer to the workspace to set logs on
+* @return True only if reading and execution successful.
+*/
+bool loadAndApplyRunTitle(::NeXus::File *const file,
+                          API::MatrixWorkspace &workspace) {
+
+  bool successfullyApplied = false;
+  try {
+    file->openData("title");
+    workspace.mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("run_title",
+                                                           file->getStrData()));
+    file->closeData();
+    successfullyApplied = true;
+  } catch (::NeXus::Exception &) {
+    successfullyApplied = false;
+  }
+  return successfullyApplied;
 }
+
+/**
+* Checks whether the specified character is invalid or a control
+* character. If it is invalid (i.e. negative) or a control character
+* the method returns true. If it is valid and not a control character
+* it returns false. Additionally if the character is invalid is
+* logs a warning with the property name so users are aware.
+*
+* @param c :: Character to check
+* @param propName :: The name of the property currently being checked for
+*logging
+* @param log :: Reference to logger to print out to
+* @return :: True if control character OR invalid. Else False
+*/
+bool isControlValue(const char &c, const std::string &propName,
+                    Kernel::Logger &log) {
+  // Have to check it falls within range accepted by c style check
+  if (c <= -1) {
+    log.warning("Found an invalid character in property " + propName);
+    // Pretend this is a control value so it is sanitized
+    return true;
+  } else {
+    // Use default global c++ locale within this program
+    std::locale locale{};
+    // Use c++ style call so we don't need to cast from int to bool
+    return std::iscntrl(c, locale);
+  }
+}
+} // End of anonymous namespace
 
 /// Empty default constructor
 LoadNexusLogs::LoadNexusLogs() {}
@@ -91,7 +141,7 @@ void LoadNexusLogs::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("OverwriteLogs", true,
                                            Direction::Input),
-      "If true then existing logs will be overwritten, if false they will "
+      "If true then some existing logs will be overwritten, if false they will "
       "not.");
   declareProperty(make_unique<PropertyWithValue<std::string>>("NXentryName", "",
                                                               Direction::Input),
@@ -178,6 +228,8 @@ void LoadNexusLogs::exec() {
 
   // If there's measurement information, load that info as logs.
   loadAndApplyMeasurementInfo(&file, *workspace);
+  // If there's title information, load that info as logs.
+  loadAndApplyRunTitle(&file, *workspace);
 
   // Freddie Akeroyd 12/10/2011
   // current ISIS implementation contains an additional indirection between
@@ -192,8 +244,7 @@ void LoadNexusLogs::exec() {
   if (workspace->mutableRun().hasProperty("proton_log")) {
     std::vector<int> event_frame_number;
     this->getLogger().notice()
-        << "Using old ISIS proton_log and event_frame_number indirection..."
-        << std::endl;
+        << "Using old ISIS proton_log and event_frame_number indirection...\n";
     try {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
@@ -215,9 +266,9 @@ void LoadNexusLogs::exec() {
                     "/event_frame_number");
       file.getData(event_frame_number);
     } catch (const ::NeXus::Exception &) {
-      this->getLogger().warning() << "Unable to load event_frame_number - "
-                                     "filtering events by time will not work "
-                                  << std::endl;
+      this->getLogger().warning()
+          << "Unable to load event_frame_number - "
+             "filtering events by time will not work \n";
     }
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
@@ -232,10 +283,11 @@ void LoadNexusLogs::exec() {
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
-      std::vector<Mantid::Kernel::DateAndTime> ptime;
+      std::vector<Mantid::Types::Core::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
       ptime.reserve(event_frame_number.size());
-      std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> plogt =
+          plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
         ptime.push_back(plogt[number]);
@@ -249,10 +301,10 @@ void LoadNexusLogs::exec() {
   try {
     // Read the start and end time strings
     file.openData("start_time");
-    Kernel::DateAndTime start(file.getStrData());
+    Types::Core::DateAndTime start(file.getStrData());
     file.closeData();
     file.openData("end_time");
-    Kernel::DateAndTime end(file.getStrData());
+    Types::Core::DateAndTime end(file.getStrData());
     file.closeData();
     workspace->mutableRun().setStartAndEndTime(start, end);
   } catch (::NeXus::Exception &) {
@@ -346,6 +398,41 @@ void LoadNexusLogs::loadNPeriods(
   if (!run.hasProperty(nPeriodsLabel)) {
     run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
   }
+
+  // For ISIS Nexus only, fabricate an additional log containing an array of
+  // proton charge information from the periods group.
+  try {
+    file.openGroup("periods", "IXperiods");
+
+    // Get the number of periods again
+    file.openData("number");
+    int numberOfPeriods = 0;
+    file.getData(&numberOfPeriods);
+    file.closeData();
+
+    // Get the proton charge vector
+    std::vector<double> protonChargeByPeriod(numberOfPeriods);
+    file.openData("proton_charge");
+    file.getDataCoerce(protonChargeByPeriod);
+    file.closeData();
+
+    // Add the proton charge vector
+    API::Run &run = workspace->mutableRun();
+    const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
+    if (!run.hasProperty(protonChargeByPeriodLabel)) {
+      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel,
+                                                protonChargeByPeriod));
+    }
+    file.closeGroup();
+  } catch (::NeXus::Exception &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
+  } catch (std::runtime_error &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
+  }
 }
 
 /**
@@ -370,9 +457,6 @@ void LoadNexusLogs::loadLogs(
       loadNXLog(file, itr->first, log_class, workspace);
     } else if (log_class == "IXseblock") {
       loadSELog(file, itr->first, workspace);
-    } else if (log_class == "NXcollection") {
-      int jj = 0;
-      ++jj;
     }
   }
   loadVetoPulses(file, workspace);
@@ -520,12 +604,12 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       throw;
     }
   }
-  if (start.compare("No Time") == 0) {
+  if (start == "No Time") {
     start = freqStart;
   }
 
   // Convert to date and time
-  Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
+  Types::Core::DateAndTime start_time = Types::Core::DateAndTime(start);
   std::string time_units;
   file.getAttr("units", time_units);
   if (time_units.compare("second") < 0 && time_units != "s" &&
@@ -555,7 +639,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
-  std::string value_units("");
+  std::string value_units;
   try {
     file.getAttr("units", value_units);
   } catch (::NeXus::Exception &) {
@@ -602,7 +686,9 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(values.begin(), values.end(), iscntrl, ' ');
+    std::replace_if(values.begin(), values.end(), [&](const char &c) {
+      return isControlValue(c, prop_name, g_log);
+    }, ' ');
     auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);

@@ -40,10 +40,6 @@
 #include <vector>
 #include "tree.hh"
 
-// Russell Taylor, 23/07/10: Remove evil import - caused clash with
-// std::tr1::function
-// using namespace std;
-
 struct rect {
   short left;
   short top;
@@ -229,8 +225,8 @@ struct vectorProperties {
   vectorProperties()
       : color(0), width(0.0), arrow_lenght(0), arrow_angle(0),
         arrow_closed(false), endXColName(), endYColName(), position(0),
-        angleColName(), magnitudeColName(0), multiplier(1.0), const_angle(0),
-        const_magnitude(0){};
+        angleColName(), magnitudeColName(nullptr), multiplier(1.0),
+        const_angle(0), const_magnitude(0){};
 };
 
 struct graphCurve {

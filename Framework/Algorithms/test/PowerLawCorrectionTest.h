@@ -49,7 +49,7 @@ public:
 
   void testMultiply() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add("PowerLawCorrectionInputWS", inputWS);
 
     Mantid::Algorithms::PowerLawCorrection expon3;
@@ -86,7 +86,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_powlc", evin);
@@ -111,7 +111,7 @@ public:
     TS_ASSERT(evout); // should be an event workspace
     for (size_t i = 0; i < 5; ++i) {
       double t = static_cast<double>(i) + 0.5;
-      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight, 3. * t * t,
+      TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(i).m_weight, 3. * t * t,
                       1e-8);
     }
 
