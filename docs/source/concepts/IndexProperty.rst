@@ -43,6 +43,7 @@ with maintaining these properties on their own. There are few special methods in
 Property declaration is as shown below: 
 
 .. code-block:: cpp
+
   #include "MantidAPI/Algorithm.tcc"
 
   // Declare property with default settings
