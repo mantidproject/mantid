@@ -4,8 +4,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "ReflTableSchema.h"
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,14 +32,14 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     const auto description = runDescriptionPair.second.description;
     auto groupName = description;
     auto cleanDescription = description;
-    static boost::regex descriptionFormatRegex(
+    static std::regex descriptionFormatRegex(
         "(.*)(th[:=]([0-9.]+))(.*)");
     constexpr auto preThetaGroup = 0;
     constexpr auto thetaValueGroup = 2;
     constexpr auto postThetaGroup = 3;
-    boost::smatch matches;
+    std::smatch matches;
 
-    if (boost::regex_search(description, matches, descriptionFormatRegex)) {
+    if (std::regex_search(description, matches, descriptionFormatRegex)) {
       // We have theta. Let's get a clean description
       const auto theta = matches[thetaValueGroup].str();
       const auto preTheta = matches[preThetaGroup].str();
@@ -101,9 +100,9 @@ ReflLegacyTransferStrategy::clone() const {
 
 bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
     const std::string &filename) const {
-  boost::regex pattern("raw$", boost::regex::icase);
-  boost::smatch match; // Unused.
-  return boost::regex_search(filename, match, pattern);
+  std::regex pattern("raw$", std::regex::icase);
+  std::smatch match; // Unused.
+  return std::regex_search(filename, match, pattern);
 }
 }
 }
