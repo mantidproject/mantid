@@ -96,8 +96,8 @@ EnggDiffFittingModel::getRunNumbersAndBanksIDs() {
   return pairs;
 }
 
-size_t EnggDiffFittingModel::guessBankID(
-    API::MatrixWorkspace_const_sptr ws) const {
+size_t
+EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
   if (ws->run().hasProperty("bankid")) {
     const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(
         ws->run().getLogData("bankid"));

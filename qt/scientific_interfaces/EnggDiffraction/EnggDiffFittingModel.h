@@ -15,7 +15,8 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel {
 public:
-  API::MatrixWorkspace_sptr getWorkspace(const int runNumber, const size_t bank);
+  API::MatrixWorkspace_sptr getWorkspace(const int runNumber,
+                                         const size_t bank);
   std::vector<int> getAllRunNumbers() const;
   void loadWorkspaces(const std::string &filename);
   std::vector<std::pair<int, size_t>> getRunNumbersAndBanksIDs();
