@@ -79,8 +79,6 @@ private:
   friend class HistogramIterator;
   /// Private constructor, can only be created by HistogramIterator
   HistogramItem(const Histogram &histogram, const size_t index);
-  /// Get a refernce to the histogram
-  const Histogram &histogramRef() const;
   /// Check if is points or bins
   bool xModeIsPoints() const;
   /// Check if is counts or frequencies
