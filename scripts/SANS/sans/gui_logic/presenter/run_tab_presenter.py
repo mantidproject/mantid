@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-import pydevd
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
@@ -59,6 +58,9 @@ class RunTabPresenter(object):
 
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
+
+        def on_data_changed(self):
+            self._presenter.on_data_changed()
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
@@ -231,6 +233,14 @@ class RunTabPresenter(object):
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
                                    " to the Mantid search directories! See here for more details: {}".format(str(e)))
+    def on_data_changed(self):
+        # 1. Populate the selected instrument and the correct detector selection
+        self._setup_instrument_specific_settings()
+
+        # 2. Perform calls on child presenters
+        self._masking_table_presenter.on_update_rows()
+        self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def on_processed_clicked(self):
         """

@@ -11,7 +11,7 @@ class BeamCentreModel(object):
         self._r_max = 280
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.0000125
+        self._tolerance = 0.000125
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
@@ -23,8 +23,13 @@ class BeamCentreModel(object):
             self.r_max = 200
 
         if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1
-            self.scale_2 = 1
+            self.scale_1 = 1.0
+
+    def set_scaling(self, instrument):
+        self.scale_1 = 1000
+        self.scale_2 = 1000
+        if instrument == SANSInstrument.LARMOR:
+            self.scale_1 = 1.0
 
     @property
     def max_iterations(self):

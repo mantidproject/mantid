@@ -55,7 +55,7 @@ class BeamCentrePresenter(object):
     def on_update_rows(self):
         if self._parent_presenter._file_information:
             instrument = self._parent_presenter._file_information.get_instrument()
-            self._beam_centre_model.reset_to_defaults_for_instrument(instrument)
+            self._beam_centre_model.set_scaling(instrument)
         self._view.set_options(self._beam_centre_model)
 
     def on_processing_finished_centre_finder(self, result):

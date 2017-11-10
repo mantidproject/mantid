@@ -59,6 +59,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_processing_finished(self):
             pass
 
+        @abstractmethod
+        def on_data_changed(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -243,12 +247,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         if instrument_name:
             self._set_mantid_instrument(instrument_name)
-
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
+        self.data_processor_table.dataChanged.connect(self._data_changed)
 
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
 
@@ -263,6 +267,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Clean up
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
+
+    def _data_changed(self):
+        """
+        Clean up
+        """
+        self._call_settings_listeners(lambda listener: listener.on_data_changed())
 
     def _on_user_file_load(self):
         """

@@ -143,7 +143,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
-        self.update_simple_line_edit_field(line_edit="lab_pos_1_line_edit", value=value*self.scale)
+        self.update_simple_line_edit_field(line_edit="lab_pos_1_line_edit", value=value)
 
     @property
     def lab_pos_2(self):
@@ -151,7 +151,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
-        self.update_simple_line_edit_field(line_edit="lab_pos_2_line_edit", value=value*self.scale)
+        self.update_simple_line_edit_field(line_edit="lab_pos_2_line_edit", value=value)
 
     @property
     def hab_pos_1(self):
@@ -159,7 +159,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
-        self.update_simple_line_edit_field(line_edit="hab_pos_1_line_edit", value=value*self.scale)
+        self.update_simple_line_edit_field(line_edit="hab_pos_1_line_edit", value=value)
 
     @property
     def hab_pos_2(self):
@@ -167,7 +167,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
-        self.update_simple_line_edit_field(line_edit="hab_pos_2_line_edit", value=value*self.scale)
+        self.update_simple_line_edit_field(line_edit="hab_pos_2_line_edit", value=value)
 
 
 

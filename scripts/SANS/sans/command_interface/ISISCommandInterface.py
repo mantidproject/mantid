@@ -1008,6 +1008,11 @@ def PhiRanges(phis, plot=True):
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
                    find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
+
+    instrument = state.data.sample_scatter.getInstrument()
+    if instrument.getName() == 'LARMOR':
+        xstart = xstart * 1000
+
     centre_finder = SANSCentreFinder()
     centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
     SetCentre(centre['pos1'], centre['pos2'], bank='rear')
