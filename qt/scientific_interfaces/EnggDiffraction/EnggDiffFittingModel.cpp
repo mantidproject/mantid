@@ -35,7 +35,7 @@ void EnggDiffFittingModel::addWorkspace(const int runNumber, const int bank,
 }
 
 API::MatrixWorkspace_sptr EnggDiffFittingModel::getWorkspace(const int runNumber, const int bank){
-	if (bank < 0 || bank >= m_wsMap.size()) {
+	if (bank < 1 || bank > m_wsMap.size()) {
 		return nullptr;
 	}
 	if (m_wsMap[bank - 1].find(runNumber) == m_wsMap[bank - 1].end()) {

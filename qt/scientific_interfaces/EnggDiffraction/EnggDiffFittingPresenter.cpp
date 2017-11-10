@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 #include "EnggDiffFittingPresWorker.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cctype>
 #include <fstream>
@@ -352,9 +353,11 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
-	const auto runNumber = m_view->getFittingListWidgetCurrentValue();
-	// Do NOT leave bank as 1 - work out how to do this properly
-	const auto ws = m_model.getWorkspace(std::stoi(runNumber), 1);
+	const auto workspaceID = m_view->getFittingListWidgetCurrentValue();
+	std::vector<std::string> tokens;
+
+	boost::split(tokens, workspaceID, boost::is_any_of("_"));
+	const auto ws = m_model.getWorkspace(std::stoi(tokens[0]), std::stoi(tokens[1]));
 	plotFocusedFile(false, ws);
 }
 
