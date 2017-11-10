@@ -28,16 +28,13 @@ double HistogramItem::binWidth() const {
     double upper = 0;
     if (m_index == 0) {
       // first point
-      upper = 0.5 * (x[m_index + 1] + x[m_index]);
-      lower = x[0] - (upper - x[0]);
+      return x[1] - x[0];
     } else if (m_index == numPoints - 1) {
       // last point
-      lower = 0.5 * (x[m_index] + x[m_index - 1]);
-      upper = x[numPoints - 1] + (x[numPoints - 1] - lower);
+      return x[m_index] - x[m_index - 1];
     } else {
       // everything inbetween
-      lower = 0.5 * (x[m_index] + x[m_index - 1]);
-      upper = 0.5 * (x[m_index + 1] + x[m_index]);
+      return 0.5 * (x[m_index + 1] - x[m_index - 1]);
     }
     return upper - lower;
   } else {
