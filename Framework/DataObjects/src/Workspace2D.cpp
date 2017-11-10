@@ -86,7 +86,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -113,7 +113,7 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(initializedHistogram.x().size(), this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
