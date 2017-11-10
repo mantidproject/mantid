@@ -245,7 +245,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options);
+    calculateStep(w.J, w.f, w.hf, w.Delta, w.d, w.normd, options);
 
     // Accept the step?
     w.Xnew = X;
@@ -409,7 +409,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   return true;
 }
 
-/** DTRS **/
+/** DTRS method **/
 namespace {
 
   const double HUGEST = std::numeric_limits<double>::max();
@@ -1315,7 +1315,7 @@ namespace {
   *  @param normd :: The 2-norm of d.
   *  @param options :: The options.
   */
-void TrustRegionMinimizer::solveStep(const DoubleFortranMatrix &J,
+void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J,
   const DoubleFortranVector &f,
   const DoubleFortranMatrix &hf, double Delta,
   DoubleFortranVector &d, double &normd,
@@ -1396,18 +1396,8 @@ void TrustRegionMinimizer::solveStep(const DoubleFortranMatrix &J,
     }
   }
 
-} // solveStep
+} // calculateStep
 
-/** Calculate one step.
-*/
-void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J,
-  const DoubleFortranVector &f,
-  const DoubleFortranMatrix &hf,
-  const DoubleFortranVector &, double Delta,
-  DoubleFortranVector &d, double &normd,
-  const NLLS::nlls_options &options) {
-  solveStep(J, f, hf, Delta, d, normd, options);
-}
 
 /** Return the current value of the cost function.
  */
