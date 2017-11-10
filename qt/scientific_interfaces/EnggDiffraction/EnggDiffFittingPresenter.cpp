@@ -764,7 +764,7 @@ void EnggDiffFittingPresenter::processLoad() {
   std::vector<std::string> workspaceIDs;
   std::transform(
       runNoBankPairs.begin(), runNoBankPairs.end(),
-      std::back_inserter(workspaceIDs), [](const std::pair<int, int> &pair) {
+      std::back_inserter(workspaceIDs), [](const std::pair<int, size_t> &pair) {
         return std::to_string(pair.first) + "_" + std::to_string(pair.second);
       });
   m_view->enableFittingListWidget(true);

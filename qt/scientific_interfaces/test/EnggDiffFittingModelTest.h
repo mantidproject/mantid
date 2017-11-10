@@ -11,7 +11,7 @@
 #include <vector>
 
 // Lets us have pairs inside assertion macros
-typedef std::pair<int, int> IntIntPair;
+typedef std::pair<int, size_t> RunBankPair;
 
 using namespace Mantid;
 using namespace MantidQT::CustomInterfaces;
@@ -76,10 +76,10 @@ public:
     const auto runNoBankPairs = model.getRunNumbersAndBanksIDs();
 
     TS_ASSERT_EQUALS(runNoBankPairs.size(), 4);
-    TS_ASSERT_EQUALS(runNoBankPairs[0], IntIntPair(123, 1));
-    TS_ASSERT_EQUALS(runNoBankPairs[1], IntIntPair(123, 2));
-    TS_ASSERT_EQUALS(runNoBankPairs[2], IntIntPair(456, 2));
-    TS_ASSERT_EQUALS(runNoBankPairs[3], IntIntPair(789, 1));
+    TS_ASSERT_EQUALS(runNoBankPairs[0], RunBankPair(123, 1));
+    TS_ASSERT_EQUALS(runNoBankPairs[1], RunBankPair(123, 2));
+    TS_ASSERT_EQUALS(runNoBankPairs[2], RunBankPair(456, 2));
+    TS_ASSERT_EQUALS(runNoBankPairs[3], RunBankPair(789, 1));
   }
 };
 
