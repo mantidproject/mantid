@@ -279,24 +279,21 @@ public:
     delete suite;
   }
 
-  HistogramIteratorTestPerformance() {
-    BinEdges edges(histSize, LinearGenerator(0, 2));
-    Counts counts(histSize - 1, LinearGenerator(0, 2));
-    for (size_t i = 0; i < nHists; i++)
-      hists.push_back(Histogram(edges, counts));
-  }
+  HistogramIteratorTestPerformance()
+      : m_hist(BinEdges(histSize, LinearGenerator(0, 2)),
+               Counts(histSize - 1, LinearGenerator(0, 2))) {}
 
   void test_iterate_and_access_each_item() {
     double total = 0;
-    for (auto &hist : hists)
-      for (auto &item : hist)
+    for (size_t i = 0; i < nHists; i++)
+      for (auto &item : m_hist)
         total += item.frequency();
   }
 
 private:
   const size_t nHists = 500;
   const size_t histSize = 10000;
-  std::vector<Histogram> hists;
+  Histogram m_hist;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_ */
