@@ -32,7 +32,6 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
@@ -195,7 +194,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
@@ -354,7 +352,6 @@ set ( TEST_FILES
 	FortranMatrixTest.h
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
-        FuncMinimizers/DTRSMinimizerTest.h
 	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
 	FuncMinimizers/ErrorMessagesTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
@@ -363,6 +360,7 @@ set ( TEST_FILES
 	FuncMinimizers/LevenbergMarquardtTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
+	FuncMinimizers/TrustRegionMinimizerTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h

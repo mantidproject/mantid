@@ -1,10 +1,10 @@
-#ifndef CURVEFITTING_DTRSMINIMIZERTTEST_H_
-#define CURVEFITTING_DTRSMINIMIZERTTEST_H_
+#ifndef CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
+#define CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -20,12 +20,12 @@ using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
-class DTRSMinimizerTest : public CxxTest::TestSuite {
+class TrustRegionMinimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DTRSMinimizerTest *createSuite() { return new DTRSMinimizerTest(); }
-  static void destroySuite(DTRSMinimizerTest *suite) { delete suite; }
+  static TrustRegionMinimizerTest *createSuite() { return new TrustRegionMinimizerTest(); }
+  static void destroySuite(TrustRegionMinimizerTest *suite) { delete suite; }
 
   void test_Linear() {
     API::FunctionDomain1D_sptr domain(
@@ -51,7 +51,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -87,7 +87,7 @@ public:
         boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(), 0.0, 0.0001);
@@ -127,7 +127,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize()); //
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
@@ -167,7 +167,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize()); //
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
@@ -205,7 +205,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -243,7 +243,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    DTRSMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -254,4 +254,4 @@ public:
   }
 };
 
-#endif /*CURVEFITTING_DTRSMINIMIZERTTEST_H_*/
+#endif /*CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_*/
