@@ -41,7 +41,7 @@ void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) {
 
 void FindFilesThreadPoolManager::createWorker(
     const QObject *parent, const FindFilesSearchParameters &parameters) {
-  cancelWorker(parent);
+  cancelWorker();
 
   // if parent is null then don't do anything as there will be no
   // object listening for the search result
@@ -91,7 +91,7 @@ void FindFilesThreadPoolManager::connectWorker(const QObject *parent,
  *
  * @param parent :: the parent widget to disconnect signals for.
  */
-void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
+void FindFilesThreadPoolManager::cancelWorker() {
   // Just disconnect any signals from the worker. We leave the worker to
   // continue running in the background because 1) terminating it directly
   // is dangerous (we have no idea what it's currently doing from here) and 2)

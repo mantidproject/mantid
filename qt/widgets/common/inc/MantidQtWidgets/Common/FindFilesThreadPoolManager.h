@@ -47,7 +47,7 @@ private slots:
 
 private:
   /// Cancel the currently running worker
-  void cancelWorker(const QObject *parent);
+  void cancelWorker();
   /// Connect worker to relevant signals/slots
   void connectWorker(const QObject *parent, const FindFilesWorker *worker);
 
