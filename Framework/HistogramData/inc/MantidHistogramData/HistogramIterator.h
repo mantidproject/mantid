@@ -54,19 +54,19 @@ public:
 private:
   friend class boost::iterator_core_access;
 
-  inline void increment() { m_item.incrementIndex(); }
+  void increment() { m_item.incrementIndex(); }
 
-  inline bool equal(const HistogramIterator &other) const {
+  bool equal(const HistogramIterator &other) const {
     return m_item.getIndex() == other.m_item.getIndex();
   }
 
-  inline const HistogramItem &dereference() const { return m_item; }
+  const HistogramItem &dereference() const { return m_item; }
 
-  inline void decrement() { m_item.decrementIndex(); }
+  void decrement() { m_item.decrementIndex(); }
 
-  inline void advance(int64_t delta) { m_item.advance(delta); }
+  void advance(int64_t delta) { m_item.advance(delta); }
 
-  inline uint64_t distance_to(const HistogramIterator &other) const {
+  uint64_t distance_to(const HistogramIterator &other) const {
     return static_cast<uint64_t>(other.m_item.getIndex()) -
            static_cast<uint64_t>(m_item.getIndex());
   }
