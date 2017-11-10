@@ -181,8 +181,7 @@ public:
   }
 
   void test_iterate_over_histogram_count_variances_when_histogram_has_counts() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
-                   CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedCountVariances = hist.countVariances();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(),
@@ -194,8 +193,7 @@ public:
 
   void
   test_iterate_over_histogram_count_variances_when_histogram_has_frequencies() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
-                   FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedCountVariances = hist.countVariances();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(),
@@ -206,8 +204,7 @@ public:
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_counts() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
-                   CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedCountStd = hist.countStandardDeviations();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
@@ -217,8 +214,7 @@ public:
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_frequencies() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
-                   FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedCountStd = hist.countStandardDeviations();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
@@ -229,8 +225,7 @@ public:
 
   void
   test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencys() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
-                   CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(),
@@ -242,8 +237,7 @@ public:
 
   void
   test_iterate_over_histogram_frequency_variances_when_histogram_has_frequencies() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
-                   FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(),
@@ -255,8 +249,7 @@ public:
 
   void
   test_iterate_over_histogram_frequency_std_when_histogram_has_frequencys() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4},
-                   CountVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
@@ -267,8 +260,7 @@ public:
 
   void
   test_iterate_over_histogram_frequency_std_when_histogram_has_frequencies() {
-    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4},
-                   FrequencyVariances{3, 2, 1});
+    Histogram hist(BinEdges{1, 2, 3, 5}, Frequencies{2, 3, 4});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
     TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
