@@ -65,15 +65,15 @@ public:
   void incrementIndex();
   void advance(int64_t delta);
 
-  inline void decrementIndex() {
+  void decrementIndex() {
     if (m_index > 0) {
       --m_index;
     }
   }
 
-  inline size_t getIndex() const { return m_index; }
+  size_t getIndex() const { return m_index; }
 
-  inline void setIndex(const size_t index) { m_index = index; }
+  void setIndex(const size_t index) { m_index = index; }
 
 private:
   friend class HistogramIterator;
