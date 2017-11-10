@@ -102,104 +102,82 @@ public:
     Counts expectedCounts{2, 3, 4};
     Histogram hist(Points{1, 2, 3}, expectedCounts);
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
-                   [](const HistogramItem &item, const double &counts) {
-                     return item.counts() == counts;
-                   });
-
-    TSM_ASSERT("Counts did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
+                         [](const HistogramItem &item, const double &counts) {
+                           return item.counts() == counts;
+                         }));
   }
 
   void test_iterate_over_histogram_counts_when_histogram_has_frequencies() {
     Histogram hist(Points{1, 2, 3}, Frequencies{2, 3, 4});
     Counts expectedCounts = hist.counts();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
-                   [](const HistogramItem &item, const double &counts) {
-                     return item.counts() == counts;
-                   });
-
-    TSM_ASSERT("Counts did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCounts.begin(),
+                         [](const HistogramItem &item, const double &counts) {
+                           return item.counts() == counts;
+                         }));
   }
 
   void test_iterate_over_histogram_frequencies() {
     Frequencies expectedFrequencies{2, 3, 4};
     Histogram hist(Points{1, 2, 3}, expectedFrequencies);
 
-    auto result =
+    TS_ASSERT(
         std::equal(hist.begin(), hist.end(), expectedFrequencies.begin(),
                    [](const HistogramItem &item, const double &frequency) {
                      return item.frequency() == frequency;
-                   });
-
-    TSM_ASSERT("Frequencies did not match", result);
+                   }));
   }
 
   void test_iterate_over_histogram_frequencies_when_histogram_has_counts() {
     Histogram hist(Points{1, 2, 3}, Counts{2, 3, 4});
     Frequencies expectedFrequencies = hist.frequencies();
 
-    auto result =
+    TS_ASSERT(
         std::equal(hist.begin(), hist.end(), expectedFrequencies.begin(),
                    [](const HistogramItem &item, const double &frequency) {
                      return item.frequency() == frequency;
-                   });
-
-    TSM_ASSERT("Frequencies did not match", result);
+                   }));
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_bins() {
     Histogram hist(BinEdges{1, 2, 3, 4}, Counts{2, 3, 4});
     Points expectedPoints = hist.points();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
-                   [](const HistogramItem &item, const double &point) {
-                     return item.center() == point;
-                   });
-
-    TSM_ASSERT("Bin centers did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
+                         [](const HistogramItem &item, const double &point) {
+                           return item.center() == point;
+                         }));
   }
 
   void test_iterate_over_histogram_center_when_histogram_has_points() {
     Histogram hist(Points{1, 2, 3}, Counts{2, 3, 4});
     Points expectedPoints = hist.points();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
-                   [](const HistogramItem &item, const double &point) {
-                     return item.center() == point;
-                   });
-
-    TSM_ASSERT("Bin centers did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedPoints.begin(),
+                         [](const HistogramItem &item, const double &point) {
+                           return item.center() == point;
+                         }));
   }
 
   void test_iterate_over_histogram_width_when_histogram_has_bins() {
     Histogram hist(BinEdges{1, 2, 3, 5}, Counts{2, 3, 4});
     std::vector<double> expectedWidths = {1, 1, 2};
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
-                   [](const HistogramItem &item, const double &width) {
-                     return item.binWidth() == width;
-                   });
-
-    TSM_ASSERT("Bin widths did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
+                         [](const HistogramItem &item, const double &width) {
+                           return item.binWidth() == width;
+                         }));
   }
 
   void test_iterate_over_histogram_width_when_histogram_has_points() {
     Histogram hist(Points{1, 3, 5}, Counts{2, 3, 4});
     std::vector<double> expectedWidths = {2, 2, 2};
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
-                   [](const HistogramItem &item, const double &width) {
-                     return item.binWidth() == width;
-                   });
-
-    TSM_ASSERT("Bin widths did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedWidths.begin(),
+                         [](const HistogramItem &item, const double &width) {
+                           return item.binWidth() == width;
+                         }));
   }
 
   void test_iterate_over_histogram_count_variances_when_histogram_has_counts() {
@@ -207,13 +185,11 @@ public:
                    CountVariances{3, 2, 1});
     auto expectedCountVariances = hist.countVariances();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCountVariances.begin(),
-                   [](const HistogramItem &item, const double &variance) {
-                     return item.countVariance() == variance;
-                   });
-
-    TSM_ASSERT("Count variances did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(),
+                         expectedCountVariances.begin(),
+                         [](const HistogramItem &item, const double &variance) {
+                           return item.countVariance() == variance;
+                         }));
   }
 
   void
@@ -222,13 +198,11 @@ public:
                    FrequencyVariances{3, 2, 1});
     auto expectedCountVariances = hist.countVariances();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCountVariances.begin(),
-                   [](const HistogramItem &item, const double &variance) {
-                     return item.countVariance() == variance;
-                   });
-
-    TSM_ASSERT("Count variances did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(),
+                         expectedCountVariances.begin(),
+                         [](const HistogramItem &item, const double &variance) {
+                           return item.countVariance() == variance;
+                         }));
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_counts() {
@@ -236,13 +210,10 @@ public:
                    CountVariances{3, 2, 1});
     auto expectedCountStd = hist.countStandardDeviations();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
-                   [](const HistogramItem &item, const double &sigma) {
-                     return item.countStandardDeviation() == sigma;
-                   });
-
-    TSM_ASSERT("Count standard deviations did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
+                         [](const HistogramItem &item, const double &sigma) {
+                           return item.countStandardDeviation() == sigma;
+                         }));
   }
 
   void test_iterate_over_histogram_count_std_when_histogram_has_frequencies() {
@@ -250,13 +221,10 @@ public:
                    FrequencyVariances{3, 2, 1});
     auto expectedCountStd = hist.countStandardDeviations();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
-                   [](const HistogramItem &item, const double &sigma) {
-                     return item.countStandardDeviation() == sigma;
-                   });
-
-    TSM_ASSERT("Count standard deviations did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedCountStd.begin(),
+                         [](const HistogramItem &item, const double &sigma) {
+                           return item.countStandardDeviation() == sigma;
+                         }));
   }
 
   void
@@ -265,13 +233,11 @@ public:
                    CountVariances{3, 2, 1});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedFrequencyVariances.begin(),
-                   [](const HistogramItem &item, const double &variance) {
-                     return item.frequencyVariance() == variance;
-                   });
-
-    TSM_ASSERT("Frequency variances did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(),
+                         expectedFrequencyVariances.begin(),
+                         [](const HistogramItem &item, const double &variance) {
+                           return item.frequencyVariance() == variance;
+                         }));
   }
 
   void
@@ -280,13 +246,11 @@ public:
                    FrequencyVariances{3, 2, 1});
     auto expectedFrequencyVariances = hist.frequencyVariances();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedFrequencyVariances.begin(),
-                   [](const HistogramItem &item, const double &variance) {
-                     return item.frequencyVariance() == variance;
-                   });
-
-    TSM_ASSERT("Frequency variances did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(),
+                         expectedFrequencyVariances.begin(),
+                         [](const HistogramItem &item, const double &variance) {
+                           return item.frequencyVariance() == variance;
+                         }));
   }
 
   void
@@ -295,13 +259,10 @@ public:
                    CountVariances{3, 2, 1});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
-                   [](const HistogramItem &item, const double &sigma) {
-                     return item.frequencyStandardDeviation() == sigma;
-                   });
-
-    TSM_ASSERT("Frequency standard deviations did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
+                         [](const HistogramItem &item, const double &sigma) {
+                           return item.frequencyStandardDeviation() == sigma;
+                         }));
   }
 
   void
@@ -310,13 +271,10 @@ public:
                    FrequencyVariances{3, 2, 1});
     auto expectedFrequencyStd = hist.frequencyStandardDeviations();
 
-    auto result =
-        std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
-                   [](const HistogramItem &item, const double &sigma) {
-                     return item.frequencyStandardDeviation() == sigma;
-                   });
-
-    TSM_ASSERT("Frequency standard deviations did not match", result);
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), expectedFrequencyStd.begin(),
+                         [](const HistogramItem &item, const double &sigma) {
+                           return item.frequencyStandardDeviation() == sigma;
+                         }));
   }
 };
 
