@@ -24,7 +24,10 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 endif()
 
 # We are only generating Qt4 packages at the moment
-set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4 )
+set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4; )
+if ( MAKE_VATES )
+  list ( APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR} )
+endif ()
 
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
@@ -61,9 +64,8 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
 # Find python site-packages dir and create mantid.pth
 ###########################################################################
 execute_process(
-  COMMAND "${PYTHON_EXECUTABLE}" -c "if True:
-    from distutils import sysconfig as sc
-    print(sc.get_python_lib(plat_specific=True))"
+  COMMAND "${PYTHON_EXECUTABLE}" -c "from distutils import sysconfig as sc
+print(sc.get_python_lib(plat_specific=True))"
   OUTPUT_VARIABLE PYTHON_SITE
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -162,6 +164,11 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython"
+                  OUTPUT_QUIET ERROR_QUIET )
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in
+                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py @ONLY )
+# Needs to be executable
+execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py"
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
