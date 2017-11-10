@@ -8,19 +8,7 @@
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
-#include <iostream>
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramItem;
-using Mantid::HistogramData::HistogramIterator;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::Frequencies;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
-using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::LinearGenerator;
+using namespace Mantid::HistogramData;
 
 class HistogramIteratorTest : public CxxTest::TestSuite {
 public:
