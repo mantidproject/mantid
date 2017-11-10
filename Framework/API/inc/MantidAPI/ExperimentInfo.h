@@ -228,9 +228,6 @@ private:
   void invalidateAllSpectrumDefinitions();
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
-  /// Mutex to protect against cow_ptr copying
-  mutable std::recursive_mutex m_mutex;
-
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
