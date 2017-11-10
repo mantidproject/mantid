@@ -78,17 +78,15 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
 }
 
 /** Initialize a workspace from its parent
- * This sets values such as instrument, units, sample, spectramap.
+ * This sets values such as title, instrument, units, sample, spectramap.
  * This does NOT copy any data.
- * This does NOT copy any sample logs, i.e., Run object of the workspace won't
- * be copied
- * from its parent.
- * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
- * @param parent
- * @param child
- * @param differentSize
+ *
+ * @param parent :: the parent workspace
+ * @param child :: the child workspace
+ * @param differentSize :: A flag to indicate if the two workspace will be
+ *different sizes
  */
-void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
+void WorkspaceFactoryImpl::initializeFromParent(
     const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
   child.setTitle(parent.getTitle());
@@ -135,21 +133,6 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
       }
     }
   }
-}
-
-/** Initialize a workspace from its parent
- * This sets values such as title, instrument, units, sample, spectramap.
- * This does NOT copy any data.
- *
- * @param parent :: the parent workspace
- * @param child :: the child workspace
- * @param differentSize :: A flag to indicate if the two workspace will be
- *different sizes
- */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
-  initializeFromParentWithoutLogs(parent, child, differentSize);
 }
 
 /** Creates a new instance of the class with the given name, and allocates

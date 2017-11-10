@@ -265,7 +265,8 @@ public:
     const std::string &name1 = "Log4";
     const std::string &value1 = "6.4a";
     parent->mutableRun().addProperty(name1, value1);
-    const auto ws = createWithoutLogs<Workspace2D>(*parent);
+    const auto ws = create<Workspace2D>(*parent);
+    ws->setSharedRun(Kernel::make_cow<Run>());
     check_indices(*ws);
     check_zeroed_data(*ws);
     check_instrument(*ws);

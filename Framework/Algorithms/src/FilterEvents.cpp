@@ -1204,7 +1204,9 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // TODO/ISSUE/NOW - How about comment and info similar to
@@ -1294,7 +1296,9 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     // create new workspace
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // TODO/NOW/ISSUE -- How about comment and info?
