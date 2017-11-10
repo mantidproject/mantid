@@ -88,8 +88,6 @@ void FindFilesThreadPoolManager::connectWorker(const QObject *parent,
  *
  * This will disconnect any signals from the worker and then let the
  * internal QThreadPool clean up the worker at a later time.
- *
- * @param parent :: the parent widget to disconnect signals for.
  */
 void FindFilesThreadPoolManager::cancelWorker() {
   // Just disconnect any signals from the worker. We leave the worker to
