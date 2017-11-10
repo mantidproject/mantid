@@ -60,8 +60,7 @@ private:
   void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
               DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
-  void calculateStep(const DoubleFortranMatrix &J,
-                     const DoubleFortranVector &f,
+  void calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                      const DoubleFortranMatrix &hf, double Delta,
                      DoubleFortranVector &d, double &normd,
                      const NLLS::nlls_options &options);

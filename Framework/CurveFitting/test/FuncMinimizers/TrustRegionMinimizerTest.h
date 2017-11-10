@@ -24,7 +24,9 @@ class TrustRegionMinimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static TrustRegionMinimizerTest *createSuite() { return new TrustRegionMinimizerTest(); }
+  static TrustRegionMinimizerTest *createSuite() {
+    return new TrustRegionMinimizerTest();
+  }
   static void destroySuite(TrustRegionMinimizerTest *suite) { delete suite; }
 
   void test_Linear() {
