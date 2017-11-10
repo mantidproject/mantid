@@ -36,20 +36,21 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) {
 void CorrectionsTab::inputChanged() { validate(); }
 
 /**
-* Check that the binning between two workspaces matches.
-*
-* @param left :: left hand workspace for the equality operator
-* @param right :: right hand workspace for the equality operator
-* @return whether the binning matches
-* @throws std::runtime_error if one of the workspaces is an invalid pointer
-*/
+ * Check that the binning between two workspaces matches.
+ *
+ * @param left :: left hand workspace for the equality operator
+ * @param right :: right hand workspace for the equality operator
+ * @return whether the binning matches
+ * @throws std::runtime_error if one of the workspaces is an invalid pointer
+ */
 bool CorrectionsTab::checkWorkspaceBinningMatches(
     MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
   if (left && right) // check the workspaces actually point to something first
   {
     const auto leftX = left->x(0);
     const auto rightX = right->x(0);
-    return std::equal(leftX.begin(), leftX.end(), rightX.begin());
+    return leftX.size() == rightX.size() &&
+           std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {
     throw std::runtime_error("CorrectionsTab: One of the operands is an "
                              "invalid MatrixWorkspace pointer");

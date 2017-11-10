@@ -5,7 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include "qwt_plot_curve.h"
 #include <QLineEdit>

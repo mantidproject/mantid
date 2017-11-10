@@ -188,8 +188,6 @@ public:
   static void setUrlHandler(const QString &scheme, QObject *receiver,
                             const char *method);
   static void unsetUrlHandler(const QString &scheme);
-  static QString storageLocation(QDesktopServices::StandardLocation type);
-  static QString displayName(QDesktopServices::StandardLocation type);
 };
 
 };
@@ -260,7 +258,7 @@ SliceViewerWindow
 %End
 
 public:
-  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f);
+  SliceViewerWindow(const QString& wsName, const QString& label, Qt::WindowFlags f);
   MantidQt::SliceViewer::SliceViewer* getSlicer();
 %Docstring
 MantidQt::SliceViewer::SliceViewer* SliceViewerWindow::getSlicer()
