@@ -16,57 +16,44 @@ set( SOURCE_FILES
   src/RotationPointDialog.cpp
 )
 
-# These are the headers to be preprocessed using Qt's moc preprocessor.
-qt4_wrap_cpp( MOC_SOURCES
+set( MOC_FILES
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
 )
 
-# Add the QtWidgets icons
-qt4_add_resources( RES_FILES icons/QtWidgetsIcons.qrc )
+set( RES_FILES icons/QtWidgetsIcons.qrc )
 
-# These are the ui files to be processed using
-# Qt's ui file processor.
-qt4_wrap_ui( UI_BUILT_SOURCES
+set( UI_FILES
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.ui
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.ui
 )
 
-# Setup the include locations.
-include_directories(
-  inc
-  ${CMAKE_CURRENT_BINARY_DIR}
+mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
+  QT_VERSION 4
+  SRC ${SOURCE_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INCLUDE_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
+  INCLUDE_DIRS
+    inc
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${POCO_LIBRARIES}
+    ${MANTID_SUBPROJECT_LIBS}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  INSTALL_DIR_BASE
+      ${PLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/Libraries
+    @loader_path/../../Contents/MacOS
 )
 
-set( ALL_FILES
-${INCLUDE_FILES}
-${SOURCE_FILES}
-${MOC_SOURCES}
-${UI_BUILT_SOURCES}
-${RES_FILES}
-)
-
-# For Windows
-add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_QTWIDGETS )
-# Add the target for this directory
-add_library( VatesSimpleGuiQtWidgets ${ALL_FILES} )
 # Set the name of the generated library
-set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgets )
+set_target_properties( VatesSimpleGuiQtWidgetsQt4 PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgetsQt4 )
 # Add to the 'VatesSimpleGui' group in VS
-set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER MantidVatesSimpleGui )
-
-target_include_directories( VatesSimpleGuiQtWidgets SYSTEM PRIVATE ${QWT_INCLUDE_DIR})
-
-target_link_libraries( VatesSimpleGuiQtWidgets  LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${POCO_LIBRARIES}
-${QT_LIBRARIES}
-${QWT_LIBRARIES}
-${MANTID_SUBPROJECT_LIBS}
-MantidQtWidgetsCommon
-)
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( VatesSimpleGuiQtWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/Libraries;@loader_path/../Contents/MacOS")
-endif ()
-
-install( TARGETS VatesSimpleGuiQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR} )
+set_property( TARGET VatesSimpleGuiQtWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGui )

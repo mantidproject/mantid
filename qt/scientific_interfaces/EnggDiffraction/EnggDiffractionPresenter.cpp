@@ -31,15 +31,6 @@ namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
-const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
-    "A valid RB Number is required";
-const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
-    std::string("An experiment reference number (or so called \"RB "
-                "number\" at ISIS) is "
-                "required to effectively use this interface. \n") +
-    "The output calibration, focusing and fitting results will be "
-    "saved in directories named using the RB number entered.";
-
 const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
     " cannot be empty, must be an integer number, valid ENGINX run number/s "
     "or "
@@ -613,8 +604,7 @@ void EnggDiffractionPresenter::processRBNumberChange() {
   const std::string rbn = m_view->getRBNumber();
   auto valid = validateRBNumber(rbn);
   m_view->enableTabs(valid);
-  m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
-                        g_msgRBNumberRequired);
+  m_view->showInvalidRBNumber(valid);
   if (!valid) {
     m_view->showStatus("Valid RB number required");
   } else {
