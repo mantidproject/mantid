@@ -14,11 +14,10 @@ else:
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
-    def test_that_can_get_state_for_index(self):
+    def test_that_can_make_presenter(self):
         parent_presenter = create_run_tab_presenter_mock()
         presenter = BeamCentrePresenter(parent_presenter)
-        state = presenter.get_state(3)
-        self.assertTrue(isinstance(state, FakeState))
+
 
 if __name__ == '__main__':
     unittest.main()
