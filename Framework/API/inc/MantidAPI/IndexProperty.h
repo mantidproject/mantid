@@ -43,7 +43,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int> {
+class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int64_t> {
 public:
   IndexProperty(const std::string &name,
                 const IWorkspaceProperty &workspaceProp,
@@ -53,7 +53,7 @@ public:
 
   IndexProperty *clone() const override;
 
-  using Kernel::ArrayProperty<int>::operator=;
+  using Kernel::ArrayProperty<int64_t>::operator=;
 
   bool isDefault() const override;
   std::string isValid() const override;

@@ -59,8 +59,8 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             static_cast<Indexing::GlobalSpectrumIndex>(max));
       case IndexType::SpectrumNum:
         return indexInfo.makeIndexSet(
-            static_cast<Indexing::SpectrumNumber>(min),
-            static_cast<Indexing::SpectrumNumber>(max));
+            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(min)),
+            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
       switch (type) {

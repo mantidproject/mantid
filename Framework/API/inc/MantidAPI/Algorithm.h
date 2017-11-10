@@ -202,7 +202,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const boost::shared_ptr<T1> &wksp,
                                    IndexType type, const T2 &list);
@@ -212,7 +212,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const std::string &wsName, IndexType type,
                                    const T2 &list);
