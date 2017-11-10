@@ -34,9 +34,9 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     auto cleanDescription = description;
     static std::regex descriptionFormatRegex(
         "(.*)(th[:=]([0-9.]+))(.*)");
-    constexpr auto preThetaGroup = 0;
-    constexpr auto thetaValueGroup = 2;
-    constexpr auto postThetaGroup = 3;
+    constexpr auto preThetaGroup = 1;
+    constexpr auto thetaValueGroup = 3;
+    constexpr auto postThetaGroup = 4;
     std::smatch matches;
 
     if (std::regex_search(description, matches, descriptionFormatRegex)) {
