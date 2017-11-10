@@ -147,7 +147,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  int findBankID(Mantid::API::MatrixWorkspace_sptr ws) const;
+  size_t findBankID(Mantid::API::MatrixWorkspace_sptr ws) const;
 
   bool isDigit(const std::string &text) const;
 

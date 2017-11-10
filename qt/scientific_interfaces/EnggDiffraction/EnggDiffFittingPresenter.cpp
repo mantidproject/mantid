@@ -720,7 +720,7 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
 void EnggDiffFittingPresenter::processStart() {}
 
-int EnggDiffFittingPresenter::findBankID(
+size_t EnggDiffFittingPresenter::findBankID(
     Mantid::API::MatrixWorkspace_sptr ws) const {
   // MOVE THIS TO THE MODEL
   size_t bankID = 1;
@@ -763,7 +763,7 @@ void EnggDiffFittingPresenter::processLoad() {
   const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
   std::vector<std::string> workspaceIDs;
   std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
-                 std::back_inserter(workspaceIDs), [](const auto &pair) {
+                 std::back_inserter(workspaceIDs), [](const std::pair<int, int> &pair) {
                    return std::to_string(pair.first) + "_" +
                           std::to_string(pair.second);
                  });
@@ -771,7 +771,7 @@ void EnggDiffFittingPresenter::processLoad() {
   m_view->clearFittingListWidget();
   std::for_each(
       workspaceIDs.begin(), workspaceIDs.end(),
-      [&](const auto &workspaceID) { m_view->addRunNoItem(workspaceID); });
+      [&](const std::string &workspaceID) { m_view->addRunNoItem(workspaceID); });
 }
 
 void EnggDiffFittingPresenter::processShutDown() {

@@ -15,20 +15,20 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel {
 public:
-  API::MatrixWorkspace_sptr getWorkspace(const int runNumber, const int bank);
+  API::MatrixWorkspace_sptr getWorkspace(const int runNumber, const size_t bank);
   std::vector<int> getAllRunNumbers() const;
   void loadWorkspaces(const std::string &filename);
-  std::vector<std::pair<int, int>> getRunNumbersAndBanksIDs();
-  void addWorkspace(const int runNumber, const int bank,
+  std::vector<std::pair<int, size_t>> getRunNumbersAndBanksIDs();
+  void addWorkspace(const int runNumber, const size_t bank,
                     const API::MatrixWorkspace_sptr ws);
 
 private:
-  static const int MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 2;
   static const std::string FOCUSED_WS_NAME;
   std::array<std::unordered_map<int, API::MatrixWorkspace_sptr>, MAX_BANKS>
       m_wsMap;
 
-  int guessBankID(API::MatrixWorkspace_const_sptr) const;
+  size_t guessBankID(API::MatrixWorkspace_const_sptr) const;
 };
 
 } // namespace CustomInterfaces

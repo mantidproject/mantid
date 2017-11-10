@@ -28,13 +28,13 @@ bool isDigit(const std::string &text) {
 namespace MantidQT {
 namespace CustomInterfaces {
 
-void EnggDiffFittingModel::addWorkspace(const int runNumber, const int bank,
+void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank,
                                         const API::MatrixWorkspace_sptr ws) {
   m_wsMap[bank - 1][runNumber] = ws;
 }
 
 API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getWorkspace(const int runNumber, const int bank) {
+EnggDiffFittingModel::getWorkspace(const int runNumber, const size_t bank) {
   if (bank < 1 || bank > m_wsMap.size()) {
     return nullptr;
   }
@@ -81,27 +81,27 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filename) {
   }
 }
 
-std::vector<std::pair<int, int>>
+std::vector<std::pair<int, size_t>>
 EnggDiffFittingModel::getRunNumbersAndBanksIDs() {
-  std::vector<std::pair<int, int>> pairs;
+  std::vector<std::pair<int, size_t>> pairs;
 
   const auto runNumbers = getAllRunNumbers();
   for (const auto runNumber : runNumbers) {
     for (size_t i = 0; i < m_wsMap.size(); ++i) {
       if (m_wsMap[i].find(runNumber) != m_wsMap[i].end()) {
-        pairs.push_back(std::pair<int, int>(runNumber, i + 1));
+        pairs.push_back(std::pair<int, size_t>(runNumber, i + 1));
       }
     }
   }
   return pairs;
 }
 
-int EnggDiffFittingModel::guessBankID(
+size_t EnggDiffFittingModel::guessBankID(
     API::MatrixWorkspace_const_sptr ws) const {
   if (ws->run().hasProperty("bankid")) {
     const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(
         ws->run().getLogData("bankid"));
-    return std::atoi(log->value().c_str());
+    return boost::lexical_cast<size_t>(log->value());
   }
 
   // couldn't get it from sample logs - try using the old naming convention
@@ -111,7 +111,7 @@ int EnggDiffFittingModel::guessBankID(
   bool isNum = isDigit(chunks.back());
   if (!chunks.empty() && isNum) {
     try {
-      return std::atoi(chunks.back().c_str());
+      return boost::lexical_cast<size_t>(chunks.back());
     } catch (boost::exception &) {
       // If we get a bad cast or something goes wrong then
       // the file is probably not what we were expecting
