@@ -92,10 +92,13 @@ Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
     return {std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
                                                        m_value.end()),
             indexInfo};
-  case IndexType::SpectrumNum:
-    return {
-        std::vector<Indexing::SpectrumNumber>(m_value.begin(), m_value.end()),
-        indexInfo};
+  case IndexType::SpectrumNum: {
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+    for (const auto index : m_value)
+      spectrumNumbers.push_back(
+          static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(index)));
+    return {spectrumNumbers, indexInfo};
+  }
   default:
     throw std::runtime_error(
         "IndexProperty::getFilteredIndexInfo -- unsupported index type");
