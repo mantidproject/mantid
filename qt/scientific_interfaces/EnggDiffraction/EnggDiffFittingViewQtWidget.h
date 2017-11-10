@@ -192,7 +192,7 @@ private slots:
   void showToolTipHelp();
   void setBankDir(int idx);
   void listViewFittingRun();
-  void listWidget_fitting_run_num_clicked(QListWidgetItem* listWidget);
+  void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
 
 private:
   /// Setup the interface (tab UI)

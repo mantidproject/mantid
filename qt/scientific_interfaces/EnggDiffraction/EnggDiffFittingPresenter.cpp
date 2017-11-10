@@ -89,48 +89,48 @@ void EnggDiffFittingPresenter::notify(
   switch (notif) {
 
   case IEnggDiffFittingPresenter::Start:
-	  processStart();
-	  break;
+    processStart();
+    break;
 
   case IEnggDiffFittingPresenter::FittingRunNo:
-	  fittingRunNoChanged();
-	  break;
+    fittingRunNoChanged();
+    break;
 
   case IEnggDiffFittingPresenter::Load:
-	  processLoad();
-	  break;
+    processLoad();
+    break;
 
   case IEnggDiffFittingPresenter::FitPeaks:
-	  processFitPeaks();
-	  break;
+    processFitPeaks();
+    break;
 
   case IEnggDiffFittingPresenter::FitAllPeaks:
-	  processFitAllPeaks();
-	  break;
+    processFitAllPeaks();
+    break;
 
   case IEnggDiffFittingPresenter::addPeaks:
-	  addPeakToList();
-	  break;
+    addPeakToList();
+    break;
 
   case IEnggDiffFittingPresenter::browsePeaks:
-	  browsePeaksToFit();
-	  break;
+    browsePeaksToFit();
+    break;
 
   case IEnggDiffFittingPresenter::savePeaks:
-	  savePeakList();
-	  break;
+    savePeakList();
+    break;
 
   case IEnggDiffFittingPresenter::ShutDown:
-	  processShutDown();
-	  break;
+    processShutDown();
+    break;
 
   case IEnggDiffFittingPresenter::LogMsg:
-	  processLogMsg();
-	  break;
+    processLogMsg();
+    break;
 
   case IEnggDiffFittingPresenter::selectRun:
-	  processSelectRun();
-	  break;
+    processSelectRun();
+    break;
   }
 }
 
@@ -353,12 +353,13 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
-	const auto workspaceID = m_view->getFittingListWidgetCurrentValue();
-	std::vector<std::string> tokens;
+  const auto workspaceID = m_view->getFittingListWidgetCurrentValue();
+  std::vector<std::string> tokens;
 
-	boost::split(tokens, workspaceID, boost::is_any_of("_"));
-	const auto ws = m_model.getWorkspace(std::stoi(tokens[0]), std::stoi(tokens[1]));
-	plotFocusedFile(false, ws);
+  boost::split(tokens, workspaceID, boost::is_any_of("_"));
+  const auto ws =
+      m_model.getWorkspace(std::stoi(tokens[0]), std::stoi(tokens[1]));
+  plotFocusedFile(false, ws);
 }
 
 /**
@@ -719,57 +720,58 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
 void EnggDiffFittingPresenter::processStart() {}
 
-int EnggDiffFittingPresenter::findBankID(Mantid::API::MatrixWorkspace_sptr ws) const{
-	// MOVE THIS TO THE MODEL
-	size_t bankID = 1;
+int EnggDiffFittingPresenter::findBankID(
+    Mantid::API::MatrixWorkspace_sptr ws) const {
+  // MOVE THIS TO THE MODEL
+  size_t bankID = 1;
 
-	auto name = ws->getName();
-	std::vector<std::string> chunks;
-	boost::split(chunks, name, boost::is_any_of("_"));
-	bool isNum = isDigit(chunks.back());
-	if (!chunks.empty() && isNum) {
-		try {
-			bankID = boost::lexical_cast<size_t>(chunks.back());
-		}
-		catch (boost::exception &) {
-			// If we get a bad cast or something goes wrong then
-			// the file is probably not what we were expecting
-			// so throw a runtime error
-			throw std::runtime_error(
-				"Failed to fit file: The data was not what is expected. "
-				"Does the file contain focused " +
-				m_view->getCurrentInstrument() + " workspace?");
-		}
-	}
-	return bankID;
+  auto name = ws->getName();
+  std::vector<std::string> chunks;
+  boost::split(chunks, name, boost::is_any_of("_"));
+  bool isNum = isDigit(chunks.back());
+  if (!chunks.empty() && isNum) {
+    try {
+      bankID = boost::lexical_cast<size_t>(chunks.back());
+    } catch (boost::exception &) {
+      // If we get a bad cast or something goes wrong then
+      // the file is probably not what we were expecting
+      // so throw a runtime error
+      throw std::runtime_error(
+          "Failed to fit file: The data was not what is expected. "
+          "Does the file contain focused " +
+          m_view->getCurrentInstrument() + " workspace?");
+    }
+  }
+  return bankID;
 }
 
 void EnggDiffFittingPresenter::processLoad() {
-	const std::string filenames = m_view->getFittingRunNo();
-	
-	try {
-		m_model.loadWorkspaces(filenames);
-	}
-	catch (Poco::PathSyntaxException &ex) {
-		m_view->userWarning("Failed to load the selected focus file.",
-		                    "The focus file failed to load. Are you sure the "
-			                "file exists? please check the logger for more" 
-			                " information.");
-		g_log.error("Failed to load file. Error message: ");
-		g_log.error(ex.what());
-		return;
-	}
+  const std::string filenames = m_view->getFittingRunNo();
 
-	const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
-	std::vector<std::string> workspaceIDs;
-	std::transform(runNoBankPairs.begin(), runNoBankPairs.end(), std::back_inserter(workspaceIDs),
-		[](const auto &pair) {return std::to_string(pair.first) + "_" + std::to_string(pair.second); });
-	m_view->enableFittingListWidget(true);
-	m_view->clearFittingListWidget();
-	std::for_each(workspaceIDs.begin(), workspaceIDs.end(),
-		[&](const auto &workspaceID) {
-		m_view->addRunNoItem(workspaceID);
-	});
+  try {
+    m_model.loadWorkspaces(filenames);
+  } catch (Poco::PathSyntaxException &ex) {
+    m_view->userWarning("Failed to load the selected focus file.",
+                        "The focus file failed to load. Are you sure the "
+                        "file exists? please check the logger for more"
+                        " information.");
+    g_log.error("Failed to load file. Error message: ");
+    g_log.error(ex.what());
+    return;
+  }
+
+  const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
+  std::vector<std::string> workspaceIDs;
+  std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+                 std::back_inserter(workspaceIDs), [](const auto &pair) {
+                   return std::to_string(pair.first) + "_" +
+                          std::to_string(pair.second);
+                 });
+  m_view->enableFittingListWidget(true);
+  m_view->clearFittingListWidget();
+  std::for_each(
+      workspaceIDs.begin(), workspaceIDs.end(),
+      [&](const auto &workspaceID) { m_view->addRunNoItem(workspaceID); });
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -954,7 +956,7 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
 }
 
 void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
-	const auto bankID = findBankID(wks);
+  const auto bankID = findBankID(wks);
 
   const std::string units = "none";
   auto &run = wks->mutableRun();
@@ -1723,7 +1725,8 @@ bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
-void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks, MatrixWorkspace_sptr focusedPeaksWS) {
+void EnggDiffFittingPresenter::plotFocusedFile(
+    bool plotSinglePeaks, MatrixWorkspace_sptr focusedPeaksWS) {
 
   try {
     auto focusedData = QwtHelper::curveDataFromWs(focusedPeaksWS);
@@ -1773,9 +1776,9 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     m_view->resetCanvas();
 
     // plots focused workspace
-	throw new std::runtime_error("Plotting fit not yet implemented");
-	// TODO: sort out what to do here
-    //plotFocusedFile(m_fittingFinishedOK);
+    throw new std::runtime_error("Plotting fit not yet implemented");
+    // TODO: sort out what to do here
+    // plotFocusedFile(m_fittingFinishedOK);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";

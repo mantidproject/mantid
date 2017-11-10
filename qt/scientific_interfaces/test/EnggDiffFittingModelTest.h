@@ -18,66 +18,69 @@ using namespace MantidQT::CustomInterfaces;
 
 namespace {
 
-void addSampleWorkspaceToModel(const int runNumber, const int bank, EnggDiffFittingModel &model) {
-	API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-		"Workspace2D", 1, 10, 10);
-	model.addWorkspace(runNumber, bank, ws);
+void addSampleWorkspaceToModel(const int runNumber, const int bank,
+                               EnggDiffFittingModel &model) {
+  API::MatrixWorkspace_sptr ws =
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+  model.addWorkspace(runNumber, bank, ws);
 }
 
 } // anonymous namespace
 
 class EnggDiffFittingModelTest : public CxxTest::TestSuite {
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static EnggDiffFittingModelTest *createSuite() { return new EnggDiffFittingModelTest(); }
-	static void destroySuite(EnggDiffFittingModelTest *suite) { delete suite; }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static EnggDiffFittingModelTest *createSuite() {
+    return new EnggDiffFittingModelTest();
+  }
+  static void destroySuite(EnggDiffFittingModelTest *suite) { delete suite; }
 
-	void test_addAndGetWorkspace() {
-		auto model = EnggDiffFittingModel();
-		API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().
-			create("Workspace2D", 1, 10, 10);
-		const int runNumber = 100;
-		const int bank = 1;
-		TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runNumber, bank, ws));
-		const auto retrievedWS = model.getWorkspace(runNumber, bank);
+  void test_addAndGetWorkspace() {
+    auto model = EnggDiffFittingModel();
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
+    const int runNumber = 100;
+    const int bank = 1;
+    TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runNumber, bank, ws));
+    const auto retrievedWS = model.getWorkspace(runNumber, bank);
 
-		TS_ASSERT(retrievedWS != nullptr);
-		TS_ASSERT_EQUALS(ws, retrievedWS);
-	}
+    TS_ASSERT(retrievedWS != nullptr);
+    TS_ASSERT_EQUALS(ws, retrievedWS);
+  }
 
-	void test_getAllRunNumbers() {
-		auto model = EnggDiffFittingModel();
-		
-		addSampleWorkspaceToModel(123, 1, model);
-		addSampleWorkspaceToModel(456, 2, model);
-		addSampleWorkspaceToModel(789, 1, model);
-		addSampleWorkspaceToModel(123, 2, model);
+  void test_getAllRunNumbers() {
+    auto model = EnggDiffFittingModel();
 
-		const auto runNumbers = model.getAllRunNumbers();
+    addSampleWorkspaceToModel(123, 1, model);
+    addSampleWorkspaceToModel(456, 2, model);
+    addSampleWorkspaceToModel(789, 1, model);
+    addSampleWorkspaceToModel(123, 2, model);
 
-		TS_ASSERT_EQUALS(runNumbers.size(), 3);
-		TS_ASSERT_EQUALS(runNumbers[0], 123);
-		TS_ASSERT_EQUALS(runNumbers[1], 456);
-		TS_ASSERT_EQUALS(runNumbers[2], 789);
-	}
+    const auto runNumbers = model.getAllRunNumbers();
 
-	void test_getRunNumbersAndBankIDs() {
-		auto model = EnggDiffFittingModel();
+    TS_ASSERT_EQUALS(runNumbers.size(), 3);
+    TS_ASSERT_EQUALS(runNumbers[0], 123);
+    TS_ASSERT_EQUALS(runNumbers[1], 456);
+    TS_ASSERT_EQUALS(runNumbers[2], 789);
+  }
 
-		addSampleWorkspaceToModel(123, 1, model);
-		addSampleWorkspaceToModel(456, 2, model);
-		addSampleWorkspaceToModel(789, 1, model);
-		addSampleWorkspaceToModel(123, 2, model);
+  void test_getRunNumbersAndBankIDs() {
+    auto model = EnggDiffFittingModel();
 
-		const auto runNoBankPairs = model.getRunNumbersAndBanksIDs();
+    addSampleWorkspaceToModel(123, 1, model);
+    addSampleWorkspaceToModel(456, 2, model);
+    addSampleWorkspaceToModel(789, 1, model);
+    addSampleWorkspaceToModel(123, 2, model);
 
-		TS_ASSERT_EQUALS(runNoBankPairs.size(), 4);
-		TS_ASSERT_EQUALS(runNoBankPairs[0], IntIntPair(123, 1));
-		TS_ASSERT_EQUALS(runNoBankPairs[1], IntIntPair(123, 2));
-		TS_ASSERT_EQUALS(runNoBankPairs[2], IntIntPair(456, 2));
-		TS_ASSERT_EQUALS(runNoBankPairs[3], IntIntPair(789, 1));
-	}
+    const auto runNoBankPairs = model.getRunNumbersAndBanksIDs();
+
+    TS_ASSERT_EQUALS(runNoBankPairs.size(), 4);
+    TS_ASSERT_EQUALS(runNoBankPairs[0], IntIntPair(123, 1));
+    TS_ASSERT_EQUALS(runNoBankPairs[1], IntIntPair(123, 2));
+    TS_ASSERT_EQUALS(runNoBankPairs[2], IntIntPair(456, 2));
+    TS_ASSERT_EQUALS(runNoBankPairs[3], IntIntPair(789, 1));
+  }
 };
 
 #endif

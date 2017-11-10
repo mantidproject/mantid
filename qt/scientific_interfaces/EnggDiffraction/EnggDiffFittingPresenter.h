@@ -88,7 +88,8 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
-  void plotFocusedFile(bool plotSinglePeaks, Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
+  void plotFocusedFile(bool plotSinglePeaks,
+                       Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
   void plotFitPeaksCurves();
 
