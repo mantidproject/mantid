@@ -32,13 +32,13 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     const auto description = runDescriptionPair.second.description;
     auto groupName = description;
     auto cleanDescription = description;
-    static std::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
-    constexpr auto preThetaGroup = 1;
-    constexpr auto thetaValueGroup = 3;
-    constexpr auto postThetaGroup = 4;
-    std::smatch matches;
 
+    static std::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
+    std::smatch matches;
     if (std::regex_search(description, matches, descriptionFormatRegex)) {
+      constexpr auto preThetaGroup = 1;
+      constexpr auto thetaValueGroup = 3;
+      constexpr auto postThetaGroup = 4;
       // We have theta. Let's get a clean description
       const auto theta = matches[thetaValueGroup].str();
       const auto preTheta = matches[preThetaGroup].str();
