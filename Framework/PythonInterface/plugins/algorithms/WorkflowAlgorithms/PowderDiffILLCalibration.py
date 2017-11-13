@@ -129,17 +129,18 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             Excludes 2theta ranges from the ratio workspace
             @param ratio_ws : the name of the ratio workspace
         """
+        ConvertToHistogram(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
+        x = mtd[ratio_ws].readX(0)
+        xmin = x[0]
+        xmax = x[-1]
         for excluded_range in self._excluded_ranges:
-            x = mtd[ratio_ws].readX(0)
-            xmin = x[0]
-            xmax = x[-1]
-            if excluded_range[1] > xmin:
+            if excluded_range[1] > xmin and excluded_range[0] < xmax:
                 if excluded_range[0] > xmin:
                     xmin = excluded_range[0]
                 if excluded_range[1] < xmax:
                     xmax = excluded_range[1]
-                CropWorkspace(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws,
-                              XMin=xmin, XMax=xmax)
+                MaskBins(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws, XMin=xmin, XMax=xmax)
+        ConvertToPointData(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
 
     def _compute_relative_factor(self, ratio_ws):
         """
@@ -149,13 +150,15 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             @returns: relative calibration factor
         """
         ratios = mtd[ratio_ws].extractY()
+        ratios = ratios[np.nonzero(ratios)]
         factor = 1.
-        if self._method == 'Median':
-            factor = np.median(ratios)
-        elif self._method == 'Mean':
-            factor = np.mean(ratios)
-        elif self._method == 'MostLikelyMean':
-            factor = MostLikelyMean(ratios)
+        if ratios.any():
+            if self._method == 'Median':
+                factor = np.median(ratios)
+            elif self._method == 'Mean':
+                factor = np.mean(ratios)
+            elif self._method == 'MostLikelyMean':
+                factor = MostLikelyMean(ratios)
         return factor
 
     def _validate_scan(self, scan_ws):
@@ -202,9 +205,6 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         self._regions_of_interest = self.getProperty('ROI').value
         self._excluded_ranges = self.getProperty('ExcludedRange').value
         self._interpolate = self.getProperty('InterpolateOverlappingAngles').value
-        if len(self._excluded_ranges) != 0:
-            n_excluded_ranges = int(len(self._excluded_ranges) / 2)
-            self._excluded_ranges = np.split(self._excluded_ranges, n_excluded_ranges)
         self._pixel_range = self.getProperty('PixelRange').value
         self._out_response = self.getPropertyValue('OutputResponseWorkspace')
         self._out_name = self.getPropertyValue('OutputWorkspace')
@@ -230,6 +230,9 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             self.log().warning('Last pixel number provided is larger than total number of pixels. '
                                'Taking the last existing pixel.')
             self._pixel_range[1] = self._n_det
+        if self._excluded_ranges.any():
+            n_excluded_ranges = int(len(self._excluded_ranges) / 2)
+            self._excluded_ranges = np.split(self._excluded_ranges, n_excluded_ranges)
 
     def _validate_roi(self, ws_2d):
         """
@@ -369,7 +372,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     RenameWorkspace(InputWorkspace=cloned_ref_ws, OutputWorkspace=cropped_ws)
 
                 Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
-                if self._excluded_ranges:
+                if len(self._excluded_ranges) != 0:
                     self._exclude_ranges(ratio_ws)
                 factor = self._compute_relative_factor(ratio_ws)
                 DeleteWorkspace(ratio_ws)
