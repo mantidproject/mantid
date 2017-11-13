@@ -50,8 +50,9 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-        src/LoadILLDiffraction.cpp
+	src/LoadILLDiffraction.cpp
 	src/LoadILLIndirect2.cpp
+	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
@@ -93,8 +94,8 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadSINQFocus.cpp
 	src/LoadSESANS.cpp
+	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
@@ -224,8 +225,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-        inc/MantidDataHandling/LoadILLDiffraction.h
+	inc/MantidDataHandling/LoadILLDiffraction.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
+	inc/MantidDataHandling/LoadILLPolarizationFactors.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
@@ -394,7 +396,8 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLDiffractionTest.h
-        LoadILLIndirect2Test.h
+	LoadILLIndirect2Test.h
+	LoadILLPolarizationFactorsTest.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadILLTOF2Test.h
