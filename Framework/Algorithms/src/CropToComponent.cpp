@@ -35,8 +35,8 @@ getWorkspaceIndices(const Mantid::API::MatrixWorkspace &workspace,
   std::vector<size_t> spectrumIndices;
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
-    const auto detectorIndex = spectrumDefinition[0].first;
-    if (spectrumDefinition.size() == 1 && detectorMap[detectorIndex])
+    if (spectrumDefinition.size() == 1 &&
+        detectorMap[spectrumDefinition[0].first])
       spectrumIndices.push_back(i);
     if (spectrumDefinition.size() > 1)
       throw std::runtime_error("Cannot map from detector ID to workspace index "
