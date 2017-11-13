@@ -8,10 +8,59 @@
 #include <Eigen/Geometry>
 #include <boost/make_shared.hpp>
 #include <tuple>
+#include <numeric>
 
 using namespace Mantid::Beamline;
 
 namespace {
+
+std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>>
+makeFlat(std::vector<Eigen::Vector3d> detPositions,
+         std::vector<Eigen::Quaterniond> detRotations) {
+  std::vector<std::pair<size_t, size_t>> componentRanges;
+  auto rootIndex = detPositions.size();
+  componentRanges.push_back(
+      std::make_pair(0, 1)); // sub-assembly (contains root only)
+  auto bankSortedDetectorIndices =
+      boost::make_shared<std::vector<size_t>>(detPositions.size());
+  std::iota(bankSortedDetectorIndices->begin(),
+            bankSortedDetectorIndices->end(), 0);
+  auto bankSortedComponentIndices =
+      boost::make_shared<const std::vector<size_t>>(
+          std::vector<size_t>{rootIndex});
+  auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+      std::vector<size_t>(detPositions.size() + 1, rootIndex));
+  std::vector<std::pair<size_t, size_t>> detectorRanges(
+      1, std::make_pair<size_t, size_t>(0, detPositions.size()));
+  auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+      1, Eigen::Vector3d{0, 0, 0}); // 1 position only for root
+  auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+      1,
+      Eigen::Quaterniond::Identity()); // 1 rotation only for root
+
+  // Component scale factors
+  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
+      std::vector<Eigen::Vector3d>(detPositions.size() + 1,
+                                   Eigen::Vector3d{1, 1, 1}));
+  auto detectorInfo =
+      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+  // Rectangular bank flag
+  auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+
+  ComponentInfo componentInfo(
+      bankSortedDetectorIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          detectorRanges),
+      bankSortedComponentIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          componentRanges),
+      parentIndices, positions, rotations, scaleFactors, isRectangularBank, -1,
+      -1);
+
+  componentInfo.setDetectorInfo(detectorInfo.get());
+
+  return std::make_tuple(componentInfo, detectorInfo);
+}
 
 std::tuple<ComponentInfo, std::vector<Eigen::Vector3d>,
            std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
@@ -543,8 +592,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex).isApprox(
-                   compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex)
+                   .isApprox(compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -628,8 +677,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex).angularDistance(
-            info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex)
+            .angularDistance(info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 
@@ -750,6 +799,58 @@ public:
     const std::pair<size_t, size_t> detectorIndex{1, 0};
     do_write_rotation_updates_positions_correctly(info, rootIndex,
                                                   detectorIndex);
+  }
+
+  void test_setScanInterval_failures() {
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+    TS_ASSERT_THROWS_EQUALS(
+        compInfo.setScanInterval(0, {1, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "ComponentInfo: cannot set scan interval with start >= end");
+    TS_ASSERT_THROWS_EQUALS(
+        compInfo.setScanInterval(0, {2, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "ComponentInfo: cannot set scan interval with start >= end");
+  }
+
+  void test_merge_fail_size() {
+
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(2),
+                           std::vector<Eigen::Quaterniond>(2));
+    auto &a = std::get<0>(infos1);
+    auto &b = std::get<0>(infos2);
+    a.setScanInterval(0, {0, 1});
+    b.setScanInterval(0, {0, 1});
+    b.setScanInterval(1, {0, 1});
+    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: size mismatch");
+  }
+
+  void test_merge_fail_no_intervals() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto &a = std::get<0>(infos1);
+    auto &b = std::get<0>(infos2);
+    auto &c = std::get<0>(infos3);
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals not defined");
+    c.setScanInterval(0, {0, 1});
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(c), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals not defined");
+    a.setScanInterval(0, {0, 1});
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals not defined");
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

@@ -9,6 +9,27 @@
 namespace Mantid {
 namespace Beamline {
 
+namespace {
+std::pair<size_t, size_t>
+getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
+         const size_t index) {
+  if (!indices)
+    return {index, 0};
+  return (*indices)[index];
+}
+void failMerge(const std::string &what) {
+  throw std::runtime_error(std::string("Cannot merge ComponentInfo: ") + what);
+}
+
+namespace {
+void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
+  if (interval.first >= interval.second)
+    throw std::runtime_error(
+        "ComponentInfo: cannot set scan interval with start >= end");
+}
+}
+}
+
 ComponentInfo::ComponentInfo()
     : m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>(0)),
@@ -378,6 +399,21 @@ ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   return (*m_indexMap)[index.first][index.second];
 }
 
+void ComponentInfo::initIndices() {
+  checkNoTimeDependence();
+  m_indexMap = Kernel::make_cow<std::vector<std::vector<size_t>>>();
+  m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
+  auto &indexMap = m_indexMap.access();
+  auto &indices = m_indices.access();
+  indexMap.reserve(size());
+  indices.reserve(size());
+  // No time dependence, so both the component index and the linear index are i.
+  for (size_t i = 0; i < size(); ++i) {
+    indexMap.emplace_back(1, i);
+    indices.emplace_back(i, 0);
+  }
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return (*m_parentIndices)[componentIndex];
 }
@@ -500,9 +536,11 @@ size_t ComponentInfo::scanSize() const {
 bool ComponentInfo::isScanning() const {
   if (m_detectorInfo && m_detectorInfo->isScanning())
     return true;
-  else if (!m_positions)
+  else if (!m_positions || !m_componentRanges)
     return false;
   else
+    // TODO what if you have a scan that causes no position change, such as a
+    // rotation. Not scanning???
     return m_componentRanges->size() != m_positions->size();
 }
 
@@ -533,11 +571,12 @@ void ComponentInfo::setScanInterval(
     const size_t index, const std::pair<int64_t, int64_t> &interval) {
   // Enforces setting scan intervals BEFORE time indexed positions and rotations
   checkNoTimeDependence();
-  // checkScanInterval(interval);
-  if (m_scanIntervals && m_isSyncScan)
+  checkScanInterval(interval);
+  if (m_scanIntervals && m_isSyncScan) {
     throw std::runtime_error("ComponentInfo has been initialized with a "
                              "synchonous scan, cannot set scan interval for "
                              "individual component.");
+  }
   if (!m_scanIntervals) {
     m_isSyncScan = false;
     initScanIntervals();
@@ -549,7 +588,7 @@ void ComponentInfo::setScanInterval(
     const std::pair<int64_t, int64_t> &interval) {
   // Enforces setting scan intervals BEFORE time indexed positions and rotations
   checkNoTimeDependence();
-  // checkScanInterval(interval);
+  checkScanInterval(interval);
   if (m_scanIntervals && !m_isSyncScan) {
     throw std::runtime_error(
         "ComponentInfo has been initialized with a "
@@ -560,6 +599,94 @@ void ComponentInfo::setScanInterval(
     initScanIntervals();
   }
   m_scanIntervals.access()[0] = interval;
+}
+
+/**
+Merges the contents of other ComponentInfo into this. The assumption is that
+this has no time dependence prior to this operation.
+ *
+ * Scan intervals in both other and this must be set. Intervals must be
+ * identical or non-overlapping. If they are identical all other parameters (for
+ * that index) must match.
+ *
+ * Time indices in `this` are preserved. Time indices added from `other` are
+ * incremented by the scan count of that detector in `this`. The relative order
+ * of time indices added from `other` is preserved. If the interval for a time
+ * index in `other` is identical to a corresponding interval in `this`, it is
+ * ignored, i.e., no time index is added.
+**/
+void ComponentInfo::merge(const ComponentInfo &other) {
+  if (!m_scanCounts)
+    this->initScanCounts();
+  const auto toMerge = buildMergeIndices(other);
+  if (m_isSyncScan)
+    throw std::runtime_error(
+        "Sync scans not currently supported for ComponentInfo");
+  initIndices();
+  auto scanCounts(m_scanCounts);
+  for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
+       ++linearIndex) {
+    if (!toMerge[linearIndex])
+      continue;
+    auto newIndex = getIndex(other.m_indices, linearIndex);
+    const size_t detIndex = newIndex.first;
+    newIndex.second += scanCount(detIndex);
+    scanCounts.access()[detIndex]++;
+    m_indexMap.access()[detIndex].push_back((*m_indices).size());
+    m_indices.access().push_back(newIndex);
+    m_positions.access().push_back((*other.m_positions)[linearIndex]);
+    m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
+    m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
+  }
+  m_scanCounts = std::move(scanCounts);
+}
+
+/**
+ *
+ * @param other : ComponentInfo
+ * @return vector of linear indices to merge (true to merge)
+ */
+std::vector<bool>
+ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
+  checkSizes(other);
+  std::vector<bool> merge(other.m_positions->size(), true);
+
+  for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
+       ++linearIndex1) {
+    const size_t detIndex = getIndex(other.m_indices, linearIndex1).first;
+    const auto &interval1 = (*other.m_scanIntervals)[linearIndex1];
+    for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
+      const auto linearIndex2 = linearIndex({detIndex, timeIndex});
+      const auto &interval2 = (*m_scanIntervals)[linearIndex2];
+      if (interval1 == interval2) {
+        checkIdenticalIntervals(other, linearIndex1, linearIndex2);
+        merge[linearIndex1] = false;
+      } else if ((interval1.first < interval2.second) &&
+                 (interval1.second > interval2.first)) {
+        failMerge("scan intervals overlap but not identical");
+      }
+    }
+  }
+  return merge;
+}
+
+void ComponentInfo::checkSizes(const ComponentInfo &other) const {
+  if (size() != other.size())
+    failMerge("size mismatch");
+  if (!m_scanIntervals || !other.m_scanIntervals)
+    failMerge("scan intervals not defined");
+  if (m_isSyncScan != other.m_isSyncScan)
+    failMerge("both or none of the scans must be synchronous");
+}
+
+void ComponentInfo::checkIdenticalIntervals(
+    const ComponentInfo &other, const size_t linearIndexOther,
+    const size_t linearIndexThis) const {
+  if ((*m_positions)[linearIndexThis] != (*other.m_positions)[linearIndexOther])
+    failMerge("matching scan interval but positions differ");
+  if ((*m_rotations)[linearIndexThis].coeffs() !=
+      (*other.m_rotations)[linearIndexOther].coeffs())
+    failMerge("matching scan interval but rotations differ");
 }
 
 void ComponentInfo::initScanCounts() {

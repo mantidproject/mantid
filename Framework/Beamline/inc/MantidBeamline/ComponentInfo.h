@@ -65,11 +65,19 @@ private:
       nullptr};
   /// For (component index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  /// For linear index -> (detector index, time index) conversions
+  Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   void failIfDetectorInfoScanning() const;
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void initScanCounts();
   void initScanIntervals();
   void checkNoTimeDependence() const;
+  std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
+  void checkSizes(const ComponentInfo &other) const;
+  void initIndices();
+  void checkIdenticalIntervals(const ComponentInfo &other,
+                               const size_t linearIndexOther,
+                               const size_t linearIndexThis) const;
 
 public:
   ComponentInfo();
@@ -138,6 +146,8 @@ public:
   void setScanInterval(const size_t index,
                        const std::pair<int64_t, int64_t> &interval);
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  void merge(const ComponentInfo &other);
+
   class Range {
   private:
     const std::vector<size_t>::const_iterator m_begin;
