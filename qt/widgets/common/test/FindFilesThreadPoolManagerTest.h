@@ -73,7 +73,7 @@ public:
     char name[] = "DummyTestingApplication";
     char *argv = name;
     QApplication app(argc, &argv);
-   // Arrange
+    // Arrange
     FakeMWRunFiles widget;
 
     // The parameters of the search
