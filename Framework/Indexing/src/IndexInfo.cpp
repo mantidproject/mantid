@@ -232,7 +232,7 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
       }
     }
     if (spectrumDefinition.size() > 1)
-      throw std::runtime_error("SpectrumDefinition containes multiple entries. "
+      throw std::runtime_error("SpectrumDefinition contains multiple entries. "
                                "No unique mapping from detector to spectrum "
                                "possible");
   }

@@ -209,7 +209,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
         const std::runtime_error &e, std::string(e.what()),
-        "SpectrumDefinition containes multiple entries. No unique mapping from "
+        "SpectrumDefinition contains multiple entries. No unique mapping from "
         "detector to spectrum possible");
   }
 
