@@ -44,11 +44,13 @@ set ( TEST_PY_FILES
   RunTest.py
   SampleTest.py
   SpectrumInfoTest.py
+  WorkspaceBinaryOpsTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py
   WorkspaceGroupTest.py
   WorkspaceHistoryTest.py
   WorkspacePropertiesTest.py
+  WorkspaceUnaryOpsTest.py
   WorkspaceValidatorsTest.py
 )
 

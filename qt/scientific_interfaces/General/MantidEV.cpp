@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QDesktopWidget>
+#include <QThreadPool>
 #include <Poco/Path.h>
 
 #include "MantidEV.h"

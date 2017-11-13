@@ -72,6 +72,7 @@ set ( TEST_PY_FILES
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SettingsTest.py
+      test/StitchingTest.py
       test/VesuvioBackgroundTest.py
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py

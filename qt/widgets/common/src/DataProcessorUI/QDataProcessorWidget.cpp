@@ -5,9 +5,13 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
+#include <QClipboard>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QWhatsThis>
 #include <QWidget>
-#include <qinputdialog.h>
-#include <qmessagebox.h>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -113,9 +117,14 @@ void QDataProcessorWidget::createTable() {
 
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
-  header->setMovable(true);
   header->setStretchLastSection(true);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
+#else
+  header->setSectionsMovable(true);
+  header->setSectionResizeMode(QHeaderView::ResizeToContents);
+#endif
   ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes

@@ -3,7 +3,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "EnggDiffFittingPresenter.h"
-#include "MantidQtWidgets/Common/PeakPicker.h"
+#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include <array>
 #include <iomanip>
@@ -14,10 +14,11 @@
 
 #include <Poco/Path.h>
 
+#include <QEvent>
 #include <QFileDialog>
+#include <QHelpEvent>
 #include <QSettings>
 
-#include <qevent.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_symbol.h>
