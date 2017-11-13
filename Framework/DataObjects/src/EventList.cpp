@@ -2,6 +2,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -28,7 +29,6 @@ using std::vector;
 
 namespace Mantid {
 namespace DataObjects {
-using Kernel::Exception::NotImplementedError;
 using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 using namespace Mantid::API;
@@ -1567,6 +1567,87 @@ void EventList::compressEventsParallelHelper(
     out.insert(out.end(), outputs[thread].begin(), outputs[thread].end());
 }
 
+template <class T>
+inline void EventList::compressFatEventsHelper(
+    const std::vector<T> &events, std::vector<WeightedEvent> &out,
+    const double tolerance, const Types::Core::DateAndTime &timeStart,
+    const double seconds) {
+  // Clear the output. We can't know ahead of time how much space to reserve :(
+  out.clear();
+  // We will make a starting guess of 1/20th of the number of input events.
+  out.reserve(events.size() / 20);
+
+  // The last TOF to which we are comparing.
+  double lastTof = std::numeric_limits<double>::lowest();
+  // For getting an accurate average TOF
+  double totalTof = 0;
+
+  // pulsetime bin information - stored as int nanoseconds because it
+  // implementation type for DateAndTime object
+  const double SEC_TO_NANO = 1.e9;
+  const int64_t PULSETIME_TOL = static_cast<int64_t>(seconds * SEC_TO_NANO);
+
+  // pusletime information
+  DateAndTime timeRight = timeStart + PULSETIME_TOL; // right boundary <
+  std::vector<DateAndTime> pulsetimes; // all the times for new event
+
+  // Carrying weight and error
+  double weight = 0;
+  double errorSquared = 0;
+
+  // move up to first event that has a large enough pusletime
+  auto it = events.cbegin();
+  for (; it != events.cend(); ++it) {
+    if (it->m_pulsetime >= timeStart)
+      break;
+  }
+  // loop through events and accumulate weight
+  for (; it != events.cend(); ++it) {
+    if ((it->m_pulsetime < timeRight) && (it->m_tof - lastTof) <= tolerance) {
+      // Carry the error and weight
+      weight += it->weight();
+      errorSquared += it->errorSquared();
+      // Track the average tof
+      totalTof += it->m_tof;
+      // Accumulate the pulse times
+      pulsetimes.push_back(it->m_pulsetime);
+    } else {
+      // We exceeded the tolerance
+      if (!pulsetimes.empty()) {
+        // Create a new event with the average TOF and summed weights and
+        // squared errors.
+        out.emplace_back(totalTof / static_cast<double>(pulsetimes.size()),
+                         Kernel::DateAndTimeHelpers::averageSorted(pulsetimes),
+                         weight, errorSquared);
+      }
+      // Start a new combined object
+      totalTof = it->m_tof;
+      weight = it->weight();
+      errorSquared = it->errorSquared();
+      lastTof = it->m_tof;
+      timeRight += PULSETIME_TOL;
+      pulsetimes.clear();
+      pulsetimes.push_back(it->m_pulsetime);
+    }
+  }
+
+  // Put the last event in there too.
+  if (!pulsetimes.empty()) {
+    // Create a new event with the average TOF and summed weights and squared
+    // errors.
+    out.emplace_back(totalTof / static_cast<double>(pulsetimes.size()),
+                     Kernel::DateAndTimeHelpers::averageSorted(pulsetimes),
+                     weight, errorSquared);
+  }
+
+  // If you have over-allocated by more than 5%, reduce the size.
+  size_t excess_limit = out.size() / 20;
+  if ((out.capacity() - out.size()) > excess_limit) {
+    // Note: This forces a copy!
+    std::vector<WeightedEvent>(out).swap(out);
+  }
+}
+
 // --------------------------------------------------------------------------
 /** Compress the event list by grouping events with the same
  * TOF (within a given tolerance). PulseTime is ignored.
@@ -1624,6 +1705,41 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
   destination->eventType = WEIGHTED_NOTIME;
   // The sort is still valid!
   destination->order = TOF_SORT;
+  // Empty out storage for vectors that are now unused.
+  destination->clearUnused();
+}
+
+void EventList::compressFatEvents(
+    const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
+    const double seconds, EventList *destination) {
+  switch (eventType) {
+  case WEIGHTED_NOTIME:
+    throw std::invalid_argument(
+        "Cannot compress events that do not have pulsetime");
+  case TOF:
+    this->sortPulseTimeTOF();
+    compressFatEventsHelper(this->events, destination->weightedEvents,
+                            tolerance, timeStart, seconds);
+    break;
+  case WEIGHTED:
+    this->sortPulseTimeTOF();
+    if (destination == this) {
+      // Put results in a temp output
+      std::vector<WeightedEvent> out;
+      compressFatEventsHelper(this->weightedEvents, out, tolerance, timeStart,
+                              seconds);
+      // Put it back
+      this->weightedEvents.swap(out);
+    } else {
+      compressFatEventsHelper(this->weightedEvents, destination->weightedEvents,
+                              tolerance, timeStart, seconds);
+    }
+    break;
+  }
+  // In all cases, you end up WEIGHTED_NOTIME.
+  destination->eventType = WEIGHTED;
+  // The sort is still valid!
+  destination->order = PULSETIMETOF_SORT;
   // Empty out storage for vectors that are now unused.
   destination->clearUnused();
 }

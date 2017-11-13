@@ -222,6 +222,9 @@ public:
   virtual size_t histogram_size() const;
 
   void compressEvents(double tolerance, EventList *destination);
+  void compressFatEvents(const double tolerance,
+                         const Types::Core::DateAndTime &timeStart,
+                         const double seconds, EventList *destination);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
@@ -435,6 +438,12 @@ private:
   void compressEventsParallelHelper(const std::vector<T> &events,
                                     std::vector<WeightedEventNoTime> &out,
                                     double tolerance);
+  template <class T>
+  static void compressFatEventsHelper(
+      const std::vector<T> &events, std::vector<WeightedEvent> &out,
+      const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
+      const double seconds);
+
   template <class T>
   static void histogramForWeightsHelper(const std::vector<T> &events,
                                         const MantidVec &X, MantidVec &Y,
