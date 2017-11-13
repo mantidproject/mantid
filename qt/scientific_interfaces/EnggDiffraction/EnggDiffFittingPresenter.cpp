@@ -751,6 +751,7 @@ void EnggDiffFittingPresenter::processLoad() {
   try {
     m_model.loadWorkspaces(filenames);
   } catch (Poco::PathSyntaxException &ex) {
+	m_view->showStatus("Error while loading focused run");
     m_view->userWarning("Failed to load the selected focus file.",
                         "The focus file failed to load. Are you sure the "
                         "file exists? please check the logger for more"
@@ -758,6 +759,16 @@ void EnggDiffFittingPresenter::processLoad() {
     g_log.error("Failed to load file. Error message: ");
     g_log.error(ex.what());
     return;
+  }
+  catch (std::invalid_argument &ex) {
+	  m_view->showStatus("Error while loading focused run");
+	  m_view->userWarning("Invalid file selected",
+		                  "Mantid could not load the selected file. "
+		                  "Are you sure it exists? "
+		                  "See the logger for more information");
+	  g_log.error("Failed to load file. Error message: ");
+	  g_log.error(ex.what());
+	  return;
   }
 
   const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
