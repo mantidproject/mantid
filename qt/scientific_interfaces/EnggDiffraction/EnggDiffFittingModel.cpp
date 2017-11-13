@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <algorithm>
@@ -31,6 +32,21 @@ namespace CustomInterfaces {
 void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank,
                                         const API::MatrixWorkspace_sptr ws) {
   m_wsMap[bank - 1][runNumber] = ws;
+}
+
+std::string EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
+	const size_t bank){
+	if (bank < 1 || bank > m_wsFilenameMap.size()) {
+		throw std::runtime_error("Tried to get filename for runNumber " +
+			std::to_string(runNumber) + " and bank number "
+			+ std::to_string(bank));
+	}
+	if (m_wsFilenameMap[bank - 1].find(runNumber) == m_wsFilenameMap[bank - 1].end()) {
+		throw std::runtime_error("Tried to get filename for runNumber " +
+			std::to_string(runNumber) + " and bank number "
+			+ std::to_string(bank));
+	}
+	return m_wsFilenameMap[bank - 1][runNumber];
 }
 
 API::MatrixWorkspace_sptr
@@ -71,13 +87,17 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filename) {
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
   if (filename.find(",") == std::string::npos) { // Only 1 run loaded
     const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(FOCUSED_WS_NAME);
-    addWorkspace(ws->getRunNumber(), guessBankID(ws), ws);
+    addWorkspace(ws->getRunNumber(), guessBankID(ws), filename, ws);
   } else {
     const auto group_ws = ADS.retrieveWS<API::WorkspaceGroup>(FOCUSED_WS_NAME);
-    for (auto iter = group_ws->begin(); iter != group_ws->end(); ++iter) {
-      const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(*iter);
-      addWorkspace(ws->getRunNumber(), guessBankID(ws), ws);
-    }
+	std::vector<std::string> filenames;
+	boost::split(filenames, filename, boost::is_any_of(","));
+
+	for (size_t i = 0; i != group_ws->getNumberOfEntries(); ++i) {
+		const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+			group_ws->getItem(i));
+		addWorkspace(ws->getRunNumber(), guessBankID(ws), filenames[i], ws);
+	}
   }
 }
 
@@ -124,6 +144,12 @@ EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
 
   throw std::runtime_error("Could not guess run number from input workspace. "
                            "Are you sure it has been focused correctly?");
+}
+
+void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank, 
+	const std::string &filename, API::MatrixWorkspace_sptr ws){
+	m_wsFilenameMap[bank - 1][runNumber] = filename;
+	addWorkspace(runNumber, bank, ws);
 }
 
 const std::string EnggDiffFittingModel::FOCUSED_WS_NAME =
