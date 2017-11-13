@@ -6,7 +6,9 @@
 
 #include <QApplication>
 #include <QCompleter>
+#include <QDrag>
 #include <QHBoxLayout>
+#include <QMimeData>
 #include <QMouseEvent>
 #include <QPushButton>
 

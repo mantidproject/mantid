@@ -18,7 +18,7 @@ Workspace::~Workspace() = default;
 
 Workspace::Workspace(const Workspace &other)
     : Kernel::DataItem(other), m_title(other.m_title),
-      m_comment(other.m_comment), m_name(other.m_name),
+      m_comment(other.m_comment), m_name(),
       m_history(Kernel::make_unique<WorkspaceHistory>(other.getHistory())),
       m_storageMode(other.m_storageMode) {}
 

@@ -1,29 +1,32 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <Poco/Environment.h>
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/LibraryManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 
+#include <Poco/Environment.h>
 #include <QStringList>
 
 using namespace MantidQt::API;
+using Mantid::Kernel::AbstractInstantiator;
 
 namespace {
 // static logger
 Mantid::Kernel::Logger g_log("InterfaceManager");
+
+// Load libraries once
+std::once_flag DLLS_LOADED;
 }
 
 // initialise VATES factory
@@ -177,25 +180,9 @@ QStringList InterfaceManager::getUserSubWindowKeys() const {
 /// Default Constructor
 InterfaceManager::InterfaceManager() {
   // Attempt to load libraries that may contain custom interface classes
-  const std::string libpath =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "mantidqt.plugins.directory");
-  if (!libpath.empty()) {
-    // Lazy loading. Avoid loading libraries every time a new instance is
-    // created.
-    static bool isLoaded;
-    if (!isLoaded) {
-      int nloaded =
-          Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-      if (nloaded == 0) {
-        g_log.warning() << "Unable to load Qt plugin libraries.\n"
-                        << "Please check that the 'mantidqt.plugins.directory' "
-                           "variable in the .properties file points to "
-                        << "the correct location.\n";
-      }
-      isLoaded = true;
-    }
-  }
+  std::call_once(DLLS_LOADED, []() {
+    loadPluginsFromCfgPath("mantidqt.plugins.directory");
+  });
 }
 
 /// Destructor

@@ -31,7 +31,7 @@ namespace SliceViewer {
  * @return
  */
 SliceViewerWindow::SliceViewerWindow(const QString &wsName,
-                                     const QString &label, Qt::WFlags f)
+                                     const QString &label, Qt::WindowFlags f)
     : QMainWindow(NULL, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
 

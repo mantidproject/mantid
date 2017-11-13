@@ -47,9 +47,6 @@ public:
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
 
-  // virtual void functionLocal(std::vector<double> &out, std::vector<double>
-  // xValues) const;
-
   /// Returns the number of attributes associated with the function (polynomial
   /// order n)
   size_t nAttributes() const override { return 1; }

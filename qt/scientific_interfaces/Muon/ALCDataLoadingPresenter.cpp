@@ -8,7 +8,7 @@
 
 #include "MuonAnalysisHelper.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/QwtHelper.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 #include "ALCLatestFileFinder.h"
 
 #include <Poco/ActiveResult.h>

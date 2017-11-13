@@ -80,7 +80,8 @@ bool EventWorkspace::threadSafe() const {
 void EventWorkspace::init(const std::size_t &NVectors,
                           const std::size_t &XLength,
                           const std::size_t &YLength) {
-  (void)YLength; // Avoid compiler warning
+  static_cast<void>(XLength);
+  static_cast<void>(YLength);
 
   // Check validity of arguments
   if (NVectors <= 0) {
@@ -106,7 +107,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
 
   // Create axes.
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -129,7 +130,7 @@ void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   }
 
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(histogram.x().size(), this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 

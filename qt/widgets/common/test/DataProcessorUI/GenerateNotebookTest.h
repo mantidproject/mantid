@@ -73,19 +73,15 @@ private:
 
   // Creates reflectometry data
   TreeData reflData() {
-
     TreeData treeData;
-    RowData rowData;
-
-    rowData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
-    treeData[0][0] = rowData;
-    rowData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
-    treeData[0][1] = rowData;
-    rowData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
-    treeData[1][0] = rowData;
-    rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};
-    treeData[1][1] = rowData;
-
+    treeData[0][0] =
+        QStringList({"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+    treeData[0][1] =
+        QStringList({"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
+    treeData[1][0] =
+        QStringList({"24681", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""});
+    treeData[1][1] =
+        QStringList({"24682", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""});
     return treeData;
   }
 
@@ -495,8 +491,8 @@ public:
     assertContainsMatchingLines(result, boost::get<0>(output));
     // All rows in second group
 
-    rowData0 = {"24681", "", "", "", "", "", "", "", ""};
-    rowData1 = {"24682", "", "", "", "", "", "", "", ""};
+    rowData0 = QStringList({"24681", "", "", "", "", "", "", "", ""});
+    rowData1 = QStringList({"24682", "", "", "", "", "", "", "", ""});
     groupData = {{0, rowData0}, {1, rowData1}};
     output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),

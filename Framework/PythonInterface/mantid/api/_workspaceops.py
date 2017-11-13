@@ -165,7 +165,7 @@ def _do_unary_operation(op, self, lhs_vars):
     ads = _api.AnalysisDataServiceImpl.Instance()
 
     alg = simpleapi._create_algorithm_object(op) # gets the child status correct for PythonAlgorithms
-    alg.setPropertyValue("InputWorkspace", self.name())
+    alg.setProperty("InputWorkspace", self)
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()
     resultws = ads[output_name]

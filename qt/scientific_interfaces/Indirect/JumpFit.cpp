@@ -1,11 +1,11 @@
 #include "JumpFit.h"
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
-#include "../General/UserInputValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -66,10 +66,10 @@ void JumpFit::setup() {
 
   // Update plot Guess
   connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(generatePlotGuess()));
+          SLOT(plotGuess()));
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(generatePlotGuess()));
+          SLOT(plotGuess()));
 
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -116,29 +116,8 @@ void JumpFit::run() {
 
   // Fit function to use
   const QString functionName = m_uiForm.cbFunction->currentText();
-  const auto functionString = generateFunctionName(functionName);
-
-  std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
-  int width = m_spectraList[widthText];
-  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
-  QString outputName = getWorkspaceBasename(QString::fromStdString(sample)) +
-                       "_" + functionName + "_fit";
-
-  const auto startX = m_dblManager->value(m_properties["QMin"]);
-  const auto endX = m_dblManager->value(m_properties["QMax"]);
-
   // Setup fit algorithm
-  m_fitAlg = AlgorithmManager::Instance().create("Fit");
-  m_fitAlg->initialize();
-
-  m_fitAlg->setProperty("Function", functionString);
-  m_fitAlg->setProperty("InputWorkspace", sample + "_HWHM");
-  m_fitAlg->setProperty("WorkspaceIndex", width);
-  m_fitAlg->setProperty("IgnoreInvalidData", true);
-  m_fitAlg->setProperty("StartX", startX);
-  m_fitAlg->setProperty("EndX", endX);
-  m_fitAlg->setProperty("CreateOutput", true);
-  m_fitAlg->setProperty("Output", outputName.toStdString());
+  m_fitAlg = createFitAlgorithm(createFunction(functionName));
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   // Connect algorithm runner to completion handler function
@@ -193,7 +172,7 @@ void JumpFit::fitAlgDone(bool error) {
  * Set the data selectors to use the default save directory
  * when browsing for input files.
  *
-* @param settings :: The current settings
+ * @param settings :: The current settings
  */
 void JumpFit::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
@@ -227,7 +206,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-    setSelectedSpectra(m_spectraList[currentWidth]);
+    setSelectedSpectrum(m_spectraList[currentWidth]);
     m_uiForm.ppPlotBottom->clear();
     plotInput(m_uiForm.ppPlotTop);
 
@@ -421,20 +400,21 @@ void JumpFit::clearPlot() {
   }
 }
 
-void JumpFit::generatePlotGuess() {
+void JumpFit::plotGuess() {
   // Do nothing if there is not a sample
-  if (!(m_uiForm.dsSample->isValid()) && m_uiForm.ckPlotGuess->isChecked())
-    return;
-  if (!m_uiForm.ckPlotGuess->isChecked()) {
-    m_uiForm.ppPlotTop->removeSpectrum("PlotGuess");
+  if (m_uiForm.dsSample->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
+    const QString functionName = m_uiForm.cbFunction->currentText();
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(functionName));
+    deletePlotGuessWorkspaces(false);
+  } else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
     deletePlotGuessWorkspaces(true);
-    return;
   }
+}
 
-  // Fit function to use
-  const QString functionName = m_uiForm.cbFunction->currentText();
-  const auto functionString = generateFunctionName(functionName);
-
+IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample =
@@ -442,40 +422,23 @@ void JumpFit::generatePlotGuess() {
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
 
-  // Setup fit algorithm
-  auto plotGuess = AlgorithmManager::Instance().create("Fit");
-  plotGuess->initialize();
-
-  plotGuess->setProperty("Function", functionString);
-  plotGuess->setProperty("InputWorkspace", sample);
-  plotGuess->setProperty("WorkspaceIndex", width);
-  plotGuess->setProperty("IgnoreInvalidData", true);
-  plotGuess->setProperty("StartX", startX);
-  plotGuess->setProperty("EndX", endX);
-  plotGuess->setProperty("CreateOutput", true);
-  plotGuess->setProperty("Output", "__PlotGuessData");
-
-  m_batchAlgoRunner->addAlgorithm(plotGuess);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotGuess(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-void JumpFit::plotGuess(bool error) {
-  if (error)
-    return;
-
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(plotGuess(bool)));
-  m_uiForm.ppPlotTop->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
-                                  Qt::green);
-  deletePlotGuessWorkspaces(false);
+  auto fitAlg = AlgorithmManager::Instance().create("Fit");
+  fitAlg->initialize();
+  fitAlg->setProperty("Function", func->asString());
+  fitAlg->setProperty("InputWorkspace", sample);
+  fitAlg->setProperty("WorkspaceIndex", width);
+  fitAlg->setProperty("IgnoreInvalidData", true);
+  fitAlg->setProperty("StartX", startX);
+  fitAlg->setProperty("EndX", endX);
+  fitAlg->setProperty("CreateOutput", true);
+  fitAlg->setProperty("Output", "__PlotGuessData");
+  return fitAlg;
 }
 
 /**
- * Generates a function string to be used in fitting
+ * Creates a function string to be used in fitting
  */
-std::string JumpFit::generateFunctionName(const QString &functionName) {
+IFunction_sptr JumpFit::createFunction(const QString &functionName) {
   QString functionString = "name=" + functionName;
 
   // Build function string
@@ -490,7 +453,8 @@ std::string JumpFit::generateFunctionName(const QString &functionName) {
 
     functionString += "," + parameterName + "=" + parameterValue;
   }
-  return functionString.toStdString();
+  return FunctionFactory::Instance().createInitialized(
+      functionString.toStdString());
 }
 
 /**
