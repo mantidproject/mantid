@@ -155,6 +155,16 @@ private:
   UserSubWindow();
 };
 
+class ManageUserDirectories : QDialog
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+%End
+public:
+    ManageUserDirectories();
+    static void openUserDirsDialog(QWidget *parent);
+};
+
 class InterfaceManager
 {
 %TypeHeaderCode

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AddRunsPage</class>
+ <widget class="QWidget" name="AddRunsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1065</width>
+    <height>615</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="histogramBinGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>460</y>
+     <width>1029</width>
+     <height>141</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Histogram Binning</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>20</y>
+      <width>1011</width>
+      <height>112</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="histogramBinLayout">
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="customBinBoundariesLineEdit"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="binningType">
+       <property name="minimumSize">
+        <size>
+         <width>671</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="customBinLabel">
+       <property name="minimumSize">
+        <size>
+         <width>161</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Custom Bin Boundaries:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="overlayEventWorkspacesCheckbox">
+       <property name="minimumSize">
+        <size>
+         <width>211</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Overlay Event Workspaces</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="histogramBinningLabel">
+       <property name="minimumSize">
+        <size>
+         <width>301</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Histogram Binning (when adding event data):</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="filesToSumGroup">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>1031</width>
+     <height>441</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Files To Sum</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>30</y>
+      <width>161</width>
+      <height>206</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="addLayout" stretch="0,0,0,0,0">
+     <item>
+      <widget class="QPushButton" name="addFileButton">
+       <property name="minimumSize">
+        <size>
+         <width>159</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="browseFileButton">
+       <property name="minimumSize">
+        <size>
+         <width>159</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="manageDirectoriesButton">
+       <property name="minimumSize">
+        <size>
+         <width>159</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Manage Directories</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeFileButton">
+       <property name="text">
+        <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeAllFilesButton">
+       <property name="text">
+        <string>Remove All</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>12</x>
+      <y>32</y>
+      <width>831</width>
+      <height>391</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLineEdit" name="fileListLineEdit"/>
+     </item>
+     <item>
+      <widget class="QListView" name="fileList"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

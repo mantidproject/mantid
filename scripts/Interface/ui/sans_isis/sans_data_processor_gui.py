@@ -26,6 +26,8 @@ from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SA
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
 
+from sans.gui_logic.models.add_runs_model import AddRunsModel
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes
@@ -137,12 +139,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
+        add_runs_page_icon_path = os.path.join(path, "icons", "run.png")
+        add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
+        _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+
         settings_icon_path = os.path.join(path, "icons", "settings.png")
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
+
+        self.add_runs_presenter = AddRunsPagePresenter(AddRunsModel(), self.add_runs_page, self)
 
         # --------------------------------------------------------------------------------------------------------------
         # Algorithm setup

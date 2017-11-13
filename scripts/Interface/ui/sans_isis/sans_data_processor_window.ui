@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>897</height>
+    <height>898</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -334,6 +334,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="AddRunsPage" name="add_runs_page"/>
         <widget class="QWidget" name="settings_page">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -1873,7 +1874,7 @@ QGroupBox::title {
      <x>0</x>
      <y>0</y>
      <width>1211</width>
-     <height>19</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -1901,6 +1902,12 @@ QGroupBox::title {
    <class>MaskingTable</class>
    <extends>QWidget</extends>
    <header>ui.sans_isis.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AddRunsPage</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.add_runs_page</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
