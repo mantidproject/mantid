@@ -5,7 +5,8 @@
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
 
-# mantidqt is run from the source directory so just add tests
+# Just add testing targets as the modules are used from source
+
 set ( PYTHON_TEST_FILES
   mantidqt/test/import_test.py
 )

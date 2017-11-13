@@ -14,16 +14,3 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
-import unittest
-
-
-class ImportTest(unittest.TestCase):
-
-    def test_import_workbench(self):
-        import workbench  # noqa
-
-if __name__ == "__main__":
-    unittest.main()
