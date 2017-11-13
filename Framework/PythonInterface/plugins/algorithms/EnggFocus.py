@@ -62,7 +62,7 @@ class EnggFocus(PythonAlgorithm):
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc='Sets the spectrum numbers for the detectors '
-                             'that should be considered in the focussing operation (all others will be '
+                             'that should be considered in the focusing operation (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
@@ -165,11 +165,20 @@ class EnggFocus(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", input_ws)
 
+    def _bank_to_int(self, bank):
+        if bank == "North":
+            return "1"
+        if bank == "South":
+            return "2"
+        if bank in ("1", "2"):
+            return bank
+        raise RuntimeError("Invalid value for bank: \"{}\" of type {}".format(bank, type(bank)))
+
     def _add_bank_number(self, ws, bank):
         alg = self.createChildAlgorithm("AddSampleLog")
         alg.setProperty("Workspace", ws)
         alg.setProperty("LogName", "bankid")
-        alg.setProperty("LogText", str(bank))
+        alg.setProperty("LogText", self._bank_to_int(bank))
         alg.setProperty("LogType", "Number")
         alg.execute()
 
