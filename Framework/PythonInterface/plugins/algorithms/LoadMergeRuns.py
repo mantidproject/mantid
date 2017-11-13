@@ -62,7 +62,7 @@ class LoadMergeRuns(PythonAlgorithm):
     def _create_fresh_loader(self):
         """
             Creates a fresh instance of the specific loader. It is needed for safety,
-            since there might be loaders, that do not reset their properties.
+            since there might be loaders, that do not reset their private members.
             So running on the same instance can potentially cause problems
             Also the output will always be on ADS, since this algorithm relies on
             MergeRuns, which does not work outside ADS
