@@ -56,8 +56,6 @@ public:
     worker->moveToThread(this);
   }
 
-  ~GenericDataProcessorPresenterThread() override { emit finished(); }
-
 public slots:
   void workerFinished(const int exitCode) {
     Q_UNUSED(exitCode);

@@ -6,9 +6,9 @@
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "Plot.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 
 #include "MantidKernel/Logger.h"
 

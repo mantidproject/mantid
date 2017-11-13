@@ -488,6 +488,7 @@ void CrystalFieldFunction::setAttribute(const std::string &attName,
     // This will throw an exception because attribute doesn't exist
     IFunction::setAttribute(attName, attr);
   } else if (attRef.first == &m_control) {
+    cacheSourceParameters();
     m_source.reset();
   }
   attRef.first->setAttribute(attRef.second, attr);
@@ -627,6 +628,13 @@ void CrystalFieldFunction::buildSourceFunction() const {
   setSource(m_control.buildSource());
   m_nControlParams = m_control.nParams();
   m_nControlSourceParams = m_nControlParams + m_source->nParams();
+  if (!m_parameterResetCache.empty() &&
+      m_parameterResetCache.size() == m_source->nParams()) {
+    for (size_t i = 0; i < m_parameterResetCache.size(); ++i) {
+      m_source->setParameter(i, m_parameterResetCache[i]);
+    }
+  }
+  m_parameterResetCache.clear();
 }
 
 /// Update spectrum function if necessary.
@@ -1369,6 +1377,21 @@ void CrystalFieldFunction::makeMapsMultiSiteMultiSpectrum() const {
       prefix.append(std::to_string(ion)).append(".").append(physPropPrefix);
       i += makeMapsForFunction(*spectrum.getFunction(ion), i, prefix);
     }
+  }
+}
+
+/// Temporary cache parameter values of the source function if it's
+/// initialised
+void CrystalFieldFunction::cacheSourceParameters() const {
+  if (!m_source) {
+    // No function - nothing to cache
+    m_parameterResetCache.clear();
+    return;
+  }
+  auto np = m_source->nParams();
+  m_parameterResetCache.resize(np);
+  for (size_t i = 0; i < np; ++i) {
+    m_parameterResetCache[i] = m_source->getParameter(i);
   }
 }
 

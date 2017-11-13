@@ -70,28 +70,5 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme,
 void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
   QDesktopServices::unsetUrlHandler(scheme);
 }
-
-/**
- * Pass through method to MantidDesktopServices::storageLocation. See Qt
- * documentation for
- * further details.
- * @param type File type
- */
-QString MantidDesktopServices::storageLocation(
-    QDesktopServices::StandardLocation type) {
-  return QDesktopServices::storageLocation(type);
-}
-
-/**
- * Pass through method to MantidDesktopServices::displayName. See Qt
- * documentation
- * for
- * further details.
- * @param type Location type
- */
-QString
-MantidDesktopServices::displayName(QDesktopServices::StandardLocation type) {
-  return QDesktopServices::displayName(type);
-}
 }
 }

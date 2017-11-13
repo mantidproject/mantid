@@ -985,7 +985,8 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 add_library ( Algorithms ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms
-						           COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS" )
+  COMPILE_DEFINITIONS "IN_MANTID_ALGORITHMS"
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
