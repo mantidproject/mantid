@@ -193,6 +193,44 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
+/** Map a vector of detector indices to a vector of global spectrum indices.
+ *
+ * The mapping is based on the held spectrum definitions. Throws if any spectrum
+ * maps to more than one detectors. Throws if there is no 1:1 mapping from
+ * detectors to spectra, such as when some of the detectors have no matching
+ * spectrum. */
+std::vector<GlobalSpectrumIndex>
+IndexInfo::globalSpectrumIndicesFromDetectorIndices(
+    const std::vector<size_t> &detectorIndices) const {
+  std::vector<bool> detectorMap;
+  for (const auto &index : detectorIndices) {
+    // IndexInfo has no knowledge of the maximum detector index so we workaround
+    // this knowledge gap by assuming below that any index beyond the end of the
+    // map is `false`.
+    if (index >= detectorMap.size())
+      detectorMap.resize(index + 1, false);
+    detectorMap[index] = true;
+  }
+
+  std::vector<GlobalSpectrumIndex> spectrumIndices;
+  for (size_t i = 0; i < size(); ++i) {
+    const auto &spectrumDefinition = m_spectrumDefinitions->operator[](i);
+    if (spectrumDefinition.size() == 1) {
+      const auto detectorIndex = spectrumDefinition[0].first;
+      if (detectorMap.size() > detectorIndex && detectorMap[detectorIndex])
+        spectrumIndices.push_back(i);
+    }
+    if (spectrumDefinition.size() > 1)
+      throw std::runtime_error("SpectrumDefinition containes multiple entries. "
+                               "No unique mapping from detector to spectrum "
+                               "possible.");
+  }
+  if (detectorIndices.size() != spectrumIndices.size())
+    throw std::runtime_error(
+        "Some of the requested detectors do not have a corresponding spectrum");
+  return spectrumIndices;
+}
+
 /// Returns true if the given global index is on this partition.
 bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
   // A map from global index to partition might be faster, consider adding this

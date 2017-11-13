@@ -1,12 +1,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CropToComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTypes/SpectrumDefinition.h"
+#include "MantidIndexing/Conversion.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/IndexInfo.h"
 
 namespace {
 std::vector<size_t>
@@ -22,31 +22,6 @@ getDetectorIndices(const Mantid::API::MatrixWorkspace &workspace,
     detIndices.insert(detIndices.end(), indices.begin(), indices.end());
   }
   return detIndices;
-}
-
-std::vector<size_t>
-getWorkspaceIndices(const Mantid::API::MatrixWorkspace &workspace,
-                    const std::vector<size_t> &detectorIndices) {
-  std::vector<bool> detectorMap(workspace.detectorInfo().size(), false);
-  for (const auto &index : detectorIndices)
-    detectorMap[index] = true;
-
-  const auto &spectrumInfo = workspace.spectrumInfo();
-  std::vector<size_t> spectrumIndices;
-  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
-    if (spectrumDefinition.size() == 1 &&
-        detectorMap[spectrumDefinition[0].first])
-      spectrumIndices.push_back(i);
-    if (spectrumDefinition.size() > 1)
-      throw std::runtime_error("Cannot map from detector ID to workspace index "
-                               "-- spectrum in MatrixWorkspace maps to more "
-                               "than 1 detector.");
-  }
-  if (detectorIndices.size() != spectrumIndices.size())
-    throw std::runtime_error(
-        "Some of the requested detectors do not have a corresponding spectrum");
-  return spectrumIndices;
 }
 }
 
@@ -111,7 +86,8 @@ void CropToComponent::exec() {
 
   // Get the corresponding workspace indices from the detectors
   const auto &workspaceIndices =
-      getWorkspaceIndices(*inputWorkspace, detectorIndices);
+      inputWorkspace->indexInfo().globalSpectrumIndicesFromDetectorIndices(
+          detectorIndices);
 
   // Run ExtractSpectra in order to obtain the cropped workspace
   auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -120,7 +96,8 @@ void CropToComponent::exec() {
   extract_alg->initialize();
   extract_alg->setProperty("InputWorkspace", inputWorkspace);
   extract_alg->setProperty("OutputWorkspace", "dummy");
-  extract_alg->setProperty("WorkspaceIndexList", workspaceIndices);
+  extract_alg->setProperty("WorkspaceIndexList",
+                           Indexing::castVector<size_t>(workspaceIndices));
   extract_alg->execute();
   Mantid::API::MatrixWorkspace_sptr outputWorkspace =
       extract_alg->getProperty("OutputWorkspace");
