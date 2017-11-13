@@ -33,7 +33,8 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     auto groupName = description;
     auto cleanDescription = description;
 
-    static std::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
+    static std::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)",
+                                             std::regex_constants::basic);
     std::smatch matches;
     if (std::regex_search(description, matches, descriptionFormatRegex)) {
       constexpr auto preThetaGroup = 1;
