@@ -7,7 +7,12 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ExtractSpectra2 : TODO: DESCRIPTION
+/** Extracts specified spectra from a workspace and places them in a new
+  workspace. In contrast to ExtractSpectra version 1 this does not support
+  cropping X at the same time.
+
+  @author Simon Heybrock
+  @date 2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
