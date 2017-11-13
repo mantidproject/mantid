@@ -124,8 +124,7 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
                                                                    ignore_indices=hydrogen_indices)
 
         print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data,
-                                    runs.replace(', ', '+'), iteration_flags)
+        results = fit_tof_iteration(sample_data, container_data, iteration_flags)
         exit_iteration += 1
 
         if last_results is not None and convergence_threshold is not None:
