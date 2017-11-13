@@ -1,45 +1,50 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CropToComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace {
-
-void getDetectors(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::vector<std::string> &componentNames,
-    std::vector<Mantid::Geometry::IDetector_const_sptr> &detectors) {
-  auto instrument = workspace->getInstrument();
+std::vector<size_t>
+getDetectorIndices(const Mantid::API::MatrixWorkspace &workspace,
+                   const std::vector<std::string> &componentNames) {
+  const auto &compInfo = workspace.componentInfo();
+  const auto instrument = workspace.getInstrument();
+  std::vector<size_t> detIndices;
   for (const auto &componentName : componentNames) {
-    instrument->getDetectorsInBank(detectors, componentName);
+    const auto comp = instrument->getComponentByName(componentName);
+    const auto compIndex = compInfo.indexOf(comp->getComponentID());
+    const auto indices = compInfo.detectorsInSubtree(compIndex);
+    detIndices.insert(detIndices.end(), indices.begin(), indices.end());
   }
+  return detIndices;
 }
 
-void getWorkspaceIndices(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    std::vector<Mantid::Geometry::IDetector_const_sptr> &detectors,
-    std::vector<size_t> &workspaceIndices) {
-  const auto numberOfDetectors = static_cast<int>(detectors.size());
-  std::vector<Mantid::detid_t> detectorIds(numberOfDetectors);
+std::vector<size_t>
+getWorkspaceIndices(const Mantid::API::MatrixWorkspace &workspace,
+                    const std::vector<size_t> &detectorIndices) {
+  std::vector<bool> detectorMap(workspace.detectorInfo().size(), false);
+  for (const auto &index : detectorIndices)
+    detectorMap[index] = true;
 
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int index = 0; index < numberOfDetectors; ++index) {
-    auto det = detectors[index];
-    detectorIds[index] = det->getID();
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  std::vector<size_t> spectrumIndices;
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+    const auto detectorIndex = spectrumDefinition[0].first;
+    if (spectrumDefinition.size() == 1 && detectorMap[detectorIndex])
+      spectrumIndices.push_back(i);
+    if (spectrumDefinition.size() > 1)
+      throw std::runtime_error("Cannot map from detector ID to workspace index "
+                               "-- spectrum in MatrixWorkspace maps to more "
+                               "than 1 detector.");
   }
-
-  // Get the corresponding workspace indices
-  auto detIdToWorkspaceIndexMap =
-      workspace->getDetectorIDToWorkspaceIndexMap(true);
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int index = 0; index < numberOfDetectors; ++index) {
-    workspaceIndices[index] = detIdToWorkspaceIndexMap[detectorIds[index]];
-  }
-
-  // Sort the workspace indices
-  std::sort(workspaceIndices.begin(), workspaceIndices.end());
+  return spectrumIndices;
 }
 }
 
@@ -99,12 +104,12 @@ void CropToComponent::exec() {
       getProperty("InputWorkspace");
 
   // Get all detectors
-  std::vector<Mantid::Geometry::IDetector_const_sptr> detectors;
-  getDetectors(inputWorkspace, componentNames, detectors);
+  const auto &detectorIndices =
+      getDetectorIndices(*inputWorkspace, componentNames);
 
   // Get the corresponding workspace indices from the detectors
-  std::vector<size_t> workspaceIndices(detectors.size());
-  getWorkspaceIndices(inputWorkspace, detectors, workspaceIndices);
+  const auto &workspaceIndices =
+      getWorkspaceIndices(*inputWorkspace, detectorIndices);
 
   // Run ExtractSpectra in order to obtain the cropped workspace
   auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
