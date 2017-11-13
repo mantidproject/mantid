@@ -14,6 +14,7 @@ from six import with_metaclass
 import ui_add_runs_page
 from PyQt4.QtCore import pyqtSignal
 from sans.gui_logic.models.add_runs_model import BinningType
+from mantidqtpython import MantidQt
 
 class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     manageDirectoriesPressed = pyqtSignal()
@@ -56,6 +57,37 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
             return BinningType.FromMonitors
         elif index == 2:
             return BinningType.SaveAsEventData
+
+    def show_directories_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
+    def filter_for_extensions(self, extensions):
+        if extensions:
+            return "Files ( *" + " *".join(extensions) + ")"
+        else:
+            return "Files ()"
+
+    def previous_directory_settings(self):
+        previous_directories = QtCore.QSettings()
+        previous_directories.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns")
+        return previous_directories
+
+    def previous_or_default_directory(self, settings, default):
+        directory = settings.value("InPath", default)
+
+    def store_previous_directory(self, settings, path):
+        previous_file = QtCore.QFileInfo(path)
+        settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
+
+    def show_file_picker(self, extensions, search_directories):
+        previous_directories = self.previous_directory_settings()
+        default_directory = search_directories[0]
+        directory = self.previous_or_default_directory(previous_directories, default_directory)
+        file_filter = self.filter_for_extensions(extensions)
+        chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
+        if chosen_files:
+            self.store_previous_directory(previous_directories, chosen_files[0])
+        return chosen_files
 
     def run_list(self):
         return self.fileListLineEdit.text()
