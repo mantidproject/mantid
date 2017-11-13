@@ -200,8 +200,8 @@ void LoadILLDiffraction::loadDataScan() {
   }
 
   resolveScanType();
-
   resolveInstrument();
+  computeThetaOffset();
 
   if (m_scanType == DetectorScan) {
     initMovingWorkspace(scan);
@@ -347,10 +347,7 @@ void LoadILLDiffraction::calculateRelativeRotations(
       firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
   if (m_instName == "D20") {
-    // this is the magical formula to treat the offset of the 2theta0 decoder.
-    firstTubeRotationAngle +=
-        static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
-        D20_PIXEL_SIZE / (m_resolutionMode * 2);
+    firstTubeRotationAngle += m_offsetTheta;
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
@@ -696,11 +693,8 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
   double twoTheta0Actual = twoTheta0Read;
-  if (m_instName == "D20") {
-    // this is the magical formula to treat the offset of the 2theta0 decoder.
-    twoTheta0Actual +=
-        static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
-        D20_PIXEL_SIZE / (m_resolutionMode * 2);
+  if (m_instName == "D20") {    
+    twoTheta0Actual += m_offsetTheta;
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
@@ -769,6 +763,14 @@ bool LoadILLDiffraction::containsCalibratedData(
   // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
   // present.
   return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
+}
+
+/**
+ * Computes the 2theta offset of the decoder for D20
+ */
+void LoadILLDiffraction::computeThetaOffset() {
+  m_offsetTheta = static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
+                  D20_PIXEL_SIZE / (static_cast<double>(m_resolutionMode) * 2);
 }
 
 } // namespace DataHandling
