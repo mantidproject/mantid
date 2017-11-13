@@ -64,6 +64,9 @@ class BASISReduction(PythonAlgorithm):
         # properties related to monitor
         self._noMonNorm = None
 
+        # properties related to filtering of events
+        self._ws_splitter = None
+
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
         self._etBins = None
@@ -104,6 +107,10 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False,
                              "Stop monitor normalization")
+        self.declareProperty('ExcludeTimeSegment', '',
+                             'Exclude from reduction a contigous time segment; '+\
+                             'Examples: "0-60" from start to 60 seconds, "300-600", '+\
+                             '"120-end" from 120s to the end of the run')
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
@@ -201,6 +208,8 @@ class BASISReduction(PythonAlgorithm):
         self._qBins[0] -= self._qBins[1]/2.0  # leftmost bin boundary
         self._qBins[2] += self._qBins[1]/2.0  # rightmost bin boundary
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
+        if self.getProperty("ExcludeTimeSegment").value:
+           self._ws_splitter = self.generateSplitterWorkspace()
         self._maskFile = self.getProperty("MaskFile").value
         maskfile = self.getProperty("MaskFile").value
         self._maskFile = maskfile if maskfile else\
@@ -353,6 +362,9 @@ class BASISReduction(PythonAlgorithm):
                 sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
                 if self._normalizationType == "by Q slice":
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
+            if self._ws_splitter:
+                sapi.DeleteWorkspace('splitter')
+                sapi.DeleteWorkspace('TOFCorrectWS')
 
     def _getRuns(self, rlist, doIndiv=True):
         """
@@ -413,10 +425,13 @@ class BASISReduction(PythonAlgorithm):
                 kwargs = {}
             sapi.LoadEventNexus(Filename=run_file,
                                 OutputWorkspace=ws_name, **kwargs)
-
+            if self._ws_splitter and extra_ext is None:
+                self._filterEvents(ws_name)
             if not self._noMonNorm:
                 sapi.LoadNexusMonitors(Filename=run_file,
                                        OutputWorkspace=mon_ws_name)
+            if self._ws_splitter and extra_ext is None:
+                self._filterEvents(mon_ws_name)
             if sam_ws != ws_name:
                 sapi.Plus(LHSWorkspace=sam_ws,
                           RHSWorkspace=ws_name,
@@ -560,6 +575,42 @@ class BASISReduction(PythonAlgorithm):
                    Factor=1./maximumYvalue,
                    Operation="Multiply")
 
+    def generateSplitterWorkspace(self):
+        r"""Create a table workspace with time intervals to keep
+        """
+        inf = 86400  # a run a full day long
+        a, b = self.getProperty("ExcludeTimeSegment").value.split('-')
+        b = inf if 'end' in b else float(b)
+        a = float(a)
+        splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace='splitter')
+        splitter.addColumn('double', 'start')
+        splitter.addColumn('double', 'stop')
+        splitter.addColumn('str', 'target') #, 'str')
+        if a == 0.0:
+            splitter.addRow([b, inf, '0'])
+        elif b == inf:
+            splitter.addRow([0, a, '0'])
+        else:
+            splitter.addRow([0, a, '0'])
+            splitter.addRow([b, inf, '0'])
+        return splitter
+
+    def _filterEvents(ws_name):
+        r"""Filter out ExcludeTimeSegment
+
+        Parameters
+        ----------
+        ws_name : str
+            name of the workspace to filter
+        """
+        sapi.FilterEvents(InputWorkspace=ws_name,
+                          SplitterWorkspace=self._ws_splitter.name(), 
+                          OutputWorkspaceBaseName='splitted', 
+                          GroupWorkspaces=True,
+                          OutputWorkspaceIndexedFrom1=True,
+                          RelativeTime=True)
+        sapi.RenameWorkspace(InputWorkspace='splitted_0', OutputWorkspace=ws_name)
+        sapi.DeleteWorkspace('splitted')
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
