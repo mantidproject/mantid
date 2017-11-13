@@ -69,6 +69,33 @@ public:
     TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
   }
 
+  void test_copyDataFrom_does_not_copy_indices() {
+    Histogram1D histogram{Histogram::XMode::Points, Histogram::YMode::Counts};
+    histogram.setHistogram(Points(1), Counts(1));
+    EventList eventList;
+    eventList.setHistogram(BinEdges(2));
+    std::unique_ptr<const ISpectrum> specHist =
+        Kernel::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        Histogram::XMode::Points, Histogram::YMode::Counts);
+    target->setSpectrumNo(37);
+    target->setDetectorID(42);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
+    TS_ASSERT(target->points());
+    TS_ASSERT_EQUALS(&target->points()[0], &histogram.points()[0]);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+  }
+
   void testcheckAndSanitizeHistogramThrowsNullY() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};

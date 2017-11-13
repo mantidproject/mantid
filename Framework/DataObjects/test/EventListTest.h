@@ -79,6 +79,55 @@ public:
     TS_ASSERT_EQUALS(target->counts()[0], 1.0);
   }
 
+  void test_copyDataFrom_does_not_copy_indices() {
+    EventList eventList;
+    eventList.setHistogram(BinEdges{0.0, 2.0});
+    eventList += TofEvent(1.0, 2);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<EventList>();
+    target->setSpectrumNo(37);
+    target->setDetectorID(42);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+    TS_ASSERT_EQUALS(target->counts()[0], 1.0);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+  }
+
+  void test_copyDataFrom_event_data_details() {
+    EventList eventList;
+    eventList.setHistogram(BinEdges{0.0, 2.0});
+    eventList += TofEvent(1.0, 2);
+    EventList target;
+
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::TOF)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_EQUALS(target.getEvents(), eventList.getEvents());
+    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+
+    eventList.switchTo(EventType::WEIGHTED);
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
+    TS_ASSERT_EQUALS(target.getWeightedEvents(), eventList.getWeightedEvents());
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+
+    eventList.switchTo(EventType::WEIGHTED_NOTIME);
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED_NOTIME)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
+    TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(),
+                     eventList.getWeightedEventsNoTime());
+  }
+
   //==================================================================================
   //--- Basics  ----
   //==================================================================================
