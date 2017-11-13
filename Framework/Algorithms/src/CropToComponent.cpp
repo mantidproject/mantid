@@ -43,6 +43,9 @@ getWorkspaceIndices(const Mantid::API::MatrixWorkspace &workspace,
                                "-- spectrum in MatrixWorkspace maps to more "
                                "than 1 detector.");
   }
+  if (detectorIndices.size() != spectrumIndices.size())
+    throw std::runtime_error(
+        "Some of the requested detectors do not have a corresponding spectrum");
   return spectrumIndices;
 }
 }
