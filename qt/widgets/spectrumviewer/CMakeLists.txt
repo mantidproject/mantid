@@ -52,45 +52,30 @@ set ( UI_FILES
        inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui
 )
 
-
-include_directories ( inc )
-
-
 ###########################################################################
 # Main Library Target
 ###########################################################################
-
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-
-# --- Add icons qrc ------
-
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-# For Windows:
-add_definitions ( -DIN_MANTIDQT_SPECTRUMVIEWER )
-
-# This creates the target library
-add_library ( MantidQtWidgetsSpectrumViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_SPECTRUMVIEWER
+  INCLUDE_DIRS
+   inc
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsSpectrumViewerQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
-# ... and links to other required libs
-target_link_libraries ( MantidQtWidgetsSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
-            ${CORE_MANTIDLIBS}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES} )
-
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsSpectrumViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

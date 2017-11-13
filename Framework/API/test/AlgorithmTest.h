@@ -244,6 +244,14 @@ public:
     TS_ASSERT_EQUALS(false, alg.isChild());
   }
 
+  void testAlwaysStoreInADSGetterSetter() {
+    TS_ASSERT(alg.getAlwaysStoreInADS())
+    alg.setAlwaysStoreInADS(false);
+    TS_ASSERT(!alg.getAlwaysStoreInADS())
+    alg.setAlwaysStoreInADS(true);
+    TS_ASSERT(alg.getAlwaysStoreInADS())
+  }
+
   void testAlgStartupLogging() {
     TSM_ASSERT_EQUALS("Default logging should be true", true,
                       alg.getAlgStartupLogging());

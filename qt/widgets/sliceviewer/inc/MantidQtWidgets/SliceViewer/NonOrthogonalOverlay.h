@@ -6,9 +6,8 @@
 #include <qwt_plot.h>
 #include <qwt_valuelist.h>
 #include <QPainter>
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"

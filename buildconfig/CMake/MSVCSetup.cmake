@@ -131,6 +131,9 @@ configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
 ###########################################################################
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
-set ( PVPLUGINS_DIR PVPlugins )
-set ( PVPLUGINS_SUBDIR PVPlugins ) # Need to tidy these things up!
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview ) # Need to tidy these things up!
