@@ -83,6 +83,12 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   return m_indices;
 }
 
+/** Return IndexInfo created from workspace but containing selected spectra.
+ *
+ * The selected spectra are the same as in the SpectrumIndexSet returned by this
+ * property and the order is guaranteed to be consistent. That is, if the Nth
+ * entry in the SpectrumIndexSet is M, the spectrum with index M in the input
+ * workspace is equal to the spectrum with index N in the returned IndexInfo. */
 Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
   const auto &indexInfo = getIndexInfoFromWorkspace();
   if (m_value.empty())
