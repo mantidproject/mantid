@@ -334,8 +334,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
 
         # loop over all the requested pixels to derive the calibration sequentially
         # this is a serial loop of about 3K iterations, so performance is critical
-        self._progress = Progress(self, start=0.0, end=1.0,
-                                  nreports=self._pixel_range[1] - self._pixel_range[0] + 1)
+        nreports = int(self._pixel_range[1] - self._pixel_range[0] + 1)
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
         for det in range(self._pixel_range[0] - 1, self._pixel_range[1]):
             self._progress.report('Computing the relative calibration factor for pixel #' + str(det))
             ws = '__det_' + str(det)
