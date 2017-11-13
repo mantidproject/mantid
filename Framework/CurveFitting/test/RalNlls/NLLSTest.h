@@ -16,14 +16,13 @@ using namespace Mantid::API;
 
 class NLLSTest : public CxxTest::TestSuite {
 public:
-
   void test_Galahad_ExpDecay() {
     auto ws = make_exp_decay_workspace();
     Fit fit;
     fit.initialize();
     fit.setPropertyValue("Function", "name=ExpDecay");
     fit.setProperty("InputWorkspace", ws);
-    fit.setProperty("Minimizer", "Trust Region"); 
+    fit.setProperty("Minimizer", "Trust Region");
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_DELTA(fun->getParameter(0), 60.195, 0.001);
