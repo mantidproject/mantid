@@ -159,7 +159,7 @@ def _gen_required_files():
 
 def run_create_cal():
     ceria_run = 98494
-    inst_obj = setup_inst_object(mode="tt88")
+    inst_obj = setup_inst_object(tt_mode="tt88", focus_mode="all")
     return inst_obj.create_cal(run_number=ceria_run)
 
 
