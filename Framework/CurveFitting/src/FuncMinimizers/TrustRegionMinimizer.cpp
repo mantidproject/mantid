@@ -5,12 +5,19 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 
 #include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
+
+// clang-format off
+///@cond nodoc
+DECLARE_FUNCMINIMIZER(TrustRegionMinimizer, Trust Region)
+///@endcond
+// clang-format on
 
 TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
   declareProperty("InitialRadius", 100.0,
