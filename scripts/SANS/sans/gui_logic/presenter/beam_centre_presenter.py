@@ -139,4 +139,3 @@ def find_beam_centre(state, beam_centre_model):
                            x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
                            find_direction=find_direction, reduction_method=True)
     return centre
-

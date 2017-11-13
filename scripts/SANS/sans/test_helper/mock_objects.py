@@ -26,6 +26,7 @@ def create_mock_masking_table():
     view.get_current_row = mock.MagicMock(return_value=3)
     return view
 
+
 def create_mock_beam_centre_tab(model = None):
     view = mock.create_autospec(BeamCentre, spec_set=False)
     view.get_current_row = mock.MagicMock(return_value=3)
@@ -43,6 +44,7 @@ def create_mock_beam_centre_tab(model = None):
         view.scale_1 = model.scale_1
         view.scale_2 = model.scale_2
     return view
+
 
 def get_cell_mock(row, column, convert_to=None):
     _ = convert_to  # noqa
