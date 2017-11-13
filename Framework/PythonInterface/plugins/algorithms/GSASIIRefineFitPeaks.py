@@ -46,13 +46,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return "GSASIIRefineFitPeaks"
 
     def summary(self):
-        return ("Perform Rietveld refinement of lattice parameters on a diffraction spectrum "
+        return ("Perform Rietveld or Pawley refinement of lattice parameters on a diffraction spectrum "
                 "using GSAS-II scriptable API")
 
     def PyInit(self):
         self.declareProperty(name=self.PROP_REFINEMENT_METHOD, defaultValue=self.REFINEMENT_METHODS[0],
                              validator=StringListValidator(self.REFINEMENT_METHODS), direction=Direction.Input,
-                             doc="Refinement method (TODO)")
+                             doc="Refinement method (Rietvield or Pawley)")
 
         self.declareProperty(WorkspaceProperty(name=self.PROP_INPUT_WORKSPACE, defaultValue="",
                                                direction=Direction.Input), doc="Workspace with spectra to fit peaks")
@@ -142,7 +142,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         """
         gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
         sys.path.append(gsas_path)
-        import GSASIIscriptable as GSASII
+        try:
+            import GSASIIscriptable as GSASII
+        except ImportError:
+            error_msg = "Could not import GSAS-II. Are you sure it's installed at {}?".format(gsas_path)
+            logger.error(error_msg)
+            raise ImportError(error_msg)
 
         gsas_proj_path = self.getPropertyValue(self.PROP_GSAS_PROJ_PATH)
         gsas_proj = GSASII.G2Project(filename=gsas_proj_path)
@@ -226,7 +231,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         """
         Suppress output from print statements. This is mainly useful for debugging, as GSAS does a lot of printing.
         """
-        if self.getPropertyValue(self.PROP_SUPPRESS_GSAS_OUTPUT) == "1":
+        if self.getProperty(self.PROP_SUPPRESS_GSAS_OUTPUT).value:
             self.log().information("Suppressing stdout")
             with open(os.devnull, "w") as devnull:
                 old_stdout = sys.stdout
