@@ -192,23 +192,23 @@ EventList::~EventList() {
 }
 
 /// Copy data from another EventList, via ISpectrum reference.
-void EventList::copyDataFrom(const ISpectrum &other) {
-  other.copyDataInto(*this);
+void EventList::copyDataFrom(const ISpectrum &source) {
+  source.copyDataInto(*this);
 }
 
-/// Used by copyDataFrom for dynamic dispatch for `other`.
-void EventList::copyDataInto(EventList &other) const {
-  other.m_histogram = m_histogram;
-  other.events = events;
-  other.weightedEvents = weightedEvents;
-  other.weightedEventsNoTime = weightedEventsNoTime;
-  other.eventType = eventType;
-  other.order = order;
+/// Used by copyDataFrom for dynamic dispatch for its `source`.
+void EventList::copyDataInto(EventList &sink) const {
+  sink.m_histogram = m_histogram;
+  sink.events = events;
+  sink.weightedEvents = weightedEvents;
+  sink.weightedEventsNoTime = weightedEventsNoTime;
+  sink.eventType = eventType;
+  sink.order = order;
 }
 
 /// Used by Histogram1D::copyDataFrom for dynamic dispatch for `other`.
-void EventList::copyDataInto(Histogram1D &other) const {
-  other.setHistogram(histogram());
+void EventList::copyDataInto(Histogram1D &sink) const {
+  sink.setHistogram(histogram());
 }
 
 // --------------------------------------------------------------------------

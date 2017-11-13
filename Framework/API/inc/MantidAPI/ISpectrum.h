@@ -60,7 +60,7 @@ public:
   void copyInfoFrom(const ISpectrum &other);
 
   /// Copy data from another ISpectrum with double-dynamic dispatch.
-  virtual void copyDataFrom(const ISpectrum &other) = 0;
+  virtual void copyDataFrom(const ISpectrum &source) = 0;
 
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
   virtual MantidVec &dataX() = 0;

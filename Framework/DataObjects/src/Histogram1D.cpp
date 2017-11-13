@@ -32,13 +32,13 @@ Histogram1D &Histogram1D::operator=(const ISpectrum &rhs) {
 }
 
 /// Copy data from a Histogram1D or EventList, via ISpectrum reference.
-void Histogram1D::copyDataFrom(const ISpectrum &other) {
-  other.copyDataInto(*this);
+void Histogram1D::copyDataFrom(const ISpectrum &source) {
+  source.copyDataInto(*this);
 }
 
-/// Used by copyDataFrom for dynamic dispatch for `other`.
-void Histogram1D::copyDataInto(Histogram1D &other) const {
-  other.m_histogram = m_histogram;
+/// Used by copyDataFrom for dynamic dispatch for its `source`.
+void Histogram1D::copyDataInto(Histogram1D &sink) const {
+  sink.m_histogram = m_histogram;
 }
 
 void Histogram1D::clearData() {
