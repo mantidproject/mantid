@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
 
@@ -365,6 +366,9 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
             dataX.begin());
   const auto dataY = computeOutput(func, dataX);
 
+  if (dataY.empty())
+    return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
   IAlgorithm_sptr createWsAlg =
       createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
   createWsAlg->execute();
@@ -383,6 +387,9 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
 std::vector<double>
 IndirectDataAnalysisTab::computeOutput(IFunction_sptr func,
                                        const std::vector<double> &dataX) {
+  if (dataX.empty())
+    return std::vector<double>();
+
   FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   func->function(domain, outputData);
