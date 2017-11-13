@@ -22,14 +22,18 @@ public:
   std::vector<std::pair<int, size_t>> getRunNumbersAndBanksIDs();
   void addWorkspace(const int runNumber, const size_t bank,
                     const API::MatrixWorkspace_sptr ws);
+  std::string getWorkspaceFilename(const int runNumber, const size_t bank);
 
 private:
   static const size_t MAX_BANKS = 2;
   static const std::string FOCUSED_WS_NAME;
   std::array<std::unordered_map<int, API::MatrixWorkspace_sptr>, MAX_BANKS>
       m_wsMap;
+  std::array<std::unordered_map<int, std::string>, MAX_BANKS> m_wsFilenameMap;
 
   size_t guessBankID(API::MatrixWorkspace_const_sptr) const;
+  void addWorkspace(const int runNumber, const size_t bank, 
+	  const std::string &filename, API::MatrixWorkspace_sptr ws);
 };
 
 } // namespace CustomInterfaces
