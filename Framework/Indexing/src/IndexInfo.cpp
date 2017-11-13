@@ -202,14 +202,18 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 std::vector<GlobalSpectrumIndex>
 IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const std::vector<size_t> &detectorIndices) const {
-  std::vector<bool> detectorMap;
+  if (!m_spectrumDefinitions)
+    throw std::runtime_error("IndexInfo::"
+                             "globalSpectrumIndicesFromDetectorIndices -- no "
+                             "spectrum definitions available");
+  std::vector<char> detectorMap;
   for (const auto &index : detectorIndices) {
     // IndexInfo has no knowledge of the maximum detector index so we workaround
     // this knowledge gap by assuming below that any index beyond the end of the
-    // map is `false`.
+    // map is 0.
     if (index >= detectorMap.size())
-      detectorMap.resize(index + 1, false);
-    detectorMap[index] = true;
+      detectorMap.resize(index + 1, 0);
+    detectorMap[index] = 1;
   }
 
   std::vector<GlobalSpectrumIndex> spectrumIndices;
@@ -217,13 +221,20 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const auto &spectrumDefinition = m_spectrumDefinitions->operator[](i);
     if (spectrumDefinition.size() == 1) {
       const auto detectorIndex = spectrumDefinition[0].first;
-      if (detectorMap.size() > detectorIndex && detectorMap[detectorIndex])
+      if (detectorMap.size() > detectorIndex &&
+          detectorMap[detectorIndex] != 0) {
+        if (detectorMap[detectorIndex] > 1)
+          throw std::runtime_error(
+              "Multiple spectra correspond to the same detector");
+        // Increment flag to catch two spectra mapping to same detector.
+        ++detectorMap[detectorIndex];
         spectrumIndices.push_back(i);
+      }
     }
     if (spectrumDefinition.size() > 1)
       throw std::runtime_error("SpectrumDefinition containes multiple entries. "
                                "No unique mapping from detector to spectrum "
-                               "possible.");
+                               "possible");
   }
   if (detectorIndices.size() != spectrumIndices.size())
     throw std::runtime_error(
