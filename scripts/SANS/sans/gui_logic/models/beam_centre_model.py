@@ -6,6 +6,9 @@ class BeamCentreModel(object):
         super(BeamCentreModel, self).__init__()
         self.reset_to_defaults_for_instrument()
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def reset_to_defaults_for_instrument(self, instrument = None):
         self._max_iterations = 10
         self._r_min = 60

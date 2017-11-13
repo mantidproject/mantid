@@ -535,10 +535,10 @@ class RunTabPresenter(object):
         self._set_on_view("radius_limit_max")
 
         # Beam Centre
-        self._set_on_view_with_view('lab_pos_1', self._beam_centre_presenter._view)
-        self._set_on_view_with_view('lab_pos_2', self._beam_centre_presenter._view)
-        self._set_on_view_with_view('hab_pos_1', self._beam_centre_presenter._view)
-        self._set_on_view_with_view('hab_pos_2', self._beam_centre_presenter._view)
+        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
 
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
@@ -729,8 +729,8 @@ class RunTabPresenter(object):
         self._set_on_state_model("radius_limit_max", state_model)
 
         # Beam Centre
-        self._set_on_state_model_with_view("lab_pos_1", state_model, self._beam_centre_presenter._view)
-        self._set_on_state_model_with_view("lab_pos_2", state_model, self._beam_centre_presenter._view)
+        self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
+        self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
 
         return state_model
 
@@ -801,11 +801,6 @@ class RunTabPresenter(object):
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
-        if attribute or isinstance(attribute, bool):
-            setattr(state_model, attribute_name, attribute)
-
-    def _set_on_state_model_with_view(self, attribute_name, state_model, view):
-        attribute = getattr(view, attribute_name)
         if attribute or isinstance(attribute, bool):
             setattr(state_model, attribute_name, attribute)
 

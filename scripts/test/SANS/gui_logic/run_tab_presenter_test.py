@@ -101,6 +101,12 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
 
+        # Assert that Beam Centre View is updated correctly
+        self.assertEqual(view.beam_centre.lab_pos_1, 155.45)
+        self.assertEqual(view.beam_centre.lab_pos_2, -169.6)
+        self.assertEqual(view.beam_centre.hab_pos_1, 155.45)
+        self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
+
         # Assert certain function calls
         self.assertTrue(view.get_user_file_path.call_count == 3)
         self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
@@ -163,7 +169,6 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_gets_states_from_view(self):
         # Arrange
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
 
@@ -202,6 +207,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(state0.slice.start_time is None)
         self.assertTrue(state0.slice.end_time is None)
         self.assertTrue(state0.reduction.reduction_dimensionality is ReductionDimensionality.OneDim)
+        self.assertEqual(state0.move.detectors['LAB'].sample_centre_pos1, 0.15544999999999998)
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)

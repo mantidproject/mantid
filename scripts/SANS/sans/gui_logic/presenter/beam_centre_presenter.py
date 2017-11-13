@@ -3,11 +3,11 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 
 from mantid.kernel import Logger
-from sans.sans_batch import SANSCentreFinder
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.common.enums import (FindDirectionEnum)
+from sans.sans_batch import SANSCentreFinder
+from sans.common.enums import FindDirectionEnum
 
 
 class BeamCentrePresenter(object):
@@ -42,7 +42,7 @@ class BeamCentrePresenter(object):
         if view:
             self._view = view
 
-            # Set up row selection listener
+            # Set up run listener
             listener = BeamCentrePresenter.ConcreteBeamCentreListener(self)
             self._view.add_listener(listener)
 
@@ -88,14 +88,14 @@ class BeamCentrePresenter(object):
         self._view.set_run_button_to_processing()
 
         #Update model
-        self.update_model_from_view()
+        self._update_beam_model_from_view()
 
         # Run the task
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
         self._work_handler.process(listener, find_beam_centre, state_copy, self._beam_centre_model)
 
-    def update_model_from_view(self):
+    def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
         self._beam_centre_model.r_max = self._view.r_max
         self._beam_centre_model.max_iterations = self._view.max_iterations
@@ -107,18 +107,36 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
         self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
 
+    def set_on_state_model(self, attribute_name, state_model):
+        attribute = getattr(self._view, attribute_name)
+        if attribute or isinstance(attribute, bool):
+            setattr(state_model, attribute_name, attribute)
 
-def find_beam_centre(state, options):
+    def set_on_view(self, attribute_name, state_model):
+        attribute = getattr(state_model, attribute_name)
+        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+            setattr(self._view, attribute_name, attribute)
+
+
+def find_beam_centre(state, beam_centre_model):
+    """
+    This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
+
+    :param state: A SANS state object
+    :param beam_centre_model: An instance of the BeamCentreModel class.
+    :returns: The centre position found.
+    """
     centre_finder = SANSCentreFinder()
     find_direction = None
-    if options.up_down and options.left_right:
+    if beam_centre_model.up_down and beam_centre_model.left_right:
         find_direction = FindDirectionEnum.All
-    elif options.up_down:
+    elif beam_centre_model.up_down:
         find_direction = FindDirectionEnum.Left_Right
-    elif options.left_right:
+    elif beam_centre_model.left_right:
         find_direction = FindDirectionEnum.Up_Down
 
-    centre = centre_finder(state, r_min=options.r_min, r_max=options.r_max, max_iter=options.max_iterations,
-                           x_start=options.lab_pos_1, y_start=options.lab_pos_2, tolerance=options.tolerance,
+    centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max, max_iter=beam_centre_model.max_iterations,
+                           x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
                            find_direction=find_direction, reduction_method=True)
     return centre
+
