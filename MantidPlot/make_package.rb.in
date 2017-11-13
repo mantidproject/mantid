@@ -159,12 +159,13 @@ if( "@MAKE_VATES@" == "ON" )
 
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
+  `cp #{ParaView_dir}/lib/libNonOrthogonalSource.dylib plugins/paraview/qt4/`
   vatesfiles = ["Contents/MacOS/MantidPlot",
                 "Contents/MacOS/libMantidQtWidgetsCommonQt4.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
                 "plugins/libMantidVatesAlgorithms.dylib",
-                "plugins/qt4/libMantidVatesSimpleGuiViewWidgets.dylib"]
-  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/*.dylib"]
+                "plugins/qt4/libMantidVatesSimpleGuiViewWidgetsQt4.dylib"]
+  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/qt4/*.dylib"]
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -196,7 +197,7 @@ if( "@MAKE_VATES@" == "ON" )
     break if issues_found == 0
   end
   #fix libNonOrthogonalSource.dylib
-  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/libNonOrthogonalSource.dylib`
+  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/qt4/libNonOrthogonalSource.dylib`
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
