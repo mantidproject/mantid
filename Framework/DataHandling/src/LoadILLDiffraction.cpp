@@ -693,7 +693,7 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
   double twoTheta0Actual = twoTheta0Read;
-  if (m_instName == "D20") {    
+  if (m_instName == "D20") {
     twoTheta0Actual += m_offsetTheta;
   }
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
