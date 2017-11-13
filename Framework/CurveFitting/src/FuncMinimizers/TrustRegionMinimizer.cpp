@@ -12,18 +12,17 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-using namespace NLLS;
-
 TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
   declareProperty("InitialRadius", 100.0,
                   "Initial radius of the trust region.");
 }
 
-/// Initialise the minimizer.
-/// @param costFunction :: The cost function to minimize. Must be the least
-/// squares.
-/// @param maxIterations :: Maximum number of iterations that the minimiser will
-/// do.
+/** Initialise the minimizer.
+ *  @param costFunction :: The cost function to minimize. Must be the least
+ *  squares.
+ *  @param maxIterations :: Maximum number of iterations that the minimiser will
+ *  do.
+ */
 void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
                                       size_t maxIterations) {
   m_leastSquares =
@@ -57,9 +56,10 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
   m_options.initial_radius = getProperty("InitialRadius");
 }
 
-/// Evaluate the fitting function and calculate the residuals.
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The output fortran vector with the weighted residuals.
+/** Evaluate the fitting function and calculate the residuals.
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param f :: The output fortran vector with the weighted residuals.
+ */
 void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
                                  DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
@@ -76,9 +76,10 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
   }
 }
 
-/// Evaluate the Jacobian
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param J :: The output fortran matrix with the weighted Jacobian.
+/** Evaluate the Jacobian
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param J :: The output fortran matrix with the weighted Jacobian.
+ */
 void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
                                  DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
@@ -99,10 +100,11 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
   }
 }
 
-/// Evaluate the Hessian
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The fortran vector with the weighted residuals.
-/// @param h :: The fortran matrix with the Hessian.
+/** Evaluate the Hessian
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param f :: The fortran vector with the weighted residuals.
+ *  @param h :: The fortran matrix with the Hessian.
+ */
 void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
                                   const DoubleFortranVector &f,
                                   DoubleFortranMatrix &h) const {
@@ -117,7 +119,8 @@ void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
   h.zero();
 }
 
-/// Perform a single iteration.
+/** Perform a single iteration.
+ */
 bool TrustRegionMinimizer::iterate(size_t) {
   int max_tr_decrease = 100;
   auto &w = m_workspace;
@@ -160,16 +163,16 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (options.calculate_svd_J) {
       // calculate the svd of J (if needed)
-      getSvdJ(w.J, w.smallest_sv(1), w.largest_sv(1));
+      NLLS::getSvdJ(w.J, w.smallest_sv(1), w.largest_sv(1));
     }
 
-    w.normF = norm2(w.f);
+    w.normF = NLLS::norm2(w.f);
     w.normF0 = w.normF;
 
     // g = -J^Tf
-    multJt(w.J, w.f, w.g);
+    NLLS::multJt(w.J, w.f, w.g);
     w.g *= -1.0;
-    w.normJF = norm2(w.g);
+    w.normJF = NLLS::norm2(w.g);
     w.normJF0 = w.normJF;
     w.normJFold = w.normJF;
 
@@ -227,7 +230,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  double rho = -one; // intialize rho as a negative value
+  double rho = -NLLS::ONE; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
   double normFnew = 0.0;
@@ -235,19 +238,17 @@ bool TrustRegionMinimizer::iterate(size_t) {
   while (!success) { // loop until successful
     no_reductions = no_reductions + 1;
     if (no_reductions > max_tr_decrease + 1) {
-      inform.status = NLLS_ERROR::MAX_TR_REDUCTIONS;
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
-                  w.calculate_step_ws);
+    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options);
 
     // Accept the step?
     w.Xnew = X;
     w.Xnew += w.d;
     evalF(w.Xnew, w.fnew);
     inform.f_eval = inform.f_eval + 1;
-    normFnew = norm2(w.fnew);
+    normFnew = NLLS::norm2(w.fnew);
 
     // Get the value of the model
     //      md :=   m_k(d)
@@ -281,12 +282,12 @@ bool TrustRegionMinimizer::iterate(size_t) {
     }
 
     // Update the TR radius
-    updateTrustRegionRadius(rho, options, inform, w);
+    updateTrustRegionRadius(rho, options, w);
 
     if (!success) {
       // finally, check d makes progress
-      if (norm2(w.d) < std::numeric_limits<double>::epsilon() * norm2(w.Xnew)) {
-        inform.status = NLLS_ERROR::X_NO_PROGRESS;
+      if (NLLS::norm2(w.d) <
+          std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
         m_errorString = "Failed to make progress.";
         return false;
       }
@@ -303,7 +304,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     // g_old = -J_k^T r_k
     w.g_old = w.g;
     // g_mixed = -J_k^T r_{k+1}
-    multJt(w.J, w.fnew, w.g_mixed);
+    NLLS::multJt(w.J, w.fnew, w.g_mixed);
     w.g_mixed *= -1.0;
   }
 
@@ -312,16 +313,16 @@ bool TrustRegionMinimizer::iterate(size_t) {
   inform.g_eval = inform.g_eval + 1;
 
   if (options.calculate_svd_J) {
-    getSvdJ(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
+    NLLS::getSvdJ(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
   }
 
   // g = -J^Tf
-  multJt(w.J, w.f, w.g);
+  NLLS::multJt(w.J, w.f, w.g);
   w.g *= -1.0;
 
   w.normJFold = w.normJF;
   w.normF = normFnew;
-  w.normJF = norm2(w.g);
+  w.normJF = NLLS::norm2(w.g);
 
   // setup the vectors needed if second derivatives are not available
   if (!options.exact_second_derivatives) {
@@ -404,7 +405,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
   return true;
 }
 
-/// Return the current value of the cost function.
+/** Return the current value of the cost function.
+ */
 double TrustRegionMinimizer::costFunctionVal() { return m_leastSquares->val(); }
 
 } // namespace FuncMinimisers

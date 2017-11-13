@@ -18,7 +18,6 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -516,7 +515,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             consider_can = False
 
         # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
 
         kwargs_stitch = {"HABCountsSample": Cf,
                          "HABNormSample": Nf,
@@ -534,6 +533,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                           "LABNormCan": Nr_can,
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
+
+        if rAnds.qRangeUserSelected:
+            q_range_stitch = {"FitMin": fit_min,
+                              "FitMax": fit_max}
+            kwargs_stitch.update(q_range_stitch)
 
         alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
         alg_stitch.execute()

@@ -2,14 +2,19 @@
 #define MANTID_API_PROPERTYWIDGETFACTORY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/Property.h"
-#include <QWidget>
-#include <QGridLayout>
-#include "MantidQtWidgets/Common/PropertyWidget.h"
+
+class QGridLayout;
+class QWidget;
+
+namespace Mantid {
+namespace Kernel {
+class Property;
+}
+}
 
 namespace MantidQt {
 namespace API {
-
+class PropertyWidget;
 /** PropertyWidgetFactory : TODO: DESCRIPTION
 
   @date 2012-02-17

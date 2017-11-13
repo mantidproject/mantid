@@ -41,7 +41,7 @@ def create_van(instrument, run_details, absorb):
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
-                                                               run_details=run_details, output_mode="mods")
+                                                               run_details=run_details)
 
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 

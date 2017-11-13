@@ -126,31 +126,32 @@ set ( UI_FILES
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui
 )
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-include_directories ( inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-add_library ( MantidQtWidgetsInstrumentView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_INSTRUMENTVIEW )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsInstrumentView PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
-endif ()
-
-target_link_libraries ( MantidQtWidgetsInstrumentView LINK_PRIVATE 
-  MantidQtWidgetsCommon
-  ${TCMALLOC_LIBRARIES_LINKTIME}
-  ${CORE_MANTIDLIBS}
-  ${QT_LIBRARIES}
-  ${QWT_LIBRARIES}
-  ${POCO_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${PYTHON_LIBRARIES}
-  ${OPENGL_LIBRARIES}
+# Target
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS
+    IN_MANTIDQT_INSTRUMENTVIEW
+  INCLUDE_DIRS
+    inc
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::QtOpenGL
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
 )
 
-install ( TARGETS MantidQtWidgetsInstrumentView ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtWidgetsInstrumentViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+endif ()

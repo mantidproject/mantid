@@ -22,6 +22,7 @@ if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
     # Link profiles to /etc/profile.d
     ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
     ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+    ln -s $RPM_INSTALL_PREFIX0/@ETC_DIR@/mantid.pth @PYTHON_SITE@/mantid.pth
 else
     # Create symbolic links in world's path
     if [ ! -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then

@@ -207,7 +207,7 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   void init(const Mantid::HistogramData::Histogram &histogram) override {
@@ -215,7 +215,7 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
 

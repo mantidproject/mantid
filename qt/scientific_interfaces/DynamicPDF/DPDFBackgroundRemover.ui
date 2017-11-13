@@ -245,7 +245,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::DisplayCurveFit</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DisplayCurveFit.h</header>
+   <header>MantidQtWidgets/LegacyQwt/DisplayCurveFit.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
