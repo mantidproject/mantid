@@ -198,7 +198,6 @@ set ( INC_FILES
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
 	inc/MantidGeometry/IDetector_fwd.h
-	inc/MantidGeometry/IObject.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
@@ -268,6 +267,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
 	inc/MantidGeometry/Objects/CSGObject.h
+	inc/MantidGeometry/objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
