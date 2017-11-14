@@ -25,7 +25,7 @@ This algorithm loads reflectometry polarization efficiency data from ILL's IDL-s
    the probability of neutron polarization being flipped at the post-sample flipper
 
 :literal:`Phi`
-   the combined polarizer-analyzer efficiencies, nominally :literal:`Phi = P1 + P2 - 2*P1*P2`
+   the combined polarizer-analyzer efficiencies
  
 Note, that the order of the histograms in the output workspace is unspecified. The histograms should be identified by the above labels instead.
 
