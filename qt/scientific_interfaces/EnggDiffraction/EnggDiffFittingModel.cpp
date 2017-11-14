@@ -5,10 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
 #include "MantidAPI/TableRow.h"
-=======
->>>>>>> Re #21171 Fixed pointer problems in model
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -29,8 +26,6 @@ bool isDigit(const std::string &text) {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
-<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
 template <typename T, size_t S>
 T getFromRunMap(const int runNumber, const size_t bank,
                 const RunMap<S, T> map) {
@@ -50,34 +45,18 @@ template <typename T, size_t S>
 void addToRunMap(const int runNumber, const size_t bank, RunMap<S, T> &map,
                  const T itemToAdd) {
   map[bank - 1][runNumber] = itemToAdd;
-=======
-template <typename T>
-T throwIfNecessary(const T toReturn, const bool throws, const std::string &message) {
-	if (throws) {
-		throw std::runtime_error(message);
-	}
-	return toReturn;
->>>>>>> Re #21171 moved save algorithms to model
 }
 
-=======
->>>>>>> Re #21171 Fixed pointer problems in model
 } // anonymous namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
 void EnggDiffFittingModel::addFocusedWorkspace(
     const int runNumber, const size_t bank, const API::MatrixWorkspace_sptr ws,
     const std::string &filename) {
   addToRunMap(runNumber, bank, m_focusedWorkspaceMap, ws);
   addToRunMap(runNumber, bank, m_wsFilenameMap, filename);
-=======
-void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank,
-                                        const API::MatrixWorkspace_sptr ws) {
-	addToRunMap(runNumber, bank, m_wsMap, ws);
->>>>>>> Re #21171 moved save algorithms to model
 }
 
 void EnggDiffFittingModel::addFitResults(
@@ -86,7 +65,6 @@ void EnggDiffFittingModel::addFitResults(
   addToRunMap(runNumber, bank, m_fitParamsMap, ws);
 }
 
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
 std::string
 EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const {
@@ -406,7 +384,8 @@ API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
                                           const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_focusedWorkspaceMap);
-=======
+}
+
 Mantid::API::ITableWorkspace_sptr EnggDiffFittingModel::getFitResults(
 	const int runNumber, const size_t bank){
   return getFromRunMap(runNumber, bank, m_fitResults);
@@ -480,12 +459,7 @@ void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, const size_
 
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getWorkspace(const int runNumber, const size_t bank) {
-<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
-	return getFromRunMap(runNumber, bank, m_wsMap, false, boost::make_shared<Mantid::API::MatrixWorkspace>());
->>>>>>> Re #21171 moved save algorithms to model
-=======
   return getFromRunMap(runNumber, bank, m_wsMap);
->>>>>>> Re #21171 Fixed pointer problems in model
 }
 
 std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
@@ -542,7 +516,6 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
                                   collectedRunBankPairs[0].second);
     renameWorkspace(ws, FOCUSED_WS_NAME);
   } else {
-<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
     std::vector<std::string> workspaceNames;
     std::transform(collectedRunBankPairs.begin(), collectedRunBankPairs.end(),
                    std::back_inserter(workspaceNames),
@@ -551,17 +524,6 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
                                                 runBankPair.second)->getName();
                    });
     groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
-=======
-    const auto group_ws = ADS.retrieveWS<API::WorkspaceGroup>(FOCUSED_WS_NAME);
-	std::vector<std::string> filenames;
-	boost::split(filenames, filename, boost::is_any_of(","));
-
-	for (int i = 0; i != group_ws->getNumberOfEntries(); ++i) {
-		const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-			group_ws->getItem(i));
-		addWorkspace(ws->getRunNumber(), guessBankID(ws), filenames[i], ws);
-	}
->>>>>>> Re #21171 Fixed pointer problems in model
   }
 }
 
