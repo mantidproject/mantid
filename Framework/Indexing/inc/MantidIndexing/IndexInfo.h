@@ -17,6 +17,7 @@ class Communicator;
 }
 namespace Indexing {
 class GlobalSpectrumIndex;
+class RoundRobinPartitioner;
 class SpectrumIndexSet;
 class SpectrumNumberTranslator;
 
@@ -135,6 +136,7 @@ private:
       nullptr};
   mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{
       nullptr};
+  mutable std::unique_ptr<RoundRobinPartitioner> m_partitioner;
 };
 
 } // namespace Indexing
