@@ -5,6 +5,7 @@
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
+#include <boost/algorithm/clamp.hpp>
 #include <cstdint>
 #include <ctime>
 #include <iosfwd>
@@ -164,12 +165,8 @@ inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
  */
 inline DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
   // Make sure that you cannot construct a date that is beyond the limits...
-  if (total_nanoseconds > MAX_NANOSECONDS)
-    _nanoseconds = MAX_NANOSECONDS;
-  else if (total_nanoseconds < MIN_NANOSECONDS)
-    _nanoseconds = MIN_NANOSECONDS;
-  else
-    _nanoseconds = total_nanoseconds;
+  _nanoseconds = boost::algorithm::clamp(total_nanoseconds, MIN_NANOSECONDS,
+                                         MAX_NANOSECONDS);
 }
 
 /** + operator to add time.
