@@ -1,7 +1,7 @@
 import unittest
 import sys
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
-from sans.gui_logic.models.add_runs_model import (AddRunsModel, BinningType)
+from sans.gui_logic.models.add_runs_model import (AddRunsModel, SummableRunModel, BinningType)
 from ui.sans_isis.add_runs_page import AddRunsPage
 
 class FakeSignal:
@@ -44,65 +44,39 @@ class AddRunsPresenterTest(unittest.TestCase):
     def _make_presenter(self, model, view):
         return AddRunsPagePresenter(model, view, None)
 
-    def test_adds_run_when_add_run_pressed(self):
+    def test_searches_for_runs_when_add_run_pressed(self):
+        run_query = '1'
+        no_runs = []
+        self.view.run_list.return_value = run_query
+        self.model.find_all_from_query.return_value = []
+        self.view.addRunsPressed.emit()
+        self.model.find_all_from_query.assert_called_with(run_query)
+
+    def _make_fake_run_model(self, run_name):
+        return SummableRunModel('/home/ejb/{}'.format(run_name))
+
+    def test_adds_search_results_to_model_when_add_run_pressed(self):
         run_name = '1'
-        self.view.run_list.return_value = run_name
-        self.view.addRunsPressed.emit()
-        self.model.add_run.assert_called_with(run_name)
+        run_query = run_name
+        found_run = self._make_fake_run_model(run_name)
 
-    def test_strips_leading_zeroes_from_run(self):
-        run_name_without_leading_zeroes = '9678'
-        run_name = '00000' + run_name_without_leading_zeroes
-        self.view.run_list.return_value = run_name
-        self.view.addRunsPressed.emit()
-        self.model.add_run.assert_called_with(run_name_without_leading_zeroes)
+        self.view.run_list.return_value = run_query
+        self.model.find_all_from_query.return_value = [found_run]
 
-    def test_strips_whitespace_from_run(self):
-        run_name_without_whitespace = '1'
-        run_name = '\t{}   '.format(run_name_without_whitespace)
-        self.view.run_list.return_value = run_name
         self.view.addRunsPressed.emit()
-        self.model.add_run.assert_called_with(run_name_without_whitespace)
+        self.model.add_run.assert_called_with(found_run)
 
-    def test_adds_comma_separated_runs_when_add_run_pressed(self):
-        run_name_1 = '1'
-        run_name_2 = '2'
-        self.view.run_list.return_value =\
-            '{},{}'.format(run_name_1, run_name_2)
-        self.view.addRunsPressed.emit()
-        expected = [mock.call.add_run(run_name_1), mock.call.add_run(run_name_2)]
-        self.assertEqual(expected, self.model.mock_calls)
+    def test_adds_multiple_search_results_to_model_when_add_run_pressed(self):
+        run_names = ['1', '009', '12']
+        run_query = ",".join(run_names)
+        found_runs = [self._make_fake_run_model(run_name) for run_name in run_names]
 
-    def test_adds_dash_separated_range_when_add_run_pressed(self):
-        run_names = ['5','6','7','8']
-        self.view.run_list.return_value =\
-            '{}-{}'.format(run_names[0], int(run_names[-1]) + 1)
-        self.view.addRunsPressed.emit()
-        expected = [mock.call.add_run(run_name)\
-                    for run_name in run_names]
-        self.assertEqual(expected, self.model.mock_calls)
+        self.view.run_list.return_value = run_query
+        self.model.find_all_from_query.return_value = found_runs
 
-    def test_adds_colon_separated_ranges_when_add_run_pressed(self):
-        run_names_1 = ['5','6','7','8']
-        run_names_2 = ['45','46','47','48']
-        self.view.run_list.return_value =\
-            '{}:{},{}:{}'.format(run_names_1[0], int(run_names_1[-1]) + 1,\
-                                 run_names_2[0], int(run_names_2[-1]) + 1)
         self.view.addRunsPressed.emit()
-        expected = [mock.call.add_run(run_name)\
-                    for run_name in run_names_1] +\
-                   [mock.call.add_run(run_name)\
-                    for run_name in run_names_2]
-        self.assertEqual(expected, self.model.mock_calls)
-
-    def test_strips_whitespace_between_runs(self):
-        run_name_1 = '1'
-        run_name_2 = '2'
-        self.view.run_list.return_value =\
-            '{}, \t{}'.format(run_name_1, run_name_2)
-        self.view.addRunsPressed.emit()
-        expected = [mock.call.add_run(run_name_1), mock.call.add_run(run_name_2)]
-        self.assertEqual(expected, self.model.mock_calls)
+        expected = [mock.call.add_run(run) for run in found_runs]
+        self.model.assert_has_calls(expected)
 
     def test_remove_runs_removes_run_from_model(self):
         run_index = 0
@@ -115,7 +89,7 @@ class AddRunsPresenterTest(unittest.TestCase):
         self.view.selected_runs.return_value = run_indices
         self.view.removeRunsPressed.emit()
         expected = [mock.call.remove_run(index) for index in run_indices]
-        self.assertEqual(expected, self.model.mock_calls)
+        self.model.assert_has_calls(expected, self.model.mock_calls)
 
     def test_clears_all_runs_from_model_when_clear_pressed(self):
         self.view.removeAllRunsPressed.emit()

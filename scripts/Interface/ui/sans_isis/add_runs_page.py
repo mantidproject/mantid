@@ -72,6 +72,14 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         previous_directories.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns")
         return previous_directories
 
+    def run_not_found(self):
+        QtGui.QMessageBox.warning(self, "Run Not Found!",\
+            "Could not find one or more of the runs specified.")
+
+    def invalid_run_query(self, message):
+        QtGui.QMessageBox.warning(self, "Invalid Run Query!",\
+            message)
+
     def previous_or_default_directory(self, settings, default):
         directory = settings.value("InPath", default)
 
@@ -98,7 +106,8 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def draw_runs(self, runs):
         model = QtGui.QStandardItemModel()
         for run in runs:
-            item = QtGui.QStandardItem(run)
+            item = QtGui.QStandardItem(run.display_name())
+            item.setToolTip(run.file_path())
             model.appendRow(item)
         self.fileList.setModel(model)
 

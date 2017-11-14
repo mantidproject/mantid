@@ -11,13 +11,14 @@ class AddRunsPagePresenter(object):
     def connect_to_view(self, view):
         view.manageDirectoriesPressed.connect(self.handle_manage_directories_pressed)
         view.addRunsPressed.connect(self.handle_add_items_pressed)
+        view.fileListLineEdit.returnPressed.connect(self.handle_add_items_enter)
         view.removeRunsPressed.connect(self.handle_remove_items_pressed)
         view.removeAllRunsPressed.connect(self.handle_remove_all_items_pressed)
         view.browsePressed.connect(self.handle_browse_pressed)
+        view.sumPressed.connect(self.handle_sum_pressed)
 
         view.binningTypeChanged.connect(self.handle_binning_type_changed)
         view.preserveEventsChanged.connect(self.handle_preserve_events_changed)
-        view.sumPressed.connect(self.handle_sum_pressed)
 
     def handle_remove_all_items_pressed(self):
         self.model.clear_all_runs()
@@ -42,20 +43,29 @@ class AddRunsPagePresenter(object):
             return None
 
     def parse_runs_from_input(self, input):
-        run_ranges_split_on_commas = input.split(',')
-        list_ranges = [run_range.replace(':','-').split('-')\
-                       for run_range in run_ranges_split_on_commas]
-        run_ranges_expanded = [self.list_range_to_iterator(range)\
-                               for range in list_ranges]
-        return (run for run_range in run_ranges_expanded for run in run_range) 
+        return self.model.find_all_from_query(input.replace(':', '-'))
 
+    def add_runs(self, runs):
+        for run in runs:
+            self.model.add_run(run)
+        self.refresh()
+
+    def handle_add_items(self):
+        input = self.view.run_list()
+        error, runs = self.parse_runs_from_input(input)
+        if error:
+            self.view.invalid_run_query(error)
+        else:
+            if runs:
+                self.add_runs(runs)
+            else:
+                self.view.run_not_found()
+
+    def handle_add_items_enter(self):
+        self.handle_add_items()
 
     def handle_add_items_pressed(self):
-        input = self.view.run_list()
-        runs = self.parse_runs_from_input(input)
-        for run in runs:
-            self.model.add_run(str(run).strip())
-        self.refresh()
+        self.handle_add_items()
 
     def refresh(self):
         self.view.draw_runs(self.model)
