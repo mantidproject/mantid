@@ -35,6 +35,8 @@ using namespace Mantid::API;
 
 namespace {
 
+const double SEC_TO_NANO = 1.e9;
+
 /**
  * Calculate the corrected full time in nanoseconds
  * @param event : The event with pulse time and time-of-flight
@@ -1647,9 +1649,8 @@ inline void EventList::compressFatEventsHelper(
 
   // pulsetime bin information - stored as int nanoseconds because it
   // implementation type for DateAndTime object
-  const int64_t PULSETIME_START = timeStart.totalNanoseconds();
-  const double SEC_TO_NANO = 1.e9;
-  const int64_t PULSETIME_DELTA = static_cast<int64_t>(seconds * SEC_TO_NANO);
+  const int64_t pulsetimeStart = timeStart.totalNanoseconds();
+  const int64_t pulsetimeDelta = static_cast<int64_t>(seconds * SEC_TO_NANO);
 
   // pulsetime information
   std::vector<DateAndTime> pulsetimes; // all the times for new event
@@ -1667,12 +1668,12 @@ inline void EventList::compressFatEventsHelper(
 
   // bin if the pulses are histogrammed
   int64_t lastPulseBin =
-      (it->m_pulsetime.totalNanoseconds() - PULSETIME_START) / PULSETIME_DELTA;
+      (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
   int64_t eventPulseBin;
   // loop through events and accumulate weight
   for (; it != events.cend(); ++it) {
-    eventPulseBin = (it->m_pulsetime.totalNanoseconds() - PULSETIME_START) /
-                    PULSETIME_DELTA;
+    eventPulseBin =
+        (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
     if ((eventPulseBin <= lastPulseBin) &&
         (std::fabs(it->m_tof - lastTof) <= tolerance)) {
       // Carry the error and weight
