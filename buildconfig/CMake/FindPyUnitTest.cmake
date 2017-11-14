@@ -3,7 +3,8 @@
 #   Adds a set of python tests based upon the unittest module
 #   Parameters:
 #       _test_src_dir_base :: A base directory when added to the relative test paths gives
-#                             an absolute path to that test
+#                             an absolute path to that test. This directory is added to the
+#                             PYTHONPATH when tests are executed
 #       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
 #                           ${_testname_prefix}_TestName
 #       ${ARGN} :: List of test files
@@ -22,11 +23,11 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${PYTHON_MODULE_OUTPUT_DIRECTORY};$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment seprator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${PYTHON_MODULE_OUTPUT_DIRECTORY}:$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
