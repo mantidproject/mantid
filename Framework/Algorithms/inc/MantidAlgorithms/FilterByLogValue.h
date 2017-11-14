@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/TriviallyParallelAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -30,7 +30,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterByLogValue : public API::TriviallyParallelAlgorithm {
+class DLLExport FilterByLogValue : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByLogValue"; };
