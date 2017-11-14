@@ -405,10 +405,10 @@ void ComponentInfo::initIndices() {
   m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
   auto &indexMap = m_indexMap.access();
   auto &indices = m_indices.access();
-  indexMap.reserve(size());
-  indices.reserve(size());
+  indexMap.reserve(m_detectorRanges->size());
+  indices.reserve(m_detectorRanges->size());
   // No time dependence, so both the component index and the linear index are i.
-  for (size_t i = 0; i < size(); ++i) {
+  for (size_t i = 0; i < m_detectorRanges->size(); ++i) {
     indexMap.emplace_back(1, i);
     indices.emplace_back(i, 0);
   }
@@ -513,17 +513,19 @@ bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
 
 /**
  * Get the number of scans for component index
- * @param index : Detector Index
+ * @param index : Component Index
  * @return Number of scans for component index
  */
 size_t ComponentInfo::scanCount(const size_t index) const {
+  if (m_detectorInfo && isDetector(index))
+    return m_detectorInfo->scanCount(index);
   if (!m_scanCounts) {
     return 1;
   }
   if (m_isSyncScan) {
     return (*m_scanCounts)[0];
   }
-  return (*m_scanCounts)[index];
+  return (*m_scanCounts)[compOffsetIndex(index)];
 }
 
 size_t ComponentInfo::scanSize() const {
@@ -552,19 +554,32 @@ void ComponentInfo::checkNoTimeDependence() const {
         "beamline has time-dependent (moving) components.");
 }
 
+/**
+ * Retrieve the scan interval for a component at a time index
+ * @param index component index, time index pair
+ * @return offset interval times since epoch
+ */
 std::pair<int64_t, int64_t>
 ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
+  if (m_detectorInfo && isDetector(index.first))
+    return m_detectorInfo->scanInterval(index);
   if (!m_scanIntervals)
     return {0, 0};
   if (m_isSyncScan)
     return (*m_scanIntervals)[index.second];
-  return (*m_scanIntervals)[linearIndex(index)];
+  return (*m_scanIntervals)[linearIndex(
+      {compOffsetIndex(index.first), index.second})];
 }
 
 /**
  * Set the scan interval using nanosecond offsets from 00:00:00 01/01/1990 epoch
- * @param index : linear index taking into account both detectors and scans per
- * detector
+ *
+ * This MUST be called before any merging has happened, therefore index is the
+ *time-independent
+ * component index.
+ *
+ * @param index : component to which to add the scan interval
+ * component
  * @param interval : Time interval for scan point
  */
 void ComponentInfo::setScanInterval(
@@ -581,7 +596,13 @@ void ComponentInfo::setScanInterval(
     m_isSyncScan = false;
     initScanIntervals();
   }
-  m_scanIntervals.access()[index] = interval;
+  for (auto subIndex : this->componentsInSubtree(index)) {
+    if (m_detectorInfo && isDetector(subIndex)) {
+      m_detectorInfo->setScanInterval(subIndex, interval);
+    } else {
+      m_scanIntervals.access()[compOffsetIndex(subIndex)] = interval;
+    }
+  }
 }
 
 void ComponentInfo::setScanInterval(
@@ -599,6 +620,9 @@ void ComponentInfo::setScanInterval(
     initScanIntervals();
   }
   m_scanIntervals.access()[0] = interval;
+  if (m_detectorInfo) {
+    m_detectorInfo->setScanInterval(interval);
+  }
 }
 
 /**
@@ -629,16 +653,17 @@ void ComponentInfo::merge(const ComponentInfo &other) {
     if (!toMerge[linearIndex])
       continue;
     auto newIndex = getIndex(other.m_indices, linearIndex);
-    const size_t detIndex = newIndex.first;
-    newIndex.second += scanCount(detIndex);
-    scanCounts.access()[detIndex]++;
-    m_indexMap.access()[detIndex].push_back((*m_indices).size());
+    const size_t compIndex = newIndex.first;
+    newIndex.second += scanCount(compIndex);
+    scanCounts.access()[compIndex]++;
+    m_indexMap.access()[compIndex].push_back((*m_indices).size());
     m_indices.access().push_back(newIndex);
     m_positions.access().push_back((*other.m_positions)[linearIndex]);
     m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
     m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
+  m_detectorInfo->merge(*other.m_detectorInfo);
 }
 
 /**
@@ -649,14 +674,17 @@ void ComponentInfo::merge(const ComponentInfo &other) {
 std::vector<bool>
 ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
   checkSizes(other);
-  std::vector<bool> merge(other.m_positions->size(), true);
+
+  size_t mergeSize = other.m_positions->size();
+  std::vector<bool> merge(mergeSize, true);
 
   for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
        ++linearIndex1) {
-    const size_t detIndex = getIndex(other.m_indices, linearIndex1).first;
+    const size_t compIndex = getIndex(other.m_indices, linearIndex1).first;
     const auto &interval1 = (*other.m_scanIntervals)[linearIndex1];
-    for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
-      const auto linearIndex2 = linearIndex({detIndex, timeIndex});
+    for (size_t timeIndex = 0; timeIndex < (*m_scanCounts)[compIndex];
+         ++timeIndex) {
+      const auto linearIndex2 = linearIndex({compIndex, timeIndex});
       const auto &interval2 = (*m_scanIntervals)[linearIndex2];
       if (interval1 == interval2) {
         checkIdenticalIntervals(other, linearIndex1, linearIndex2);
@@ -693,8 +721,10 @@ void ComponentInfo::initScanCounts() {
   checkNoTimeDependence();
   if (m_isSyncScan)
     m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
-  else
-    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(size(), 1);
+  else {
+    const size_t componentsSize = this->m_detectorRanges->size();
+    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(componentsSize, 1);
+  }
 }
 
 void ComponentInfo::initScanIntervals() {
@@ -704,9 +734,10 @@ void ComponentInfo::initScanIntervals() {
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
             1, std::pair<int64_t, int64_t>{0, 1});
   } else {
+    const size_t componentsSize = this->m_detectorRanges->size();
     m_scanIntervals =
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-            size(), std::pair<int64_t, int64_t>{0, 1});
+            componentsSize, std::pair<int64_t, int64_t>{0, 1});
   }
 }
 

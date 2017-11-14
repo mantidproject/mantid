@@ -852,5 +852,129 @@ public:
         a.merge(b), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge ComponentInfo: scan intervals not defined");
   }
+
+  void test_merge_fail_sync_async_mismatch() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto &a = std::get<0>(infos1);
+    auto &b = std::get<0>(infos2);
+    a.setScanInterval(0, {0, 1});
+    b.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "both or none of the scans "
+                            "must be synchronous");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "both or none of the scans "
+                            "must be synchronous");
+  }
+
+  void test_merge_identical_async() {
+    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
+                          std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = std::get<0>(infos);
+    a.setScanInterval(0, {0, 10});
+    ComponentInfo b(a);
+    TSM_ASSERT_EQUALS("Scan size should be 1", b.scanCount(0), 1);
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    TSM_ASSERT_EQUALS("Intervals identical. Scan size should not grow",
+                      b.scanCount(0), 1)
+  }
+
+  void test_merge_detectors() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = std::get<0>(infos1);
+
+    ComponentInfo &b = std::get<0>(infos2);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    a.setPosition(0, pos1);
+    b.setPosition(0, pos2);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
+    a.merge(b); // Execute the merge
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 3);
+    TS_ASSERT_EQUALS(a.scanCount(0), 2);
+    // Note that the order is not guaranteed, currently these are just in the
+    // order in which the are merged.
+    auto index1 =
+        std::pair<size_t, size_t>(0 /*static index*/, 0 /*time index*/);
+    auto index2 =
+        std::pair<size_t, size_t>(0 /*static index*/, 1 /*time index*/);
+    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.position(index1), pos1);
+    TS_ASSERT_EQUALS(a.position(index2), pos2);
+    // Root is not scanning
+    TS_ASSERT_EQUALS(a.scanCount(1), a.root());
+    // Test Detector info is synched internally
+    const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(2), 0);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index1), interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.position(index1), pos1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
+  }
+
+  void test_merge_root() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = std::get<0>(infos1);
+
+    ComponentInfo &b = std::get<0>(infos2);
+    const auto detPosA = a.position(0);
+    const auto detPosB = b.position(0);
+    const auto rootPosA = a.position(a.root());
+    const auto rootPosB = b.position(b.root());
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    a.setPosition(a.root(), pos1);
+    b.setPosition(b.root(), pos2);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval(a.root(), interval1);
+    b.setScanInterval(b.root(), interval2);
+    a.merge(b); // Execute the merge
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 4);
+    TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
+    // Note that the order is not guaranteed, currently these are just in the
+    // order in which the are merged.
+    auto index1 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
+    auto index2 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
+    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.position(index1), pos1);
+    TS_ASSERT_EQUALS(a.position(index2), pos2);
+
+    // Test Detector info is synched internally
+    const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(2), 0);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
+    // Check that the child detectors have been positioned according to the
+    // correct offsets
+    const auto rootOffsetA = pos1 - rootPosA;
+    const auto rootOffsetB = pos2 - rootPosB;
+    TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 0}), rootOffsetA + detPosA);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 1}), rootOffsetB + detPosB);
+  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
