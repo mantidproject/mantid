@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -61,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL CSGObject {
+class MANTID_GEOMETRY_DLL CSGObject : public IObject {
 public:
   /// Default constructor
   CSGObject();
