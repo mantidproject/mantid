@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
 #define MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
 
-#include "MantidAPI/TriviallyParallelAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -48,7 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadNexusLogs : public API::TriviallyParallelAlgorithm {
+class DLLExport LoadNexusLogs : public API::ParallelAlgorithm {
 public:
   /// Default constructor
   LoadNexusLogs();

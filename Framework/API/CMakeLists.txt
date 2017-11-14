@@ -112,6 +112,7 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+	src/ParallelAlgorithm.cpp
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
@@ -136,7 +137,6 @@ set ( SRC_FILES
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
-	src/TriviallyParallelAlgorithm.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
@@ -308,6 +308,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
@@ -333,7 +334,6 @@ set ( INC_FILES
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
-	inc/MantidAPI/TriviallyParallelAlgorithm.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
