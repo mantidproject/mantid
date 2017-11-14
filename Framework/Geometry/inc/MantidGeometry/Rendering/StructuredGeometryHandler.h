@@ -7,8 +7,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
-#include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Logger.h"
 

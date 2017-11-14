@@ -10,7 +10,6 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 namespace Mantid {
 
 namespace Geometry {
