@@ -2,9 +2,11 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -14,7 +16,7 @@
 
 using namespace Mantid;
 
-namespace {
+namespace { // helpers
 
 template <typename T> void insertInOrder(const T &item, std::vector<T> &vec) {
   vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
@@ -22,14 +24,6 @@ template <typename T> void insertInOrder(const T &item, std::vector<T> &vec) {
 
 bool isDigit(const std::string &text) {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
-}
-
-template <typename T>
-T throwIfNecessary(const T toReturn, const bool throws, const std::string &message) {
-	if (throws) {
-		throw std::runtime_error(message);
-	}
-	return toReturn;
 }
 
 } // anonymous namespace
@@ -59,8 +53,7 @@ std::string EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
 
 Mantid::API::ITableWorkspace_sptr EnggDiffFittingModel::getFitResults(
 	const int runNumber, const size_t bank){
-	return getFromRunMap(runNumber, bank, m_fitResults, true,
-		boost::make_shared<Mantid::API::ITableWorkspace>());
+  return getFromRunMap(runNumber, bank, m_fitResults);
 }
 
 void EnggDiffFittingModel::setDifcTzero(const int runNumber, const size_t bank,
@@ -125,12 +118,13 @@ void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, const size_
 	saveAlg->setProperty("RunNumber", runNumber);
 	saveAlg->setProperty("Bank", bank);
 	saveAlg->setProperty("OutMode", "AppendToExistingFile");
+	saveAlg->setProperty("Filename", filename);
 	saveAlg->execute();
 }
 
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getWorkspace(const int runNumber, const size_t bank) {
-	return getFromRunMap(runNumber, bank, m_wsMap, false, boost::make_shared<Mantid::API::MatrixWorkspace>());
+  return getFromRunMap(runNumber, bank, m_wsMap);
 }
 
 std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
@@ -166,7 +160,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filename) {
 	std::vector<std::string> filenames;
 	boost::split(filenames, filename, boost::is_any_of(","));
 
-	for (size_t i = 0; i != group_ws->getNumberOfEntries(); ++i) {
+	for (int i = 0; i != group_ws->getNumberOfEntries(); ++i) {
 		const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
 			group_ws->getItem(i));
 		addWorkspace(ws->getRunNumber(), guessBankID(ws), filenames[i], ws);
@@ -226,21 +220,21 @@ void EnggDiffFittingModel::addToRunMap(const int runNumber, const size_t bank,
 
 }
 
-template<typename T, size_t S>
-T EnggDiffFittingModel::getFromRunMap(const int runNumber, const size_t bank, 
-	RunMap<S, T> map,	const bool throws, const T default){
+template <typename T, size_t S>
+T EnggDiffFittingModel::getFromRunMap(const int runNumber, const size_t bank,
+                                      RunMap<S, T> map) {
 
-	const std::string error_msg = "Tried to acces invalid run: run number " +
-		std::to_string(runNumber) + " and bank: " +
-		std::to_string(bank);
+  const std::string error_msg = "Tried to acces invalid run: run number " +
+                                std::to_string(runNumber) + " and bank: " +
+                                std::to_string(bank);
 
-	if (bank < 1 || bank > map.size()) {
-		return throwIfNecessary(default, throws, error_msg);
-	}
-	if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
-		return throwIfNecessary(default, throws, error_msg);
-	}
-	return map[bank - 1][runNumber];
+  if (bank < 1 || bank > map.size()) {
+    throw std::runtime_error(error_msg);
+  }
+  if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
+    throw std::runtime_error(error_msg);
+  }
+  return map[bank - 1][runNumber];
 }
 
 void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank, 

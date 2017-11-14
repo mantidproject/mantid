@@ -1,5 +1,5 @@
 set ( SRC_FILES
-    EnggDiffFittingModel.cpp
+        EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffractionPresenter.cpp

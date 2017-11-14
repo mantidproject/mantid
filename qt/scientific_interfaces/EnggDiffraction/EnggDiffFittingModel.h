@@ -51,8 +51,7 @@ private:
 	  T itemToAdd);
   
   template<typename T, size_t S>
-  T getFromRunMap(const int runNumber, const size_t bank, const RunMap<S, T> map,
-	 const bool throws, const T default);
+  T getFromRunMap(const int runNumber, const size_t bank, const RunMap<S, T> map);
 
   void addWorkspace(const int runNumber, const size_t bank,
 	  const std::string &filename, Mantid::API::MatrixWorkspace_sptr);
