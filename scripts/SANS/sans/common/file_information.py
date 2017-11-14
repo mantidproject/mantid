@@ -103,7 +103,7 @@ def find_sans_file(file_name):
             runs = FileFinder.findRuns(file_name)
             if runs:
                 full_path = runs[0]
-    except RuntimeError as e:
+    except RuntimeError:
         raise RuntimeError(error_message.format(file_name))
 
     if not full_path:
