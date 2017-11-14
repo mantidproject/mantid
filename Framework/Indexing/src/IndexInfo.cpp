@@ -311,7 +311,7 @@ void IndexInfo::makeSpectrumNumberTranslator(
       numberOfPartitions, partition,
       Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
-      std::move(spectrumNumbers), std::move(partitioner), partition);
+      std::move(spectrumNumbers), *partitioner, partition);
 }
 
 template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<SpectrumNumber>,
