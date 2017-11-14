@@ -199,7 +199,7 @@ const std::string LoadILLPolarizationFactors::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLPolarizationFactors::summary() const {
-  return "Loads ILL formatted reflectometry polarization efficiency correction factors.";
+  return "Loads ILL formatted reflectometry polarization efficiency factors.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -208,12 +208,12 @@ const std::string LoadILLPolarizationFactors::summary() const {
 void LoadILLPolarizationFactors::init() {
   declareProperty(
       Kernel::make_unique<API::FileProperty>(Prop::FILENAME, "", API::FileProperty::Load),
-      "Path to the polarization factor file.");
+      "Path to the polarization efficiency file.");
   const auto refWSValidator = boost::make_shared<API::IncreasingAxisValidator>();
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUT_WS, "",
                                                              Direction::Output, refWSValidator),
-      "An output workspace containing the factors evaluated at the reference workspace's wavelength points.");
+      "An output workspace containing the efficiencies at the reference workspace's wavelength points.");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::REF_WS, "",
                                                              Direction::Input),
