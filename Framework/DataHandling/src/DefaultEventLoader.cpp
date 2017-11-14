@@ -52,9 +52,9 @@ DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg,
                                        const size_t numBanks,
                                        const bool precount, const int chunk,
                                        const int totalChunks)
-    : alg(alg), m_ws(ws), m_haveWeights(haveWeights),
-      event_id_is_spec(event_id_is_spec), precount(precount), chunk(chunk),
-      totalChunks(totalChunks) {
+    : m_haveWeights(haveWeights), event_id_is_spec(event_id_is_spec),
+      precount(precount), chunk(chunk), totalChunks(totalChunks), alg(alg),
+      m_ws(ws) {
   // This map will be used to find the workspace index
   if (event_id_is_spec)
     pixelID_to_wi_vector =

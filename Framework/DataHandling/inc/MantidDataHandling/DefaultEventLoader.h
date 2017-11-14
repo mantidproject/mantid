@@ -45,6 +45,33 @@ public:
        std::vector<std::size_t> bankNumEvents, const bool oldNeXusFileNames,
        const bool precount, const int chunk, const int totalChunks);
 
+  /// Flag for dealing with a simulated file
+  bool m_haveWeights;
+
+  /// True if the event_id is spectrum no not pixel ID
+  bool event_id_is_spec;
+
+  /// whether or not to launch multiple ProcessBankData jobs per bank
+  bool splitProcessing;
+
+  /// Do we pre-count the # of events in each pixel ID?
+  bool precount;
+
+  /// Offset in the pixelID_to_wi_vector to use.
+  detid_t pixelID_to_wi_offset;
+
+  /// Maximum (inclusive) event ID possible for this instrument
+  int32_t eventid_max{0};
+
+  /// chunk number
+  int chunk;
+  /// number of chunks
+  int totalChunks;
+  /// for multiple chunks per bank
+  int firstChunkForBank;
+  /// number of chunks per bank
+  size_t eventsPerChunk;
+
   LoadEventNexus *alg;
   EventWorkspaceCollection &m_ws;
 
@@ -62,35 +89,8 @@ public:
   /// index)
   std::vector<size_t> pixelID_to_wi_vector;
 
-  /// Offset in the pixelID_to_wi_vector to use.
-  detid_t pixelID_to_wi_offset;
-
-  /// Flag for dealing with a simulated file
-  bool m_haveWeights;
-
-  /// True if the event_id is spectrum no not pixel ID
-  bool event_id_is_spec;
-
-  /// Maximum (inclusive) event ID possible for this instrument
-  int32_t eventid_max{0};
-
   /// One entry of pulse times for each preprocessor
   std::vector<boost::shared_ptr<BankPulseTimes>> m_bankPulseTimes;
-
-  /// whether or not to launch multiple ProcessBankData jobs per bank
-  bool splitProcessing;
-
-  /// Do we pre-count the # of events in each pixel ID?
-  bool precount;
-
-  /// chunk number
-  int chunk;
-  /// number of chunks
-  int totalChunks;
-  /// for multiple chunks per bank
-  int firstChunkForBank;
-  /// number of chunks per bank
-  size_t eventsPerChunk;
 
 private:
   DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollection &ws,
