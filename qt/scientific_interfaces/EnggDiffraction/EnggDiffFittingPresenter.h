@@ -150,6 +150,8 @@ private:
 
   bool isDigit(const std::string &text) const;
 
+  void warnFileNotFound(const std::exception &ex);
+
   // Methods related single peak fits
   virtual void
   startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
