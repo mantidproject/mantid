@@ -27,6 +27,7 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
+- :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 
 Core Functionality
 ------------------
