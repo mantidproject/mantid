@@ -27,6 +27,20 @@ namespace CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
+
+std::pair<int, size_t> runAndBankNumberFromListWidgetLabel(const std::string &listLabel) {
+	const size_t underscorePosition = listLabel.find_first_of("_");
+	const auto runNumber = listLabel.substr(0, underscorePosition);
+	const auto bank = listLabel.substr(underscorePosition + 1);
+	
+	return std::pair<int, size_t>(std::atoi(runNumber.c_str()), 
+		                          std::atoi(bank.c_str()));
+}
+
+std::string listWidgetLabelFromRunAndBankNumber(const int runNumber, const size_t bank) {
+	return std::to_string(runNumber) + "_" + std::to_string(bank);
+}
+
 }
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
@@ -353,12 +367,12 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
-  const auto workspaceID = m_view->getFittingListWidgetCurrentValue();
-  std::vector<std::string> tokens;
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  int runNumber;
+  size_t bank;
+  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
-  boost::split(tokens, workspaceID, boost::is_any_of("_"));
-  const auto ws =
-      m_model.getWorkspace(std::stoi(tokens[0]), std::stoi(tokens[1]));
+  const auto ws = m_model.getWorkspace(runNumber, bank);
   plotFocusedFile(false, ws);
 }
 
@@ -762,17 +776,17 @@ void EnggDiffFittingPresenter::processLoad() {
   }
 
   const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
-  std::vector<std::string> workspaceIDs;
+  std::vector<std::string> listWidgetLabels;
   std::transform(
       runNoBankPairs.begin(), runNoBankPairs.end(),
-      std::back_inserter(workspaceIDs), [](const std::pair<int, size_t> &pair) {
-        return std::to_string(pair.first) + "_" + std::to_string(pair.second);
+      std::back_inserter(listWidgetLabels), [](const std::pair<int, size_t> &pair) {
+        return listWidgetLabelFromRunAndBankNumber(pair.first, pair.second);
       });
   m_view->enableFittingListWidget(true);
   m_view->clearFittingListWidget();
-  std::for_each(workspaceIDs.begin(), workspaceIDs.end(),
-                [&](const std::string &workspaceID) {
-                  m_view->addRunNoItem(workspaceID);
+  std::for_each(listWidgetLabels.begin(), listWidgetLabels.end(),
+                [&](const std::string &listLabel) {
+                  m_view->addRunNoItem(listLabel);
                 });
 }
 
@@ -837,7 +851,11 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->getFittingRunNo();
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  int runNumber;
+  size_t bank;
+  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+  const auto filename = m_model.getWorkspaceFilename(runNumber, bank);
   std::string fittingPeaks = m_view->fittingPeaksData();
 
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
@@ -845,7 +863,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
 
   try {
-    inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
+    inputChecksBeforeFitting(filename, fitPeaksData);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
@@ -858,8 +876,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
                     "single peak fits into workspace '" +
-                        outWSName + "'. This "
-                                    "may take some seconds... \n";
+                        outWSName + "'. This may take some seconds... \n";
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
@@ -867,24 +884,23 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // startAsyncFittingWorker
   // doFitting()
   std::vector<std::string> focusRunNoVec;
-  focusRunNoVec.push_back(focusedRunNo);
+  focusRunNoVec.push_back(filename);
 
   startAsyncFittingWorker(focusRunNoVec, fitPeaksData);
 }
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
-    const std::string &focusedRunNo, const std::string &expectedPeaks) {
-  if (focusedRunNo.empty()) {
+    const std::string &focusedRunFilename, const std::string &expectedPeaks) {
+  if (focusedRunFilename.empty()) {
     throw std::invalid_argument(
-        "Focused Run "
-        "cannot be empty and must be a valid directory");
+        "Focused run filename cannot be empty and must be a valid file");
   }
 
-  Poco::File file(focusedRunNo);
+  Poco::File file(focusedRunFilename);
   if (!file.exists()) {
     throw std::invalid_argument("The focused workspace file for single peak "
                                 "fitting could not be found: " +
-                                focusedRunNo);
+                                focusedRunFilename);
   }
 
   if (expectedPeaks.empty()) {
@@ -957,89 +973,32 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
   return expectedPeaks;
 }
 
-void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
-  const auto bankID = findBankID(wks);
-
-  const std::string units = "none";
-  auto &run = wks->mutableRun();
-
-  std::vector<GSASCalibrationParms> calibParms = currentCalibration();
-  if (calibParms.empty()) {
-    run.addProperty<int>("bankid", 1, units, true);
-    run.addProperty<double>("difc", 18400.0, units, true);
-    run.addProperty<double>("difa", 0.0, units, true);
-    run.addProperty<double>("tzero", 4.0, units, true);
-  } else {
-    GSASCalibrationParms parms(0, 0.0, 0.0, 0.0);
-    for (const auto &p : calibParms) {
-      if (p.bankid == bankID) {
-        parms = p;
-        break;
-      }
-    }
-    if (0 == parms.difc)
-      parms = calibParms.front();
-
-    run.addProperty<int>("bankid", static_cast<int>(parms.bankid), units, true);
-    run.addProperty<double>("difc", parms.difc, units, true);
-    run.addProperty<double>("difa", parms.difa, units, true);
-    run.addProperty<double>("tzero", parms.tzero, units, true);
-  }
-}
-
-void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
+void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
                                          const std::string &expectedPeaks) {
-  g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
-                 << focusedRunNo << ". This may take a few seconds... \n";
+  g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
+                 << runNumber << " and bank " << bank 
+	             << ". This may take a few seconds... \n";
 
-  MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
 
-  // if the last directory in vector matches the input directory within this
-  // function then clear the vector
-  if (!g_multi_run_directories.empty()) {
-    auto lastDir = g_multi_run_directories.back() == focusedRunNo;
-    if (lastDir) {
-      m_view->enableFitAllButton(false);
-      g_fitting_runno_counter = 0;
-    }
-  }
-
   // load the focused workspace file to perform single peak fits
-  runLoadAlg(focusedRunNo, focusedWS);
+  //runLoadAlg(focusedRunNo, focusedWS);
   // apply calibration to the focused workspace
-  setDifcTzero(focusedWS);
+  m_model.setDifcTzero(runNumber, bank, currentCalibration());
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
-  auto enggFitPeaks =
-      Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
-  const std::string focusedFitPeaksTableName =
-      "engggui_fitting_fitpeaks_params";
+  m_model.enggFitPeaks(runNumber, bank, expectedPeaks);
 
-  // delete existing table workspace to avoid confusion
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  if (ADS.doesExist(focusedFitPeaksTableName)) {
-    ADS.remove(focusedFitPeaksTableName);
-  }
+  const auto outFilename = m_view->getCurrentInstrument() + std::to_string(runNumber) +
+	  "_Single_Peak_Fitting.csv";
+  auto saveDirectory = outFilesUserDir("SinglePeakFitting");
+  saveDirectory.append(outFilename);
+  m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
 
-  try {
-    enggFitPeaks->initialize();
-    enggFitPeaks->setProperty("InputWorkspace", focusedWS);
-    if (!expectedPeaks.empty()) {
-      enggFitPeaks->setProperty("expectedPeaks", expectedPeaks);
-    }
-    enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
-    enggFitPeaks->execute();
 
-  } catch (std::exception) {
-    throw std::runtime_error(
-        "Could not run the algorithm EnggFitPeaks successfully.");
-  }
-
-  auto fPath = focusedRunNo;
-  runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
-  runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
+  // remove this hard-coded value
+  runFittingAlgs("engggui_fitting_fitpeaks_params", g_focusedFittingWSName);
 }
 
 void EnggDiffFittingPresenter::runLoadAlg(
@@ -1064,57 +1023,6 @@ void EnggDiffFittingPresenter::runLoadAlg(
                " Please check also the previous log messages for details.";
     return;
   }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
-    runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
-                               std::string &filePath) {
-
-  // split to get run number and bank
-  auto fileSplit = splitFittingDirectory(filePath);
-  // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
-  if (fileSplit.size() == 1) {
-    // The user probably has input just `ENGINX012345.nxs`
-    throw std::invalid_argument(
-        "Could not save fitting ASCII as"
-        " file name does not contain any '_' characters"
-        " - expected file name is "
-        "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs \n");
-  }
-
-  auto runNumber = fileSplit[1];
-
-  // if a normal focused file assign bank number otherwise 'customised'
-  std::string bank = "customised";
-  if (fileSplit.size() == 5)
-    bank = fileSplit[4];
-
-  // generate file name
-  std::string fileName;
-  if (g_multi_run.size() > 1) {
-    fileName = m_view->getCurrentInstrument() + "_" + g_multi_run.front() +
-               "-" + g_multi_run.back() + "_Single_Peak_Fitting.csv";
-  } else {
-    fileName = m_view->getCurrentInstrument() + "_" + runNumber +
-               "_Single_Peak_Fitting.csv";
-  }
-
-  // separate folder for Single Peak Fitting output;
-  auto dir = outFilesUserDir("SinglePeakFitting");
-  dir.append(fileName);
-
-  // save the results
-  // run the algorithm SaveDiffFittingAscii with output of EnggFitPeaks
-  auto saveDiffFit =
-      Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
-
-  saveDiffFit->initialize();
-  saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
-  saveDiffFit->setProperty("Filename", dir.toString());
-  saveDiffFit->setProperty("RunNumber", runNumber);
-  saveDiffFit->setProperty("Bank", bank);
-  saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
-  saveDiffFit->execute();
 }
 
 void EnggDiffFittingPresenter::runFittingAlgs(
@@ -1194,7 +1102,7 @@ void EnggDiffFittingPresenter::runFittingAlgs(
   // convert units for both workspaces to dSpacing from ToF
   if (rowCount > size_t(0)) {
     auto swks = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
-    setDifcTzero(swks);
+    //setDifcTzero(swks);
     convertUnits(single_peak_out_WS);
   } else {
     g_log.error() << "The engggui_fitting_fitpeaks_params table produced is"
@@ -1787,10 +1695,15 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // detaches previous plots from canvas
     m_view->resetCanvas();
 
+
+	const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+	int runNumber;
+	size_t bank;
+	std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+	const auto ws = m_model.getWorkspace(runNumber, bank);
+
     // plots focused workspace
-    throw new std::runtime_error("Plotting fit not yet implemented");
-    // TODO: sort out what to do here
-    // plotFocusedFile(m_fittingFinishedOK);
+    plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
