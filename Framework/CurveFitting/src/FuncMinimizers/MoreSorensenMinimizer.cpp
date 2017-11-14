@@ -4,9 +4,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h"
-#include "MantidCurveFitting/RalNlls/TrustRegion.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include <math.h>
+#include "MantidCurveFitting/RalNlls/TrustRegion.h"
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,8 +18,6 @@ DECLARE_FUNCMINIMIZER(MoreSorensenMinimizer,More-Sorensen)
 ///@endcond
 // clang-format on
 
-using namespace NLLS;
-
 MoreSorensenMinimizer::MoreSorensenMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
@@ -27,35 +25,36 @@ std::string MoreSorensenMinimizer::name() const { return "More-Sorensen"; }
 
 namespace {
 
-/// Solve a system of linear equations. The system's matrix must be
-/// positive-definite.
-/// @param A :: A matrix of a system of equations. Must be positive-definite
-/// otherwise
-///     the solution will not be found and an error code returned.
-/// @param b :: A vector of the right-hand side.
-/// @param LtL :: A work matrix.
-/// @param x :: A vector that receives the solution.
-/// @param inform :: The information struct.
-void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
-              DoubleFortranMatrix &LtL, DoubleFortranVector &x,
-              nlls_inform &inform) {
+/** Solve a system of linear equations. The system's matrix must be
+ *  positive-definite.
+ *  @param A :: A matrix of a system of equations.
+ *     Must be positive-definite for success.
+ *  @param b :: A vector of the right-hand side.
+ *  @param LtL :: A work matrix.
+ *  @param x :: A vector that receives the solution.
+ *  @return true if successful
+ */
+bool solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
+              DoubleFortranMatrix &LtL, DoubleFortranVector &x) {
   // Fortran code uses this:
   // dposv('L', n, 1, LtL, n, x, n, inform.external_return)
   // This is the GSL replacement:
   LtL = A;
   auto res = gsl_linalg_cholesky_decomp(LtL.gsl());
   if (res == GSL_EDOM) {
-    inform.status = NLLS_ERROR::MS_NOT_PD;
-    return;
+    // Matrix is not positive definite, return for retry.
+    return false;
   }
   gsl_linalg_cholesky_solve(LtL.gsl(), b.gsl(), x.gsl());
+  return true;
 }
 
-/// Calculate the leftmost eigenvalue of a matrix.
-/// @param A :: A matrix to analyse.
-/// @param sigma :: A variable to receive the value of the smallest
-///        eigenvalue.
-/// @param y :: A vector that receives the corresponding eigenvector.
+/** Calculate the leftmost eigenvalue of a matrix.
+ *  @param A :: A matrix to analyse.
+ *  @param sigma :: A variable to receive the value of the smallest
+ *        eigenvalue.
+ *  @param y :: A vector that receives the corresponding eigenvector.
+ */
 void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
                 DoubleFortranVector &y) {
   auto M = A;
@@ -72,9 +71,10 @@ void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
   }
 }
 
-/// Calculate AplusSigma = A + sigma * I
-/// @param sigma :: The value of the diagonal shift.
-/// @param AplusSigma :: The resulting matrix.
+/** Calculate AplusSigma = A + sigma * I
+ *  @param sigma :: The value of the diagonal shift.
+ *  @param AplusSigma :: The resulting matrix.
+ */
 void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
                  DoubleFortranMatrix &AplusSigma) {
   AplusSigma = A;
@@ -84,71 +84,38 @@ void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
   }
 }
 
-/// Negate a vector
-/// @param v :: A vector.
+/** Negate a vector
+ *  @param v :: A vector.
+ */
 DoubleFortranVector negative(const DoubleFortranVector &v) {
   DoubleFortranVector neg = v;
   neg *= -1.0;
   return neg;
 }
 
-/// Given an indefinite matrix w.A, find a shift sigma
-/// such that (A + sigma I) is positive definite.
-/// @param sigma :: The result (shift).
-/// @param d :: A solution vector to the system of linear equations
-///    with the found positive defimnite matrix. The RHS vector is -w.v.
-/// @param options :: The options.
-/// @param inform :: The inform struct.
-/// @param w :: The work struct.
-void getPdShift(double &sigma, DoubleFortranVector &d,
-                const nlls_options &options, nlls_inform &inform,
-                more_sorensen_work &w) {
-  int no_shifts = 0;
-  bool successful_shift = false;
-  while (!successful_shift) {
-    shiftMatrix(w.A, sigma, w.AplusSigma);
-    solveSpd(w.AplusSigma, negative(w.v), w.LtL, d, inform);
-    if (inform.status != NLLS_ERROR::OK) {
-      // reset the error calls -- handled in the code....
-      inform.status = NLLS_ERROR::OK;
-      inform.external_return = 0;
-      inform.external_name = "";
-      no_shifts = no_shifts + 1;
-      if (no_shifts == 10) { // too many shifts -- exit
-        inform.status = NLLS_ERROR::MS_TOO_MANY_SHIFTS;
-        return;
-      }
-      sigma = sigma + (pow(10.0, no_shifts)) * options.more_sorensen_shift;
-    } else {
-      successful_shift = true;
-    }
-  }
-}
-
-///  A subroutine to find the optimal beta such that
-///   || d || = Delta, where d = a + beta * b
-///
-///   uses the approach from equation (3.20b),
-///    "Methods for non-linear least squares problems" (2nd edition, 2004)
-///    by Madsen, Nielsen and Tingleff
-/// @param a :: The first vector.
-/// @param b :: The second vector.
-/// @param Delta :: The Delta.
-/// @param beta :: The beta.
-/// @param inform :: The inform struct.
-void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
-              double Delta, double &beta, nlls_inform &inform) {
+/**  A subroutine to find the optimal beta such that
+ *    || d || = Delta, where d = a + beta * b
+ *
+ *    uses the approach from equation (3.20b),
+ *     "Methods for non-linear least squares problems" (2nd edition, 2004)
+ *     by Madsen, Nielsen and Tingleff
+ *  @param a :: The first vector.
+ *  @param b :: The second vector.
+ *  @param Delta :: The Delta.
+ *  @param beta :: The beta.
+ *  @return true if successful
+ */
+bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
+              double Delta, double &beta) {
 
   auto c = a.dot(b);
 
-  auto norma2 = pow(norm2(a), 2);
-  auto normb2 = pow(norm2(b), 2);
+  auto norma2 = pow(NLLS::norm2(a), 2);
+  auto normb2 = pow(NLLS::norm2(b), 2);
 
   double discrim = pow(c, 2) + (normb2) * (pow(Delta, 2) - norma2);
-  if (discrim < zero) {
-    inform.status = NLLS_ERROR::FIND_BETA;
-    inform.external_name = "findBeta";
-    return;
+  if (discrim < NLLS::ZERO) {
+    return false;
   }
 
   if (c <= 0) {
@@ -156,30 +123,60 @@ void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   } else {
     beta = (pow(Delta, 2) - norma2) / (c + sqrt(discrim));
   }
+  return true;
 }
 
-/// Solve the trust-region subproblem using
-/// the method of More and Sorensen
-///
-/// Using the implementation as in Algorithm 7.3.6
-/// of Trust Region Methods
-///
-/// main output  d, the soln to the TR subproblem
-/// @param J :: The Jacobian.
-/// @param f :: The residuals.
-/// @param hf :: The Hessian (sort of).
-/// @param Delta :: The raduis of the trust region.
-/// @param d :: The output vector of corrections to the parameters giving the
-///       solution to the TR subproblem.
-/// @param nd :: The 2-norm of d.
-/// @param options :: The options.
-/// @param inform :: The inform struct.
-/// @param w :: The work struct.
-void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                  const DoubleFortranMatrix &hf, double Delta,
-                  DoubleFortranVector &d, double &nd,
-                  const nlls_options &options, nlls_inform &inform,
-                  more_sorensen_work &w) {
+} // namespace
+
+/** Given an indefinite matrix m_A, find a shift sigma
+*  such that (A + sigma I) is positive definite.
+*  @param sigma :: The result (shift).
+*  @param d :: A solution vector to the system of linear equations
+*     with the found positive defimnite matrix. The RHS vector is -m_v.
+*  @param options :: The options.
+*  @return true if successful
+*/
+bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
+                                       const NLLS::nlls_options &options) {
+  int no_shifts = 0;
+  bool successful_shift = false;
+  while (!successful_shift) {
+    shiftMatrix(m_A, sigma, m_AplusSigma);
+    successful_shift = solveSpd(m_AplusSigma, negative(m_v), m_LtL, d);
+    if (!successful_shift) {
+      // We try again with a shifted sigma, but no too many times.
+      no_shifts = no_shifts + 1;
+      if (no_shifts == 10) {
+        return false;
+      }
+      sigma = sigma + (pow(10.0, no_shifts)) * options.more_sorensen_shift;
+    }
+  }
+  return true;
+}
+
+/** Solve the trust-region subproblem using
+ *  the method of More and Sorensen
+ *
+ *  Using the implementation as in Algorithm 7.3.6
+ *  of Trust Region Methods
+ *
+ *  main output  d, the soln to the TR subproblem
+ *  @param J :: The Jacobian.
+ *  @param f :: The residuals.
+ *  @param hf :: The Hessian (sort of).
+ *  @param Delta :: The raduis of the trust region.
+ *  @param d :: The output vector of corrections to the parameters giving the
+ *        solution to the TR subproblem.
+ *  @param nd :: The 2-norm of d.
+ *  @param options :: The options.
+ */
+void MoreSorensenMinimizer::solveSubproblem(const DoubleFortranMatrix &J,
+                                            const DoubleFortranVector &f,
+                                            const DoubleFortranMatrix &hf,
+                                            double Delta,
+                                            DoubleFortranVector &d, double &nd,
+                                            const NLLS::nlls_options &options) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p
@@ -188,63 +185,55 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // set A and v for the model being considered here...
 
   // Set A = J^T J
-  matmultInner(J, w.A);
+  NLLS::matmultInner(J, m_A);
   // add any second order information...
   // so A = J^T J + HF
-  w.A += hf;
+  m_A += hf;
   // now form v = J^T f
-  multJt(J, f, w.v);
+  NLLS::multJt(J, f, m_v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
+    applyScaling(J, m_A, m_v, m_scale, options);
   }
 
   auto n = J.len2();
-  auto scaleBack = [n, &d, &options, &w]() {
+  auto scaleBack = [n, &d, &options, this]() {
     if (options.scale != 0) {
       for (int i = 1; i <= n; ++i) {
-        d(i) = d(i) / w.apply_scaling_ws.diag(i);
+        d(i) = d(i) / m_scale(i);
       }
     }
   };
 
   auto local_ms_shift = options.more_sorensen_shift;
   // d = -A\v
-  DoubleFortranVector negv = w.v;
+  DoubleFortranVector negv = m_v;
   negv *= -1.0;
-  solveSpd(w.A, negv, w.LtL, d, inform);
+  bool matrix_ok = solveSpd(m_A, negv, m_LtL, d);
   double sigma = 0.0;
-  if (inform.status == NLLS_ERROR::OK) {
+  if (matrix_ok) {
     // A is symmetric positive definite....
-    sigma = zero;
+    sigma = NLLS::ZERO;
   } else {
-    // reset the error calls -- handled in the code....
-    inform.status = NLLS_ERROR::OK;
-    inform.external_return = 0;
-    inform.external_name = "";
-    minEigSymm(w.A, sigma, w.y1);
-    if (inform.status != NLLS_ERROR::OK) {
-      scaleBack();
-      return;
-    }
+    // shift and try again
+    minEigSymm(m_A, sigma, m_y1);
     sigma = -(sigma - local_ms_shift);
     // find a shift that makes (A + sigma I) positive definite
-    getPdShift(sigma, d, options, inform, w);
-    if (inform.status != NLLS_ERROR::OK) {
+    bool ok = getPdShift(sigma, d, options);
+    if (!ok) {
       scaleBack();
       return;
     }
   }
 
-  nd = norm2(d);
+  nd = NLLS::norm2(d);
   if (!std::isfinite(nd)) {
-    inform.status = NLLS_ERROR::NAN_OR_INF;
     throw std::runtime_error("Step is NaN or infinite.");
   }
 
   // now, we're not in the trust region initally, so iterate....
-  auto sigma_shift = zero;
+  auto sigma_shift = NLLS::ZERO;
   int no_restarts = 0;
   // set 'small' in the context of the algorithm
   double epsilon =
@@ -259,11 +248,10 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
         // we're good....exit
         break;
       }
-      if (w.y1.len() == n) {
+      if (m_y1.len() == n) {
         double alpha = 0.0;
-        findBeta(d, w.y1, Delta, alpha, inform);
-        if (inform.status == NLLS_ERROR::OK) {
-          DoubleFortranVector tmp = w.y1;
+        if (findBeta(d, m_y1, Delta, alpha)) {
+          DoubleFortranVector tmp = m_y1;
           tmp *= alpha;
           d += tmp;
         }
@@ -272,62 +260,59 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
       break;
     }
 
-    // w.q = R'\d
-    // DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, w.LtL, n,
-    // w.q, n );
-    for (int j = 1; j <= w.LtL.len1(); ++j) {
-      for (int k = j + 1; k <= w.LtL.len1(); ++k) {
-        w.LtL(j, k) = 0.0;
+    // m_q = R'\d
+    // DTRSM( "Left", "Lower", "No Transpose", "Non-unit", n, 1, one, m_LtL, n,
+    // m_q, n );
+    for (int j = 1; j <= m_LtL.len1(); ++j) {
+      for (int k = j + 1; k <= m_LtL.len1(); ++k) {
+        m_LtL(j, k) = 0.0;
       }
     }
-    w.LtL.solve(d, w.q);
+    m_LtL.solve(d, m_q);
 
-    auto nq = norm2(w.q);
+    auto nq = NLLS::norm2(m_q);
     sigma_shift = (pow((nd / nq), 2)) * ((nd - Delta) / Delta);
     if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
         // find a shift that makes (A + sigma I) positive definite
-        getPdShift(sigma, d, options, inform, w);
-        if (inform.status != NLLS_ERROR::OK) {
+        bool ok = getPdShift(sigma, d, options);
+        if (!ok) {
           break;
         }
         no_restarts = no_restarts + 1;
       } else {
         // we're not going to make progress...jump out
-        inform.status = NLLS_ERROR::MS_NO_PROGRESS;
-        break;
+        throw std::runtime_error("Not making progress.");
       }
     } else {
       sigma = sigma + sigma_shift;
     }
 
-    shiftMatrix(w.A, sigma, w.AplusSigma);
-    DoubleFortranVector negv = w.v;
+    shiftMatrix(m_A, sigma, m_AplusSigma);
+    DoubleFortranVector negv = m_v;
     negv *= -1.0;
-    solveSpd(w.AplusSigma, negv, w.LtL, d, inform);
-    if (inform.status != NLLS_ERROR::OK) {
+    bool matrix_ok = solveSpd(m_AplusSigma, negv, m_LtL, d);
+    if (!matrix_ok) {
       break;
     }
 
-    nd = norm2(d);
+    nd = NLLS::norm2(d);
   }
 
   if (it == options.more_sorensen_maxits) {
     // maxits reached, not converged
-    inform.status = NLLS_ERROR::MS_MAXITS;
+    throw std::runtime_error("No convergence in maximum number of iterations.");
   }
   scaleBack();
 }
 
-} // namespace
-
-/// Implements the abstarct method of TrustRegionMinimizer.
+/** Implements the abstract method of TrustRegionMinimizer.
+ */
 void MoreSorensenMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
-    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
-    NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-  moreSorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);
+    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options) {
+  solveSubproblem(J, f, hf, Delta, d, normd, options);
 }
 
 } // namespace FuncMinimisers

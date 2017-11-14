@@ -59,8 +59,6 @@ private slots:
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tie = false);
-  boost::shared_ptr<Mantid::API::IFunction>
-  createExponentialFunction(const QString &name, bool tie = false);
   QtProperty *createExponential(const QString &);
   QtProperty *createStretchedExp(const QString &);
   void setDefaultParameters(const QString &name);
@@ -74,7 +72,6 @@ private:
   iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
                   const size_t &specMin, const size_t &specMax);
   void updateFitFunctions();
-  void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
   QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
@@ -86,16 +83,13 @@ private:
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
-  QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
-  QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
+  QtTreePropertyBrowser *m_iqtFTree; ///< IqtFit Property Browser
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
   std::string m_plotOption;
   std::string m_baseName;
-  size_t m_runMin;
-  size_t m_runMax;
 
   QVector<QString> m_fitFunctions;
   QHash<QString, QHash<size_t, double>> m_parameterValues;

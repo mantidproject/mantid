@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>963</width>
-    <height>631</height>
+    <height>679</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -261,7 +261,21 @@
      <item>
       <layout class="QVBoxLayout" name="loMiniPlot">
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
          <property name="showLegend" stdset="0">
           <bool>true</bool>
          </property>
@@ -468,7 +482,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

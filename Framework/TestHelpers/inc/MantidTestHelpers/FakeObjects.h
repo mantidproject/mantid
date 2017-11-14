@@ -207,7 +207,7 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
   void init(const Mantid::HistogramData::Histogram &histogram) override {
@@ -215,7 +215,7 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[0] = new Mantid::API::RefAxis(this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
 
@@ -396,6 +396,17 @@ protected:
   }
   const void *void_pointer(size_t) const override {
     throw std::runtime_error("void_pointer const not implemented");
+  }
+};
+
+class VariableBinThrowingTester : public AxeslessWorkspaceTester {
+  size_t blocksize() const override {
+    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
+      return getSpectrum(0).dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
+
+    return 0;
   }
 };
 #endif /* FAKEOBJECTS_H_ */

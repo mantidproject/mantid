@@ -8,7 +8,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QMessageBox>
 #include <boost/algorithm/string/find.hpp>

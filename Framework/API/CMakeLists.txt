@@ -128,6 +128,7 @@ set ( SRC_FILES
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
+	src/SingleCountValidator.cpp
 	src/SpectraAxis.cpp
 	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
@@ -322,6 +323,7 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
+	inc/MantidAPI/SingleCountValidator.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
@@ -396,6 +398,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IFunctionTest.h
 	ILatticeFunctionTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
@@ -440,6 +443,7 @@ set ( TEST_FILES
 	SampleValidatorTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
+	SingleCountValidatorTest.h
 	SpectraAxisTest.h
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h

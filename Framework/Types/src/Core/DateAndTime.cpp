@@ -1,5 +1,7 @@
 #include "MantidTypes/Core/DateAndTime.h"
 
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
 namespace Mantid {
 namespace Types {
 namespace Core {
@@ -335,11 +337,17 @@ const DateAndTime &DateAndTime::defaultTime() {
 }
 
 //------------------------------------------------------------------------------------------------
-/** Sets the date and time using an ISO8601-formatted string
+/** Sets the date and time using an ISO8601 or Posix formatted string
  *
- * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ * @param str :: ISO8601 or posix format string:
+ *               "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz" or "yyy-MMM-dd hh:mm:ss.ssss"
  */
 void DateAndTime::setFromISO8601(const std::string &str) {
+  if (!DateAndTimeHelpers::stringIsISO8601(str) &&
+      !DateAndTimeHelpers::stringIsPosix(str)) {
+    throw std::invalid_argument("Error interpreting string '" + str +
+                                "' as a date/time.");
+  }
   // Make a copy
   std::string time = str;
 

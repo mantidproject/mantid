@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/BoolPropertyWidget.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
@@ -7,7 +6,7 @@
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
-#include <MantidQtWidgets/Common/ListPropertyWidget.h>
+#include "MantidQtWidgets/Common/ListPropertyWidget.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
