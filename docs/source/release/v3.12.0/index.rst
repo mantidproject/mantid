@@ -58,7 +58,6 @@ Changes
    Spectroscopy <spectroscopy>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
-   SANS <sans>
 
 Full Change Listings
 --------------------

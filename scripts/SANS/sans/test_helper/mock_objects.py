@@ -101,6 +101,12 @@ def create_mock_view(user_file_path, batch_file_path=None):
     _merge_q_range_stop = mock.PropertyMock(return_value=None)
     type(view).merge_q_range_stop = _merge_q_range_stop
 
+    _merge_min = mock.PropertyMock(return_value=None)
+    type(view).merge_min = _merge_min
+
+    _merge_max = mock.PropertyMock(return_value=None)
+    type(view).merge_max = _merge_max
+
     _sample_height = mock.PropertyMock(return_value=None)
     type(view).sample_height = _sample_height
 

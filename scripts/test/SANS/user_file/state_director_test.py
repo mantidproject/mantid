@@ -62,6 +62,9 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
     def _assert_reduction(self, state):
         reduction = state.reduction
         self.assertTrue(reduction.reduction_mode is ISISReductionMode.LAB)
+        self.assertFalse(reduction.merge_mask)
+        self.assertTrue(reduction.merge_min == None)
+        self.assertTrue(reduction.merge_max == None)
 
     def _assert_scale(self, state):
         scale = state.scale

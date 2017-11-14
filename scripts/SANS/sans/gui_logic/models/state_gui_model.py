@@ -247,6 +247,30 @@ class StateGuiModel(object):
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
 
+    @property
+    def merge_mask(self):
+        return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.set_simple_element(element_id=OtherId.merge_mask, value=value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_element(element_id=OtherId.merge_max, default_value=None)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        self.set_simple_element(element_id=OtherId.merge_max, value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_element(element_id=OtherId.merge_min, default_value=None)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        self.set_simple_element(element_id=OtherId.merge_min, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
     # ------------------------------------------------------------------------------------------------------------------
