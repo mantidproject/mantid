@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"

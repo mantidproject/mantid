@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_CONTAINER_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include <unordered_map>
 
 namespace Mantid {

@@ -7,7 +7,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Unit.h"

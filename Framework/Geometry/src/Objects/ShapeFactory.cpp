@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidGeometry/Instrument/Container.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Surfaces/Cone.h"

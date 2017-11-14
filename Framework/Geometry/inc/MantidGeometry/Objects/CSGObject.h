@@ -31,13 +31,14 @@ class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
 /**
-\class Object
-\brief Global object for object
+\class CSGObject
+\brief Constructive Solid Geometry object
 \version 1.0
 \date July 2007
 \author S. Ansell
 
-An object is a collection of Rules and surface objects
+A Constructive Solid Geometry (CSG) object, implemented
+as a collection of Rules and surface objects
 
 Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

@@ -1,7 +1,7 @@
 #ifndef MANTID_TESTOBJECT__
 #define MANTID_TESTOBJECT__
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Sphere.h"

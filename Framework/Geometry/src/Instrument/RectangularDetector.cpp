@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"

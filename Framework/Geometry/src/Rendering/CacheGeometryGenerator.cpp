@@ -1,7 +1,7 @@
 #include <vector>
 #include <cmath>
 #include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 

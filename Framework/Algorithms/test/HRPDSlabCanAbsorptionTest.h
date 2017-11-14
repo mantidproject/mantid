@@ -11,7 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 

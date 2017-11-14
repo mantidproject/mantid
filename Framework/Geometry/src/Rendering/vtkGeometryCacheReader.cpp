@@ -13,7 +13,7 @@ using Poco::XML::Element;
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 

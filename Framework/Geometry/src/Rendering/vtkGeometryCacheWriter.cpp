@@ -1,6 +1,6 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Logger.h"
 

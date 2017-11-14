@@ -10,7 +10,7 @@
 #ifndef COMPONENTCREATIONHELPER_H_
 #define COMPONENTCREATIONHELPER_H_
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
