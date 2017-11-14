@@ -5,7 +5,10 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
 #include "MantidAPI/TableRow.h"
+=======
+>>>>>>> Re #21171 Fixed pointer problems in model
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -26,6 +29,7 @@ bool isDigit(const std::string &text) {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
+<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
 <<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
 template <typename T, size_t S>
 T getFromRunMap(const int runNumber, const size_t bank,
@@ -56,6 +60,8 @@ T throwIfNecessary(const T toReturn, const bool throws, const std::string &messa
 >>>>>>> Re #21171 moved save algorithms to model
 }
 
+=======
+>>>>>>> Re #21171 Fixed pointer problems in model
 } // anonymous namespace
 
 namespace MantidQt {
@@ -403,8 +409,7 @@ EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
 =======
 Mantid::API::ITableWorkspace_sptr EnggDiffFittingModel::getFitResults(
 	const int runNumber, const size_t bank){
-	return getFromRunMap(runNumber, bank, m_fitResults, true,
-		boost::make_shared<Mantid::API::ITableWorkspace>());
+  return getFromRunMap(runNumber, bank, m_fitResults);
 }
 
 void EnggDiffFittingModel::setDifcTzero(const int runNumber, const size_t bank,
@@ -469,13 +474,18 @@ void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, const size_
 	saveAlg->setProperty("RunNumber", runNumber);
 	saveAlg->setProperty("Bank", bank);
 	saveAlg->setProperty("OutMode", "AppendToExistingFile");
+	saveAlg->setProperty("Filename", filename);
 	saveAlg->execute();
 }
 
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getWorkspace(const int runNumber, const size_t bank) {
+<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
 	return getFromRunMap(runNumber, bank, m_wsMap, false, boost::make_shared<Mantid::API::MatrixWorkspace>());
 >>>>>>> Re #21171 moved save algorithms to model
+=======
+  return getFromRunMap(runNumber, bank, m_wsMap);
+>>>>>>> Re #21171 Fixed pointer problems in model
 }
 
 std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
@@ -532,6 +542,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
                                   collectedRunBankPairs[0].second);
     renameWorkspace(ws, FOCUSED_WS_NAME);
   } else {
+<<<<<<< 62223840c4a3b5647f8ef6ff5390688eecc42203
     std::vector<std::string> workspaceNames;
     std::transform(collectedRunBankPairs.begin(), collectedRunBankPairs.end(),
                    std::back_inserter(workspaceNames),
@@ -540,6 +551,17 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
                                                 runBankPair.second)->getName();
                    });
     groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
+=======
+    const auto group_ws = ADS.retrieveWS<API::WorkspaceGroup>(FOCUSED_WS_NAME);
+	std::vector<std::string> filenames;
+	boost::split(filenames, filename, boost::is_any_of(","));
+
+	for (int i = 0; i != group_ws->getNumberOfEntries(); ++i) {
+		const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+			group_ws->getItem(i));
+		addWorkspace(ws->getRunNumber(), guessBankID(ws), filenames[i], ws);
+	}
+>>>>>>> Re #21171 Fixed pointer problems in model
   }
 }
 
@@ -590,7 +612,6 @@ EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
                            "Are you sure it has been focused correctly?");
 }
 
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
 std::string EnggDiffFittingModel::createFunctionString(
     const Mantid::API::ITableWorkspace_sptr fitFunctionParams,
     const size_t row) {
@@ -624,38 +645,8 @@ std::pair<double, double> EnggDiffFittingModel::getStartAndEndXFromFitParams(
   const auto startX = X0 - (windowLeft * S);
   const auto endX = X0 + (windowRight * S);
   return std::pair<double, double>(startX, endX);
-=======
-template<typename T, size_t S>
-void EnggDiffFittingModel::addToRunMap(const int runNumber, const size_t bank,
-	RunMap<S, T> &map, const T itemToAdd) {
-	map[bank - 1][runNumber] = itemToAdd;
-
 }
-
-template<typename T, size_t S>
-T EnggDiffFittingModel::getFromRunMap(const int runNumber, const size_t bank, 
-	RunMap<S, T> map,	const bool throws, const T default){
-
-	const std::string error_msg = "Tried to acces invalid run: run number " +
-		std::to_string(runNumber) + " and bank: " +
-		std::to_string(bank);
-
-	if (bank < 1 || bank > map.size()) {
-		return throwIfNecessary(default, throws, error_msg);
-	}
-	if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
-		return throwIfNecessary(default, throws, error_msg);
-	}
-	return map[bank - 1][runNumber];
-}
-
-void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank, 
-	const std::string &filename, API::MatrixWorkspace_sptr ws){
-	addToRunMap(runNumber, bank, m_wsFilenameMap, filename);
-	addWorkspace(runNumber, bank, ws);
->>>>>>> Re #21171 moved save algorithms to model
-}
-
+ 
 const std::string EnggDiffFittingModel::FOCUSED_WS_NAME =
     "engggui_fitting_focused_ws";
 const std::string EnggDiffFittingModel::FIT_RESULTS_TABLE_NAME =
