@@ -89,14 +89,6 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
             self.store_previous_directory(previous_directories, chosen_files[0])
         return chosen_files
 
-    def should_continue_adding(self, error):
-        choice = QtGui.QMessageBox.warning(self, \
-                                     "Error Adding Run", \
-                                     error, \
-                                     QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel, \
-                                     QtGui.QMessageBox.Ok)
-        return choice == QtGui.QMessageBox.Ok
-
     def run_list(self):
         return self.fileListLineEdit.text()
 

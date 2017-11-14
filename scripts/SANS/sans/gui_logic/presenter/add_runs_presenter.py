@@ -47,22 +47,14 @@ class AddRunsPagePresenter(object):
                        for run_range in run_ranges_split_on_commas]
         run_ranges_expanded = [self.list_range_to_iterator(range)\
                                for range in list_ranges]
-        return (run for run_range in run_ranges_expanded for run in run_range)
+        return (run for run_range in run_ranges_expanded for run in run_range) 
 
-    def should_continue_adding(self, error):
-        if error:
-            return self.view.should_continue_adding(error)
-        else:
-            return True
 
     def handle_add_items_pressed(self):
         input = self.view.run_list()
         runs = self.parse_runs_from_input(input)
         for run in runs:
-            error = self.model.add_run(str(run).strip())
-            if not self.should_continue_adding(error):
-                self.refresh()
-                return
+            self.model.add_run(str(run).strip())
         self.refresh()
 
     def refresh(self):
