@@ -107,7 +107,7 @@ def find_sans_file(file_name):
 
     if not full_path:
         raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
-                         "the relevant paths are added.".format(file_name))
+                         "the relevant paths are added and the correct instrument is selected.".format(file_name))
     return full_path
 
 
