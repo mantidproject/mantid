@@ -396,7 +396,11 @@ void EnggDiffFittingPresenter::processSelectRun() {
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
+<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
   const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+=======
+  const auto ws = m_model.getWorkspace(runNumber, bank);
+>>>>>>> Re #21171 moved save algorithms to model
   plotFocusedFile(false, ws);
 }
 
@@ -856,10 +860,12 @@ void EnggDiffFittingPresenter::processFitPeaks() {
                         "Please select a run to fit from the list");
     return;
   }
+
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+  
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -887,7 +893,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
-
+  
   startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
 }
 
@@ -946,8 +952,6 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
 
   m_fittingFinishedOK = false;
 
-  // load the focused workspace file to perform single peak fits
-
   // apply calibration to the focused workspace
   m_model->setDifcTzero(runNumber, bank, currentCalibration());
 
@@ -961,7 +965,7 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
   m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
-
+  
   m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
@@ -1187,11 +1191,20 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // detaches previous plots from canvas
     m_view->resetCanvas();
 
+<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
     const auto listLabel = m_view->getFittingListWidgetCurrentValue();
     int runNumber;
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
     const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
+=======
+
+	const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+	int runNumber;
+	size_t bank;
+	std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+	const auto ws = m_model.getWorkspace(runNumber, bank);
+>>>>>>> Re #21171 moved save algorithms to model
 
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);

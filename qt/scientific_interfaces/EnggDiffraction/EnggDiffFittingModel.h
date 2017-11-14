@@ -56,6 +56,13 @@ protected:
 
   void addFitResults(const int runNumber, const size_t bank,
                      const Mantid::API::ITableWorkspace_sptr ws);
+  
+  void setDifcTzero(const int runNumber, const size_t bank,
+	  const std::vector<GSASCalibrationParms> &calibParams);
+  void enggFitPeaks(const int runNumber, const size_t bank,
+	                const std::string &expectedPeaks);
+  void saveDiffFittingAscii(const int runNumber, const size_t bank,
+	  const std::string &filename);
 
 private:
   static const size_t MAX_BANKS = 2;
