@@ -17,6 +17,7 @@
 #include <Poco/Exception.h>
 
 #include <algorithm>
+#include <iostream>
 
 namespace {
 enum BINOPTIONS { CUSTOMBINNING, FROMMONITORS, SAVEASEVENTDATA };
@@ -213,6 +214,7 @@ void SANSAddFiles::add2Runs2Add() {
 
     for (QStringList::const_iterator k = ranges.begin(); k != ranges.end();
          ++k) {
+      std::cout << k->toStdString() << std::endl;
       // Check the file property
       FileProperty search("dummy", k->toStdString(), FileProperty::Load,
                           std::vector<std::string>(), Direction::Input);
