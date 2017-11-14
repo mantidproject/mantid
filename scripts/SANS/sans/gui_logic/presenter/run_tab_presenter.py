@@ -244,7 +244,7 @@ class RunTabPresenter(object):
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   "has been loaded")
+                                   " has been loaded")
             property_manager_service = PropertyManagerService()
             property_manager_service.add_states_to_pmds(states)
 
@@ -254,9 +254,9 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
-        except:
+        except Exception as e:
             self._view.halt_process_flag()
-            raise
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
@@ -843,9 +843,6 @@ class RunTabPresenter(object):
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
                 except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                           "been added to the Mantid search directories! See here for more "
-                                           "details: {}".format(row, str(e)))
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))
