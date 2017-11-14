@@ -80,9 +80,7 @@ IndexInfo::IndexInfo(const IndexInfo &other)
       m_communicator(
           Kernel::make_unique<Parallel::Communicator>(*other.m_communicator)),
       m_spectrumDefinitions(other.m_spectrumDefinitions),
-      m_spectrumNumberTranslator(other.m_spectrumNumberTranslator),
-      m_partitioner(
-          Kernel::make_unique<RoundRobinPartitioner>(*other.m_partitioner)) {}
+      m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {}
 
 IndexInfo::IndexInfo(IndexInfo &&) = default;
 
@@ -309,11 +307,11 @@ void IndexInfo::makeSpectrumNumberTranslator(
     throw std::runtime_error("IndexInfo: unknown storage mode " +
                              Parallel::toString(m_storageMode));
   }
-  m_partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
       numberOfPartitions, partition,
       Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
-      std::move(spectrumNumbers), *m_partitioner, partition);
+      std::move(spectrumNumbers), *partitioner, partition);
 }
 
 template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<SpectrumNumber>,
