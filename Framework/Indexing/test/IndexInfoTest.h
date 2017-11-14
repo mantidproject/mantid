@@ -94,6 +94,17 @@ void run_construct_from_parent_StorageMode_Distributed(
   }
   TS_ASSERT_EQUALS(i.size(), expectedSize);
 }
+
+void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
+    const Parallel::Communicator &comm) {
+  IndexInfo i(47, Parallel::StorageMode::Distributed, comm);
+  if (comm.size() != 1)
+    TS_ASSERT_THROWS_EQUALS(
+        i.globalSpectrumIndicesFromDetectorIndices({}),
+        const std::runtime_error &e, std::string(e.what()),
+        "IndexInfo::globalSpectrumIndicesFromDetectorIndices "
+        "does not support MPI runs");
+}
 }
 
 class IndexInfoTest : public CxxTest::TestSuite {
@@ -363,6 +374,10 @@ public:
 
   void test_construct_from_parent_StorageMode_Distributed() {
     runParallel(run_construct_from_parent_StorageMode_Distributed);
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_Distributed() {
+    runParallel(run_globalSpectrumIndicesFromDetectorIndices_Distributed);
   }
 
 private:

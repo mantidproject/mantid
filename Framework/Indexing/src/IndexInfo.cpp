@@ -226,6 +226,10 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 std::vector<GlobalSpectrumIndex>
 IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const std::vector<size_t> &detectorIndices) const {
+  if (m_communicator->size() != 1)
+    throw std::runtime_error("IndexInfo::"
+                             "globalSpectrumIndicesFromDetectorIndices does "
+                             "not support MPI runs");
   if (!m_spectrumDefinitions)
     throw std::runtime_error("IndexInfo::"
                              "globalSpectrumIndicesFromDetectorIndices -- no "
