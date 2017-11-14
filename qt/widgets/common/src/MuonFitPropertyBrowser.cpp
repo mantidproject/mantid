@@ -1465,11 +1465,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   if (m_periodBoxes.size() > 1) {
-    for (auto iter = m_periodBoxes.constBegin();
+    for (auto iter = std::next(m_periodBoxes.constBegin());
          iter != m_periodBoxes.constEnd(); ++iter) {
-      if (iter != m_periodBoxes.constBegin()) {
-        delete (iter);
-      }
+      delete (*iter);
     }
   }
   m_periodsToFitOptions.clear();

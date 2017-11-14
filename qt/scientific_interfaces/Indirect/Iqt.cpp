@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <qwt_plot.h>
 

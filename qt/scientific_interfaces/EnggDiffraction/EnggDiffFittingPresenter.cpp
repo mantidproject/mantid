@@ -6,7 +6,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/QwtHelper.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 #include "EnggDiffFittingPresWorker.h"
 
 #include <boost/lexical_cast.hpp>

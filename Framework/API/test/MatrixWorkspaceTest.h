@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -400,6 +401,17 @@ public:
     ws.initialize(indexInfo,
                   HistogramData::Histogram(HistogramData::Points(1)));
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
+  }
+
+  void testCloneClearsWorkspaceName() {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(1, 1, 1);
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
   }
 
   void testGetSetTitle() {

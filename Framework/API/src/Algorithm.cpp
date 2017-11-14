@@ -163,6 +163,11 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
   m_alwaysStoreInADS = doStore;
 }
 
+/** Returns true if we always store in the AnalysisDataService.
+ *  @return true if output is saved to the AnalysisDataService.
+ */
+bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
+
 /** Set whether the algorithm will rethrow exceptions
  * @param rethrow :: true if you want to rethrow exception.
  */
@@ -1334,7 +1339,11 @@ bool Algorithm::processGroups() {
         // Set the property using the name of that workspace
         if (Property *prop =
                 dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
-          alg->setPropertyValue(prop->name(), ws->getName());
+          if (ws->getName().empty()) {
+            alg->setProperty(prop->name(), ws);
+          } else {
+            alg->setPropertyValue(prop->name(), ws->getName());
+          }
         } else {
           throw std::logic_error("Found a Workspace property which doesn't "
                                  "inherit from Property.");

@@ -304,25 +304,6 @@ Example Input:
   # In this example assume we mean a cycle with run numbers 100-200
   hrpd_example.create_vanadium(first_cycle_run_no=100, ...)
 
-.. _mode_hrpd_isis-powder-diffraction-ref:
-
-mode
-^^^^
-*Optional*
-
-Indicates the coupling mode of the runs in
-:ref:`create_vanadium_hrpd_isis-powder-diffraction-ref` and
-:ref:`focus_hrpd_isis-powder-diffraction-ref`.
-
-Accepted values are **coupled** and **decoupled**. By default this is
-set to **coupled**, but may be overridden as required,
-
-.. code-block:: python
-
-  hrpd_example.create_vanadium(mode="coupled", ...)
-  # Or
-  hrpd_example.focus(mode="decoupled", ...)
-
 .. _multiple_scattering_hrpd_isis-powder-diffraction-ref:
 
 multiple_scattering
@@ -566,6 +547,22 @@ On HRPD this is set to the following:
 ..  code-block:: python
 		 
   grouping_file_name = "hrpd_new_072_01_corr.cal"
+
+.. _mode_hrpd_isis-powder-diffraction-ref:
+
+mode
+^^^^
+Indicates the coupling mode of the runs in
+:ref:`create_vanadium_hrpd_isis-powder-diffraction-ref` and
+:ref:`focus_hrpd_isis-powder-diffraction-ref`.
+
+Accepted values are **coupled** and **decoupled**.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  mode = "coupled"
 
 spline_coefficient
 ^^^^^^^^^^^^^^^^^^
