@@ -70,6 +70,8 @@ public:
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
+  PartitionIndex partitionOf(const GlobalSpectrumIndex globalIndex) const;
+
 private:
   bool isPartitioned() const;
   void checkUniqueSpectrumNumbers() const;

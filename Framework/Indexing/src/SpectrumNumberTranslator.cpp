@@ -153,6 +153,14 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   return SpectrumIndexSet(indices, m_globalToLocal.size());
 }
 
+PartitionIndex SpectrumNumberTranslator::partitionOf(
+    const GlobalSpectrumIndex globalIndex) const {
+  checkUniqueSpectrumNumbers();
+  const auto spectrumNumber =
+      m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
+  return m_spectrumNumberToPartition.at(spectrumNumber);
+}
+
 void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
   // To support legacy code that creates workspaces with duplicate spectrum
   // numbers we check for bad spectrum numbers only when needed, i.e., when

@@ -97,13 +97,27 @@ void run_construct_from_parent_StorageMode_Distributed(
 
 void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
     const Parallel::Communicator &comm) {
-  IndexInfo i(47, Parallel::StorageMode::Distributed, comm);
-  if (comm.size() != 1)
-    TS_ASSERT_THROWS_EQUALS(
-        i.globalSpectrumIndicesFromDetectorIndices({}),
-        const std::runtime_error &e, std::string(e.what()),
-        "IndexInfo::globalSpectrumIndicesFromDetectorIndices "
-        "does not support MPI runs");
+  IndexInfo i(666, Parallel::StorageMode::Distributed, comm);
+  // Out of order
+  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199};
+  std::vector<SpectrumDefinition> specDefs(i.size());
+  size_t current = 0;
+  for (size_t spec = 0; spec < 200; ++spec) {
+    if (i.isOnThisPartition(GlobalSpectrumIndex(spec))) {
+      if (spec > 42)
+        specDefs[current].add(spec + 1);
+      ++current;
+    }
+  }
+  i.setSpectrumDefinitions(specDefs);
+  const auto &indices =
+      i.globalSpectrumIndicesFromDetectorIndices(detectorIndices);
+  TS_ASSERT_EQUALS(indices.size(), 5);
+  TS_ASSERT_EQUALS(indices[0], 99);
+  TS_ASSERT_EQUALS(indices[1], 100);
+  TS_ASSERT_EQUALS(indices[2], 101);
+  TS_ASSERT_EQUALS(indices[3], 198);
+  TS_ASSERT_EQUALS(indices[4], 199);
 }
 }
 
