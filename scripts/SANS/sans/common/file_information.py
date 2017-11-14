@@ -92,6 +92,8 @@ def find_sans_file(file_name):
     :param file_name: a file name or a run number.
     :return: the full path.
     """
+    error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that "\
+                    "the relevant paths are added and the correct instrument is selected."
     try:
         full_path = find_full_file_path(file_name)
         if not full_path:
@@ -102,12 +104,10 @@ def find_sans_file(file_name):
             if runs:
                 full_path = runs[0]
     except RuntimeError as e:
-        raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
-                         "the relevant paths are added.".format(file_name))
+        raise RuntimeError(error_message.format(file_name))
 
     if not full_path:
-        raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
-                         "the relevant paths are added and the correct instrument is selected.".format(file_name))
+        raise RuntimeError(error_message.format(file_name))
     return full_path
 
 
