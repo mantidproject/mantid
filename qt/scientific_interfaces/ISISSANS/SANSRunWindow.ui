@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -2110,19 +2110,6 @@ intermediate ranges are there for comparison</string>
                <item row="0" column="2">
                 <widget class="QLineEdit" name="frontDetQmax"/>
                </item>
-               <item row="1" column="0">
-                <spacer name="horizontalSpacer_8">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
                <item row="0" column="0">
                 <widget class="QLineEdit" name="frontDetQmin"/>
                </item>
@@ -2140,6 +2127,26 @@ intermediate ranges are there for comparison</string>
                  </property>
                  <property name="text">
                   <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QCheckBox" name="mergeQRangeOnOff">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QLineEdit" name="mergeQMax"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLineEdit" name="mergeQMin"/>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>to</string>
                  </property>
                 </widget>
                </item>

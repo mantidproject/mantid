@@ -135,6 +135,24 @@ class DetectorBank(object):
         def n_pixels(self):
             return self._n_pixels
 
+    class _MergeRange(object):
+        def __init__(self, q_max=None, q_min=None):
+            """
+                @param scale: Default to 1.0. Value to multiply data with
+                @param shift: Default to 0.0. Value to add to data
+                @param fitScale: Default is False. Whether or not to try and fit this param
+                @param fitShift: Default is False. Whether or not to try and fit this param
+                @param qMin: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
+                @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors
+            """
+            self.q_min = q_min
+            self.q_max = q_max
+
+            if self.q_min is None and self.q_max is None:
+                self.q_merge_range = False
+            else:
+                self.q_merge_range = True
+
     class _RescaleAndShift(object):
         """
             Stores property about the detector which is used to rescale and shift

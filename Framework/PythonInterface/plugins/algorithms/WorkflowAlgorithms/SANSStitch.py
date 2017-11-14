@@ -291,6 +291,9 @@ class SANSStitch(DataProcessorAlgorithm):
         fit_min = self.getProperty('FitMin').value
         fit_max = self.getProperty('FitMax').value
 
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
         nF = self.getProperty('HABNormSample').value
