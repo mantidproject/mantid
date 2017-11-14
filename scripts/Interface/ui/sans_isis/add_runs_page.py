@@ -17,14 +17,14 @@ from sans.gui_logic.models.add_runs_model import BinningType
 from mantidqtpython import MantidQt
 
 class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
-    manageDirectoriesPressed = pyqtSignal()
-    browsePressed = pyqtSignal()
-    addRunsPressed = pyqtSignal()
-    removeRunsPressed = pyqtSignal()
-    removeAllRunsPressed = pyqtSignal()
+    manageDirectories = pyqtSignal()
+    browse = pyqtSignal()
+    addRuns = pyqtSignal()
+    removeRuns = pyqtSignal()
+    removeAllRuns = pyqtSignal()
     binningTypeChanged = pyqtSignal(int)
     preserveEventsChanged = pyqtSignal(bool)
-    sumPressed = pyqtSignal()
+    sum = pyqtSignal()
 
     def __init__(self, parent=None):
         super(AddRunsPage, self).__init__(parent)
@@ -46,6 +46,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         self.binningType.currentIndexChanged.connect(self.on_binning_type_changed)
         self.overlayEventWorkspacesCheckbox.stateChanged.connect(self.on_overlay_ews_changed)
         self.addFileButton.pressed.connect(self.on_add_pressed)
+        self.fileListLineEdit.returnPressed.connect(self.on_add_pressed)
         self.removeFileButton.pressed.connect(self.on_remove_pressed)
         self.removeAllFilesButton.pressed.connect(self.on_remove_all_pressed)
         self.manageDirectoriesButton.pressed.connect(self.on_manage_directories)
@@ -104,7 +105,6 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def selected_runs(self):
         selected = [runModel.row() for runModel in\
                     self.fileList.selectedIndexes()]
-        selected.sort(reverse=True)
         return selected
 
     def draw_runs(self, runs):
