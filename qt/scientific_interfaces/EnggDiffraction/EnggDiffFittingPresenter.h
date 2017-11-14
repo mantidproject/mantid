@@ -74,7 +74,7 @@ public:
   //@}
 
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const std::string &focusedRunNo,
+  void doFitting(const int runNumber, const size_t bank,
                  const std::string &expectedPeaks);
 
   void runLoadAlg(const std::string &focusedFile,
@@ -113,7 +113,6 @@ public:
   void runConvertUnitsAlg(std::string workspaceName);
   void runAlignDetectorsAlg(std::string workspaceName);
 
-  void setDifcTzero(Mantid::API::MatrixWorkspace_sptr wks) const;
   void getDifcTzero(Mantid::API::MatrixWorkspace_const_sptr wks, double &difc,
                     double &difa, double &tzero) const;
 
@@ -230,7 +229,7 @@ private:
   IEnggDiffFittingView *const m_view;
 
   /// Associated model for this presenter
-  MantidQT::CustomInterfaces::EnggDiffFittingModel m_model;
+  EnggDiffFittingModel m_model;
 
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;

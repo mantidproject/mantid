@@ -54,7 +54,8 @@ private slots:
 
       auto runNo = m_multiRunNo[i];
       try {
-        m_pres->doFitting(runNo, m_expectedPeaks);
+		  // WORK OUT WHAT TO DO HERE
+        //m_pres->doFitting(runNo, m_expectedPeaks);
       } catch (std::exception &e) {
         // If we catch any sort of exception throw we should break
         // the loop to ensure we don't continue and emit
