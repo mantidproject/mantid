@@ -61,16 +61,22 @@ public:
       const auto tagIter = factorTags.find(label);
       TS_ASSERT_DIFFERS(tagIter, factorTags.end())
       std::vector<double> fs;
+      double errorFactor;
       if (*tagIter == "F1") {
         fs = factors(points, F1_limits(), F1_K());
+        errorFactor = 1. / 3000.;
       } else if (*tagIter == "F2") {
         fs = factors(points, F2_limits(), F2_K());
+        errorFactor = 1. / 3000.;
       } else if (*tagIter == "P1") {
         fs = factors(points, P1_limits(), P1_K());
+        errorFactor = 1. / 500.;
       } else if (*tagIter == "P2") {
         fs = factors(points, P2_limits(), P2_K());
+        errorFactor = 1. / 500.;
       } else {
         fs = factors(points, Phi_limits(), Phi_K());
+        errorFactor = 1. / 500.;
       }
       const auto &xs = outWS->x(i);
       TS_ASSERT_EQUALS(xs.size(), edges.size())
@@ -81,7 +87,7 @@ public:
       for (size_t j = 0; j != ys.size(); ++j) {
         TS_ASSERT_EQUALS(xs[j], edges[j])
         TS_ASSERT_DELTA(ys[j], fs[j], 1e-12)
-        TS_ASSERT_EQUALS(es[j], 0)
+        TS_ASSERT_EQUALS(es[j], errorFactor * ys[j])
       }
       factorTags.erase(tagIter);
     }

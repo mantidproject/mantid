@@ -29,6 +29,8 @@ This algorithm loads reflectometry polarization efficiency data from ILL's IDL-s
  
 Note, that the order of the histograms in the output workspace is unspecified. The histograms should be identified by the above labels instead.
 
+The errors in the output histograms are estimated by multiplying the efficiencies by constant factors.
+
 Usage
 -----
 

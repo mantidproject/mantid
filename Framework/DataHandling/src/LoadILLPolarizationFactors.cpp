@@ -173,6 +173,22 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
   }
 }
 
+void addErrors(Mantid::HistogramData::Histogram &h, const Factor tag) {
+  // The error estimates are taken from the LAMP/COSMOS software.
+  double f;
+  switch(tag) {
+  case Factor::F1:
+  case Factor::F2:
+    f = 1. / 3000.;
+    break;
+  case Factor::P1:
+  case Factor::P2:
+  case Factor::Phi:
+    f = 1. / 500.;
+    break;
+  }
+  h.mutableE() = (h.y() * f).rawData();
+}
 }
 
 namespace Mantid {
@@ -254,6 +270,7 @@ void LoadILLPolarizationFactors::exec() {
     calculate_factors_in_place(source, fDef.fitFactors);
     auto target = outWS->histogram(i);
     HistogramData::interpolateLinearInplace(source, target);
+    addErrors(target, tag);
     HistogramData::Histogram outH{refWS->histogram(0)};
     outH.setSharedY(target.sharedY());
     outH.setSharedE(target.sharedE());
