@@ -751,14 +751,14 @@ void EnggDiffFittingPresenter::processLoad() {
   try {
     m_model.loadWorkspaces(filenames);
   } catch (Poco::PathSyntaxException &ex) {
-	throwFileNotFound(ex);
+	warnFileNotFound(ex);
     return;
   } catch (std::invalid_argument &ex) {
-	throwFileNotFound(ex);
+	warnFileNotFound(ex);
 	return;
   }
   catch (Mantid::Kernel::Exception::NotFoundError &ex) {
-	  throwFileNotFound(ex);
+	  warnFileNotFound(ex);
 	  return;
   }
 
@@ -1728,7 +1728,7 @@ bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
-void EnggDiffFittingPresenter::throwFileNotFound(const std::exception &ex){
+void EnggDiffFittingPresenter::warnFileNotFound(const std::exception &ex){
 	m_view->showStatus("Error while loading focused run");
 	m_view->userWarning("Invalid file selected",
 		"Mantid could not load the selected file. "
