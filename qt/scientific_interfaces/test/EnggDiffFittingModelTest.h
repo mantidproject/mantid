@@ -14,7 +14,7 @@
 typedef std::pair<int, size_t> RunBankPair;
 
 using namespace Mantid;
-using namespace MantidQT::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 

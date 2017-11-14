@@ -223,16 +223,12 @@ void EnggDiffFittingModel::addToRunMap(const int runNumber, const size_t bank,
 template <typename T, size_t S>
 T EnggDiffFittingModel::getFromRunMap(const int runNumber, const size_t bank,
                                       RunMap<S, T> map) {
-
-  const std::string error_msg = "Tried to acces invalid run: run number " +
-                                std::to_string(runNumber) + " and bank: " +
-                                std::to_string(bank);
-
   if (bank < 1 || bank > map.size()) {
-    throw std::runtime_error(error_msg);
+    throw std::runtime_error("Tried to access invalid bank: " + std::to_string(bank));
   }
   if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
-    throw std::runtime_error(error_msg);
+    throw std::runtime_error("Accessed invalid run number " + std::to_string(runNumber)
+		+ " for bank " + std::to_string(bank));
   }
   return map[bank - 1][runNumber];
 }
