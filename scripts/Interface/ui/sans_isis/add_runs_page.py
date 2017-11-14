@@ -40,6 +40,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         ]
         for binningType in binningTypes:
             self.binningType.addItem(binningType)
+        self.fileList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     def connect_signals(self):
         self.binningType.currentIndexChanged.connect(self.on_binning_type_changed)
@@ -101,7 +102,10 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return self.fileListLineEdit.text()
 
     def selected_runs(self):
-        return [runModel.row() for runModel in self.fileList.selectedIndexes()]
+        selected = [runModel.row() for runModel in\
+                    self.fileList.selectedIndexes()]
+        selected.sort(reverse=True)
+        return selected
 
     def draw_runs(self, runs):
         model = QtGui.QStandardItemModel()

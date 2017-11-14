@@ -27,6 +27,9 @@ class AddRunsModel(object):
     def __init__(self, runs = []):
         self.runs = runs
 
+    def create_run_from_path(self, path):
+        return SummableRunModel(path)
+
     def find_all_from_query(self, query_string):
         try:
             results = FileFinder.findRuns(query_string.encode('utf-8'))

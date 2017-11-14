@@ -81,7 +81,7 @@ class AddRunsPagePresenter(object):
 
     def handle_browse_pressed(self):
         search_directories = ConfigService.Instance().getDataSearchDirs()
-        files = self.view.show_file_picker([".txt", ".nxs"], search_directories)
-        for file in files:
-            self.model.add_run(file)
+        files = self.view.show_file_picker([".nxs"], search_directories)
+        # TODO: Get file extensions from a reputable source.
+        self.add_runs(self.model.create_run_from_path(file) for file in files)
         self.refresh()
