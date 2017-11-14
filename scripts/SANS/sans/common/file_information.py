@@ -102,11 +102,11 @@ def find_sans_file(file_name):
             if runs:
                 full_path = runs[0]
     except RuntimeError as e:
-        raise ValueError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
+        raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
                          "the relevant paths are added.".format(file_name))
 
     if not full_path:
-        raise ValueError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
+        raise RuntimeError("Trying to find the SANS file {0}, but cannot find it. Make sure that "
                          "the relevant paths are added.".format(file_name))
     return full_path
 

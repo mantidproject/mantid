@@ -842,7 +842,7 @@ class RunTabPresenter(object):
                 try:
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
-                except ValueError as e:
+                except (ValueError, RuntimeError) as e:
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))
