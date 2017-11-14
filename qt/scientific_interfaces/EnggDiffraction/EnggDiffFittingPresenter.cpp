@@ -751,23 +751,15 @@ void EnggDiffFittingPresenter::processLoad() {
   try {
     m_model.loadWorkspaces(filenames);
   } catch (Poco::PathSyntaxException &ex) {
-    m_view->showStatus("Error while loading focused run");
-    m_view->userWarning("Failed to load the selected focus file.",
-                        "The focus file failed to load. Are you sure the "
-                        "file exists? please check the logger for more"
-                        " information.");
-    g_log.error("Failed to load file. Error message: ");
-    g_log.error(ex.what());
+	throwFileNotFound(ex);
     return;
   } catch (std::invalid_argument &ex) {
-    m_view->showStatus("Error while loading focused run");
-    m_view->userWarning("Invalid file selected",
-                        "Mantid could not load the selected file. "
-                        "Are you sure it exists? "
-                        "See the logger for more information");
-    g_log.error("Failed to load file. Error message: ");
-    g_log.error(ex.what());
-    return;
+	throwFileNotFound(ex);
+	return;
+  }
+  catch (Mantid::Kernel::Exception::NotFoundError &ex) {
+	  throwFileNotFound(ex);
+	  return;
   }
 
   const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
@@ -1734,6 +1726,16 @@ void EnggDiffFittingPresenter::setDefaultBank(
 
 bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
+}
+
+void EnggDiffFittingPresenter::throwFileNotFound(const std::exception &ex){
+	m_view->showStatus("Error while loading focused run");
+	m_view->userWarning("Invalid file selected",
+		"Mantid could not load the selected file. "
+		"Are you sure it exists? "
+		"See the logger for more information");
+	g_log.error("Failed to load file. Error message: ");
+	g_log.error(ex.what());
 }
 
 void EnggDiffFittingPresenter::plotFocusedFile(
