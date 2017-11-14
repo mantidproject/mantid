@@ -2057,7 +2057,7 @@ public:
     this->fake_uniform_data_weights(TOF);
     TS_ASSERT_THROWS_NOTHING(
         el.compressFatEvents(20000., el.getPulseTimeMin(), 5., &el_output));
-    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 400);
+    TS_ASSERT_EQUALS(el_output.getNumberEvents(), 401);
     TS_ASSERT_EQUALS(el_output.integrate(XMIN, XMAX, true),
                      el.integrate(XMIN, XMAX, true));
 
@@ -2066,7 +2066,7 @@ public:
     this->fake_uniform_data_weights(WEIGHTED);
     TS_ASSERT_THROWS_NOTHING(el.compressFatEvents(20000., el.getPulseTimeMin(),
                                                   5., &el_weight_output));
-    TS_ASSERT_EQUALS(el_weight_output.getNumberEvents(), 400);
+    TS_ASSERT_EQUALS(el_weight_output.getNumberEvents(), 401);
     TS_ASSERT_EQUALS(el_weight_output.integrate(XMIN, XMAX, true),
                      el.integrate(XMIN, XMAX, true));
 

@@ -120,6 +120,34 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
   return false;
 }
 
+// comparator for pulse time with tolerance
+struct comparePulseTimeTOFDelta {
+  explicit comparePulseTimeTOFDelta(const Types::Core::DateAndTime &start,
+                                    const double seconds)
+      : startNano(start.totalNanoseconds()),
+        deltaNano(static_cast<int64_t>(seconds * 1.e9)) {}
+
+  bool operator()(const TofEvent &e1, const TofEvent &e2) {
+    // get the pulse times converted into bin number from start time
+    int64_t e1Pulse =
+        (e1.pulseTime().totalNanoseconds() - startNano) / deltaNano;
+    int64_t e2Pulse =
+        (e2.pulseTime().totalNanoseconds() - startNano) / deltaNano;
+
+    // compare with the calculated bin information
+    if (e1Pulse < e2Pulse) {
+      return true;
+    } else if ((e1Pulse == e2Pulse) && (e1.tof() < e2.tof())) {
+      return true;
+    }
+
+    return false;
+  }
+
+  int64_t startNano;
+  int64_t deltaNano;
+};
+
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
@@ -918,9 +946,13 @@ void EventList::sort(const EventSortType order) const {
     this->sortPulseTime();
   } else if (order == PULSETIMETOF_SORT) {
     this->sortPulseTimeTOF();
+  } else if (order == PULSETIMETOF_DELTA_SORT) {
+    throw std::invalid_argument("sorting by pulse time with delta requires "
+                                "extraparameters. Use sortPulseTimeTOFDelta "
+                                "instead.");
   } else if (order == TIMEATSAMPLE_SORT) {
     throw std::invalid_argument("sorting by time at sample requires extra "
-                                "parameters. call sortTimeAtSample instead.");
+                                "parameters. Use sortTimeAtSample instead.");
   } else {
     throw runtime_error("Invalid sort type in EventList::sort(EventSortType)");
   }
@@ -1101,6 +1133,37 @@ void EventList::sortPulseTimeTOF() const {
 
   // Save
   this->order = PULSETIMETOF_SORT;
+}
+
+/**
+ * Sort by the pulse time with a tolerance. The pulsetime to compare is a
+ * constant binning of seconds from start. This will set the sort order to
+ * UNSORTED upon completion rather than storing the call parameters.
+ * @param start The absolute start time
+ * @param seconds The tolerance of pulse time in seconds.
+ */
+void EventList::sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start,
+                                      const double seconds) const {
+  // Avoid sorting from multiple threads
+  std::lock_guard<std::mutex> _lock(m_sortMutex);
+
+  std::function<bool(TofEvent &, TofEvent &)> comparator =
+      comparePulseTimeTOFDelta(start, seconds);
+
+  switch (eventType) {
+  case TOF:
+    tbb::parallel_sort(events.begin(), events.end(), comparator);
+    break;
+  case WEIGHTED:
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       comparator);
+    break;
+  case WEIGHTED_NOTIME:
+    // Do nothing; there is no time to sort
+    break;
+  }
+
+  this->order = UNSORTED; // so the function always re-runs
 }
 
 // --------------------------------------------------------------------------
@@ -1584,11 +1647,11 @@ inline void EventList::compressFatEventsHelper(
 
   // pulsetime bin information - stored as int nanoseconds because it
   // implementation type for DateAndTime object
+  const int64_t PULSETIME_START = timeStart.totalNanoseconds();
   const double SEC_TO_NANO = 1.e9;
-  const int64_t PULSETIME_TOL = static_cast<int64_t>(seconds * SEC_TO_NANO);
+  const int64_t PULSETIME_DELTA = static_cast<int64_t>(seconds * SEC_TO_NANO);
 
-  // pusletime information
-  DateAndTime timeRight = timeStart + PULSETIME_TOL; // right boundary <
+  // pulsetime information
   std::vector<DateAndTime> pulsetimes; // all the times for new event
 
   // Carrying weight and error
@@ -1601,9 +1664,17 @@ inline void EventList::compressFatEventsHelper(
     if (it->m_pulsetime >= timeStart)
       break;
   }
+
+  // bin if the pulses are histogrammed
+  int64_t lastPulseBin =
+      (it->m_pulsetime.totalNanoseconds() - PULSETIME_START) / PULSETIME_DELTA;
+  int64_t eventPulseBin;
   // loop through events and accumulate weight
   for (; it != events.cend(); ++it) {
-    if ((it->m_pulsetime < timeRight) && (it->m_tof - lastTof) <= tolerance) {
+    eventPulseBin = (it->m_pulsetime.totalNanoseconds() - PULSETIME_START) /
+                    PULSETIME_DELTA;
+    if ((eventPulseBin <= lastPulseBin) &&
+        (std::fabs(it->m_tof - lastTof) <= tolerance)) {
       // Carry the error and weight
       weight += it->weight();
       errorSquared += it->errorSquared();
@@ -1625,7 +1696,7 @@ inline void EventList::compressFatEventsHelper(
       weight = it->weight();
       errorSquared = it->errorSquared();
       lastTof = it->m_tof;
-      timeRight += PULSETIME_TOL;
+      lastPulseBin = eventPulseBin;
       pulsetimes.clear();
       pulsetimes.push_back(it->m_pulsetime);
     }
@@ -1717,12 +1788,12 @@ void EventList::compressFatEvents(
     throw std::invalid_argument(
         "Cannot compress events that do not have pulsetime");
   case TOF:
-    this->sortPulseTimeTOF();
+    this->sortPulseTimeTOFDelta(timeStart, seconds);
     compressFatEventsHelper(this->events, destination->weightedEvents,
                             tolerance, timeStart, seconds);
     break;
   case WEIGHTED:
-    this->sortPulseTimeTOF();
+    this->sortPulseTimeTOFDelta(timeStart, seconds);
     if (destination == this) {
       // Put results in a temp output
       std::vector<WeightedEvent> out;
@@ -1738,7 +1809,7 @@ void EventList::compressFatEvents(
   }
   // In all cases, you end up WEIGHTED_NOTIME.
   destination->eventType = WEIGHTED;
-  // The sort is still valid!
+  // The sort order is pulsetimetof as we've compressed out the tolerance
   destination->order = PULSETIMETOF_SORT;
   // Empty out storage for vectors that are now unused.
   destination->clearUnused();

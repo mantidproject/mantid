@@ -29,6 +29,7 @@ enum EventSortType {
   TOF_SORT,
   PULSETIME_SORT,
   PULSETIMETOF_SORT,
+  PULSETIMETOF_DELTA_SORT,
   TIMEATSAMPLE_SORT
 };
 
@@ -425,6 +426,9 @@ private:
 
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
+  // should not be called externally
+  void sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start,
+                             const double seconds) const;
 
   // helper functions are all internal to simplify the code
   template <class T1, class T2>
