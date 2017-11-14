@@ -1784,29 +1784,34 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
 void EventList::compressFatEvents(
     const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
     const double seconds, EventList *destination) {
-  switch (eventType) {
-  case WEIGHTED_NOTIME:
-    throw std::invalid_argument(
-        "Cannot compress events that do not have pulsetime");
-  case TOF:
-    this->sortPulseTimeTOFDelta(timeStart, seconds);
-    compressFatEventsHelper(this->events, destination->weightedEvents,
-                            tolerance, timeStart, seconds);
-    break;
-  case WEIGHTED:
-    this->sortPulseTimeTOFDelta(timeStart, seconds);
-    if (destination == this) {
-      // Put results in a temp output
-      std::vector<WeightedEvent> out;
-      compressFatEventsHelper(this->weightedEvents, out, tolerance, timeStart,
-                              seconds);
-      // Put it back
-      this->weightedEvents.swap(out);
-    } else {
-      compressFatEventsHelper(this->weightedEvents, destination->weightedEvents,
+
+  // only worry about non-empty EventLists
+  if (this->getNumberEvents() > 0) {
+    switch (eventType) {
+    case WEIGHTED_NOTIME:
+      throw std::invalid_argument(
+          "Cannot compress events that do not have pulsetime");
+    case TOF:
+      this->sortPulseTimeTOFDelta(timeStart, seconds);
+      compressFatEventsHelper(this->events, destination->weightedEvents,
                               tolerance, timeStart, seconds);
+      break;
+    case WEIGHTED:
+      this->sortPulseTimeTOFDelta(timeStart, seconds);
+      if (destination == this) {
+        // Put results in a temp output
+        std::vector<WeightedEvent> out;
+        compressFatEventsHelper(this->weightedEvents, out, tolerance, timeStart,
+                                seconds);
+        // Put it back
+        this->weightedEvents.swap(out);
+      } else {
+        compressFatEventsHelper(this->weightedEvents,
+                                destination->weightedEvents, tolerance,
+                                timeStart, seconds);
+      }
+      break;
     }
-    break;
   }
   // In all cases, you end up WEIGHTED_NOTIME.
   destination->eventType = WEIGHTED;
