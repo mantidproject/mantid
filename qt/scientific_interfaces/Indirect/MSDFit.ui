@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>949</width>
-    <height>734</height>
+    <width>522</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,37 +62,86 @@
      <item>
       <layout class="QVBoxLayout" name="loMSDPlot">
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
-         <property name="showLegend" stdset="0">
-          <bool>true</bool>
-         </property>
-         <property name="curveErrorBars" stdset="0">
-          <stringlist>
-           <string>Sample</string>
-          </stringlist>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
-         <property name="showLegend" stdset="0">
-          <bool>true</bool>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="loPlotProperties">
+         <item>
+          <layout class="QVBoxLayout" name="loProperties">
+           <item>
+            <widget class="QCheckBox" name="ckPlotGuess">
+             <property name="text">
+              <string>Plot Guess</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="properties"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="loPlotsLayout" stretch="5,3">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetNoConstraint</enum>
+           </property>
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>125</height>
+              </size>
+             </property>
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="curveErrorBars" stdset="0">
+              <stringlist>
+               <string>Sample</string>
+              </stringlist>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>1</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>75</height>
+              </size>
+             </property>
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="loPlotOptions">
