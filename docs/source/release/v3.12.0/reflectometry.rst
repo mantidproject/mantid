@@ -1,6 +1,6 @@
-====================
-Spectroscopy Changes
-====================
+=====================
+Reflectometry Changes
+=====================
 
 .. contents:: Table of Contents
    :local:
