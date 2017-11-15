@@ -1009,7 +1009,7 @@ public:
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 4);
+    TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
     TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -1024,7 +1024,7 @@ public:
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
     // Check that the child detectors have been positioned according to the
@@ -1057,7 +1057,7 @@ public:
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 4);
+    TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
     TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -1072,7 +1072,7 @@ public:
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
     // Check detectors moved correcly as a result of root rotation
     // Detector at x=1,y=0,z=0 rotated around root at x=0,y=0,z=0 with rotation
@@ -1083,6 +1083,57 @@ public:
     // vector y=1, -90 degrees
     TS_ASSERT(
         mergeDetectorInfo.position({0, 1}).isApprox(Eigen::Vector3d{0, 0, 1}));
+  }
+
+  void test_merge_root_multiple() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = std::get<0>(infos1);
+    ComponentInfo &b = std::get<0>(infos2);
+    ComponentInfo &c = std::get<0>(infos3);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    Eigen::Vector3d pos3(3, 0, 0);
+    a.setPosition(a.root(), pos1);
+    b.setPosition(b.root(), pos2);
+    c.setPosition(c.root(), pos3);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    std::pair<int64_t, int64_t> interval3(2, 3);
+    a.setScanInterval(a.root(), interval1);
+    b.setScanInterval(b.root(), interval2);
+    c.setScanInterval(c.root(), interval3);
+    b.merge(c); // Execute the merge
+    a.merge(b); // Merge again
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 2 * 3);
+    TS_ASSERT_EQUALS(a.scanCount(a.root()), 3);
+    // Note that the order is not guaranteed, currently these are just in the
+    // order in which the are merged.
+    auto index1 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
+    auto index2 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
+    auto index3 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 2 /*time index*/);
+    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.scanInterval(index3), interval3);
+    TS_ASSERT_EQUALS(a.position(index1), pos1);
+    TS_ASSERT_EQUALS(a.position(index2), pos2);
+    TS_ASSERT_EQUALS(a.position(index3), pos3);
+
+    // Test Detector info is synched internally
+    const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 3);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 2}), interval3);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
