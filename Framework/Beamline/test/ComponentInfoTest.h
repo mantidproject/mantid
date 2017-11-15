@@ -592,8 +592,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex).isApprox(
-                   compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex)
+                   .isApprox(compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -677,8 +677,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex).angularDistance(
-            info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex)
+            .angularDistance(info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 
@@ -884,6 +884,45 @@ public:
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
     TSM_ASSERT_EQUALS("Intervals identical. Scan size should not grow",
                       b.scanCount(0), 1)
+  }
+  void do_test_merge_identical_interval_failures(ComponentInfo &a) {
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    Eigen::Quaterniond rot1(
+        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+    Eigen::Quaterniond rot2(
+        Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+    auto rootIndex = a.root();
+    a.setPosition(rootIndex, pos1);
+    a.setRotation(rootIndex, rot1);
+    auto b(a);
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+
+    b = a;
+    b.setPosition(rootIndex, pos2);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "matching scan interval but "
+                            "positions differ");
+    b.setPosition(rootIndex, pos1);
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+
+    b = a;
+    b.setRotation(rootIndex, rot2);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "matching scan interval but "
+                            "rotations differ");
+  }
+
+  void test_merge_identical_interval_failures_async() {
+    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
+                          std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo a = std::get<0>(infos);
+    a.setScanInterval(a.root(), {0, 1});
+    do_test_merge_identical_interval_failures(a);
   }
 
   void test_merge_detectors() {

@@ -585,6 +585,7 @@ ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 void ComponentInfo::setScanInterval(
     const size_t index, const std::pair<int64_t, int64_t> &interval) {
   // Enforces setting scan intervals BEFORE time indexed positions and rotations
+  checkSpecialIndices(index);
   checkNoTimeDependence();
   checkScanInterval(interval);
   if (m_scanIntervals && m_isSyncScan) {
@@ -602,6 +603,17 @@ void ComponentInfo::setScanInterval(
     } else {
       m_scanIntervals.access()[compOffsetIndex(subIndex)] = interval;
     }
+  }
+}
+
+void ComponentInfo::checkSpecialIndices(size_t componentIndex) const {
+  if (!isDetector(componentIndex)) {
+    // Empty range means no child detectors
+    const auto range = detectorRangeInSubtree(componentIndex);
+    if (range.empty())
+      throw std::runtime_error("ComponentInfo does not support scanning of "
+                               "components that are not connected to "
+                               "Detectors");
   }
 }
 

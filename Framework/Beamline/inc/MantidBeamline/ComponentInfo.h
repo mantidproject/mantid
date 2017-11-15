@@ -55,9 +55,9 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<bool>> m_isStructuredBank;
 
-  const size_t m_size = 0;
-  const int64_t m_sourceIndex = -1;
-  const int64_t m_sampleIndex = -1;
+  size_t m_size = 0;
+  int64_t m_sourceIndex = -1;
+  int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   bool m_isSyncScan{true};
@@ -78,6 +78,7 @@ private:
   void checkIdenticalIntervals(const ComponentInfo &other,
                                const size_t linearIndexOther,
                                const size_t linearIndexThis) const;
+  void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
 
 public:
