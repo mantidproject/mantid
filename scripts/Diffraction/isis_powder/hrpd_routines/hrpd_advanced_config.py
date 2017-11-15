@@ -12,11 +12,11 @@ absorption_correction_params = {
 # Default cropping values are 5% off each end
 
 window_10_50_params = {
-    "vanadium_tof_cropping": (1e4, 5e4),
+    "vanadium_tof_cropping": (1.1e4, 5e4),
     "focused_cropping_values": [
-        (1.08e4, 5e4),     # Bank 1
-        (1.03e4, 4.99e4),  # Bank 2
-        (1e4,    5e4),     # Bank 3
+        (1.2e4, 4.9e4),  # Bank 1
+        (1.2e4, 5.3e4),  # Bank 2
+        (1.1e4, 5.1e4),  # Bank 3
     ]
 }
 
@@ -25,7 +25,7 @@ window_10_110_params = {
     "focused_cropping_values": [
         (1.5e4, 1.08e5),  # Bank 1
         (1.5e4, 1.12e5),  # Bank 2
-        (1.5e4, 1e5)   # Bank 3
+        (1.5e4, 1e5)      # Bank 3
     ]
 }
 
@@ -51,9 +51,9 @@ window_100_200_params = {
 window_180_280_params = {
     "vanadium_tof_cropping": (1.8e5, 2.8e5),
     "focused_cropping_values": [
-        (1.86e5, 2.8e5),    # Bank 1
-        (1.8e5,  2.8e5),    # Bank 2
-        (1.84e5, 2.795e5),  # Bank 3
+        (1.8e5, 2.8e5),  # Bank 1
+        (1.8e5, 3.0e5),  # Bank 2
+        (1.7e5, 2.9e5),  # Bank 3
     ]
 }
 
