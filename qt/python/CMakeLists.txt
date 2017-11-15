@@ -5,8 +5,10 @@
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
 
-# Just add testing targets as the modules are used from source
+# Create egg link to binary output directory for mantidqt
+add_python_package ( mantidqt )
 
+# ctest targets
 set ( PYTHON_TEST_FILES
   mantidqt/test/import_test.py
 )
