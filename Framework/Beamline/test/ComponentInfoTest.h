@@ -7,8 +7,8 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include <Eigen/Geometry>
 #include <boost/make_shared.hpp>
-#include <tuple>
 #include <numeric>
+#include <tuple>
 
 using namespace Mantid::Beamline;
 
@@ -592,8 +592,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex)
-                   .isApprox(compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex).isApprox(
+                   compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -677,8 +677,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex)
-            .angularDistance(info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex).angularDistance(
+            info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 
@@ -921,7 +921,7 @@ public:
     TS_ASSERT_EQUALS(a.scanCount(1), a.root());
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(2), 0);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index1), interval1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index2), interval2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index1), pos1);
@@ -966,7 +966,7 @@ public:
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(2), 0);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
     // Check that the child detectors have been positioned according to the
