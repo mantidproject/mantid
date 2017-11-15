@@ -396,11 +396,7 @@ void EnggDiffFittingPresenter::processSelectRun() {
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
   const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-=======
-  const auto ws = m_model.getWorkspace(runNumber, bank);
->>>>>>> Re #21171 moved save algorithms to model
   plotFocusedFile(false, ws);
 }
 
@@ -845,7 +841,11 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     // doFitting()
     // WORK OUT WHAT TO DO HERE
+<<<<<<< 8fb1a9a6e1c6402aa676f39c4c57bb97151c5391
     // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+=======
+	//startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+>>>>>>> Re #21171 Added missing parameters to doFitting
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
@@ -893,7 +893,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
-  
+
   startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
 }
 
@@ -1191,21 +1191,11 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // detaches previous plots from canvas
     m_view->resetCanvas();
 
-<<<<<<< 60eb39f45044ee893f153fe304947dc43db23296
     const auto listLabel = m_view->getFittingListWidgetCurrentValue();
     int runNumber;
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
     const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
-=======
-
-	const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-	int runNumber;
-	size_t bank;
-	std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-	const auto ws = m_model.getWorkspace(runNumber, bank);
->>>>>>> Re #21171 moved save algorithms to model
-
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 

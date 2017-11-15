@@ -434,8 +434,10 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
 		enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
 		enggFitPeaksAlg->execute();
 
-		API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-		const auto fitResultsTable = ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
+		API::AnalysisDataServiceImpl &ADS = 
+			API::AnalysisDataService::Instance();
+		const auto fitResultsTable = ADS.retrieveWS<API::ITableWorkspace>(
+			FIT_RESULTS_TABLE_NAME);
 		addToRunMap(runNumber, bank, m_fitResults, fitResultsTable);
 		m_fitResults[bank - 1][runNumber] = fitResultsTable;
 	}
@@ -445,13 +447,15 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
 	}
 }
 
-void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, const size_t bank, const std::string &filename){
+void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, 
+	const size_t bank, const std::string &filename){
 	const auto ws = getFitResults(runNumber, bank);
-	auto saveAlg = Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
+	auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+		"SaveDiffFittingAscii");
 	saveAlg->initialize();
 	saveAlg->setProperty("InputWorkspace", ws);
-	saveAlg->setProperty("RunNumber", runNumber);
-	saveAlg->setProperty("Bank", bank);
+	saveAlg->setProperty("RunNumber", std::to_string(runNumber));
+	saveAlg->setProperty("Bank", std::to_string(bank));
 	saveAlg->setProperty("OutMode", "AppendToExistingFile");
 	saveAlg->setProperty("Filename", filename);
 	saveAlg->execute();

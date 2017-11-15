@@ -41,8 +41,9 @@ class EnggDiffFittingWorker : public QObject {
 
 public:
   // for fitting (single peak fits)
-  EnggDiffFittingWorker(EnggDiffFittingPresenter *pres, const int runNumber,
-                        const size_t bank, const std::string &ExpectedPeaks)
+  EnggDiffFittingWorker(EnggDiffFittingPresenter *pres,
+                        const int runNumber, const size_t bank,
+                        const std::string &ExpectedPeaks)
       : m_pres(pres), m_runNumber(runNumber), m_bank(bank),
         m_expectedPeaks(ExpectedPeaks) {}
 
