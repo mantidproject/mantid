@@ -24,7 +24,10 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
 endif()
 
 # We are only generating Qt4 packages at the moment
-set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4 )
+set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4; )
+if ( MAKE_VATES )
+  list ( APPEND CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR} )
+endif ()
 
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
@@ -39,9 +42,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
   "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
   "PATH=$PATH:$MANTIDPATH\n"
-  "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
 
-  "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH\n"
+  "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
 )
 
 # c-shell
@@ -50,17 +52,25 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
   "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
   "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
-
-  "if ($?PYTHONPATH) then\n"
-  "  setenv PYTHONPATH \"\${MANTIDPATH}:\${PYTHONPATH}\"\n"
-  "else\n"
-  "  setenv PYTHONPATH \"\${MANTIDPATH}\"\n"
-  "endif\n"
 )
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+  ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
   DESTINATION ${ETC_DIR}
+)
+
+###########################################################################
+# Find python site-packages dir and create mantid.pth
+###########################################################################
+execute_process(
+  COMMAND "${PYTHON_EXECUTABLE}" -c "from distutils import sysconfig as sc
+print(sc.get_python_lib(plat_specific=True))"
+  OUTPUT_VARIABLE PYTHON_SITE
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
+  "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 )
 
 ############################################################################
@@ -154,6 +164,11 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython"
+                  OUTPUT_QUIET ERROR_QUIET )
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in
+                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py @ONLY )
+# Needs to be executable
+execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py"
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
