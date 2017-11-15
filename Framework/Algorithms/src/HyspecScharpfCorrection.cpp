@@ -79,9 +79,9 @@ void HyspecScharpfCorrection::exec() {
   outputWS = this->getProperty("OutputWorkspace");
   angle = getProperty("PolarizationAngle");
   angle *= M_PI / 180.;
-  precision = getProperty("Precision");
+  m_precision = getProperty("Precision");
   if (inputWS->run().hasProperty("Ei")) {
-    Ei = boost::lexical_cast<double>(inputWS->run().getProperty("Ei")->value());
+    m_Ei = inputWS->run().getPropertyValueAsType<double>("Ei");
   } else {
     throw std::invalid_argument(
         "No Ei value has been set or stored within the run information.");
@@ -134,15 +134,15 @@ void HyspecScharpfCorrection::exec() {
     size_t spectrumSize = xIn.size();
     for (size_t j = 0; j < spectrumSize; ++j) {
       double factor = 0.;
-      if (xIn[j] < Ei) {
-        double kfki = std::sqrt(1. - xIn[j] / Ei); // k_f/k_i
+      if (xIn[j] < m_Ei) {
+        double kfki = std::sqrt(1. - xIn[j] / m_Ei); // k_f/k_i
         // angle between in plane Q and z axis
         double angleQ = std::atan2(-kfki * std::sin(thetaPlane),
                                    1. - kfki * std::cos(thetaPlane));
         // Scarpf agle = angle - angleQ
         factor = std::cos(2. * (angle - angleQ));
         // set intensity to 0 if the Scarpf angle is close to 45 degrees
-        if (std::abs(factor) > precision) {
+        if (std::abs(factor) > m_precision) {
           factor = 1. / factor;
         } else {
           factor = 0.;
@@ -219,12 +219,16 @@ void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
                                                  double thPlane) {
   typename std::vector<T>::iterator it;
   for (it = wevector.begin(); it < wevector.end();) {
+<<<<<<< HEAD
     double Ef;
     Ef = Ei - it->tof();
+=======
+    Ef = m_Ei - it->tof();
+>>>>>>> Re #21020. First batch of fixes
     if (Ef <= 0) {
       it = wevector.erase(it);
     } else {
-      double kfki = std::sqrt(Ef / Ei);
+      double kfki = std::sqrt(Ef / m_Ei);
 
       // angle between in plane Q and z axis
       double angleQ =
@@ -232,7 +236,7 @@ void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
       // Scarpf agle = angle - angleQ
       float factor = static_cast<float>(std::cos(2. * (angle - angleQ)));
       // set intensity to 0 if the Scarpf angle is close to 45 degrees
-      if (std::abs(factor) > precision) {
+      if (std::abs(factor) > m_precision) {
         factor = 1.f / factor;
       } else {
         factor = 0.;
