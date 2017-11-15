@@ -11,7 +11,6 @@ from mantid.kernel import IntArrayProperty, StringListValidator,\
     FloatArrayLengthValidator, Direction, PropertyCriterion
 from mantid import config
 from os.path import join as pjoin
-import sys
 
 TEMPERATURE_SENSOR = "SensorA"
 DEFAULT_RANGE = [6.24, 6.30]
@@ -106,16 +105,16 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("NoMonitorNorm", False,
                              "Stop monitor normalization")
         self.declareProperty('ExcludeTimeSegment', '',
-                             'Exclude a contigous time segment; '+\
-                             'Examples: "71546:0-60" filter run 71546 from '+\
-                             'start to 60 seconds, "71546:300-600", '+\
+                             'Exclude a contigous time segment; '+
+                             'Examples: "71546:0-60" filter run 71546 from '+
+                             'start to 60 seconds, "71546:300-600", '+
                              '"71546:120-end" from 120s to the end of the run')
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
-        self.declareProperty("NormalizeToFirst", False, "Normalize spectra \
-        to intensity of spectrum with lowest Q?")
+        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '+
+                             'to intensity of spectrum with lowest Q?')
 
         # Properties affected by the reflection selected
         titleReflection = "Reflection Selector"
@@ -421,7 +420,7 @@ class BASISReduction(PythonAlgorithm):
             sapi.LoadEventNexus(Filename=run_file,
                                 OutputWorkspace=ws_name, **kwargs)
             if str(run)+':' in self.getProperty("ExcludeTimeSegment").value:
-                 self._filterEvents(str(run), ws_name)
+                self._filterEvents(str(run), ws_name)
 
             if not self._noMonNorm:
                 sapi.LoadNexusMonitors(Filename=run_file,
@@ -593,7 +592,7 @@ class BASISReduction(PythonAlgorithm):
         else:
             splitter.addRow([0, a, '0'])
             splitter.addRow([b, inf, '0'])
- 
+
     def _filterEvents(self, run, ws_name):
         r"""Filter out ExcludeTimeSegment if applicable
 
