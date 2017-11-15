@@ -80,8 +80,7 @@ public:
   void runLoadAlg(const std::string &focusedFile,
                   Mantid::API::MatrixWorkspace_sptr &focusedWS);
 
-  void runFittingAlgs(std::string FocusedFitPeaksTableName,
-                      std::string FocusedWSName);
+  void runFittingAlgs(const int runNumber, const size_t bank);
 
   std::string
   functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
@@ -154,7 +153,7 @@ private:
 
   // Methods related single peak fits
   virtual void
-  startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
+  startAsyncFittingWorker(const int runNumber, const size_t bank,
                           const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;

@@ -38,17 +38,7 @@ void EnggDiffFittingModel::addWorkspace(const int runNumber, const size_t bank,
 
 std::string EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
 	const size_t bank){
-	if (bank < 1 || bank > m_wsFilenameMap.size()) {
-		throw std::runtime_error("Tried to get filename for runNumber " +
-			std::to_string(runNumber) + " and bank number "
-			+ std::to_string(bank));
-	}
-	if (m_wsFilenameMap[bank - 1].find(runNumber) == m_wsFilenameMap[bank - 1].end()) {
-		throw std::runtime_error("Tried to get filename for runNumber " +
-			std::to_string(runNumber) + " and bank number "
-			+ std::to_string(bank));
-	}
-	return m_wsFilenameMap[bank - 1][runNumber];
+	return getFromRunMap(runNumber, bank, m_wsFilenameMap);
 }
 
 Mantid::API::ITableWorkspace_sptr EnggDiffFittingModel::getFitResults(
@@ -99,8 +89,10 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
 		enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
 		enggFitPeaksAlg->execute();
 
-		API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-		const auto fitResultsTable = ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
+		API::AnalysisDataServiceImpl &ADS = 
+			API::AnalysisDataService::Instance();
+		const auto fitResultsTable = ADS.retrieveWS<API::ITableWorkspace>(
+			FIT_RESULTS_TABLE_NAME);
 		addToRunMap(runNumber, bank, m_fitResults, fitResultsTable);
 		m_fitResults[bank - 1][runNumber] = fitResultsTable;
 	}
@@ -110,13 +102,15 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
 	}
 }
 
-void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, const size_t bank, const std::string &filename){
+void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber, 
+	const size_t bank, const std::string &filename){
 	const auto ws = getFitResults(runNumber, bank);
-	auto saveAlg = Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
+	auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+		"SaveDiffFittingAscii");
 	saveAlg->initialize();
 	saveAlg->setProperty("InputWorkspace", ws);
-	saveAlg->setProperty("RunNumber", runNumber);
-	saveAlg->setProperty("Bank", bank);
+	saveAlg->setProperty("RunNumber", std::to_string(runNumber));
+	saveAlg->setProperty("Bank", std::to_string(bank));
 	saveAlg->setProperty("OutMode", "AppendToExistingFile");
 	saveAlg->setProperty("Filename", filename);
 	saveAlg->execute();
@@ -224,11 +218,12 @@ template <typename T, size_t S>
 T EnggDiffFittingModel::getFromRunMap(const int runNumber, const size_t bank,
                                       RunMap<S, T> map) {
   if (bank < 1 || bank > map.size()) {
-    throw std::runtime_error("Tried to access invalid bank: " + std::to_string(bank));
+    throw std::invalid_argument("Tried to access invalid bank: " + 
+		std::to_string(bank));
   }
   if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
-    throw std::runtime_error("Accessed invalid run number " + std::to_string(runNumber)
-		+ " for bank " + std::to_string(bank));
+    throw std::invalid_argument("Tried to access invalid run number " + 
+		std::to_string(runNumber) + " for bank " + std::to_string(bank));
   }
   return map[bank - 1][runNumber];
 }
