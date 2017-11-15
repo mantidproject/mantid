@@ -273,11 +273,9 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    // Expect that the view enables the 'process' button and disables the
-    // 'pause' button
-    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(0, true))
-        .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, false))
+    // Expect that the view updates the menu with isProcessing=false
+    // and enables the 'autoreduce' button
+    EXPECT_CALL(mockRunsTabView, updateMenuEnabledState(false))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(true))
         .Times(Exactly(1));
@@ -300,11 +298,9 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    // Expect that the view enables the 'process' button and disables the
-    // 'pause' button
-    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(0, false))
-        .Times(Exactly(1));
-    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, true))
+    // Expect that the view updates the menu with isProcessing=true
+    // and disables the 'autoreduce' button
+    EXPECT_CALL(mockRunsTabView, updateMenuEnabledState(true))
         .Times(Exactly(1));
     EXPECT_CALL(mockRunsTabView, setAutoreduceButtonEnabled(false))
         .Times(Exactly(1));

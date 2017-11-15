@@ -51,7 +51,7 @@ public:
   * @param adaptee :: The action to add
   */
   QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
-      : m_adaptee(std::move(adaptee)) {
+      : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChild()) {
       // We are dealing with a submenu
@@ -66,8 +66,9 @@ public:
       }
     } else {
       // We are dealing with an action
-      QAction *action = getAction();
-      menu->addAction(action);
+      /// @todo Generalise m_action to include submenus
+      m_action = createAction();
+      menu->addAction(m_action);
     }
   };
 
@@ -76,22 +77,47 @@ public:
   * @param adaptee :: The action to add
   */
   QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
-      : m_adaptee(std::move(adaptee)) {
+      : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     if (!m_adaptee->hasChild()) {
       // Sub-menus cannot be added to a toolbar
 
-      QAction *action = getAction(true);
-      toolbar->addAction(action);
+      m_action = createAction(true);
+      toolbar->addAction(m_action);
     }
   };
 
+  /** Set the action to be enabled/disabled according
+   * to whether processing is running or not based on
+   * the properties of the adaptee.
+   *
+   * @param isProcessing :: true if processing is in progress
+   * */
+  void updateEnabledState(const bool isProcessing) {
+    if (!m_action)
+      return;
+
+    // If the command modifies settings, always disable it
+    // when processing is in progress, and enable it when idle.
+    // Otherwise, if the command modifies running processes,
+    // enable it if processing is in progress.
+    if (m_adaptee->modifiesSettings())
+      m_action->setEnabled(!isProcessing);
+    else if (m_adaptee->modifiesRunningProcesses())
+      m_action->setEnabled(isProcessing);
+  }
+
+  QAction *getAction() {
+    return m_action;
+  }
+
+private:
   /**
-   * Returns the action
+   * Creates the action
    *
    * @param shortcut : Whether or not to add a shortcut
    */
-  QAction *getAction(bool shortcut = false) {
+  QAction *createAction(bool shortcut = false) {
     QAction *action = new QAction(m_adaptee->name(), this);
     action->setIcon(QIcon(m_adaptee->icon()));
     action->setSeparator(m_adaptee->isSeparator());
@@ -108,6 +134,7 @@ public slots:
   void call() { m_adaptee->execute(); }
 
 private:
+  QAction *m_action;
   // The adaptee
   Command_uptr m_adaptee;
   std::vector<std::unique_ptr<QtCommandAdapter>> m_adapter;

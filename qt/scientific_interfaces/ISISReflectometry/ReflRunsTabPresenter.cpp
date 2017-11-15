@@ -156,8 +156,7 @@ void ReflRunsTabPresenter::pushCommands() {
 
   // The expected number of commands
   const size_t nCommands = 31;
-  auto commands =
-      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
+  auto commands = m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -398,6 +397,7 @@ void ReflRunsTabPresenter::notifyADSChanged(
 
   UNUSED_ARG(workspaceList);
   pushCommands();
+  m_view->updateMenuEnabledState(m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
 /** Requests property names associated with pre-processing values.
@@ -462,11 +462,12 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
 /** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
+/// @todo These should probably call pause/resume functions on the view and
+/// leave it up to the view to enable/disable menus/buttons accordingly
 void ReflRunsTabPresenter::pause() const {
 
-  m_view->setRowActionEnabled(0, true);
+  m_view->updateMenuEnabledState(false);
   m_view->setAutoreduceButtonEnabled(true);
-  m_view->setRowActionEnabled(1, false);
 }
 
 /** Tells view to disable the 'process' button and enable the 'pause' button
@@ -474,9 +475,8 @@ void ReflRunsTabPresenter::pause() const {
 */
 void ReflRunsTabPresenter::resume() const {
 
-  m_view->setRowActionEnabled(0, false);
+  m_view->updateMenuEnabledState(true);
   m_view->setAutoreduceButtonEnabled(false);
-  m_view->setRowActionEnabled(1, true);
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the

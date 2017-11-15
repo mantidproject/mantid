@@ -56,7 +56,8 @@ public:
   virtual bool isSeparator() final {
     return name().isEmpty() && icon().isEmpty();
   }
-
+  virtual bool modifiesSettings() { return true; };
+  virtual bool modifiesRunningProcesses() { return false; }
 protected:
   std::vector<std::unique_ptr<Command>> m_child;
 };

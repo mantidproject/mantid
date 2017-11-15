@@ -152,7 +152,8 @@ void QDataProcessorWidget::addActions(
   // Add actions to context menu
   m_contextMenu = new QMenu(this);
   for (const auto &command : m_commands) {
-    m_contextMenu->addAction(command->getAction());
+    if (command->getAction())
+      m_contextMenu->addAction(command->getAction());
   }
 
   // Add a whats this button
@@ -325,30 +326,18 @@ void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 Handle interface when data reduction paused
 */
 void QDataProcessorWidget::pause() {
-
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
-
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(false);
-  m_contextMenu->actions()[1]->setEnabled(false);
+  for (const auto &command : m_commands) {
+    command->updateEnabledState(false);
+  }
 }
 
 /**
 Handle interface when data reduction resumed
 */
 void QDataProcessorWidget::resume() {
-
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(false);
-  m_contextMenu->actions()[0]->setEnabled(false);
-  ui.buttonProcess->setEnabled(false);
-
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(true);
-  m_contextMenu->actions()[1]->setEnabled(true);
+  for (const auto &command : m_commands) {
+    command->updateEnabledState(true);
+  }
 }
 
 /**
