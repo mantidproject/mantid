@@ -240,6 +240,7 @@ public:
   void enableHistoryRecordingForChild(const bool on) override;
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore) override;
+  bool getAlwaysStoreInADS() const override;
   void setRethrows(const bool rethrow) override;
 
   /** @name Asynchronous Execution */

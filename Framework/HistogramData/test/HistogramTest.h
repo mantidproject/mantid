@@ -152,6 +152,47 @@ public:
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::Points);
   }
 
+  void test_size() {
+    TS_ASSERT_EQUALS(Histogram(BinEdges(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(2)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(3)).size(), 2);
+    TS_ASSERT_EQUALS(Histogram(Points(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(Points(1)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(Points(2)).size(), 2);
+  }
+
+  void test_resize_point_data() {
+    Histogram histogram(Points(3), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 1);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
+  }
+
+  void test_resize_histogram() {
+    Histogram histogram(BinEdges(4), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 3);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
+  }
+
   void test_xMode() {
     Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist1.xMode(), Histogram::XMode::Points);
