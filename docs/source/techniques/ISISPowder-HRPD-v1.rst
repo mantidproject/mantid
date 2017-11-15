@@ -529,6 +529,13 @@ On HRPD this is set to the following:
 
 .. code-block:: python
 
+  # window = "10-50"
+  focused_cropping_values = [
+        (1.2e4, 4.9e4),  # Bank 1
+        (1.2e4, 5.3e4),  # Bank 2
+        (1.1e4, 5.1e4),  # Bank 3
+  ]
+
   # window = "10-110"
   focused_cropping_values = [
         (1e4, 1.1e5),    # Bank 1
@@ -549,7 +556,14 @@ On HRPD this is set to the following:
         (9.6e4, 2.18e5),  # Bank 2
         (1e5, 2.11e5)     # Bank 3
   ]
-  
+
+  # window = "180-280"
+  focused_cropping_values = [
+        (1.8e5, 2.8e5),  # Bank 1
+        (1.8e5, 3.0e5),  # Bank 2
+        (1.7e5, 2.9e5),  # Bank 3
+  ]
+
 .. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
   
 grouping_file_name
@@ -592,6 +606,9 @@ On HRPD this is set to the following:
 
 .. code-block:: python
 
+  # window = "10-50"
+  vanadium_tof_cropping = (1.1e4, 5e4)
+
   # window = "10-110"
   vanadium_tof_cropping = (1e4, 1.2e5)
 
@@ -600,6 +617,9 @@ On HRPD this is set to the following:
 
   # window = "100-200"
   vanadium_tof_cropping = (1e5, 2.15e5)
+
+  # window = "180-280"
+  vanadium_tof_cropping = (1.8e5, 2.8e5)
 
 Vanadium Sample details
 ^^^^^^^^^^^^^^^^^^^^^^^
