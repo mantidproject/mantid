@@ -512,9 +512,9 @@ On HRPD this is set to the following:
 
   # window = "10-50"
   focused_cropping_values = [
-        (1.2e4, 4.9e4),  # Bank 1
-        (1.2e4, 5.3e4),  # Bank 2
-        (1.1e4, 5.1e4),  # Bank 3
+        (1.2e4, 4.99e4),  # Bank 1
+        (1.2e4, 4.99e4),  # Bank 2
+        (1.2e4, 4.99e4),  # Bank 3
   ]
 
   # window = "10-110"
@@ -540,9 +540,9 @@ On HRPD this is set to the following:
 
   # window = "180-280"
   focused_cropping_values = [
-        (1.8e5, 2.8e5),  # Bank 1
-        (1.8e5, 3.0e5),  # Bank 2
-        (1.7e5, 2.9e5),  # Bank 3
+        (1.86e5, 2.8e5),   # Bank 1
+        (1.8e5, 2.798e5),  # Bank 2
+        (1.9e5, 2.795e5),  # Bank 3
   ]
 
 .. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
