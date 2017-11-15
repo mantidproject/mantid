@@ -90,8 +90,8 @@ void HyspecScharpfCorrection::exec() {
   }
 
   // Check if it is an event workspace
-  if (dynamic_cast <const Mantid::DataObjects::EventWorkspace*>(
-              m_inputWS.get())!= nullptr) {
+  if (dynamic_cast<const Mantid::DataObjects::EventWorkspace *>(
+          m_inputWS.get()) != nullptr) {
     this->execEvent();
     return;
   }
@@ -131,8 +131,8 @@ void HyspecScharpfCorrection::exec() {
     // get detector info and calculate the in plane angle
     Mantid::Kernel::V3D detPos = spectrumInfo.position(i);
     const auto l2 = detPos - samplePos;
-    const double thPlane =
-            std::atan2(l2[refFrame->pointingHorizontal()], l2[refFrame->pointingAlongBeam()]);
+    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()],
+                                      l2[refFrame->pointingAlongBeam()]);
     size_t spectrumSize = xIn.size();
     for (size_t j = 0; j < spectrumSize; ++j) {
       double factor = 0.;
@@ -184,8 +184,8 @@ void HyspecScharpfCorrection::execEvent() {
     }
     Mantid::Kernel::V3D detPos = spectrumInfo.position(i);
     const auto l2 = detPos - samplePos;
-    const double thPlane =
-            std::atan2(l2[refFrame->pointingHorizontal()], l2[refFrame->pointingAlongBeam()]);
+    const double thPlane = std::atan2(l2[refFrame->pointingHorizontal()],
+                                      l2[refFrame->pointingAlongBeam()]);
     // Do the correction
     auto &evlist = eventWS->getSpectrum(i);
     switch (evlist.getEventType()) {
@@ -227,7 +227,8 @@ void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
   }
 }
 
-float HyspecScharpfCorrection::calculateFactor(const double kfki, const double thPlane) {
+float HyspecScharpfCorrection::calculateFactor(const double kfki,
+                                               const double thPlane) {
   // angle between in plane Q and z axis
   const double angleQ =
       std::atan2(-kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
@@ -240,7 +241,7 @@ float HyspecScharpfCorrection::calculateFactor(const double kfki, const double t
     factor = 0.;
   }
 
-  return(factor);
+  return (factor);
 }
 
 } // namespace Algorithms

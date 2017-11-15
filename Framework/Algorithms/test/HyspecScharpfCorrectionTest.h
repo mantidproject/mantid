@@ -31,6 +31,7 @@ public:
     HyspecScharpfCorrection alg;
 
     alg.setChild(true);
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
