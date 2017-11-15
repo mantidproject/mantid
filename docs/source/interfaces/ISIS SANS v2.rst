@@ -132,23 +132,22 @@ General
    :width: 800px
 
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **1** | **Reduction dimensionality** | Allows the user to choose either a 1D or 2D reduction                                        |
-+-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **2** | **Reduction mode**           | The user can choose to either perform a reduction on the low angle bank (**LAB**),           |
+| **1** | **Reduction mode**           | The user can choose to either perform a reduction on the low angle bank (**LAB**),           |
 |       |                              | the high angle bank (**HAB**), on both (**Both**) or she can perform a merged (**Merged**).  |
 |       |                              | If a merged reduction is enabled, then further settings are required (see below).            |
 |       |                              | A merged reduction essentially means that the reduced result from the                        |
 |       |                              | low angle bank and the high angle bank are stitched together.                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **3** | **Merge scale**              | Sets the scale of a merged reduction. If the **Fit** check-box is enabled, then this scale is|
+| **2** | **Merge scale**              | Sets the scale of a merged reduction. If the **Fit** check-box is enabled, then this scale is|
 |       |                              | being fitted.                                                                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **4** | **Merge shift**              | Sets the shift of a merged reduction. If the **Fit** check-box is enabled, then this shift is|
+| **3** | **Merge shift**              | Sets the shift of a merged reduction. If the **Fit** check-box is enabled, then this shift is|
 |       |                              | being fitted.                                                                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **5** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
+| **4** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **6** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   | |       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
+| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |                            
+|       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 
 Event Slice
