@@ -387,8 +387,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     end = self._scan_points - self._bin_offset
                     for scan_point in range(0, self._bin_offset):
                         index = mtd[response_ws].blocksize() - self._bin_offset + scan_point
-                        mtd[response_ws].dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
-                        mtd[response_ws].dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
+                        mtd[response_ws].dataY(0)[index] = ws.readY(0)[end + scan_point]
+                        mtd[response_ws].dataE(0)[index] = ws.readE(0)[end + scan_point]
 
                 for scan_point in range(0, end):
                     index = det * self._bin_offset + scan_point
