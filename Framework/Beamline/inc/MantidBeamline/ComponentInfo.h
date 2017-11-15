@@ -78,6 +78,7 @@ private:
   void checkIdenticalIntervals(const ComponentInfo &other,
                                const size_t linearIndexOther,
                                const size_t linearIndexThis) const;
+  size_t nonDetectorSize() const;
 
 public:
   ComponentInfo();

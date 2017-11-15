@@ -69,7 +69,7 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should have as many positions "
                                 "as rotations ranges");
   }
-  if (m_rotations->size() != m_componentRanges->size()) {
+  if (m_rotations->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should have as many positions "
                                 "and rotations as assembly sorted component "
                                 "ranges");
@@ -86,7 +86,7 @@ ComponentInfo::ComponentInfo(
         "ComponentInfo should have been provided same "
         "number of scale factors as number of components");
   }
-  if (m_isStructuredBank->size() != m_componentRanges->size()) {
+  if (m_isStructuredBank->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of rectangular bank flags as number of "
                                 "non-detector components");
@@ -393,7 +393,7 @@ ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
     return index.first;
   // Calculate the linear index without a lookup
   if (m_isSyncScan) {
-    const size_t nNonDetectorComponents = m_detectorRanges->size();
+    const size_t nNonDetectorComponents = nonDetectorSize();
     return index.first + nNonDetectorComponents * index.second;
   }
   return (*m_indexMap)[index.first][index.second];
@@ -405,10 +405,10 @@ void ComponentInfo::initIndices() {
   m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
   auto &indexMap = m_indexMap.access();
   auto &indices = m_indices.access();
-  indexMap.reserve(m_detectorRanges->size());
-  indices.reserve(m_detectorRanges->size());
+  indexMap.reserve(nonDetectorSize());
+  indices.reserve(nonDetectorSize());
   // No time dependence, so both the component index and the linear index are i.
-  for (size_t i = 0; i < m_detectorRanges->size(); ++i) {
+  for (size_t i = 0; i < nonDetectorSize(); ++i) {
     indexMap.emplace_back(1, i);
     indices.emplace_back(i, 0);
   }
@@ -543,7 +543,7 @@ bool ComponentInfo::isScanning() const {
   else
     // TODO what if you have a scan that causes no position change, such as a
     // rotation. Not scanning???
-    return m_componentRanges->size() != m_positions->size();
+    return nonDetectorSize() != m_positions->size();
 }
 
 /// Throws if this has time-dependent data.
@@ -717,13 +717,26 @@ void ComponentInfo::checkIdenticalIntervals(
     failMerge("matching scan interval but rotations differ");
 }
 
+/**
+ * As part of the public API, the ComponentInfo treats any component to be the
+ * same whether detector or otherwise. However, internally we often need to know
+ * what the non-detector size is as composed non-detector members are managed as
+ * part of this type.
+ * @return size of the component info in terms of non-detectors.
+ */
+size_t ComponentInfo::nonDetectorSize() const {
+  if (m_detectorRanges)
+    return m_detectorRanges->size();
+  else
+    return 0;
+}
+
 void ComponentInfo::initScanCounts() {
   checkNoTimeDependence();
   if (m_isSyncScan)
     m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
   else {
-    const size_t componentsSize = this->m_detectorRanges->size();
-    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(componentsSize, 1);
+    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(nonDetectorSize(), 1);
   }
 }
 
@@ -734,10 +747,9 @@ void ComponentInfo::initScanIntervals() {
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
             1, std::pair<int64_t, int64_t>{0, 1});
   } else {
-    const size_t componentsSize = this->m_detectorRanges->size();
     m_scanIntervals =
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-            componentsSize, std::pair<int64_t, int64_t>{0, 1});
+            nonDetectorSize(), std::pair<int64_t, int64_t>{0, 1});
   }
 }
 
