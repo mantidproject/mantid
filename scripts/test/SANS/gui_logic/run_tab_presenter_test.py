@@ -274,11 +274,10 @@ class RunTabPresenterTest(unittest.TestCase):
         self._clear_property_manager_data_service()
         batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
 
-        with self.assertRaises(RuntimeError):
-            presenter.on_processed_clicked()
+        presenter.on_processed_clicked()
 
         # Assert
-        # We should have raised an exception and called halt process flag
+        # We should have printed an error message to the logs and called halt process flag
         self.assertTrue(view.halt_process_flag.call_count == 1)
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
@@ -296,13 +295,12 @@ class RunTabPresenterTest(unittest.TestCase):
         #Set invalid state
         presenter._state_model.event_slices = 'Hello'
 
-        with self.assertRaises(RuntimeError):
-            presenter.on_processed_clicked()
+        presenter.on_processed_clicked()
 
         # Assert
-        # We should have raised an exception and called halt process flag
+        # We should have printed an error to logs and called halt process flag
         self.assertTrue(view.halt_process_flag.call_count == 1)
-        #self.assertTrue(has_raised)
+
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
@@ -318,13 +316,12 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.get_states = mock.MagicMock(return_value='')
 
-        with self.assertRaises(RuntimeError):
-            presenter.on_processed_clicked()
+        presenter.on_processed_clicked()
 
         # Assert
-        # We should have raised an exception and called halt process flag
+        # We should have printed an error to logs and called halt process flag
         self.assertTrue(view.halt_process_flag.call_count == 1)
-        #self.assertTrue(has_raised)
+
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
