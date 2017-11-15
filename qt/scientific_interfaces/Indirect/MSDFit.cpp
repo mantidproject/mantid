@@ -1,8 +1,9 @@
 #include "MSDFit.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -36,11 +37,14 @@ void MSDFit::setup() {
   m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
-  m_properties["Gaussian"] = createModel("Gaussian", {"Intensity", "MSD"});
-  m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
-  m_properties["Yi"] = createModel("Yi", {"Intensity", "MSD", "Sigma"});
+  m_properties["Gaussian"] = createModel("MsdGauss", {"Height", "MSD"});
+  m_properties["Peters"] = createModel("MsdPeters", {"Height", "MSD", "Beta"});
+  m_properties["Yi"] = createModel("MsdYi", {"Height", "MSD", "Sigma"});
 
   auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
+  m_dblManager->setValue(m_properties["StartX"],
+                         fitRangeSelector->getMinimum());
+  m_dblManager->setValue(m_properties["EndX"], fitRangeSelector->getMaximum());
 
   modelSelection(m_uiForm.cbModelInput->currentIndex());
 
@@ -63,6 +67,13 @@ void MSDFit::setup() {
           SLOT(updateProperties(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
+
+  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(plotGuess()));
+  connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+          SLOT(plotGuess()));
+  connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(plotGuess()));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -90,7 +101,8 @@ void MSDFit::run() {
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
       model.toStdString() + "_msd";
-  m_parameterToProperty = createParameterToPropertyMap(model);
+  m_parameterToProperty =
+      createParameterToPropertyMap(m_properties[model]->propertyName());
 
   IAlgorithm_sptr msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
@@ -113,7 +125,8 @@ void MSDFit::singleFit() {
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(fitSpec) + "_" + model.toStdString() + "_msd";
-  m_parameterToProperty = createParameterToPropertyMap(model);
+  m_parameterToProperty =
+      createParameterToPropertyMap(m_properties[model]->propertyName());
 
   IAlgorithm_sptr msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
@@ -210,6 +223,23 @@ void MSDFit::updatePlot() {
   IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
+}
+
+void MSDFit::plotGuess() {
+
+  if (m_uiForm.ckPlotGuess->isChecked()) {
+    QString modelName = m_uiForm.cbModelInput->currentText();
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(modelName));
+  } else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+  }
+}
+
+IFunction_sptr MSDFit::createFunction(const QString &modelName) {
+  return createPopulatedFunction(
+      m_properties[modelName]->propertyName().toStdString(),
+      m_properties[modelName]);
 }
 
 /**
@@ -313,12 +343,23 @@ QtProperty *MSDFit::createModel(const QString &modelName,
 }
 
 void MSDFit::modelSelection(int selected) {
-  QString model = m_uiForm.cbModelInput->itemText(selected);
+  auto model = m_uiForm.cbModelInput->itemText(selected);
   m_msdTree->clear();
 
   m_msdTree->addProperty(m_properties["StartX"]);
   m_msdTree->addProperty(m_properties["EndX"]);
   m_msdTree->addProperty(m_properties[model]);
+
+  if (!m_pythonExportWsName.empty()) {
+    auto idx = m_pythonExportWsName.rfind("_");
+    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
+    idx = m_pythonExportWsName.rfind("_");
+    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
+    m_pythonExportWsName += "_" + model.toStdString() + "_msd";
+  }
+
+  m_uiForm.ckPlotGuess->setChecked(false);
+  updatePlot();
 }
 
 /*
@@ -333,7 +374,7 @@ void MSDFit::modelSelection(int selected) {
 QHash<QString, QString>
 MSDFit::createParameterToPropertyMap(const QString &model) {
   QHash<QString, QString> parameterToProperty;
-  parameterToProperty["Height"] = model + ".Intensity";
+  parameterToProperty["Height"] = model + ".Height";
   parameterToProperty["MSD"] = model + ".MSD";
 
   if (model == "Peters")

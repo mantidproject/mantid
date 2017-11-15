@@ -169,10 +169,15 @@ fi
 ###############################################################################
 # Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
+PY2_BUILD=false
+PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
+  PY3_BUILD=true
   PYTHON3_EXECUTABLE=`which python3`
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
   PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+else
+  PY2_BUILD=true
 fi
 
 ###############################################################################
@@ -181,10 +186,12 @@ fi
 if [[ "$BUILDPKG" == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
-  if [[ ${ON_MACOS} != true ]]; then
+  if [[ "${ON_MACOS}" == true ]]; then
+    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+  else
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      echo "Performing release build" # do nothing
+       PACKAGE_SUFFIX=""
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
@@ -193,19 +200,16 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
-    # Add '-python3' to package name and install path
-    if [[ ${JOB_NAME} == *python3* ]]; then
-	PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+    if [[ ${PY3_BUILD} == true ]]; then
+      # Add '-python3' to package name and install path
+      PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
 
-    # Only unsuffixed release builds create envvars scripts
-    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
+      # No suffix and traditional install path for python 2 release build
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
-    fi
-
-    if [ ! -z "$PACKAGE_SUFFIX" ]; then
+      # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
   fi

@@ -105,7 +105,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtGroupBoxPropertyBrowser
     : public QtAbstractPropertyBrowser {
   Q_OBJECT
 public:
-  QtGroupBoxPropertyBrowser(QWidget *parent = 0);
+  QtGroupBoxPropertyBrowser(QWidget *parent = nullptr);
   ~QtGroupBoxPropertyBrowser() override;
 
 protected:
@@ -139,8 +139,8 @@ public:
 
   struct WidgetItem {
     WidgetItem()
-        : widget(0), label(0), widgetLabel(0), groupBox(0), layout(0), line(0),
-          parent(0) {}
+        : widget(nullptr), label(nullptr), widgetLabel(nullptr),
+          groupBox(nullptr), layout(nullptr), line(nullptr), parent(nullptr) {}
     QWidget *widget; // can be null
     QLabel *label;
     QLabel *widgetLabel;
