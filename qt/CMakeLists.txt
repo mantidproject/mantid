@@ -13,6 +13,7 @@ function ( add_python_package pkg_name )
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir}
       ${PYTHON_EXECUTABLE} ${_setup_py} develop
       --install-dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+      --script-dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
   add_custom_target ( ${pkg_name} ALL
