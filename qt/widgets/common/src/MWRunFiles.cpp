@@ -572,7 +572,7 @@ void MWRunFiles::findFiles() {
 
   } else {
     // Make sure errors are correctly set if we didn't run
-    inspectThreadResult();
+    inspectThreadResult(m_cachedResults);
   }
 }
 
@@ -631,6 +631,8 @@ void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
     emit filesFound();
   if (m_lastFoundFiles != m_foundFiles)
     emit filesFoundChanged();
+
+  m_cachedResults = results;
 }
 
 /**

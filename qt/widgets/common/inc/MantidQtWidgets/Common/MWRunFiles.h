@@ -285,6 +285,8 @@ private:
   QString m_valueForProperty;
   /// Handle to a find files thread pool manager
   FindFilesThreadPoolManager m_pool;
+  /// Handle to any results found
+  FindFilesSearchResults m_cachedResults;
 };
 }
 }
