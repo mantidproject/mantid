@@ -1,18 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import itertools
-from six import iteritems
 
 from IndirectReductionCommon import load_files
 
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (AddSampleLog, AlignDetectors, CropWorkspace, DeleteWorkspace, DiffractionFocussing,
-                              Divide, Minus, NormalizeByCurrent, RebinToWorkspace, ReplaceSpecialValues, Scale)
+                              MergeRuns, NormalizeByCurrent, RebinToWorkspace, ReplaceSpecialValues)
 
 
 # pylint: disable=too-few-public-methods
-
 
 class DRange(object):
     """
@@ -186,28 +184,7 @@ def average_ws_list(ws_list):
     if num_workspaces == 1:
         return ws_list[0]
 
-    def do_binary_op(name, operands):
-        alg = AlgorithmManager.createUnmanaged(name)
-        alg.initialize()
-        alg.setChild(True)
-        for prop_name, value in iteritems(operands):
-            alg.setProperty(prop_name, value)
-        alg.setProperty("OutputWorkspace", "__unused__")
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
-
-    def local_sum(operand_list):
-        total = operand_list[0]
-        for j in range(1, num_workspaces):
-            operands = {"LHSWorkspace": total,
-                        "RHSWorkspace": operand_list[j]}
-            total = do_binary_op("Plus", operands)
-        return total
-
-    inputs = {"InputWorkspace": local_sum(ws_list),
-              "Factor": 1. / float(num_workspaces),
-              "Operation": "Multiply"}
-    return do_binary_op("Scale", inputs)
+    return sum(ws_list) / num_workspaces
 
 
 def find_intersection_of_ranges(range_a, range_b):
@@ -271,7 +248,6 @@ def list_to_range(array_to_convert):
     :param array_to_convert:  The array to convert to a range.
     :return:                The generated range.
     """
-
     if len(array_to_convert) == 1:
         return array_to_convert
     else:
@@ -471,11 +447,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
                 # Scale every container workspace
                 for container_ws_name in container_ws_names:
-                    container_workspaces.append(Scale(InputWorkspace=container_ws_name,
-                                                      Operation="Multiply",
-                                                      Factor=self._container_scale_factor,
-                                                      OutputWorkspace="scaled_container",
-                                                      StoreInADS=False, enableLogging=False))
+                    container_workspaces.append(mtd[container_ws_name] * self._container_scale_factor)
             else:
                 container_workspaces = container_ws_names
 
@@ -487,11 +459,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                                       WorkspaceToMatch=sample_ws_name,
                                                       OutputWorkspace="rebinned_container",
                                                       StoreInADS=False, enableLogging=False)
-
-                sample_ws = Minus(LHSWorkspace=sample_ws_name,
-                                  RHSWorkspace=rebinned_container,
-                                  OutputWorkspace="container_corrected_sample",
-                                  StoreInADS=False, enableLogging=False)
+                sample_ws = mtd[sample_ws_name] - rebinned_container
             else:
                 sample_ws = mtd[sample_ws_name]
 
@@ -719,12 +687,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Divide all dividend workspaces by the corresponding divisor workspaces.
         for dividend_ws, divisor_ws in zip(dividend_workspaces, divisor_workspaces):
             dividend_ws, divisor_ws = rebin_to_smallest(dividend_ws, divisor_ws)
-
-            divided_ws = Divide(LHSWorkspace=dividend_ws,
-                                RHSWorkspace=divisor_ws,
-                                OutputWorkspace="divided",
-                                StoreInADS=False, enableLogging=False)
-
+            divided_ws = dividend_ws / divisor_ws
             divided.append(ReplaceSpecialValues(InputWorkspace=divided_ws,
                                                 NaNValue=0.0, InfinityValue=0.0,
                                                 OutputWorkspace="removed_special",
