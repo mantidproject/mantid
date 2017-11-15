@@ -50,7 +50,6 @@ const std::array<Factor, 5> factor_list() {
   return {Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi};
 }
 
-
 /// Returns the string presentation of tag f.
 std::string to_string(const Factor f) {
   switch (f) {
