@@ -2351,7 +2351,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
 
   exec_reduce += "i.SetFrontDetRescaleShift(" + fdArguments + ")\n";
 
-  //Set the merge q range
+  // Set the merge q range
   QString mergeArguments = "";
   if (m_uiForm.mergeQRangeOnOff->isChecked() &&
       !m_uiForm.mergeQMin->text().isEmpty() &&
