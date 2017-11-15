@@ -14,6 +14,8 @@ New
 Improved
 ########
 
+- BASISReduction now permits the user to exclude a contigous time segment from the reduction process
+
 Vesuvio
 -------
 
