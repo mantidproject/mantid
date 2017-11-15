@@ -51,7 +51,7 @@ The Scharpf angle is then:
  
 .. Note::
 
-    This algorithm assume that all scattering is in the horizontal plane (good enough approximation
+    This algorithm assumes that all scattering is in the horizontal plane (good enough approximation
     for Hyspec instrument, in polarized mode).
     
 For more information, see 
