@@ -181,7 +181,7 @@ General
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 | **5** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **6** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   | |       |                              | uncombined HAB or LAB data is used.                                                          |
+| **6** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   | |       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 
 Event Slice
