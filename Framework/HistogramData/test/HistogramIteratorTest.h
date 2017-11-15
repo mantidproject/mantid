@@ -280,8 +280,8 @@ public:
   }
 
   HistogramIteratorTestPerformance()
-      : m_hist(BinEdges(histSize, LinearGenerator(0, 2)),
-               Counts(histSize - 1, LinearGenerator(0, 2))) {}
+      : m_hist(BinEdges(histSize, LinearGenerator(0, 1)),
+               Counts(histSize - 1, LinearGenerator(0, 1))) {}
 
   void test_convert_counts_to_frequency_for_each_item() {
     double total = 0;
@@ -303,7 +303,7 @@ public:
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
       for (auto &item : m_hist) {
-        if (item.counts() > 1.95)
+        if (item.counts() > histSize - 5)
           total += item.frequency();
       }
     }
@@ -312,10 +312,11 @@ public:
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
+      auto counts = m_hist.frequencies();
       auto frequencies = m_hist.frequencies();
-      for (auto &frequency : frequencies)
-          if (frequency > 1.95)
-            total += frequency;
+      for (size_t j = 0; j < nHists; ++j)
+          if (counts[j] > histSize - 5)
+            total += frequencies[j];
     }
   }
 private:
