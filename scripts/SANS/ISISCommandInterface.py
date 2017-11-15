@@ -431,7 +431,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
-
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
     # check if fit is required.
     fitRequired = False
@@ -529,7 +528,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         except KeyError:
             # The CAN was not specified
             consider_can = False
-
         # Get fit paramters
         scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
         merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange

@@ -2446,7 +2446,6 @@ QString SANSRunWindow::readSampleObjectGUIChanges() {
  */
 void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
-
   // Make sure that all settings are valid
   if (!areSettingsValid(type)) {
     return;
@@ -3374,13 +3373,13 @@ void SANSRunWindow::updateMergeQRange(int state) {
   if (state == Qt::Checked) {
     m_uiForm.mergeQMax->setEnabled(true);
     m_uiForm.mergeQMin->setEnabled(true);
-    //runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
-     //                       "FRONT').rescaleAndShift.qRangeUserSelected=True");
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=True");
   } else {
     m_uiForm.mergeQMax->setEnabled(false);
     m_uiForm.mergeQMin->setEnabled(false);
-    //runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
-     //                       "FRONT').rescaleAndShift.qRangeUserSelected=False");
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=False");
   }
 }
 
