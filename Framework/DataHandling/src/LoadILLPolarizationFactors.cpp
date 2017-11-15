@@ -11,20 +11,25 @@
 #include <fstream>
 
 namespace {
+/// Constants for algorithm's property names.
 namespace Prop {
 const static std::string FILENAME{"Filename"};
 const static std::string OUT_WS{"OutputWorkspace"};
 const static std::string REF_WS{"WavelengthReference"};
 }
 
+/// A struct holding the due of number arrays in the IDL files.
 struct FactorDefinition {
+  /// Wavelength points where the linear coeffs change.
   std::vector<double> limits;
+  /// The linear coeffs to construct the efficiencies from.
   std::vector<double> fitFactors;
 };
 
 /// Tags for the polarization factors.
 enum class Factor { F1, F2, Phi, P1, P2 };
 
+/// Maps a string to a Factor tag.
 Factor factor(const std::string &l) {
   const auto id = l.substr(0, 2);
   if (id == "F1")
@@ -40,10 +45,13 @@ Factor factor(const std::string &l) {
   throw std::runtime_error("Syntax error.");
 }
 
+/// Returns a list of all available Factor tags.
 const std::array<Factor, 5> factor_list() {
   return {Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi};
 }
 
+
+/// Returns the string presentation of tag f.
 std::string to_string(const Factor f) {
   switch (f) {
   case Factor::F1:
@@ -60,12 +68,14 @@ std::string to_string(const Factor f) {
   throw std::runtime_error("Unknown polarization correction factor tag.");
 }
 
+/// Returns `l` with comments erased.
 std::string cleanse_comments(const std::string &l) {
   const auto commentBegin = l.find(';');
   // commentBegin == npos is OK.
   return l.substr(0, commentBegin);
 }
 
+/// Returns `l` with all whitespace erased.
 std::string cleanse_whitespace(const std::string &l) {
   std::string s;
   s.reserve(l.size());
@@ -77,10 +87,12 @@ std::string cleanse_whitespace(const std::string &l) {
   return s;
 }
 
+/// Returns true if `l` contains the limits array.
 bool contains_limits(const std::string &l) {
   return l.find("_limits") != std::string::npos;
 }
 
+/// Converts the IDL array in `l` to std::vector.
 std::vector<double> extract_values(const std::string &l) {
   const auto valBegin = l.find('[');
   const auto valEnd = l.find(']');
@@ -108,6 +120,7 @@ std::vector<double> extract_values(const std::string &l) {
   return values;
 }
 
+/// Returns a histogram with X set to [0, ...points..., maxWavelength)].
 Mantid::HistogramData::Histogram
 make_histogram(const std::vector<double> &points, const double maxWavelength) {
   Mantid::HistogramData::Points p(points.size() + 2);
@@ -121,6 +134,7 @@ make_histogram(const std::vector<double> &points, const double maxWavelength) {
   return Mantid::HistogramData::Histogram(p, c);
 }
 
+/// Fills `h` with the efficiency factors.
 void calculate_factors_in_place(Mantid::HistogramData::Histogram &h,
                                 const std::vector<double> &piecewiseFactors) {
   const auto &xs = h.x();
@@ -131,6 +145,7 @@ void calculate_factors_in_place(Mantid::HistogramData::Histogram &h,
   }
 }
 
+/// Parses `in`, returns a map from factor tags to their numeric definitions.
 std::map<Factor, FactorDefinition> parse(std::istream &in) {
   std::map<Factor, FactorDefinition> factors;
   std::string l;
@@ -155,6 +170,7 @@ std::map<Factor, FactorDefinition> parse(std::istream &in) {
   return factors;
 }
 
+/// Checks that all needed data has been gathered.
 void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
   const auto factors = factor_list();
   for (const auto f : factors) {
@@ -176,6 +192,7 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
   }
 }
 
+/// Calculates error estimates in place.
 void addErrors(Mantid::HistogramData::Histogram &h, const Factor tag) {
   // The error estimates are taken from the LAMP/COSMOS software.
   double f;
@@ -290,6 +307,9 @@ void LoadILLPolarizationFactors::exec() {
   setProperty(Prop::OUT_WS, outWS);
 }
 
+/** Validates the algorithm's inputs.
+ * @return a map from property names to discovered issues.
+ */
 std::map<std::string, std::string>
 LoadILLPolarizationFactors::validateInputs() {
   std::map<std::string, std::string> issues;
