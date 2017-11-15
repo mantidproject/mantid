@@ -18,6 +18,7 @@ Powder Diffraction
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
+- ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 
 Engineering Diffraction
 -----------------------
