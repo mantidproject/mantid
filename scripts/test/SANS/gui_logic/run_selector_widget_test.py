@@ -3,17 +3,7 @@ import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.models.add_runs_model import (AddRunsModel, SummableRunModel, BinningType)
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
-
-class FakeSignal:
-    def __init__(self):
-        self._handlers = []
-
-    def connect(self, handler):
-        self._handlers.append(handler)
-
-    def emit(self, **args):
-        for handler in self._handlers:
-            handler(**args)
+from fake_signal import FakeSignal
 
 if sys.version_info.major == 3:
      from unittest import mock
