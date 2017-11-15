@@ -358,7 +358,10 @@ class BASISReduction(PythonAlgorithm):
                 sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
                 if self._normalizationType == "by Q slice":
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
-
+            if self.getProperty("ExcludeTimeSegment").value:
+                sapi.DeleteWorkspace('splitted_unfiltered')
+                sapi.DeleteWorkspace('splitter')
+                sapi.DeleteWorkspace('TOFCorrectWS')
     def _getRuns(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
@@ -603,7 +606,7 @@ class BASISReduction(PythonAlgorithm):
         ws_name : str
             name of the workspace to filter
         """
-        for run_fragment in self.getProperty("ExcludeTimeSegment").value.split(','):
+        for run_fragment in self.getProperty("ExcludeTimeSegment").value.split(';'):
             if run+':' in run_fragment:
                 self.generateSplitterWorkspace(run_fragment.split(':')[1])
                 sapi.FilterEvents(InputWorkspace=ws_name,
@@ -615,9 +618,6 @@ class BASISReduction(PythonAlgorithm):
                 sapi.UnGroupWorkspace('splitted')
                 sapi.RenameWorkspace(InputWorkspace='splitted_0',
                                      OutputWorkspace=ws_name)
-                sapi.DeleteWorkspace('splitted_unfiltered')
-                sapi.DeleteWorkspace('splitter')
-                sapi.DeleteWorkspace('TOFCorrectWS')
                 break
 
 # Register algorithm with Mantid.
