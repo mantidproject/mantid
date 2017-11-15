@@ -62,7 +62,7 @@ public:
         std::atan2(-kikf * std::sin(M_PI_4), 1. - kikf * std::cos(M_PI_4)) +
         11. * M_PI / 180.;
     TS_ASSERT_DELTA(x[16], 6.5, 1e-10);
-    TS_ASSERT_DELTA(y[16], 1. / std::cos(2. * alpha), 1e-10);
+    TS_ASSERT_DELTA(y[16], 1. / std::cos(2. * alpha), 1e-6);
   }
 };
 

@@ -51,12 +51,19 @@ private:
    */
   template <class T>
   void ScharpfEventHelper(std::vector<T> &wevector, double thPlane);
+  /**
+   * @brief calculate the Scharph angle correction factor
+   * @param kfki kf/ki
+   * @param thPlane the in-plane angle of the detector
+   * @return factor
+   */
+  float calculateFactor(const double kfki, const double thPlane);
   /// The user selected (input) workspace
-  Mantid::API::MatrixWorkspace_const_sptr inputWS;
+  Mantid::API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
-  Mantid::API::MatrixWorkspace_sptr outputWS;
+  Mantid::API::MatrixWorkspace_sptr m_outputWS;
   /// In plane angle beween polarization and incident beam (in degrees)
-  double angle;
+  double m_angle;
   /// Lower limit  for abs(cos(2*Scharpf angle)), below which intensities are 0
   double m_precision;
   /// Incident energy
