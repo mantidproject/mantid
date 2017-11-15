@@ -427,9 +427,9 @@ class MergePeaksThread(QThread):
             self._outputMDFileList = md_file_list[:]
 
         # other about preprocessed options
-        self._forceMergeScans = True
         self._checkPreprocessedScans = False
         self._preProcessedDir = None
+        self._redoMerge = True
 
         # link signals
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
@@ -443,43 +443,6 @@ class MergePeaksThread(QThread):
         :return:
         """
         self.wait()
-
-        return
-
-
-    def set_force_write(self, flag=True):
-        """
-        set whether to force to merge and create a new workspace
-        :param flag:
-        :return:
-        """
-        # check
-        assert isinstance(flag, bool), 'Flag to force merge to a workspace must be a bool but not a {0}.'.format(type(flag))
-
-        self._forceMergeScans = flag
-
-        return
-
-    def set_pre_process_options(self, option_to_use, pre_process_dir):
-        """
-        set the pre-process options
-        :param option_to_use:
-        :param pre_process_dir:
-        :return:
-        """
-        # check
-        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
-                                                ''.format(type(option_to_use))
-
-        self._checkPreprocessedScans = option_to_use
-
-        if self._checkPreprocessedScans:
-            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
-                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
-            if os.path.exists(pre_process_dir) is False:
-                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
-            self._preProcessedDir = pre_process_dir
-        # END-IF
 
         return
 
@@ -510,8 +473,8 @@ class MergePeaksThread(QThread):
                 status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                 scan_no=scan_number,
                                                                                 pt_num_list=pt_number_list,
-                                                                                rewrite=False,
-                                                                                preprocessed_dir=None)
+                                                                                rewrite=self._redoMerge,
+                                                                                preprocessed_dir=self._preProcessedDir)
                 if status:
                     merged_ws_name = str(ret_tup[0])
                     error_message = ''
@@ -546,5 +509,41 @@ class MergePeaksThread(QThread):
                 continue
                 # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             # END-IF
+
+        return
+
+    def set_pre_process_options(self, option_to_use, pre_process_dir):
+        """
+        set the pre-process options
+        :param option_to_use:
+        :param pre_process_dir:
+        :return:
+        """
+        # check
+        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
+                                                ''.format(type(option_to_use))
+
+        self._checkPreprocessedScans = option_to_use
+
+        if self._checkPreprocessedScans:
+            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
+                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
+            if os.path.exists(pre_process_dir) is False:
+                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
+            self._preProcessedDir = pre_process_dir
+        # END-IF
+
+        return
+
+    def set_rewrite(self, flag):
+        """
+        set the flag to re-merge the scan regardless whether the target workspace is in memory
+        or a pre-processed MD workspace does exist.
+        :param flag:
+        :return:
+        """
+        assert isinstance(flag, bool), 'Re-merge/re-write flag must be a boolean but not a {0}'.format(type(flag))
+
+        self._redoMerge = flag
 
         return

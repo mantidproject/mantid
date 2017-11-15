@@ -106,7 +106,8 @@ class CWSCDReductionControl(object):
 
         # Record for merged scans
         self._mergedWSManager = list()
-
+        # calibration information for merged scans.  key = scan number, value = merging
+        self._scanCalibrationDict = dict()
         # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
         self._roiDict = dict()
 
@@ -1736,7 +1737,8 @@ class CWSCDReductionControl(object):
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
 
-                # TODO/ISSUE/NOW - Need to record all the shift, return and for further check!
+                # TEST TODO/NOW - record all the shift, return and for further check!
+                self._scanCalibrationDict[scan_no] = alg_args
 
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)

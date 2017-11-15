@@ -1,4 +1,5 @@
 import os
+import time
 from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
 import reduce4circleControl
@@ -16,6 +17,11 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :param parent:
         """
         super(ScanPreProcessWindow, self).__init__(parent)
+
+        # mutex and data structure that can be in contention
+        self._recordLogMutex = False
+        self._scansToProcess = set()
+        self._scanNumbersProcessed = set()
 
         # define UI
         self.ui = ui_preprocess_window.Ui_PreprocessWindow()
@@ -163,6 +169,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         # launch the multiple threading to scans
         self._myMergePeaksThread = multi_threads_helpers.MergePeaksThread(self, exp_number, scan_list,
                                                                           file_list)
+        self._scansToProcess = set(scan_list)
+        self._scanNumbersProcessed = set()
+
         self._myMergePeaksThread.start()
 
         return
@@ -381,13 +390,48 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.ui.tableView_scanProcessState.set_status(row_number, message)
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
-        # TODO/TODO/ISSUE/NOW - write the result to file
+        counter = 0
+        while self._recordLogMutex:
+            # waiting for the mutex to be released
+            time.sleep(0.1)
+            counter += 1
+            if counter > 600:  # 60 seconds... too long
+                raise RuntimeError('It is too long to wait for mutex released.  There must be a bug!')
+        # END-WHILE
+
+        # update processed scan numbers
+        self._recordLogMutex = True
+        self._scanNumbersProcessed.add(scan_number)
+        self._recordLogMutex = False
+
+        # check whether it is time to write all the scans to file
+        if len(self._scansToProcess) == len(self._scanNumbersProcessed):
+            self.update_record_file(check_duplicates=False)
+            if self._scansToProcess != self._scanNumbersProcessed:
+                raise RuntimeWarning('Scans to process {0} is not same as scans processed {1}.'
+                                     ''.format(self._scansToProcess, self._scanNumbersProcessed))
+        # END-IF
+
+        return
+
+    # TODO/NOW - In-implementation
+    def update_record_file(self, check_duplicates):
+        """
+        update the record file
+        it is an option to append file or check and remove duplication.
+        duplication can be removed in the record file loading method by checking the time stamp
+        :param check_duplicates:
+        :return:
+        """
+        # check inputs
+        assert len(self._scanNumbersProcessed) > 0, 'Processed scan number set cannot be empty!'
+
+        # TODO/TODO/ISSUE/NOW - write the result to file ... FROM HERE!
         # 1. a CSV file in appending mode
         # 2. file's name is standard and defined in fourcircile_utility
         # 3. csv file contains: exp, scan, pt_list, center (7 float), wave (7 float), det shift (int, int), det size
         #                       file name, workspace name
 
-        return
 
 
 class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
