@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SummationSettingsWidget</class>
+ <widget class="QWidget" name="SummationSettingsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1041</width>
+    <height>151</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="histogramBinGroup">
+     <property name="title">
+      <string>Histogram Binning</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>20</y>
+        <width>1011</width>
+        <height>112</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="histogramBinLayout">
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="customBinBoundariesLineEdit"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="customBinLabel">
+         <property name="minimumSize">
+          <size>
+           <width>161</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Custom Bin Boundaries:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="histogramBinningLabel">
+         <property name="minimumSize">
+          <size>
+           <width>301</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Histogram Binning (when adding event data):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="overlayEventWorkspacesCheckbox">
+         <property name="minimumSize">
+          <size>
+           <width>211</width>
+           <height>26</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Overlay Event Workspaces</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="binningType">
+         <property name="minimumSize">
+          <size>
+           <width>671</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,8 +1,8 @@
 import unittest
 import sys
-from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.models.add_runs_model import (AddRunsModel, SummableRunModel, BinningType)
-from ui.sans_isis.add_runs_page import AddRunsPage
+from ui.sans_isis.run_selector_widget import RunSelectorWidget
 
 class FakeSignal:
     def __init__(self):
@@ -27,22 +27,19 @@ class AddRunsPresenterTest(unittest.TestCase):
         self.presenter = self._make_presenter(self.model, self.view)
 
     def _make_mock_view(self):
-        mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
+        mock_view = mock.create_autospec(RunSelectorWidget, spec_set=True)
         mock_view.addRuns = FakeSignal()
         mock_view.removeRuns = FakeSignal()
         mock_view.manageDirectories = FakeSignal()
         mock_view.browse = FakeSignal()
         mock_view.removeAllRuns = FakeSignal()
-        mock_view.binningTypeChanged = FakeSignal()
-        mock_view.preserveEventsChanged = FakeSignal()
-        mock_view.sum = FakeSignal()
         return mock_view
 
     def _make_mock_model(self):
         return mock.create_autospec(AddRunsModel)
 
     def _make_presenter(self, model, view):
-        return AddRunsPagePresenter(model, view, None)
+        return RunSelectorPresenter(model, view, None)
 
     def test_searches_for_runs_when_add_run_pressed(self):
         run_query = '1'
