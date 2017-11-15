@@ -159,13 +159,12 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
-    const std::vector<std::string> &focusedRunNo,
-    const std::string &expectedPeaks) {
+    const int runNumber, const size_t bank, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffFittingWorker *worker =
-      new EnggDiffFittingWorker(this, focusedRunNo, expectedPeaks);
+      new EnggDiffFittingWorker(this, runNumber, bank, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -841,7 +840,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     m_view->enableFitAllButton(false);
     // startAsyncFittingWorker
     // doFitting()
-    startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+    // WORK OUT WHAT TO DO HERE
+	//startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
@@ -886,7 +886,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   std::vector<std::string> focusRunNoVec;
   focusRunNoVec.push_back(filename);
 
-  startAsyncFittingWorker(focusRunNoVec, fitPeaksData);
+  startAsyncFittingWorker(runNumber, bank, fitPeaksData);
 }
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
@@ -1025,8 +1025,8 @@ void EnggDiffFittingPresenter::runLoadAlg(
   }
 }
 
-void EnggDiffFittingPresenter::runFittingAlgs(
-    std::string focusedFitPeaksTableName, std::string focusedWSName) {
+void EnggDiffFittingPresenter::runFittingAlgs(const int runNumber, 
+	                                          const size_t bank) {
   // retrieve the table with parameters
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   if (!ADS.doesExist(focusedFitPeaksTableName)) {
