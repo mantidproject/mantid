@@ -283,11 +283,6 @@ private:
 
   /// Coordinates
   Kernel::SpecialCoordinateSystem m_coordSystem;
-
-  // adapter for logs() function, which create reference to this class itself
-  // and does not allow to delete the shared pointers,
-  // returned by logs() function when they go out of scope
-  API::LogManager_sptr m_logCash;
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
