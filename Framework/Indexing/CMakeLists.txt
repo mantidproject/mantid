@@ -9,6 +9,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/Conversion.h
 	inc/MantidIndexing/DetectorID.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/Extract.h
@@ -27,6 +28,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	ConversionTest.h
 	DetectorIDTest.h
 	ExtractTest.h
 	GlobalSpectrumIndexTest.h
