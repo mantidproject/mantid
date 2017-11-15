@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1041</width>
-    <height>151</height>
+    <width>749</width>
+    <height>164</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,70 +19,91 @@
      <property name="title">
       <string>Histogram Binning</string>
      </property>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>20</y>
-        <width>1011</width>
-        <height>112</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="histogramBinLayout">
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="customBinBoundariesLineEdit"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="customBinLabel">
-         <property name="minimumSize">
-          <size>
-           <width>161</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Custom Bin Boundaries:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="histogramBinningLabel">
-         <property name="minimumSize">
-          <size>
-           <width>301</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Histogram Binning (when adding event data):</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QCheckBox" name="overlayEventWorkspacesCheckbox">
-         <property name="minimumSize">
-          <size>
-           <width>211</width>
-           <height>26</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Overlay Event Workspaces</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="binningType">
-         <property name="minimumSize">
-          <size>
-           <width>671</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1">
+      <item row="0" column="0">
+       <widget class="QLabel" name="histogramBinningLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>301</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Histogram Binning (when adding event data):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="binningType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="overlayEventWorkspacesCheckbox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>211</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Overlay Event Workspaces</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="customBinLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>161</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Custom Bin Boundaries:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="customBinBoundariesLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>36</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
