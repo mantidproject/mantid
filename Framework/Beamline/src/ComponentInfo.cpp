@@ -541,8 +541,6 @@ bool ComponentInfo::isScanning() const {
   else if (!m_positions || !m_componentRanges)
     return false;
   else
-    // TODO what if you have a scan that causes no position change, such as a
-    // rotation. Not scanning???
     return nonDetectorSize() != m_positions->size();
 }
 

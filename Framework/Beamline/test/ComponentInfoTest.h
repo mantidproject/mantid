@@ -885,7 +885,11 @@ public:
     TSM_ASSERT_EQUALS("Intervals identical. Scan size should not grow",
                       b.scanCount(0), 1)
   }
-  void do_test_merge_identical_interval_failures(ComponentInfo &a) {
+  void test_merge_identical_interval_failures() {
+    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
+                          std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo a = std::get<0>(infos);
+    a.setScanInterval(a.root(), {0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     Eigen::Quaterniond rot1(
@@ -895,34 +899,49 @@ public:
     auto rootIndex = a.root();
     a.setPosition(rootIndex, pos1);
     a.setRotation(rootIndex, rot1);
-    auto b(a);
+    ComponentInfo b = a;
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
-    b = a;
-    b.setPosition(rootIndex, pos2);
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+    ComponentInfo c = a;
+    c.setPosition(rootIndex, pos2);
+    TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
                             "positions differ");
-    b.setPosition(rootIndex, pos1);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    c.setPosition(rootIndex, pos1);
+    TS_ASSERT_THROWS_NOTHING(c.merge(a));
 
-    b = a;
-    b.setRotation(rootIndex, rot2);
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+    ComponentInfo d = a;
+    d.setRotation(rootIndex, rot2);
+    TS_ASSERT_THROWS_EQUALS(d.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
                             "rotations differ");
   }
 
-  void test_merge_identical_interval_failures_async() {
-    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
-                          std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo a = std::get<0>(infos);
-    a.setScanInterval(a.root(), {0, 1});
-    do_test_merge_identical_interval_failures(a);
+  void test_merge_fail_partial_overlap() {
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo a = std::get<0>(infos1);
+    a.setScanInterval(a.root(), {0, 10});
+
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo b = std::get<0>(infos2);
+    b.setScanInterval(b.root(), {-1, 5});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
+    b.setScanInterval(b.root(), {1, 5});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
+    b.setScanInterval(b.root(), {1, 11});
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
   }
 
   void test_merge_detectors() {
@@ -967,7 +986,7 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
   }
 
-  void test_merge_root() {
+  void test_merge_root_with_offset() {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
@@ -1014,6 +1033,56 @@ public:
     const auto rootOffsetB = pos2 - rootPosB;
     TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 0}), rootOffsetA + detPosA);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 1}), rootOffsetB + detPosB);
+  }
+
+  void test_merge_root_with_rotation() {
+    auto detPos = Eigen::Vector3d{1, 0, 0};
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
+                           std::vector<Eigen::Quaterniond>(1));
+    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = std::get<0>(infos1);
+
+    ComponentInfo &b = std::get<0>(infos2);
+    Eigen::Quaterniond rot1(
+        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitY()));
+    Eigen::Quaterniond rot2(
+        Eigen::AngleAxisd(-M_PI / 2, Eigen::Vector3d::UnitY()));
+    a.setRotation(a.root(), rot1);
+    b.setRotation(b.root(), rot2);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval(a.root(), interval1);
+    b.setScanInterval(b.root(), interval2);
+    a.merge(b); // Execute the merge
+    TS_ASSERT(a.isScanning());
+    TS_ASSERT_EQUALS(a.size(), 2);
+    TS_ASSERT_EQUALS(a.scanSize(), 4);
+    TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
+    // Note that the order is not guaranteed, currently these are just in the
+    // order in which the are merged.
+    auto index1 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
+    auto index2 =
+        std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
+    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
+    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT(a.rotation(index1).isApprox(rot1));
+    TS_ASSERT(a.rotation(index2).isApprox(rot2));
+
+    // Test Detector info is synched internally
+    const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
+    // Check detectors moved correcly as a result of root rotation
+    // Detector at x=1,y=0,z=0 rotated around root at x=0,y=0,z=0 with rotation
+    // vector y=1, 90 degrees
+    TS_ASSERT(
+        mergeDetectorInfo.position({0, 0}).isApprox(Eigen::Vector3d{0, 0, -1}));
+    // Detector at x=1,y=0,z=0 rotated around root at x=0,y=0,z=0 with rotation
+    // vector y=1, -90 degrees
+    TS_ASSERT(
+        mergeDetectorInfo.position({0, 1}).isApprox(Eigen::Vector3d{0, 0, 1}));
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
