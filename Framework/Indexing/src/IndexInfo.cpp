@@ -296,9 +296,6 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
             "No unique mapping from detector to spectrum "
             "possible");
     }
-    if (detectorIndices.size() != spectrumIndices.size())
-      throw std::runtime_error("Some of the requested detectors do not have a "
-                               "corresponding spectrum");
     for (int rank = 1; rank < communicator().size(); ++rank) {
       int tag = 0;
       auto buffer = reinterpret_cast<char *>(spectrumIndices.data());
@@ -313,9 +310,13 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     spectrumIndices.resize(detectorIndices.size());
     buffer = reinterpret_cast<char *>(spectrumIndices.data());
     bytes = static_cast<int>(sizeof(int64_t) * spectrumIndices.size());
-    communicator().recv(0, tag, buffer, bytes);
+    const auto status = communicator().recv(0, tag, buffer, bytes);
+    spectrumIndices.resize(*status.count<int64_t>());
   }
 
+  if (detectorIndices.size() != spectrumIndices.size())
+    throw std::runtime_error("Some of the requested detectors do not have a "
+                             "corresponding spectrum");
   return spectrumIndices;
 }
 

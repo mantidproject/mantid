@@ -44,7 +44,7 @@ class ThreadingBackend;
 class MANTID_PARALLEL_DLL Status {
 public:
 #ifdef MPI_EXPERIMENTAL
-  Status(const boost::mpi::status &status);
+  Status(const boost::mpi::status &status) : m_status(status) {}
 #endif
 
   template <typename T> boost::optional<int> count() const {

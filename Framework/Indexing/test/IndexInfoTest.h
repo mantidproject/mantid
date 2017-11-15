@@ -95,11 +95,8 @@ void run_construct_from_parent_StorageMode_Distributed(
   TS_ASSERT_EQUALS(i.size(), expectedSize);
 }
 
-void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
-    const Parallel::Communicator &comm) {
+IndexInfo makeIndexInfo(const Parallel::Communicator &comm) {
   IndexInfo i(666, Parallel::StorageMode::Distributed, comm);
-  // Out of order
-  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199};
   std::vector<SpectrumDefinition> specDefs(i.size());
   size_t current = 0;
   for (size_t spec = 0; spec < 200; ++spec) {
@@ -110,6 +107,14 @@ void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
     }
   }
   i.setSpectrumDefinitions(specDefs);
+  return i;
+}
+
+void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
+    const Parallel::Communicator &comm) {
+  const auto &i = makeIndexInfo(comm);
+  // Out of order
+  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199};
   const auto &indices =
       i.globalSpectrumIndicesFromDetectorIndices(detectorIndices);
   TS_ASSERT_EQUALS(indices.size(), 5);
@@ -118,6 +123,17 @@ void run_globalSpectrumIndicesFromDetectorIndices_Distributed(
   TS_ASSERT_EQUALS(indices[2], 101);
   TS_ASSERT_EQUALS(indices[3], 198);
   TS_ASSERT_EQUALS(indices[4], 199);
+}
+
+void run_globalSpectrumIndicesFromDetectorIndices_missing(
+    const Parallel::Communicator &comm) {
+  const auto &i = makeIndexInfo(comm);
+  // No spectrum maps to 17
+  std::vector<size_t> detectorIndices{100, 101, 102, 200, 199, 17};
+  TS_ASSERT_THROWS_EQUALS(
+      i.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+      const std::runtime_error &e, std::string(e.what()),
+      "Some of the requested detectors do not have a corresponding spectrum");
 }
 }
 
@@ -392,6 +408,10 @@ public:
 
   void test_globalSpectrumIndicesFromDetectorIndices_Distributed() {
     runParallel(run_globalSpectrumIndicesFromDetectorIndices_Distributed);
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_missing() {
+    runParallel(run_globalSpectrumIndicesFromDetectorIndices_missing);
   }
 
 private:
