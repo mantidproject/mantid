@@ -52,7 +52,19 @@ class DRangeToWorkspaceMap(object):
     def __init__(self):
         self._map = {}
 
-    def add_ws(self, workspace, d_range=None):
+    def add_workspaces(self, workspaces):
+        """
+        Takes in the given workspace ands lists them alongside their time regime
+        value.  If the time regime has yet to be created, it will create it,
+        and if there is already a workspace listed beside the time regime, then
+        the new workspace will be appended to that list.
+
+        @param workspaces The workspaces to add
+        """
+        for workspace in workspaces:
+            self.add_workspace(workspace)
+
+    def add_workspace(self, workspace):
         """
         Takes in the given workspace and lists it alongside its time regime
         value.  If the time regime has yet to be created, it will create it,
@@ -60,31 +72,10 @@ class DRangeToWorkspaceMap(object):
         the new ws will be appended to that list.
 
         @param workspace The workspace to add
-        @param d_range Optionally override the dRange
         """
 
         # Get the time regime of the workspace, and use it to find the DRange.
-        time_regime = workspace.dataX(0)[0]
-        time_regimes = sorted(TIME_REGIME_TO_DRANGE.keys())
-
-        for idx in range(len(time_regimes)):
-            if idx == len(time_regimes) - 1:
-                if time_regimes[idx] < time_regime:
-                    time_regime = time_regimes[idx]
-                    break
-            else:
-                if time_regimes[idx] < time_regime < time_regimes[idx + 1]:
-                    time_regime = time_regimes[idx]
-                    break
-
-        if d_range is None:
-            d_range = TIME_REGIME_TO_DRANGE[time_regime]
-        else:
-
-            try:
-                d_range = TIME_REGIME_TO_DRANGE[time_regimes[d_range]]
-            except RuntimeError:
-                raise RuntimeError("Supplied d-range, " + str(d_range) + ", is out of bounds.")
+        d_range = self._d_range_of(workspace)
 
         logger.information('dRange for workspace %s is %s' % (workspace.getName(), str(d_range)))
 
@@ -92,17 +83,11 @@ class DRangeToWorkspaceMap(object):
         if d_range not in self._map:
             self._map[d_range] = [workspace]
         else:
+            def x_range_differs(x):
+                return x.readX(0)[-1] != workspace.readX(0)[-1]
 
-            # Check if x ranges match an existing run
-            for ws in self._map[d_range]:
-                map_lastx = ws.readX(0)[-1]
-                ws_lastx = workspace.readX(0)[-1]
-
-                # if it matches ignore it
-                if map_lastx == ws_lastx:
-                    return
-
-            self._map[d_range].append(workspace)
+            if all(map(x_range_differs, self._map[d_range])):
+                self._map[d_range].append(workspace)
 
     def average_across_dranges(self):
         """
@@ -110,13 +95,23 @@ class DRangeToWorkspaceMap(object):
         removing them from the map and mapping the averaged workspace
         to that drange.
         """
-        temp_map = {}
+        self._map = {d_range: average_ws_list(rebin_to_smallest(*ws_list))
+                     for d_range, ws_list in self._map}
 
-        for d_range, ws_list in self._map.items():
-            ws_list = rebin_to_smallest(*ws_list)
-            temp_map[d_range] = average_ws_list(ws_list)
+    def combine(self, d_range_map, combinator):
+        """
+        Creates a new DRangeToWorkspaceMap by combining this map with the
+        specified map, using the specified combinator.
 
-        self._map = temp_map
+        :param d_range_map: The map to combine with this.
+        :param combinator:  The combinator specifying how to combine.
+        :return:            The combined map.
+        """
+        combined_map = DRangeToWorkspaceMap()
+
+        for d_range in self.keys():
+            combined_map[d_range] = combinator(self._map[d_range], d_range_map._map[d_range])
+        return combined_map
 
     def items(self):
         """
@@ -165,6 +160,22 @@ class DRangeToWorkspaceMap(object):
         for d_range, workspaces in self._map.items():
             str_output += str(d_range) + ": " + str(workspaces) + "\n"
         return str_output + "}"
+
+    def _d_range_of(self, workspace):
+        return TIME_REGIME_TO_DRANGE[self._time_regime_of(workspace)]
+
+    def _time_regime_of(self, workspace):
+        time_regime = workspace.dataX(0)[0]
+        time_regimes = sorted(TIME_REGIME_TO_DRANGE.keys())
+        num_regimes = len(time_regimes)
+
+        for idx in range(num_regimes):
+            if idx == num_regimes - 1:
+                if time_regimes[idx] < time_regime:
+                    return time_regimes[idx]
+            else:
+                if time_regimes[idx] < time_regime < time_regimes[idx + 1]:
+                    return time_regimes[idx]
 
 
 def average_ws_list(ws_list):
@@ -286,6 +297,21 @@ def rebin_to_smallest(*workspaces):
 
     return rebinned_workspaces
 
+def rebin_and_subtract(minuend_workspace, subtrahend_workspace):
+    rebinned = RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
+                                WorkspaceToMatch=minuend_workspace,
+                                OutputWorkspace="rebinned_container",
+                                StoreInADS=False, enableLogging=False)
+    return minuend_workspace - rebinned
+
+def divide_workspace(dividend_workspace, divisor_workspace):
+    dividend_ws, divisor_ws = rebin_to_smallest(dividend_workspace, divisor_workspace)
+    divided_ws = dividend_ws / divisor_ws
+    return ReplaceSpecialValues(InputWorkspace=divided_ws,
+                                NaNValue=0.0, InfinityValue=0.0,
+                                OutputWorkspace="removed_special",
+                                StoreInADS=False, enableLogging=False)
+
 
 # pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
@@ -301,7 +327,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _container_scale_factor = None
     _sam_ws_map = None
     _van_ws_map = None
-    _man_d_range = None
     _load_logs = None
     _spec_min = None
     _spec_max = None
@@ -349,6 +374,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._output_ws_name = None
 
         self._sam_ws_map = DRangeToWorkspaceMap()
+        self._con_ws_map = DRangeToWorkspaceMap()
         self._van_ws_map = DRangeToWorkspaceMap()
 
     def _get_properties(self):
@@ -367,20 +393,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._spec_min = self.getPropertyValue("SpectraMin")
         self._spec_max = self.getPropertyValue("SpectraMax")
-
-        self._man_d_range = None
-
-        if not self.getProperty("DetectDRange").value:
-            self._man_d_range = self._parse_string_array(self.getProperty("DRange").value)
-            self._man_d_range = [x - 1 for x in self._man_d_range]
-            num_ranges = len(self._man_d_range)
-            num_runs = len(self._sample_runs)
-
-            if num_runs % num_ranges == 0:
-                self._man_d_range = list(self._man_d_range * int(num_runs / num_ranges))
-            elif num_runs != num_ranges:
-                raise ValueError("Less D-Ranges supplied than Sample Runs. Expected " + str(num_runs)
-                                 + ", Received " + str(num_ranges) + ".")
 
     def validateInputs(self):
         issues = dict()
@@ -422,6 +434,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                         self._spec_max,
                                         load_logs=self._load_logs,
                                         load_opts=load_opts)
+        # Add the sample workspaces to the sample d-range map
+        self._sam_ws_map.add_workspaces([mtd[sample_ws_name] for sample_ws_name in sample_ws_names])
+        self._sam_ws_map.average_across_dranges()
 
         vanadium_ws_names, _ = load_files(self._vanadium_runs,
                                           ipf_file_name,
@@ -429,9 +444,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                           self._spec_max,
                                           load_logs=self._load_logs,
                                           load_opts=load_opts)
-
-        container_ws_names = []
-        container_workspaces = []
+        # Add the vanadium workspaces to the vanadium drange map
+        self._van_ws_map.add_workspaces(vanadium_ws_names)
+        self._van_ws_map.average_across_dranges()
 
         # Load the container run
         if self._container_files:
@@ -444,48 +459,20 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
             # Scale the container run if required
             if self._container_scale_factor != 1.0:
-
-                # Scale every container workspace
-                for container_ws_name in container_ws_names:
-                    container_workspaces.append(mtd[container_ws_name] * self._container_scale_factor)
+                self._con_ws_map.add_workspaces([mtd[container_ws_name] * self._container_scale_factor
+                                                 for container_ws_name in container_ws_names])
             else:
-                container_workspaces = container_ws_names
+                self._con_ws_map.add_workspaces([mtd[container_ws_name]
+                                                 for container_ws_name in container_ws_names])
 
-        # Add the sample workspaces to the dRange to sample map
-        for idx, sample_ws_name in enumerate(sample_ws_names):
-
-            if container_workspaces:
-                rebinned_container = RebinToWorkspace(WorkspaceToRebin=container_workspaces[idx],
-                                                      WorkspaceToMatch=sample_ws_name,
-                                                      OutputWorkspace="rebinned_container",
-                                                      StoreInADS=False, enableLogging=False)
-                sample_ws = mtd[sample_ws_name] - rebinned_container
-            else:
-                sample_ws = mtd[sample_ws_name]
-
-            if self._man_d_range is not None and idx < len(self._man_d_range):
-                self._sam_ws_map.add_ws(sample_ws,
-                                        self._man_d_range[idx])
-            else:
-                self._sam_ws_map.add_ws(sample_ws)
-
-        self._delete_workspaces(container_ws_names)
-
-        # Add the vanadium workspaces to the vanadium drange map
-        self._add_to_drange_map(vanadium_ws_names, self._van_ws_map)
+            self._con_ws_map.average_across_dranges()
+            self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
+            self._delete_workspaces(container_ws_names)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map:
             if d_range not in self._van_ws_map:
-                raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
-
-        # Average together any sample workspaces with the same DRange.
-        # This will mean our map of DRanges to list of workspaces becomes a map
-        # of DRanges, each to a *single* workspace.
-        self._sam_ws_map.average_across_dranges()
-
-        # Now do the same to the vanadium workspaces
-        self._van_ws_map.average_across_dranges()
+                raise RuntimeError("There is no vanadium file that covers the " + str(d_range) + " DRange.")
 
         # Run necessary algorithms on the Sample workspaces.
         self._calibrate_runs_in_map(self._sam_ws_map)
@@ -498,37 +485,38 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._delete_workspaces(vanadium_ws_names)
 
         # Divide all sample files by the corresponding vanadium files.
-        divided = self._divide_all_by(self._sam_ws_map.values(), self._van_ws_map.values())
+        self._sam_ws_map.combine(self._van_ws_map, divide_workspace)
+        normalised_sample_workspaces = self._sam_ws_map.values()
 
         # Workspaces must be added to the ADS, as there does not yet exist
         # a workspace list property (must be passed to merge runs by name).
         for sample_ws_name, sample_ws in zip(sample_ws_names,
-                                             divided):
+                                             normalised_sample_workspaces):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
-        if len(divided) > 1:
+        if len(normalised_sample_workspaces) > 1:
             # Merge the sample files into one.
             output_ws = MergeRuns(InputWorkspaces=sample_ws_names,
                                   OutputWorkspace="merged_sample_runs",
                                   StoreInADS=False, enableLogging=False)
         else:
-            output_ws = divided[0]
+            output_ws = normalised_sample_workspaces[0]
 
         # Sample workspaces are now finished with and can be deleted
         # safely from the ADS.
         self._delete_workspaces(sample_ws_names)
 
-        mtd.addOrReplace(self._output_ws_name, output_ws)
+        if self._output_ws_name:
+            mtd.addOrReplace(self._output_ws_name, output_ws)
 
+        d_ranges = self._sam_ws_map.keys()
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
-                     LogText="D-Ranges used for reduction: " + self.getPropertyValue("Drange"))
-
-        result = mtd[self._output_ws_name]
+                     LogText="D-Ranges used for reduction: " + ", ".join(d_ranges))
 
         # Create scalar data to cope with where merge has combined overlapping data.
-        intersections = get_intersection_of_ranges(self._sam_ws_map.keys())
+        intersections = get_intersection_of_ranges(d_ranges)
 
-        data_x = result.dataX(0)
+        data_x = output_ws.dataX(0)
         data_y = []
         data_e = []
         for i in range(0, len(data_x) - 1):
@@ -542,17 +530,17 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 data_e.append(1)
 
         # apply scalar data to result workspace
-        for i in range(0, result.getNumberHistograms()):
-            result_y = result.dataY(i)
-            result_e = result.dataE(i)
+        for i in range(0, output_ws.getNumberHistograms()):
+            result_y = output_ws.dataY(i)
+            result_e = output_ws.dataE(i)
 
             result_y = result_y / data_y
             result_e = result_e / data_e
 
-            result.setY(i, result_y)
-            result.setE(i, result_e)
+            output_ws.setY(i, result_y)
+            output_ws.setE(i, result_e)
 
-        self.setProperty("OutputWorkspace", result)
+        self.setProperty("OutputWorkspace", output_ws)
 
     def _delete_workspaces(self, workspace_names):
         """
@@ -567,28 +555,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
             if mtd.doesExist(workspace_name):
                 DeleteWorkspace(workspace_name)
-
-    def _add_to_drange_map(self, workspace_names, drange_map):
-        """
-        Adds the specified workspaces to the specified drange map.
-        Attempts to add using the manually entered dranges where
-        possible - if not, automatically finds the drange.
-
-        :param workspaces:      The names of the workspaces to add to the drange map.
-        :param drange_map:      The drange map to add the workspaces to.
-        :param do_log_found:    If True print the found workspaces to log.
-                                Else don't print to log.
-        """
-        if self._man_d_range is not None:
-            drange_len = len(self._man_d_range)
-        else:
-            drange_len = None
-
-        for idx, ws_name in enumerate(workspace_names):
-            if drange_len is not None and idx < drange_len:
-                drange_map.add_ws(mtd[ws_name], self._man_d_range[idx])
-            else:
-                drange_map.add_ws(mtd[ws_name])
 
     def _parse_string_array(self, string):
         """
@@ -658,42 +624,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                                 XMin=d_range[0], XMax=d_range[1],
                                                 OutputWorkspace="calibrated_sample",
                                                 StoreInADS=False, enableLogging=False)
-
-    def _init_child_algorithm(self, algorithm_name, enable_logging=False):
-        """
-        Initializes the algorithm with the specified name as a child algorithm.
-        The getProperty, setProperty and execute methods for this child algorithm
-        are returned.
-
-        :param algorithm_name:   The name of the algorithm to initialize.
-        :param enable_logging:   If True, enables algorithm logging.
-        :return:                getProperty, setProperty, execute methods of
-                                the created child algorithm.
-        """
-        algorithm = self.createChildAlgorithm(algorithm_name, enable_logging)
-        return algorithm.getProperty, algorithm.setProperty, algorithm.execute
-
-    def _divide_all_by(self, dividend_workspaces, divisor_workspaces):
-        """
-        Divides the workspaces with the specified divided workspace names by
-        the workspaces with the specified divisor workspace names.
-
-        :param dividend_workspaces:   The workspaces to be divided.
-        :param divisor_workspaces:    The workspaces to divide by.
-        :return:                      A list of the resultant divided workspaces.
-        """
-        divided = []
-
-        # Divide all dividend workspaces by the corresponding divisor workspaces.
-        for dividend_ws, divisor_ws in zip(dividend_workspaces, divisor_workspaces):
-            dividend_ws, divisor_ws = rebin_to_smallest(dividend_ws, divisor_ws)
-            divided_ws = dividend_ws / divisor_ws
-            divided.append(ReplaceSpecialValues(InputWorkspace=divided_ws,
-                                                NaNValue=0.0, InfinityValue=0.0,
-                                                OutputWorkspace="removed_special",
-                                                StoreInADS=False, enableLogging=False))
-
-        return divided
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
