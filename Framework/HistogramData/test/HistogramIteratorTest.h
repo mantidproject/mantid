@@ -299,6 +299,25 @@ public:
     }
   }
 
+  void test_convert_counts_to_frequency_for_each_item_sparse() {
+    double total = 0;
+    for (size_t i = 0; i < nHists; i++) {
+      for (auto &item : m_hist) {
+        if (item.counts() > 1.95)
+          total += item.frequency();
+      }
+    }
+  }
+
+  void test_convert_counts_to_frequency_once_per_histogram_sparse() {
+    double total = 0;
+    for (size_t i = 0; i < nHists; i++) {
+      auto frequencies = m_hist.frequencies();
+      for (auto &frequency : frequencies)
+          if (frequency > 1.95)
+            total += frequency;
+    }
+  }
 private:
   const size_t nHists = 500;
   const size_t histSize = 50000;
