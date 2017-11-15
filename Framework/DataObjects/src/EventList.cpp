@@ -1669,10 +1669,9 @@ inline void EventList::compressFatEventsHelper(
   // bin if the pulses are histogrammed
   int64_t lastPulseBin =
       (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
-  int64_t eventPulseBin;
   // loop through events and accumulate weight
   for (; it != events.cend(); ++it) {
-    eventPulseBin =
+    const int64_t eventPulseBin =
         (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
     if ((eventPulseBin <= lastPulseBin) &&
         (std::fabs(it->m_tof - lastTof) <= tolerance)) {

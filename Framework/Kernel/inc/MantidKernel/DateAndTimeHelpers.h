@@ -16,7 +16,7 @@ MANTID_KERNEL_DLL std::string
 verifyAndSanitizeISO8601(const std::string &date, bool displayWarnings = true);
 
 MANTID_KERNEL_DLL Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> times);
+averageSorted(const std::vector<Types::Core::DateAndTime> &times);
 
 } // namespace DateAndTimeHelpers
 } // namespace Kernel

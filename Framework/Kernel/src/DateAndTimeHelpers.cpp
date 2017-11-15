@@ -80,7 +80,7 @@ std::string verifyAndSanitizeISO8601(const std::string &date,
  * time
  */
 Types::Core::DateAndTime
-averageSorted(const std::vector<Types::Core::DateAndTime> times) {
+averageSorted(const std::vector<Types::Core::DateAndTime> &times) {
   if (times.empty())
     throw std::invalid_argument("Cannot find average of empty vector");
 
