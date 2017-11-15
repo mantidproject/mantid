@@ -86,7 +86,7 @@ std::vector<double> extract_values(const std::string &l) {
   const auto valEnd = l.find(']');
   if (valBegin == std::string::npos || valEnd == std::string::npos)
     throw std::runtime_error("Syntax error.");
-  std::vector <double> values;
+  std::vector<double> values;
   std::string valStr;
   for (size_t i = valBegin + 1; i != valEnd; i++) {
     const auto c = l[i];
@@ -108,10 +108,12 @@ std::vector<double> extract_values(const std::string &l) {
   return values;
 }
 
-Mantid::HistogramData::Histogram make_histogram(const std::vector<double> &points, const double maxWavelength) {
+Mantid::HistogramData::Histogram
+make_histogram(const std::vector<double> &points, const double maxWavelength) {
   Mantid::HistogramData::Points p(points.size() + 2);
   p.mutableRawData().front() = 0;
-  p.mutableRawData().back() = maxWavelength > points.back() ? maxWavelength : 2 * points.back();
+  p.mutableRawData().back() =
+      maxWavelength > points.back() ? maxWavelength : 2 * points.back();
   for (size_t i = 1; i != p.size() - 1; ++i) {
     p.mutableData()[i] = points[i - 1];
   }
@@ -119,8 +121,8 @@ Mantid::HistogramData::Histogram make_histogram(const std::vector<double> &point
   return Mantid::HistogramData::Histogram(p, c);
 }
 
-
-void calculate_factors_in_place(Mantid::HistogramData::Histogram &h, const std::vector<double> &piecewiseFactors) {
+void calculate_factors_in_place(Mantid::HistogramData::Histogram &h,
+                                const std::vector<double> &piecewiseFactors) {
   const auto &xs = h.x();
   auto &ys = h.mutableY();
   ys[0] = piecewiseFactors.front();
@@ -168,7 +170,8 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
       throw std::runtime_error("No fitting information defined for a factor.");
     }
     if (fDef.limits.size() + 2 != fDef.fitFactors.size()) {
-      throw std::runtime_error("Size mismatch between limits and fitting information.");
+      throw std::runtime_error(
+          "Size mismatch between limits and fitting information.");
     }
   }
 }
@@ -176,7 +179,7 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
 void addErrors(Mantid::HistogramData::Histogram &h, const Factor tag) {
   // The error estimates are taken from the LAMP/COSMOS software.
   double f;
-  switch(tag) {
+  switch (tag) {
   case Factor::F1:
   case Factor::F2:
     f = 1. / 3000.;
@@ -203,7 +206,9 @@ DECLARE_ALGORITHM(LoadILLPolarizationFactors)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadILLPolarizationFactors::name() const { return "LoadILLPolarizationFactors"; }
+const std::string LoadILLPolarizationFactors::name() const {
+  return "LoadILLPolarizationFactors";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadILLPolarizationFactors::version() const { return 1; }
@@ -222,18 +227,18 @@ const std::string LoadILLPolarizationFactors::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLPolarizationFactors::init() {
-  declareProperty(
-      Kernel::make_unique<API::FileProperty>(Prop::FILENAME, "", API::FileProperty::Load),
-      "Path to the polarization efficiency file.");
-  const auto refWSValidator = boost::make_shared<API::IncreasingAxisValidator>();
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::OUT_WS, "",
-                                                             Direction::Output, refWSValidator),
-      "An output workspace containing the efficiencies at the reference workspace's wavelength points.");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(Prop::REF_WS, "",
-                                                             Direction::Input),
-      "A reference workspace to get the wavelength axis from.");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      Prop::FILENAME, "", API::FileProperty::Load),
+                  "Path to the polarization efficiency file.");
+  const auto refWSValidator =
+      boost::make_shared<API::IncreasingAxisValidator>();
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::OUT_WS, "", Direction::Output, refWSValidator),
+                  "An output workspace containing the efficiencies at the "
+                  "reference workspace's wavelength points.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::REF_WS, "", Direction::Input),
+                  "A reference workspace to get the wavelength axis from.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -242,7 +247,8 @@ void LoadILLPolarizationFactors::init() {
 void LoadILLPolarizationFactors::exec() {
   API::MatrixWorkspace_const_sptr refWS = getProperty(Prop::REF_WS);
   HistogramData::Histogram tmplHist{refWS->histogram(0).points()};
-  API::MatrixWorkspace_sptr outWS = DataObjects::create<DataObjects::Workspace2D>(5, tmplHist);
+  API::MatrixWorkspace_sptr outWS =
+      DataObjects::create<DataObjects::Workspace2D>(5, tmplHist);
   auto outVertAxis = Kernel::make_unique<API::TextAxis>(5);
   const auto maxWavelength = tmplHist.x().back();
 
@@ -257,7 +263,8 @@ void LoadILLPolarizationFactors::exec() {
       definition_map_sanity_check(fittingData);
       return fittingData;
     } catch (std::exception &e) {
-      throw std::runtime_error("Error while reading " + filename + ": " + e.what());
+      throw std::runtime_error("Error while reading " + filename + ": " +
+                               e.what());
     }
   }();
   const auto factorTags = factor_list();
@@ -283,17 +290,20 @@ void LoadILLPolarizationFactors::exec() {
   setProperty(Prop::OUT_WS, outWS);
 }
 
-std::map<std::string, std::string> LoadILLPolarizationFactors::validateInputs() {
+std::map<std::string, std::string>
+LoadILLPolarizationFactors::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr refWS = getProperty(Prop::REF_WS);
   if (refWS->getNumberHistograms() == 0) {
-    issues[Prop::REF_WS] = "The reference workspace does not contain any histograms.";
+    issues[Prop::REF_WS] =
+        "The reference workspace does not contain any histograms.";
     return issues;
   }
   const auto &xs = refWS->x(0);
   // A validator should have checked that xs is ordered.
   if (xs.front() < 0) {
-    issues[Prop::REF_WS] = "The reference workspace contains negative X values.";
+    issues[Prop::REF_WS] =
+        "The reference workspace contains negative X values.";
   }
   return issues;
 }

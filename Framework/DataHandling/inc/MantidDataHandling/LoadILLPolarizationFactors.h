@@ -31,7 +31,8 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL LoadILLPolarizationFactors : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadILLPolarizationFactors
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
