@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class CompressEventsTesting(stresstesting.MantidStressTest):
     event_files = ["PG3_4844_event.nxs"] # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
 
@@ -17,7 +18,6 @@ class CompressEventsTesting(stresstesting.MantidStressTest):
             totalEvents = mtd[wkspname].getNumberEvents()
 
             SumSpectra(InputWorkspace=wkspname, OutputWorkspace=wkspname)
-
 
             # max for Integration algorithm is not inclusive
             for name in (outname, wkspname): # first out of place, then in place
