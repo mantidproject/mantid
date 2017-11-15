@@ -315,10 +315,11 @@ public:
       auto counts = m_hist.frequencies();
       auto frequencies = m_hist.frequencies();
       for (size_t j = 0; j < nHists; ++j)
-          if (counts[j] > histSize - 5)
-            total += frequencies[j];
+        if (counts[j] > histSize - 5)
+          total += frequencies[j];
     }
   }
+
 private:
   const size_t nHists = 500;
   const size_t histSize = 50000;
