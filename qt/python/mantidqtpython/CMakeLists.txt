@@ -20,10 +20,12 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/UserSubWindow.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/InterfaceManager.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MantidDesktopServices.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MessageDisplay.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MWRunFiles.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
+  
 
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h
