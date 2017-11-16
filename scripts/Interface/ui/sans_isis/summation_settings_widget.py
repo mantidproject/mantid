@@ -64,28 +64,33 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
 
     def apply_overlay_event_workspaces(self, settings):
         if settings.has_overlay_event_workspaces():
-            self.overlayEventWorkspacesCheckbox.setEnabled(True)
+            self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
             #self.overlayEventWorkspacesCheckbox.setChecked(should_be_checked)
         else:
             #self.overlayEventWorkspacesCheckbox.setChecked(False)
-            self.overlayEventWorkspacesCheckbox.setEnabled(False)
+            self.overlayEventWorkspacesCheckbox.setVisible(False)
 
     def disable_and_clear_text(self):
-        print("Disable and clear!")
-        self.customBinBoundariesLineEdit.setEnabled(False)
+        self.customBinBoundariesLineEdit.setVisible(False)
         self.customBinBoundariesLineEdit.setText('')
 
     def apply_bin_settings(self, settings):
         if settings.has_bin_settings():
-            self.customBinBoundariesLineEdit.setEnabled(True)
+            self.customBinBoundariesLineEdit.setVisible(True)
+            self.customBinLabel.setVisible(True)
             self.customBinBoundariesLineEdit.setText(settings.bin_settings)
+            self.customBinLabel.setText('Custom Bin Boundaries:')
         elif not settings.has_additional_time_shifts():
+            self.customBinLabel.setVisible(False)
             self.disable_and_clear_text()
 
     def apply_additional_time_shifts(self, settings):
         if settings.has_additional_time_shifts():
-            self.customBinBoundariesLineEdit.setEnabled(True)
+            self.customBinLabel.setVisible(True)
+            self.customBinBoundariesLineEdit.setVisible(True)
             self.customBinBoundariesLineEdit.setText(settings.additional_time_shifts)
+            self.customBinLabel.setText('Additional Time Shifts:')
         elif not settings.has_bin_settings():
+            self.customBinLabel.setVisible(False)
             self.disable_and_clear_text()
