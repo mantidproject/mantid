@@ -194,18 +194,19 @@ void definition_map_sanity_check(const std::map<Factor, FactorDefinition> &m) {
 /// Calculates error estimates in place.
 void addErrors(Mantid::HistogramData::Histogram &h, const Factor tag) {
   // The error estimates are taken from the LAMP/COSMOS software.
-  double f;
-  switch (tag) {
-  case Factor::F1:
-  case Factor::F2:
-    f = 1. / 3000.;
-    break;
-  case Factor::P1:
-  case Factor::P2:
-  case Factor::Phi:
-    f = 1. / 500.;
-    break;
-  }
+  const auto f = [tag]() {
+    switch (tag) {
+    case Factor::F1:
+    case Factor::F2:
+      return 1. / 3000.;
+    case Factor::P1:
+    case Factor::P2:
+    case Factor::Phi:
+      return 1. / 500.;
+    default:
+      throw std::logic_error("Logic error: unknown efficiency factor tag.");
+    }
+  }();
   h.mutableE() = (h.y() * f).rawData();
 }
 }
