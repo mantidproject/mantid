@@ -34,9 +34,9 @@ noise. Those events can be filtered out of the reduction process.
 Example:
 
 - "71465:0-500;71466:900-2100;71467:4000-end" will filter out events
-happening between the start of the run and 500 seconds for run 71465, then
-between 900 and 2100 seconds for run 71466 and between 4000 seconds and the
-end of the run for 71467. Only one time segment can be excluded per run number.
+  happening between the start of the run and 500 seconds for run 71465, then
+  between 900 and 2100 seconds for run 71466 and between 4000 seconds and the
+  end of the run for 71467. Only one time segment can be excluded per run number.
 
 **Momentum transfer binning scheme**: Three values are required, the
 center of the bin with the minimum momentum, the bin width, and the
@@ -143,4 +143,3 @@ Workflow
 --------
 
 .. diagram:: BASISReduction-v1_wkflw.dot
-
