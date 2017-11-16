@@ -68,7 +68,7 @@ class DRangeToWorkspaceMap(object):
             self.add_workspace(workspace)
 
         if combinator is not None:
-            self._map = {d_range: combinator(ws_list) for d_range, ws_list in self._map}
+            self._map = {d_range: combinator(ws_list) for d_range, ws_list in self._map.items()}
 
     def add_workspace(self, workspace):
         """
@@ -185,6 +185,7 @@ class DRangeToWorkspaceMap(object):
             else:
                 if time_regimes[idx] < time_regime < time_regimes[idx + 1]:
                     return time_regimes[idx]
+        return time_regime
 
 
 def average_ws_list(ws_list):
@@ -302,7 +303,7 @@ def rebin_to_smallest(*workspaces):
             rebinned_workspaces.append(RebinToWorkspace(WorkspaceToRebin=workspace,
                                                         WorkspaceToMatch=smallest_ws,
                                                         OutputWorkspace="rebinned",
-                                                        StoreInADS=False, enableLogging=False))
+                                                        StoreInADS=False, EnableLogging=False))
 
     return rebinned_workspaces
 
@@ -319,7 +320,7 @@ def rebin_and_subtract(minuend_workspace, subtrahend_workspace):
     rebinned = RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
                                 WorkspaceToMatch=minuend_workspace,
                                 OutputWorkspace="rebinned_container",
-                                StoreInADS=False, enableLogging=False)
+                                StoreInADS=False, EnableLogging=False)
     return minuend_workspace - rebinned
 
 
@@ -337,15 +338,15 @@ def divide_workspace(dividend_workspace, divisor_workspace):
     return ReplaceSpecialValues(InputWorkspace=divided_ws,
                                 NaNValue=0.0, InfinityValue=0.0,
                                 OutputWorkspace="removed_special",
-                                StoreInADS=False, enableLogging=False)
+                                StoreInADS=False, EnableLogging=False)
 
 
 def rebin_and_average(ws_list):
     """
-   Rebins the specified list of workspaces to the smallest and then averages.
+    Rebins the specified list of workspaces to the smallest and then averages.
 
-   @param ws_list The workspace list to rebin and average.
-   """
+    @param ws_list The workspace list to rebin and average.
+    """
     return average_ws_list(rebin_to_smallest(*ws_list))
 
 
@@ -481,7 +482,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                           load_logs=self._load_logs,
                                           load_opts=load_opts)
         # Add the vanadium workspaces to the vanadium drange map
-        self._van_ws_map.add_workspaces(vanadium_ws_names, rebin_and_average)
+        self._van_ws_map.add_workspaces([mtd[vanadium_ws_name] for vanadium_ws_name in vanadium_ws_names],
+                                        rebin_and_average)
 
         # Load the container run
         if self._container_files:
@@ -501,18 +503,22 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                                  for container_ws_name in container_ws_names], rebin_and_average)
 
             if set(self._con_ws_map.keys()) != set(self._sam_ws_map.keys()):
+                con_d_ranges = map(str, self._con_ws_map.keys())
+                sam_d_ranges = map(str, self._sam_ws_map.keys())
                 raise RuntimeError("The d-ranges found for the supplied container files (" +
-                                   ", ".join(self._con_ws_map.keys()) + ") do not match those found for"
-                                   " the supplied sample files (" + ", ".join(self._sam_ws_map.keys()) + ").")
+                                   ", ".join(con_d_ranges) + ") do not match those found for"
+                                   " the supplied sample files (" + ", ".join(sam_d_ranges) + ").")
 
             self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
             self._delete_workspaces(container_ws_names)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
-        if set(self._van_ws_map.keys()) != set(self._sam_ws_map.keys()):
+        if not set(self._sam_ws_map.keys()).issubset(set(self._van_ws_map)):
+            van_d_ranges = map(str, self._van_ws_map)
+            sam_d_ranges = map(str, self._sam_ws_map)
             raise RuntimeError("The d-ranges found for the supplied vanadium files (" +
-                               ", ".join(self._van_ws_map.keys()) + ") do not match those found for"
-                               " the supplied sample files (" + ", ".join(self._sam_ws_map.keys()) + ").")
+                               ", ".join(van_d_ranges) + ") do not cover those found for"
+                               " the supplied sample files (" + ", ".join(sam_d_ranges) + ").")
 
         # Run necessary algorithms on the Sample workspaces.
         self._calibrate_runs_in_map(self._sam_ws_map)
@@ -541,7 +547,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             # Merge the sample files into one.
             output_ws = MergeRuns(InputWorkspaces=sample_ws_names,
                                   OutputWorkspace="merged_sample_runs",
-                                  StoreInADS=False, enableLogging=False)
+                                  StoreInADS=False, EnableLogging=False)
         else:
             output_ws = self._sam_ws_map.values()[0]
 
@@ -554,7 +560,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         d_ranges = self._sam_ws_map.keys()
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
-                     LogText="D-Ranges used for reduction: " + ", ".join(d_ranges))
+                     LogText="D-Ranges used for reduction: " + ", ".join(map(str, d_ranges)))
 
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(d_ranges)
@@ -651,22 +657,22 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for d_range, wrksp in drange_map.items():
             normalised = NormaliseByCurrent(InputWorkspace=wrksp,
                                             OutputWorkspace="normalised_sample",
-                                            StoreInADS=False, enableLogging=False)
+                                            StoreInADS=False, EnableLogging=False)
 
             aligned = AlignDetectors(InputWorkspace=normalised,
                                      CalibrationFile=self._cal,
                                      OutputWorkspace="aligned_sample",
-                                     StoreInADS=False, enableLogging=False)
+                                     StoreInADS=False, EnableLogging=False)
 
             focussed = DiffractionFocussing(InputWorkspace=aligned,
                                             GroupingFileName=self._cal,
                                             OutputWorkspace="focussed_sample",
-                                            StoreInADS=False, enableLogging=False)
+                                            StoreInADS=False, EnableLogging=False)
 
             drange_map[d_range] = CropWorkspace(InputWorkspace=focussed,
                                                 XMin=d_range[0], XMax=d_range[1],
                                                 OutputWorkspace="calibrated_sample",
-                                                StoreInADS=False, enableLogging=False)
+                                                StoreInADS=False, EnableLogging=False)
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
