@@ -434,6 +434,9 @@ class MainWindow(QtGui.QMainWindow):
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
 
+        # about pre-processed data
+        self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
+
         return
 
     def _build_peak_info_list(self, zero_hkl, is_spice=True):
@@ -877,6 +880,7 @@ class MainWindow(QtGui.QMainWindow):
         # get data directory, working directory and data server URL from GUI
         local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
         working_dir = str(self.ui.lineEdit_workDir.text()).strip()
+        pre_process_dir = str(self.ui.lineEdit_preprocessedDir.text()).strip()
 
         # set to my controller
         status, err_msg = self._myControl.set_local_data_dir(local_data_dir)
@@ -917,6 +921,20 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.ui.lineEdit_workDir.setStyleSheet("color: green;")
         # END-IF-ELSE
+
+        # preprocess directory
+        # blabla ... doc
+        if len(pre_process_dir) == 0:
+            self._myControl.pre_processed_dir = None
+        elif os.path.exists(pre_process_dir):
+            self._myControl.pre_processed_dir = pre_process_dir
+            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: green;')
+        else:
+            self.pop_one_button_dialog('Pre-processed dictory {0} ({1}) does not exist.'
+                                       ''.format(pre_process_dir, type(pre_process_dir)))
+            self._myControl.pre_processed_dir = None
+            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
+        # END-IF
 
         if len(error_message) > 0:
             self.pop_one_button_dialog(error_message)
@@ -1139,7 +1157,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # merge peak if necessary
         if self._myControl.has_merged_data(exp_no, scan_number) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [])
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [], rewrite=True,
+                                                                preprocessed_dir=self._myControl.pre_processed_dir)
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
@@ -1934,7 +1953,8 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                                pt_num_list=[])
+                                                                pt_num_list=[], rewrite=False,
+                                                                preprocessed_dir=self._myControl.pre_processed_dir)
             # find peaks too
             status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
 

@@ -614,8 +614,11 @@
                    <bold>true</bold>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Check directories and apply!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
-                  <string>Check &amp;&amp; Apply</string>
+                  <string>Apply</string>
                  </property>
                 </widget>
                </item>

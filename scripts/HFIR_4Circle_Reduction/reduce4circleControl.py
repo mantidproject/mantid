@@ -64,6 +64,7 @@ class CWSCDReductionControl(object):
 
         self._dataDir = None
         self._workDir = '/tmp'
+        self._preprocessedDir = None
 
         self._myServerURL = ''
 
@@ -130,6 +131,27 @@ class CWSCDReductionControl(object):
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
+
+        return
+
+    @property
+    def pre_processed_dir(self):
+        """
+        get the pre-processed directory
+        :return:
+        """
+        return self._preprocessedDir
+
+    @pre_processed_dir.setter
+    def pre_processed_dir(self, dir_name):
+        """
+        setting pre-processed directory
+        :param dir_name:
+        :return:
+        """
+        assert isinstance(dir_name, str) or dir_name is None, 'blabla'
+
+        self._preprocessedDir = dir_name
 
         return
 
@@ -564,6 +586,19 @@ class CWSCDReductionControl(object):
             raise KeyError(err_msg)
 
         return self._myUBMatrixDict[exp_number]
+
+    def get_calibrated_wave_length(self, exp_number):
+        """
+
+        :param exp_number:
+        :return:
+        """
+        # blabla TODO check ..
+
+        if exp_number not in self._userWavelengthDict:
+            return None
+
+        return self._userWavelengthDict[exp_number]
 
     def get_wave_length(self, exp_number, scan_number_list):
         """
@@ -1597,27 +1632,31 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
-    def load_preprocessed_scan(self):
+    # TEST TODO/ - Just Implemented
+    def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """
 
         :return:
         """
-        # TODO/TODO/ - Implement
-        if False:
-            md_file_path = os.path.join(self._wsDir, ws_name + '.nxs')
-            try:
-                mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=ws_name)
-            except RuntimeError as run_err:
-                print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
-            except OSError as run_err:
-                print('[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err))
-            except IOError as run_err:
-                print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
-        # END-FOR
+        # check inputs  TODO/ASAP
+        # blabla
 
-        return False
+        # TODO/NICE - refactor the workspace name definition together with pre-processed file writing method
+        ws_name = 'Exp{0}_Scan{1}_MD'.format(exp_number, scan_number)
+        md_file_path = os.path.join(md_dir, ws_name + '.nxs')
+        status = False
+        try:
+            mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
+            status = AnalysisDataService.doesExist(output_ws_name)
+        except RuntimeError as run_err:
+            print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
+        except OSError as run_err:
+            print('[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err))
+        except IOError as run_err:
+            print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
 
-    # TODO/TODO/FIXME - Signature changed... Applied to all callers
+        return status
+
     def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
         """
         Merge Pts in Scan
@@ -1676,11 +1715,13 @@ class CWSCDReductionControl(object):
                 rewrite = False
             elif preprocessed_dir is not None:
                 # not re-write, target workspace does not exist, attempt to load from preprocessed
-                data_loaded = self.load_preprocessed_scan(exp_no, scan_no, pt_num_list, preprocessed_dir, out_q_name)
+                data_loaded = self.load_preprocessed_scan(exp_number=exp_no,
+                                                          scan_number=scan_no,
+                                                          md_dir=preprocessed_dir,
+                                                          output_ws_name=out_q_name)
                 rewrite = not data_loaded
             # END-IF (ADS)
-        # END-IF
-        # END-IF
+        # END-IF (rewrite)
 
         # now to load the data
         # check whether it is an option load preprocessed (merged) data
@@ -1850,6 +1891,19 @@ class CWSCDReductionControl(object):
 
         return
 
+    def get_calibrated_det_center(self, exp_number):
+        """
+
+        :param exp_number:
+        :return:
+        """
+        # blabla TODO .. check and
+
+        if exp_number not in self._detCenterDict:
+            return self._defaultDetectorCenter
+
+        return self._detCenterDict[exp_number]
+
     def set_detector_center(self, exp_number, center_row, center_col, default=False):
         """
         Set detector center
@@ -1869,9 +1923,9 @@ class CWSCDReductionControl(object):
             ''.format(center_col, type(center_col))
 
         if default:
-            self._defaultDetectorCenter = (center_row, center_col)
+            self._defaultDetectorCenter = center_row, center_col
         else:
-            self._detCenterDict[exp_number] = (center_row, center_col)
+            self._detCenterDict[exp_number] = center_row, center_col
 
         return
 
@@ -1892,6 +1946,20 @@ class CWSCDReductionControl(object):
         self._detectorSize[1] = size_y
 
         return
+
+    def get_calibrated_det_sample_distance(self, exp_number):
+        """
+
+        :param exp_number:
+        :return:
+        """
+        # blabla TODO
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+
+        if exp_number not in self._detSampleDistanceDict:
+            return None
+
+        return self._detSampleDistanceDict[exp_number]
 
     def set_detector_sample_distance(self, exp_number, sample_det_distance):
         """

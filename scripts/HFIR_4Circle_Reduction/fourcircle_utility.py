@@ -814,6 +814,74 @@ def write_pre_process_record(file_name, record_dict):
     return
 
 
+def pre_processed_file_name(exp_number, scan, output_dir):
+    """
+
+    :param exp_number:
+    :param scan:
+    :param output_dir:
+    :return:
+    """
+    # TODO/NOW/ - check inputs
+
+    md_file_name = 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan)
+    if output_dir is not None:
+        md_file_name = os.path.join(output_dir, md_file_name)
+
+    return md_file_name
+
+
+"""
+NOTE
+1. a CSV file in appending mode
+2. file's name is standard and defined in fourcircile_utility
+3. csv file contains:
+    Scan, MD file path, ... balbla
+"""
+
+
+def pre_processed_record_file(exp_number, md_dir):
+    """
+    blabla
+    :param exp_number:
+    :param md_dir:
+    :return:
+    """
+    # check ...
+
+    record_file_name = os.path.join(md_dir, 'Exp{0}Record.txt'.format(exp_number))
+
+    return record_file_name
+
+
+def pre_processed_record_header():
+    """
+    blabla
+    :return:
+    """
+    return ['Scan', 'MD', 'DetSampleDistance', 'Center', 'WaveLength']
+
+
+def pre_processed_record_make(scan_number, file_name, distance, center_x, center_y, wave_length):
+    """
+    blabla
+    :param scan_number:
+    :param file_name:
+    :param distance:
+    :param center_x:
+    :param center_y:
+    :param wave_length:
+    :return:
+    """
+    record = {'Scan': scan_number,
+              'MD': file_name,
+              'DetSampleDistance': distance,
+              'Center': (center_x, center_y),
+              'WaveLength': wave_length}
+
+    return record
+
+
 def read_pre_process_record(file_name):
     """ Read a pre-processed scan record file
     :param file_name:

@@ -71,7 +71,7 @@ class AddPeaksThread(QThread):
 
             # merge peak
             status, err_msg = self._mainWindow.controller.merge_pts_in_scan(
-                self._expNumber, scan_number, [])
+                self._expNumber, scan_number, [], False, self._mainWindow.controller.pre_processed_dir)
 
             # continue to the next scan if there is something wrong
             if status is False:
@@ -162,9 +162,7 @@ class IntegratePeaksThread(QThread):
         self._scaleFactor = scale_factor
 
         # other about preprocessed options
-        self._forceMergeScans = False
         self._checkPreprocessedScans = True
-        self._preProcessedDir = None
 
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
@@ -199,12 +197,13 @@ class IntegratePeaksThread(QThread):
             if merged is False:
                 merged_ws_name = 'X'
                 try:
+                    pre_dir = self._mainWindow.controller.pre_processed_dir
                     status, ret_tup = \
                         self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                       scan_no=scan_number,
                                                                       pt_num_list=pt_number_list,
-                                                                      rewrite=self._forceMergeScans,
-                                                                      preprocessed_dir=self._preProcessedDir)
+                                                                      rewrite=False,
+                                                                      preprocessed_dir=pre_dir)
 
                     if status:
                         merged_ws_name = str(ret_tup[0])
@@ -349,42 +348,6 @@ class IntegratePeaksThread(QThread):
 
         return
 
-    def set_force_write(self, flag=True):
-        """
-        set whether to force to merge and create a new workspace
-        :param flag:
-        :return:
-        """
-        # check
-        assert isinstance(flag, bool), 'Flag to force merge to a workspace must be a bool but not a {0}.'.format(type(flag))
-
-        self._forceMergeScans = flag
-
-        return
-
-    def set_pre_process_options(self, option_to_use, pre_process_dir):
-        """
-        set the pre-process options
-        :param option_to_use:
-        :param pre_process_dir:
-        :return:
-        """
-        # check
-        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
-                                                ''.format(type(option_to_use))
-
-        self._checkPreprocessedScans = option_to_use
-
-        if self._checkPreprocessedScans:
-            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
-                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
-            if os.path.exists(pre_process_dir) is False:
-                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
-            self._preProcessedDir = pre_process_dir
-        # END-IF
-
-        return
-
 
 class MergePeaksThread(QThread):
     """A thread to integrate peaks
@@ -489,7 +452,6 @@ class MergePeaksThread(QThread):
                                                                  pt_number_list=pt_number_list,
                                                                  merged_ws_name=merged_ws_name,
                                                                  output=out_file_name)
-                    # TODO/ISSUE/NOW - Need to write to a file with calibration information
                 # END-IF-ELSE
 
             except RuntimeError as run_err:
@@ -507,7 +469,6 @@ class MergePeaksThread(QThread):
                 # merging error
                 self.mergeMsgSignal.emit(scan_number, error_message)
                 continue
-                # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             # END-IF
 
         return
