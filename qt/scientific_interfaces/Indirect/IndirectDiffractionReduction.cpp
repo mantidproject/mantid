@@ -61,8 +61,9 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(
               const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSelected(const QString &, const QString &,
-                                        const QString &)));
+          this,
+          SLOT(instrumentSelected(const QString &, const QString &,
+                                  const QString &)));
 
   // Update run button based on state of raw files field
   connect(m_uiForm.rfSampleFiles, SIGNAL(fileTextChanged(const QString &)),
@@ -720,7 +721,8 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories")).split(";")[0];
+                            "datasearch.directories"))
+                        .split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
