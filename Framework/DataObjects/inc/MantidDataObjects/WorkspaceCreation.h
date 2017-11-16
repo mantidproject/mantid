@@ -152,6 +152,7 @@ template <> struct IsIndexInfo<Indexing::IndexInfo> {
 template <class UseIndexInfo>
 void initializeFromParent(const API::MatrixWorkspace &parent,
                           API::MatrixWorkspace &workspace);
+}
 
 /** This is the create() method that all the other create() methods call.
  *  And it is also called directly.
