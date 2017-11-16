@@ -63,7 +63,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_multi_period_selection(self):
             pass
 
-
     def __init__(self, main_presenter):
         """
         Initialise the interface
