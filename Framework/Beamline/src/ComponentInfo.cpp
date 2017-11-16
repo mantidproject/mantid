@@ -269,6 +269,7 @@ void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
                                 const Eigen::Vector3d &newPosition) {
 
   auto componentIndex = index.first;
+  checkSpecialIndices(componentIndex);
   auto timeIndex = index.second;
   if (isDetector(componentIndex)) {
     return m_detectorInfo->setPosition(index, newPosition);
@@ -341,6 +342,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
 void ComponentInfo::setRotation(const std::pair<size_t, size_t> index,
                                 const Eigen::Quaterniond &newRotation) {
   const auto componentIndex = index.first;
+  checkSpecialIndices(componentIndex);
   const auto timeIndex = index.second;
   if (isDetector(componentIndex))
     return m_detectorInfo->setRotation(index, newRotation);
@@ -576,6 +578,8 @@ ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
  *time-independent
  * component index.
  *
+ * For scanning of banks prefer the overload of this method that
+ *
  * @param index : component to which to add the scan interval
  * component
  * @param interval : Time interval for scan point
@@ -652,27 +656,48 @@ this has no time dependence prior to this operation.
 void ComponentInfo::merge(const ComponentInfo &other) {
   if (!m_scanCounts)
     this->initScanCounts();
-  const auto toMerge = buildMergeIndices(other);
-  if (m_isSyncScan)
-    throw std::runtime_error(
-        "Sync scans not currently supported for ComponentInfo");
-  initIndices();
-  auto scanCounts(m_scanCounts);
-  for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
-       ++linearIndex) {
-    if (!toMerge[linearIndex])
-      continue;
-    auto newIndex = getIndex(other.m_indices, linearIndex);
-    const size_t compIndex = newIndex.first;
-    newIndex.second += scanCount(compIndex);
-    scanCounts.access()[compIndex]++;
-    m_indexMap.access()[compIndex].push_back((*m_indices).size());
-    m_indices.access().push_back(newIndex);
-    m_positions.access().push_back((*other.m_positions)[linearIndex]);
-    m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
-    m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
+  if (m_isSyncScan) {
+    const auto &toMerge = buildMergeIndicesSync(other);
+    for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals->size();
+         ++timeIndex) {
+      if (!toMerge[timeIndex])
+        continue;
+      auto &scanIntervals = m_scanIntervals.access();
+      auto &positions = m_positions.access();
+      auto &rotations = m_rotations.access();
+      m_scanCounts.access()[0]++;
+      scanIntervals.push_back((*other.m_scanIntervals)[timeIndex]);
+      const size_t indexStart = other.linearIndex({0, timeIndex});
+      size_t indexEnd = indexStart + nonDetectorSize();
+      positions.insert(positions.end(), other.m_positions->begin() + indexStart,
+                       other.m_positions->begin() + indexEnd);
+      rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
+                       other.m_rotations->begin() + indexEnd);
+    }
+
+  } else {
+    const auto toMerge = buildMergeIndices(other);
+    if (m_isSyncScan)
+      throw std::runtime_error(
+          "Sync scans not currently supported for ComponentInfo");
+    initIndices();
+    auto scanCounts(m_scanCounts);
+    for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
+         ++linearIndex) {
+      if (!toMerge[linearIndex])
+        continue;
+      auto newIndex = getIndex(other.m_indices, linearIndex);
+      const size_t compIndex = newIndex.first;
+      newIndex.second += scanCount(compIndex);
+      scanCounts.access()[compIndex]++;
+      m_indexMap.access()[compIndex].push_back((*m_indices).size());
+      m_indices.access().push_back(newIndex);
+      m_positions.access().push_back((*other.m_positions)[linearIndex]);
+      m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
+      m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
+    }
+    m_scanCounts = std::move(scanCounts);
   }
-  m_scanCounts = std::move(scanCounts);
   m_detectorInfo->merge(*other.m_detectorInfo);
 }
 
@@ -702,6 +727,31 @@ ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
       } else if ((interval1.first < interval2.second) &&
                  (interval1.second > interval2.first)) {
         failMerge("scan intervals overlap but not identical");
+      }
+    }
+  }
+  return merge;
+}
+
+std::vector<bool>
+ComponentInfo::buildMergeIndicesSync(const ComponentInfo &other) const {
+  checkSizes(other);
+  std::vector<bool> merge(other.m_scanIntervals->size(), true);
+
+  for (size_t t1 = 0; t1 < other.m_scanIntervals->size(); ++t1) {
+    for (size_t t2 = 0; t2 < m_scanIntervals->size(); ++t2) {
+      const auto &interval1 = (*other.m_scanIntervals)[t1];
+      const auto &interval2 = (*m_scanIntervals)[t2];
+      if (interval1 == interval2) {
+        for (size_t compIndex = 0; compIndex < nonDetectorSize(); ++compIndex) {
+          const size_t linearIndex1 = other.linearIndex({compIndex, t1});
+          const size_t linearIndex2 = linearIndex({compIndex, t2});
+          checkIdenticalIntervals(other, linearIndex1, linearIndex2);
+        }
+        merge[t1] = false;
+      } else if ((interval1.first < interval2.second) &&
+                 (interval1.second > interval2.first)) {
+        failMerge("sync scan intervals overlap but not identical");
       }
     }
   }

@@ -73,6 +73,7 @@ private:
   void initScanIntervals();
   void checkNoTimeDependence() const;
   std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
+  std::vector<bool> buildMergeIndicesSync(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
   void checkIdenticalIntervals(const ComponentInfo &other,
