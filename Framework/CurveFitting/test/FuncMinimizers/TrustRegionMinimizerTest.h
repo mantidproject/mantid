@@ -1,10 +1,10 @@
-#ifndef CURVEFITTING_MORESORNSENTTEST_H_
-#define CURVEFITTING_MORESORNSENTTEST_H_
+#ifndef CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
+#define CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -20,12 +20,14 @@ using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
-class MoreSorensenTest : public CxxTest::TestSuite {
+class TrustRegionMinimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MoreSorensenTest *createSuite() { return new MoreSorensenTest(); }
-  static void destroySuite(MoreSorensenTest *suite) { delete suite; }
+  static TrustRegionMinimizerTest *createSuite() {
+    return new TrustRegionMinimizerTest();
+  }
+  static void destroySuite(TrustRegionMinimizerTest *suite) { delete suite; }
 
   void test_Linear() {
     API::FunctionDomain1D_sptr domain(
@@ -51,7 +53,7 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
@@ -87,7 +89,7 @@ public:
         boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fun, domain, values);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
     TS_ASSERT_DELTA(costFun->val(), 0.0, 0.0001);
@@ -127,15 +129,15 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
-    TS_ASSERT(s.minimize());
+    TS_ASSERT(s.minimize()); //
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1., 0.000001);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.90, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("h"), 2.67, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("s"), 0.27, 0.01);
-    TS_ASSERT_EQUALS(s.getError(), "success");
+    TS_ASSERT_EQUALS(s.getError(), "success"); // Failed to converge
   }
 
   void test_Gaussian_tied() {
@@ -167,57 +169,15 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 3);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
-    TS_ASSERT(s.minimize());
+    TS_ASSERT(s.minimize()); //
     TS_ASSERT_DELTA(costFun->val(), 0.2, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1., 0.000001);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.90, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("h"), 2.67, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("s"), 0.27, 0.01);
-    TS_ASSERT_EQUALS(s.getError(), "success");
-  }
-
-  void xtest_Gaussian_tied_with_formula() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 10.0, 20));
-    API::FunctionValues mockData(*domain);
-    UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
-    dataMaker.setParameter("a", 1.1);
-    dataMaker.setParameter("b", 2.2);
-    dataMaker.setParameter("h", 3.3);
-    dataMaker.setParameter("s", 0.2);
-    dataMaker.function(*domain, mockData);
-
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
-    values->setFitDataFromCalculated(mockData);
-    values->setFitWeights(1.0);
-
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
-    fun->setAttributeValue("Formula", "a*x+b+h*exp(-s*x^2)");
-    fun->setParameter("a", 1.);
-    fun->setParameter("b", 2.);
-    fun->setParameter("h", 3.);
-    fun->setParameter("s", 0.1);
-    fun->tie("b", "2*a+0.1");
-
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fun, domain, values);
-    TS_ASSERT_EQUALS(costFun->nParams(), 3);
-
-    MoreSorensenMinimizer s;
-    s.initialize(costFun);
-    TS_ASSERT(s.minimize());
-    TS_ASSERT_DELTA(costFun->val(), 0.002, 0.01);
-
-    double a = fun->getParameter("a");
-    TS_ASSERT_DELTA(a, 1.0895, 0.01);
-    TS_ASSERT_DELTA(fun->getParameter("b"), 2 * a + 0.1, 0.0001);
-    TS_ASSERT_DELTA(fun->getParameter("h"), 3.23, 0.01);
-    TS_ASSERT_DELTA(fun->getParameter("s"), 0.207, 0.001);
-    TS_ASSERT_EQUALS(s.getError(), "success");
+    TS_ASSERT_EQUALS(s.getError(), "success"); // Failed to converge
   }
 
   void xtest_Linear_constrained() {
@@ -247,16 +207,16 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
-    TS_ASSERT_DELTA(fun->getParameter("a"), 0.5, 0.1);
-    TS_ASSERT_DELTA(fun->getParameter("b"), 5.2, 0.2);
+    TS_ASSERT_DELTA(fun->getParameter("a"), 0.5, 0.1); // got 1.1
+    TS_ASSERT_DELTA(fun->getParameter("b"), 5.2, 0.2); // got 2.2
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  void xtest_Linear_constrained1() {
+  void test_Linear_constrained1() {
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
@@ -285,45 +245,15 @@ public:
     costFun->setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun->nParams(), 2);
 
-    MoreSorensenMinimizer s;
+    TrustRegionMinimizer s;
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
-
-    // std::cerr << "a=" << fun->getParameter("a") << '\n';
-    // std::cerr << "b=" << fun->getParameter("b") << '\n';
 
     TS_ASSERT_DELTA(costFun->val(), 0.00, 0.0001);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
-
-  void xtest_cannot_reach_tolerance() {
-    API::FunctionDomain1D_sptr domain(
-        new API::FunctionDomain1DVector(0.0, 1.0, 10));
-    API::FunctionValues mockData(*domain);
-    UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "a*x");
-    dataMaker.setParameter("a", 1.0);
-    dataMaker.function(*domain, mockData);
-
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
-    values->setFitDataFromCalculated(mockData);
-    values->setFitWeights(1.0);
-
-    boost::shared_ptr<UserFunction> fun = boost::make_shared<UserFunction>();
-    fun->setAttributeValue("Formula", "a+b+0*x");
-
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fun, domain, values);
-
-    MoreSorensenMinimizer s;
-    s.initialize(costFun);
-    TS_ASSERT(!s.minimize());
-
-    TS_ASSERT_EQUALS(s.getError(), "cannot reach the specified tolerance in F");
-  }
 };
 
-#endif /*CURVEFITTING_MORESORNSENTTEST_H_*/
+#endif /*CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_*/
