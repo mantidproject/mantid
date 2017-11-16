@@ -986,7 +986,8 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
   }
 
-  void test_merge_root_with_offset_async() {
+  template <typename SetScanIntervalFunctor>
+  void do_test_merge_root_with_offset(SetScanIntervalFunctor functor) {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
@@ -1004,8 +1005,8 @@ public:
     b.setPosition(b.root(), pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(a.root(), interval1);
-    b.setScanInterval(b.root(), interval2);
+    functor(a, a.root(), interval1);
+    functor(b, b.root(), interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1035,7 +1036,8 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 1}), rootOffsetB + detPosB);
   }
 
-  void test_merge_root_with_rotation_async() {
+  template <typename SetScanIntervalFunction>
+  void do_test_merge_root_with_rotation(SetScanIntervalFunction functor) {
     auto detPos = Eigen::Vector3d{1, 0, 0};
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
                            std::vector<Eigen::Quaterniond>(1));
@@ -1052,8 +1054,8 @@ public:
     b.setRotation(b.root(), rot2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(a.root(), interval1);
-    b.setScanInterval(b.root(), interval2);
+    functor(a, a.root(), interval1);
+    functor(b, b.root(), interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1085,7 +1087,8 @@ public:
         mergeDetectorInfo.position({0, 1}).isApprox(Eigen::Vector3d{0, 0, 1}));
   }
 
-  void test_merge_root_multiple_async() {
+  template <typename SetScanIntervalFunctor>
+  void do_test_merge_root_multiple(SetScanIntervalFunctor functor) {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
@@ -1104,9 +1107,9 @@ public:
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
-    a.setScanInterval(a.root(), interval1);
-    b.setScanInterval(b.root(), interval2);
-    c.setScanInterval(c.root(), interval3);
+    functor(a, a.root(), interval1);
+    functor(b, b.root(), interval2);
+    functor(c, c.root(), interval3);
     b.merge(c); // Execute the merge
     a.merge(b); // Merge again
     TS_ASSERT(a.isScanning());
@@ -1136,53 +1139,52 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 2}), interval3);
   }
 
+  void test_merge_root_with_rotation_sync() {
+    auto setScanIntervalSync =
+        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
+          info.setScanInterval(interval);
+        };
+    do_test_merge_root_with_rotation(setScanIntervalSync);
+  }
+
+  void test_merge_root_with_rotation_async() {
+    auto setScanIntervalAsync = [](ComponentInfo &info, size_t index,
+                                   std::pair<int64_t, int64_t> interval) {
+      info.setScanInterval(index, interval);
+    };
+    do_test_merge_root_with_rotation(setScanIntervalAsync);
+  }
+
   void test_merge_root_with_offset_sync() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos1);
+    auto setScanIntervalSync =
+        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
+          info.setScanInterval(interval);
+        };
+    do_test_merge_root_with_offset(setScanIntervalSync);
+  }
 
-    ComponentInfo &b = std::get<0>(infos2);
-    const auto detPosA = a.position(0);
-    const auto detPosB = b.position(0);
-    const auto rootPosA = a.position(a.root());
-    const auto rootPosB = b.position(b.root());
-    Eigen::Vector3d pos1(1, 0, 0);
-    Eigen::Vector3d pos2(2, 0, 0);
-    a.setPosition(a.root(), pos1);
-    b.setPosition(b.root(), pos2);
-    std::pair<int64_t, int64_t> interval1(0, 1);
-    std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(interval1);
-    b.setScanInterval(interval2);
-    a.merge(b); // Execute the merge
-    TS_ASSERT(a.isScanning());
-    TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
-    TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
-    // Note that the order is not guaranteed, currently these are just in the
-    // order in which the are merged.
-    auto index1 =
-        std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
-    auto index2 =
-        std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
-    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
-    TS_ASSERT_EQUALS(a.position(index1), pos1);
-    TS_ASSERT_EQUALS(a.position(index2), pos2);
+  void test_merge_root_with_offset_async() {
+    auto setScanIntervalAsync = [](ComponentInfo &info, size_t index,
+                                   std::pair<int64_t, int64_t> interval) {
+      info.setScanInterval(index, interval);
+    };
+    do_test_merge_root_with_offset(setScanIntervalAsync);
+  }
 
-    // Test Detector info is synched internally
-    const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
-    // Check that the child detectors have been positioned according to the
-    // correct offsets
-    const auto rootOffsetA = pos1 - rootPosA;
-    const auto rootOffsetB = pos2 - rootPosB;
-    TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 0}), rootOffsetA + detPosA);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 1}), rootOffsetB + detPosB);
+  void test_merge_root_multiple_sync() {
+    auto setIntervalSync =
+        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
+          info.setScanInterval(interval);
+        };
+    do_test_merge_root_multiple(setIntervalSync);
+  }
+
+  void test_merge_root_multiple_async() {
+    auto setIntervalAsync = [](ComponentInfo &info, size_t index,
+                               std::pair<int64_t, int64_t> interval) {
+      info.setScanInterval(index, interval);
+    };
+    do_test_merge_root_multiple(setIntervalAsync);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
