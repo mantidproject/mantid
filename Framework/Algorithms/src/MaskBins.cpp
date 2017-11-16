@@ -64,6 +64,9 @@ void MaskBins::exec() {
   // Copy indices from legacy property
   std::vector<int> spectraList = this->getProperty("SpectraList");
   if (!spectraList.empty()) {
+    if (!isDefault("InputWorkspaceIndexSet"))
+      throw std::runtime_error("Cannot provide both InputWorkspaceIndexSet and "
+                               "SpectraList at the same time.");
     setProperty("InputWorkspaceIndexSet", spectraList);
     g_log.warning("The 'SpectraList' property is deprecated. Use "
                   "'InputWorkspaceIndexSet' instead.");
