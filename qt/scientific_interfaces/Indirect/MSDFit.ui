@@ -57,9 +57,6 @@
    <item>
     <layout class="QHBoxLayout" name="loMSDFit">
      <item>
-      <layout class="QVBoxLayout" name="properties"/>
-     </item>
-     <item>
       <layout class="QVBoxLayout" name="loMSDPlot">
        <item>
         <layout class="QHBoxLayout" name="loPlotProperties">
