@@ -367,7 +367,7 @@ size_t ObjCompAssembly::registerContents(
  *  The shape can be either a box or a cylinder.
  *  @return The shape of the outline: "cylinder", "box", ...
  */
-boost::shared_ptr<CSGObject> ObjCompAssembly::createOutline() {
+boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   if (group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
   }
@@ -382,7 +382,7 @@ boost::shared_ptr<CSGObject> ObjCompAssembly::createOutline() {
   int otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
-  boost::shared_ptr<const CSGObject> obj = group.front()->shape();
+  boost::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Found ObjComponent without shape");
@@ -600,14 +600,14 @@ boost::shared_ptr<CSGObject> ObjCompAssembly::createOutline() {
     setOutline(s);
     return s;
   }
-  return boost::shared_ptr<CSGObject>();
+  return boost::shared_ptr<IObject>();
 }
 
 /**
  * Sets the outline shape for this assembly
  * @param obj :: The outline shape created previously fith createOutline()
  */
-void ObjCompAssembly::setOutline(boost::shared_ptr<const CSGObject> obj) {
+void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
   m_shape = obj;
 }
 

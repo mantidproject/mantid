@@ -55,7 +55,7 @@ ComponentInfo::ComponentInfo(
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         componentIdToIndexMap,
-    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::CSGObject>>>
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
         shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
@@ -166,7 +166,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-const CSGObject &ComponentInfo::shape(const size_t componentIndex) const {
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
   return *(*m_shapes)[componentIndex];
 }
 

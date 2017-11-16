@@ -7,15 +7,15 @@
 #include <Poco/Exception.h>
 #include <Poco/DOM/Element.h>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
 
 namespace Mantid {
 namespace Geometry {
@@ -57,7 +57,7 @@ void vtkGeometryCacheReader::Init() {
 /**
  * Set the geometry for the object
  */
-void vtkGeometryCacheReader::readCacheForObject(CSGObject *obj) {
+void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
   // Get the element corresponding to the name of the object
   std::stringstream objName;
   objName << obj->getName();

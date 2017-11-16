@@ -58,7 +58,7 @@ struct MANTID_GEOMETRY_DLL Link {
   * hit. (Default=NULL)
   */
   inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
-              const double totalDistance, const CSGObject &obj,
+              const double totalDistance, const IObject &obj,
               const ComponentID compID = nullptr)
       : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
         distInsideObject(entryPoint.distance(exitPoint)), object(&obj),
@@ -78,7 +78,7 @@ struct MANTID_GEOMETRY_DLL Link {
   Kernel::V3D exitPoint;   ///< Exit point
   double distFromStart;    ///< Total distance from track beginning
   double distInsideObject; ///< Total distance covered inside object
-  const CSGObject *object;    ///< The object that was intersected
+  const IObject *object;    ///< The object that was intersected
   ComponentID componentID; ///< ComponentID of the intersected component
                            //@}
 };
@@ -156,7 +156,7 @@ public:
                 const CSGObject &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
-              const double distanceAlongTrack, const CSGObject &obj,
+              const double distanceAlongTrack, const IObject &obj,
               const ComponentID compID = nullptr);
   /// Remove touching Links that have identical components
   void removeCojoins();

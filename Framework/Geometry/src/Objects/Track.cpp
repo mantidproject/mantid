@@ -128,7 +128,7 @@ void Track::addPoint(const int directionFlag, const V3D &endPoint,
 * @retval Index of link within the track
 */
 int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
-                   const double distanceAlongTrack, const CSGObject &obj,
+                   const double distanceAlongTrack, const IObject &obj,
                    const ComponentID compID) {
   // Process First Point
   Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);

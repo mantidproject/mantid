@@ -80,21 +80,21 @@ public:
   void setID(const std::string &id) { m_id = id; }
   inline const std::string &id() const { return m_id; }
 
-  void setName(const int nx) { ObjNum = nx; } ///< Set Name
-  int getName() const { return ObjNum; }      ///< Get Name
+  void setName(const int nx) override { ObjNum = nx; }  ///< Set Name
+  int getName() const override { return ObjNum; }      ///< Get Name
 
-  void setMaterial(const Kernel::Material &material);
-  const Kernel::Material material() const;
+  void setMaterial(const Kernel::Material &material) override;
+  const Kernel::Material material() const override;
 
   /// Return whether this object has a valid shape
-  bool hasValidShape() const;
-  int setObject(const int ON, const std::string &Ln);
+  bool hasValidShape() const override;
+  int setObject(const int ON, const std::string &Ln) override;
   int procString(const std::string &Line);
   int complementaryObject(const int Cnum,
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
+  int populate(const std::map<int, boost::shared_ptr<Surface>> &) override;
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);
@@ -106,10 +106,10 @@ public:
   virtual void print() const;
   void printTree() const;
 
-  bool isValid(const Kernel::V3D &) const; ///< Check if a point is valid
+  bool isValid(const Kernel::V3D &) const override; ///< Check if a point is valid
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
-  bool isOnSide(const Kernel::V3D &) const;
+  bool isOnSide(const Kernel::V3D &) const override;
   int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
@@ -125,13 +125,13 @@ public:
   void write(std::ostream &) const; ///< MCNPX output
 
   // INTERSECTION
-  int interceptSurface(Geometry::Track &) const;
+  int interceptSurface(Geometry::Track &) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
-  double solidAngle(const Kernel::V3D &observer) const;
+  double solidAngle(const Kernel::V3D &observer) const override;
   // Solid angle with a scaling of the object
   double solidAngle(const Kernel::V3D &observer,
-                    const Kernel::V3D &scaleFactor) const;
+                    const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
   double triangleSolidAngle(const Kernel::V3D &observer) const;
   // Solid angle via triangulation with scaling factor for object size
@@ -149,7 +149,7 @@ public:
                       double &ymin, double &zmin) const;
 
   /// Return cached value of axis-aligned bounding box
-  const BoundingBox &getBoundingBox() const;
+  const BoundingBox &getBoundingBox() const override;
   /// Define axis-aligned bounding box
   void defineBoundingBox(const double &xMax, const double &yMax,
                          const double &zMax, const double &xMin,
@@ -157,7 +157,7 @@ public:
   /// Set a null bounding box for this object
   void setNullBoundingBox();
   // find internal point to object
-  int getPointInObject(Kernel::V3D &point) const;
+  int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
@@ -167,20 +167,20 @@ public:
                                     const size_t) const;
 
   // Rendering member functions
-  void draw() const;
+  void draw() const override;
   // Initialize Drawing
-  void initDraw() const;
+  void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler();
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() override;
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) override;
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) override;
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const;
+                     double &myradius, double &myheight) const override;
   /// Getter for the shape xml
   std::string getShapeXML() const;
 

@@ -117,7 +117,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    boost::shared_ptr<CSGObject> s =
+    boost::shared_ptr<IObject> s =
         Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
@@ -132,7 +132,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    boost::shared_ptr<CSGObject> shape = bank.createOutline();
+    boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
     int otype;

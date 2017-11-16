@@ -93,8 +93,8 @@ public:
   Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
-  boost::shared_ptr<CSGObject> createOutline();
-  void setOutline(boost::shared_ptr<const CSGObject> obj);
+  boost::shared_ptr<IObject> createOutline();
+  void setOutline(boost::shared_ptr<const IObject> obj);
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */

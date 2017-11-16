@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_COMPONENTINFO_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -14,9 +15,9 @@ class V3D;
 }
 
 namespace Geometry {
-class BoundingBox;
+//class BoundingBox;
 class IComponent;
-class CSGObject;
+class IObject;
 }
 
 namespace Beamline {
@@ -61,7 +62,7 @@ private:
       m_compIDToIndex;
 
   /// Shapes for each component
-  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::CSGObject>>>
+  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
       m_shapes;
 
   BoundingBox componentBoundingBox(const size_t index,
@@ -74,7 +75,7 @@ public:
           componentIds,
       boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
                                                  size_t>> componentIdToIndexMap,
-      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::CSGObject>>>
+      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
           shapes);
   ComponentInfo(const ComponentInfo &other);
   ~ComponentInfo();
@@ -108,7 +109,7 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
   bool hasShape(const size_t componentIndex) const;
-  const Geometry::CSGObject &shape(const size_t componentIndex) const;
+  const Geometry::IObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,

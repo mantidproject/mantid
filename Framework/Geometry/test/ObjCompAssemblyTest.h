@@ -357,7 +357,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    boost::shared_ptr<CSGObject> shape = bank.createOutline();
+    boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
     int otype;
@@ -394,7 +394,7 @@ public:
     bank.add(det2);
     bank.add(det3);
 
-    TS_ASSERT_THROWS(boost::shared_ptr<CSGObject> shape = bank.createOutline(),
+    TS_ASSERT_THROWS(boost::shared_ptr<IObject> shape = bank.createOutline(),
                      std::runtime_error);
   }
 };

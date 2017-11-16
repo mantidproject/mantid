@@ -572,7 +572,7 @@ void StructuredDetector::initDraw() const {
 }
 
 /// Returns the shape of the Object
-const boost::shared_ptr<const CSGObject> StructuredDetector::shape() const {
+const boost::shared_ptr<const IObject> StructuredDetector::shape() const {
   // --- Create a hexahedral shape for your pixels ----
   auto w = this->xPixels() + 1;
   auto xlb = m_xvalues[0];
