@@ -14,6 +14,7 @@ Reflectometry
 
 Small Angle Scattering
 ----------------------
+- Added the option to hide the period selection columns in the SANS GUI V2
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
 - Fixed a bug in the old GUI where loading files on UNIX systems would not work unless the file name was in uppercase letters.
 
