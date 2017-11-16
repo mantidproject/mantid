@@ -59,6 +59,25 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
   return inventory;
 }
 
+/**
+ * Return algorithm descriptors as a python list of lists.
+ * @param self :: An instance of AlgorithmFactory.
+ * @param includeHidden :: If true hidden algorithms are included.
+ */
+list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
+  auto descriptors = self.getDescriptors(includeHidden);
+  list pyDescriptors;
+  for(auto &descr: descriptors) {
+    list descrList;
+    descrList.append(descr.name);
+    descrList.append(descr.version);
+    descrList.append(descr.category);
+    descrList.append(descr.alias);
+    pyDescriptors.append(descrList);
+  }
+  return pyDescriptors;
+}
+
 //------------------------------------------------------------------------------
 // Python algorithm subscription
 //------------------------------------------------------------------------------
@@ -142,6 +161,8 @@ void export_AlgorithmFactory() {
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from "
            "PythonAlgorithm into the factory")
+      .def("getDescriptors", &getDescriptors, (arg("self"), arg("include_hidden")),
+           "Return a list of descriptors of registered algorithms. Each descriptor is a list: [name, version, category, alias].")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),
