@@ -362,6 +362,7 @@ class BASISReduction(PythonAlgorithm):
                 sapi.DeleteWorkspace('splitted_unfiltered')
                 sapi.DeleteWorkspace('splitter')
                 sapi.DeleteWorkspace('TOFCorrectWS')
+
     def _getRuns(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
