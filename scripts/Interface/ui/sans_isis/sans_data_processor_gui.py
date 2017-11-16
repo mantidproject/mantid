@@ -59,6 +59,11 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_processing_finished(self):
             pass
 
+        @abstractmethod
+        def on_multi_period_selection(self):
+            pass
+
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -487,6 +492,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Check if multi-period should be enabled
         show_periods = self.multi_period_check_box.isChecked()
         self.create_data_table(show_periods=show_periods)
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
