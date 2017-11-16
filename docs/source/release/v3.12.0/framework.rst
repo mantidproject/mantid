@@ -27,6 +27,7 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
+- :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 
 Core Functionality
 ------------------
