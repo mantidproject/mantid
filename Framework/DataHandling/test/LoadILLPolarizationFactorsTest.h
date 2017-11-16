@@ -12,6 +12,8 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 
+#include <array>
+
 using Mantid::DataHandling::LoadILLPolarizationFactors;
 
 class LoadILLPolarizationFactorsTest : public CxxTest::TestSuite {
