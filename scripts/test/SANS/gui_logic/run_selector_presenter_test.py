@@ -1,7 +1,9 @@
 import unittest
 import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
-from sans.gui_logic.models.add_runs_model import (AddRunsModel, SummableRunModel, BinningType)
+from sans.gui_logic.models.run_selection import RunSelection
+from sans.gui_logic.models.run_finder import RunFinder
+from sans.gui_logic.models.run_file import RunFile
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
@@ -10,11 +12,12 @@ if sys.version_info.major == 3:
 else:
      import mock
 
-class AddRunsPresenterTest(unittest.TestCase):
+class RunSelectorPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = self._make_mock_view()
-        self.model = self._make_mock_model()
-        self.presenter = self._make_presenter(self.model, self.view)
+        self.run_selection = self._make_mock_selection()
+        self.run_finder = self._make_mock_finder()
+        self.presenter = self._make_presenter(self.run_selection, self.run_finder, self.view)
 
     def _make_mock_view(self):
         mock_view = mock.create_autospec(RunSelectorWidget, spec_set=True)
@@ -25,22 +28,25 @@ class AddRunsPresenterTest(unittest.TestCase):
         mock_view.removeAllRuns = FakeSignal()
         return mock_view
 
-    def _make_mock_model(self):
-        return mock.create_autospec(AddRunsModel)
+    def _make_mock_selection(self):
+        return mock.create_autospec(RunSelection)
 
-    def _make_presenter(self, model, view):
-        return RunSelectorPresenter(model, view, None)
+    def _make_mock_finder(self):
+        return mock.create_autospec(RunFinder)
+
+    def _make_presenter(self, run_selection, run_finder, view):
+        return RunSelectorPresenter(run_selection, run_finder, view, None)
 
     def test_searches_for_runs_when_add_run_pressed(self):
         run_query = '1'
         no_runs = ('', [])
         self.view.run_list.return_value = run_query
-        self.model.find_all_from_query.return_value = no_runs
+        self.run_finder.find_all_from_query.return_value = no_runs
         self.view.addRuns.emit()
-        self.model.find_all_from_query.assert_called_with(run_query)
+        self.run_finder.find_all_from_query.assert_called_with(run_query)
 
     def _make_fake_run_model(self, run_name):
-        return SummableRunModel('/home/{}'.format(run_name))
+        return RunFile('/home/{}'.format(run_name))
 
     def test_adds_search_results_to_model_when_add_run_pressed(self):
         run_name = '1'
@@ -48,16 +54,16 @@ class AddRunsPresenterTest(unittest.TestCase):
         found_run = self._make_fake_run_model(run_name)
 
         self.view.run_list.return_value = run_query
-        self.model.find_all_from_query.return_value = ('', [found_run])
+        self.run_finder.find_all_from_query.return_value = ('', [found_run])
 
         self.view.addRuns.emit()
-        self.model.add_run.assert_called_with(found_run)
+        self.run_selection.add_run.assert_called_with(found_run)
 
     def test_handles_error_when_invalid_query(self):
         run_query = '1-0'
         error_message = 'Invalid Query'
         self.view.run_list.return_value = run_query
-        self.model.find_all_from_query.return_value = (error_message, [])
+        self.run_finder.find_all_from_query.return_value = (error_message, [])
 
         self.view.addRuns.emit()
         self.view.invalid_run_query.assert_called_with(error_message)
@@ -65,7 +71,7 @@ class AddRunsPresenterTest(unittest.TestCase):
     def test_handles_error_when_run_not_found(self):
         run_query = '1-10'
         self.view.run_list.return_value = run_query
-        self.model.find_all_from_query.return_value = ('', [])
+        self.run_finder.find_all_from_query.return_value = ('', [])
 
         self.view.addRuns.emit()
         self.view.run_not_found.assert_called()
@@ -76,35 +82,35 @@ class AddRunsPresenterTest(unittest.TestCase):
         found_runs = [self._make_fake_run_model(run_name) for run_name in run_names]
 
         self.view.run_list.return_value = run_query
-        self.model.find_all_from_query.return_value = ('', found_runs)
+        self.run_finder.find_all_from_query.return_value = ('', found_runs)
 
         self.view.addRuns.emit()
         expected = [mock.call.add_run(run) for run in found_runs]
-        self.model.assert_has_calls(expected)
+        self.run_selection.assert_has_calls(expected)
 
     def test_remove_runs_removes_run_from_model(self):
         run_index = 0
         self.view.selected_runs.return_value = [run_index]
         self.view.removeRuns.emit()
-        self.model.remove_run.assert_called_with(run_index)
+        self.run_selection.remove_run.assert_called_with(run_index)
 
     def test_removes_runs_from_model_when_multi_selected(self):
         run_indices = [0, 2]
         self.view.selected_runs.return_value = run_indices
         self.view.removeRuns.emit()
         expected = [mock.call.remove_run(index) for index in run_indices]
-        self.model.assert_has_calls(expected, any_order=True)
+        self.run_selection.assert_has_calls(expected, any_order=True)
 
     def test_removes_runs_in_correct_order_when_multi_selected(self):
         run_indices = [2, 1, 5, 0]
         self.view.selected_runs.return_value = run_indices
         self.view.removeRuns.emit()
         expected = [mock.call.remove_run(index) for index in [5, 2, 1, 0]]
-        self.model.assert_has_calls(expected, any_order=False)
+        self.run_selection.assert_has_calls(expected, any_order=False)
 
     def test_clears_all_runs_from_model_when_clear_pressed(self):
         self.view.removeAllRuns.emit()
-        self.model.clear_all_runs.assert_called()
+        self.run_selection.clear_all_runs.assert_called()
 
     def test_manage_directories_launches_dialog(self):
         self.view.manageDirectories.emit()

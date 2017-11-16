@@ -2,8 +2,9 @@ from mantidqtpython import MantidQt
 from mantid import ConfigService
 
 class RunSelectorPresenter(object):
-    def __init__(self, model, view, parent_view):
-        self.model = model
+    def __init__(self, run_selection, run_finder, view, parent_view):
+        self.run_selection = run_selection
+        self._run_finder = run_finder
         self.view = view
         self.parent_view = parent_view
         self.connect_to_view(view)
@@ -16,22 +17,22 @@ class RunSelectorPresenter(object):
         view.browse.connect(self.handle_browse)
 
     def handle_remove_all_items(self):
-        self.model.clear_all_runs()
+        self.run_selection.clear_all_runs()
         self.refresh()
 
     def handle_remove_items(self):
         selected = self.view.selected_runs()
         selected.sort(reverse=True)
         for index in selected:
-            self.model.remove_run(index)
+            self.run_selection.remove_run(index)
         self.refresh()
 
     def parse_runs_from_input(self, input):
-        return self.model.find_all_from_query(input.replace(':', '-'))
+        return self._run_finder.find_all_from_query(input.replace(':', '-'))
 
     def add_runs(self, runs):
         for run in runs:
-            self.model.add_run(run)
+            self.run_selection.add_run(run)
         self.refresh()
 
     def handle_add_items(self):
@@ -46,7 +47,7 @@ class RunSelectorPresenter(object):
                 self.view.run_not_found()
 
     def refresh(self):
-        self.view.draw_runs(self.model)
+        self.view.draw_runs(self.run_selection)
 
     def handle_manage_directories(self):
         self.view.show_directories_manager()
@@ -55,5 +56,5 @@ class RunSelectorPresenter(object):
         search_directories = ConfigService.Instance().getDataSearchDirs()
         files = self.view.show_file_picker([".nxs"], search_directories)
         # TODO: Get file extensions from a reputable source.
-        self.add_runs(self.model.create_run_from_path(file) for file in files)
+        self.add_runs(self.run_selection.create_run_from_path(file) for file in files)
         self.refresh()

@@ -7,7 +7,7 @@ from six import with_metaclass
 
 import ui_run_selector_widget
 from PyQt4.QtCore import pyqtSignal
-from sans.gui_logic.models.add_runs_model import BinningType
+from sans.gui_logic.models.binning_type import BinningType
 from mantidqtpython import MantidQt
 
 class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidget):
