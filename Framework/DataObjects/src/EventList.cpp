@@ -1149,7 +1149,7 @@ void EventList::sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start,
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
 
-  std::function<bool(TofEvent &, TofEvent &)> comparator =
+  std::function<bool(const TofEvent &, const TofEvent &)> comparator =
       comparePulseTimeTOFDelta(start, seconds);
 
   switch (eventType) {
