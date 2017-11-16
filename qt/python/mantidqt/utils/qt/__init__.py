@@ -22,18 +22,7 @@ from __future__ import absolute_import
 import os
 
 # 3rd-party modules
-from qtpy.QtWidgets import QApplication
 from qtpy.uic import loadUi
-
-
-def qapplication():
-    """Either return a reference to an existing application instance
-    or create a new one
-    """
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication(['Mantid Workbench'])
-    return app
 
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):

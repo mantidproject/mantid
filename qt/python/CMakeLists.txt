@@ -5,6 +5,18 @@
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
 
+###########################################################################
+# mantidqt
+###########################################################################
+# Configure utils.qt.plugins file for build. It is placed in the source
+# directory and added to the .gitignore for simplicity.
+if ( WIN32 )
+  set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
+endif ()
+configure_file ( mantidqt/utils/qt/plugins.py.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
+)
+
 # Create egg link to binary output directory for mantidqt
 add_python_package ( mantidqt )
 
@@ -19,3 +31,4 @@ pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # No package installation yet...
+# Configure utils.qt.plugins file for install
