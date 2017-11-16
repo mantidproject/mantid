@@ -454,12 +454,18 @@ Supported Algorithms
 ================= =============== ========
 Algorithm         Supported modes Comments
 ================= =============== ========
+CompressEvents    all
 CreateWorkspace   all
+FilterBadPulses   all
+FilterByLogValue  all
 LoadEventNexus    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadInstrument    all
 LoadNexusLogs     all
 LoadParameterFile all             segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
+MaskBins          all
 Rebin             all             min and max bin boundaries must be given explicitly
+RemovePromptPulse all
+SortEvents        all
 ================= =============== ========
 
 .. rubric:: Footnotes

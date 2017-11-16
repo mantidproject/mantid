@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "FakeAlgorithms.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -171,10 +172,16 @@ public:
   static const std::string FAIL_MSG;
 
   void init() override {
-    declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace");
+    declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", "");
     declareProperty(
         Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
             "InputWorkspace2", "", Mantid::Kernel::Direction::Input));
+    declareWorkspaceInputProperties<
+        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+        "InputWorkspace3", "");
+    declareWorkspaceInputProperties<
+        MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
+        "InputWorkspace4", "", boost::make_shared<HistogramValidator>());
   }
 
   void exec() override {}

@@ -1,5 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -2008,40 +2008,6 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
 
 } // namespace API
 } // Namespace Mantid
-
-// Explicit Instantiations of IndexProperty Methods in Algorithm
-namespace Mantid {
-namespace API {
-template DLLExport void
-Algorithm::declareWorkspaceInputProperties<MatrixWorkspace>(
-    const std::string &propertyName, const int allowedIndexTypes,
-    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::string &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::string &list);
-
-template DLLExport
-    std::tuple<boost::shared_ptr<MatrixWorkspace>, Indexing::SpectrumIndexSet>
-    Algorithm::getWorkspaceAndIndices(const std::string &name) const;
-} // namespace API
-} // namespace Mantid
 
 ///\cond TEMPLATE
 namespace Mantid {
