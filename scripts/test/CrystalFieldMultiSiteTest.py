@@ -1,5 +1,7 @@
 import numpy as np
 import unittest
+
+import mantid # noqa
 from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
@@ -235,7 +237,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
                                    ToleranceIntensity=6.0, ToleranceEnergy=1.0, FixAllPeaks=True, parameters=params)
 
-        cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40', 
+        cf.fix('ion0.BmolX', 'ion0.BmolY', 'ion0.BmolZ', 'ion0.BextX', 'ion0.BextY', 'ion0.BextZ', 'ion0.B40',
                'ion0.B42', 'ion0.B44', 'ion0.B60', 'ion0.B62', 'ion0.B64', 'ion0.B66', 'ion0.IntensityScaling',
                'ion1.BmolX', 'ion1.BmolY', 'ion1.BmolZ', 'ion1.BextX', 'ion1.BextY', 'ion1.BextZ', 'ion1.B40',
                'ion1.B42', 'ion1.B44', 'ion1.B60', 'ion1.B62', 'ion1.B64', 'ion1.B66', 'ion1.IntensityScaling')

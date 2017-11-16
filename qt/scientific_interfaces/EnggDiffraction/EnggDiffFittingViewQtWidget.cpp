@@ -86,11 +86,8 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
           this, SLOT(resetFittingMode()));
 
-  connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(editingFinished()), this,
-          SLOT(FittingRunNo()));
-
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
-          SLOT(FittingRunNo()));
+          SLOT(loadClicked()));
 
   connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
 
@@ -125,6 +122,10 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 
   connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()),
           SLOT(plotSeparateWindow()));
+
+  connect(m_ui.listWidget_fitting_run_num,
+          SIGNAL(itemClicked(QListWidgetItem *)), this,
+          SLOT(listWidget_fitting_run_num_clicked(QListWidgetItem *)));
 
   // Tool-tip button
   connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
@@ -274,6 +275,12 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     setFittingRunNo(itemText.toStdString());
     FittingRunNo();
   }
+}
+
+void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
+    QListWidgetItem *clickedItem) {
+  const auto label = clickedItem->text();
+  m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
 }
 
 void EnggDiffFittingViewQtWidget::resetFittingMode() {
@@ -459,17 +466,17 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
-  QString path(
-      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
-                                   QString::fromStdString(nexusFormat)));
+  QStringList paths(
+      QFileDialog::getOpenFileNames(this, tr("Open Focused File "), prevPath,
+                                    QString::fromStdString(nexusFormat)));
 
-  if (path.isEmpty()) {
+  if (paths.isEmpty()) {
     return;
   }
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  setFittingRunNo(path.toStdString());
-  getBanks();
+  // MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(paths[0]);
+  setFittingRunNo(paths.join(",").toStdString());
+  // getBanks();
 }
 
 void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
@@ -502,6 +509,11 @@ void EnggDiffFittingViewQtWidget::enableFittingListWidget(bool enable) const {
 
 int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
   return m_ui.listWidget_fitting_run_num->currentRow();
+}
+
+std::string
+EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
+  return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
