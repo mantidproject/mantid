@@ -555,7 +555,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                               "FitMax": fit_max}
             kwargs_stitch.update(q_range_stitch)
 
-
         if merge_range.q_merge_range:
             if merge_range.q_min:
                 q_range_options = {"MergeMin": merge_range.q_min}
