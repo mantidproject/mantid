@@ -362,7 +362,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
     sampleWidth = 4.0;
 
   // Get detector dimensions
-  Geometry::Object_const_sptr pixelShape = detector.shape();
+  Geometry::IObject_const_sptr pixelShape = detector.shape();
   if (!pixelShape || !pixelShape->hasValidShape()) {
     throw std::invalid_argument("Detector pixel has no defined shape!");
   }

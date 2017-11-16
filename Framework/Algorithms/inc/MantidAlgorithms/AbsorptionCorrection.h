@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -13,7 +14,7 @@ class Sample;
 }
 namespace Geometry {
 class IDetector;
-class CSGObject;
+class IObject;
 }
 
 namespace Algorithms {

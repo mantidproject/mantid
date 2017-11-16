@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {
 namespace Algorithms {
