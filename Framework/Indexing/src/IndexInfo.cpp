@@ -254,7 +254,7 @@ bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
 Parallel::StorageMode IndexInfo::storageMode() const { return m_storageMode; }
 
 /// Returns the communicator used in MPI runs.
-Parallel::Communicator IndexInfo::communicator() const {
+const Parallel::Communicator &IndexInfo::communicator() const {
   return *m_communicator;
 }
 
