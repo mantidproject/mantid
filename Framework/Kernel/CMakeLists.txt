@@ -13,8 +13,8 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
 	src/DateAndTime.cpp
+	src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
@@ -129,14 +129,14 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
 )
 
 set ( INC_FILES
@@ -162,9 +162,9 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+    	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
@@ -337,7 +337,6 @@ set ( TEST_FILES
 	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeHelpersTest.h
-	DateAndTimeTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -561,8 +560,10 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
+set ( QTPLUGINS "." )
+# %V will be replaced with the major version of Qt at runtime
 if ( MAKE_VATES )
-  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  set ( PV_PLUGINS "./plugins/paraview/qt%V" )
   if ( MSVC )
     set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   else()
@@ -573,7 +574,6 @@ else ()
   set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
-set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
@@ -728,9 +728,9 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
+  set ( QTPLUGINS "${MANTID_ROOT}/plugins/qt%V" )
+  set ( PV_PLUGINS "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
-  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
 endif ()
 
 set ( CONSOLECHANNELCLASS "StdoutChannel" )

@@ -47,7 +47,7 @@
        <property name="title">
         <string>Help</string>
        </property>
-       <addaction name="actionOnline_Help_Page"/>
+       <addaction name="actionHelp_Page"/>
       </widget>
       <addaction name="menuFile"/>
       <addaction name="menuView"/>
@@ -3739,9 +3739,9 @@
     <string>Reset Default Settings</string>
    </property>
   </action>
-  <action name="actionOnline_Help_Page">
+  <action name="actionHelp_Page">
    <property name="text">
-    <string>Online Help Page</string>
+    <string>Help Page</string>
    </property>
   </action>
   <action name="actionSave_Nexus_Peaks">

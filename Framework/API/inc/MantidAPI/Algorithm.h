@@ -240,6 +240,7 @@ public:
   void enableHistoryRecordingForChild(const bool on) override;
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore) override;
+  bool getAlwaysStoreInADS() const override;
   void setRethrows(const bool rethrow) override;
 
   /** @name Asynchronous Execution */
@@ -423,7 +424,7 @@ private:
 
   bool executeAsyncImpl(const Poco::Void &i);
 
-  bool doCallProcessGroups(Mantid::Kernel::DateAndTime &start_time);
+  bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,

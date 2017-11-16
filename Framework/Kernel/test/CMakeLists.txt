@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
 
   target_link_libraries( KernelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            Types
             Kernel
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}

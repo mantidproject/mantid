@@ -12,8 +12,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
-#include <MantidKernel/DateAndTimeHelpers.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DirectoryIterator.h>
@@ -23,6 +23,8 @@
 #include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
+
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -34,8 +36,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadLog::LoadLog() {}
@@ -466,13 +468,12 @@ bool LoadLog::isAscii(const std::string &filename) {
 }
 
 /**
- * Check if first 19 characters of a string is date-time string according to
- * yyyy-mm-ddThh:mm:ss
+ * Check if the string conforms to the ISO8601 standard.
  * @param str :: The string to test
  * @returns true if the strings format matched the expected date format
  */
 bool LoadLog::isDateTimeString(const std::string &str) const {
-  return Kernel::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
+  return Types::Core::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
 }
 
 /**

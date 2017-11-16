@@ -79,7 +79,7 @@
 #include "Folder.h"
 #include "FindDialog.h"
 #include "ScaleDraw.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "ScriptFileInterpreter.h"
@@ -376,21 +376,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  auto &config = ConfigService::Instance(); // Starts logging
-  resultsLog->attachLoggingChannel();       // Must be done after logging starts
+  ConfigService::Instance();          // Starts logging
+  resultsLog->attachLoggingChannel(); // Must be done after logging starts
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
-  // Load Paraview plugin libraries if possible
-  if (config.pvPluginsAvailable()) {
-    // load paraview plugins
-    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
-      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() +
-                  "\"");
-    }
-    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(),
-                                                false);
-  }
-
 #ifdef MAKE_VATES
   if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
     g_log.error("The OpenGL configuration does not support the VSI.");
@@ -6566,7 +6555,7 @@ void ApplicationWindow::exportASCII(const QString &tableName,
   if (!fname.isEmpty()) {
     QFileInfo fi(fname);
     QString baseName = fi.fileName();
-    if (baseName.contains(".") == 0)
+    if (!baseName.contains("."))
       fname.append(selectedFilter.remove("*"));
 
     asciiDirPath = fi.absolutePath();
@@ -7557,7 +7546,7 @@ void ApplicationWindow::zoomIn() {
   QList<Graph *> layers = plot->layersList();
   foreach (Graph *g, layers) {
     if (!g->isPiePlot())
-      g->zoom(true);
+      g->zoomMode(true);
   }
 }
 
@@ -8305,7 +8294,7 @@ void ApplicationWindow::drawArrow() {
 
   Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
   if (g) {
-    g->drawLine(true, 1);
+    g->drawLine(true, true);
     emit modified();
   }
 }
@@ -13827,7 +13816,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.toLatin1().constData()
+          << qPrintable(str)
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -13845,8 +13834,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (m_cmdline_filename.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.toLatin1().constData()
-          << "' unknown command line option!\n"
+          << "'" << qPrintable(str) << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;

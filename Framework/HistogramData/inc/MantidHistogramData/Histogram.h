@@ -139,7 +139,7 @@ public:
 
   /// Returns the size of the histogram, i.e., the number of Y data points.
   size_t size() const {
-    if (xMode() == XMode::BinEdges)
+    if (!m_x->empty() && xMode() == XMode::BinEdges)
       return m_x->size() - 1;
     return m_x->size();
   }

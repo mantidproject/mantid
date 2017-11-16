@@ -346,7 +346,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
   std::vector<std::string> detectors;
 
   try {
-    for (const auto wsIndex : wsIndices) {
+    for (const auto &wsIndex : wsIndices) {
 
       size_t index = boost::lexical_cast<size_t>(wsIndex);
 

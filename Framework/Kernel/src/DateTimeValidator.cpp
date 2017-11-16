@@ -40,7 +40,7 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
   } else {
     std::string error;
     try {
-      DateAndTime timestamp(value);
+      Types::Core::DateAndTime timestamp(value);
       UNUSED_ARG(timestamp);
     } catch (std::invalid_argument &exc) {
       error = exc.what();

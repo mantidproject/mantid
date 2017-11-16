@@ -41,9 +41,7 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
   (void)YLength; // Avoid compiler warning
 }
 
-void WorkspaceSingleValue::init(const std::size_t &NVectors,
-                                const HistogramData::Histogram &histogram) {
-  UNUSED_ARG(NVectors);
+void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) {
   UNUSED_ARG(histogram);
 }
 

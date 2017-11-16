@@ -24,7 +24,7 @@
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataObjects {
@@ -80,7 +80,8 @@ bool EventWorkspace::threadSafe() const {
 void EventWorkspace::init(const std::size_t &NVectors,
                           const std::size_t &XLength,
                           const std::size_t &YLength) {
-  (void)YLength; // Avoid compiler warning
+  static_cast<void>(XLength);
+  static_cast<void>(YLength);
 
   // Check validity of arguments
   if (NVectors <= 0) {
@@ -106,12 +107,11 @@ void EventWorkspace::init(const std::size_t &NVectors,
 
   // Create axes.
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-void EventWorkspace::init(const std::size_t &NVectors,
-                          const HistogramData::Histogram &histogram) {
+void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
     throw std::runtime_error(
         "EventWorkspace can only be initialized with XMode::BinEdges");
@@ -120,17 +120,17 @@ void EventWorkspace::init(const std::size_t &NVectors,
     throw std::runtime_error(
         "EventWorkspace cannot be initialized non-NULL Y or E data");
 
-  data.resize(NVectors, nullptr);
+  data.resize(numberOfDetectorGroups(), nullptr);
   EventList el;
   el.setHistogram(histogram);
-  for (size_t i = 0; i < NVectors; i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     data[i] = new EventList(el);
     data[i]->setMRU(mru);
     data[i]->setSpectrumNo(specnum_t(i));
   }
 
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(histogram.x().size(), this);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -192,7 +192,7 @@ double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
  */
 DateAndTime EventWorkspace::getPulseTimeMin() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -211,7 +211,7 @@ DateAndTime EventWorkspace::getPulseTimeMin() const {
  */
 DateAndTime EventWorkspace::getPulseTimeMax() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -229,8 +229,8 @@ Get the maximum and mimumum pulse time for events accross the entire workspace.
 @param Tmax maximal pulse time as a DateAndTime.
 */
 void EventWorkspace::getPulseTimeMinMax(
-    Mantid::Kernel::DateAndTime &Tmin,
-    Mantid::Kernel::DateAndTime &Tmax) const {
+    Mantid::Types::Core::DateAndTime &Tmin,
+    Mantid::Types::Core::DateAndTime &Tmax) const {
 
   Tmax = DateAndTime::minimum();
   Tmin = DateAndTime::maximum();
@@ -267,7 +267,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
 
@@ -294,7 +294,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;

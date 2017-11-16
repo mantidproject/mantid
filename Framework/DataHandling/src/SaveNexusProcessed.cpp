@@ -287,7 +287,7 @@ void SaveNexusProcessed::doExec(
   // Switch to the Cpp API for the algorithm history
   if (trackingHistory()) {
     m_history->fillAlgorithmHistory(
-        this, Mantid::Kernel::DateAndTime::getCurrentTime(), 0,
+        this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
         Algorithm::g_execCount);
     if (!isChild()) {
       inputWorkspace->history().addHistory(m_history);
@@ -547,7 +547,7 @@ void SaveNexusProcessed::saveSpectraMapNexus(
   }
 
   // Start the detector group
-  file->makeGroup("detector", "NXdetector", 1);
+  file->makeGroup("detector", "NXdetector", true);
   file->putAttr("version", 1);
 
   int numberSpec = int(spec.size());

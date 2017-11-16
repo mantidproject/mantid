@@ -200,7 +200,6 @@ class SANSStitchTest(unittest.TestCase):
 
         expected_y_array = [1.5] * 9
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)))
-        x_array = out_ws.readX(0)
 
     def test_strip_special_values(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -317,6 +316,60 @@ class SANSStitchTest(unittest.TestCase):
         y_array = out_ws.readY(0)
 
         expected_y_array = lab_workspace.readY(0) # We scale and shift to the back (lab) detectors
+
+        self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
+                        msg='All data should be scaled and shifted to the LAB scale=1 shift=-5')
+
+    def test_scale_both_without_can_with_q_range(self):
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.setProperty('DataX', range(0, 12))
+
+        # HAB as linear function y=x+5
+        hab_range = list(range(5, 16))
+        hab_range[0] = 15000
+        hab_range[9] = 15000
+        create_alg.setProperty('DataY', hab_range)
+        create_alg.execute()
+        hab_workspace = create_alg.getProperty('OutputWorkspace').value
+
+        # LAB as linear function y=x+0
+        create_alg.setProperty('DataY', range(0, 11))
+        create_alg.execute()
+        lab_workspace= create_alg.getProperty('OutputWorkspace').value
+
+        # FLAT NORM
+        create_alg.setProperty('DataY', [1] * 11)
+        create_alg.execute()
+        flat_norm = create_alg.getProperty('OutputWorkspace').value
+
+        alg = AlgorithmManager.create('SANSStitch')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'Both')
+        alg.setProperty('HABCountsSample', hab_workspace)
+        alg.setProperty('LABCountsSample', lab_workspace)
+        alg.setProperty('HABNormSample', flat_norm)
+        alg.setProperty('LABNormSample', flat_norm)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('FitMin', 1)
+        alg.setProperty('FitMax', 9)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
+        out_shift_factor = alg.getProperty('OutShiftFactor').value
+        out_scale_factor = alg.getProperty('OutScaleFactor').value
+        self.assertEquals(out_scale_factor, 1.0)
+        self.assertEquals(out_shift_factor, -5.0)
+
+        out_ws = alg.getProperty('OutputWorkspace').value
+
+        y_array = out_ws.readY(0)
+
+        expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502, 10.0]  # We scale and shift to the back (lab) detectors
 
         self.assertTrue(all(map(lambda element: element in y_array, expected_y_array)),
                         msg='All data should be scaled and shifted to the LAB scale=1 shift=-5')

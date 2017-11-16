@@ -32,6 +32,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Types::Core::DateAndTime;
 
 using namespace std;
 
@@ -448,7 +449,7 @@ void FilterEvents::processAlgorithmProperties() {
 
   // Get run start time from property 'run_start'
   if (m_eventWS->run().hasProperty("run_start")) {
-    Kernel::DateAndTime run_start_time(
+    Types::Core::DateAndTime run_start_time(
         m_eventWS->run().getProperty("run_start")->value());
     m_runStartTime = run_start_time;
   }
@@ -460,7 +461,7 @@ void FilterEvents::processAlgorithmProperties() {
     std::string start_time_str = getProperty("FilterStartTime");
     if (!start_time_str.empty()) {
       // User specifies the filter starting time
-      Kernel::DateAndTime temp_shift_time(start_time_str);
+      Types::Core::DateAndTime temp_shift_time(start_time_str);
       m_filterStartTime = temp_shift_time;
     } else {
       // Retrieve filter starting time from property run_start as default
@@ -628,7 +629,7 @@ void FilterEvents::splitTimeSeriesLogs(
     const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
     const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector) {
   // get split times by converting vector of int64 to Time
-  std::vector<Kernel::DateAndTime> split_datetime_vec;
+  std::vector<Types::Core::DateAndTime> split_datetime_vec;
 
   // convert splitters workspace to vectors used by TableWorkspace and
   // MatrixWorkspace splitters
@@ -696,7 +697,7 @@ void FilterEvents::splitTimeSeriesLogs(
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,
-    std::vector<Kernel::DateAndTime> &split_datetime_vec,
+    std::vector<Types::Core::DateAndTime> &split_datetime_vec,
     const int max_target_index) {
   // skip the sample logs if they are specified
   // get property name and etc
@@ -1091,7 +1092,9 @@ void FilterEvents::createOutputWorkspaces() {
     }
 
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
@@ -1201,7 +1204,9 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // TODO/ISSUE/NOW - How about comment and info similar to
@@ -1291,7 +1296,9 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     // create new workspace
     boost::shared_ptr<EventWorkspace> optws =
-        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
+        create<EventWorkspace>(*m_eventWS);
+    // Clear Run without copying first.
+    optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // TODO/NOW/ISSUE -- How about comment and info?
@@ -1504,7 +1511,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
       const DataObjects::EventList events = m_eventWS->getSpectrum(i);
-      auto detids = events.getDetectorIDs();
+      const auto &detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
         stringstream errss;
@@ -1732,7 +1739,7 @@ void FilterEvents::generateSplitterTSP(
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
     // add initial value if the first splitter time is after the run start time
-    split_tsp->addValue(Kernel::DateAndTime(m_runStartTime), 0);
+    split_tsp->addValue(Types::Core::DateAndTime(m_runStartTime), 0);
   }
 
   // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add
@@ -1893,7 +1900,7 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
 
     // append to vector if it is either double TimeSeries or int TimeSeries
     if (dbltimeprop || inttimeprop || booltimeprop) {
-      std::string pname = ip->name();
+      const std::string &pname = ip->name();
       lognames.push_back(pname);
     }
   }

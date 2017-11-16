@@ -1,19 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 import io
+import six
 import numpy as np
 import AbinsModules
 from mantid.kernel import Atom, logger
 
 
-class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
+class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading CRYSTAL DFT phonon data. Special thanks to Leonardo Bernasconi for contributing to this module.
+    Class for loading CRYSTAL ab initio vibrational or phonon data. Special thanks to Leonardo Bernasconi for
+    contributing to this module.
     """
-    def __init__(self, input_dft_filename=None):
+    def __init__(self, input_ab_initio_filename=None):
         """
-        :param input_dft_filename: name of a file with phonon data (foo.out)
+        :param input_ab_initio_filename: name of a file with vibrational or phonon data (foo.out)
         """
-        super(LoadCRYSTAL, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadCRYSTAL, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         self._num_k = None
         self._num_modes = None
@@ -23,15 +25,15 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
         self._inv_expansion_matrix = np.eye(3, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
 
-        self._dft_program = "CRYSTAL"
+        self._ab_initio_program = "CRYSTAL"
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
-        Reads phonon data from CRYSTAL output files. Saves frequencies, weights of k-point vectors, k-point vectors,
-        amplitudes of atomic displacements, hash of the phonon file (hash) to <>.hdf5
-
+        Reads vibrational or phonon data from CRYSTAL output files. Saves frequencies, weights of k-point vectors,
+        k-point vectors, amplitudes of atomic displacements, hash of the vibrational or phonon data file (hash) to
+        <>.hdf5.
         :return  object of type AbinsData.
         """
 
@@ -52,18 +54,21 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 lattice_vectors = [[0, 0, 0]] * 3
 
             coord_lines = self._read_atomic_coordinates(file_obj=crystal_file)
+            masses = self._read_masses_from_file(file_obj=crystal_file)
+
             freq, coordinates, weights, k_coordinates = self._read_modes(file_obj=crystal_file,
                                                                          phonon_dispersion=phonon_dispersion)
 
         # put data into Abins data structure
         data = {}
-        self._create_atoms_data(data=data, coord_lines=coord_lines[:self._num_atoms])
+        self._create_atoms_data(data=data, coord_lines=coord_lines[:self._num_atoms],
+                                atoms_masses=masses[:self._num_atoms])
         self._create_kpoints_data(data=data, freq=freq, atomic_displacements=coordinates,
                                   atomic_coordinates=coord_lines[:self._num_atoms], weights=weights,
                                   k_coordinates=k_coordinates, unit_cell=lattice_vectors)
 
         # save data to hdf file
-        self.save_dft_data(data=data)
+        self.save_ab_initio_data(data=data)
 
         # return AbinsData object
         return self._rearrange_data(data=data)
@@ -163,7 +168,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _read_modes(self, file_obj=None, phonon_dispersion=None):
         """
-        Reads vibrational modes (frequencies and atomic displacements).
+        Reads vibrational or phonon modes (frequencies and atomic displacements).
         :param phonon_dispersion: True if more then one k-point to parse, otherwise False.
         :param file_obj: file object from which we read
         :returns: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
@@ -366,20 +371,25 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 return num_k
             num_k += 1
 
-    def _create_atoms_data(self, data=None, coord_lines=None):
+    def _create_atoms_data(self, data=None, coord_lines=None, atoms_masses=None):
         """
         Creates Python dictionary with atoms data which can be easily converted to AbinsData object.
+        :param atoms_masses: atom masses from output ab-initio file
         :param data: Python dictionary to which found atoms data should be added
         :param coord_lines: list with information about atoms
         """
         data.update({"atoms": dict()})
+
         for i, line in enumerate(coord_lines):
             l = line.split()
             symbol = str(l[2].decode("utf-8").capitalize())
+
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol, "mass": atom.mass, "sort": i,
                 "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
+
+        self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              weights=None, k_coordinates=None, unit_cell=None):
@@ -512,3 +522,29 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         local_displacements = np.transpose(np.asarray([x, y, z]))
 
         return local_displacements
+
+    def _read_masses_from_file(self, file_obj):
+        masses = []
+        pos = file_obj.tell()
+        self._parser.find_first(file_obj=file_obj,
+                                msg="ATOMS ISOTOPIC MASS (AMU) FOR FREQUENCY CALCULATION ")
+        file_obj.readline()  # blank line
+        end_message = ["INFORMATION", "*******************************************************************************",
+                       "GAMMA"]
+
+        if not six.PY2:
+            for i, item in enumerate(end_message):
+                end_message[i] = bytes(item, "utf8")
+
+        while not self._parser.file_end(file_obj=file_obj):
+
+            line = file_obj.readline()
+            if any([word in line for word in end_message]):
+                break
+
+            items = line.split()
+            length = len(items)
+            for i in range(2, length, 3):
+                masses.append(float(items[i]))
+        file_obj.seek(pos)  # revert position of file pointer to the initial state
+        return masses

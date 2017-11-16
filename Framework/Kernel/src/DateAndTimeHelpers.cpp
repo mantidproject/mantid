@@ -8,6 +8,9 @@ namespace {
 std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
   // Some ARGUS files have an invalid date with a space instead of zero.
   // To enable such files to be loaded we correct the date and issue a warning
+  // Normal ISO8601 Date "2009-07-08T10:23:50"
+  // Possible Argus Format "2009-07- 8T10:23:50"
+
   // (ticket #4017).
   // just take the date not the time or any date-time separator
   std::string strippedDate = date.substr(0, 10);
@@ -27,24 +30,13 @@ Logger g_log("DateAndTime");
  *@param date Date used to create DateAndTime object. May be sanitized first.
  *
  */
-DateAndTime createFromSanitizedISO8601(const std::string &date) {
-  return DateAndTime(verifyAndSanitizeISO8601(date));
-}
-
-/** Check if a string is iso8601 format.
- *
- * @param date :: string to check
- * @return true if the string conforms to ISO 860I, false otherwise.
- */
-bool stringIsISO8601(const std::string &date) {
-  Poco::DateTime dt;
-  int tz_diff;
-  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                        date, dt, tz_diff);
+Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date) {
+  return Types::Core::DateAndTime(verifyAndSanitizeISO8601(date));
 }
 
 /** Verifies whether or not a string conforms to ISO8601. Corrects the string
- *if it does not and is of the ARGUS file date/time format
+ *if it does not and is of the ARGUS file date/time format.
+ *e.g 2009-07- 8T10:23:50 becomes 2009-07-08T10:23:50.
  *
  *@param date Date to be checked/corrected
  *@param displayWarnings display warning messages in the log if the date is non

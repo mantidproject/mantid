@@ -1,6 +1,6 @@
 # Include useful utils
 include ( MantidUtils )
-
+include ( GenerateMantidExportHeader )
 # Make the default build type Release
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )
@@ -20,6 +20,11 @@ set ( BUILD_SHARED_LIBS On )
 # Send libraries to common place
 set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/plugins/paraview )
+else ()
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins/paraview )
+endif()
 
 # This allows us to group targets logically in Visual Studio
 set_property ( GLOBAL PROPERTY USE_FOLDERS ON )

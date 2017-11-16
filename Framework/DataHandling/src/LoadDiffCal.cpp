@@ -21,7 +21,6 @@ namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;

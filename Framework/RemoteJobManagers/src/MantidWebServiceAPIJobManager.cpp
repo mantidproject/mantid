@@ -18,6 +18,7 @@ Mantid::Kernel::Logger g_log("MantidWebServiceAPIJobManager");
 }
 
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Abort a previously submitted job

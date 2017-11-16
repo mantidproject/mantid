@@ -1,33 +1,33 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
+#include <QCheckBox>
+#include <QCloseEvent>
+#include <QComboBox>
+#include <QDateTimeEdit>
+#include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
-#include <QMessageBox>
 #include <QLineEdit>
-#include <QComboBox>
-#include <QCheckBox>
+#include <QMessageBox>
 #include <QPushButton>
-#include <QHBoxLayout>
-#include <QCheckBox>
-#include <QtGui>
 
 #include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::IAlgorithm;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("AlgorithmDialog");
@@ -478,10 +478,10 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
       return true;
 
     /**
-    * The control is disabled if
-    *   (1) It is contained in the disabled list or
-    *   (2) A user passed a value into the dialog
-    */
+     * The control is disabled if
+     *   (1) It is contained in the disabled list or
+     *   (2) A user passed a value into the dialog
+     */
 
     return !(m_disabled.contains(propName) ||
              m_python_arguments.contains(propName));
@@ -820,10 +820,10 @@ void AlgorithmDialog::parse() {
 
 //-------------------------------------------------------------------------------------------------
 /**
-  * Set a list of values for the properties
-  * @param presetValues :: A string containing a list of "name=value" pairs with
+ * Set a list of values for the properties
+ * @param presetValues :: A string containing a list of "name=value" pairs with
  * each separated by an '|' character
-  */
+ */
 void AlgorithmDialog::setPresetValues(
     const QHash<QString, QString> &presetValues) {
   if (presetValues.isEmpty())

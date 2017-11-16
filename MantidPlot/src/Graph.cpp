@@ -28,7 +28,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include <QVarLengthArray>
 
 #include "ApplicationWindow.h"
@@ -41,7 +42,6 @@
 #include "Grid.h"
 #include "ImageMarker.h"
 #include "LegendWidget.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "PatternBox.h"
 #include "PlotCurve.h"
 #include "QwtBarCurve.h"
@@ -62,11 +62,11 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
@@ -187,7 +187,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget *parent, Qt::WFlags f)
       new QwtPlotZoomer(QwtPlot::xTop, QwtPlot::yRight,
                         QwtPicker::DragSelection | QwtPicker::CornerToCorner,
                         QwtPicker::AlwaysOff, d_plot->canvas());
-  zoom(false);
+  zoomMode(false);
 
   c_type = QVector<int>();
   c_keys = QVector<int>();
@@ -1006,7 +1006,7 @@ void Graph::initScaleLimits() { // We call this function the first time we add
       continue;
 
     const QwtPlotCurve *c = dynamic_cast<const QwtPlotCurve *>(item);
-    const QwtSymbol s = c->symbol();
+    const QwtSymbol &s = c->symbol();
     if (s.style() != QwtSymbol::NoSymbol && s.size().width() >= maxSymbolSize)
       maxSymbolSize = s.size().width();
 
@@ -1845,7 +1845,7 @@ void Graph::updateCurvesData(Table *w, const QString &yColName) {
 
 QColor Graph::canvasFrameColor() {
   QwtPlotCanvas *canvas = (QwtPlotCanvas *)d_plot->canvas();
-  QPalette pal = canvas->palette();
+  const QPalette &pal = canvas->palette();
   return pal.color(QPalette::Active, QPalette::Foreground);
 }
 
@@ -1988,7 +1988,7 @@ QString Graph::saveCurveLayout(int index) {
     s += QString::number(c->pen().style() - 1) + "\t";
     s += QString::number(c->pen().widthF()) + "\t";
 
-    const QwtSymbol symbol = c->symbol();
+    const QwtSymbol &symbol = c->symbol();
     s += QString::number(symbol.size().width()) + "\t";
     s += QString::number(SymbolBox::symbolIndex(symbol.style())) + "\t";
     s += QString::number(ColorBox::colorIndex(symbol.pen().color())) + "\t";
@@ -2754,7 +2754,7 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
     if (!xval.isEmpty() && !yval.isEmpty()) {
       bool valid_data = true;
       if (xColType == Table::Text) {
-        if (xLabels.contains(xval) == 0)
+        if (!xLabels.contains(xval))
           xLabels << xval;
         X[size] = (double)(xLabels.indexOf(xval) + 1);
       } else if (xColType == Table::Time) {
@@ -3357,14 +3357,20 @@ bool Graph::zoomOn() {
   return (d_zoomer[0]->isEnabled() || d_zoomer[1]->isEnabled());
 }
 
-void Graph::zoomed(const QwtDoubleRect &) { emit modifiedGraph(); }
+void Graph::zoomed(const QwtDoubleRect &) {
+  updateSecondaryAxis(QwtPlot::xTop);
+  updateSecondaryAxis(QwtPlot::yRight);
+  d_plot->replot();
+  emit modifiedGraph();
+}
+
 bool Graph::hasActiveTool() {
   return (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
           d_magnifier || d_panner ||
           (d_range_selector && d_range_selector->isVisible()));
 }
 
-void Graph::zoom(bool on) {
+void Graph::zoomMode(bool on) {
   d_zoomer[0]->setEnabled(on);
   d_zoomer[1]->setEnabled(false);
   for (int i = 0; i < n_curves; i++) {
@@ -4566,7 +4572,7 @@ void Graph::setActiveTool(PlotToolInterface *tool) {
 
 void Graph::disableTools() {
   if (zoomOn())
-    zoom(false);
+    zoomMode(false);
   enablePanningMagnifier(false);
   if (drawLineActive())
     drawLine(false);
@@ -4619,7 +4625,7 @@ void Graph::guessUniqueCurveLayout(int &colorIndex, int &symbolIndex) {
     if (c) {
       colorIndex = std::max(ColorBox::colorIndex(c->pen().color()), colorIndex);
 
-      QwtSymbol symb = c->symbol();
+      const QwtSymbol &symb = c->symbol();
       symbolIndex = std::max(SymbolBox::symbolIndex(symb.style()), symbolIndex);
     }
   }

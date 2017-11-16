@@ -37,6 +37,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;

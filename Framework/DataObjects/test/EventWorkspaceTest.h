@@ -41,6 +41,8 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class EventWorkspaceTest : public CxxTest::TestSuite {
 private:

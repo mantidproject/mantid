@@ -64,14 +64,16 @@ private:
   };
 
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  std::vector<Kernel::DateAndTime>
+  std::vector<Types::Core::DateAndTime>
   getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
+  bool containsCalibratedData(const std::string &filename) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   std::vector<double>
@@ -104,11 +106,11 @@ private:
   size_t m_numberScanPoints;      ///< number of scan points
   size_t m_resolutionMode;        ///< resolution mode; 1:low, 2:nominal, 3:high
 
-  std::string m_instName;            ///< instrument name to load the IDF
-  std::set<std::string> m_instNames; ///< supported instruments
-  std::string m_fileName;            ///< file name to load
-  Kernel::DateAndTime m_startTime;   ///< start time of acquisition
-  ScanType m_scanType;               ///< NoScan, DetectorScan or OtherScan
+  std::string m_instName;               ///< instrument name to load the IDF
+  std::set<std::string> m_instNames;    ///< supported instruments
+  std::string m_filename;               ///< file name to load
+  Types::Core::DateAndTime m_startTime; ///< start time of acquisition
+  ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata

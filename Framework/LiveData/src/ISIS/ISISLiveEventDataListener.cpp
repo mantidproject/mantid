@@ -150,7 +150,7 @@ bool ISISLiveEventDataListener::connect(
 }
 
 // start event collection
-void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void ISISLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime;
   m_thread.start(*this);
 }
@@ -247,7 +247,7 @@ void ISISLiveEventDataListener::run() {
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
-      Mantid::Kernel::DateAndTime pulseTime =
+      Mantid::Types::Core::DateAndTime pulseTime =
           m_startTime + static_cast<double>(events.head_n.frame_time_zero);
       // Save the pulse charge in the logs
       double protons = static_cast<double>(events.head_n.protons);
@@ -375,7 +375,7 @@ void ISISLiveEventDataListener::initEventBuffer(
  */
 void ISISLiveEventDataListener::saveEvents(
     const std::vector<TCPStreamEventNeutron> &data,
-    const Kernel::DateAndTime &pulseTime, size_t period) {
+    const Types::Core::DateAndTime &pulseTime, size_t period) {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (period >= static_cast<size_t>(m_numberOfPeriods)) {
@@ -388,7 +388,7 @@ void ISISLiveEventDataListener::saveEvents(
   }
 
   for (const auto &streamEvent : data) {
-    Mantid::DataObjects::TofEvent event(streamEvent.time_of_flight, pulseTime);
+    Types::Event::TofEvent event(streamEvent.time_of_flight, pulseTime);
     m_eventBuffer[period]
         ->getSpectrum(streamEvent.spectrum)
         .addEventQuickly(event);

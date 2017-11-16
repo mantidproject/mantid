@@ -91,7 +91,7 @@ public:
   AlgExecSummaryGrpBox(QString, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,
-               const Mantid::Kernel::DateAndTime execDate);
+               const Mantid::Types::Core::DateAndTime execDate);
 
 private:
   QLineEdit *getAlgExecDurationCtrl() const { return m_execDurationEdit; }

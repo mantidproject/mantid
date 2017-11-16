@@ -17,15 +17,16 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <cmath>
 #include <numeric>
+
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,13 +34,14 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
-using namespace Kernel::DateAndTimeHelpers;
+using namespace DateAndTimeHelpers;
 using namespace API;
 using Geometry::Instrument;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
+using Mantid::Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
