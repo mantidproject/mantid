@@ -9,7 +9,7 @@ class RunSelection(object):
         self._runs.pop(index)
 
     def clear_all_runs(self):
-        self._runs = []
+        del self._runs[:]
 
     def __iter__(self):
         return self._runs.__iter__()
