@@ -114,10 +114,13 @@ public:
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
+  std::vector<GlobalSpectrumIndex> globalSpectrumIndicesFromDetectorIndices(
+      const std::vector<size_t> &detectorIndices) const;
+
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
   Parallel::StorageMode storageMode() const;
-  Parallel::Communicator communicator() const;
+  const Parallel::Communicator &communicator() const;
 
 private:
   void makeSpectrumNumberTranslator(

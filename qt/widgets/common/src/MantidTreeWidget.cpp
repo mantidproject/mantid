@@ -7,9 +7,11 @@
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 #include <QApplication>
+#include <QDrag>
 #include <QDragMoveEvent>
 #include <QFileInfo>
 #include <QList>
+#include <QMimeData>
 #include <QUrl>
 
 using namespace Mantid::API;
