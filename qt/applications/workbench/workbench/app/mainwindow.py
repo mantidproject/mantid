@@ -39,21 +39,32 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import QCoreApplication, Qt  # noqa
 from qtpy.QtWidgets import QApplication, QMainWindow  # noqa
-from workbench.qt_helpers import load_ui, qapplication  # noqa
+from mantidqt.utils.qt import load_ui, plugins  # noqa
 
-# -----------------------------------------------------------------------------
-# High-dpi scaling (if available). Must be set before the QApplication
-# instance is created (only available for Qt >= 5.6.0)
-# -----------------------------------------------------------------------------
+# Pre-application startup
+plugins.setup_library_paths()
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+
 
 # -----------------------------------------------------------------------------
 # Create the application instance early, set the application name for window
 # titles and hold on to a reference to it. Required to be performed early so
 # that the splash screen can be displayed
 # -----------------------------------------------------------------------------
-APP_INSTANCE = qapplication()
+
+def qapplication():
+    """Either return a reference to an existing application instance
+    or create a new one
+    :return: A reference to the QApplication object
+    """
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(['Mantid Workbench'])
+    return app
+
+# Create the application object early
+MAIN_APP = qapplication()
 
 
 # -----------------------------------------------------------------------------
@@ -64,7 +75,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self._ui = load_ui(__file__, 'mainwindow.ui', baseinstance=self)
-        APP_INSTANCE.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        MAIN_APP.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
 
 def initialize():
