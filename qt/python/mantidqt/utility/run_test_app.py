@@ -1,5 +1,21 @@
 import sys
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QPushButton
+from qtpy.QtCore import Qt, QTimer
+from qtpy.QtTest import QTest
+
+
+class Worker(object):
+
+    def __init__(self, widget):
+        self.widget = widget
+
+    def __call__(self):
+        print self.widget
+        button = self.widget.findChild(QPushButton, "The Button")
+        print button.pos()
+        # time.sleep(3)
+        QTest.mouseMove(self.widget)
+        QTest.mouseClick(button, Qt.LeftButton)
 
 
 def import_widget(widget_path):
@@ -17,7 +33,7 @@ def import_widget(widget_path):
     return getattr(m, widget_name)
 
 
-def main(widget_name):
+def open_in_window(widget_name):
     """
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
@@ -28,12 +44,17 @@ def main(widget_name):
     w.setWindowTitle(widget_name)
     w.show()
 
+    # Worker(w)()
+    # QTimer.singleShot(0, Worker(w))
+
     sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        widget_name = sys.argv[1]
-        main(widget_name)
-    else:
-        print('Give a name of a widget to display')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("widget", help="A qualified name of a widget to open for testing. The name must contain the "
+                                       "python module where the widget is defined, ie mypackage.mymodule.MyWidget")
+    args = parser.parse_args()
+    open_in_window(args.widget)
