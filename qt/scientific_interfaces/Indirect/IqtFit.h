@@ -59,8 +59,6 @@ private slots:
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tie = false);
-  boost::shared_ptr<Mantid::API::IFunction>
-  createExponentialFunction(const QString &name, bool tie = false);
   QtProperty *createExponential(const QString &);
   QtProperty *createStretchedExp(const QString &);
   void setDefaultParameters(const QString &name);
