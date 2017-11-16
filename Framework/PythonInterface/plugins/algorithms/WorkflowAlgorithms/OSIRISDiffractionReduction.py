@@ -7,7 +7,7 @@ from IndirectReductionCommon import load_files
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (AddSampleLog, AlignDetectors, CropWorkspace, DeleteWorkspace, DiffractionFocussing,
-                              MergeRuns, NormalizeByCurrent, RebinToWorkspace, ReplaceSpecialValues)
+                              MergeRuns, NormaliseByCurrent, RebinToWorkspace, ReplaceSpecialValues)
 
 
 # pylint: disable=too-few-public-methods
@@ -649,7 +649,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     def _calibrate_runs_in_map(self, drange_map):
 
         for d_range, wrksp in drange_map.items():
-            normalised = NormalizeByCurrent(InputWorkspace=wrksp,
+            normalised = NormaliseByCurrent(InputWorkspace=wrksp,
                                             OutputWorkspace="normalised_sample",
                                             StoreInADS=False, enableLogging=False)
 
