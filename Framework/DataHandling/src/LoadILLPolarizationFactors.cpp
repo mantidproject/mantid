@@ -47,7 +47,7 @@ Factor factor(const std::string &l) {
 
 /// Returns a list of all available Factor tags.
 const std::array<Factor, 5> factor_list() {
-  return {Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi};
+  return {{Factor::F1, Factor::F2, Factor::P1, Factor::P2, Factor::Phi}};
 }
 
 /// Returns the string presentation of tag f.

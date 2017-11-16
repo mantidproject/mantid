@@ -102,52 +102,52 @@ public:
 private:
   static std::array<double, 4> F1_limits() {
     // Values directly from the test file.
-    return {6.0000, 8.0000, 10.0000, 14.0000};
+    return {{6.0000, 8.0000, 10.0000, 14.0000}};
   }
 
   static std::array<double, 6> F1_K() {
     // Values directly from the test file.
-    return {0.9950, -0.0004, -0.0014, -0.0007, -0.0011, -0.0023};
+    return {{0.9950, -0.0004, -0.0014, -0.0007, -0.0011, -0.0023}};
   }
 
   static std::array<double, 4> F2_limits() {
     // Values directly from the test file.
-    return {6.0000, 8.5000, 12.0000, 16.0000};
+    return {{6.0000, 8.5000, 12.0000, 16.0000}};
   }
 
   static std::array<double, 6> F2_K() {
     // Values directly from the test file.
-    return {0.9918, 0.0000, -0.0003, -0.0011, -0.0011, -0.0011};
+    return {{0.9918, 0.0000, -0.0003, -0.0011, -0.0011, -0.0011}};
   }
 
   static std::array<double, 4> P1_limits() {
     // Values directly from the test file.
-    return {7.0120, 7.4048, 14.2916, 16.3};
+    return {{7.0120, 7.4048, 14.2916, 16.3}};
   }
 
   static std::array<double, 6> P1_K() {
     // Values directly from the test file.
-    return {-0.0002, 0.0006, -0.0023, 0.0001, 0.0043, -0.000};
+    return {{-0.0002, 0.0006, -0.0023, 0.0001, 0.0043, -0.000}};
   }
 
   static std::array<double, 4> P2_limits() {
     // Values directly from the test file.
-    return {6.7983, 11.0000, 14.0000, 16.85};
+    return {{6.7983, 11.0000, 14.0000, 16.85}};
   }
 
   static std::array<double, 6> P2_K() {
     // Values directly from the test file.
-    return {0.0136, -0.0014, 0.0020, 0.0030, 0.0088, 0.0178};
+    return {{0.0136, -0.0014, 0.0020, 0.0030, 0.0088, 0.0178}};
   }
 
   static std::array<double, 4> Phi_limits() {
     // Values directly from the test file.
-    return {6.6115, 8.3926, 9.5390, 13.8787};
+    return {{6.6115, 8.3926, 9.5390, 13.8787}};
   }
 
   static std::array<double, 6> Phi_K() {
     // Values directly from the test file.
-    return {0.0114, -0.0005, 0.0007, 0.0019, 0.0027, 0.0120};
+    return {{0.0114, -0.0005, 0.0007, 0.0019, 0.0027, 0.0120}};
   }
 
   static std::vector<double> factors(const std::vector<double> &wavelength,
