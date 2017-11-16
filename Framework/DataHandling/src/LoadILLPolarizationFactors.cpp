@@ -79,7 +79,7 @@ std::string cleanse_whitespace(const std::string &l) {
   std::string s;
   s.reserve(l.size());
   for (const auto c : l) {
-    if (!std::isblank(c)) {
+    if (!isblank(c)) {
       s.push_back(c);
     }
   }
