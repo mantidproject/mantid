@@ -502,63 +502,53 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._con_ws_map.add_workspaces([mtd[container_ws_name]
                                                  for container_ws_name in container_ws_names], rebin_and_average)
 
-            if set(self._con_ws_map.keys()) != set(self._sam_ws_map.keys()):
-                con_d_ranges = map(str, self._con_ws_map.keys())
-                sam_d_ranges = map(str, self._sam_ws_map.keys())
-                raise RuntimeError("The d-ranges found for the supplied container files (" +
-                                   ", ".join(con_d_ranges) + ") do not match those found for"
-                                   " the supplied sample files (" + ", ".join(sam_d_ranges) + ").")
-
-            self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
+            result_map = self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
             self._delete_workspaces(container_ws_names)
-
-        # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
-        if not set(self._sam_ws_map.keys()).issubset(set(self._van_ws_map)):
-            van_d_ranges = map(str, self._van_ws_map)
-            sam_d_ranges = map(str, self._sam_ws_map)
-            raise RuntimeError("The d-ranges found for the supplied vanadium files (" +
-                               ", ".join(van_d_ranges) + ") do not cover those found for"
-                               " the supplied sample files (" + ", ".join(sam_d_ranges) + ").")
+        else:
+            result_map = self._sam_ws_map
 
         # Run necessary algorithms on the Sample workspaces.
-        self._calibrate_runs_in_map(self._sam_ws_map)
+        self._calibrate_runs_in_map(result_map)
 
         # Run necessary algorithms on the Vanadium workspaces.
         self._calibrate_runs_in_map(self._van_ws_map)
 
-        # Workspaces in vanadium map are no longer in the ADS - can safely delete
-        # vanadium workspaces in ADS.
-        self._delete_workspaces(vanadium_ws_names)
-
         # Divide all sample files by the corresponding vanadium files.
-        self._sam_ws_map.combine(self._van_ws_map, divide_workspace)
+        result_map = result_map.combine(self._van_ws_map, divide_workspace)
 
         # Workspaces in vanadium map are no longer in the ADS - can safely delete
         # vanadium workspaces in ADS.
         self._delete_workspaces(vanadium_ws_names)
 
-        if len(self._sam_ws_map) > 1:
+        # Workspaces in sample map are no longer in the ADS - can safely delete
+        # sample workspaces in the ADS.
+        self._delete_workspaces(sample_ws_names)
+
+        if len(result_map) > 1:
             # Workspaces must be added to the ADS, as there does not yet exist
             # a workspace list property (must be passed to merge runs by name).
             for sample_ws_name, sample_ws in zip(sample_ws_names,
-                                                 self._sam_ws_map.values()):
+                                                 result_map.values()):
                 mtd.addOrReplace(sample_ws_name, sample_ws)
 
             # Merge the sample files into one.
             output_ws = MergeRuns(InputWorkspaces=sample_ws_names,
                                   OutputWorkspace="merged_sample_runs",
                                   StoreInADS=False, EnableLogging=False)
+            self._delete_workspaces(sample_ws_names)
+        elif len(result_map) == 1:
+            output_ws = result_map.values()[0]
         else:
-            output_ws = self._sam_ws_map.values()[0]
-
-        # Sample workspaces are now finished with and can be deleted
-        # safely from the ADS.
-        self._delete_workspaces(sample_ws_names)
+            logger.error("D-Ranges found in runs have no overlap:\n" +
+                         "Found Sample D-Ranges: " + ", ".join(map(str, self._sam_ws_map.keys())) + "\n" +
+                         "Found Container D-Ranges: " + ", ".join(map(str, self._con_ws_map.keys())) + "\n" +
+                         "Found Vanadium D-Ranges: " + ", ".join(map(str, self._van_ws_map.keys())))
+            return
 
         if self._output_ws_name:
             mtd.addOrReplace(self._output_ws_name, output_ws)
 
-        d_ranges = self._sam_ws_map.keys()
+        d_ranges = result_map.keys()
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
                      LogText="D-Ranges used for reduction: " + ", ".join(map(str, d_ranges)))
 
