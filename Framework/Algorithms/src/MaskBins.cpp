@@ -93,8 +93,7 @@ void MaskBins::exec() {
       this->findIndices(X, startBin, endBin);
     }
 
-    const int numHists = static_cast<int>(indexSet.size());
-    Progress progress(this, 0.0, 1.0, numHists);
+    Progress progress(this, 0.0, 1.0, indexSet.size());
     // Parallel running has problems with a race condition, leading to
     // occaisional test failures and crashes
 
@@ -119,14 +118,10 @@ void MaskBins::execEvent() {
   MatrixWorkspace_sptr outputMatrixWS = getProperty("OutputWorkspace");
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputMatrixWS);
 
-  // set up the progress bar
-  const size_t numHists = outputWS->getNumberHistograms();
-  Progress progress(this, 0.0, 1.0, numHists * 2);
+  Progress progress(this, 0.0, 1.0, outputWS->getNumberHistograms() * 2);
 
-  // sort the events
   outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
 
-  // Go through all histograms
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(indexSet.size()); // NOLINT
        ++i) {
