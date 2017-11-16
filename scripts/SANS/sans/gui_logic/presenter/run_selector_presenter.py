@@ -1,5 +1,6 @@
 from mantidqtpython import MantidQt
 from mantid import ConfigService
+from sans.gui_logic.models.run_file import RunFile
 
 class RunSelectorPresenter(object):
     def __init__(self, run_selection, run_finder, view, parent_view):
@@ -7,9 +8,10 @@ class RunSelectorPresenter(object):
         self._run_finder = run_finder
         self.view = view
         self.parent_view = parent_view
-        self.connect_to_view(view)
+        self._connect_to_view(view)
+        self.refresh()
 
-    def connect_to_view(self, view):
+    def _connect_to_view(self, view):
         view.manageDirectories.connect(self.handle_manage_directories)
         view.addRuns.connect(self.handle_add_items)
         view.removeRuns.connect(self.handle_remove_items)
@@ -56,5 +58,5 @@ class RunSelectorPresenter(object):
         search_directories = ConfigService.Instance().getDataSearchDirs()
         files = self.view.show_file_picker([".nxs"], search_directories)
         # TODO: Get file extensions from a reputable source.
-        self.add_runs(self.run_selection.create_run_from_path(file) for file in files)
+        self.add_runs(RunFile(file) for file in files)
         self.refresh()

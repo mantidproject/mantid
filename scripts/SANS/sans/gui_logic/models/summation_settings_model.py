@@ -91,7 +91,6 @@ class SummationSettings(object):
 
     @additional_time_shifts.setter
     def additional_time_shifts(self, additional_time_shifts):
-        print("Setting additional_time_shifts to {}".format(additional_time_shifts))
         self._settings.additional_time_shifts = additional_time_shifts
 
     def enable_overlay_event_workspaces(self):
@@ -109,7 +108,6 @@ class SummationSettings(object):
 
     @bin_settings.setter
     def bin_settings(self, bin_settings):
-        print("Setting bin_settings to {}".format(bin_settings))
         self._settings.bin_settings = bin_settings
 
     def _settings_from_type(self, type):
