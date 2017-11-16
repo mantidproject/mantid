@@ -640,7 +640,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :param array_y: numpy array with S
         :returns: rebined frequencies, rebined S
         """
-        maximum_index = min(len(array_x), len(array_y), self._freq_size)
+        maximum_index = min(len(array_x), len(array_y))
         return np.histogram(array_x[:maximum_index], bins=self._bins, range=(0, self._freq_size),
                             weights=array_y[:maximum_index], density=False)[0]
 
