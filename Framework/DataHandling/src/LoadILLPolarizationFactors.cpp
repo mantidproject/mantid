@@ -285,7 +285,7 @@ void LoadILLPolarizationFactors::exec() {
   }();
   const auto factorTags = factor_list();
   PARALLEL_FOR_IF(Kernel::threadSafe(*refWS))
-  for (size_t i = 0; i < factorTags.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(factorTags.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const auto tag = factorTags[i];
     const auto &fDef = fittingData.at(tag);
