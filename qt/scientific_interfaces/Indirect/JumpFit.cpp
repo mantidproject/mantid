@@ -116,8 +116,12 @@ void JumpFit::run() {
 
   // Fit function to use
   const QString functionName = m_uiForm.cbFunction->currentText();
+  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const QString outputName =
+      getWorkspaceBasename(QString::fromStdString(sample)) + "_" +
+      functionName + "_fit";
   // Setup fit algorithm
-  m_fitAlg = createFitAlgorithm(createFunction(functionName));
+  m_fitAlg = createFitAlgorithm(createFunction(functionName), outputName);
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   // Connect algorithm runner to completion handler function
@@ -414,7 +418,8 @@ void JumpFit::plotGuess() {
   }
 }
 
-IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
+IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func,
+                                            QString const &outputWSName) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample =
@@ -431,7 +436,7 @@ IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   fitAlg->setProperty("StartX", startX);
   fitAlg->setProperty("EndX", endX);
   fitAlg->setProperty("CreateOutput", true);
-  fitAlg->setProperty("Output", "__PlotGuessData");
+  fitAlg->setProperty("Output", outputWSName);
   return fitAlg;
 }
 
