@@ -454,13 +454,17 @@ Supported Algorithms
 ================================= =============== ========
 Algorithm                         Supported modes Comments
 ================================= =============== ========
+CloneWorkspace                    all
 CompressEvents                    all
 CreateWorkspace                   all
+CreateSingleValuedWorkspace       Identical       ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
+CropToComponent                   all
 CropWorkspace                     all             see ExtractSpectra regarding X cropping
 ExtractSpectra2                   all             currently not available via algorithm factory or Python
 ExtractSpectra                    all             not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
 FilterBadPulses                   all
 FilterByLogValue                  all
+FilterByTime                      all
 LoadEventNexus                    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadInstrument                    all
 LoadNexusLogs                     all
@@ -468,6 +472,7 @@ LoadParameterFile                 all             segfaults when used in unit te
 MaskBins                          all
 MoveInstrumentComponent           all
 Rebin                             all             min and max bin boundaries must be given explicitly
+RebinToWorkspace                  all             ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                 all
 RotateInstrumentComponent         all
 SortEvents                        all
