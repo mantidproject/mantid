@@ -13,9 +13,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -26,18 +24,19 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <sstream>
@@ -518,12 +517,14 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
  * @param instrument :: instrument to which the component will be added
  * @param position :: position of the component
  * @param name :: name of the component
+ * @return a component pointer
  */
-void addComponent(Instrument_sptr &instrument, const V3D &position,
-                  std::string name = "component") {
+ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
+                           std::string name = "component") {
   ObjComponent *component = new ObjComponent(name);
   component->setPos(position);
   instrument->add(component);
+  return component;
 }
 
 /** Adds a source to an instrument
@@ -534,9 +535,7 @@ void addComponent(Instrument_sptr &instrument, const V3D &position,
  */
 void addSource(Instrument_sptr &instrument, const V3D &position,
                std::string name = "source") {
-  ObjComponent *source = new ObjComponent(name);
-  source->setPos(position);
-  instrument->add(source);
+  auto source = addComponent(instrument, position, name);
   instrument->markAsSource(source);
 }
 
@@ -548,9 +547,7 @@ void addSource(Instrument_sptr &instrument, const V3D &position,
  */
 void addSample(Instrument_sptr &instrument, const V3D &position,
                std::string name = "some-surface-holder") {
-  ObjComponent *sample = new ObjComponent(name);
-  sample->setPos(position);
-  instrument->add(sample);
+  auto sample = addComponent(instrument, position, name);
   instrument->markAsSamplePos(sample);
 }
 
@@ -617,33 +614,38 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
  * @param slit2Pos :: slit 2 position
  * @param vg1 :: vertical slit 1
  * @param vg2 :: vertical slit 2
+ * @param sourcePos :: source position
+ * @param monitorPos :: monitor position
+ * @param samplePos :: sample position
+ * @param detectorPos :: detector position
+ * @param up :: pointing up axis
+ * @param along :: pointing along beam axis
  * @param nSpectra :: number of spectra
  * @param nBins :: number of bins
  * @param deltaX :: TOF delta x-value
  */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
     double startX, V3D slit1Pos, V3D slit2Pos, double vg1, double vg2,
-    const int nSpectra, const int nBins, const double deltaX) {
+    V3D sourcePos, V3D monitorPos, V3D samplePos, V3D detectorPos,
+    PointingAlong up, PointingAlong along, const int nSpectra, const int nBins,
+    const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
+      boost::make_shared<ReferenceFrame>(up, along, Handedness::Left, "0,0,0"));
 
-  addSource(instrument, V3D(0, 0, 0));
-  addMonitor(instrument, V3D(14, 0, 0), 1);
-  addSample(instrument, V3D(15, 0, 0));
-  addDetector(instrument, V3D(20, (20 - 15), 0), 2);
-  addComponent(instrument, slit1Pos, "slit1");
-  addComponent(instrument, slit2Pos, "slit2");
+  addSource(instrument, sourcePos);
+  addMonitor(instrument, monitorPos, 1);
+  addSample(instrument, samplePos);
+  addDetector(instrument, detectorPos, 2);
+  auto slit1 = addComponent(instrument, slit1Pos, "slit1");
+  auto slit2 = addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
 
-  IComponent_const_sptr slit1 = instrument->getComponentByName("slit1");
-  IComponent_const_sptr slit2 = instrument->getComponentByName("slit2");
-
   ParameterMap &pmap = workspace->instrumentParameters();
-  pmap.addDouble(slit1.get(), "vertical gap", vg1);
-  pmap.addDouble(slit2.get(), "vertical gap", vg2);
+  pmap.addDouble(slit1, "vertical gap", vg1);
+  pmap.addDouble(slit2, "vertical gap", vg2);
 
   workspace->getSpectrum(0).setDetectorID(2);
   workspace->getSpectrum(1).setDetectorID(1);
