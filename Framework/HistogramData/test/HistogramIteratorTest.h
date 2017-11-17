@@ -293,7 +293,7 @@ public:
   void test_convert_counts_to_frequency_once_per_histogram() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
-      auto frequencies = m_hist.frequencies();
+      const auto& frequencies = m_hist.frequencies();
       for (auto &frequency : frequencies)
         total += frequency;
     }
@@ -312,8 +312,8 @@ public:
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
-      auto counts = m_hist.counts();
-      auto frequencies = m_hist.frequencies();
+      const auto& counts = m_hist.counts();
+      const auto& frequencies = m_hist.frequencies();
       for (size_t j = 0; j < histSize; ++j)
         if (counts[j] > histSize - 5)
           total += frequencies[j];
@@ -321,8 +321,8 @@ public:
   }
 
 private:
-  const size_t nHists = 500;
-  const size_t histSize = 50000;
+  const size_t nHists = 1000;
+  const size_t histSize = 1000000;
   Histogram m_hist;
 };
 
