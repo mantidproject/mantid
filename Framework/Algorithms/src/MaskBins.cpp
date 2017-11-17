@@ -41,7 +41,7 @@ void MaskBins::init() {
   declareProperty("XMax", std::numeric_limits<double>::max(), required,
                   "The value to end masking at.");
 
-  this->declareProperty(make_unique<ArrayProperty<int>>("SpectraList"),
+  this->declareProperty(make_unique<ArrayProperty<int64_t>>("SpectraList"),
                         "Deprecated, use InputWorkspaceIndexSet.");
 }
 
@@ -62,7 +62,7 @@ void MaskBins::exec() {
   }
 
   // Copy indices from legacy property
-  std::vector<int> spectraList = this->getProperty("SpectraList");
+  std::vector<int64_t> spectraList = this->getProperty("SpectraList");
   if (!spectraList.empty()) {
     if (!isDefault("InputWorkspaceIndexSet"))
       throw std::runtime_error("Cannot provide both InputWorkspaceIndexSet and "

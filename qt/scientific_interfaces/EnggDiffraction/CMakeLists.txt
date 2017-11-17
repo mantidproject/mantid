@@ -70,7 +70,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
     @loader_path/../../plugins/qt4
 )
 
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesEnggDiffractionQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()
