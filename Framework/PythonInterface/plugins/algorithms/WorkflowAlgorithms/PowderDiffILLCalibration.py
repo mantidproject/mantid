@@ -113,11 +113,11 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         if factor == 0.:
             CloneWorkspace(InputWorkspace=cropped_ws, OutputWorkspace=ref_ws)
         elif str(factor) != 'inf' and str(factor) != 'nan':
-            cropped_ws = Scale(InputWorkspace=cropped_ws, Factor=factor, StoreInADS=False)
+            Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ref_ws)
 
-        x = ws.readX(0)[-self._bin_offset]
-        last_bins = self._hide('last_bins')
+        x = mtd[ws].readX(0)[-self._bin_offset]
+        last_bins = ws + '_last_bins'
         CropWorkspace(InputWorkspace=ws, XMin=x, OutputWorkspace=last_bins)
         ConjoinXRuns(InputWorkspaces=[ref_ws,last_bins], OutputWorkspace=ref_ws)
         x = mtd[ref_ws].readX(0)[self._bin_offset]
@@ -129,8 +129,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             Excludes 2theta ranges from the ratio workspace
             @param ratio_ws : the name of the ratio workspace
         """
-        ratio_ws = ConvertToHistogram(InputWorkspace=ratio_ws, StoreInADS=False)
-        x = ratio_ws.readX(0)
+        ConvertToHistogram(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
+        x = mtd[ratio_ws].readX(0)
         xmin = x[0]
         xmax = x[-1]
         for excluded_range in self._excluded_ranges:
@@ -139,9 +139,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     xmin = excluded_range[0]
                 if excluded_range[1] < xmax:
                     xmax = excluded_range[1]
-                ratio_ws = MaskBins(InputWorkspace=ratio_ws, XMin=xmin, XMax=xmax, StoreInADS=False)
-        ratio_ws = ConvertToPointData(InputWorkspace=ratio_ws, StoreInADS=False)
-        return ratio_ws
+                MaskBins(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws, XMin=xmin, XMax=xmax)
+        ConvertToPointData(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
 
     def _compute_relative_factor(self, ratio_ws):
         """
@@ -150,7 +149,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             @param ratio_ws: input workspace containing response ratios
             @returns: relative calibration factor
         """
-        ratios = ratio_ws.extractY()
+        ratios = mtd[ratio_ws].extractY()
         ratios = ratios[np.nonzero(ratios)]
         factor = 1.
         if ratios.any():
@@ -342,9 +341,10 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
         for det in range(self._pixel_range[0] - 1, self._pixel_range[1]):
             self._progress.report('Computing the relative calibration factor for pixel #' + str(det))
-            ws = ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=det, StoreInADS=False)
-            y = ws.readY(0)
-            x = ws.readX(0)
+            ws = '__det_' + str(det)
+            ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=det, OutputWorkspace=ws)
+            y = mtd[ws].readY(0)
+            x = mtd[ws].readX(0)
             # keep track of dead pixels
             if np.count_nonzero(y) > self._scan_points/5:
                 self._live_pixels[det] = True
@@ -352,25 +352,30 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             if det == self._pixel_range[0] - 1:
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, XMin=x[self._bin_offset])
             else:
-                cropped_ws = CropWorkspace(InputWorkspace=ws, XMax=x[-(self._bin_offset+1)], StoreInADS=False)
+                ratio_ws = ws + '_ratio'
+                cropped_ws = ws + '_cropped'
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws, XMax=x[-(self._bin_offset+1)])
 
                 if self._interpolate and self._live_pixels[det]:
                     # SplineInterpolation invalidates the errors, so we need to copy them over
-                    interp_ws = SplineInterpolation(WorkspaceToInterpolate=cropped_ws, WorkspaceToMatch=ref_ws,
-                                                    OutputWorkspaceDeriv="", EnableLogging=False, StoreInADS=False)
-                    interp_ws.setE(0, cropped_ws.readE(0))
-                    cropped_ws = interp_ws
+                    interp_ws = ws + '_interp'
+                    SplineInterpolation(WorkspaceToInterpolate=cropped_ws, WorkspaceToMatch=ref_ws,
+                                        OutputWorkspace=interp_ws, OutputWorkspaceDeriv="", EnableLogging=False)
+                    mtd[interp_ws].setE(0, mtd[cropped_ws].readE(0))
+                    RenameWorkspace(InputWorkspace=interp_ws, OutputWorkspace=cropped_ws)
                 else:
                     # here we need to effectively clone the x-axis
-                    cloned_ref_ws = CloneWorkspace(InputWorkspace=ref_ws, StoreInADS=False)
-                    cloned_ref_ws.setY(0, cropped_ws.readY(0))
-                    cloned_ref_ws.setE(0, cropped_ws.readE(0))
-                    cropped_ws = cloned_ref_ws
+                    cloned_ref_ws = ws + '_cloned'
+                    CloneWorkspace(InputWorkspace=ref_ws, OutputWorkspace=cloned_ref_ws)
+                    mtd[cloned_ref_ws].setY(0, mtd[cropped_ws].readY(0))
+                    mtd[cloned_ref_ws].setE(0, mtd[cropped_ws].readE(0))
+                    RenameWorkspace(InputWorkspace=cloned_ref_ws, OutputWorkspace=cropped_ws)
 
-                ratio_ws = Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, EnableLogging=False, StoreInADS=False)
+                Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
                 if len(self._excluded_ranges) != 0:
-                    ratio_ws = self._exclude_ranges(ratio_ws)
+                    self._exclude_ranges(ratio_ws)
                 factor = self._compute_relative_factor(ratio_ws)
+                DeleteWorkspace(ratio_ws)
 
                 if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
                     self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det))
@@ -379,6 +384,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     mtd[constants_ws].dataY(det)[0] = factor
 
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
+                DeleteWorkspace(cropped_ws)
 
             if self._out_response:
                 # take care of combined response
@@ -395,6 +401,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     mtd[response_ws].dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
                     mtd[response_ws].dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
 
+            DeleteWorkspace(ws)
         # end of loop over pixels
         DeleteWorkspace(ref_ws)
 
