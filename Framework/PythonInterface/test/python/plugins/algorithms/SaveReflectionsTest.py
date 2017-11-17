@@ -65,7 +65,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(filecmp.cmp(reference_result, file_name))
+        self.assertTrue(compare_file(reference_result, file_name))
 
     def test_save_jana_format(self):
         # Arrange
@@ -77,7 +77,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(filecmp.cmp(reference_result, file_name))
+        self.assertTrue(compare_file(reference_result, file_name))
 
     def test_save_GSAS_format(self):
         # Arrange
@@ -89,7 +89,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(filecmp.cmp(reference_result, file_name))
+        self.assertTrue(compare_file(reference_result, file_name))
 
     def test_save_SHELX_format(self):
         # Arrange
@@ -101,7 +101,21 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(filecmp.cmp(reference_result, file_name))
+        self.assertTrue(compare_file(reference_result, file_name))
+
+
+def compare_file(reference_result, file_name):
+    with open(reference_result, 'r') as ref_file:
+        with open(file_name, 'r') as actual_file:
+            ref_lines = ref_file.readlines()
+            actual_lines = actual_file.readlines()
+            ref_lines = map(lambda x: x.strip(), ref_lines)
+            actual_lines = map(lambda x: x.strip(), ref_lines)
+            for ref_line, actual_line in zip(ref_lines, actual_lines):
+                if ref_line != actual_line:
+                    return False
+
+    return True
 
 
 if __name__ == '__main__':
