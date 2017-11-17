@@ -56,7 +56,7 @@ public:
     if (xModeIsPoints()) {
       return x[m_index];
     } else {
-      return (x[m_index + 1] + x[m_index]) / 2.0;
+      return 0.5 * (x[m_index + 1] + x[m_index]);
     }
   }
 
