@@ -495,6 +495,7 @@ LoadMD                            Identical       see ``IFileLoader``
 LoadMLZ                           Identical       see ``IFileLoader``
 LoadMuonNexus                     Identical       see ``IFileLoader``
 LoadNexusLogs                     all
+LoadNexusMonitors2                Identical
 LoadNexusProcessed                Identical       see ``IFileLoader``
 LoadNXcanSAS                      Identical       see ``IFileLoader``
 LoadNXSPE                         Identical       see ``IFileLoader``
