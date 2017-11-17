@@ -177,14 +177,12 @@ public:
     }
 
     const auto &run = outputWS->run();
-    TS_ASSERT(outputWS->run().hasProperty("Omega.Position"))
-    TS_ASSERT(outputWS->run().hasProperty("Detector.TotalCount"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy.Time"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings.SampleTemp"))
-    TS_ASSERT(outputWS->run().hasProperty("MagneticField.field"))
-
-    const auto omega = outputWS->run().getLogData("Omega.Position");
-
+    TS_ASSERT(outputWS->run().hasProperty("omega.position"))
+    TS_ASSERT(outputWS->run().hasProperty("detector.totalcount"))
+    TS_ASSERT(outputWS->run().hasProperty("acquisitionspy.time"))
+    TS_ASSERT(outputWS->run().hasProperty("samplesettings.sampletemp"))
+    TS_ASSERT(outputWS->run().hasProperty("magneticfield.field"))
+    const auto omega = run.getLogData("omega.position");
     TS_ASSERT_EQUALS(omega->size(), 21)
     const double steps = run.getLogAsSingleValue("ScanSteps");
     const auto scanType = run.getLogData("ScanType");

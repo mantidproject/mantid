@@ -16,12 +16,11 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <numeric>
-
 #include <H5Cpp.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 #include <nexus/napi.h>
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -486,8 +485,13 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto &mutableRun = m_outWorkspace->mutableRun();
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
-      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(
-          m_scanVar[i].name + "." + m_scanVar[i].property);
+      const std::string scanVarName =
+          boost::algorithm::to_lower_copy(m_scanVar[i].name);
+      const std::string scanVarProp =
+          boost::algorithm::to_lower_copy(m_scanVar[i].property);
+      const std::string propName = scanVarName + "." + scanVarProp;
+      auto property =
+          Kernel::make_unique<TimeSeriesProperty<double>>(propName);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
