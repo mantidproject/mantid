@@ -83,6 +83,27 @@ public:
     checkWorkspace(*outputWS);
   }
 
+  void test_exec_in_place() {
+    MatrixWorkspace_sptr inputWS = makeWorkspace();
+    MaskSpectra alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setWorkspaceInputProperties("InputWorkspace", inputWS,
+                                    IndexType::WorkspaceIndex,
+                                    std::vector<int64_t>{1, 3});
+
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outputWS, inputWS);
+    checkWorkspace(*outputWS);
+  }
+
   void test_exec_with_instrument() {
     MatrixWorkspace_sptr inputWS = makeWorkspace();
     InstrumentCreationHelper::addFullInstrumentToWorkspace(*inputWS, false,
