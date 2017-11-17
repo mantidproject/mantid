@@ -48,7 +48,7 @@ class MANTID_HISTOGRAMDATA_DLL HistogramIterator
                                     boost::bidirectional_traversal_tag> {
 
 public:
-  HistogramIterator(const Histogram &histogram, const size_t index = 0)
+  HistogramIterator(const Histogram &histogram, const size_t index)
       : m_item(histogram, index){};
 
 private:
