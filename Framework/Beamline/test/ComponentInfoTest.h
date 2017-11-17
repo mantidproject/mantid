@@ -14,7 +14,7 @@ using namespace Mantid::Beamline;
 
 namespace {
 
-std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>>
+std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
 makeFlat(std::vector<Eigen::Vector3d> detPositions,
          std::vector<Eigen::Quaterniond> detRotations) {
   std::vector<std::pair<size_t, size_t>> componentRanges;
@@ -47,7 +47,7 @@ makeFlat(std::vector<Eigen::Vector3d> detPositions,
   // Rectangular bank flag
   auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
 
-  ComponentInfo componentInfo(
+  auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
@@ -57,12 +57,12 @@ makeFlat(std::vector<Eigen::Vector3d> detPositions,
       parentIndices, positions, rotations, scaleFactors, isRectangularBank, -1,
       -1);
 
-  componentInfo.setDetectorInfo(detectorInfo.get());
+  componentInfo->setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(componentInfo, detectorInfo);
 }
 
-std::tuple<ComponentInfo, std::vector<Eigen::Vector3d>,
+std::tuple<boost::shared_ptr<ComponentInfo>, std::vector<Eigen::Vector3d>,
            std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
            std::vector<Eigen::Quaterniond>, boost::shared_ptr<DetectorInfo>>
 makeTreeExampleAndReturnGeometricArguments() {
@@ -123,7 +123,7 @@ makeTreeExampleAndReturnGeometricArguments() {
   // Rectangular bank flag
   auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
 
-  ComponentInfo compInfo(
+  auto compInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
@@ -133,13 +133,14 @@ makeTreeExampleAndReturnGeometricArguments() {
       parentIndices, compPositions, compRotations, scaleFactors,
       isRectangularBank, -1, -1);
 
-  compInfo.setDetectorInfo(detectorInfo.get());
+  compInfo->setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(compInfo, detPositions, detRotations, *compPositions,
                          *compRotations, detectorInfo);
 }
 
-std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
+std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+makeTreeExample() {
   /*
    Detectors are marked with detector indices below.
    There are 3 detectors.
@@ -185,7 +186,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
   // Rectangular bank flag
   auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
 
-  ComponentInfo componentInfo(
+  auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           detectorRanges),
@@ -195,10 +196,22 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       parentIndices, positions, rotations, scaleFactors, isRectangularBank, -1,
       -1);
 
-  componentInfo.setDetectorInfo(detectorInfo.get());
+  componentInfo->setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(componentInfo, detectorInfo);
 }
+
+std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+cloneInfos(const std::tuple<boost::shared_ptr<ComponentInfo>,
+                            boost::shared_ptr<DetectorInfo>> &in) {
+  auto compInfo = boost::shared_ptr<ComponentInfo>(
+      std::get<0>(in)->cloneWithoutDetectorInfo());
+  auto detInfo = boost::make_shared<DetectorInfo>(*std::get<1>(in));
+  compInfo->setDetectorInfo(detInfo.get());
+  detInfo->setComponentInfo(compInfo.get());
+  return std::make_tuple(compInfo, detInfo);
+}
+
 } // namespace
 
 class ComponentInfoTest : public CxxTest::TestSuite {
@@ -215,7 +228,17 @@ public:
     auto infos = makeTreeExample();
     auto compInfo = std::get<0>(infos);
 
-    TS_ASSERT_EQUALS(compInfo.size(), 5);
+    TS_ASSERT_EQUALS(compInfo->size(), 5);
+  }
+
+  void test_partial_clone() {
+    auto infos = makeTreeExample();
+    auto compInfo = std::get<0>(infos);
+    TS_ASSERT(compInfo->hasDetectorInfo());
+    auto clone = compInfo->cloneWithoutDetectorInfo();
+    TSM_ASSERT("DetectorInfo is not copied", !clone->hasDetectorInfo());
+    // Sanity check other internals
+    TS_ASSERT_EQUALS(compInfo->size(), clone->size());
   }
 
   void
@@ -330,7 +353,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
     std::vector<Eigen::Vector3d> detPositions = std::get<1>(allOutputs);
     std::vector<Eigen::Quaterniond> detRotations = std::get<2>(allOutputs);
@@ -360,7 +383,7 @@ public:
   void do_write_positions(const IndexType rootIndex) {
 
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
     std::vector<Eigen::Vector3d> originalDetPositions = std::get<1>(allOutputs);
     std::vector<Eigen::Quaterniond> originalDetRotations =
@@ -493,7 +516,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     size_t rootIndex = 4;
     size_t detectorIndex = 1;
     do_test_write_rotation(info, rootIndex, detectorIndex);
@@ -503,7 +526,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
 
     const size_t rootIndex = 4;
@@ -515,7 +538,7 @@ public:
   void test_detector_indexes() {
 
     auto infos = makeTreeExample();
-    const auto &compInfo = std::get<0>(infos);
+    const auto &compInfo = *std::get<0>(infos);
     /*
     Note that detectors are always the first n component indexes!
     */
@@ -534,7 +557,7 @@ public:
   void test_component_indexes() {
 
     auto infos = makeTreeExample();
-    const auto &compInfo = std::get<0>(infos);
+    const auto &compInfo = *std::get<0>(infos);
     /*
     Note that detectors are always the first n component indexes!
     */
@@ -555,7 +578,7 @@ public:
 
   void test_parent_component_indices() {
     auto infos = makeTreeExample();
-    const auto &compInfo = std::get<0>(infos);
+    const auto &compInfo = *std::get<0>(infos);
     TSM_ASSERT_EQUALS("Root component's parent index is self", 4,
                       compInfo.parent(4));
     TSM_ASSERT_EQUALS("Parent of detector 0 is assembly index 3", 3,
@@ -576,7 +599,7 @@ public:
 
     using namespace Eigen;
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
 
     const size_t rootIndex = 4;
     const size_t detectorIndex = 0;
@@ -608,7 +631,7 @@ public:
 
     using namespace Eigen;
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
 
     const size_t rootIndex = 4;
     const size_t subComponentIndex = 3;
@@ -645,7 +668,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
 
     const size_t rootIndex = 4;
@@ -685,7 +708,7 @@ public:
   void test_has_parent() {
     using namespace Eigen;
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
 
     TSM_ASSERT("Detector should have a parent", compInfo.hasParent(0));
     TSM_ASSERT("Sub component should have a parent", compInfo.hasParent(3));
@@ -697,7 +720,7 @@ public:
 
     using namespace Eigen;
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
 
     // No scale factors by default
     for (size_t i = 0; i < compInfo.size(); ++i) {
@@ -717,7 +740,7 @@ public:
 
   void test_isScanning() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
 
     TSM_ASSERT("No time indexed points added so should not be scanning",
                !compInfo.isScanning());
@@ -729,7 +752,7 @@ public:
 
   void test_set_sync_interval_then_async_interval_throws() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
     // Using the indexed overload implies a non-sync scan
     std::pair<int64_t, int64_t> interval{1000, 1001};
     // Set the scanning up to be synchronous (no index provided)
@@ -741,7 +764,7 @@ public:
 
   void test_set_async_interval_then_sync_interval_throws() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
     // Using the indexed overload implies a non-sync scan
     std::pair<int64_t, int64_t> interval{1000, 1001};
     // Set the scanning up to be synchronous (no index provided)
@@ -752,7 +775,7 @@ public:
 
   void test_set_scan_interval_sync_scan() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
     auto interval = std::pair<int64_t, int64_t>{10000, 10001};
     compInfo.setScanInterval(interval);
     auto outInterval1 = compInfo.scanInterval(std::pair<size_t, size_t>{0, 0});
@@ -763,7 +786,7 @@ public:
 
   void test_set_scan_interval_async_scan() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
     auto interval1 = std::pair<int64_t, int64_t>{10000, 10001};
     auto interval2 = std::pair<int64_t, int64_t>{10001, 10002};
     compInfo.setScanInterval(0, interval1);
@@ -784,7 +807,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     const std::pair<size_t, size_t> rootIndex{4, 0};
     const std::pair<size_t, size_t> detectorIndex{1, 0};
     do_test_write_rotation(info, rootIndex, detectorIndex);
@@ -794,7 +817,7 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
     // Resulting ComponentInfo
-    ComponentInfo info = std::get<0>(allOutputs);
+    ComponentInfo &info = *std::get<0>(allOutputs);
     const std::pair<size_t, size_t> rootIndex{4, 0};
     const std::pair<size_t, size_t> detectorIndex{1, 0};
     do_write_rotation_updates_positions_correctly(info, rootIndex,
@@ -803,7 +826,7 @@ public:
 
   void test_setScanInterval_failures() {
     auto infos = makeTreeExample();
-    auto &compInfo = std::get<0>(infos);
+    auto &compInfo = *std::get<0>(infos);
     TS_ASSERT_THROWS_EQUALS(
         compInfo.setScanInterval(0, {1, 1}), const std::runtime_error &e,
         std::string(e.what()),
@@ -820,8 +843,8 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(2),
                            std::vector<Eigen::Quaterniond>(2));
-    auto &a = std::get<0>(infos1);
-    auto &b = std::get<0>(infos2);
+    auto &a = *std::get<0>(infos1);
+    auto &b = *std::get<0>(infos2);
     a.setScanInterval(0, {0, 1});
     b.setScanInterval(0, {0, 1});
     b.setScanInterval(1, {0, 1});
@@ -837,9 +860,9 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    auto &a = std::get<0>(infos1);
-    auto &b = std::get<0>(infos2);
-    auto &c = std::get<0>(infos3);
+    auto &a = *std::get<0>(infos1);
+    auto &b = *std::get<0>(infos2);
+    auto &c = *std::get<0>(infos3);
     TS_ASSERT_THROWS_EQUALS(
         a.merge(b), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge ComponentInfo: scan intervals not defined");
@@ -858,8 +881,8 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    auto &a = std::get<0>(infos1);
-    auto &b = std::get<0>(infos2);
+    auto &a = *std::get<0>(infos1);
+    auto &b = *std::get<0>(infos2);
     a.setScanInterval(0, {0, 1});
     b.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
@@ -875,20 +898,31 @@ public:
   }
 
   void test_merge_identical_async() {
-    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
-                          std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos);
+    auto infos1 = makeFlat(
+        std::vector<Eigen::Vector3d>(1, Eigen::Vector3d(0, 0, 0)),
+        std::vector<Eigen::Quaterniond>(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                               0, Eigen::Vector3d::UnitY()))));
+    ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(0, {0, 10});
-    ComponentInfo b(a);
+
+    auto infos2 = makeFlat(
+        std::vector<Eigen::Vector3d>(1, Eigen::Vector3d(0, 0, 0)),
+        std::vector<Eigen::Quaterniond>(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                               0, Eigen::Vector3d::UnitY()))));
+    ComponentInfo &b = *std::get<0>(infos2);
+    b.setScanInterval(0, {0, 10});
+
     TSM_ASSERT_EQUALS("Scan size should be 1", b.scanCount(0), 1);
+    b.merge(a);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
     TSM_ASSERT_EQUALS("Intervals identical. Scan size should not grow",
                       b.scanCount(0), 1)
   }
+
   void test_merge_identical_interval_failures() {
-    auto infos = makeFlat(std::vector<Eigen::Vector3d>(1),
-                          std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo a = std::get<0>(infos);
+    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
+                           std::vector<Eigen::Quaterniond>(1));
+    ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(a.root(), {0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
@@ -899,10 +933,12 @@ public:
     auto rootIndex = a.root();
     a.setPosition(rootIndex, pos1);
     a.setRotation(rootIndex, rot1);
-    ComponentInfo b = a;
+    auto infos2 = cloneInfos(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
-    ComponentInfo c = a;
+    auto infos3 = cloneInfos(infos1);
+    ComponentInfo &c = *std::get<0>(infos3);
     c.setPosition(rootIndex, pos2);
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
@@ -912,7 +948,8 @@ public:
     c.setPosition(rootIndex, pos1);
     TS_ASSERT_THROWS_NOTHING(c.merge(a));
 
-    ComponentInfo d = a;
+    auto infos4 = cloneInfos(infos1);
+    ComponentInfo &d = *std::get<0>(infos4);
     d.setRotation(rootIndex, rot2);
     TS_ASSERT_THROWS_EQUALS(d.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
@@ -924,12 +961,11 @@ public:
   void test_merge_fail_partial_overlap() {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo a = std::get<0>(infos1);
+    ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(a.root(), {0, 10});
 
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo b = std::get<0>(infos2);
+    auto infos2 = cloneInfos(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
     b.setScanInterval(b.root(), {-1, 5});
     TS_ASSERT_THROWS_EQUALS(
         b.merge(a), const std::runtime_error &e, std::string(e.what()),
@@ -949,9 +985,9 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos1);
+    ComponentInfo &a = *std::get<0>(infos1);
 
-    ComponentInfo &b = std::get<0>(infos2);
+    ComponentInfo &b = *std::get<0>(infos2);
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     a.setPosition(0, pos1);
@@ -993,9 +1029,9 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos1);
+    ComponentInfo &a = *std::get<0>(infos1);
 
-    ComponentInfo &b = std::get<0>(infos2);
+    ComponentInfo &b = *std::get<0>(infos2);
     const auto detPosA = a.position(0);
     const auto detPosB = b.position(0);
     const auto rootPosA = a.position(a.root());
@@ -1045,9 +1081,9 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
                            std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos1);
+    ComponentInfo &a = *std::get<0>(infos1);
 
-    ComponentInfo &b = std::get<0>(infos2);
+    ComponentInfo &b = *std::get<0>(infos2);
     Eigen::Quaterniond rot1(
         Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitY()));
     Eigen::Quaterniond rot2(
@@ -1098,9 +1134,9 @@ public:
                            std::vector<Eigen::Quaterniond>(1));
     auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
-    ComponentInfo &a = std::get<0>(infos1);
-    ComponentInfo &b = std::get<0>(infos2);
-    ComponentInfo &c = std::get<0>(infos3);
+    ComponentInfo &a = *std::get<0>(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    ComponentInfo &c = *std::get<0>(infos3);
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     Eigen::Vector3d pos3(3, 0, 0);

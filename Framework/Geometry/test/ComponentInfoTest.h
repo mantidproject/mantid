@@ -168,7 +168,7 @@ public:
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
 
-  void test_copy_construction() {
+  void test_partial_copy() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -184,14 +184,15 @@ public:
                     makeComponentIDMap(componentIds), shapes);
 
     // Make the copy
-    ComponentInfo b = a;
+    auto b = a.cloneWithoutDetectorInfo();
 
     // Compare sizes
-    TS_ASSERT_EQUALS(b.size(), a.size());
+    TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
-    TS_ASSERT_EQUALS(&b.shape(0), &a.shape(0));
+    TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
     // IDs are the same
-    TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT(!b->hasDetectorInfo());
   }
 
   void test_has_shape() {

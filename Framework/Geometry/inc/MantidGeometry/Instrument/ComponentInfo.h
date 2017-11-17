@@ -67,6 +67,9 @@ private:
   BoundingBox componentBoundingBox(const size_t index,
                                    const BoundingBox *reference) const;
 
+  /// Private copy constructor. Do not make public.
+  ComponentInfo(const ComponentInfo &other);
+
 public:
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
@@ -76,9 +79,10 @@ public:
                                                  size_t>> componentIdToIndexMap,
       boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
           shapes);
-  ComponentInfo(const ComponentInfo &other);
   ~ComponentInfo();
-
+  /// Copy assignment is not possible for ComponentInfo
+  ComponentInfo &operator=(const ComponentInfo &) = delete;
+  std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
@@ -92,6 +96,7 @@ public:
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
+  bool hasDetectorInfo() const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   bool hasSource() const;

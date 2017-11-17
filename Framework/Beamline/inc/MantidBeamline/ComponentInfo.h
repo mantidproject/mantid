@@ -81,6 +81,8 @@ private:
                                const size_t linearIndexThis) const;
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
+  /// Copy constructor is private because of the way DetectorInfo stored
+  ComponentInfo(const ComponentInfo &other) = default;
 
 public:
   ComponentInfo();
@@ -98,11 +100,10 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
                 boost::shared_ptr<std::vector<bool>> isStructuredBank,
                 int64_t sourceIndex, int64_t sampleIndex);
-  /// Copies not permitted because of the way DetectorInfo stored
-  ComponentInfo(const ComponentInfo &other) = default; // TODO should be deleted
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
-
+  /// Clone method
+  std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
   size_t size() const;

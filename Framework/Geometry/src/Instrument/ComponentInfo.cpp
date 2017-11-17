@@ -73,13 +73,22 @@ ComponentInfo::ComponentInfo(
   }
 }
 
+/**
+ * Clone current instance but not the DetectorInfo non-owned parts
+ * @return unique pointer wrapped deep copy of ComponentInfo
+ */
+std::unique_ptr<Geometry::ComponentInfo>
+ComponentInfo::cloneWithoutDetectorInfo() const {
+  return std::unique_ptr<Geometry::ComponentInfo>(
+      new Geometry::ComponentInfo(*this));
+}
+
 /** Copy constructor. Use with EXTREME CARE.
  *
- * Public copy should not be used since proper links between DetectorInfo and
+ * Should not be public since proper links between DetectorInfo and
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
-    : m_componentInfo(
-          Kernel::make_unique<Beamline::ComponentInfo>(*other.m_componentInfo)),
+    : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()),
       m_componentIds(other.m_componentIds),
       m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
 
@@ -129,6 +138,10 @@ size_t ComponentInfo::parent(const size_t componentIndex) const {
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const {
   return m_componentInfo->hasParent(componentIndex);
+}
+
+bool ComponentInfo::hasDetectorInfo() const {
+  return m_componentInfo->hasDetectorInfo();
 }
 
 bool ComponentInfo::hasShape(const size_t componentIndex) const {

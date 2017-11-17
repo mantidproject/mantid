@@ -93,6 +93,12 @@ ComponentInfo::ComponentInfo(
   }
 }
 
+std::unique_ptr<ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo() const {
+  auto copy = std::unique_ptr<ComponentInfo>(new ComponentInfo(*this));
+  copy->setDetectorInfo(nullptr);
+  return copy;
+}
+
 std::vector<size_t>
 ComponentInfo::detectorsInSubtree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
@@ -429,7 +435,8 @@ bool ComponentInfo::hasDetectorInfo() const {
 }
 
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
-  if (detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+  if (detectorInfo &&
+      detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
     throw std::invalid_argument("ComponentInfo must have detector indices "
                                 "input of same size as size of DetectorInfo");
   }
