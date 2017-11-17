@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
