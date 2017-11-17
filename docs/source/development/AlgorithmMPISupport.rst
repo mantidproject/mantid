@@ -468,10 +468,53 @@ ExtractSpectra                    all             not supported with ``DetectorL
 FilterBadPulses                   all
 FilterByLogValue                  all
 FilterByTime                      all
+FilterEventsByLogValuePreNexus    Identical       see ``IFileLoader``
+IFileLoader                       Identical       implicitly adds support for many load inheriting from this
+LoadAscii2                        Identical       see ``IFileLoader``
+LoadAscii                         Identical       see ``IFileLoader``
+LoadBBY                           Identical       see ``IFileLoader``
+LoadCanSAS1D                      Identical       see ``IFileLoader``
+LoadDaveGrp                       Identical       see ``IFileLoader``
+LoadEmptyInstrument               Identical       see ``IFileLoader``
 LoadEventNexus                    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
+LoadEventPreNexus2                Identical       see ``IFileLoader``
+LoadFITS                          Identical       see ``IFileLoader``
+LoadGSS                           Identical       see ``IFileLoader``
+LoadILLDiffraction                Identical       see ``IFileLoader``
+LoadILLIndirect2                  Identical       see ``IFileLoader``
+LoadILLReflectometry              Identical       see ``IFileLoader``
+LoadILLSANS                       Identical       see ``IFileLoader``
+LoadILLTOF2                       Identical       see ``IFileLoader``
 LoadInstrument                    all
+LoadIsawPeaks                     Identical       see ``IFileLoader``
+LoadISISNexus2                    Identical       see ``IFileLoader``
+LoadLLB                           Identical       see ``IFileLoader``
+LoadMcStas                        Identical       see ``IFileLoader``
+LoadMcStasNexus                   Identical       see ``IFileLoader``
+LoadMD                            Identical       see ``IFileLoader``
+LoadMLZ                           Identical       see ``IFileLoader``
+LoadMuonNexus                     Identical       see ``IFileLoader``
 LoadNexusLogs                     all
+LoadNexusProcessed                Identical       see ``IFileLoader``
+LoadNXcanSAS                      Identical       see ``IFileLoader``
+LoadNXSPE                         Identical       see ``IFileLoader``
 LoadParameterFile                 all             segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
+LoadPDFgetNFile                   Identical       see ``IFileLoader``
+LoadPreNexus                      Identical       see ``IFileLoader``
+LoadQKK                           Identical       see ``IFileLoader``
+LoadRawHelper                     Identical       see ``IFileLoader``
+LoadRKH                           Identical       see ``IFileLoader``
+LoadSassena                       Identical       see ``IFileLoader``
+LoadSESANS                        Identical       see ``IFileLoader``
+LoadSINQFocus                     Identical       see ``IFileLoader``
+LoadSNSspec                       Identical       see ``IFileLoader``
+LoadSPE                           Identical       see ``IFileLoader``
+LoadSpice2D                       Identical       see ``IFileLoader``
+LoadSQW2                          Identical       see ``IFileLoader``
+LoadSQW                           Identical       see ``IFileLoader``
+LoadSwans                         Identical       see ``IFileLoader``
+LoadTBL                           Identical       see ``IFileLoader``
+LoadTOFRawNexus                   Identical       see ``IFileLoader``
 MaskBins                          all
 Minus                             all             see ``BinaryOperation``
 MoveInstrumentComponent           all
