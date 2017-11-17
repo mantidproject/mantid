@@ -122,14 +122,45 @@ class FocusTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
+class CreateCalTest(stresstesting.MantidStressTest):
+
+    calibration_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.calibration_results = run_create_cal()
+
+    def valid(self):
+        return ceria_validator(self.calibration_results)
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
 def _gen_required_files():
     required_run_numbers = ["98472", "98485",  # create_van
-                            "98507", "98472_splined"]  # Focus (Si)
+                            "98507", "98472_splined",  # Focus (Si)
+                            "98494"]  # create_cal (Ce)
 
     # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
     return input_files
+
+
+def run_create_cal():
+    ceria_run = 98494
+    inst_obj = setup_inst_object(tt_mode="tt88", focus_mode="all")
+    return inst_obj.create_cal(run_number=ceria_run)
 
 
 def run_vanadium_calibration(focus_mode):
@@ -159,6 +190,11 @@ def run_focus():
 
 def focus_validation(results):
     reference_file_name = "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
+
+
+def ceria_validator(results):
+    reference_file_name = "ISIS_Powder-PEARL00098494_grouped.nxs"
     return _compare_ws(reference_file_name=reference_file_name, results=results)
 
 

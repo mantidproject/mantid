@@ -426,20 +426,21 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   }
 
   if (fitType == 2) {
-    fname = "StretchedExp";
+    result->addFunction(createPopulatedFunction(
+        "StretchExp", m_properties["StretchedExp"], tie));
   } else {
-    fname = "Exponential1";
+    result->addFunction(
+        createPopulatedFunction("ExpDecay", m_properties["Exponential1"], tie));
   }
-
-  result->addFunction(createExponentialFunction(fname, tie));
 
   if (fitType == 1 || fitType == 3) {
     if (fitType == 1) {
-      fname = "Exponential2";
+      result->addFunction(createPopulatedFunction(
+          "ExpDecay", m_properties["Exponential2"], tie));
     } else {
-      fname = "StretchedExp";
+      result->addFunction(createPopulatedFunction(
+          "StretchExp", m_properties["StretchedExp"], tie));
     }
-    result->addFunction(createExponentialFunction(fname, tie));
   }
 
   // Return CompositeFunction object to caller.
@@ -447,51 +448,11 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   return result;
 }
 
-IFunction_sptr IqtFit::createExponentialFunction(const QString &name,
-                                                 bool tie) {
-  IFunction_sptr result;
-  if (name.startsWith("Exp")) {
-    IFunction_sptr result =
-        FunctionFactory::Instance().createFunction("ExpDecay");
-    result->setParameter(
-        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime",
-                         m_dblManager->value(m_properties[name + ".Tau"]));
-    if (tie) {
-      result->tie("Height",
-                  m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime",
-                  m_properties[name + ".Tau"]->valueText().toStdString());
-    }
-    result->applyTies();
-    return result;
-  } else {
-    IFunction_sptr result =
-        FunctionFactory::Instance().createFunction("StretchExp");
-    result->setParameter(
-        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
-    result->setParameter("Lifetime",
-                         m_dblManager->value(m_properties[name + ".Tau"]));
-    result->setParameter("Stretching",
-                         m_dblManager->value(m_properties[name + ".Beta"]));
-    if (tie) {
-      result->tie("Height",
-                  m_properties[name + ".Intensity"]->valueText().toStdString());
-      result->tie("Lifetime",
-                  m_properties[name + ".Tau"]->valueText().toStdString());
-      result->tie("Stretching",
-                  m_properties[name + ".Beta"]->valueText().toStdString());
-    }
-    result->applyTies();
-    return result;
-  }
-}
-
 QtProperty *IqtFit::createExponential(const QString &name) {
   QtProperty *expGroup = m_grpManager->addProperty(name);
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
+  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Height");
   m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
-  m_properties[name + ".Tau"] = m_dblManager->addProperty("Tau");
+  m_properties[name + ".Tau"] = m_dblManager->addProperty("Lifetime");
   m_dblManager->setDecimals(m_properties[name + ".Tau"], NUM_DECIMALS);
   expGroup->addSubProperty(m_properties[name + ".Intensity"]);
   expGroup->addSubProperty(m_properties[name + ".Tau"]);
@@ -500,9 +461,9 @@ QtProperty *IqtFit::createExponential(const QString &name) {
 
 QtProperty *IqtFit::createStretchedExp(const QString &name) {
   QtProperty *prop = m_grpManager->addProperty(name);
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
-  m_properties[name + ".Tau"] = m_dblManager->addProperty("Tau");
-  m_properties[name + ".Beta"] = m_dblManager->addProperty("Beta");
+  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Height");
+  m_properties[name + ".Tau"] = m_dblManager->addProperty("Lifetime");
+  m_properties[name + ".Beta"] = m_dblManager->addProperty("Stretching");
   m_dblManager->setRange(m_properties[name + ".Beta"], 0, 1);
   m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties[name + ".Tau"], NUM_DECIMALS);

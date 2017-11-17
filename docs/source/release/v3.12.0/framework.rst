@@ -27,6 +27,7 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
+- :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 
 Core Functionality
 ------------------
@@ -38,6 +39,7 @@ Performance
 -----------
 
 - Improved performance for second and consecutive loads of instrument geometry, particularly for instruments with many detector pixels. This affects :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` and load algorithms that are using it.
+- Up to 30% performance improvement for :ref:`CropToComponent <algm-CropToComponent>` based on ongoing work on Instrument-2.0.
 
 Python
 ------
