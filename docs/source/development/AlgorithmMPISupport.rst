@@ -455,6 +455,8 @@ Supported Algorithms
 Algorithm                         Supported modes         Comments
 ================================= ======================= ========
 BinaryOperation                   all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
+CalculateChiSquared               MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateCostFunction             MasterOnly, Identical   see ``IFittingAlgorithm``
 CloneWorkspace                    all
 CompressEvents                    all
 CreateSingleValuedWorkspace       Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
@@ -462,6 +464,8 @@ CreateWorkspace                   all
 CropToComponent                   all
 CropWorkspace                     all                     see ``ExtractSpectra`` regarding X cropping
 Divide                            all                     see ``BinaryOperation``
+EstimateFitParameters             MasterOnly, Identical   see ``IFittingAlgorithm``
+EvaluateFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
 ExtractSingleSpectrum             all                     in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
 ExtractSpectra2                   all                     currently not available via algorithm factory or Python
 ExtractSpectra                    all                     not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
@@ -469,7 +473,9 @@ FilterBadPulses                   all
 FilterByLogValue                  all
 FilterByTime                      all
 FilterEventsByLogValuePreNexus    Identical               see ``IFileLoader``
-IFileLoader                       Identical               implicitly adds support for many load inheriting from this
+Fit                               MasterOnly, Identical   see ``IFittingAlgorithm``
+IFileLoader                       Identical               implicitly adds support for many load-algorithms inheriting from this
+IFittingAlgorithm                 MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
 LoadAscii2                        Identical               see ``IFileLoader``
 LoadAscii                         Identical               see ``IFileLoader``
 LoadBBY                           Identical               see ``IFileLoader``
