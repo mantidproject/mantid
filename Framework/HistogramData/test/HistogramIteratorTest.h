@@ -21,7 +21,7 @@ public:
 
   void test_construction() {
     Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
-    TS_ASSERT_THROWS_NOTHING(HistogramIterator iter(hist));
+    TS_ASSERT_THROWS_NOTHING(HistogramIterator iter(hist, 0));
   }
 
   void test_iterator_begin() {
