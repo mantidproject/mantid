@@ -9,7 +9,6 @@ set ( SRC_FILES
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
 	src/HistogramBuilder.cpp
-        src/HistogramItem.cpp
 	src/HistogramMath.cpp
 	src/Interpolate.cpp
 	src/Points.cpp
