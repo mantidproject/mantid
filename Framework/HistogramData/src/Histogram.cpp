@@ -1,4 +1,6 @@
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
+
 #include <sstream>
 
 namespace Mantid {
@@ -281,6 +283,14 @@ void Histogram::resize(size_t n) {
   if (m_dx) {
     m_dx.access().mutableRawData().resize(n);
   }
+}
+
+HistogramIterator Histogram::begin() const {
+    return HistogramIterator(*this, 0);
+}
+
+HistogramIterator Histogram::end() const {
+    return HistogramIterator(*this, size());
 }
 
 } // namespace HistogramData
