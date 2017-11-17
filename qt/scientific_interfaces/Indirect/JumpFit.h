@@ -59,9 +59,6 @@ private:
   /// Clears the mini plot of data excluding sample
   void clearPlot();
 
-  /// Deletes Plot Guess Workspace after use
-  void deletePlotGuessWorkspaces(const bool &removePlotGuess);
-
   // The UI form
   Ui::JumpFit m_uiForm;
 

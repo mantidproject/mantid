@@ -149,13 +149,13 @@ void JumpFit::fitAlgDone(bool error) {
   std::string outWsName = outName + "_Workspace";
   IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
-
   // Update parameters in UI
   std::string paramTableName = outName + "_Parameters";
 
   ITableWorkspace_sptr paramTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
           paramTableName);
+
   const auto plotResult = m_uiForm.ckPlotGuess->isChecked();
   if (plotResult) {
     m_uiForm.ckPlotGuess->setChecked(false);
@@ -356,6 +356,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
   if (plotGuess) {
     m_uiForm.ckPlotGuess->setChecked(false);
   }
+
   // Remove current parameter elements
   for (auto it = m_properties.begin(); it != m_properties.end();) {
     if (it.key().startsWith("parameter_")) {
@@ -410,11 +411,9 @@ void JumpFit::plotGuess() {
     const QString functionName = m_uiForm.cbFunction->currentText();
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
                                        createFunction(functionName));
-    deletePlotGuessWorkspaces(false);
   } else {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
     m_uiForm.ckPlotGuess->setChecked(false);
-    deletePlotGuessWorkspaces(true);
   }
 }
 
@@ -460,34 +459,6 @@ IFunction_sptr JumpFit::createFunction(const QString &functionName) {
   }
   return FunctionFactory::Instance().createInitialized(
       functionString.toStdString());
-}
-
-/**
- * Remove PlotGuess related workspaces from the ADS
- * @param removePlotGuess :: Removes the plotGuess data and not just the
- * unwanted workspaces
- */
-void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
-  auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setLogging(false);
-  if (removePlotGuess) {
-    if (AnalysisDataService::Instance().doesExist(
-            "__PlotGuessData_Workspace")) {
-      deleteAlg->setProperty("Workspace", "__PlotGuessData_Workspace");
-      deleteAlg->execute();
-    }
-  }
-  if (AnalysisDataService::Instance().doesExist("__PlotGuessData_Parameters")) {
-    deleteAlg->setProperty("Workspace", "__PlotGuessData_Parameters");
-    deleteAlg->execute();
-  }
-  if (AnalysisDataService::Instance().doesExist(
-          "__PlotGuessData_NormalisedCovarianceMatrix")) {
-    deleteAlg->setProperty("Workspace",
-                           "__PlotGuessData_NormalisedCovarianceMatrix");
-    deleteAlg->execute();
-  }
 }
 
 /**

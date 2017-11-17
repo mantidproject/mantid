@@ -67,6 +67,9 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() {
 void IndirectDataAnalysisTab::setInputWorkspace(
     MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = inputWorkspace;
+
+  if (m_guessWorkspace)
+    m_guessWorkspace.reset();
 }
 
 /**
@@ -158,9 +161,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -333,12 +335,16 @@ void IndirectDataAnalysisTab::plotGuess(
   previewPlot->removeSpectrum("Guess");
 
   if (inputWorkspace()) {
-    auto guessWs = createGuessWorkspace(function);
+
+    if (!m_guessWorkspace || m_selectedSpectrum != m_guessSpectrum) {
+      m_guessWorkspace = createGuessWorkspace(function, m_selectedSpectrum);
+      m_guessSpectrum = m_selectedSpectrum;
+    }
 
     // Check whether the guess workspace has enough data points
     // to plot
-    if (guessWs->x(0).size() >= 2) {
-      previewPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+    if (m_guessWorkspace->x(0).size() >= 2) {
+      previewPlot->addSpectrum("Guess", m_guessWorkspace, 0, Qt::green);
     }
   }
 }
@@ -347,11 +353,13 @@ void IndirectDataAnalysisTab::plotGuess(
  * Creates a guess workspace, for approximating a fit with the specified
  * function on the input workspace.
  *
- * @param func  The function to fit.
- * @return      A guess workspace containing the guess data for the fit.
+ * @param func    The function to fit.
+ * @param wsIndex The index of the input workspace to create a guess for.
+ * @return        A guess workspace containing the guess data for the fit.
  */
 MatrixWorkspace_sptr
-IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
+IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func,
+                                              size_t wsIndex) {
   const auto inputWS = inputWorkspace();
   const auto startX = m_dblManager->value(m_properties["StartX"]);
   const auto endX = m_dblManager->value(m_properties["EndX"]);
@@ -359,7 +367,7 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   const auto binIndexHigh = inputWS->binIndexOf(endX);
   const auto nData = binIndexHigh - binIndexLow;
 
-  const auto &xPoints = inputWS->points(0);
+  const auto &xPoints = inputWS->points(wsIndex);
 
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
