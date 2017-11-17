@@ -21,6 +21,8 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         mock_view = mock.create_autospec(SummationSettingsWidget, spec_set=True)
         mock_view.binningTypeChanged = FakeSignal()
         mock_view.preserveEventsChanged = FakeSignal()
+        mock_view.additionalTimeShiftsChanged = FakeSignal()
+        mock_view.binSettingsChanged = FakeSignal()
         mock_view.sum = FakeSignal()
         return mock_view
 
@@ -35,15 +37,25 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.view.binningTypeChanged.emit(new_binning_type)
         self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.Custom)
 
-    def test_retrieves_additional_time_shifts_when_getting_settings_in_event_workspace_mode(self):
-        new_binning_type = BinningType.SaveAsEventData
-        self.view.binningTypeChanged.emit(new_binning_type)
+    def test_retrieves_additional_time_shifts_when_changed(self):
+        self.view.additionalTimeShiftsChanged.emit()
         self.view.additional_time_shifts.assert_called()
 
-    def test_retrieves_bin_settings_when_getting_settings_in_custom_binning_mode(self):
-        new_binning_type = BinningType.Custom
-        self.view.binningTypeChanged.emit(new_binning_type)
+    def test_retrieves_bin_settings_when_changed(self):
+        self.view.binSettingsChanged.emit()
         self.view.bin_settings.assert_called()
+
+    def test_updates_model_when_bin_settings_changed(self):
+        new_bin_settings = 'bin settings'
+        self.view.bin_settings.return_value = new_bin_settings
+        self.view.binSettingsChanged.emit()
+        self.assertEqual(new_bin_settings, self.summation_settings.bin_settings)
+
+    def test_updates_model_when_additional_time_shifts_changed(self):
+        new_additional_time_shifts = '213221.123123'
+        self.view.additional_time_shifts.return_value = new_additional_time_shifts
+        self.view.additionalTimeShiftsChanged.emit()
+        self.assertEqual(new_additional_time_shifts, self.summation_settings.additional_time_shifts)
 
     def test_refreshes_view_when_binning_type_changed(self):
         new_binning_type = BinningType.Custom

@@ -9,21 +9,28 @@ import ui_summation_settings_widget
 from sans.gui_logic.models.binning_type import BinningType
 import types
 
+def set_checked_without_signal(checkable, should_be_checked):
+    checkable.blockSignals(True)
+    checkable.setChecked(should_be_checked)
+    checkable.blockSignals(False)
+
 class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_SummationSettingsWidget):
     binningTypeChanged = pyqtSignal(BinningType)
     preserveEventsChanged = pyqtSignal(bool)
+    binSettingsChanged = pyqtSignal()
+    additionalTimeShiftsChanged = pyqtSignal()
     sum = pyqtSignal()
 
     def __init__(self, parent=None):
         super(SummationSettingsWidget, self).__init__(parent)
         self.setupUi(self)
-        self.connect_signals()
+        self._connect_signals()
 
     def setupUi(self, other):
         ui_summation_settings_widget.Ui_SummationSettingsWidget.setupUi(self, other)
-        self.setupBinningTypes()
+        self._setupBinningTypes()
 
-    def setupBinningTypes(self):
+    def _setupBinningTypes(self):
         binningTypes = [
             'Use custom binning',
             'Use binning from monitors',
@@ -32,11 +39,12 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         for binningType in binningTypes:
             self.binningType.addItem(binningType)
 
-    def connect_signals(self):
-        self.binningType.currentIndexChanged.connect(self.on_binning_type_changed)
-        self.overlayEventWorkspacesCheckbox.stateChanged.connect(self.on_overlay_ews_changed)
+    def _connect_signals(self):
+        self.binningType.currentIndexChanged.connect(self._on_binning_type_changed)
+        self.overlayEventWorkspacesCheckbox.stateChanged.connect(self._on_overlay_ews_changed)
+        self.binningOptionsLineEdit.editingFinished.connect(self._on_binning_options_line_edit_changed)
 
-    def binning_type_index_to_type(self, index):
+    def _binning_type_index_to_type(self, index):
         if index == 0:
             return BinningType.Custom
         elif index == 1:
@@ -44,53 +52,61 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         elif index == 2:
             return BinningType.SaveAsEventData
 
-    def on_binning_type_changed(self, index):
-        binning_type = self.binning_type_index_to_type(index)
+    def _on_binning_type_changed(self, index):
+        binning_type = self._binning_type_index_to_type(index)
         self.binningTypeChanged.emit(binning_type)
 
-    def on_overlay_ews_changed(self, state):
+    def _on_binning_options_line_edit_changed(self):
+        # Since the text box is shared we don't
+        # know which of these was actually changed.
+        # The presenter can work it out.
+        self.binSettingsChanged.emit()
+        self.additionalTimeShiftsChanged.emit()
+
+    def _on_overlay_ews_changed(self, state):
         self.preserveEventsChanged.emit(state != 0)
 
     def apply_settings(self, settings):
-        self.apply_bin_settings(settings)
-        self.apply_additional_time_shifts(settings)
-        self.apply_overlay_event_workspaces(settings)
+        self._apply_bin_settings(settings)
+        self._apply_additional_time_shifts(settings)
+        self._apply_overlay_event_workspaces(settings)
 
     def bin_settings(self):
-        return self.customBinBoundariesLineEdit.text()
+        return self.binningOptionsLineEdit.text()
 
     def additional_time_shifts(self):
-        return self.customBinBoundariesLineEdit.text()
+        return self.binningOptionsLineEdit.text()
 
-    def apply_overlay_event_workspaces(self, settings):
+    def _apply_overlay_event_workspaces(self, settings):
         if settings.has_overlay_event_workspaces():
             self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
-            #self.overlayEventWorkspacesCheckbox.setChecked(should_be_checked)
+            set_checked_without_signal(\
+                self.overlayEventWorkspacesCheckbox, should_be_checked)
         else:
-            #self.overlayEventWorkspacesCheckbox.setChecked(False)
+            set_checked_without_signal(\
+                self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
 
-    def disable_and_clear_text(self):
-        self.customBinBoundariesLineEdit.setVisible(False)
-        self.customBinBoundariesLineEdit.setText('')
-
-    def apply_bin_settings(self, settings):
+    def _apply_bin_settings(self, settings):
         if settings.has_bin_settings():
-            self.customBinBoundariesLineEdit.setVisible(True)
-            self.customBinLabel.setVisible(True)
-            self.customBinBoundariesLineEdit.setText(settings.bin_settings)
-            self.customBinLabel.setText('Custom Bin Boundaries:')
+            self._activate_line_edit('Custom Bin Boundaries:', settings.bin_settings)
         elif not settings.has_additional_time_shifts():
-            self.customBinLabel.setVisible(False)
-            self.disable_and_clear_text()
+            self._deactivate_line_edit()
 
-    def apply_additional_time_shifts(self, settings):
+    def _apply_additional_time_shifts(self, settings):
         if settings.has_additional_time_shifts():
-            self.customBinLabel.setVisible(True)
-            self.customBinBoundariesLineEdit.setVisible(True)
-            self.customBinBoundariesLineEdit.setText(settings.additional_time_shifts)
-            self.customBinLabel.setText('Additional Time Shifts:')
+            self._activate_line_edit('Additional Time Shifts:', settings.additional_time_shifts)
         elif not settings.has_bin_settings():
-            self.customBinLabel.setVisible(False)
-            self.disable_and_clear_text()
+            self._deactivate_line_edit()
+
+    def _activate_line_edit(self, label, content):
+        self.binningOptionsLineEdit.setText(content)
+        self.binningOptionsLineEdit.setVisible(True)
+        self.lineEditLabel.setText(label)
+        self.lineEditLabel.setVisible(True)
+
+    def _deactivate_line_edit(self):
+        self.binningOptionsLineEdit.setText('')
+        self.binningOptionsLineEdit.setVisible(False)
+        self.lineEditLabel.setVisible(False)

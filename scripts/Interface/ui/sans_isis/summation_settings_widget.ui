@@ -75,7 +75,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="customBinLabel">
+       <widget class="QLabel" name="lineEditLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -94,7 +94,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="customBinBoundariesLineEdit">
+       <widget class="QLineEdit" name="binningOptionsLineEdit">
         <property name="minimumSize">
          <size>
           <width>200</width>
