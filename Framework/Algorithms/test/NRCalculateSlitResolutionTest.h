@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,11 +20,12 @@ class NRCalculateSlitResolutionTest : public CxxTest::TestSuite {
 public:
   void testNRCalculateSlitResolutionX() {
     auto ws =
-        createWorkspace("testCalcResWS2", V3D(1, 0, 0), 0.5, V3D(0, 0, 0), 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, V3D(1, 0, 0), V3D(0, 0, 0), 0.5, 1.0);
 
     NRCalculateSlitResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->getName());
+    alg.setProperty("Workspace", ws);
     alg.setProperty("TwoTheta", 1.0);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -36,11 +36,12 @@ public:
 
   void testNRCalculateSlitResolutionZ() {
     auto ws =
-        createWorkspace("testCalcResWS", V3D(0, 0, 0), 1.0, V3D(0, 0, 1), 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, V3D(0, 0, 0), V3D(0, 0, 1), 1.0, 0.5);
 
     NRCalculateSlitResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->getName());
+    alg.setProperty("Workspace", ws);
     alg.setProperty("TwoTheta", 1.0);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -52,8 +53,9 @@ public:
   void testNRCalculateSlitResolutionThetaFromLog() {
     // Test getting theta from a log property with value
     // Test using the default log name
-    auto ws = createWorkspace("testCalcResLogWS", V3D(0, 0, 0), 1.0,
-                              V3D(0, 0, 1), 0.5);
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, V3D(0, 0, 0), V3D(0, 0, 1), 1.0, 0.5);
 
     PropertyWithValue<double> *p =
         new PropertyWithValue<double>("Theta", 0.5); // default name is Theta
@@ -61,7 +63,7 @@ public:
 
     NRCalculateSlitResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->getName());
+    alg.setProperty("Workspace", ws);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -73,7 +75,8 @@ public:
     // Test getting theta from a time series property
     // Test using a non-default log name
     auto ws =
-        createWorkspace("testCalcTSWS", V3D(0, 0, 0), 1.0, V3D(0, 0, 1), 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, V3D(0, 0, 0), V3D(0, 0, 1), 1.0, 0.5);
 
     TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("ThetaTSP");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 0.5));
@@ -81,25 +84,13 @@ public:
 
     NRCalculateSlitResolution alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace", ws->getName());
+    alg.setProperty("Workspace", ws);
     alg.setProperty("ThetaLogName", "ThetaTSP");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     const double res = alg.getProperty("Resolution");
     TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
-  }
-
-  MatrixWorkspace_sptr createWorkspace(const std::string &name,
-                                       const V3D &s1Pos, double s1VG,
-                                       const V3D &s2Pos, double s2VG) {
-
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-            0.0, s1Pos, s2Pos, s1VG, s2VG);
-
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(name, ws));
-    return ws;
   }
 };
 
