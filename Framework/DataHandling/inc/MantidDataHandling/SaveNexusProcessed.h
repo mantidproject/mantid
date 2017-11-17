@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <nexus/NeXusFile.hpp>
@@ -49,10 +49,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveNexusProcessed : public API::Algorithm {
+class DLLExport SaveNexusProcessed : public API::SerialAlgorithm {
 public:
-  /// Default constructor
-  SaveNexusProcessed();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexusProcessed"; };
   /// Summary of algorithms purpose
@@ -113,7 +111,7 @@ private:
   /// Pointer to the local workspace, cast to EventWorkspace
   DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
   /// Proportion of progress time expected to write initial part
-  double m_timeProgInit;
+  double m_timeProgInit{0.0};
   /// Progress bar
   std::unique_ptr<API::Progress> m_progress;
 };

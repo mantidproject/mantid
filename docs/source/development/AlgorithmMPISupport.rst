@@ -482,6 +482,8 @@ Rebin                             all             min and max bin boundaries mus
 RebinToWorkspace                  all             ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                 all
 RotateInstrumentComponent         all
+SaveNexus                         MasterOnly
+SaveNexusProcessed                MasterOnly
 SortEvents                        all
 WeightedMean                      all             see ``BinaryOperation``
 ================================= =============== ========
