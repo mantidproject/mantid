@@ -21,7 +21,7 @@ class MaxEntModel(object):
         self.alg.execute()
 
     def cancel(self):
-         self.alg.cancel()
+        self.alg.cancel()
 
     def output(self):
         mantid.AnalysisDataService.addOrReplace( self.inputs["EvolChi"],self.alg.getProperty("EvolChi").value)

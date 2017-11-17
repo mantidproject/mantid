@@ -27,6 +27,7 @@ class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def closeEvent(self,event):
         self.presenter.close()
 
+
 def qapp():
     if QtGui.QApplication.instance():
         _app = QtGui.QApplication.instance()

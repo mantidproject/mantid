@@ -38,10 +38,9 @@ class MaxEntPresenter(object):
         self.thread.start()
 
     def cancel(self):
-        import time
         if self.thread is not None:
             self.thread.cancel()
- 
+
     def handleFinished(self):
         self.activate()
         self.thread.deleteLater()
