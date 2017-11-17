@@ -457,6 +457,7 @@ Algorithm                         Supported modes         Comments
 BinaryOperation                   all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
 CalculateChiSquared               MasterOnly, Identical   see ``IFittingAlgorithm``
 CalculateCostFunction             MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateFlatBackground           MasterOnly, Identical
 CalculateTransmission             MasterOnly, Identical
 CloneWorkspace                    all
 CompressEvents                    all
