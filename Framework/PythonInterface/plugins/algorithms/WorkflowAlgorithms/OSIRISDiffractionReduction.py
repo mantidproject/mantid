@@ -537,7 +537,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                   StoreInADS=False, EnableLogging=False)
             self._delete_workspaces(sample_ws_names)
         elif len(result_map) == 1:
-            output_ws = result_map.values()[0]
+            output_ws = list(result_map.values())[0]
         else:
             logger.error("D-Ranges found in runs have no overlap:\n" +
                          "Found Sample D-Ranges: " + ", ".join(map(str, self._sam_ws_map.keys())) + "\n" +
