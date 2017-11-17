@@ -462,6 +462,7 @@ CropToComponent                   all
 CropWorkspace                     all             see ExtractSpectra regarding X cropping
 ExtractSpectra2                   all             currently not available via algorithm factory or Python
 ExtractSpectra                    all             not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
+ExtractSingleSpectrum             all             in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
 FilterBadPulses                   all
 FilterByLogValue                  all
 FilterByTime                      all
