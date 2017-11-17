@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_BINARYOPERATION_H_
 #define MANTID_ALGORITHMS_BINARYOPERATION_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport BinaryOperation : public API::ParallelAlgorithm {
+class DLLExport BinaryOperation : public API::Algorithm {
 public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
@@ -71,6 +71,10 @@ public:
                             const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
   // Overridden Algorithm methods
   void exec() override;
   void init() override;

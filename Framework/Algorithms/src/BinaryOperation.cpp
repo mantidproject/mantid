@@ -1034,5 +1034,24 @@ BinaryOperation::buildBinaryOperationTable(
   return table;
 }
 
+Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))
+    return Parallel::ExecutionMode::Invalid;
+  auto lhs = storageModes.find("LHSWorkspace")->second;
+  auto rhs = storageModes.find("RHSWorkspace")->second;
+  // Two identical modes is ok
+  if (lhs == rhs)
+    return getCorrespondingExecutionMode(storageModes.begin()->second);
+  // Mode <X> times Cloned is ok if the cloned workspace is WorkspaceSingleValue
+  if (rhs == Parallel::StorageMode::Cloned) {
+    API::MatrixWorkspace_const_sptr ws = getProperty("RHSWorkspace");
+    if (boost::dynamic_pointer_cast<const WorkspaceSingleValue>(ws))
+      return getCorrespondingExecutionMode(lhs);
+  }
+  // Other options are not ok (e.g., MasterOnly times Distributed)
+  return Parallel::ExecutionMode::Invalid;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

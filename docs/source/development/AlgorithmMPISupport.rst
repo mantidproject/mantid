@@ -454,15 +454,17 @@ Supported Algorithms
 ================================= =============== ========
 Algorithm                         Supported modes Comments
 ================================= =============== ========
+BinaryOperation                   all             not supported if ``AllowDifferentNumberSpectra`` is enabled
 CloneWorkspace                    all
 CompressEvents                    all
-CreateWorkspace                   all
 CreateSingleValuedWorkspace       Identical       ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
+CreateWorkspace                   all
 CropToComponent                   all
-CropWorkspace                     all             see ExtractSpectra regarding X cropping
+CropWorkspace                     all             see ``ExtractSpectra`` regarding X cropping
+Divide                            all             see ``BinaryOperation``
+ExtractSingleSpectrum             all             in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
 ExtractSpectra2                   all             currently not available via algorithm factory or Python
 ExtractSpectra                    all             not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
-ExtractSingleSpectrum             all             in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
 FilterBadPulses                   all
 FilterByLogValue                  all
 FilterByTime                      all
@@ -471,12 +473,17 @@ LoadInstrument                    all
 LoadNexusLogs                     all
 LoadParameterFile                 all             segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
 MaskBins                          all
+Minus                             all             see ``BinaryOperation``
 MoveInstrumentComponent           all
+Multiply                          all             see ``BinaryOperation``
+Plus                              all             see ``BinaryOperation``
+PoissonErrors                     all             see ``BinaryOperation``
 Rebin                             all             min and max bin boundaries must be given explicitly
 RebinToWorkspace                  all             ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
 RemovePromptPulse                 all
 RotateInstrumentComponent         all
 SortEvents                        all
+WeightedMean                      all             see ``BinaryOperation``
 ================================= =============== ========
 
 Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
