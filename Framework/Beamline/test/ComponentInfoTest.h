@@ -987,7 +987,8 @@ public:
   }
 
   template <typename SetScanIntervalFunctor>
-  void do_test_merge_root_with_offset(SetScanIntervalFunctor functor) {
+  void
+  do_test_merge_root_with_offset(SetScanIntervalFunctor applySetScanInterval) {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
@@ -1005,8 +1006,8 @@ public:
     b.setPosition(b.root(), pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    functor(a, a.root(), interval1);
-    functor(b, b.root(), interval2);
+    applySetScanInterval(a, a.root(), interval1);
+    applySetScanInterval(b, b.root(), interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1037,7 +1038,8 @@ public:
   }
 
   template <typename SetScanIntervalFunction>
-  void do_test_merge_root_with_rotation(SetScanIntervalFunction functor) {
+  void do_test_merge_root_with_rotation(
+      SetScanIntervalFunction applySetScanInterval) {
     auto detPos = Eigen::Vector3d{1, 0, 0};
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
                            std::vector<Eigen::Quaterniond>(1));
@@ -1054,8 +1056,8 @@ public:
     b.setRotation(b.root(), rot2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    functor(a, a.root(), interval1);
-    functor(b, b.root(), interval2);
+    applySetScanInterval(a, a.root(), interval1);
+    applySetScanInterval(b, b.root(), interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1088,7 +1090,8 @@ public:
   }
 
   template <typename SetScanIntervalFunctor>
-  void do_test_merge_root_multiple(SetScanIntervalFunctor functor) {
+  void
+  do_test_merge_root_multiple(SetScanIntervalFunctor applySetScanInterval) {
     auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
                            std::vector<Eigen::Quaterniond>(1));
     auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
@@ -1107,9 +1110,9 @@ public:
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
-    functor(a, a.root(), interval1);
-    functor(b, b.root(), interval2);
-    functor(c, c.root(), interval3);
+    applySetScanInterval(a, a.root(), interval1);
+    applySetScanInterval(b, b.root(), interval2);
+    applySetScanInterval(c, c.root(), interval3);
     b.merge(c); // Execute the merge
     a.merge(b); // Merge again
     TS_ASSERT(a.isScanning());
