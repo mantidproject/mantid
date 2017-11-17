@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_EXTRACTSPECTRA2_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,7 +35,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL ExtractSpectra2 : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractSpectra2 : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

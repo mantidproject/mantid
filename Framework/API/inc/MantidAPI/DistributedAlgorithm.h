@@ -1,5 +1,5 @@
-#ifndef MANTID_API_PARALLELALGORITHM_H_
-#define MANTID_API_PARALLELALGORITHM_H_
+#ifndef MANTID_API_DISTRIBUTEDALGORITHM_H_
+#define MANTID_API_DISTRIBUTEDALGORITHM_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
@@ -13,7 +13,7 @@ namespace API {
   propagated from input to output. When a specific algorithm is determined to be
   trivially parallel (this is a manual process), the only required change to add
   MPI support is to inherit from this class instead of Algorithm. Inheriting
-  from ParallelAlgorithm instead of from Algorithm provides the necessary
+  from DistributedAlgorithm instead of from Algorithm provides the necessary
   overriden method(s) to allow running an algorithm with MPI. This works under
   the following conditions:
   1. The algorithm must have a single input and a single output workspace.
@@ -22,7 +22,7 @@ namespace API {
   class to support MPI. For example, modifications of the instrument are handled
   in a identical manner on all MPI ranks, without requiring changes to the
   algorithm, other than setting the correct execution mode via the overloads
-  provided by ParallelAlgorithm.
+  provided by DistributedAlgorithm.
 
   @author Simon Heybrock
   @date 2017
@@ -48,7 +48,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ParallelAlgorithm : public Algorithm {
+class MANTID_API_DLL DistributedAlgorithm : public Algorithm {
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
@@ -58,4 +58,4 @@ protected:
 } // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_API_PARALLELALGORITHM_H_ */
+#endif /* MANTID_API_DISTRIBUTEDALGORITHM_H_ */

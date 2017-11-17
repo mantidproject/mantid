@@ -266,8 +266,8 @@ In that case the execution mode can simply be determined from the input workspac
 Here the helper ``Parallel::getCorrespondingExecutionMode`` is used to obtain the 'natural' execution mode from a storage mode, i.e., ``ExecutionMode::Identical`` for ``StorageMode::Cloned``, ``ExecutionMode::Distributed`` for ``StorageMode::Distributed``, and ``ExecutionMode::MasterOnly`` for ``StorageMode::MasterOnly``.
 More complex algorithms may require more complex decision mechanism, e.g., when there is more than one input workspace.
 
-For many algorithms the base class ``API::ParallelAlgorithm`` provides a sufficient default implementation of ``Algorithm::getParallelExecutionMode()``.
-MPI support can simply be enabled by inheriting from ``ParallelAlgorithm`` instead of from ``Algorithm``.
+For many algorithms the base class ``API::DistributedAlgorithm`` provides a sufficient default implementation of ``Algorithm::getParallelExecutionMode()``.
+MPI support can simply be enabled by inheriting from ``DistributedAlgorithm`` instead of from ``Algorithm``.
 Generally this works only for algorithms with a single input and a single output that either process only non-spectrum data or process all spectra independently.
 
 If none of the other virtual methods listed above is implemented, ``Algorithm`` will run the normal ``exec()`` method on all MPI ranks.

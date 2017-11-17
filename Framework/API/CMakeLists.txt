@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/DetectorSearcher.cpp
+	src/DistributedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -112,7 +113,6 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
-	src/ParallelAlgorithm.cpp
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
@@ -192,6 +192,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DetectorSearcher.h
+	inc/MantidAPI/DistributedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -308,7 +309,6 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
-	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h

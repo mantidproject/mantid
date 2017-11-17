@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_CROPTOCOMPONENT_H_
 #define MANTID_ALGORITHMS_CROPTOCOMPONENT_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -31,7 +31,7 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_ALGORITHMS_DLL CropToComponent final
-    : public API::ParallelAlgorithm {
+    : public API::DistributedAlgorithm {
 public:
   const std::string name() const override final;
   int version() const override final;

@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_ROTATEINSTRUMENTCOMPONENT_H_
 #define MANTID_DATAHANDLING_ROTATEINSTRUMENTCOMPONENT_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid {
@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RotateInstrumentComponent : public API::ParallelAlgorithm {
+class DLLExport RotateInstrumentComponent : public API::DistributedAlgorithm {
 public:
   /// Default constructor
   RotateInstrumentComponent();

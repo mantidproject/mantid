@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_EXTRACTSINGLESPECTRUM_H_
 #define MANTID_ALGORITHMS_EXTRACTSINGLESPECTRUM_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -40,7 +40,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ExtractSingleSpectrum : public API::ParallelAlgorithm {
+class DLLExport ExtractSingleSpectrum : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractSingleSpectrum"; }
