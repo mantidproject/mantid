@@ -25,6 +25,7 @@ from HFIR_4Circle_Reduction import peak_integration_utility
 from HFIR_4Circle_Reduction import FindUBUtility
 from HFIR_4Circle_Reduction import message_dialog
 from HFIR_4Circle_Reduction import PreprocessWindow
+from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
 
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
@@ -81,6 +82,7 @@ class MainWindow(QtGui.QMainWindow):
         self._mySinglePeakIntegrationDialog = None
         self._preProcessWindow = None
         self._singlePeakIntegrationDialogBuffer = ''
+        self._dataDownloadDialog = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -108,14 +110,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_apply_setup)
         self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_spice_data)
-        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
-                     self.do_test_url)
-        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
-                     self.do_list_scans)
-        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
-                     self.do_download_spice_data)
-        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_data_access_mode)
         self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_detector_distance)
         self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
@@ -230,14 +224,12 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_select_all_peaks)
 
         # Tab 'Setup'
-        self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
-                     self.do_setup_dir_default)
-        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_cache_dir)
         self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_working_dir)
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_change_instrument_name)
+        self.connect(self.ui.pushButton_browsePreprocessed, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_preprocessed_dir)
 
         # Tab 'UB Matrix'
         self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
@@ -320,6 +312,10 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
                      self.menu_pre_process)
+
+        # menu
+        self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
+                     self.menu_download_data)
 
         # Validator ... (NEXT)
 
@@ -423,8 +419,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.radioButton_ubSelectNoScan.setChecked(True)
 
         # Tab 'Access'
-        self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
-        self.ui.comboBox_mode.setCurrentIndex(0)
+        # self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
+        # self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
@@ -437,6 +433,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
+
+        # about pre-processed data
+        self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
 
         return
 
@@ -563,9 +562,10 @@ class MainWindow(QtGui.QMainWindow):
 
         self._myControl.save_project(project_file_name, ui_dict)
 
-        # TODO/NOW/TODAY - Implement a pop-up dialog for this
+        # show user the message that the saving process is over
         information = 'Project has been saved to {0}\n'.format(project_file_name),
         information += 'Including dictionary keys: {0}'.format(ui_dict)
+        self.pop_one_button_dialog(information)
         print('[INFO]\n{0}'.format(information))
 
         return
@@ -751,7 +751,7 @@ class MainWindow(QtGui.QMainWindow):
     #     """ Add current to ub peaks
     #     :return:
     #     """
-    #     # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
+    #     # TODO//ISSUE/Future - Find out whether this method is still needed
     #     # Add peak
     #     status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
     #                                                      self.ui.lineEdit_scanNumber])
@@ -880,14 +880,13 @@ class MainWindow(QtGui.QMainWindow):
         # get data directory, working directory and data server URL from GUI
         local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
         working_dir = str(self.ui.lineEdit_workDir.text()).strip()
-        data_server = str(self.ui.lineEdit_url.text()).strip()
+        pre_process_dir = str(self.ui.lineEdit_preprocessedDir.text()).strip()
 
         # set to my controller
         status, err_msg = self._myControl.set_local_data_dir(local_data_dir)
         if not status:
             raise RuntimeError(err_msg)
         self._myControl.set_working_directory(working_dir)
-        self._myControl.set_server_url(data_server, check_link=False)
 
         # check
         error_message = ''
@@ -923,35 +922,40 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_workDir.setStyleSheet("color: green;")
         # END-IF-ELSE
 
-        # Set the URL red as it is better not check at this stage. Leave it to user
-        self.ui.lineEdit_url.setStyleSheet("color: black;")
+        # preprocess directory
+        if len(pre_process_dir) == 0:
+            # user does not specify
+            self._myControl.pre_processed_dir = None
+        elif os.path.exists(pre_process_dir):
+            # user specifies a valid directory
+            self._myControl.pre_processed_dir = pre_process_dir
+            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: green;')
+        else:
+            # user specifies a non-exist directory. make an error message
+            self.pop_one_button_dialog('Pre-processed directory {0} ({1}) does not exist.'
+                                       ''.format(pre_process_dir, type(pre_process_dir)))
+            self._myControl.pre_processed_dir = None
+            self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
+        # END-IF
 
         if len(error_message) > 0:
             self.pop_one_button_dialog(error_message)
 
         return
 
-    def do_browse_local_cache_dir(self):
-        """ Browse local cache directory
+    def do_browse_preprocessed_dir(self):
+        """ browse the pre-processed merged scans' directory
         :return:
         """
-        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
-                                                                     'Get Local Cache Directory',
-                                                                     self._homeSrcDir))
+        # determine default directory
+        exp_number_str = str(self.ui.lineEdit_exp.text())
+        default_pp_dir = os.path.join('/HFIR/HB3A/exp{0}/Shared/'.format(exp_number_str))
+        if not os.path.exists(default_pp_dir):
+            default_pp_dir = os.path.expanduser('~')
 
-        # Set local directory to control
-        status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
-        if status is False:
-            self.pop_one_button_dialog(error_message)
-            return
-
-        # Synchronize to local data/spice directory and local cache directory
-        if str(self.ui.lineEdit_localSpiceDir.text()) != '':
-            prev_dir = str(self.ui.lineEdit_localSrcDir.text())
-            self.pop_one_button_dialog('Local data directory was set up as %s' %
-                                       prev_dir)
-        self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
-        self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
+        # use FileDialog to get the directory and set to preprocessedDir
+        pp_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory', default_pp_dir))
+        self.ui.lineEdit_preprocessedDir.setText(pp_dir)
 
         return
 
@@ -1023,31 +1027,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             err_msg = ub_matrix
             self.pop_one_button_dialog(err_msg)
-
-        return
-
-    def do_change_data_access_mode(self):
-        """ Change data access mode between downloading from server and local
-        Event handling methods
-        :return:
-        """
-        new_mode = str(self.ui.comboBox_mode.currentText())
-        self._dataAccessMode = new_mode
-
-        if new_mode.startswith('Local') is True:
-            self.ui.lineEdit_localSpiceDir.setEnabled(True)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
-            self.ui.lineEdit_url.setEnabled(False)
-            self.ui.lineEdit_localSrcDir.setEnabled(False)
-            self.ui.pushButton_browseLocalCache.setEnabled(False)
-            self._allowDownload = False
-        else:
-            self.ui.lineEdit_localSpiceDir.setEnabled(False)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
-            self.ui.lineEdit_url.setEnabled(True)
-            self.ui.lineEdit_localSrcDir.setEnabled(True)
-            self.ui.pushButton_browseLocalCache.setEnabled(True)
-            self._allowDownload = True
 
         return
 
@@ -1167,54 +1146,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_download_spice_data(self):
-        """ Download SPICE data
-        :return:
-        """
-        # Check scans to download
-        scan_list_str = str(self.ui.lineEdit_downloadScans.text())
-        if len(scan_list_str) > 0:
-            # user specifies scans to download
-            valid, scan_list = hb3a_util.parse_int_array(scan_list_str)
-            if valid is False:
-                error_message = scan_list
-                self.pop_one_button_dialog(error_message)
-        else:
-            # Get all scans
-            status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-            if status is False:
-                self.pop_one_button_dialog(ret_obj)
-                return
-            exp_no = ret_obj
-            assert isinstance(exp_no, int)
-            server_url = str(self.ui.lineEdit_url.text())
-            scan_list = hb3a_util.get_scans_list(server_url, exp_no, return_list=True)
-        self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
-
-        # Check location
-        destination_dir = str(self.ui.lineEdit_localSrcDir.text())
-        status, error_message = self._myControl.set_local_data_dir(destination_dir)
-        if status is False:
-            self.pop_one_button_dialog(error_message)
-        else:
-            self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
-
-        # Set up myControl for downloading data
-        exp_no = int(self.ui.lineEdit_exp.text())
-        self._myControl.set_exp_number(exp_no)
-
-        server_url = str(self.ui.lineEdit_url.text())
-        status, error_message = self._myControl.set_server_url(server_url)
-        if status is False:
-            self.pop_one_button_dialog(error_message)
-            return
-
-        # Download
-        self._myControl.download_data_set(scan_list)
-
-        return
-
-    def find_peak_in_scan(self , scan_number, load_spice_hkl):
+    def find_peak_in_scan(self, scan_number, load_spice_hkl):
         """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
@@ -1227,7 +1159,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # merge peak if necessary
         if self._myControl.has_merged_data(exp_no, scan_number) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [])
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [], rewrite=True,
+                                                                preprocessed_dir=self._myControl.pre_processed_dir)
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
@@ -1680,25 +1613,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_list_scans(self):
-        """ List all scans available
-        :return:
-        """
-        # Experiment number
-        exp_no = int(self.ui.lineEdit_exp.text())
-
-        access_mode = str(self.ui.comboBox_mode.currentText())
-        if access_mode == 'Local':
-            spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
-            message = hb3a_util.get_scans_list_local_disk(spice_dir, exp_no)
-        else:
-            url = str(self.ui.lineEdit_url.text())
-            message = hb3a_util.get_scans_list(url, exp_no)
-
-        self.pop_one_button_dialog(message)
-
-        return
-
     def do_load_scan_info(self):
         """ Load SIICE's scan file
         :return:
@@ -2041,7 +1955,8 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                                pt_num_list=[])
+                                                                pt_num_list=[], rewrite=False,
+                                                                preprocessed_dir=self._myControl.pre_processed_dir)
             # find peaks too
             status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
 
@@ -2197,8 +2112,10 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
-        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the completion
-        print('[INFO] Project from file {0} is loaded.'.format(project_file_name))
+        # pop out a dialog to notify the completion
+        message = 'Project from file {0} is loaded.'.format(project_file_name)
+        self.pop_one_button_dialog(message)
+        print('[INFO] {0}'.format(message))
 
         return
 
@@ -3111,21 +3028,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_test_url(self):
-        """ Test whether the root URL provided specified is good
-        """
-        url = str(self.ui.lineEdit_url.text())
-
-        url_is_good, err_msg = hb3a_util.check_url(url)
-        if url_is_good is True:
-            self.pop_one_button_dialog("URL %s is valid." % url)
-            self.ui.lineEdit_url.setStyleSheet("color: green;")
-        else:
-            self.pop_one_button_dialog(err_msg)
-            self.ui.lineEdit_url.setStyleSheet("color: read;")
-
-        return url_is_good
-
     def do_view_data_set_3d(self):
         """
         Launch the sub window to view merged data in 3D.
@@ -3482,6 +3384,23 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def menu_download_data(self):
+        """ launch a dialog for user to download data
+        :return:
+        """
+        # create the dialog instance if it is not created
+        if self._dataDownloadDialog is None:
+            self._dataDownloadDialog = DataDownloadDialog(self)
+
+        # set the experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+        self._dataDownloadDialog.set_experiment_number(exp_number)
+
+        # show the dialog
+        self._dataDownloadDialog.show()
+
+        return
+
     def menu_quit(self):
         """
 
@@ -3491,8 +3410,7 @@ class MainWindow(QtGui.QMainWindow):
         self.close()
 
     def menu_pre_process(self):
-        """
-        blabla
+        """ handling action to trigger menu pre-process
         :return:
         """
         # initialize the pre processing window if it is not initialized
@@ -3507,6 +3425,8 @@ class MainWindow(QtGui.QMainWindow):
         self._preProcessWindow.show()
 
         # setup the parameters
+        # TODO/FUTURE - Add a push button somewhere to force pre-processing menu to synchronize with main UI for
+        # TODO          instrument calibration
         if reset_pre_process_window:
             exp_number = int(str(self.ui.lineEdit_exp.text()))
             # detector size/pixel numbers
@@ -3577,16 +3497,23 @@ class MainWindow(QtGui.QMainWindow):
         :param peak_info:
         :return:
         """
-        # Check requirements
-        assert isinstance(peak_info, r4c.PeakProcessRecord)
+        # Check requirement
+        assert isinstance(peak_info, r4c.PeakProcessRecord), 'Peak information instance must be a PeakProcessedRecord' \
+                                                             'but not a {0}'.format(type(peak_info))
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
+        # wave length
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
-        # TODO/ISSUE/NOW consider user specified
-        wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
+        user_wave_length = self._myControl.get_calibrated_wave_length(exp_number)
+        if user_wave_length is None:
+            # no user specified wave length
+            wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
+        else:
+            # user specified is found
+            wave_length = user_wave_length
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1,
