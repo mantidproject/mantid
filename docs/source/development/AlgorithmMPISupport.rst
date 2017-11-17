@@ -457,6 +457,7 @@ Algorithm                         Supported modes         Comments
 BinaryOperation                   all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
 CalculateChiSquared               MasterOnly, Identical   see ``IFittingAlgorithm``
 CalculateCostFunction             MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateTransmission             MasterOnly, Identical
 CloneWorkspace                    all
 CompressEvents                    all
 CompareWorkspace                  MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used

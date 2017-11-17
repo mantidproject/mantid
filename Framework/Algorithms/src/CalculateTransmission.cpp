@@ -1,7 +1,3 @@
-
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FunctionFactory.h"
