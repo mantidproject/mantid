@@ -39,7 +39,7 @@
 
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
-%Import mantidqt.sip
+%Import mantidqtpython.sip
 
 class MdiSubWindow: QFrame /PyName=MDIWindow/
 {
@@ -1484,9 +1484,9 @@ public:
   MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
     bool clearWindow = false);
-    
-  MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList, 
-                           MantidQt::DistributionFlag distr = MantidQt::DistributionDefault, 
+
+  MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList,
+                           MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                            bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);

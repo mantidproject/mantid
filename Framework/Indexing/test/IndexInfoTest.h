@@ -187,6 +187,90 @@ public:
     TS_ASSERT_EQUALS(info.spectrumDefinitions().get(), defs.get());
   }
 
+  void test_globalSpectrumIndicesFromDetectorIndices_fails_without_spec_defs() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "IndexInfo::globalSpectrumIndicesFromDetectorIndices -- no spectrum "
+        "definitions available");
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_fails_multiple() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(6);
+    specDefs[1].add(7);
+    specDefs[1].add(77);
+    specDefs[2].add(8);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "SpectrumDefinition contains multiple entries. No unique mapping from "
+        "detector to spectrum possible");
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_fails_missing() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    std::vector<SpectrumDefinition> specDefs(3);
+    // Nothing maps to 8
+    specDefs[0].add(6);
+    specDefs[1].add(7);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "Some of the requested detectors do not have a corresponding spectrum");
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    std::vector<SpectrumDefinition> specDefs(3);
+    // Two indices map to same detector.
+    specDefs[0].add(6);
+    specDefs[1].add(6);
+    specDefs[2].add(8);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "Multiple spectra correspond to the same detector");
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict_miss() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    std::vector<SpectrumDefinition> specDefs(3);
+    // Two indices map to same detector, but additionally one is missing.
+    specDefs[0].add(6);
+    specDefs[1].add(6);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "Multiple spectra correspond to the same detector");
+  }
+
+  void test_globalSpectrumIndicesFromDetectorIndices() {
+    IndexInfo info(3);
+    std::vector<size_t> detectorIndices{6, 8};
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(6);
+    specDefs[1].add(7);
+    specDefs[2].add(8);
+    info.setSpectrumDefinitions(specDefs);
+    const auto &indices =
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices);
+    TS_ASSERT_EQUALS(indices.size(), detectorIndices.size());
+    TS_ASSERT_EQUALS(indices[0], 0);
+    TS_ASSERT_EQUALS(indices[1], 2);
+  }
+
   void test_StorageMode_Cloned() {
     runParallel(run_StorageMode_Cloned);
     // Trivial: Run with one partition.

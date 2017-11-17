@@ -693,7 +693,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
-    def _process(self):
+    def _process(self):  # noqa: C901
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
@@ -758,7 +758,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                                     thetaRun = thetaRun[0]
                                 if not theta_in:
                                     theta_in = getLogValue(thetaRun, "Theta")
-                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2*theta_in)
+                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2 * theta_in)
 
                                 # Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
@@ -969,7 +969,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                 name += '_' + str(t)
         return name
 
-    def _do_run(self, runno, row, which):
+    def _do_run(self, runno, row, which):  # noqa: C901
         """
         Run quick on the given run and row
         """

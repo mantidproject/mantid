@@ -1,7 +1,7 @@
 #ifndef PEAKSWORKSPACEWIDGET_H
 #define PEAKSWORKSPACEWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"

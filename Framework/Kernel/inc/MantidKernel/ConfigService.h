@@ -255,12 +255,6 @@ public:
   // Starts up the logging
   void configureLogging();
 
-  /// Return true if ParaView plugins are available
-  bool pvPluginsAvailable() const;
-
-  /// Return the path to the pv plugins
-  const std::string getPVPluginsPath() const;
-
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
 

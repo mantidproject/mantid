@@ -345,7 +345,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # load dft data for one k point
         clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsModules.AbinsParameters.dft_group)
+                                      group_name=AbinsModules.AbinsParameters.ab_initio_group)
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]

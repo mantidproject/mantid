@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import sys
 
+import mantid #noqa
 from  Muon import load_utils
 from  Muon import maxent_presenter
 from  Muon import maxent_view
