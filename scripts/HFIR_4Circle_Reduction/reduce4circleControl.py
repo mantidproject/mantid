@@ -1719,9 +1719,20 @@ class CWSCDReductionControl(object):
         else:
             md_file_path = self._preprocessedInfoDict[scan_number]['MD']
 
+        # check
+        if os.path.exists(md_file_path) is False:
+            print ('[WARNING] MD file {0} does not exist.'.format(md_file_path))
+            return False
+
+        # load and check
         status = False
         try:
+            # load
+            mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
+            # check
             status = AnalysisDataService.doesExist(output_ws_name)
+            print ('[INFO] {0} is loaded from {1} with status {2}'
+                   ''.format(output_ws_name, md_file_path, status))
         except RuntimeError as run_err:
             print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
         except OSError as run_err:
@@ -1731,28 +1742,13 @@ class CWSCDReductionControl(object):
 
         return status
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
+    def _process_pt_list(self, exp_no, scan_no, pt_num_list):
         """
-        Merge Pts in Scan
-        All the workspaces generated as internal results will be grouped
-        Requirements:
-          1. target_frame must be either 'q-sample' or 'hkl'
-          2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
-        Guarantees: An MDEventWorkspace is created containing merged Pts.
+        convert list of Pt (in int) to a string like a list of integer
         :param exp_no:
         :param scan_no:
-        :param pt_num_list: If empty, then merge all Pt. in the scan
-        :param rewrite: if True, then the data will be re-merged regardless workspace exists or not
-        :param preprocessed_dir: If None, then merge Pts. Otherwise, try to search and load preprocessed data first
-        :return: (boolean, error message) # (merged workspace name, workspace group name)
+        :return:
         """
-        # Check
-        if exp_no is None:
-            exp_no = self._expNumber
-        assert isinstance(exp_no, int) and isinstance(scan_no, int)
-        assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
-
-        # Get list of Pt.
         if len(pt_num_list) > 0:
             # user specified
             pt_num_list = pt_num_list
@@ -1778,6 +1774,61 @@ class CWSCDReductionControl(object):
         # END-FOR (pt)
         if pt_list_str == '-1':
             return False, err_msg
+
+        return True, (pt_num_list, pt_list_str)
+
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
+        """
+        Merge Pts in Scan
+        All the workspaces generated as internal results will be grouped
+        Requirements:
+          1. target_frame must be either 'q-sample' or 'hkl'
+          2. pt_list must be a list.  an empty list means to merge all Pts. in the scan
+        Guarantees: An MDEventWorkspace is created containing merged Pts.
+        :param exp_no:
+        :param scan_no:
+        :param pt_num_list: If empty, then merge all Pt. in the scan
+        :param rewrite: if True, then the data will be re-merged regardless workspace exists or not
+        :param preprocessed_dir: If None, then merge Pts. Otherwise, try to search and load preprocessed data first
+        :return: (boolean, error message) # (merged workspace name, workspace group name)
+        """
+        # Check
+        if exp_no is None:
+            exp_no = self._expNumber
+        assert isinstance(exp_no, int) and isinstance(scan_no, int)
+        assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
+
+        # Get list of Pt.
+        status, ret_obj = self._process_pt_list(exp_no, scan_no, pt_num_list)
+        if not status:
+            error_msg = ret_obj
+            return False, error_msg
+        pt_num_list, pt_list_str = ret_obj
+        # if len(pt_num_list) > 0:
+        #     # user specified
+        #     pt_num_list = pt_num_list
+        # else:
+        #     # default: all Pt. of scan
+        #     status, pt_num_list = self.get_pt_numbers(exp_no, scan_no)
+        #     if status is False:
+        #         err_msg = pt_num_list
+        #         return False, err_msg
+        # # END-IF-ELSE
+        #
+        # # construct a list of Pt as the input of CollectHB3AExperimentInfo
+        # pt_list_str = '-1'  # header
+        # err_msg = ''
+        # for pt in pt_num_list:
+        #     # Download file
+        #     try:
+        #         self.download_spice_xml_file(scan_no, pt, exp_no=exp_no, overwrite=False)
+        #     except RuntimeError as e:
+        #         err_msg += 'Unable to download xml file for pt %d due to %s\n' % (pt, str(e))
+        #         continue
+        #     pt_list_str += ',%d' % pt
+        # # END-FOR (pt)
+        # if pt_list_str == '-1':
+        #     return False, err_msg
 
         # create output workspace's name
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)

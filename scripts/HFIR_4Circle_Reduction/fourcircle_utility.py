@@ -559,7 +559,8 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     # check
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
+    assert isinstance(pt_list, list), 'Pt list {0} must be a list but not a {1}' \
+                                      ''.format(pt_list, type(pt_list))
 
     if len(pt_list) == 0:
         raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
