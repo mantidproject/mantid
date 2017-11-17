@@ -903,9 +903,24 @@ def read_pre_process_record(file_name):
     scan_record_dict = dict()
     with open(file_name, 'r') as csv_file:
         reader = csv.DictReader(csv_file)
-        for row in reader:
-            scan_number = row['Scan']
-            scan_record_dict[scan_number] = row
+        for row_dict in reader:
+            scan_number = int(row_dict['Scan'])
+
+            if len(row_dict['DetSampleDistance']) > 0:
+                row_dict['DetSampleDistance'] = float(row_dict['DetSampleDistance'])
+            else:
+                row_dict['DetSampleDistance'] = None
+
+            if len(row_dict['WaveLength']) > 0:
+                row_dict['WaveLength'] = float(row_dict['WaveLength'])
+            else:
+                row_dict['WaveLength'] = None
+
+            center_str = row_dict['Center'].replace('(', '').replace(')', '').replace(',', ' ').strip()
+            tup_str = center_str.split()
+            row_dict['Center'] = int(tup_str[0]), int(tup_str[1])
+
+            scan_record_dict[scan_number] = row_dict
     # END-WITH
 
     return scan_record_dict

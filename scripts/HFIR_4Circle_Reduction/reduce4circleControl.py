@@ -1656,6 +1656,8 @@ class CWSCDReductionControl(object):
         """
         # no record is found. it should not happen!
         if scan_number not in self._preprocessedInfoDict:
+            print ('[DB...BAT] Scan {0} is not in pre-processed scan information dictionary. keys are '
+                   '{1}'.format(scan_number, self._preprocessedInfoDict.keys()))
             return False
 
         # check others
@@ -1670,9 +1672,9 @@ class CWSCDReductionControl(object):
         wavelength = self.get_calibrated_wave_length(exp_number)
         record_lambda = self._preprocessedInfoDict[scan_number]['WaveLength']
         if type(record_lambda) != type(wavelength):
-            unmatch_score += 10
-        elif wavelength is not None and abs(wavelength - record_lambda) > 1.E-5:
             unmatch_score += 20
+        elif wavelength is not None and abs(wavelength - record_lambda) > 1.E-5:
+            unmatch_score += 40
 
         # detector distance
         det_sample_distance = self.get_calibrated_det_sample_distance(exp_number)
@@ -1683,7 +1685,7 @@ class CWSCDReductionControl(object):
             unmatch_score += 400
 
         if unmatch_score > 0:
-            print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}' \
+            print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}'
                   ''.format(exp_number, scan_number, unmatch_score))
             return False
 
@@ -1715,11 +1717,10 @@ class CWSCDReductionControl(object):
         if self._preprocessedInfoDict is None or scan_number not in self._preprocessedInfoDict:
             md_file_path = fourcircle_utility.pre_processed_file_name(exp_number, scan_number, md_dir)
         else:
-            md_file_path = self._preprocessedInfoDict[scan_number]
+            md_file_path = self._preprocessedInfoDict[scan_number]['MD']
 
         status = False
         try:
-            mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
             status = AnalysisDataService.doesExist(output_ws_name)
         except RuntimeError as run_err:
             print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
@@ -1782,10 +1783,14 @@ class CWSCDReductionControl(object):
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
 
         # find out the cases that rewriting is True
+        print ('[DB...BAT] Rewrite = {0}'.format(rewrite))
+
         if not rewrite:
+            print ('[DB...BAT] pre-processed dir: {0}'.format(preprocessed_dir))
+
             if AnalysisDataService.doesExist(out_q_name):
                 # not re-write, target workspace exists
-                rewrite = False
+                pass
             elif preprocessed_dir is not None:
                 # not re-write, target workspace does not exist, attempt to load from preprocessed
                 if self.is_calibration_match(exp_no, scan_no):
@@ -1794,6 +1799,12 @@ class CWSCDReductionControl(object):
                                                               md_dir=preprocessed_dir,
                                                               output_ws_name=out_q_name)
                     rewrite = not data_loaded
+                else:
+                    rewrite = True
+            else:
+                print ('[WARNING] Target MDWorkspace does not exist. And preprocessed directory is not given '
+                       '. Why re-write flag is turned off in the first place?')
+                rewrite = True
             # END-IF (ADS)
         # END-IF (rewrite)
 

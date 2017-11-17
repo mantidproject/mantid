@@ -99,7 +99,9 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         """
         # check inputs
         assert isinstance(row_number, int), 'Row number {0} must be an integer.'.format(row_number)
-        assert isinstance(status, str), 'Merging status must be a string.'
+        status = str(status)
+        if not isinstance(status, str):
+            print ('[DB] status is an instance of {0}.'.format(type(status)))
 
         self.update_cell_value(row_number, self._iColStatus, status)
 
