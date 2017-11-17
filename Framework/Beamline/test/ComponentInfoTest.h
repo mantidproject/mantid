@@ -14,9 +14,11 @@ using namespace Mantid::Beamline;
 
 namespace {
 
+using PosVec = std::vector<Eigen::Vector3d>;
+using RotVec = std::vector<Eigen::Quaterniond>;
+
 std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
-makeFlat(std::vector<Eigen::Vector3d> detPositions,
-         std::vector<Eigen::Quaterniond> detRotations) {
+makeFlat(PosVec detPositions, RotVec detRotations) {
   std::vector<std::pair<size_t, size_t>> componentRanges;
   auto rootIndex = detPositions.size();
   componentRanges.push_back(
@@ -32,16 +34,15 @@ makeFlat(std::vector<Eigen::Vector3d> detPositions,
       std::vector<size_t>(detPositions.size() + 1, rootIndex));
   std::vector<std::pair<size_t, size_t>> detectorRanges(
       1, std::make_pair<size_t, size_t>(0, detPositions.size()));
-  auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+  auto positions = boost::make_shared<PosVec>(
       1, Eigen::Vector3d{0, 0, 0}); // 1 position only for root
-  auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+  auto rotations = boost::make_shared<RotVec>(
       1,
       Eigen::Quaterniond::Identity()); // 1 rotation only for root
 
   // Component scale factors
-  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
-      std::vector<Eigen::Vector3d>(detPositions.size() + 1,
-                                   Eigen::Vector3d{1, 1, 1}));
+  auto scaleFactors = boost::make_shared<PosVec>(
+      PosVec(detPositions.size() + 1, Eigen::Vector3d{1, 1, 1}));
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
@@ -62,9 +63,8 @@ makeFlat(std::vector<Eigen::Vector3d> detPositions,
   return std::make_tuple(componentInfo, detectorInfo);
 }
 
-std::tuple<boost::shared_ptr<ComponentInfo>, std::vector<Eigen::Vector3d>,
-           std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
-           std::vector<Eigen::Quaterniond>, boost::shared_ptr<DetectorInfo>>
+std::tuple<boost::shared_ptr<ComponentInfo>, PosVec, RotVec, PosVec, RotVec,
+           boost::shared_ptr<DetectorInfo>>
 makeTreeExampleAndReturnGeometricArguments() {
 
   /*
@@ -76,14 +76,13 @@ makeTreeExampleAndReturnGeometricArguments() {
   */
 
   // Set detectors at different positions
-  std::vector<Eigen::Vector3d> detPositions;
+  PosVec detPositions;
   detPositions.emplace_back(1, -1, 0);
   detPositions.emplace_back(2, -1, 0);
   detPositions.emplace_back(3, -1, 0);
   // Set all Detectors rotated 45 degrees around Y
-  std::vector<Eigen::Quaterniond> detRotations(
-      3, Eigen::Quaterniond(
-             Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitY())));
+  RotVec detRotations(3, Eigen::Quaterniond(Eigen::AngleAxisd(
+                             M_PI / 4, Eigen::Vector3d::UnitY())));
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   auto bankSortedDetectorIndices =
@@ -107,18 +106,18 @@ makeTreeExampleAndReturnGeometricArguments() {
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
   // Set non-detectors at different positions
-  auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+  auto compPositions = boost::make_shared<PosVec>();
   compPositions->emplace_back(1, -1, 0);
   compPositions->emplace_back(1, -1, 0);
 
   // Set non-detectors at different rotations
-  auto compRotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+  auto compRotations = boost::make_shared<RotVec>();
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
 
   // Component scale factors
-  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
-      std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
+  auto scaleFactors =
+      boost::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
 
   // Rectangular bank flag
   auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
@@ -153,8 +152,8 @@ makeTreeExample() {
   | 0  | 2
   */
 
-  std::vector<Eigen::Vector3d> detPositions(3);
-  std::vector<Eigen::Quaterniond> detRotations(3);
+  PosVec detPositions(3);
+  RotVec detRotations(3);
   auto bankSortedDetectorIndices =
       boost::make_shared<const std::vector<size_t>>(
           std::vector<size_t>{0, 2, 1});
@@ -172,15 +171,15 @@ makeTreeExample() {
   componentRanges.push_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
-  auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+  auto positions = boost::make_shared<PosVec>(
       2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
-  auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+  auto rotations = boost::make_shared<RotVec>(
       2,
       Eigen::Quaterniond::Identity()); // 2 rotations provided. 2 non-detectors
 
   // Component scale factors
-  auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
-      std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
+  auto scaleFactors =
+      boost::make_shared<PosVec>(PosVec(5, Eigen::Vector3d{1, 1, 1}));
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
@@ -201,6 +200,7 @@ makeTreeExample() {
   return std::make_tuple(componentInfo, detectorInfo);
 }
 
+// Helper to clone and resync both Info objects
 std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
 cloneInfos(const std::tuple<boost::shared_ptr<ComponentInfo>,
                             boost::shared_ptr<DetectorInfo>> &in) {
@@ -259,9 +259,9 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
-    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(3);
+    auto positions = boost::make_shared<PosVec>();
+    auto rotations = boost::make_shared<RotVec>();
+    auto scaleFactors = boost::make_shared<PosVec>(3);
     auto isRectangularBank = boost::make_shared<std::vector<bool>>();
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
@@ -294,12 +294,10 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::move(innerComponentRanges));
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-        1); // 1 position provided
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-        0); // 0 rotations provided
+    auto positions = boost::make_shared<PosVec>(1); // 1 position provided
+    auto rotations = boost::make_shared<RotVec>(0); // 0 rotations provided
 
-    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    auto scaleFactors = boost::make_shared<PosVec>();
     auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
@@ -329,12 +327,10 @@ public:
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-        1); // 1 position provided
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-        1); // 1 rotation provided
+    auto positions = boost::make_shared<PosVec>(1); // 1 position provided
+    auto rotations = boost::make_shared<RotVec>(1); // 1 rotation provided
 
-    auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    auto scaleFactors = boost::make_shared<PosVec>();
     // Only one component. So single empty component range.
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
@@ -355,10 +351,10 @@ public:
     // Resulting ComponentInfo
     ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
-    std::vector<Eigen::Vector3d> detPositions = std::get<1>(allOutputs);
-    std::vector<Eigen::Quaterniond> detRotations = std::get<2>(allOutputs);
-    std::vector<Eigen::Vector3d> compPositions = std::get<3>(allOutputs);
-    std::vector<Eigen::Quaterniond> compRotations = std::get<4>(allOutputs);
+    PosVec detPositions = std::get<1>(allOutputs);
+    RotVec detRotations = std::get<2>(allOutputs);
+    PosVec compPositions = std::get<3>(allOutputs);
+    RotVec compRotations = std::get<4>(allOutputs);
 
     /*
      * Remember. We have 3 detectors. So component index 3 corresponds to
@@ -385,13 +381,10 @@ public:
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
     ComponentInfo &info = *std::get<0>(allOutputs);
     // Arguments to ComponentInfo for geometric aspects
-    std::vector<Eigen::Vector3d> originalDetPositions = std::get<1>(allOutputs);
-    std::vector<Eigen::Quaterniond> originalDetRotations =
-        std::get<2>(allOutputs);
-    std::vector<Eigen::Vector3d> originalCompPositions =
-        std::get<3>(allOutputs);
-    std::vector<Eigen::Quaterniond> originalCompRotations =
-        std::get<4>(allOutputs);
+    PosVec originalDetPositions = std::get<1>(allOutputs);
+    RotVec originalDetRotations = std::get<2>(allOutputs);
+    PosVec originalCompPositions = std::get<3>(allOutputs);
+    RotVec originalCompRotations = std::get<4>(allOutputs);
 
     // Change the position of the root.
 
@@ -839,10 +832,8 @@ public:
 
   void test_merge_fail_size() {
 
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(2),
-                           std::vector<Eigen::Quaterniond>(2));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(2), RotVec(2));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
     a.setScanInterval(0, {0, 1});
@@ -854,12 +845,9 @@ public:
   }
 
   void test_merge_fail_no_intervals() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1), RotVec(1));
+    auto infos3 = makeFlat(PosVec(1), RotVec(1));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
     auto &c = *std::get<0>(infos3);
@@ -877,10 +865,8 @@ public:
   }
 
   void test_merge_fail_sync_async_mismatch() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1), RotVec(1));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
     a.setScanInterval(0, {0, 1});
@@ -898,17 +884,15 @@ public:
   }
 
   void test_merge_identical_async() {
-    auto infos1 = makeFlat(
-        std::vector<Eigen::Vector3d>(1, Eigen::Vector3d(0, 0, 0)),
-        std::vector<Eigen::Quaterniond>(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                               0, Eigen::Vector3d::UnitY()))));
+    auto infos1 = makeFlat(PosVec(1, Eigen::Vector3d(0, 0, 0)),
+                           RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                         0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(0, {0, 10});
 
-    auto infos2 = makeFlat(
-        std::vector<Eigen::Vector3d>(1, Eigen::Vector3d(0, 0, 0)),
-        std::vector<Eigen::Quaterniond>(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                               0, Eigen::Vector3d::UnitY()))));
+    auto infos2 = makeFlat(PosVec(1, Eigen::Vector3d(0, 0, 0)),
+                           RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                         0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &b = *std::get<0>(infos2);
     b.setScanInterval(0, {0, 10});
 
@@ -920,8 +904,7 @@ public:
   }
 
   void test_merge_identical_interval_failures() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(a.root(), {0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
@@ -959,8 +942,7 @@ public:
   }
 
   void test_merge_fail_partial_overlap() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval(a.root(), {0, 10});
 
@@ -981,10 +963,8 @@ public:
   }
 
   void test_merge_detectors_async() {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -1025,10 +1005,8 @@ public:
   template <typename SetScanIntervalFunctor>
   void
   do_test_merge_root_with_offset(SetScanIntervalFunctor applySetScanInterval) {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -1077,10 +1055,8 @@ public:
   void do_test_merge_root_with_rotation(
       SetScanIntervalFunction applySetScanInterval) {
     auto detPos = Eigen::Vector3d{1, 0, 0};
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1, detPos),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1, detPos), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1, detPos), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -1128,12 +1104,9 @@ public:
   template <typename SetScanIntervalFunctor>
   void
   do_test_merge_root_multiple(SetScanIntervalFunctor applySetScanInterval) {
-    auto infos1 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos2 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
-    auto infos3 = makeFlat(std::vector<Eigen::Vector3d>(1),
-                           std::vector<Eigen::Quaterniond>(1));
+    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos2 = makeFlat(PosVec(1), RotVec(1));
+    auto infos3 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     ComponentInfo &c = *std::get<0>(infos3);
