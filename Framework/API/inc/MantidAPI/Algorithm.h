@@ -10,13 +10,11 @@
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
-#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <MantidIndexing/SpectrumIndexSet.h>
 
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
@@ -37,6 +35,9 @@ class Value;
 }
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumIndexSet;
+}
 namespace Parallel {
 class Communicator;
 }
@@ -201,7 +202,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const boost::shared_ptr<T1> &wksp,
                                    IndexType type, const T2 &list);
@@ -211,7 +212,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const std::string &wsName, IndexType type,
                                    const T2 &list);
@@ -291,6 +292,10 @@ public:
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1);
+  void setupAsChildAlgorithm(boost::shared_ptr<Algorithm> algorithm,
+                             const double startProgress = -1.,
+                             const double endProgress = -1.,
+                             const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.

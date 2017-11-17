@@ -110,7 +110,7 @@ void Algorithm::setWorkspaceInputProperties(const std::string &name,
 
 /** Mechanism for setting the index property with a workspace shared pointer.
 * This method can only be used if T1 is convertible to a MatrixWorkspace and
-* T2 is either std::string or std::vector<int>
+* T2 is either std::string or std::vector<int64_t>
 
 @param name Property name
 @param wsName Workspace name as string
