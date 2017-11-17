@@ -5,7 +5,6 @@ import os
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
-import HFIR_4Circle_Reduction.guiutility as gutil
 from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
 
 
@@ -228,4 +227,3 @@ class DataDownloadDialog(QtGui.QDialog):
         self._expNumber = exp_number
 
         return
-

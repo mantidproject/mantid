@@ -2058,29 +2058,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def load_pre_processed_data(self, scan_number):
-        """
-        load pre-processed data
-        :param scan_number:
-        :return:
-        """
-        # check whether it is an option to load
-        if self.ui.checkBox_searchPreprocessedFirst.isChecked() is False:
-            return False
-
-        # locate the pre-processed data
-        pp_dir = str(self.ui.lineEdit_preprocessedDir.text())
-        pp_file_name = os.path.join(pp_dir, '{0}.nxs'.format(scan_number))
-        if not os.path.exists(pp_file_name):
-            return None
-
-        # load
-        exp_number = int(self.ui.lineEdit_exp.text())
-        md_ws_name = self._myControl.load_merged_scan(exp_number, scan_number, pp_file_name)
-
-        return md_ws_name
-
-
     def load_project(self, project_file_name):
         """
         Load a saved project with all the setup loaded to memory
