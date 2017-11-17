@@ -1646,6 +1646,51 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
+    def is_calibration_match(self, exp_number, scan_number):
+        """
+        check whether the pre-processed data has a set of matching calibrated parameters comparing to
+        the current one
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        # no record is found. it should not happen!
+        if scan_number not in self._preprocessedInfoDict:
+            return False
+
+        # check others
+        unmatch_score = 0
+
+        # center
+        center_x, center_y = self.get_calibrated_det_center(exp_number)
+        if (center_x, center_y) != self._preprocessedInfoDict[scan_number]['Center']:
+            unmatch_score += 2
+
+        # wave length
+        wavelength = self.get_calibrated_wave_length(exp_number)
+        record_lambda = self._preprocessedInfoDict[scan_number]['WaveLength']
+        if type(record_lambda) != type(wavelength):
+            unmatch_score += 10
+        elif wavelength is not None and abs(wavelength - record_lambda) > 1.E-5:
+            unmatch_score += 20
+
+        # detector distance
+        det_sample_distance = self.get_calibrated_det_sample_distance(exp_number)
+        record_distance = self._preprocessedInfoDict[scan_number]['DetSampleDistance']
+        if type(det_sample_distance) != type(record_distance):
+            unmatch_score += 200
+        elif det_sample_distance is not None and abs(det_sample_distance - record_distance) > 1.E-5:
+            unmatch_score += 400
+
+        if unmatch_score > 0:
+            print('[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}' \
+                  ''.format(exp_number, scan_number, unmatch_score))
+            return False
+
+        print('[INFO] Exp {0} Scan {1} has a matched calibrated record from pre-processed data.')
+
+        return True
+
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
         """ load preprocessed scan from hard disk
         :return:
@@ -1743,11 +1788,12 @@ class CWSCDReductionControl(object):
                 rewrite = False
             elif preprocessed_dir is not None:
                 # not re-write, target workspace does not exist, attempt to load from preprocessed
-                data_loaded = self.load_preprocessed_scan(exp_number=exp_no,
-                                                          scan_number=scan_no,
-                                                          md_dir=preprocessed_dir,
-                                                          output_ws_name=out_q_name)
-                rewrite = not data_loaded
+                if self.is_calibration_match(exp_no, scan_no):
+                    data_loaded = self.load_preprocessed_scan(exp_number=exp_no,
+                                                              scan_number=scan_no,
+                                                              md_dir=preprocessed_dir,
+                                                              output_ws_name=out_q_name)
+                    rewrite = not data_loaded
             # END-IF (ADS)
         # END-IF (rewrite)
 
