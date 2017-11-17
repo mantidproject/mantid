@@ -312,9 +312,9 @@ public:
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
-      auto counts = m_hist.frequencies();
+      auto counts = m_hist.counts();
       auto frequencies = m_hist.frequencies();
-      for (size_t j = 0; j < nHists; ++j)
+      for (size_t j = 0; j < histSize; ++j)
         if (counts[j] > histSize - 5)
           total += frequencies[j];
     }
