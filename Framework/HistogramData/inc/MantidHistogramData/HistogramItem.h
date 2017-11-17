@@ -64,8 +64,6 @@ public:
     const auto &x = m_histogram.x();
     if (xModeIsPoints()) {
       auto numPoints = m_histogram.size();
-      double lower = 0;
-      double upper = 0;
       if (m_index == 0) {
         // first point
         return x[1] - x[0];
@@ -76,7 +74,6 @@ public:
         // everything inbetween
         return 0.5 * (x[m_index + 1] - x[m_index - 1]);
       }
-      return upper - lower;
     } else {
       return x[m_index + 1] - x[m_index];
     }
