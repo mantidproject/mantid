@@ -517,6 +517,7 @@ LoadSwans                         Identical               see ``IFileLoader``
 LoadTBL                           Identical               see ``IFileLoader``
 LoadTOFRawNexus                   Identical               see ``IFileLoader``
 MaskBins                          all
+MaskSpectra                       all
 Minus                             all                     see ``BinaryOperation``
 MoveInstrumentComponent           all
 Multiply                          all                     see ``BinaryOperation``
