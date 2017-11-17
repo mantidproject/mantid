@@ -110,6 +110,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
@@ -307,6 +308,7 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
