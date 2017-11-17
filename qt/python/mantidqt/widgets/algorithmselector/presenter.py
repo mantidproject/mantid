@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from mantid import AlgorithmFactory
+from .model import Model
 
 
 class IAlgorithmSelectorView(object):
@@ -10,6 +10,8 @@ class IAlgorithmSelectorView(object):
     def __init__(self):
         # Actual view creates its ui elements
         self.init_ui()
+        # A dict key for retrieving algorithms that have no sub-categories
+        self.algorithm_key = Model.algorithm_key
         # The view will have a reference to the Presenter
         self.presenter = Presenter(self)
 
@@ -27,5 +29,6 @@ class Presenter(object):
     """
     def __init__(self, view):
         self.view = view
-        descriptors = AlgorithmFactory.getDescriptors(False)
-        self.view.populate_ui(descriptors)
+        self.model = Model(self)
+        algorithm_data = self.model.get_algorithm_data()
+        self.view.populate_ui(algorithm_data)
