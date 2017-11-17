@@ -432,7 +432,6 @@ class MergePeaksThread(QThread):
             merged_ws_name = None
             out_file_name = 'No File To Save'
             try:
-                # TODO/ISSUE - rewrite and preprocessed_dir shall be set by caller of this class
                 status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                 scan_no=scan_number,
                                                                                 pt_num_list=pt_number_list,

@@ -24,6 +24,7 @@ import random
 import os
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
+import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
@@ -65,6 +66,8 @@ class CWSCDReductionControl(object):
         self._dataDir = None
         self._workDir = '/tmp'
         self._preprocessedDir = None
+        # dictionary for pre-processed scans.  key = scan number, value = dictionary for all kinds of information
+        self._preprocessedInfoDict = None
 
         self._myServerURL = ''
 
@@ -107,8 +110,6 @@ class CWSCDReductionControl(object):
 
         # Record for merged scans
         self._mergedWSManager = list()
-        # calibration information for merged scans.  key = scan number, value = merging
-        self._scanCalibrationDict = dict()
         # Region of interest: key = (experiment, scan), value = 2-tuple of 2-tuple: ( (lx, ly), (ux, uy))
         self._roiDict = dict()
 
@@ -149,9 +150,21 @@ class CWSCDReductionControl(object):
         :param dir_name:
         :return:
         """
-        assert isinstance(dir_name, str) or dir_name is None, 'blabla'
+        # check
+        assert isinstance(dir_name, str) or dir_name is None, 'Directory {0} must be None or string.'.format(dir_name)
 
+        if os.path.exists(dir_name) is False:
+            raise RuntimeError('Pre-processed scans directory {0} does not exist!'.format(dir_name))
+
+        # set
         self._preprocessedDir = dir_name
+
+        # load pre-processed scans' record file if possible
+        if self._expNumber is None:
+            raise RuntimeError('Experiment number {0} must be set up before pre-processesd scan directory is set.')
+        record_file_name = fourcircle_utility.pre_processed_record_file(self._expNumber, self._preprocessedDir)
+        if os.path.exists(record_file_name):
+            self._preprocessedInfoDict = fourcircle_utility.read_pre_process_record(record_file_name)
 
         return
 
@@ -588,12 +601,13 @@ class CWSCDReductionControl(object):
         return self._myUBMatrixDict[exp_number]
 
     def get_calibrated_wave_length(self, exp_number):
-        """
-
+        """ Get the user specified (i.e., calibrated) wave length for a specific experiment
         :param exp_number:
         :return:
         """
-        # blabla TODO check ..
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment numbe {0} must be an integer but not a {1}' \
+                                            ''.format(exp_number, type(exp_number))
 
         if exp_number not in self._userWavelengthDict:
             return None
@@ -1632,18 +1646,32 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
-    # TEST TODO/ - Just Implemented
     def load_preprocessed_scan(self, exp_number, scan_number, md_dir, output_ws_name):
-        """
-
+        """ load preprocessed scan from hard disk
         :return:
         """
-        # check inputs  TODO/ASAP
-        # blabla
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(md_dir, str), 'MD file directory {0} ({1}) must be a string.' \
+                                        ''.format(md_dir, type(md_dir))
+        assert isinstance(output_ws_name, str), 'Output workspace name {0} ({1}) must be a string.' \
+                                                ''.format(output_ws_name, type(output_ws_name))
 
-        # TODO/NICE - refactor the workspace name definition together with pre-processed file writing method
-        ws_name = 'Exp{0}_Scan{1}_MD'.format(exp_number, scan_number)
-        md_file_path = os.path.join(md_dir, ws_name + '.nxs')
+        if os.path.exists(md_dir) is False:
+            raise RuntimeError('Pre-processed directory {0} does not exist.'.format(md_dir))
+
+        # ws_name = 'Exp{0}_Scan{1}_MD'.format(exp_number, scan_number)
+        # md_file_path = os.path.join(md_dir, ws_name + '.nxs')
+
+        # 2-ways to get file name
+        if self._preprocessedInfoDict is None or scan_number not in self._preprocessedInfoDict:
+            md_file_path = fourcircle_utility.pre_processed_file_name(exp_number, scan_number, md_dir)
+        else:
+            md_file_path = self._preprocessedInfoDict[scan_number]
+
         status = False
         try:
             mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=output_ws_name)
@@ -1778,9 +1806,6 @@ class CWSCDReductionControl(object):
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
 
-                # TEST TODO/NOW - record all the shift, return and for further check!
-                self._scanCalibrationDict[scan_no] = alg_args
-
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
 
@@ -1893,11 +1918,13 @@ class CWSCDReductionControl(object):
 
     def get_calibrated_det_center(self, exp_number):
         """
-
+        get calibrated/user-specified detector center or the default center
         :param exp_number:
-        :return:
+        :return: 2-tuple (int, int) as pixel ID in X and Y directory
         """
-        # blabla TODO .. check and
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer.' \
+                                            ''.format(exp_number, type(exp_number))
 
         if exp_number not in self._detCenterDict:
             return self._defaultDetectorCenter
@@ -1953,7 +1980,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :return:
         """
-        # blabla TODO
+        # check inputs
         assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
 
         if exp_number not in self._detSampleDistanceDict:
@@ -2406,7 +2433,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(tag, str)
+        assert isinstance(tag, str), 'Tag must be a string'
         assert len(region_of_interest) == 2
         assert len(region_of_interest[0]) == 2
         assert len(region_of_interest[1]) == 2

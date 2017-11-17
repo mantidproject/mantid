@@ -923,14 +923,16 @@ class MainWindow(QtGui.QMainWindow):
         # END-IF-ELSE
 
         # preprocess directory
-        # blabla ... doc
         if len(pre_process_dir) == 0:
+            # user does not specify
             self._myControl.pre_processed_dir = None
         elif os.path.exists(pre_process_dir):
+            # user specifies a valid directory
             self._myControl.pre_processed_dir = pre_process_dir
             self.ui.lineEdit_preprocessedDir.setStyleSheet('color: green;')
         else:
-            self.pop_one_button_dialog('Pre-processed dictory {0} ({1}) does not exist.'
+            # user specifies a non-exist directory. make an error message
+            self.pop_one_button_dialog('Pre-processed directory {0} ({1}) does not exist.'
                                        ''.format(pre_process_dir, type(pre_process_dir)))
             self._myControl.pre_processed_dir = None
             self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
@@ -3431,8 +3433,7 @@ class MainWindow(QtGui.QMainWindow):
         self.close()
 
     def menu_pre_process(self):
-        """
-        blabla
+        """ handling action to trigger menu pre-process
         :return:
         """
         # initialize the pre processing window if it is not initialized
@@ -3447,6 +3448,8 @@ class MainWindow(QtGui.QMainWindow):
         self._preProcessWindow.show()
 
         # setup the parameters
+        # TODO/FUTURE - Add a push button somewhere to force pre-processing menu to synchronize with main UI for
+        # TODO          instrument calibration
         if reset_pre_process_window:
             exp_number = int(str(self.ui.lineEdit_exp.text()))
             # detector size/pixel numbers
@@ -3517,16 +3520,23 @@ class MainWindow(QtGui.QMainWindow):
         :param peak_info:
         :return:
         """
-        # Check requirements
-        assert isinstance(peak_info, r4c.PeakProcessRecord)
+        # Check requirement
+        assert isinstance(peak_info, r4c.PeakProcessRecord), 'Peak information instance must be a PeakProcessedRecord' \
+                                                             'but not a {0}'.format(type(peak_info))
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
+        # wave length
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
-        # TODO/ISSUE/NOW consider user specified
-        wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
+        user_wave_length = self._myControl.get_calibrated_wave_length(exp_number)
+        if user_wave_length is None:
+            # no user specified wave length
+            wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
+        else:
+            # user specified is found
+            wave_length = user_wave_length
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1,

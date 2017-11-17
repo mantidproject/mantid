@@ -581,10 +581,14 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     :return:
     """
     # check
-    assert isinstance(instrument_name, str), 'blabla'
-    assert isinstance(exp_no, int) and isinstance(scan_no, int), 'blabla'
-    assert isinstance(pt_list, list), 'blabla'
-    assert len(pt_list) > 0, 'blabla'
+    assert isinstance(instrument_name, str), 'Instrument name {0} shall be a string but not a {1}' \
+                                             ''.format(instrument_name, type(instrument_name))
+    assert isinstance(exp_no, int) and isinstance(scan_no, int),\
+        'Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer.' \
+        ''.format(exp_no, type(exp_no), scan_no, type(scan_no))
+    assert isinstance(pt_list, list), 'Pt list {0} shall be a list but not a {1}'.format(pt_list, type(pt_list))
+    if len(pt_list) == 0:
+        raise RuntimeWarning('Pt list cannot be empty.')
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
                                                          pt_list[0], pt_list[-1])
@@ -822,7 +826,10 @@ def pre_processed_file_name(exp_number, scan, output_dir):
     :param output_dir:
     :return:
     """
-    # TODO/NOW/ - check inputs
+    # check inputs
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(scan, int), 'Scan number must be an integer'
+    assert output_dir is None or isinstance(output_dir, str), 'Output directory must be a None or a string.'
 
     md_file_name = 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan)
     if output_dir is not None:
@@ -836,18 +843,19 @@ NOTE
 1. a CSV file in appending mode
 2. file's name is standard and defined in fourcircile_utility
 3. csv file contains:
-    Scan, MD file path, ... balbla
+    Scan, MD file path, detector-sample distance, peak center pixel (int, int), wave length
 """
 
 
 def pre_processed_record_file(exp_number, md_dir):
-    """
-    blabla
+    """ form the name of the pre-processed scans' record file
     :param exp_number:
     :param md_dir:
     :return:
     """
-    # check ...
+    # check
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(md_dir, str), 'Target directory must be a string'
 
     record_file_name = os.path.join(md_dir, 'Exp{0}Record.txt'.format(exp_number))
 
@@ -855,23 +863,21 @@ def pre_processed_record_file(exp_number, md_dir):
 
 
 def pre_processed_record_header():
-    """
-    blabla
+    """ give the header in pre-processed scan's record file in CSV format
     :return:
     """
     return ['Scan', 'MD', 'DetSampleDistance', 'Center', 'WaveLength']
 
 
 def pre_processed_record_make(scan_number, file_name, distance, center_x, center_y, wave_length):
-    """
-    blabla
+    """ make a pre-processed scan's entry in record file
     :param scan_number:
     :param file_name:
     :param distance:
     :param center_x:
     :param center_y:
     :param wave_length:
-    :return:
+    :return: a dictionary
     """
     record = {'Scan': scan_number,
               'MD': file_name,
@@ -885,7 +891,7 @@ def pre_processed_record_make(scan_number, file_name, distance, center_x, center
 def read_pre_process_record(file_name):
     """ Read a pre-processed scan record file
     :param file_name:
-    :return:
+    :return: a dictionary
     """
     # check input
     assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
@@ -894,11 +900,12 @@ def read_pre_process_record(file_name):
         raise RuntimeError('Pre-processed scan record file {0} does not exist.'.format(file_name))
 
     # load file
-    record_list = list()
+    scan_record_dict = dict()
     with open(file_name, 'r') as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
-            record_list.append(row)
+            scan_number = row['Scan']
+            scan_record_dict[scan_number] = row
     # END-WITH
 
-    return record_list
+    return scan_record_dict

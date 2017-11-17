@@ -158,7 +158,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.set_calibration_to_reduction_controller(exp_number)
 
         # set up GUI
-        self._rowScanDict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
+        self._rowScanDict = self.ui.tableView_scanProcessState.add_new_scans(scan_list)
 
         # form the output files
         output_dir = str(self.ui.lineEdit_outputDir.text())
@@ -426,7 +426,6 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         return
 
-    # TODO  TEST
     def update_record_file(self, exp_number, check_duplicates, scan_list):
         """
         update the record file
@@ -444,19 +443,25 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         user_wave_length = self._myController.get_calibrated_wave_length(exp_number)
 
         record_file_name = fourcircle_utility.pre_processed_record_file(exp_number, self._outputDir)
+        if os.path.exists(record_file_name):
+            write_header = False
+        else:
+            write_header = True
+
         with open(record_file_name, 'a') as csvfile:
             fieldnames = fourcircle_utility.pre_processed_record_header()
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            # TODO/ISSUE/SEVERE - Do it one and only one time!
-            writer.writeheader()
 
-            print 'UPDATE RECODE FILE'
+            # write header for the first time
+            if write_header:
+                writer.writeheader()
+
             for scan_number in scan_list:
                 record = fourcircle_utility.pre_processed_record_make(scan_number, self._mdFileDict[scan_number],
                                                                       det_sample_distance,
                                                                       det_center_x, det_center_y, user_wave_length)
                 writer.writerow(record)
-                print 'Scan {0}: {1}'.format(scan_number, record)
+            # END-FOR
 
         # END-WITH
 
