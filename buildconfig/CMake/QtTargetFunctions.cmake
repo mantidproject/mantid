@@ -56,7 +56,7 @@ endfunction()
 # keyword: UI Qt designer ui files that are to be parsed by the UI compiler
 # keyword: NOMOC Additional headers that are not to be passed to moc
 # keyword: RES Any resource .qrc files
-# keyword: DEFS Compiler definitions to set to the target
+# keyword: DEFS Compiler definitions to set for all targets. Also QTX_DEFS can be used to set per-version targets
 # keyword: OUTPUT_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt version
 # keyword: OUTPUT_SUBDIR Additional directory to added to the final output path
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
@@ -79,8 +79,8 @@ function (mtd_add_qt_target)
   set (oneValueArgs
     TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
     INSTALL_DIR INSTALL_DIR_BASE PRECOMPILED)
-  set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
-    NOMOC RES DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
+  set (multiValueArgs SRC UI MOC
+    NOMOC RES DEFS QT4_DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -98,15 +98,16 @@ function (mtd_add_qt_target)
   _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _ui_dir
                      ${CMAKE_CURRENT_BINARY_DIR})
   set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
+  set ( _all_defines ${PARSED_DEFS};${PARSED_QT${PARSED_QT_VERSION}_DEFS} )
   if (PARSED_QT_VERSION EQUAL 4)
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
-    _internal_qt_wrap_cpp ( 4 MOC_GENERATED ${PARSED_MOC})
+    _internal_qt_wrap_cpp ( 4 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT4_SRC} ${MOC_GENERATED})
     qt4_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
   elseif (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
-    _internal_qt_wrap_cpp ( 5 MOC_GENERATED ${PARSED_MOC} )
+    _internal_qt_wrap_cpp ( 5 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC} )
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
     qt5_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
@@ -161,8 +162,8 @@ function (mtd_add_qt_target)
   endif()
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
-  if(PARSED_DEFS)
-    set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${PARSED_DEFS}" )
+  if(_all_defines)
+    set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${_all_defines}" )
   endif()
 
   if (OSX_VERSION VERSION_GREATER 10.8)
@@ -335,19 +336,29 @@ endfunction ()
 # allowed limit on Windows (260 chars). It is assumed that the input paths
 # can be made absolute by prefixing them with ${CMAKE_CURRENT_LIST_DIR}
 # It assumes that the unnamed arguments are the input files to run through moc
-function(_internal_qt_wrap_cpp qtversion moc_generated)
-  foreach (_infile ${ARGN})
+function (_internal_qt_wrap_cpp qtversion moc_generated )
+  set (options)
+  set (oneValueArgs)
+  set (multiValueArgs DEFS INFILES)
+  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+                         "${multiValueArgs}" ${ARGN})
+  foreach (_def ${PARSED_DEFS})
+    list ( APPEND _moc_defs "-D${_def}")
+  endforeach ()
+  foreach (_infile ${PARSED_INFILES})
     if(qtversion EQUAL 4)
-      qt4_wrap_cpp (moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+      qt4_wrap_cpp (moc_generated ${_infile}
+        OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs} )
     elseif (qtversion EQUAL 5)
-      qt5_wrap_cpp (moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+      qt5_wrap_cpp (moc_generated ${_infile}
+        OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs} )
     else()
       message (FATAL_ERROR "Unknown Qt version='${qtversion}'.")
     endif()
   endforeach()
   # Pass the output variable out
   set (${moc_generated} ${${moc_generated}} PARENT_SCOPE)
-endfunction()
+endfunction ()
 
 # Disables suggest override for versions of Qt < 5.6.2 as
 # Q_OBJECT produces them and the cannot be avoided.
