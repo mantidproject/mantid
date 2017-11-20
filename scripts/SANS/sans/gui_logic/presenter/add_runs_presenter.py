@@ -4,13 +4,19 @@ from run_selector_presenter import RunSelectorPresenter
 from summation_settings_presenter import SummationSettingsPresenter
 
 class AddRunsPagePresenter(object):
-    def __init__(self, sum_runs, run_selection, run_finder, summation_settings, view, parent_view):
+    def __init__(self, \
+                 sum_runs, \
+                 make_run_selector_presenter, \
+                 make_run_summation_presenter, \
+                 view, \
+                 parent_view):
         self._view = view
         self._sum_runs = sum_runs
         self._run_selector_presenter = \
-            RunSelectorPresenter(run_selection, run_finder, self._view.run_selector, self)
+            make_run_selector_presenter(view.run_selector, view)
         self._summation_settings_presenter = \
-            SummationSettingsPresenter(summation_settings, self._view.summation_settings, self)
+            make_run_summation_presenter(view.summation_settings, view) \
+
         self._connect_to_view(view)
 
     def _init_views(view, parent_view):

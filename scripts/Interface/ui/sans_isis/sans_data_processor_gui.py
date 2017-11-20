@@ -31,7 +31,21 @@ from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import RunFinder
 from sans.gui_logic.models.summation_settings_model import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
+
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+
+def _make_run_selector(run_selector_view, parent_view):
+    return RunSelectorPresenter(RunSelection(), \
+                                RunFinder(), \
+                                run_selector_view, \
+                                parent_view)
+
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
+    return SummationSettingsPresenter(SummationSettings(BinningType.Custom), \
+                                      summation_settings_view, \
+                                      parent_view)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes
@@ -124,6 +138,15 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def set_current_page(self, index):
         self.main_stacked_widget.setCurrentIndex(index)
 
+    def _setup_add_runs_page(self):
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(), \
+                                                       _make_run_selector, \
+                                                       _make_run_summation_settings_presenter,
+                                                       self.add_runs_page, self)
+
+
+
+
     def setup_layout(self):
         """
         Do further setup that could not be done in the designer.
@@ -154,11 +177,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
-        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(), \
-                                                       RunSelection(), \
-                                                       RunFinder(), \
-                                                       SummationSettings(BinningType.Custom), \
-                                                       self.add_runs_page, self)
+        self._setup_add_runs_page()
 
         # --------------------------------------------------------------------------------------------------------------
         # Algorithm setup
