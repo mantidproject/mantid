@@ -189,19 +189,19 @@ def set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options, 
                 load_options.update({load_monitor_name_for_period: monitor_name})
         count += 1
 
+
 def set_output_workspaces_on_load_algorithm(load_options, state):
     data = state.data
     file_information_factory = SANSFileInformationFactory()
 
-    for run_number in data.sample_scatter:
-        # SampleScatter and SampleScatterMonitor
-        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
-                                                                      load_workspace_name="SampleScatterWorkspace",
-                                                                      file_name=run_number,
-                                                                      period=data.sample_scatter_period,
-                                                                      is_transmission=False,
-                                                                      file_info_factory=file_information_factory,
-                                                                      load_monitor_name="SampleScatterMonitorWorkspace")
+    # SampleScatter and SampleScatterMonitor
+    set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                  load_workspace_name="SampleScatterWorkspace",
+                                                                  file_name=data.sample_scatter,
+                                                                  period=data.sample_scatter_period,
+                                                                  is_transmission=False,
+                                                                  file_info_factory=file_information_factory,
+                                                                  load_monitor_name="SampleScatterMonitorWorkspace")
 
     # SampleTransmission
     sample_transmission = data.sample_transmission
@@ -221,6 +221,7 @@ def set_output_workspaces_on_load_algorithm(load_options, state):
                                                                       period=data.sample_direct_period,
                                                                       is_transmission=True,
                                                                       file_info_factory=file_information_factory)
+
     # CanScatter + CanMonitor
     can_scatter = data.can_scatter
     if can_scatter:
@@ -231,6 +232,7 @@ def set_output_workspaces_on_load_algorithm(load_options, state):
                                                                       is_transmission=False,
                                                                       file_info_factory=file_information_factory,
                                                                       load_monitor_name="CanScatterMonitorWorkspace")
+
     # CanTransmission
     can_transmission = data.can_transmission
     if can_transmission:

@@ -40,33 +40,17 @@ class StateScale(StateBase):
         pass
 
 
-def ensure_all_same(property_name, items):
-    try:
-        first = next(items)
-        if not all(x == first for x in items):
-            raise RuntimeError('All file informations in a single reduction must have the same {}'\
-                .format(property_name))
-    except StopIteration:
-        return
-
 # ----------------------------------------------------------------------------------------------------------------------
 #  Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def set_geometry_from_file(state, data_info):
-    file_informations = data_info.file_information()
-    first_file_information = file_informations[0]
+    file_information = data_info.file_information()
 
-    ensure_all_same('height', (file_information.get_height() for file_information in file_informations))
-    state.height_from_file = first_file_information.get_height()
-
-    ensure_all_same('width', (file_information.get_width() for file_information in file_informations))
-    state.width_from_file = first_file_information.get_width()
-
-    ensure_all_same('thickness', (file_information.get_thickness() for file_information in file_informations))
-    state.thickness_from_file = first_file_information.get_thickness()
-
-    ensure_all_same('shape', (file_information.get_shape() for file_information in file_informations))
-    state.shape_from_file = first_file_information.get_shape()
+    # Get the geometry
+    state.height_from_file = file_information.get_height()
+    state.width_from_file = file_information.get_width()
+    state.thickness_from_file = file_information.get_thickness()
+    state.shape_from_file = file_information.get_shape()
 
 
 class StateScaleBuilder(object):
