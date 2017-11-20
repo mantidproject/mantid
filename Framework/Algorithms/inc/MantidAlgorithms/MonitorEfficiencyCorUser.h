@@ -47,7 +47,7 @@ private:
   /// stores the incident energy of the neutrons
   double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts = 0;
+  double m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

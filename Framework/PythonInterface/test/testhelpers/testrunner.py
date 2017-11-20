@@ -8,10 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 import imp
 import os
 import sys
-from xmlrunner import XMLTestRunner
-from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode
 import unittest
 
+from xmlrunner import XMLTestRunner
+from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode
 
 class GroupedNameTestInfo(_TestInfo):
     """
@@ -128,4 +128,8 @@ def result_class(pathname):
 
 
 if __name__ == "__main__":
+    # Import mantid so that it sets up the additional paths to scripts etc
+    # It would be good to try & remove this to soften the impact on tests
+    # that don't require importing mantid at all
+    import mantid  # noqa
     main(sys.argv)

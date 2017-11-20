@@ -266,6 +266,10 @@ In that case the execution mode can simply be determined from the input workspac
 Here the helper ``Parallel::getCorrespondingExecutionMode`` is used to obtain the 'natural' execution mode from a storage mode, i.e., ``ExecutionMode::Identical`` for ``StorageMode::Cloned``, ``ExecutionMode::Distributed`` for ``StorageMode::Distributed``, and ``ExecutionMode::MasterOnly`` for ``StorageMode::MasterOnly``.
 More complex algorithms may require more complex decision mechanism, e.g., when there is more than one input workspace.
 
+For many algorithms the base class ``API::ParallelAlgorithm`` provides a sufficient default implementation of ``Algorithm::getParallelExecutionMode()``.
+MPI support can simply be enabled by inheriting from ``ParallelAlgorithm`` instead of from ``Algorithm``.
+Generally this works only for algorithms with a single input and a single output that either process only non-spectrum data or process all spectra independently.
+
 If none of the other virtual methods listed above is implemented, ``Algorithm`` will run the normal ``exec()`` method on all MPI ranks.
 The exception are non-master ranks if the execution mode is ``ExecutionMode::MasterOnly`` -- in that case creating a dummy workspace is attempted.
 This is discussed in more detail in the subsections below.
@@ -447,12 +451,27 @@ Potential limitations must be described in the comments.
 Supported Algorithms
 ####################
 
-=============== =============== ========
-Algorithm       Supported modes Comments
-=============== =============== ========
-CreateWorkspace all
-Rebin           all             min and max bin boundaries must be given explicitly
-=============== =============== ========
+================= =============== ========
+Algorithm         Supported modes Comments
+================= =============== ========
+CompressEvents    all
+CreateWorkspace   all
+CropWorkspace     all             see ExtractSpectra regarding X cropping
+ExtractSpectra2   all             currently not available via algorithm factory or Python
+ExtractSpectra    all             not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
+FilterBadPulses   all
+FilterByLogValue  all
+LoadEventNexus    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
+LoadInstrument    all
+LoadNexusLogs     all
+LoadParameterFile all             segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
+MaskBins          all
+Rebin             all             min and max bin boundaries must be given explicitly
+RemovePromptPulse all
+SortEvents        all
+================= =============== ========
+
+Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
 
 .. rubric:: Footnotes
 
