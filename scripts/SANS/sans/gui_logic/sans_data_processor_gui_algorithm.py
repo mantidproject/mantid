@@ -53,7 +53,7 @@ def create_option_column_properties():
              ]
     return props
 
-  
+
 def create_properties(show_periods=True):
     if show_periods:
         properties = [algorithm_list_entry(column_name="SampleScatter",
@@ -155,13 +155,13 @@ def create_properties(show_periods=True):
                                            prefix='',
                                            property_type=str),
                       algorithm_list_entry(column_name="User File",
-                                       algorithm_property="UserFile",
-                                       description=('The user file to use, this will override GUI changes for this row.'
-                                                    ' If left unspecified default will be used'),
-                                       show_value=False,
-                                       default="",
-                                       prefix='',
-                                       property_type=str),
+                                           algorithm_property="UserFile",
+                                           description=('The user file to use, this will override GUI changes for this row.'
+                                                        ' If left unspecified default will be used'),
+                                           show_value=False,
+                                           default="",
+                                           prefix='',
+                                           property_type=str),
                       algorithm_list_entry(column_name="",
                                            algorithm_property="RowIndex",
                                            description='The row index (which is automatically populated by the GUI)',
@@ -235,13 +235,13 @@ def create_properties(show_periods=True):
                                            prefix='',
                                            property_type=str),
                       algorithm_list_entry(column_name="User File",
-                                       algorithm_property="UserFile",
-                                       description=('The user file to use, this will override GUI changes for this row.'
-                                                    ' If left unspecified default will be used'),
-                                       show_value=False,
-                                       default="",
-                                       prefix='',
-                                       property_type=str),
+                                           algorithm_property="UserFile",
+                                           description=('The user file to use, this will override GUI changes for this row.'
+                                                        ' If left unspecified default will be used'),
+                                           show_value=False,
+                                           default="",
+                                           prefix='',
+                                           property_type=str),
                       algorithm_list_entry(column_name="",
                                            algorithm_property="RowIndex",
                                            description='The row index (which is automatically populated by the GUI)',
