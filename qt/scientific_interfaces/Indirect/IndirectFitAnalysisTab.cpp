@@ -79,7 +79,7 @@ void IndirectFitAnalysisTab::updateProperties(int specNo) {
 
     // Check whether values for this property were found in the
     // parameters workspace.
-    if (m_parameterValues.contains[propertyName]) {
+    if (m_parameterValues.contains(propertyName)) {
       auto parameterName = m_propertyToParameter[propertyName];
       auto parameters = m_parameterValues[parameterName];
 
@@ -90,7 +90,7 @@ void IndirectFitAnalysisTab::updateProperties(int specNo) {
     }
     // If parameter values were not found in fit for property at
     // the specified spectrum, update with default.
-    if (m_defaultPropertyValues.contains[propertyName])
+    if (m_defaultPropertyValues.contains(propertyName))
       m_dblManager->setValue(m_properties[propertyName],
                              m_defaultPropertyValues[propertyName]);
     else
@@ -104,7 +104,7 @@ void IndirectFitAnalysisTab::updateProperties(int specNo) {
  *
  * @param wsName  The name of the loaded input workspace.
  */
-void IndirectFitAnalysisTab::newDataLoaded(const QString &wsName) {
+void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
@@ -186,6 +186,7 @@ QVector<QString> IndirectFitAnalysisTab::addPrefixToParameters(
 
   for (int i = 0; i < parameters.size(); i++)
     parametersWithPrefix[i] = addPrefixToParameter(parameters[i], functionName);
+  return parametersWithPrefix;
 }
 
 /*

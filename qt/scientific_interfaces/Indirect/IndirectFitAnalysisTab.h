@@ -2,18 +2,6 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
 #include "IndirectDataAnalysisTab.h"
-#include <boost/weak_ptr.hpp>
-
-class QwtPlotCurve;
-class QwtPlot;
-class QSettings;
-class QString;
-
-namespace MantidQt {
-namespace MantidWidgets {
-class RangeSelector;
-}
-} // namespace MantidQt
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -24,10 +12,6 @@ class RangeSelector;
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -63,7 +47,7 @@ protected:
 protected slots:
   void updateProperties(int specNo);
 
-  virtual void newDataLoaded(const QString &wsName);
+  void newInputDataLoaded(const QString &wsName);
 
 private:
   /// Overidden by child class.
@@ -73,7 +57,7 @@ private:
   /// Overidden by child class.
   bool validate() override = 0;
   /// Overidden by child class.
-  virtual void loadSettings(const QSettings &settings) = 0;
+  void loadSettings(const QSettings &settings) override = 0;
   /// Can be overidden by child class.
   virtual QString addPrefixToParameter(const QString &parameter,
                                        const QString &functionName,

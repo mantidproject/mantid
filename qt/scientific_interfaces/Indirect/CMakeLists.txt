@@ -107,6 +107,7 @@ set ( MOC_FILES
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
+	IndirectFitAnalysisTab.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
