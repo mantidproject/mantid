@@ -99,6 +99,9 @@ public:
   // sets the current row of the fitting list widget
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
+  // gets current value of the fitting list widget
+  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue, std::string());
+
   // sets the peak list according to the QString given
   MOCK_CONST_METHOD1(setPeakList, void(const std::string &peakList));
 

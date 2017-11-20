@@ -877,15 +877,9 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 struct NullDeleter {
   template <typename T> void operator()(T *) {}
 };
-/**Get access to shared pointer containing workspace porperties, cashes the
- shared pointer
- into internal class variable to not allow shared pointer being deleted */
+/**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
-  if (m_logCash)
-    return m_logCash;
-
-  m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
-  return m_logCash;
+  return API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
 }
 
 /** Get constant access to shared pointer containing workspace porperties;
