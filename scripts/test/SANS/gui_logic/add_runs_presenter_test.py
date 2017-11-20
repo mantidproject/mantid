@@ -23,16 +23,16 @@ class AddRunsPagePresenterTest(unittest.TestCase):
         self.run_selector_presenter = self._make_mock_run_selector_presenter()
         self.summation_settings_presenter = self._make_mock_summation_settings_presenter()
         self.view = self._make_mock_view()
-        self.presenter = self._make_presenter(self.run_summation, \
-                                              self.run_selector_presenter, \
-                                              self.summation_settings_presenter, \
+        self.presenter = self._make_presenter(self.run_summation,
+                                              self.run_selector_presenter,
+                                              self.summation_settings_presenter,
                                               self.view)
 
     def _make_presenter(self, run_summation, run_selector_presenter, summation_settings_presenter, view):
         return AddRunsPagePresenter(run_summation,
-                                    lambda view, parent: run_selector_presenter, \
+                                    lambda view, parent: run_selector_presenter,
                                     lambda view, parent: summation_settings_presenter,
-                                    view, \
+                                    view,
                                     None)
 
     def _make_mock_view(self):

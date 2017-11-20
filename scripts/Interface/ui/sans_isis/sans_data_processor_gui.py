@@ -37,14 +37,14 @@ from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 
 def _make_run_selector(run_selector_view, parent_view):
-    return RunSelectorPresenter(RunSelection(), \
-                                RunFinder(), \
-                                run_selector_view, \
+    return RunSelectorPresenter(RunSelection(),
+                                RunFinder(),
+                                run_selector_view,
                                 parent_view)
 
 def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
-    return SummationSettingsPresenter(SummationSettings(BinningType.Custom), \
-                                      summation_settings_view, \
+    return SummationSettingsPresenter(SummationSettings(BinningType.Custom),
+                                      summation_settings_view,
                                       parent_view)
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.main_stacked_widget.setCurrentIndex(index)
 
     def _setup_add_runs_page(self):
-        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(), \
-                                                       _make_run_selector, \
+        self.add_runs_presenter = AddRunsPagePresenter(RunSummation(),
+                                                       _make_run_selector,
                                                        _make_run_summation_settings_presenter,
                                                        self.add_runs_page, self)
 
