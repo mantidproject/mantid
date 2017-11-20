@@ -43,8 +43,10 @@ class StateScale(StateBase):
 # ----------------------------------------------------------------------------------------------------------------------
 #  Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def set_geometry_from_file(state, data_info):
-    file_information = data_info.file_information()
+def set_geometry_from_file(state, date_info):
+    sample_scatter = date_info.sample_scatter
+    file_information_factory = SANSFileInformationFactory()
+    file_information = file_information_factory.create_sans_file_information(sample_scatter)
 
     # Get the geometry
     state.height_from_file = file_information.get_height()

@@ -19,15 +19,12 @@ class GuiStateDirector(object):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
-    def parse_sample_scatter(self, sample_scatter):
-        return sample_scatter.split('+')
-
     def create_state(self, row):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
         data_builder = get_data_builder(self._facility)
 
-        self._set_data_entry(data_builder.set_sample_scatter, self.parse_sample_scatter(table_index_model.sample_scatter))
+        self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
         self._set_data_entry(data_builder.set_sample_transmission, table_index_model.sample_transmission)
         self._set_data_period_entry(data_builder.set_sample_transmission_period, table_index_model.sample_transmission_period)  # noqa

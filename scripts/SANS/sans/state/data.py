@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 
-from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter, StringListParameter,
+from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
                                    ClassTypeParameter, rename_descriptor_names)
 from sans.common.enums import (SANSInstrument, SANSFacility)
 import sans.common.constants
@@ -20,7 +20,7 @@ from sans.state.automatic_setters import automatic_setters
 @rename_descriptor_names
 class StateData(StateBase):
     ALL_PERIODS = sans.common.constants.ALL_PERIODS
-    sample_scatter = StringListParameter()
+    sample_scatter = StringParameter()
     sample_scatter_period = PositiveIntegerParameter()
     sample_transmission = StringParameter()
     sample_transmission_period = PositiveIntegerParameter()
@@ -66,7 +66,7 @@ class StateData(StateBase):
         # A sample scatter must be specified
         if not self.sample_scatter:
             entry = validation_message("Sample scatter was not specified.",
-                                       "Make sure that one or more sample scatter files are specified.",
+                                       "Make sure that the sample scatter file is specified.",
                                        {"sample_scatter": self.sample_scatter})
             is_invalid.update(entry)
 
@@ -102,23 +102,20 @@ class StateData(StateBase):
             raise ValueError("StateData: The provided inputs are illegal. "
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
-    @staticmethod
-    def file_information_from_run_number(run_number):
-        factory = SANSFileInformationFactory()
-        return factory.create_sans_file_information(run_number)
-
-    def file_information(self):
-        run_numbers = self.sample_scatter
-        return StateData.file_information_from_run_number(run_numbers[0])
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def set_information_from_file(data_info):
-    file_information = data_info.file_information()
-    data_info.instrument = file_information.get_instrument()
-    data_info.facility = file_information.get_facility()
-    data_info.sample_scatter_run_number = file_information.get_run_number()
+    file_name = data_info.sample_scatter
+    file_information_factory = SANSFileInformationFactory()
+    file_information = file_information_factory.create_sans_file_information(file_name)
+    instrument = file_information.get_instrument()
+    facility = file_information.get_facility()
+    run_number = file_information.get_run_number()
+    data_info.instrument = instrument
+    data_info.facility = facility
+    data_info.sample_scatter_run_number = run_number
     data_info.sample_scatter_is_multi_period = file_information.get_number_of_periods() > 1
     data_info.idf_file_path = file_information.get_idf_file_path()
     data_info.ipf_file_path = file_information.get_ipf_file_path()
