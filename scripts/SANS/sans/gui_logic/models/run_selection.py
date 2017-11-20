@@ -1,6 +1,6 @@
 class RunSelection(object):
-    def __init__(self, runs = []):
-        self._runs = runs
+    def __init__(self, runs = None):
+        self._runs = runs if runs is not None or []
 
     def add_run(self, run):
         self._runs.append(run)
