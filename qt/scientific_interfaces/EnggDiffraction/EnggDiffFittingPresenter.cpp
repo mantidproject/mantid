@@ -204,6 +204,11 @@ void EnggDiffFittingPresenter::fittingFinished() {
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
+      const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+	  int runNumber;
+	  size_t bank;
+	  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+
       plotFitPeaksCurves();
 
     } catch (std::runtime_error &re) {
@@ -851,6 +856,10 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {
+  if (!m_view->listWidgetHasSelectedRow()) {
+	  m_view->userWarning("No run selected", "Please select a run to fit from the list");
+	  return;
+  }
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   int runNumber;
   size_t bank;
@@ -881,10 +890,6 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
-  // startAsyncFittingWorker
-  // doFitting()
-  std::vector<std::string> focusRunNoVec;
-  focusRunNoVec.push_back(filename);
 
   startAsyncFittingWorker(runNumber, bank, fitPeaksData);
 }
@@ -1487,17 +1492,6 @@ void EnggDiffFittingPresenter::plotFocusedFile(
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  std::string singlePeaksWs = "engggui_fitting_single_peaks";
-
-  if (!ADS.doesExist(singlePeaksWs) && !ADS.doesExist(g_focusedFittingWSName)) {
-    g_log.error() << "Fitting results could not be plotted as there is no " +
-                         singlePeaksWs + " or " + g_focusedFittingWSName +
-                         " workspace found.\n";
-    m_view->showStatus("Error while fitting peaks");
-    return;
-  }
-
   try {
 
     // detaches previous plots from canvas
@@ -1508,14 +1502,14 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
 	int runNumber;
 	size_t bank;
 	std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-	const auto ws = m_model.getWorkspace(runNumber, bank);
+	const auto ws = m_model.getAlignedWorkspace(runNumber, bank);
 
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
-      auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+	  auto singlePeaksWS = m_model.getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");

@@ -40,6 +40,10 @@ public:
   void createFittedPeaksWS(const int runNumber, 
 	  const size_t bank);
 
+  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const int runNumber, const size_t bank);
+
+  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const int runNumber, const size_t bank);
+
 private:
   static const size_t MAX_BANKS = 2;
   static const double DEFAULT_DIFC;
@@ -52,6 +56,7 @@ private:
   RunMap<MAX_BANKS, std::string> m_wsFilenameMap;
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_fitParamsMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
+  RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_alignedWorkspaceMap;
 
   template<typename T, size_t S>
   void addToRunMap(const int runNumber, const size_t bank, RunMap<S, T> &map,
@@ -100,9 +105,10 @@ private:
 
   void convertFromDistribution(Mantid::API::MatrixWorkspace_sptr inputWS);
 
-  void alignDetectors(const std::string &wsName);
+  void alignDetectors(const std::string &inputWSName, const std::string &outputWSName);
 
-  void alignDetectors(Mantid::API::MatrixWorkspace_sptr inputWS);
+  void alignDetectors(Mantid::API::MatrixWorkspace_sptr inputWS, 
+	  const std::string &outputWSName);
 
   size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr) const;
 };
