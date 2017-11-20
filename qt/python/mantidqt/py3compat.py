@@ -44,16 +44,12 @@ __all__ = dir(six)
 def is_text_string(obj):
     """Return True if `obj` is a text string, False if it is anything else,
     like binary data (Python 3) or QString (Python 2, PyQt API #1)"""
-    if PY2:
-        # Python 2
-        return isinstance(obj, basestring)
-    else:
-        # Python 3
-        return isinstance(obj, str)
+    return isinstance(obj, string_types)
 
 
 def to_text_string(obj, encoding=None):
     """Convert `obj` to (unicode) text string"""
+
     if PY2:
         # Python 2
         if encoding is None:
