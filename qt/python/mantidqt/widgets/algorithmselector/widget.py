@@ -36,8 +36,12 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         IAlgorithmSelectorView.__init__(self)
 
     def _make_execute_button(self):
+        """
+        Make the button that starts the algorithm.
+        :return: A QPushButton
+        """
         button = QPushButton('Execute')
-        button.clicked.connect(self.on_click)
+        button.clicked.connect(self._on_execute_button_click)
         return button
 
     def _make_search_box(self):
@@ -48,7 +52,7 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
-        search_box.setObjectName('SearchBox')
+        search_box.setInsertPolicy(QComboBox.NoInsert)
         search_box.editTextChanged.connect(self._on_search_box_selection_changed)
         return search_box
 
@@ -60,6 +64,7 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         tree = QTreeWidget(self)
         tree.setColumnCount(1)
         tree.setHeaderHidden(True)
+        tree.itemSelectionChanged.connect(self._on_tree_selection_changed)
         return tree
 
     def _add_tree_items(self, item_list, algorithm_data):
@@ -88,6 +93,10 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
                 cat_item.addChildren(cat_item_list)
 
     def _get_selected_tree_item(self):
+        """
+        Get algorithm selected in the tree widget.
+        :return: A SelectedAlgorithm tuple or None if nothing is selected.
+        """
         items = self.tree.selectedItems()
         if len(items) == 0:
             return None
@@ -97,18 +106,41 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         return None
 
     def _get_search_box_selection(self):
-        i = self.search_box.currentIndex()
+        """
+        Get algorithm selected in the search box.
+        :return: A SelectedAlgorithm tuple or None if nothing is selected.
+        """
+        text = self.search_box.lineEdit().text()
+        i = self.search_box.findText(text)
         if i < 0:
             return None
         return SelectedAlgorithm(name=self.search_box.currentText(), version=-1)
 
     def _on_search_box_selection_changed(self, text):
+        """
+        Called when text in the search box is changed by the user or script.
+        :param text: New text in the search box.
+        """
         with block_signals(self.tree):
             self.tree.setCurrentIndex(QModelIndex())
         with block_signals(self.search_box):
             i = self.search_box.findText(text)
             if i >= 0:
                 self.search_box.setCurrentIndex(i)
+
+    def _on_tree_selection_changed(self):
+        """
+        Called when selection in the tree widget changes by user clicking
+        or a script.
+        """
+        selected_algorithm = self._get_selected_tree_item()
+        if selected_algorithm is not None:
+            with block_signals(self.search_box):
+                i = self.search_box.findText(selected_algorithm.name)
+                self.search_box.setCurrentIndex(i)
+
+    def _on_execute_button_click(self):
+        self.execute_algorithm()
 
     def init_ui(self):
         """
@@ -148,7 +180,3 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         if selected_algorithm is not None:
             return selected_algorithm
         return self._get_search_box_selection()
-
-    def on_click(self):
-        text = QInputDialog.getText(self, 'STUFF', 'stuff')
-        print text

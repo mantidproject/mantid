@@ -1,6 +1,6 @@
 import unittest
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QApplication, QComboBox
+from collections import Counter
 from mantidqt.widgets.algorithmselector.model import Model
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utility.gui_test import meta_gui_test
@@ -16,6 +16,8 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('LoadAscii' in names)
         self.assertTrue('Rebin' in names)
         self.assertTrue('RealFFT' in descriptors['Arithmetic']['FFT'][Model.algorithm_key])
+        counter = Counter(names)
+        self.assertEqual(counter['FindEPP'], 1)
 
 
 class WidgetTest(unittest.TestCase):
@@ -36,6 +38,7 @@ class WidgetTest(unittest.TestCase):
         selected_algorithm = widget.get_selected_algorithm()
         self.assertEqual(selected_algorithm.name, 'Squares')
         self.assertEqual(selected_algorithm.version, 1)
+        self.assertEqual(widget.search_box.lineEdit().text(), 'Squares')
 
     def test_tree_selection_two_versions(self):
         widget = AlgorithmSelectorWidget()
@@ -81,6 +84,7 @@ class WidgetTest(unittest.TestCase):
         self._select_in_tree(widget, 'FindEPP v.2')
         widget.search_box.lineEdit().setText('abc')
         self.assertTrue(widget.get_selected_algorithm() is None)
+        self.assertEqual(widget.search_box.currentText(), 'abc')
 
 
 if __name__ == '__main__':

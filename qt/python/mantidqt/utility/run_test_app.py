@@ -60,8 +60,8 @@ def open_in_window(widget_name):
     w.setWindowTitle(widget_name)
     w.show()
 
-    tester = Tester(w)
-    tester.start()
+    # tester = Tester(w)
+    # tester.start()
 
     sys.exit(app.exec_())
 

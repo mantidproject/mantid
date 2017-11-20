@@ -28,6 +28,11 @@ class IAlgorithmSelectorView(object):
     def get_selected_algorithm(self):
         raise NotImplementedError('Method has to be implemented in a subclass')
 
+    def execute_algorithm(self):
+        algorithm = self.get_selected_algorithm()
+        if algorithm is not None:
+            print 'Execute %s v.%s' % algorithm
+
 
 class Presenter(object):
     """

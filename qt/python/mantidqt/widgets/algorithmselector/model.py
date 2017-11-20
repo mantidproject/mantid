@@ -47,7 +47,8 @@ class Model(object):
         for descriptor in descriptors:
             # d is a list of [name, version, category, alias]
             name, version, categories, alias = tuple(descriptor)
-            algorithm_names.append(name)
+            if name not in algorithm_names:
+                algorithm_names.append(name)
             categories = categories.split('\\')
             # Create nested dictionaries in which the key is a category and the value
             # is a similar dictionary with sub-categories as keys
