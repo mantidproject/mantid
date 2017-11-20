@@ -7,6 +7,7 @@ attr_mapping = \
     [
         ParamMapEntry(ext_name="calibration_directory",     int_name="calibration_dir"),
         ParamMapEntry(ext_name="calibration_mapping_file",  int_name="cal_mapping_path"),
+        ParamMapEntry(ext_name="config_file",               int_name="config_file_name"),
         ParamMapEntry(ext_name="do_absorb_corrections",     int_name="do_absorb_corrections"),
         ParamMapEntry(ext_name="file_ext",                  int_name="file_extension", optional=True),
         ParamMapEntry(ext_name="focused_bin_widths",        int_name="focused_bin_widths"),

@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/Run.h"
 
 namespace Mantid {
@@ -34,7 +34,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RemovePromptPulse : public API::Algorithm {
+class DLLExport RemovePromptPulse : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

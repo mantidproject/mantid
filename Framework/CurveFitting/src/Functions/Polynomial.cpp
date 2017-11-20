@@ -19,7 +19,7 @@ DECLARE_FUNCTION(Polynomial)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-Polynomial::Polynomial() : m_n(0) {}
+Polynomial::Polynomial() : m_n(0) { declareParameter("A0"); }
 
 //----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial
@@ -43,38 +43,6 @@ void Polynomial::function1D(double *out, const double *xValues,
     out[i] = temp;
   }
 }
-
-//----------------------------------------------------------------------------------------------
-/** Function to calcualte polynomial based on vector
-
-void Polynomial::functionLocal(std::vector<double> &out, std::vector<double>
-xValues) const
-{
-  size_t nData = xValues.size();
-  if (out.size() > xValues.size())
-  {
-    std::stringstream errss;
-    errss << "Polynomial::functionLocal: input vector out has a larger size ("
-          << out.size() << ") than xValues's (" << nData << ").";
-    throw std::runtime_error(errss.str());
-  }
-
-  for (size_t i = 0; i < nData; ++i)
-  {
-    double x = xValues[i];
-    double temp = getParameter(0);
-    double nx = x;
-    for (int j = 1; j <= m_n; ++j)
-    {
-      temp += getParameter(j)*nx;
-      nx *= x;
-    }
-    out[i] = temp;
-  }
-
-  return;
-}
-*/
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
@@ -123,17 +91,31 @@ void Polynomial::setAttribute(const std::string &attName,
                               const API::IFunction::Attribute &att) {
   if (attName == "n") {
     // set the polynomial order
+
+    auto newN = att.asInt();
+    if (newN < 0) {
+      throw std::invalid_argument(
+          "Polynomial: polynomial order cannot be negative.");
+    }
+
+    // Save old values
+    std::vector<double> oldValues(std::min(m_n, newN) + 1);
+    for (size_t i = 0; i < oldValues.size(); ++i) {
+      oldValues[i] = getParameter(i);
+    }
+
     if (m_n >= 0) {
       clearAllParameters();
     }
     m_n = att.asInt();
-    if (m_n < 0) {
-      throw std::invalid_argument(
-          "Polynomial: polynomial order cannot be negative.");
-    }
     for (int i = 0; i <= m_n; ++i) {
       std::string parName = "A" + std::to_string(i);
       declareParameter(parName);
+    }
+
+    // Reset old values to new parameters
+    for (size_t i = 0; i < oldValues.size(); ++i) {
+      setParameter(i, oldValues[i]);
     }
   }
 }

@@ -60,10 +60,43 @@ Data Table
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **9** | **Select instrument**    | Selects the instrument to use. Note that this setting is used to resolve run numbers.   |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **10**| **Options**              | This column allows the user to provide row specific settings. Currently only            |
-|       |                          | **WavelengthMin** and **WavelengthMax** can be set here.                                |
+| **10**| **Unused Functionality** | These icons are not used                                                                |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
+Columns
+^^^^^^^
+
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleScatter**        |   Scatter data file to use. This is the only mandatory field                                    |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **ssp**                  |   Sample scatter period, if not specified all periods will be used (where applicable)           |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleTrans**          |   Transmission data file to use.                                                                |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **stp**                  |   Sample scatter period, if not specified all periods will be used (where applicable)           |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleDirect**         |   Direct data file to use                                                                       |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **sdp**                  |   Sample direct period, if not specified all periods will be used (where applicable)            |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanScatter**           |   Scatter datafile for can run                                                                  |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **csp**                  |   Can scatter period, if not specified all periods will be used (where applicable)              |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanTrans**             |   Transmission datafile for can run                                                             |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **ctp**                  |   Can transmission period, if not specified all periods will be used (where applicable)         |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanDirect**            |   Direct datafile for can run                                                                   |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **OutputName**           |   Name of output workspace                                                                      |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
+|                          |   otherwise the default file will be used.                                                      |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
+|                          |   and WavelengthMax can be set here.                                                            |
++--------------------------+-------------------------------------------------------------------------------------------------+
 
 Save Options
 ^^^^^^^^^^^^

@@ -29,65 +29,47 @@ set ( UI_FILES
        inc/MantidQtWidgets/RefDetectorView/RefImageView.ui
 )
 
-include_directories ( inc )
-include_directories ( ../spectrumviewer/inc )
-
-
 ###########################################################################
 # Main Library Target
 ###########################################################################
-
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-
-# --- Add icons qrc ------
-
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( inc )
-
-# For Windows:
-add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
-
-# This creates the target library
-add_library ( MantidQtWidgetsRefDetectorView ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_REFDETECTORVIEWER
+  INCLUDE_DIRS
+    inc
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${Boost_LIBRARIES}
+    ${POCO_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsSpectrumViewer
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsRefDetectorView PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
-
-# ... and links to other required libs
-target_link_libraries ( MantidQtWidgetsRefDetectorView LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsSpectrumViewer
-            ${CORE_MANTIDLIBS}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
-            )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
-
-add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
-target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsRefDetectorView
-            MantidQtWidgetsSpectrumViewer
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${QT_LIBRARIES}
-            )
-
-###########################################################################
-# Unit tests setup
-###########################################################################
-
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsRefDetectorView ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
+  QT_VERSION 4
+  SRC src/RefDetectorViewDemo.cpp
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${Boost_LIBRARIES}
+      ${POCO_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsRefDetectorView
+      MantidQtWidgetsSpectrumViewer
+  EXCLUDE_FROM_ALL
+)

@@ -42,25 +42,15 @@ IndexProperty::operator Indexing::SpectrumIndexSet() const {
 }
 
 Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
-  MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      m_workspaceProp.getWorkspace());
-  if (!wksp)
-    throw std::runtime_error("Invalid workspace type provided to "
-                             "IndexProperty. Must be convertible to "
-                             "MatrixWorkspace.");
-
-  const auto &indexInfo = wksp->indexInfo();
+  const auto &indexInfo = getIndexInfoFromWorkspace();
   auto type = m_indexTypeProp.selectedType();
 
   if (m_value.empty()) {
     return indexInfo.makeIndexSet();
   } else {
-    auto res = std::minmax_element(m_value.cbegin(), m_value.cend());
-    auto min = *res.first;
-    auto max = *res.second;
-
+    auto min = m_value.front();
+    auto max = m_value.back();
     auto isRange = (max - min) == static_cast<int>(m_value.size() - 1);
-
     if (isRange) {
       switch (type) {
       case IndexType::WorkspaceIndex:
@@ -69,8 +59,8 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             static_cast<Indexing::GlobalSpectrumIndex>(max));
       case IndexType::SpectrumNum:
         return indexInfo.makeIndexSet(
-            static_cast<Indexing::SpectrumNumber>(min),
-            static_cast<Indexing::SpectrumNumber>(max));
+            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(min)),
+            static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
       switch (type) {
@@ -78,9 +68,13 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
         return indexInfo.makeIndexSet(
             std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
                                                        m_value.end()));
-      case IndexType::SpectrumNum:
-        return indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
-            m_value.begin(), m_value.end()));
+      case IndexType::SpectrumNum: {
+        std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+        for (const auto index : m_value)
+          spectrumNumbers.push_back(static_cast<Indexing::SpectrumNumber>(
+              static_cast<int32_t>(index)));
+        return indexInfo.makeIndexSet(spectrumNumbers);
+      }
       }
     }
   }
@@ -89,8 +83,47 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
   return m_indices;
 }
 
+/** Return IndexInfo created from workspace but containing selected spectra.
+ *
+ * The selected spectra are the same as in the SpectrumIndexSet returned by this
+ * property and the order is guaranteed to be consistent. That is, if the Nth
+ * entry in the SpectrumIndexSet is M, the spectrum with index M in the input
+ * workspace is equal to the spectrum with index N in the returned IndexInfo. */
+Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
+  const auto &indexInfo = getIndexInfoFromWorkspace();
+  if (m_value.empty())
+    return indexInfo;
+  switch (m_indexTypeProp.selectedType()) {
+  case IndexType::WorkspaceIndex:
+    return {std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
+                                                       m_value.end()),
+            indexInfo};
+  case IndexType::SpectrumNum: {
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+    for (const auto index : m_value)
+      spectrumNumbers.push_back(
+          static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(index)));
+    return {spectrumNumbers, indexInfo};
+  }
+  default:
+    throw std::runtime_error(
+        "IndexProperty::getFilteredIndexInfo -- unsupported index type");
+  }
+}
+
 std::string IndexProperty::generatePropertyName(const std::string &name) {
   return name + "IndexSet";
 }
+
+const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
+  auto wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      m_workspaceProp.getWorkspace());
+  if (!wksp)
+    throw std::runtime_error("Invalid workspace type provided to "
+                             "IndexProperty. Must be convertible to "
+                             "MatrixWorkspace.");
+  return wksp->indexInfo();
+}
+
 } // namespace API
 } // namespace Mantid
