@@ -80,6 +80,11 @@ public:
 
   void plotFitPeaksCurves();
 
+<<<<<<< 7b90b58a869562b8031e9c1f1c6a77f6c6f1e6d9
+=======
+  void setBankItems(const std::vector<std::string> &bankFiles);
+
+>>>>>>> Re #21171 Remove fitting algorithms from the Presenter
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
 

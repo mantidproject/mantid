@@ -852,17 +852,11 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
 void EnggDiffFittingPresenter::processFitPeaks() {
   if (!m_view->listWidgetHasSelectedRow()) {
-<<<<<<< bfb7dcf54979d8f52f273340bb6170a403ec18db
     m_view->userWarning("No run selected",
                         "Please select a run to fit from the list");
     return;
   }
 
-=======
-	  m_view->userWarning("No run selected", "Please select a run to fit from the list");
-	  return;
-  }
->>>>>>> Re #21171 Enable plotting in d of focused workspace and fitted peaks
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   int runNumber;
   size_t bank;
@@ -1084,6 +1078,55 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
   } else {
     auto expPeaks = m_view->getExpectedPeaksInput();
     outfile << expPeaks;
+}
+
+void EnggDiffFittingPresenter::setBankItems(
+    const std::vector<std::string> &bankFiles) {
+
+  if (bankFiles.empty()) {
+    // upon invalid file
+    // disable the widgets when only one related file found
+    m_view->enableFittingComboBox(false);
+
+    m_view->clearFittingComboBox();
+    return;
+  }
+
+  // delete previous bank added to the list
+  m_view->clearFittingComboBox();
+
+  try {
+    // Keep track of current loop iteration for banks
+    int index = 0;
+    for (const auto &filePath : bankFiles) {
+
+      const Poco::Path bankFile(filePath);
+      const std::string strVecFile = bankFile.toString();
+      // split the directory from m_fitting_runno_dir_vec
+      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
+
+      // get the last split in vector which will be bank
+      std::string bankID = (vecFileSplit.back());
+
+      bool digit = isDigit(bankID);
+
+      if (digit || bankID == "cropped") {
+        m_view->addBankItem(bankID);
+      } else {
+        QString qBank = QString("Bank %1").arg(index + 1);
+        m_view->addBankItem(qBank.toStdString());
+        ++index;
+      }
+    }
+
+    m_view->enableFittingComboBox(true);
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning("Unable to insert items: ",
+                        "Could not add banks to "
+                        "combo-box or list widget; " +
+                            static_cast<std::string>(re.what()) +
+                            ". Please try again");
   }
 }
 
