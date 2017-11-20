@@ -120,8 +120,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
 )
-
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesISISReflectometryQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()

@@ -1,8 +1,11 @@
 import os
+import time
+import csv
 from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
+import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
 
 
@@ -16,6 +19,21 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :param parent:
         """
         super(ScanPreProcessWindow, self).__init__(parent)
+
+        # class variables
+        self._myController = None
+        self._myMergePeaksThread = None
+        self._rowScanDict = dict()
+
+        # mutex and data structure that can be in contention
+        self._recordLogMutex = False
+        self._scansToProcess = set()
+        self._mdFileDict = dict()
+        self._scanNumbersProcessed = set()
+
+        # current experiment number in processing
+        self._currExpNumber = None
+        self._outputDir = None
 
         # define UI
         self.ui = ui_preprocess_window.Ui_PreprocessWindow()
@@ -48,11 +66,6 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                      self.do_fix_calibration_settings)
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
                      self.do_quit)
-
-        # class variables
-        self._myController = None
-        self._myMergePeaksThread = None
-        self._rowScanDict = dict()
 
         return
 
@@ -145,7 +158,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.set_calibration_to_reduction_controller(exp_number)
 
         # set up GUI
-        self._rowScanDict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
+        self._rowScanDict = self.ui.tableView_scanProcessState.add_new_scans(scan_list)
 
         # form the output files
         output_dir = str(self.ui.lineEdit_outputDir.text())
@@ -153,15 +166,21 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             # create output directory and change to all accessible
             os.mkdir(output_dir)
             os.chmod(output_dir, 0o777)
+        self._outputDir = output_dir
 
         file_list = list()
         for scan in scan_list:
-            md_file_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan))
+            # md_file_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan))
+            md_file_name = fourcircle_utility.pre_processed_file_name(exp_number, scan, output_dir)
             file_list.append(md_file_name)
 
         # launch the multiple threading to scans
         self._myMergePeaksThread = multi_threads_helpers.MergePeaksThread(self, exp_number, scan_list,
                                                                           file_list)
+        self._scansToProcess = set(scan_list)
+        self._scanNumbersProcessed = set()
+
+        self._currExpNumber = exp_number
         self._myMergePeaksThread.start()
 
         return
@@ -336,7 +355,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                     self.ui.lineEdit_outputDir.setText(default_output_dir)
                 except OSError:
                     self.ui.lineEdit_outputDir.setText('/tmp')
-                    default_output_dir = '/tmp'
+                    # default_output_dir = '/tmp'
             # END-IF
         # END-IF
 
@@ -362,6 +381,33 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :param file_name:
         :return:
         """
+        # file is written, then check whether it is time to write a record file
+        counter = 0
+        while self._recordLogMutex:
+            # waiting for the mutex to be released
+            time.sleep(0.1)
+            counter += 1
+            if counter > 600:  # 60 seconds... too long
+                raise RuntimeError('It is too long to wait for mutex released.  There must be a bug!')
+        # END-WHILE
+
+        # update processed scan numbers
+        self._recordLogMutex = True
+        self._scanNumbersProcessed.add(scan_number)
+        self._mdFileDict[scan_number] = file_name
+        self._recordLogMutex = False
+
+        # check whether it is time to write all the scans to file
+        print '[DB...BAT] Scans to process: {0} vs \n\tScans processed: {1}' \
+              ''.format(self._scansToProcess, self._scanNumbersProcessed)
+
+        if len(self._scansToProcess) == len(self._scanNumbersProcessed):
+            self.update_record_file(self._currExpNumber, check_duplicates=False, scan_list=self._scanNumbersProcessed)
+            if self._scansToProcess != self._scanNumbersProcessed:
+                raise RuntimeWarning('Scans to process {0} is not same as scans processed {1}.'
+                                     ''.format(self._scansToProcess, self._scanNumbersProcessed))
+        # END-IF
+
         row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_file_name(row_number, file_name)
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
@@ -379,6 +425,45 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         return
+
+    def update_record_file(self, exp_number, check_duplicates, scan_list):
+        """
+        update the record file
+        it is an option to append file or check and remove duplication.
+        duplication can be removed in the record file loading method by checking the time stamp
+        :param check_duplicates:
+        :return:
+        """
+        # check inputs
+        assert len(self._scanNumbersProcessed) > 0, 'Processed scan number set cannot be empty!'
+
+        # get calibration information
+        det_sample_distance = self._myController.get_calibrated_det_sample_distance(exp_number=exp_number)
+        det_center_x, det_center_y = self._myController.get_calibrated_det_center(exp_number)
+        user_wave_length = self._myController.get_calibrated_wave_length(exp_number)
+
+        record_file_name = fourcircle_utility.pre_processed_record_file(exp_number, self._outputDir)
+        if os.path.exists(record_file_name):
+            write_header = False
+        else:
+            write_header = True
+
+        with open(record_file_name, 'a') as csvfile:
+            fieldnames = fourcircle_utility.pre_processed_record_header()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            # write header for the first time
+            if write_header:
+                writer.writeheader()
+
+            for scan_number in scan_list:
+                record = fourcircle_utility.pre_processed_record_make(scan_number, self._mdFileDict[scan_number],
+                                                                      det_sample_distance,
+                                                                      det_center_x, det_center_y, user_wave_length)
+                writer.writerow(record)
+            # END-FOR
+
+        # END-WITH
 
 
 class ScanPreProcessStatusTable(NTableWidget.NTableWidget):

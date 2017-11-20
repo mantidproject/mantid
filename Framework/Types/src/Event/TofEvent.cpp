@@ -6,24 +6,6 @@ namespace Mantid {
 namespace Types {
 using Core::DateAndTime;
 namespace Event {
-//==========================================================================
-/// --------------------- TofEvent stuff ----------------------------------
-//==========================================================================
-/** Constructor, specifying the time of flight only
- * @param tof :: time of flight, in microseconds
- */
-TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
-
-/** Constructor, specifying the time of flight and the frame id
- * @param tof :: time of flight, in microseconds
- * @param pulsetime :: absolute pulse time of the neutron.
- */
-TofEvent::TofEvent(const double tof, const DateAndTime pulsetime)
-    : m_tof(tof), m_pulsetime(pulsetime) {}
-
-/// Empty constructor
-TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}
-
 /** Comparison operator.
  * @param rhs: the other TofEvent to compare.
  * @return true if the TofEvent's are identical.*/

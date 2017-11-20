@@ -6,6 +6,7 @@ from ui.sans_isis.masking_table import MaskingTable
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode)
 from sans.test_helper.test_director import TestDirector
+from functools import (partial)
 
 import sys
 if sys.version_info.major == 3:
@@ -26,7 +27,7 @@ def create_mock_masking_table():
     return view
 
 
-def get_cell_mock(row, column, convert_to=None):
+def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
@@ -37,6 +38,13 @@ def get_cell_mock(row, column, convert_to=None):
             return "SANS2D00022048"
         elif column == 4:
             return "SANS2D00022048"
+        else:
+            return ""
+    elif row == 1:
+        if column == 0:
+            return "SANS2D00022024"
+        if column == 13:
+            return user_file_path
         else:
             return ""
     else:
@@ -64,10 +72,12 @@ def add_listener_mock(listener):
     mock_listener_list.append(listener)
 
 
-def create_mock_view(user_file_path, batch_file_path=None):
+def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = ""):
+    get_cell_mock_with_path = partial(get_cell_mock, user_file_path = row_user_file_path)
+
     view = mock.create_autospec(SANSDataProcessorGui, spec_set=False)
     view.get_user_file_path = mock.Mock(return_value=user_file_path)
-    view.get_cell = mock.MagicMock(side_effect=get_cell_mock)
+    view.get_cell = mock.MagicMock(side_effect=get_cell_mock_with_path)
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
     view.get_number_of_rows = mock.MagicMock(return_value=2)
 

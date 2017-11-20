@@ -158,7 +158,6 @@ class RunTabPresenter(object):
 
             if not user_file_path:
                 return
-
             # 2. Get the full file path
             user_file_path = FileFinder.getFullPath(user_file_path)
             if not os.path.exists(user_file_path):
@@ -204,7 +203,6 @@ class RunTabPresenter(object):
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
-
             # 3. Clear the table
             self._view.clear_table()
 
@@ -799,6 +797,7 @@ class RunTabPresenter(object):
             can_direct = self._view.get_cell(row=row, column=self.table_index['CAN_DIRECT_INDEX'], convert_to=str)
             can_direct_period = self._view.get_cell(row=row, column=self.table_index['CAN_DIRECT_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
             output_name = self._view.get_cell(row=row, column=self.table_index['OUTPUT_NAME_INDEX'], convert_to=str)
+            user_file = self._view.get_cell(row=row, column=self.table_index['USER_FILE_INDEX'], convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -819,6 +818,7 @@ class RunTabPresenter(object):
                                                 can_direct=can_direct,
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
+                                                user_file = user_file,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -843,17 +843,32 @@ class RunTabPresenter(object):
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
-                try:
-                    state = gui_state_director.create_state(row)
-                    states.update({row: state})
-                except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                           "been added to the Mantid search directories! See here for more "
-                                           "details: {}".format(row, str(e)))
-                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                                       "been added to the Mantid search directories! See here for more "
-                                       "details: {}".format(row, str(e)))
+                row_user_file = table_model.get_row_user_file(row)
+                if row_user_file:
+                    user_file_path = FileFinder.getFullPath(row_user_file)
+                    if not os.path.exists(user_file_path):
+                        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                                           " has been specified.".format(user_file_path))
+
+                    user_file_reader = UserFileReader(user_file_path)
+                    user_file_items = user_file_reader.read_user_file()
+
+                    row_state_model = StateGuiModel(user_file_items)
+                    row_gui_state_director = GuiStateDirector(table_model, row_state_model, self._facility)
+                    self._create_row_state(row_gui_state_director, states, row)
+                else:
+                    self._create_row_state(gui_state_director, states, row)
         return states
+
+    def _create_row_state(self, director, states, row):
+        try:
+            state = director.create_state(row)
+            states.update({row: state})
+        except ValueError as e:
+            error_msg = "There was a bad entry for row {}. Ensure that the path to your files has been added to the " \
+                        "Mantid search directories! See here for more details: {}"
+            self.sans_logger.error(error_msg.format(row, str(e)))
+            raise RuntimeError(error_msg.format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """
