@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
-#include <QtGui/QWidget>
-#include <QtGui/QCursor>
+#include <QWidget>
+#include <QCursor>
 
 // Forward dec
 class QwtPlot;

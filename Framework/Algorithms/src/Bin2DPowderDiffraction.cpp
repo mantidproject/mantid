@@ -183,7 +183,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
                   << std::endl;
 
     size_t idx = 0;
-    for (const auto Xbins : fileXbins) {
+    for (const auto &Xbins : fileXbins) {
       g_log.debug() << "Xbins size: " << Xbins.size() << std::endl;
       BinEdges binEdges(Xbins);
       outputWS->setBinEdges(idx, binEdges);
@@ -360,7 +360,7 @@ size_t Bin2DPowderDiffraction::UnifyXBins(
 
 void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
   NumericAxis *verticalAxis = dynamic_cast<NumericAxis *>(outWS->getAxis(1));
-  const std::vector<double> yValues = verticalAxis->getValues();
+  const std::vector<double> &yValues = verticalAxis->getValues();
   auto nhist = outWS->getNumberHistograms();
   g_log.debug() << "Number of hists: " << nhist
                 << " Length of YAxis: " << verticalAxis->length() << std::endl;

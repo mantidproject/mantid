@@ -89,10 +89,21 @@
 #define QTEDITORFACTORY_H
 
 #include "qtpropertymanager.h"
+#include "qtpropertybrowserutils_p.h"
+
+#include <QComboBox>
+#include <QDateTimeEdit>
+#include <QLineEdit>
+#include <QScrollBar>
+#include <QSpinBox>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
+
+class QColor;
+class QLabel;
+class QToolButton;
 
 class QtSpinBoxFactoryPrivate;
 
@@ -100,7 +111,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtSpinBoxFactory(QObject *parent = 0);
+  QtSpinBoxFactory(QObject *parent = nullptr);
   ~QtSpinBoxFactory() override;
 
 protected:
@@ -127,7 +138,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtSliderFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtSliderFactory(QObject *parent = 0);
+  QtSliderFactory(QObject *parent = nullptr);
   ~QtSliderFactory() override;
 
 protected:
@@ -154,7 +165,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtScrollBarFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtScrollBarFactory(QObject *parent = 0);
+  QtScrollBarFactory(QObject *parent = nullptr);
   ~QtScrollBarFactory() override;
 
 protected:
@@ -181,7 +192,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCheckBoxFactory
     : public QtAbstractEditorFactory<QtBoolPropertyManager> {
   Q_OBJECT
 public:
-  QtCheckBoxFactory(QObject *parent = 0);
+  QtCheckBoxFactory(QObject *parent = nullptr);
   ~QtCheckBoxFactory() override;
 
 protected:
@@ -206,7 +217,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDoubleSpinBoxFactory
     : public QtAbstractEditorFactory<QtDoublePropertyManager> {
   Q_OBJECT
 public:
-  QtDoubleSpinBoxFactory(QObject *parent = 0);
+  QtDoubleSpinBoxFactory(QObject *parent = nullptr);
   ~QtDoubleSpinBoxFactory() override;
 
 protected:
@@ -234,7 +245,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtLineEditFactory
     : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  QtLineEditFactory(QObject *parent = 0);
+  QtLineEditFactory(QObject *parent = nullptr);
   ~QtLineEditFactory() override;
 
 protected:
@@ -262,7 +273,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDateEditFactory
     : public QtAbstractEditorFactory<QtDatePropertyManager> {
   Q_OBJECT
 public:
-  QtDateEditFactory(QObject *parent = 0);
+  QtDateEditFactory(QObject *parent = nullptr);
   ~QtDateEditFactory() override;
 
 protected:
@@ -290,7 +301,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtTimeEditFactory
     : public QtAbstractEditorFactory<QtTimePropertyManager> {
   Q_OBJECT
 public:
-  QtTimeEditFactory(QObject *parent = 0);
+  QtTimeEditFactory(QObject *parent = nullptr);
   ~QtTimeEditFactory() override;
 
 protected:
@@ -316,7 +327,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDateTimeEditFactory
     : public QtAbstractEditorFactory<QtDateTimePropertyManager> {
   Q_OBJECT
 public:
-  QtDateTimeEditFactory(QObject *parent = 0);
+  QtDateTimeEditFactory(QObject *parent = nullptr);
   ~QtDateTimeEditFactory() override;
 
 protected:
@@ -342,7 +353,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtKeySequenceEditorFactory
     : public QtAbstractEditorFactory<QtKeySequencePropertyManager> {
   Q_OBJECT
 public:
-  QtKeySequenceEditorFactory(QObject *parent = 0);
+  QtKeySequenceEditorFactory(QObject *parent = nullptr);
   ~QtKeySequenceEditorFactory() override;
 
 protected:
@@ -369,7 +380,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCharEditorFactory
     : public QtAbstractEditorFactory<QtCharPropertyManager> {
   Q_OBJECT
 public:
-  QtCharEditorFactory(QObject *parent = 0);
+  QtCharEditorFactory(QObject *parent = nullptr);
   ~QtCharEditorFactory() override;
 
 protected:
@@ -395,7 +406,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtEnumEditorFactory
     : public QtAbstractEditorFactory<QtEnumPropertyManager> {
   Q_OBJECT
 public:
-  QtEnumEditorFactory(QObject *parent = 0);
+  QtEnumEditorFactory(QObject *parent = nullptr);
   ~QtEnumEditorFactory() override;
 
 protected:
@@ -424,7 +435,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCursorEditorFactory
     : public QtAbstractEditorFactory<QtCursorPropertyManager> {
   Q_OBJECT
 public:
-  QtCursorEditorFactory(QObject *parent = 0);
+  QtCursorEditorFactory(QObject *parent = nullptr);
   ~QtCursorEditorFactory() override;
 
 protected:
@@ -450,7 +461,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtColorEditorFactory
     : public QtAbstractEditorFactory<QtColorPropertyManager> {
   Q_OBJECT
 public:
-  QtColorEditorFactory(QObject *parent = 0);
+  QtColorEditorFactory(QObject *parent = nullptr);
   ~QtColorEditorFactory() override;
 
 protected:
@@ -476,7 +487,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtFontEditorFactory
     : public QtAbstractEditorFactory<QtFontPropertyManager> {
   Q_OBJECT
 public:
-  QtFontEditorFactory(QObject *parent = 0);
+  QtFontEditorFactory(QObject *parent = nullptr);
   ~QtFontEditorFactory() override;
 
 protected:
@@ -494,6 +505,294 @@ private:
                  void slotPropertyChanged(QtProperty *, const QFont &))
   Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
   Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QFont &))
+};
+
+// Private classes //
+
+// ---------- EditorFactoryPrivate :
+// Base class for editor factory private classes. Manages mapping of properties
+// to editors and vice versa.
+
+template <class Editor> class EditorFactoryPrivate {
+public:
+  typedef QList<Editor *> EditorList;
+  typedef QMap<QtProperty *, EditorList> PropertyToEditorListMap;
+  typedef QMap<Editor *, QtProperty *> EditorToPropertyMap;
+
+  Editor *createEditor(QtProperty *property, QWidget *parent);
+  void initializeEditor(QtProperty *property, Editor *e);
+  void slotEditorDestroyed(QObject *object);
+
+  PropertyToEditorListMap m_createdEditors;
+  EditorToPropertyMap m_editorToProperty;
+};
+
+template <class Editor>
+Editor *EditorFactoryPrivate<Editor>::createEditor(QtProperty *property,
+                                                   QWidget *parent) {
+  Editor *editor = new Editor(parent);
+  initializeEditor(property, editor);
+  return editor;
+}
+
+template <class Editor>
+void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property,
+                                                    Editor *editor) {
+  typename PropertyToEditorListMap::iterator it =
+      m_createdEditors.find(property);
+  if (it == m_createdEditors.end())
+    it = m_createdEditors.insert(property, EditorList());
+  it.value().append(editor);
+  m_editorToProperty.insert(editor, property);
+}
+
+template <class Editor>
+void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object) {
+  const typename EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
+  for (typename EditorToPropertyMap::iterator itEditor =
+           m_editorToProperty.begin();
+       itEditor != ecend; ++itEditor) {
+    if (itEditor.key() == object) {
+      Editor *editor = itEditor.key();
+      QtProperty *property = itEditor.value();
+      const typename PropertyToEditorListMap::iterator pit =
+          m_createdEditors.find(property);
+      if (pit != m_createdEditors.end()) {
+        pit.value().removeAll(editor);
+        if (pit.value().empty())
+          m_createdEditors.erase(pit);
+      }
+      m_editorToProperty.erase(itEditor);
+      return;
+    }
+  }
+}
+
+class QtCharEdit : public QWidget {
+  Q_OBJECT
+public:
+  QtCharEdit(QWidget *parent = nullptr);
+
+  QChar value() const;
+  bool eventFilter(QObject *o, QEvent *e) override;
+public Q_SLOTS:
+  void setValue(const QChar &value);
+Q_SIGNALS:
+  void valueChanged(const QChar &value);
+
+protected:
+  void focusInEvent(QFocusEvent *e) override;
+  void focusOutEvent(QFocusEvent *e) override;
+  void keyPressEvent(QKeyEvent *e) override;
+  void keyReleaseEvent(QKeyEvent *e) override;
+  bool event(QEvent *e) override;
+private slots:
+  void slotClearChar();
+
+private:
+  void handleKeyEvent(QKeyEvent *e);
+
+  QChar m_value;
+  QLineEdit *m_lineEdit;
+};
+
+class QtColorEditWidget : public QWidget {
+  Q_OBJECT
+
+public:
+  QtColorEditWidget(QWidget *parent);
+
+  bool eventFilter(QObject *obj, QEvent *ev) override;
+
+public Q_SLOTS:
+  void setValue(const QColor &value);
+
+private Q_SLOTS:
+  void buttonClicked();
+
+Q_SIGNALS:
+  void valueChanged(const QColor &value);
+
+private:
+  QColor m_color;
+  QLabel *m_pixmapLabel;
+  QLabel *m_label;
+  QToolButton *m_button;
+};
+
+class QtCharEditorFactoryPrivate : public EditorFactoryPrivate<QtCharEdit> {
+  QtCharEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtCharEditorFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QChar &value);
+  void slotSetValue(const QChar &value);
+};
+
+class QtCheckBoxFactoryPrivate : public EditorFactoryPrivate<QtBoolEdit> {
+  QtCheckBoxFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtCheckBoxFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, bool value);
+  void slotSetValue(bool value);
+};
+
+class QtColorEditorFactoryPrivate
+    : public EditorFactoryPrivate<QtColorEditWidget> {
+  QtColorEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtColorEditorFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QColor &value);
+  void slotSetValue(const QColor &value);
+};
+
+class QtCursorEditorFactoryPrivate {
+  QtCursorEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtCursorEditorFactory)
+public:
+  QtCursorEditorFactoryPrivate();
+
+  void slotPropertyChanged(QtProperty *property, const QCursor &cursor);
+  void slotEnumChanged(QtProperty *property, int value);
+  void slotEditorDestroyed(QObject *object);
+
+  QtEnumEditorFactory *m_enumEditorFactory;
+  QtEnumPropertyManager *m_enumPropertyManager;
+
+  QMap<QtProperty *, QtProperty *> m_propertyToEnum;
+  QMap<QtProperty *, QtProperty *> m_enumToProperty;
+  QMap<QtProperty *, QList<QWidget *>> m_enumToEditors;
+  QMap<QWidget *, QtProperty *> m_editorToEnum;
+  bool m_updatingEnum;
+};
+
+class QtDateEditFactoryPrivate : public EditorFactoryPrivate<QDateEdit> {
+  QtDateEditFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtDateEditFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QDate &value);
+  void slotRangeChanged(QtProperty *property, const QDate &min,
+                        const QDate &max);
+  void slotSetValue(const QDate &value);
+};
+
+class QtDateTimeEditFactoryPrivate
+    : public EditorFactoryPrivate<QDateTimeEdit> {
+  QtDateTimeEditFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtDateTimeEditFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QDateTime &value);
+  void slotSetValue(const QDateTime &value);
+};
+
+class QtDoubleSpinBoxFactoryPrivate
+    : public EditorFactoryPrivate<QDoubleSpinBox> {
+  QtDoubleSpinBoxFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtDoubleSpinBoxFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, double value);
+  void slotRangeChanged(QtProperty *property, double min, double max);
+  void slotSingleStepChanged(QtProperty *property, double step);
+  void slotDecimalsChanged(QtProperty *property, int prec);
+  void slotSetValue(double value);
+};
+
+class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QComboBox> {
+  QtEnumEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtEnumEditorFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, int value);
+  void slotEnumNamesChanged(QtProperty *property, const QStringList &);
+  void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &);
+  void slotSetValue(int value);
+};
+
+class QtFontEditWidget : public QWidget {
+  Q_OBJECT
+
+public:
+  QtFontEditWidget(QWidget *parent);
+
+  bool eventFilter(QObject *obj, QEvent *ev) override;
+
+public Q_SLOTS:
+  void setValue(const QFont &value);
+
+private Q_SLOTS:
+  void buttonClicked();
+
+Q_SIGNALS:
+  void valueChanged(const QFont &value);
+
+private:
+  QFont m_font;
+  QLabel *m_pixmapLabel;
+  QLabel *m_label;
+  QToolButton *m_button;
+};
+
+class QtFontEditorFactoryPrivate
+    : public EditorFactoryPrivate<QtFontEditWidget> {
+  QtFontEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtFontEditorFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QFont &value);
+  void slotSetValue(const QFont &value);
+};
+
+class QtKeySequenceEditorFactoryPrivate
+    : public EditorFactoryPrivate<QtKeySequenceEdit> {
+  QtKeySequenceEditorFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtKeySequenceEditorFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QKeySequence &value);
+  void slotSetValue(const QKeySequence &value);
+};
+
+class QtLineEditFactoryPrivate : public EditorFactoryPrivate<QLineEdit> {
+  QtLineEditFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtLineEditFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QString &value);
+  void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
+  void slotSetValue(const QString &value);
+};
+
+class QtScrollBarFactoryPrivate : public EditorFactoryPrivate<QScrollBar> {
+  QtScrollBarFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtScrollBarFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, int value);
+  void slotRangeChanged(QtProperty *property, int min, int max);
+  void slotSingleStepChanged(QtProperty *property, int step);
+  void slotSetValue(int value);
+};
+
+class QtSliderFactoryPrivate : public EditorFactoryPrivate<QSlider> {
+  QtSliderFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtSliderFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, int value);
+  void slotRangeChanged(QtProperty *property, int min, int max);
+  void slotSingleStepChanged(QtProperty *property, int step);
+  void slotSetValue(int value);
+};
+
+class QtSpinBoxFactoryPrivate : public EditorFactoryPrivate<QSpinBox> {
+  QtSpinBoxFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtSpinBoxFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, int value);
+  void slotRangeChanged(QtProperty *property, int min, int max);
+  void slotSingleStepChanged(QtProperty *property, int step);
+  void slotSetValue(int value);
+};
+
+class QtTimeEditFactoryPrivate : public EditorFactoryPrivate<QTimeEdit> {
+  QtTimeEditFactory *q_ptr;
+  Q_DECLARE_PUBLIC(QtTimeEditFactory)
+public:
+  void slotPropertyChanged(QtProperty *property, const QTime &value);
+  void slotSetValue(const QTime &value);
 };
 
 #if QT_VERSION >= 0x040400

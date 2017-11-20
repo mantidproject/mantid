@@ -47,7 +47,7 @@ public:
     TS_ASSERT_EQUALS(Box->getNumDims(), 4);
     MDBox<MDLeanEvent<4>, 4> *leanBox =
         dynamic_cast<MDBox<MDLeanEvent<4>, 4> *>(Box);
-    TS_ASSERT(leanBox != NULL);
+    TS_ASSERT(leanBox != nullptr);
     delete Box;
 
     bc.reset(new BoxController(9));
@@ -55,7 +55,7 @@ public:
         MDEventFactory::createBox(9, MDEventFactory::BoxType::MDBoxWithFat, bc);
     TS_ASSERT_EQUALS(Box->getNumDims(), 9);
     MDBox<MDEvent<9>, 9> *fatBox = dynamic_cast<MDBox<MDEvent<9>, 9> *>(Box);
-    TS_ASSERT(fatBox != NULL);
+    TS_ASSERT(fatBox != nullptr);
     delete Box;
 
     bc.reset(new BoxController(3));
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_EQUALS(Box->getNumDims(), 3);
     MDGridBox<MDLeanEvent<3>, 3> *leanGridBox =
         dynamic_cast<MDGridBox<MDLeanEvent<3>, 3> *>(Box);
-    TS_ASSERT(leanGridBox != NULL);
+    TS_ASSERT(leanGridBox != nullptr);
     delete Box;
 
     bc.reset(new BoxController(1));
@@ -73,7 +73,7 @@ public:
     TS_ASSERT_EQUALS(Box->getNumDims(), 1);
     MDGridBox<MDEvent<1>, 1> *fatGridBox =
         dynamic_cast<MDGridBox<MDEvent<1>, 1> *>(Box);
-    TS_ASSERT(fatGridBox != NULL);
+    TS_ASSERT(fatGridBox != nullptr);
     delete Box;
 
     TS_ASSERT_THROWS(MDEventFactory::createBox(

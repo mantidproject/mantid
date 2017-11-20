@@ -31,8 +31,8 @@
 #include "Graph.h"
 #include "Grid.h"
 #include "LegendWidget.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "PlotCurve.h"
 #include "ScaleDraw.h"
 #include "Spectrogram.h"
@@ -263,19 +263,19 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
   int y2 = rect.bottom();
 
   QPalette pal = axisWidget(axis)->palette();
-  QColor color = pal.color(QPalette::Active, QPalette::Foreground);
+  const QColor &color = pal.color(QPalette::Active, QPalette::Foreground);
 
   painter->save();
   painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
   const QwtScaleDiv *scDiv = (const QwtScaleDiv *)axisScaleDiv(axis);
-  const QwtValueList minTickList = scDiv->ticks(QwtScaleDiv::MinorTick);
+  const QwtValueList &minTickList = scDiv->ticks(QwtScaleDiv::MinorTick);
   int minTicks = (int)minTickList.count();
 
-  const QwtValueList medTickList = scDiv->ticks(QwtScaleDiv::MediumTick);
+  const QwtValueList &medTickList = scDiv->ticks(QwtScaleDiv::MediumTick);
   int medTicks = (int)medTickList.count();
 
-  const QwtValueList majTickList = scDiv->ticks(QwtScaleDiv::MajorTick);
+  const QwtValueList &majTickList = scDiv->ticks(QwtScaleDiv::MajorTick);
   int majTicks = (int)majTickList.count();
 
   int j, x, y, low, high;
@@ -474,7 +474,7 @@ QwtPlotCurve *Plot::curve(int index) {
   if (it && it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     return static_cast<QwtPlotCurve *>(it);
   else
-    return 0;
+    return nullptr;
 }
 
 /**
@@ -737,7 +737,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
                  const QwtPlotPrintFilter &pfilter) const {
   int axisId;
 
-  if (painter == 0 || !painter->isActive() || !plotRect.isValid() ||
+  if (painter == nullptr || !painter->isActive() || !plotRect.isValid() ||
       size().isNull())
     return;
 

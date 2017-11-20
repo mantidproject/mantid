@@ -9,7 +9,6 @@ namespace Mantid {
 using PhysicalConstants::Atom;
 using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
-using PhysicalConstants::getNeutronAtom;
 namespace Kernel {
 
 namespace {

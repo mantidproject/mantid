@@ -157,11 +157,11 @@ and the reconstructed image, i.e. Fourier transform (right).
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', chiTarget=N, A=0.0001)
 
-   print "First  reconstructed coefficient: %.3f" % data.readY(0)[5]
-   print "Second reconstructed coefficient: %.3f" % data.readY(0)[10]
-   print "Third  reconstructed coefficient: %.3f" % data.readY(0)[20]
-   print "Fourth reconstructed coefficient: %.3f" % data.readY(0)[12]
-   print "Fifth  reconstructed coefficient: %.3f" % data.readY(0)[14]
+   print("First  reconstructed coefficient: {:.3f}".format(data.readY(0)[5]))
+   print("Second reconstructed coefficient: {:.3f}".format(data.readY(0)[10]))
+   print("Third  reconstructed coefficient: {:.3f}".format(data.readY(0)[20]))
+   print("Fourth reconstructed coefficient: {:.3f}".format(data.readY(0)[12]))
+   print("Fifth  reconstructed coefficient: {:.3f}".format(data.readY(0)[14]))
 
 Output:
 
@@ -193,9 +193,9 @@ and :ref:`algm-FFT` (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='MUSR00022725')
 
-   print "Image at %.3f: %.3f" % (image.readX(0)[44], image.readY(0)[44])
-   print "Image at %.3f: %.3f" % (image.readX(0)[46], image.readY(0)[46])
-   print "Image at %.3f: %.3f" % (image.readX(0)[48], image.readY(0)[48])
+   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[44], image.readY(0)[44]))
+   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[46], image.readY(0)[46]))
+   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[48], image.readY(0)[48]))
 
 Output:
 
@@ -222,12 +222,12 @@ and its imaginary part (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
-   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[129], image.readY(0)[129])
-   print "Image (real part) at  %.3f:  %.3f" % (image.readX(0)[135], image.readY(0)[135])
-   print "Image (real part) at  %.3f: %.3f" % (image.readX(0)[141], image.readY(0)[141])
-   print "Image (imaginary part) at %.3f: %.3f" % (image.readX(0)[129], image.readY(0)[129])
-   print "Image (imaginary part) at  %.3f:  %.3f" % (image.readX(0)[135], image.readY(0)[135])
-   print "Image (imaginary part) at  %.3f: %.3f" % (image.readX(0)[141], image.readY(0)[141])
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
+   print("Image (real part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
+   print("Image (real part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
+   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
+   print("Image (imaginary part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
 
 Output:
 
@@ -268,9 +268,9 @@ the original and reconstructed data (left), and the reconstructed image (right).
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001)
 
-   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[102], image.readY(0)[102])
-   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[103], image.readY(0)[103])
-   print "Image (real part) at %.3f: %.3f" % (image.readX(0)[104], image.readY(0)[104])
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[104], image.readY(0)[104]))
 
 Output:
 
@@ -320,9 +320,9 @@ image in order to obtain smooth results).
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
 
-   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102])
-   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
-   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102])
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
 
 Output:
 
@@ -367,8 +367,8 @@ the reconstructed data is twice the size of the original (experimental) data.
    evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
    evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
 
-   print "Image at %.3f: %.3f (ResolutionFactor=1)" % (image1.readX(0)[135], image1.readY(0)[135])
-   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[270], image2.readY(0)[270])
+   print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
+   print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
 
 Output:
 

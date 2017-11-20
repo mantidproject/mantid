@@ -30,7 +30,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
                                        CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
                                        CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
                                        OPTIONS_SEPARATOR, OPTIONS_INDEX,
-                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
+                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX, USER_FILE_INDEX)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
@@ -159,7 +159,6 @@ class RunTabPresenter(object):
 
             if not user_file_path:
                 return
-
             # 2. Get the full file path
             user_file_path = FileFinder.getFullPath(user_file_path)
             if not os.path.exists(user_file_path):
@@ -205,7 +204,6 @@ class RunTabPresenter(object):
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
-
             # 3. Clear the table
             self._view.clear_table()
 
@@ -233,26 +231,30 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-        self.sans_logger.information("Starting processing of batch table.")
-        # 0. Validate rows
-        self._create_dummy_input_workspace()
-        self._validate_rows()
 
-        # 1. Set up the states and convert them into property managers
-        states = self.get_states()
-        if not states:
+        try:
+            self.sans_logger.information("Starting processing of batch table.")
+            # 0. Validate rows
+            self._create_dummy_input_workspace()
+            self._validate_rows()
+
+            # 1. Set up the states and convert them into property managers
+            states = self.get_states()
+            if not states:
+                raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
+                                   "has been loaded")
+            property_manager_service = PropertyManagerService()
+            property_manager_service.add_states_to_pmds(states)
+
+            # 2. Add dummy input workspace to Options column
+            self._remove_dummy_workspaces_and_row_index()
+            self._set_dummy_workspace()
+
+            # 3. Add dummy row index to Options column
+            self._set_indices()
+        except:
             self._view.halt_process_flag()
-            raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                               "has been loaded")
-        property_manager_service = PropertyManagerService()
-        property_manager_service.add_states_to_pmds(states)
-
-        # 2. Add dummy input workspace to Options column
-        self._remove_dummy_workspaces_and_row_index()
-        self._set_dummy_workspace()
-
-        # 3. Add dummy row index to Options column
-        self._set_indices()
+            raise
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
@@ -343,7 +345,6 @@ class RunTabPresenter(object):
             if not self.is_empty_row(row):
                 sample_scatter = self._view.get_cell(row, 0)
                 if not sample_scatter:
-                    self._view.halt_process_flag()
                     raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
 
     def get_processing_options(self):
@@ -792,6 +793,7 @@ class RunTabPresenter(object):
             can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
             can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
             output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
+            user_file = self._view.get_cell(row=row, column=USER_FILE_INDEX, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -812,6 +814,7 @@ class RunTabPresenter(object):
                                                 can_direct=can_direct,
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
+                                                user_file = user_file,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -836,18 +839,32 @@ class RunTabPresenter(object):
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
-                try:
-                    state = gui_state_director.create_state(row)
-                    states.update({row: state})
-                except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                           "been added to the Mantid search directories! See here for more "
-                                           "details: {}".format(row, str(e)))
-                    self._view.halt_process_flag()
-                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                                       "been added to the Mantid search directories! See here for more "
-                                       "details: {}".format(row, str(e)))
+                row_user_file = table_model.get_row_user_file(row)
+                if row_user_file:
+                    user_file_path = FileFinder.getFullPath(row_user_file)
+                    if not os.path.exists(user_file_path):
+                        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                                           " has been specified.".format(user_file_path))
+
+                    user_file_reader = UserFileReader(user_file_path)
+                    user_file_items = user_file_reader.read_user_file()
+
+                    row_state_model = StateGuiModel(user_file_items)
+                    row_gui_state_director = GuiStateDirector(table_model, row_state_model, self._facility)
+                    self._create_row_state(row_gui_state_director, states, row)
+                else:
+                    self._create_row_state(gui_state_director, states, row)
         return states
+
+    def _create_row_state(self, director, states, row):
+        try:
+            state = director.create_state(row)
+            states.update({row: state})
+        except ValueError as e:
+            error_msg = "There was a bad entry for row {}. Ensure that the path to your files has been added to the " \
+                        "Mantid search directories! See here for more details: {}"
+            self.sans_logger.error(error_msg.format(row, str(e)))
+            raise RuntimeError(error_msg.format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """

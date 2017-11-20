@@ -17,6 +17,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class AppendSpectraTest : public CxxTest::TestSuite {
 public:
@@ -159,6 +160,19 @@ public:
         "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "outevent"));
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void testExecNonConstantBins() {
+    AppendSpectra alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace1", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 15)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "outExecNonConstantBins"));
     alg.execute();
     TS_ASSERT(!alg.isExecuted());
   }

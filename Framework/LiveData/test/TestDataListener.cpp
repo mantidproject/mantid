@@ -12,6 +12,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace LiveData {
@@ -21,7 +22,7 @@ DECLARE_LISTENER(TestDataListener)
 TestDataListener::TestDataListener()
     : LiveListener(), m_buffer(),
       m_rand(new Kernel::MersenneTwister(
-          Kernel::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
+          Types::Core::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
           60000)),
       m_changeStatusAfter(0), m_newStatus(ILiveListener::EndRun) {
   // Set up the first workspace buffer
@@ -79,7 +80,7 @@ ILiveListener::RunStatus TestDataListener::runStatus() {
 int TestDataListener::runNumber() const { return 999; }
 
 void TestDataListener::start(
-    Kernel::DateAndTime /*startTime*/) // Ignore the start time
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /** Create the default empty event workspace */

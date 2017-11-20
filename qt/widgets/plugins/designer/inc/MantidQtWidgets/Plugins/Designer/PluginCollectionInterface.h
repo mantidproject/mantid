@@ -3,22 +3,23 @@
 
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
-#include "MantidQtWidgets/Common/ColorBarWidget.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
-#include "MantidQtWidgets/Common/DisplayCurveFit.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
-#include "MantidQtWidgets/Common/MWView.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/PreviewPlot.h"
 #include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
-#include "MantidQtWidgets/Common/SafeQwtPlot.h"
+
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
+#include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
+#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
+#include "MantidQtWidgets/LegacyQwt/MWView.h"
+#include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
+#include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
 #include "MantidQtWidgets/Plugins/Designer/DesignerPlugin.h"
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
@@ -61,9 +62,10 @@ class PluginCollectionInterface
 
 public:
   /// Default constructor
-  PluginCollectionInterface(QObject *parent = 0);
+  PluginCollectionInterface(QObject *parent = nullptr);
   /// Returns a list of the custom widgets within this library
-  virtual QList<QDesignerCustomWidgetInterface *> customWidgets() const;
+  virtual QList<QDesignerCustomWidgetInterface *>
+  customWidgets() const override;
 
 private:
   QList<QDesignerCustomWidgetInterface *> m_widgets;
@@ -81,10 +83,12 @@ private:
   class PluginClass : public DesignerPlugin {                                  \
   public:                                                                      \
     PluginClass(QObject *parent) : DesignerPlugin(parent) {}                   \
-    QWidget *createWidget(QWidget *parent) { return new WidgetClass(parent); } \
-    QString name() const { return #WidgetClass; }                              \
-    QString toolTip() const { return ToolTip; }                                \
-  };
+    QWidget *createWidget(QWidget *parent) override {                          \
+      return new WidgetClass(parent);                                          \
+    }                                                                          \
+    QString name() const override { return #WidgetClass; }                     \
+    QString toolTip() const override { return ToolTip; }                       \
+  }
 
 //==============================================================================
 // Declare plugins for several types of widgets in MantidWidgets

@@ -23,7 +23,7 @@ FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
 #ifdef Q_OS_WIN
       QMainWindow(appWindow, f),
 #else
-      QMainWindow(NULL, f),
+      QMainWindow(nullptr, f),
 #endif
       d_app(appWindow), m_draggingToTiledWindow(false),
       m_isInsideTiledWindow(false), m_dragMouseDown(false) {
@@ -192,7 +192,7 @@ void FloatingWindow::removeMdiSubWindow() {
   MdiSubWindowParent_t *wrapper =
       dynamic_cast<MdiSubWindowParent_t *>(centralWidget());
   if (wrapper) {
-    wrapper->setWidget(NULL);
+    wrapper->setWidget(nullptr);
   }
 }
 

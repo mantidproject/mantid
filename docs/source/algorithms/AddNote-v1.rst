@@ -30,17 +30,17 @@ Usage
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:50:00", Value="Final")
    
 	log = ws.getRun().getLogData("my_log")
-	print "my_log has %i entries" % log.size()
+	print("my_log has {} entries".format(log.size()))
 	for i in range(log.size()):
-		print "\t%s\t%s" %(log.times[i], log.value[i])
+		print("\t{}\t{}".format(log.times[i], log.value[i]))
 	
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="New Initial", DeleteExisting=True)
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:00", Value="New Final")
 	
 	log = ws.getRun().getLogData("my_log")
-	print "my_log now has %i entries" %log.size()
+	print("my_log now has {} entries".format(log.size()))
 	for i in range(log.size()):
-		print "\t%s\t%s" % (log.times[i], log.value[i])
+		print("\t{}\t{}".format(log.times[i], log.value[i]))
 		
 Output:
 

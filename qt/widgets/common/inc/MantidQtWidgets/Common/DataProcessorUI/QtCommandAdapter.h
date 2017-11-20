@@ -5,9 +5,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QObject>
+#include <QMenu>
+#include <QToolBar>
 #include <memory>
-#include <qmenu.h>
-#include <qtoolbar.h>
 #include <vector>
 
 namespace MantidQt {

@@ -4,7 +4,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qlistwidget.h>
+#include <QListWidget>
 #include <QLabel>
 
 namespace MantidQt {
@@ -38,8 +38,8 @@ class DLLExport ListPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = NULL,
-                     QGridLayout *layout = NULL, int row = -1);
+  ListPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
+                     QGridLayout *layout = nullptr, int row = -1);
   ~ListPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;

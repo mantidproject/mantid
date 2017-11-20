@@ -18,6 +18,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -52,6 +53,8 @@ public:
         alg.setPropertyValue("InputWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "PG3_Resolution"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PartialResolutionWorkspaces", "PG3_partial"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOF", 40.0));
 
     alg.execute();

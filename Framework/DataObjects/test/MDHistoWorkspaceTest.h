@@ -260,6 +260,18 @@ public:
   }
 
   //--------------------------------------------------------------------------------------
+  void test_clone_clear_workspace_name() {
+    auto ws =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
+  }
+
+  //--------------------------------------------------------------------------------------
   void test_array_operator() {
     MDHistoWorkspace_sptr a =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.234);
@@ -1094,7 +1106,7 @@ public:
   }
 
   void test_maskNULL() {
-    doTestMasking(NULL, 0); // 1000 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 1000 out of 1000 bins masked
   }
 
   void test_mask_everything() {

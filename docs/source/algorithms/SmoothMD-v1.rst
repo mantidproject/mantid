@@ -58,7 +58,7 @@ Usage
    smoothed = SmoothMD(InputWorkspace=histogram, WidthVector=5, Function='Hat')
    # plotSlice(smoothed)
 
-   print 'Smoothed has %i points' % smoothed.getNPoints()
+   print('Smoothed has {0} points'.format(smoothed.getNPoints()))
 
 Output:
 

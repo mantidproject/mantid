@@ -2,14 +2,16 @@
 #include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 #include <QApplication>
+#include <QDrag>
 #include <QDragMoveEvent>
 #include <QFileInfo>
 #include <QList>
+#include <QMimeData>
 #include <QUrl>
 
 using namespace Mantid::API;
@@ -56,17 +58,7 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
 * @param de :: The drag drop event
 */
 void MantidTreeWidget::dropEvent(QDropEvent *de) {
-  QStringList filenames;
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    QList<QUrl> urlList = mimeData->urls();
-    for (int i = 0; i < urlList.size(); ++i) {
-      QString fName = urlList[i].toLocalFile();
-      if (fName.size() > 0) {
-        filenames.append(fName);
-      }
-    }
-  }
+  const auto filenames = DropEventHelper::getFileNames(de);
   de->acceptProposedAction();
 
   for (int i = 0; i < filenames.size(); ++i) {

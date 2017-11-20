@@ -64,6 +64,7 @@ namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Sets double validator for specified field.
@@ -135,7 +136,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
 
   const Run &run = runWs->run();
 
-  Mantid::Kernel::DateAndTime start, end;
+  Mantid::Types::Core::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";
@@ -730,7 +731,7 @@ std::pair<std::string, std::string> findLogRange(
     const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
     bool (*isLessThan)(const std::string &first, const std::string &second)) {
   std::string smallest, largest;
-  for (auto ws : workspaces) {
+  for (const auto &ws : workspaces) {
     auto range = findLogRange(ws, logName, isLessThan);
     if (smallest.empty() || isLessThan(range.first, smallest)) {
       smallest = range.first;

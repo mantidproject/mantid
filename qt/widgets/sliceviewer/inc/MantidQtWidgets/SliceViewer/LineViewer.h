@@ -5,12 +5,12 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "ui_LineViewer.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include <qwt_painter.h>
 #include "MantidAPI/CoordTransform.h"
-#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 
@@ -20,7 +20,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget {
   Q_OBJECT
 
 public:
-  LineViewer(QWidget *parent = 0);
+  LineViewer(QWidget *parent = nullptr);
   ~LineViewer() override;
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);

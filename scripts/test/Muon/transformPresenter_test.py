@@ -1,11 +1,12 @@
 import sys
 
-from  Muon import FFT_presenter
+import mantid #noqa
+from  Muon import fft_presenter
 from  Muon import load_utils
 from  Muon import transform_presenter
 from  Muon import transform_view
 from  Muon import transform_selection_view
-from  Muon import MaxEnt_presenter
+from  Muon import maxent_presenter
 from  Muon import model_constructor
 
 import unittest
@@ -18,8 +19,8 @@ else:
 class FFTTransformTest(unittest.TestCase):
     def setUp(self):
         load_utils.LoadUtils=mock.Mock()
-        FFT_presenter.FFTPresenter=mock.Mock()
-        MaxEnt_presenter.MaxEntPresenter=mock.Mock()
+        fft_presenter.FFTPresenter=mock.Mock()
+        maxent_presenter.MaxEntPresenter=mock.Mock()
         self.view=mock.create_autospec(transform_view.TransformView,spec_set=False)
         self.view.getView=mock.Mock()
         self.view.getMethods=mock.Mock(return_value=["FFT","MaxEnt"])
@@ -29,7 +30,6 @@ class FFTTransformTest(unittest.TestCase):
         self.view.selection.changeMethodSignal=mock.Mock()
         self.model=mock.create_autospec(model_constructor.ModelConstructor)
         self.model.getModel=mock.Mock()
- 
         #set presenter
         self.presenter=transform_presenter.TransformPresenter(self.view,self.model)
 

@@ -17,8 +17,10 @@ namespace Indexing {
 class IndexInfo;
 }
 
-namespace Kernel {
+namespace Types {
+namespace Core {
 class DateAndTime;
+}
 }
 
 namespace Geometry {
@@ -153,8 +155,8 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
 
-  virtual Kernel::DateAndTime getFirstPulseTime() const;
-  Kernel::DateAndTime getLastPulseTime() const;
+  virtual Types::Core::DateAndTime getFirstPulseTime() const;
+  Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const std::size_t = 0) const;
@@ -449,6 +451,7 @@ public:
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -556,8 +559,7 @@ protected:
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
-  virtual void init(const std::size_t &NVectors,
-                    const HistogramData::Histogram &histogram) = 0;
+  virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.

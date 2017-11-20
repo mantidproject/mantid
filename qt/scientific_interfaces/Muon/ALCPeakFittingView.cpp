@@ -1,7 +1,7 @@
 #include "ALCPeakFittingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ErrorCurve.h"
+#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <QMessageBox>
 
@@ -14,8 +14,8 @@ namespace CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
-      m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(NULL),
-      m_peakPicker(NULL) {}
+      m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(nullptr),
+      m_peakPicker(nullptr) {}
 
 ALCPeakFittingView::~ALCPeakFittingView() {
   m_dataCurve->detach();
@@ -130,7 +130,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
 }
 
 void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
 }
 
 void ALCPeakFittingView::displayError(const QString &message) {

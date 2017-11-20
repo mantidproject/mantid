@@ -174,9 +174,9 @@ void ClickableLabel::mousePressEvent(QMouseEvent *event) {
  */
 PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
                                QGridLayout *layout, int row)
-    : QWidget(parent), m_prop(prop), m_gridLayout(layout), m_parent(NULL),
+    : QWidget(parent), m_prop(prop), m_gridLayout(layout), m_parent(nullptr),
       m_row(row), // m_info(NULL),
-      m_doc(), m_replaceWSButton(NULL), m_widgets(), m_error(),
+      m_doc(), m_replaceWSButton(nullptr), m_widgets(), m_error(),
       m_isOutputWsProp(false), m_previousValue(), m_enteredValue(), m_icons(),
       m_useHistory(true) {
   if (!prop)
@@ -308,7 +308,7 @@ void PropertyWidget::updateIconVisibility(const QString &error) {
     try {
       userError = QString::fromStdString(m_prop->setValue(value.toStdString()));
     } catch (std::exception &err_details) {
-      userError = QString::fromAscii(err_details.what());
+      userError = QString::fromLatin1(err_details.what());
     }
   }
   this->setError(userError.trimmed());

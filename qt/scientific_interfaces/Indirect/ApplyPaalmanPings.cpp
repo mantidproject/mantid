@@ -183,7 +183,7 @@ void ApplyPaalmanPings::run() {
       const char *text = "Binning on sample and container does not match."
                          "Would you like to enable rebinning of the container?";
 
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+      int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 
@@ -407,9 +407,12 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", "__algorithm_can");
-  deleteAlg->execute();
+  if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
+
+    deleteAlg->initialize();
+    deleteAlg->setProperty("Workspace", "__algorithm_can");
+    deleteAlg->execute();
+  }
   const auto conv =
       AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
   if (conv) {

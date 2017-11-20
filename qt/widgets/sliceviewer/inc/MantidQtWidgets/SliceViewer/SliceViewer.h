@@ -1,7 +1,9 @@
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "MantidQtWidgets/Common/ColorBarWidget.h"
+#include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
@@ -11,7 +13,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
-#include "MantidQtWidgets/Common/SafeQwtPlot.h"
 #include "MantidQtWidgets/Common/SyncedCheckboxes.h"
 #include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
@@ -19,7 +20,6 @@
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
 #include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
-#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <qwt_color_map.h>
 #include <qwt_plot_spectrogram.h>
@@ -76,7 +76,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
   Q_OBJECT
 
 public:
-  SliceViewer(QWidget *parent = 0);
+  SliceViewer(QWidget *parent = nullptr);
   ~SliceViewer() override;
 
   void setWorkspace(const QString &wsName);
@@ -424,6 +424,8 @@ private:
   AspectRatioType m_lastRatioState;
   QwtScaleDrawNonOrthogonal *m_nonOrthAxis0;
   QwtScaleDrawNonOrthogonal *m_nonOrthAxis1;
+
+  bool m_holdDisplayUpdates;
 };
 
 } // namespace SliceViewer

@@ -50,6 +50,11 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
       ++currentIndex;
     }
   }
+  // Careful: Do NOT use maps of spectrum numbers for size check, since those
+  // can (currently) be smaller than the actual size due to duplicate spectrum
+  // numbers.
+  m_isPartitioned = (m_globalToLocal.size() != m_globalSpectrumNumbers.size());
+
   // At this point, m_globalToLocal is sorted by construction so it can be used
   // as a "map" (using methods from the anonymous namespace above).
   // m_spectrumNumberToIndex is not sorted. It will be sorted in makeIndexSet()
@@ -58,30 +63,30 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   // called.
 }
 
-/// Returns the global number of spectra.
-size_t SpectrumNumberTranslator::globalSize() const {
-  return m_globalSpectrumNumbers.size();
+SpectrumNumberTranslator::SpectrumNumberTranslator(
+    const std::vector<SpectrumNumber> &spectrumNumbers,
+    const SpectrumNumberTranslator &parent)
+    : m_isPartitioned(parent.m_isPartitioned), m_partition(parent.m_partition),
+      m_globalSpectrumNumbers(spectrumNumbers) {
+  size_t currentIndex = 0;
+  for (size_t i = 0; i < m_globalSpectrumNumbers.size(); ++i) {
+    auto partition = parent.m_spectrumNumberToPartition.at(spectrumNumbers[i]);
+    auto number = m_globalSpectrumNumbers[i];
+    m_spectrumNumberToPartition.emplace(number, partition);
+    if (partition == m_partition) {
+      m_spectrumNumberToIndex.emplace_back(number, currentIndex);
+      m_globalToLocal.emplace_back(GlobalSpectrumIndex(i), currentIndex);
+      if (m_isPartitioned)
+        m_spectrumNumbers.emplace_back(number);
+      ++currentIndex;
+    }
+  }
 }
 
-/// Returns the local number of spectra.
-size_t SpectrumNumberTranslator::localSize() const {
-  if (isPartitioned())
-    return m_spectrumNumbers.size();
-  return globalSize();
-}
-
-/// Returns the spectrum number for given index.
-SpectrumNumber
-SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
-  if (globalSize() == localSize())
-    return m_globalSpectrumNumbers[index];
-  return m_spectrumNumbers[index];
-}
-
-// Full set
-SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
-  return SpectrumIndexSet(localSize());
-}
+SpectrumNumberTranslator::SpectrumNumberTranslator(
+    const std::vector<GlobalSpectrumIndex> &globalIndices,
+    const SpectrumNumberTranslator &parent)
+    : SpectrumNumberTranslator(parent.spectrumNumbers(globalIndices), parent) {}
 
 SpectrumIndexSet
 SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
@@ -148,13 +153,6 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   return SpectrumIndexSet(indices, m_globalToLocal.size());
 }
 
-bool SpectrumNumberTranslator::isPartitioned() const {
-  // Careful: Do NOT use maps of spectrum numbers for size check, since those
-  // can (currently) be smaller than the actual size due to duplicate spectrum
-  // numbers.
-  return m_globalToLocal.size() != m_globalSpectrumNumbers.size();
-}
-
 void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
   // To support legacy code that creates workspaces with duplicate spectrum
   // numbers we check for bad spectrum numbers only when needed, i.e., when
@@ -169,6 +167,15 @@ void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
             [](const std::pair<SpectrumNumber, size_t> &a,
                const std::pair<SpectrumNumber, size_t> &b)
                 -> bool { return std::get<0>(a) < std::get<0>(b); });
+}
+
+std::vector<SpectrumNumber> SpectrumNumberTranslator::spectrumNumbers(
+    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+  std::vector<SpectrumNumber> spectrumNumbers;
+  for (const auto index : globalIndices)
+    spectrumNumbers.push_back(
+        m_globalSpectrumNumbers[static_cast<size_t>(index)]);
+  return spectrumNumbers;
 }
 
 } // namespace Indexing

@@ -7,8 +7,11 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -61,7 +64,7 @@ public:
 
     // convert workspace index into detector id
     const auto &spectrum = wksp->getSpectrum(wkspIndex);
-    const auto detIds = spectrum.getDetectorIDs();
+    const auto &detIds = spectrum.getDetectorIDs();
     if (detIds.size() != 1) {
       throw std::runtime_error("Summed pixels is not currently supported");
     }
@@ -308,6 +311,29 @@ std::map<std::string, std::string> PDCalibration::validateInputs() {
   return messages;
 }
 
+namespace {
+
+bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
+  const auto columnNames = table->getColumnNames();
+  return (std::find(columnNames.begin(), columnNames.end(),
+                    std::string("dasid")) != columnNames.end());
+}
+
+/// @return Conversion factor or 1. if it is unknown
+double getWidthToFWHM(const std::string &peakshape) {
+  if (peakshape == "Gaussian") {
+    return 2 * std::sqrt(2. * std::log(2.));
+  } else if (peakshape == "Lorentzian") {
+    return 2.;
+  } else if (peakshape == "BackToBackExponential") {
+    return 1.; // TODO the conversion isn't document in the function
+  } else {
+    return 1.;
+  }
+}
+
+} //  end of anonymous namespace
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -401,6 +427,13 @@ void PDCalibration::exec() {
       m_uncalibratedWS->getInstrument());
   setProperty("MaskWorkspace", maskWS);
 
+  const std::string peakFunction = getProperty("PeakFunction");
+  const double WIDTH_TO_FWHM = getWidthToFWHM(peakFunction);
+  if (WIDTH_TO_FWHM == 1.) {
+    g_log.notice() << "Unknown conversion for \"" << peakFunction
+                   << "\", found peak widths and resolution should not be "
+                      "directly compared to delta-d/d";
+  }
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
@@ -428,7 +461,7 @@ void PDCalibration::exec() {
     alg->setProperty("FitWindows", peaks.inTofWindows);
     alg->setProperty<int>("FWHM", getProperty("FWHM"));
     alg->setProperty<int>("Tolerance", getProperty("Tolerance"));
-    alg->setProperty<std::string>("PeakFunction", getProperty("PeakFunction"));
+    alg->setProperty<std::string>("PeakFunction", peakFunction);
     alg->setProperty<std::string>("BackgroundType",
                                   getProperty("BackgroundType"));
     alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
@@ -444,15 +477,19 @@ void PDCalibration::exec() {
     API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
 
     // includes peaks that aren't used in the fit
-    std::vector<double> tof_vec_full(m_peaksInDspacing.size(), std::nan(""));
+    const size_t numPeaks = m_peaksInDspacing.size();
+    std::vector<double> tof_vec_full(numPeaks, std::nan(""));
     std::vector<double> d_vec;
     std::vector<double> tof_vec;
+    std::vector<double> width_vec_full(numPeaks, std::nan(""));
+    std::vector<double> height_vec_full(numPeaks, std::nan(""));
     std::vector<double> height2; // the square of the peak height
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
-      double centre = fittedTable->getRef<double>("centre", i);
-      double height = fittedTable->getRef<double>("height", i);
-      double chi2 = fittedTable->getRef<double>("chi2", i);
+      const double centre = fittedTable->getRef<double>("centre", i);
+      const double width = fittedTable->getRef<double>("width", i);
+      const double height = fittedTable->getRef<double>("height", i);
+      const double chi2 = fittedTable->getRef<double>("chi2", i);
 
       // check chi-square
       if (chi2 > maxChiSquared || chi2 < 0.) {
@@ -486,6 +523,8 @@ void PDCalibration::exec() {
       tof_vec.push_back(centre);
       height2.push_back(height * height);
       tof_vec_full[i + peaks.badPeakOffset] = centre;
+      width_vec_full[i + peaks.badPeakOffset] = width;
+      height_vec_full[i + peaks.badPeakOffset] = height;
     }
 
     if (d_vec.size() < 2) { // not enough peaks were found
@@ -499,18 +538,21 @@ void PDCalibration::exec() {
       double chisq = 0.;
       auto converter =
           Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
-      for (std::size_t i = 0; i < tof_vec_full.size(); ++i) {
+      for (std::size_t i = 0; i < numPeaks; ++i) {
         if (std::isnan(tof_vec_full[i]))
           continue;
         const double dspacing = converter(tof_vec_full[i]);
         const double temp = m_peaksInDspacing[i] - dspacing;
         chisq += (temp * temp);
         m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
+        m_peakWidthTable->cell<double>(rowNum, i + 1) =
+            WIDTH_TO_FWHM * converter(width_vec_full[i]);
+        m_peakHeightTable->cell<double>(rowNum, i + 1) = height_vec_full[i];
       }
       m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 1) =
           chisq;
       m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 2) =
-          chisq / static_cast<double>(d_vec.size() - 1);
+          chisq / static_cast<double>(numPeaks - 1);
 
       setCalibrationValues(peaks.detid, difc, difa, t0);
     }
@@ -521,27 +563,16 @@ void PDCalibration::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // sort the calibration workspaces
-  { // limit scope
-    auto alg = createChildAlgorithm("SortTableWorkspace");
-    alg->setLoggingOffset(1);
-    alg->setProperty("InputWorkspace", m_calibrationTable);
-    alg->setProperty("OutputWorkspace", m_calibrationTable);
-    alg->setProperty("Columns", "detid");
-    alg->executeAsChildAlg();
-    m_calibrationTable = alg->getProperty("OutputWorkspace");
-  }
+  m_calibrationTable = sortTableWorkspace(m_calibrationTable);
   setProperty("OutputCalibrationTable", m_calibrationTable);
 
   // fix-up the diagnostic workspaces
-  { // limit scope
-    auto alg = createChildAlgorithm("SortTableWorkspace");
-    alg->setLoggingOffset(1);
-    alg->setProperty("InputWorkspace", m_peakPositionTable);
-    alg->setProperty("OutputWorkspace", m_peakPositionTable);
-    alg->setProperty("Columns", "detid");
-    alg->executeAsChildAlg();
-    m_peakPositionTable = alg->getProperty("OutputWorkspace");
-  }
+  m_calibrationTable = sortTableWorkspace(m_peakPositionTable);
+  m_calibrationTable = sortTableWorkspace(m_peakWidthTable);
+  m_calibrationTable = sortTableWorkspace(m_peakHeightTable);
+
+  // a derived table from the position and width
+  auto resolutionWksp = calculateResolutionTable();
 
   // set the diagnostic workspaces out
   const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
@@ -549,6 +580,15 @@ void PDCalibration::exec() {
   API::AnalysisDataService::Instance().addOrReplace(
       partials_prefix + "_dspacing", m_peakPositionTable);
   diagnosticGroup->addWorkspace(m_peakPositionTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_width",
+                                                    m_peakWidthTable);
+  diagnosticGroup->addWorkspace(m_peakWidthTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_height",
+                                                    m_peakHeightTable);
+  diagnosticGroup->addWorkspace(m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      partials_prefix + "_resolution", resolutionWksp);
+  diagnosticGroup->addWorkspace(resolutionWksp);
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
@@ -905,15 +945,6 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   return wksp;
 }
 
-namespace {
-
-bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
-  const auto columnNames = table->getColumnNames();
-  return (std::find(columnNames.begin(), columnNames.end(),
-                    std::string("dasid")) != columnNames.end());
-}
-}
-
 void PDCalibration::loadOldCalibration() {
   // load the old one
   std::string filename = getProperty("PreviousCalibration");
@@ -1015,14 +1046,23 @@ void PDCalibration::createNewCalTable() {
 void PDCalibration::createInformationWorkspaces() {
   // table for the fitted location of the various peaks
   m_peakPositionTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakWidthTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakHeightTable = boost::make_shared<DataObjects::TableWorkspace>();
+
   m_peakPositionTable->addColumn("int", "detid");
+  m_peakWidthTable->addColumn("int", "detid");
+  m_peakHeightTable->addColumn("int", "detid");
+
   for (double dSpacing : m_peaksInDspacing) {
     std::stringstream namess;
     namess << "@" << std::setprecision(5) << dSpacing;
     m_peakPositionTable->addColumn("double", namess.str());
+    m_peakWidthTable->addColumn("double", namess.str());
+    m_peakHeightTable->addColumn("double", namess.str());
   }
   m_peakPositionTable->addColumn("double", "chisq");
   m_peakPositionTable->addColumn("double", "normchisq");
+  // residuals aren't needed for FWHM or height
 
   // convert the map of m_detidToRow to be a vector of detector ids
   std::vector<detid_t> detIds(m_detidToRow.size());
@@ -1032,13 +1072,80 @@ void PDCalibration::createInformationWorkspaces() {
 
   // copy the detector ids from the main table and add lots of NaNs
   for (const auto &detId : detIds) {
-    API::TableRow newRow = m_peakPositionTable->appendRow();
-    newRow << detId;
+    API::TableRow newPosRow = m_peakPositionTable->appendRow();
+    API::TableRow newWidthRow = m_peakWidthTable->appendRow();
+    API::TableRow newHeightRow = m_peakHeightTable->appendRow();
+
+    newPosRow << detId;
+    newWidthRow << detId;
+    newHeightRow << detId;
+
     for (double dSpacing : m_peaksInDspacing) {
       UNUSED_ARG(dSpacing);
-      newRow << std::nan("");
+      newPosRow << std::nan("");
+      newWidthRow << std::nan("");
+      newHeightRow << std::nan("");
     }
   }
+}
+
+API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
+  DataObjects::SpecialWorkspace2D_sptr resolutionWksp =
+      boost::make_shared<DataObjects::SpecialWorkspace2D>(
+          m_uncalibratedWS->getInstrument());
+  resolutionWksp->setTitle("average width/height");
+
+  // assume both tables have the same number of rows b/c the algorithm created
+  // both
+  // they are also in the same order
+  // accessing cells is done by (row, col)
+  const size_t numRows = m_peakPositionTable->rowCount();
+  const size_t numPeaks = m_peaksInDspacing.size();
+  std::vector<double> resolution; // vector of non-nan resolutions
+  for (size_t rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+    resolution.clear();
+    // first column is detid
+    const detid_t detId =
+        static_cast<detid_t>(m_peakPositionTable->Int(rowIndex, 0));
+    for (size_t peakIndex = 1; peakIndex < numPeaks + 1; ++peakIndex) {
+      const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
+      if (std::isnormal(pos)) {
+        resolution.push_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
+                             pos);
+      }
+    }
+
+    if (resolution.empty()) {
+      resolutionWksp->setValue(detId, 0.,
+                               0.); // instrument view doesn't like nan
+    } else {
+      // calculate the mean
+      const double mean =
+          std::accumulate(resolution.begin(), resolution.end(), 0.) /
+          static_cast<double>(resolution.size());
+      double stddev = 0.;
+      for (const auto value : resolution) {
+        stddev += (value - mean) * (value * mean);
+      }
+      stddev = std::sqrt(stddev / static_cast<double>(resolution.size() - 1));
+      resolutionWksp->setValue(detId, mean, stddev);
+    }
+  }
+
+  return resolutionWksp;
+}
+
+API::ITableWorkspace_sptr
+PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
+  auto alg = createChildAlgorithm("SortTableWorkspace");
+  alg->setLoggingOffset(1);
+  alg->setProperty("InputWorkspace", table);
+  alg->setProperty("OutputWorkspace", table);
+  alg->setProperty("Columns", "detid");
+  alg->executeAsChildAlg();
+  table = alg->getProperty("OutputWorkspace");
+
+  return table;
 }
 
 } // namespace Algorithms

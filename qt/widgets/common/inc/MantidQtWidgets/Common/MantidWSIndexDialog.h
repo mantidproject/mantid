@@ -230,7 +230,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
     /// constructor to join together the QLineEdit and an 'invisible'
     /// *
     /// label.
-    explicit QLineEditWithErrorMark(QWidget *parent = 0);
+    explicit QLineEditWithErrorMark(QWidget *parent = nullptr);
     /// virtual destructor to allow Qt to deallocate all objects
     ~QLineEditWithErrorMark() override{};
     /// provide acess to the QLineEdit
@@ -285,7 +285,7 @@ public:
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
   /// list of the names of workspaces to be plotted.
-  MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
+  MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
                       const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showTiledOption = false,
@@ -408,7 +408,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexDialog : public QDialog {
 
 public:
   /// Constructor - has a list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
+  MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
                       const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,

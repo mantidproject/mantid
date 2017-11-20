@@ -97,8 +97,8 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
-                                   const Kernel::DateAndTime &stop) {
+void PropertyManager::filterByTime(const Types::Core::DateAndTime &start,
+                                   const Types::Core::DateAndTime &stop) {
   // Iterate through all properties
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
@@ -488,10 +488,11 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 
 //-----------------------------------------------------------------------------------------------
 /** Return the property manager serialized as a json object.
- * * @param withDefaultValues :: If true then the value of default parameters
- will
- *be included
-
+ * Note that this method does not serialize WorkspacePropertys with workspaces
+ * not
+ * in the ADS.
+ * @param withDefaultValues :: If true then the value of default parameters
+ * will be included
  * @returns A serialized version of the manager
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
@@ -499,7 +500,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   const size_t count = propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (withDefaultValues || !(p->isDefault())) {
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault())) {
       jsonMap[p->name()] = p->value();
     }
   }

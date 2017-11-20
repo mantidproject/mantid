@@ -1,8 +1,10 @@
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
-#include <QtGui>
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include <QDir>
+#include <QFileDialog>
+#include <QSettings>
+#include <QUrl>
 
 using namespace MantidQt::API;
 
@@ -67,11 +69,29 @@ void ManageUserDirectories::loadProperties() {
   // set flag of whether to search the data archive
   QString archive = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.searcharchive")).trimmed();
-  if (archive == "On")
-    m_uiForm.ckSearchArchive->setChecked(true);
-  else
-    m_uiForm.ckSearchArchive->setChecked(false);
+                            "datasearch.searcharchive"))
+                        .trimmed()
+                        .toLower();
+  QString defaultFacility =
+      QString::fromStdString(
+          Mantid::Kernel::ConfigService::Instance().getString(
+              "default.facility"))
+          .trimmed()
+          .toUpper();
+  m_uiForm.cbSearchArchive->addItem(QString("default facility only - ") +
+                                    defaultFacility);
+  m_uiForm.cbSearchArchive->addItem("all");
+  m_uiForm.cbSearchArchive->addItem("off");
+  if (archive == "on") {
+    m_uiForm.cbSearchArchive->setCurrentIndex(0);
+  } else if (archive == "all") {
+    m_uiForm.cbSearchArchive->setCurrentIndex(1);
+  } else if (archive == "off") {
+    m_uiForm.cbSearchArchive->setCurrentIndex(2);
+  } else { // only add custom if it has been set
+    m_uiForm.cbSearchArchive->addItem("custom - " + archive.toUpper());
+    m_uiForm.cbSearchArchive->setCurrentIndex(3);
+  }
 
   // default save directory
   QString saveDir = QString::fromStdString(
@@ -80,15 +100,20 @@ void ManageUserDirectories::loadProperties() {
   m_uiForm.leDefaultSave->setText(saveDir);
 }
 void ManageUserDirectories::saveProperties() {
-  QString newSearchArchive;
-  QString newDataDirs;
-  QString newUserDirs;
-  QString newSaveDir;
-
-  if (m_uiForm.ckSearchArchive->isChecked())
-    newSearchArchive = "On";
-  else
-    newSearchArchive = "Off";
+  QString newSearchArchive = m_uiForm.cbSearchArchive->currentText().toLower();
+  if (newSearchArchive == "all" || newSearchArchive == "off") {
+    // do nothing
+  } else if (newSearchArchive.startsWith("default facility only")) {
+    newSearchArchive = "on";
+  } else {
+    // the only way "custom" gets set is by using the value in ConfigService
+    // already, so just copy it
+    newSearchArchive = QString::fromStdString(
+                           Mantid::Kernel::ConfigService::Instance().getString(
+                               "datasearch.searcharchive"))
+                           .trimmed()
+                           .toLower();
+  }
 
   QStringList dataDirs;
   QStringList userDirs;
@@ -104,6 +129,10 @@ void ManageUserDirectories::saveProperties() {
     appendSlashIfNone(dir);
     userDirs.append(dir);
   }
+
+  QString newDataDirs;
+  QString newUserDirs;
+  QString newSaveDir;
 
   newDataDirs = dataDirs.join(";");
   newUserDirs = userDirs.join(";");
@@ -146,14 +175,13 @@ QListWidget *ManageUserDirectories::listWidget() {
              m_uiForm.tabPythonDirectories) {
     return m_uiForm.lwUserSearchDirs;
   } else {
-    return NULL;
+    return nullptr;
   }
 }
 
 // SLOTS
 void ManageUserDirectories::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/ManageUserDirectories"));
+  HelpWindow::showConcept(this, QString("ManageUserDirectories"));
 }
 void ManageUserDirectories::cancelClicked() { this->close(); }
 void ManageUserDirectories::confirmClicked() {
@@ -162,7 +190,7 @@ void ManageUserDirectories::confirmClicked() {
 }
 
 void ManageUserDirectories::addDirectory() {
-  QLineEdit *input(NULL);
+  QLineEdit *input(nullptr);
 
   if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch) {
     input = m_uiForm.leDirectoryPath;

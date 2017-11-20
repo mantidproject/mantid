@@ -8,13 +8,7 @@
 #include <Poco/DOM/Element.h>
 
 using Poco::XML::DOMParser;
-using Poco::XML::InputSource;
 using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::AutoPtr;
-using Poco::Exception;
 using Poco::XML::Element;
 
 #include "MantidKernel/Exception.h"

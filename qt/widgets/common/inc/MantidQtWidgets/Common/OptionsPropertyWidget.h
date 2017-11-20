@@ -4,7 +4,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qcombobox.h>
+#include <QComboBox>
 #include <QLabel>
 
 namespace MantidQt {
@@ -40,8 +40,9 @@ class DLLExport OptionsPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
-  OptionsPropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = NULL,
-                        QGridLayout *layout = NULL, int row = -1);
+  OptionsPropertyWidget(Mantid::Kernel::Property *prop,
+                        QWidget *parent = nullptr,
+                        QGridLayout *layout = nullptr, int row = -1);
   ~OptionsPropertyWidget() override;
   QString getValue() const override;
   void setValueImpl(const QString &value) override;

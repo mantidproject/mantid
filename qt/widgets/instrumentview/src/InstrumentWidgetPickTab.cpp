@@ -150,8 +150,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   m_selectionType = Single;
 
-  m_infoController = NULL;
-  m_plotController = NULL;
+  m_infoController = nullptr;
+  m_plotController = nullptr;
 
   m_activeTool = new QLabel(this);
   // set up the tool bar

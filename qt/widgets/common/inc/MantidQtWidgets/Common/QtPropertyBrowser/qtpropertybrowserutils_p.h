@@ -99,10 +99,10 @@
 #ifndef QTPROPERTYBROWSERUTILS_H
 #define QTPROPERTYBROWSERUTILS_H
 
-#include <QtCore/QMap>
-#include <QtGui/QIcon>
-#include <QtGui/QWidget>
-#include <QtCore/QStringList>
+#include <QMap>
+#include <QIcon>
+#include <QWidget>
+#include <QStringList>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -146,7 +146,7 @@ public:
 class QtBoolEdit : public QWidget {
   Q_OBJECT
 public:
-  QtBoolEdit(QWidget *parent = 0);
+  QtBoolEdit(QWidget *parent = nullptr);
 
   bool textVisible() const { return m_textVisible; }
   void setTextVisible(bool textVisible);
@@ -173,7 +173,7 @@ private:
 class QtKeySequenceEdit : public QWidget {
   Q_OBJECT
 public:
-  QtKeySequenceEdit(QWidget *parent = 0);
+  QtKeySequenceEdit(QWidget *parent = nullptr);
 
   QKeySequence keySequence() const;
   bool eventFilter(QObject *o, QEvent *e) override;

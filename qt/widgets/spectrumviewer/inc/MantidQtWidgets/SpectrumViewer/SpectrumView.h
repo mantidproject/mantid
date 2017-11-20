@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
-#include <QtGui>
 #include <QList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -68,7 +67,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView
 
 public:
   /// Construct a SpectrumView to display data from the specified data source
-  SpectrumView(QWidget *parent = 0);
+  SpectrumView(QWidget *parent = nullptr);
 
   ~SpectrumView() override;
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);

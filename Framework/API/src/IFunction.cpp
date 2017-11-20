@@ -1416,14 +1416,18 @@ void IFunction::unfixParameter(const std::string &name) {
 /// @param isDefault :: If true fix them by default
 void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i, isDefault);
+    if (isActive(i)) {
+      fix(i, isDefault);
+    }
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
+    if (isFixed(i)) {
+      unfix(i);
+    }
   }
 }
 

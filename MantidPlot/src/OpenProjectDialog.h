@@ -37,8 +37,8 @@ class OpenProjectDialog : public ExtensibleFileDialog {
   Q_OBJECT
 public:
   enum OpenMode { NewProject, NewFolder };
-  OpenProjectDialog(QWidget *parent = 0, bool extended = true,
-                    Qt::WFlags flags = 0);
+  OpenProjectDialog(QWidget *parent = nullptr, bool extended = true,
+                    Qt::WFlags flags = nullptr);
   OpenMode openMode() const { return (OpenMode)d_open_mode->currentIndex(); }
 
 private:
