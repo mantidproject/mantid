@@ -77,9 +77,6 @@ public:
   void doFitting(const int runNumber, const size_t bank,
                  const std::string &expectedPeaks);
 
-  void runLoadAlg(const std::string &focusedFile,
-                  Mantid::API::MatrixWorkspace_sptr &focusedWS);
-
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 

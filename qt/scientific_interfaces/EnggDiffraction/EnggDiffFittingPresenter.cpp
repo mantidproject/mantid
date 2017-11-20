@@ -1,6 +1,4 @@
 #include "EnggDiffFittingPresenter.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -44,10 +42,6 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber, const size_
 }
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
-
-// MOVE THIS TO THE MODEL
-const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
-    "engggui_fitting_focused_ws";
 
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
@@ -987,7 +981,7 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   m_fittingFinishedOK = false;
 
   // load the focused workspace file to perform single peak fits
-  //runLoadAlg(focusedRunNo, focusedWS);
+
   // apply calibration to the focused workspace
   m_model.setDifcTzero(runNumber, bank, currentCalibration());
 
@@ -1003,31 +997,6 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
 
   m_model.createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
-}
-
-void EnggDiffFittingPresenter::runLoadAlg(
-	const std::string &focusedFile,
-	Mantid::API::MatrixWorkspace_sptr &focusedWS) {
-	// load the focused workspace file to perform single peak fits
-	try {
-		auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
-		load->initialize();
-		load->setPropertyValue("Filename", focusedFile);
-		load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-		load->execute();
-
-		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-		focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-	}
-	catch (std::runtime_error &re) {
-		g_log.error()
-			<< "Error while loading focused data. "
-			"Could not run the algorithm Load successfully for the Fit "
-			"peaks (file name: " +
-			focusedFile + "). Error description: " + re.what() +
-			" Please check also the previous log messages for details.";
-		return;
-	}
 }
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
@@ -1314,11 +1283,9 @@ void EnggDiffFittingPresenter::plotFocusedFile(
 
   } catch (std::runtime_error &re) {
     g_log.error()
-        << "Unable to plot focused " + g_focusedFittingWSName +
-               "workspace on the canvas. "
-               "Error description: " +
-               re.what() +
-               " Please check also the previous log messages for details.";
+        << "Unable to plot focused workspace on the canvas. "
+        << "Error description: " << re.what()
+        << " Please check also the previous log messages for details.";
 
     m_view->showStatus("Error while plotting the peaks fitted");
     throw;
@@ -1329,8 +1296,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
   try {
 
     // detaches previous plots from canvas
-    m_view->resetCanvas();
-
+	  m_view->resetCanvas();
 
 	const auto listLabel = m_view->getFittingListWidgetCurrentValue();
 	int runNumber;
