@@ -4,12 +4,16 @@ from sans.gui_logic.models.run_file import RunFile
 
 class RunSelectorPresenter(object):
     def __init__(self, run_selection, run_finder, view, parent_view):
-        self.run_selection = run_selection
+        self._run_selection = run_selection
         self._run_finder = run_finder
         self.view = view
         self.parent_view = parent_view
         self._connect_to_view(view)
         self.refresh()
+
+    @property
+    def run_selection(self):
+        return self._run_selection
 
     def _connect_to_view(self, view):
         view.manageDirectories.connect(self.handle_manage_directories)
@@ -19,14 +23,14 @@ class RunSelectorPresenter(object):
         view.browse.connect(self.handle_browse)
 
     def handle_remove_all_items(self):
-        self.run_selection.clear_all_runs()
+        self._run_selection.clear_all_runs()
         self.refresh()
 
     def handle_remove_items(self):
         selected = self.view.selected_runs()
         selected.sort(reverse=True)
         for index in selected:
-            self.run_selection.remove_run(index)
+            self._run_selection.remove_run(index)
         self.refresh()
 
     def parse_runs_from_input(self, input):
@@ -34,7 +38,7 @@ class RunSelectorPresenter(object):
 
     def add_runs(self, runs):
         for run in runs:
-            self.run_selection.add_run(run)
+            self._run_selection.add_run(run)
         self.refresh()
 
     def handle_add_items(self):
@@ -49,7 +53,7 @@ class RunSelectorPresenter(object):
                 self.view.run_not_found()
 
     def refresh(self):
-        self.view.draw_runs(self.run_selection)
+        self.view.draw_runs(self._run_selection)
 
     def handle_manage_directories(self):
         self.view.show_directories_manager()

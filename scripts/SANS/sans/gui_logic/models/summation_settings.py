@@ -85,6 +85,9 @@ class SummationSettings(object):
     def has_overlay_event_workspaces(self):
         return self._settings.has_overlay_event_workspaces()
 
+    def should_save_as_event_workspaces(self):
+        return isinstance(self._settings, SaveAsEventData)
+
     @property
     def additional_time_shifts(self):
         return self._settings.additional_time_shifts
