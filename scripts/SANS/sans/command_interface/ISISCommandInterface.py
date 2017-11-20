@@ -1009,6 +1009,8 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
                    find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
 
+    # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
+    # function
     if config['default.instrument'] == 'LARMOR':
         xstart = xstart * 1000
 
