@@ -167,7 +167,6 @@ private:
   HistogramItem(const Histogram &histogram, const size_t index)
       : m_histogram(histogram), m_index(index) {}
 
-
   bool xModeIsPoints() const {
     return Histogram::XMode::Points == m_histogram.xMode();
   }

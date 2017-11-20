@@ -286,11 +286,11 @@ void Histogram::resize(size_t n) {
 }
 
 HistogramIterator Histogram::begin() const {
-    return HistogramIterator(*this, 0);
+  return HistogramIterator(*this, 0);
 }
 
 HistogramIterator Histogram::end() const {
-    return HistogramIterator(*this, size());
+  return HistogramIterator(*this, size());
 }
 
 } // namespace HistogramData
