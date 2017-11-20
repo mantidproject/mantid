@@ -56,7 +56,6 @@ public:
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
   MOCK_METHOD1(setModel, void(const QString &));
-  MOCK_METHOD1(setTableList, void(const QSet<QString> &));
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));

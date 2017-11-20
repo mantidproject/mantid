@@ -87,7 +87,6 @@ public:
   virtual void updateMenuEnabledState(const bool isProcessing) = 0;
 
   // Setter methods
-  virtual void setTableList(const QSet<QString> &tables) = 0;
   virtual void setInstrumentList(const QString &instruments,
                                  const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;

@@ -107,7 +107,6 @@ public:
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
-  void setTableList(const QSet<QString> &tables) override;
   void setInstrumentList(const QString &instruments,
                          const QString &defaultInstrument) override;
   void

@@ -199,30 +199,6 @@ void QDataProcessorWidget::showTable(
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
 }
 
-/**
-Set the list of tables the user is offered to open
-@param tables : the names of the tables in the ADS
-*/
-void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
-  ui.menuOpenTable->clear();
-  for (auto it = tables.begin(); it != tables.end(); ++it) {
-    QAction *openTable = ui.menuOpenTable->addAction(*it);
-    openTable->setIcon(QIcon("://worksheet.png"));
-
-    // Map this action to the table name
-    m_openMap->setMapping(openTable, *it);
-    // When repeated corrections happen the QMessageBox from openTable()
-    // method in ReflMainViewPresenter will be called multiple times
-    // when 'no' is clicked.
-    // ConnectionType = UniqueConnection ensures that
-    // each object has only one of these signals.
-    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()),
-            Qt::UniqueConnection);
-    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
-            Qt::UniqueConnection);
-  }
-}
-
 /** This slot is used to update the instrument*/
 void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
     int index) {

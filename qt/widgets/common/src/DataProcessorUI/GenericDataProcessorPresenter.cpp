@@ -275,7 +275,6 @@ void GenericDataProcessorPresenter::acceptViews(
   observeRename();
   observeADSClear();
   observeAfterReplace();
-  m_view->setTableList(m_workspaceList);
 
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
@@ -1277,7 +1276,6 @@ void GenericDataProcessorPresenter::addHandle(
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1286,7 +1284,6 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1295,7 +1292,6 @@ Handle ADS clear events
 */
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1312,7 +1308,6 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   if (m_workspaceList.contains(qOldName)) {
     m_workspaceList.remove(qOldName);
     m_workspaceList.insert(qNewName);
-    m_view->setTableList(m_workspaceList);
     m_mainPresenter->notifyADSChanged(m_workspaceList);
   }
 }
@@ -1329,8 +1324,6 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, static_cast<int>(m_whitelist.size())))
     m_workspaceList.insert(qName);
-
-  m_view->setTableList(m_workspaceList);
 }
 
 /** Expands the current selection */
