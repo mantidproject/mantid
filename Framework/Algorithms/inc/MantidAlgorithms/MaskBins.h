@@ -4,6 +4,7 @@
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 
 namespace Mantid {
 

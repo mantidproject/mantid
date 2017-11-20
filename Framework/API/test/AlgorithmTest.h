@@ -836,10 +836,9 @@ public:
         WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS_NOTHING((
-        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-            "InputWorkspace", wksp, IndexType::WorkspaceIndex,
-            std::vector<int>{1, 2, 3, 4, 5})));
+    TS_ASSERT_THROWS_NOTHING((indexAlg.setWorkspaceInputProperties(
+        "InputWorkspace", wksp, IndexType::WorkspaceIndex,
+        std::vector<int64_t>{1, 2, 3, 4, 5})));
   }
 
   void
@@ -861,10 +860,10 @@ public:
     IndexingAlgorithm indexAlg;
     indexAlg.init();
     // Requires workspace in ADS due to validity checks
-    TS_ASSERT_THROWS_NOTHING((
-        indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
+    TS_ASSERT_THROWS_NOTHING(
+        (indexAlg.setWorkspaceInputProperties<MatrixWorkspace>(
             "InputWorkspace", "wksp", IndexType::WorkspaceIndex,
-            std::vector<int>{1, 2, 3, 4, 5})));
+            std::vector<int64_t>{1, 2, 3, 4, 5})));
     AnalysisDataService::Instance().remove("wksp");
   }
 
