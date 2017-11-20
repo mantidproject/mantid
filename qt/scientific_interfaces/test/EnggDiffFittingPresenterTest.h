@@ -23,11 +23,9 @@ public:
 
 private:
   // not async at all
-  void startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
+  void startAsyncFittingWorker(const int runNumber, const size_t bank,
                                const std::string &ExpectedPeaks) override {
-
-    std::string runNo = focusedRunNo[0];
-    doFitting(runNo, ExpectedPeaks);
+    doFitting(runNumber, bank, ExpectedPeaks);
     fittingFinished();
   }
 };
