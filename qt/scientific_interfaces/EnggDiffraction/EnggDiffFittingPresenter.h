@@ -80,33 +80,10 @@ public:
   void runLoadAlg(const std::string &focusedFile,
                   Mantid::API::MatrixWorkspace_sptr &focusedWS);
 
-  void runFittingAlgs(const int runNumber, const size_t bank);
-
-  std::string
-  functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
-                     std::string tableName, size_t row, std::string &startX,
-                     std::string &endX);
-
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
   void plotFitPeaksCurves();
-
-  void runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
-                                  std::string &filePath);
-
-  void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
-                              const std::string &InputName,
-                              const std::string &OutputName,
-                              const std::string &startX,
-                              const std::string &endX);
-
-  void runCropWorkspaceAlg(std::string workspaceName);
-
-  void runAppendSpectraAlg(std::string workspace1Name,
-                           std::string workspace2Name);
-
-  void runRebinToWorkspaceAlg(std::string workspaceName);
 
   void convertUnits(std::string workspaceName);
   void runConvertUnitsAlg(std::string workspaceName);

@@ -996,152 +996,33 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   saveDirectory.append(outFilename);
   m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
 
-
-  // remove this hard-coded value
-  runFittingAlgs("engggui_fitting_fitpeaks_params", g_focusedFittingWSName);
-}
-
-void EnggDiffFittingPresenter::runLoadAlg(
-    const std::string &focusedFile,
-    Mantid::API::MatrixWorkspace_sptr &focusedWS) {
-  // load the focused workspace file to perform single peak fits
-  try {
-    auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", focusedFile);
-    load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-    load->execute();
-
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading focused data. "
-           "Could not run the algorithm Load successfully for the Fit "
-           "peaks (file name: " +
-               focusedFile + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    return;
-  }
-}
-
-void EnggDiffFittingPresenter::runFittingAlgs(const int runNumber, 
-	                                          const size_t bank) {
-  // retrieve the table with parameters
-  auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  if (!ADS.doesExist(focusedFitPeaksTableName)) {
-    // convert units so valid dSpacing peaks can still be added to gui
-    if (ADS.doesExist(g_focusedFittingWSName)) {
-      convertUnits(g_focusedFittingWSName);
-    }
-
-    throw std::invalid_argument(
-        focusedFitPeaksTableName +
-        " workspace could not be found. "
-        "Please check the log messages for more details.");
-  }
-
-  auto table = ADS.retrieveWS<ITableWorkspace>(focusedFitPeaksTableName);
-  size_t rowCount = table->rowCount();
-  const std::string single_peak_out_WS = "engggui_fitting_single_peaks";
-  std::string currentPeakOutWS;
-
-  std::string Bk2BkExpFunctionStr;
-  std::string startX = "";
-  std::string endX = "";
-  for (size_t i = 0; i < rowCount; i++) {
-    // get the functionStrFactory to generate the string for function
-    // property, returns the string with i row from table workspace
-    // table is just passed so it works?
-    Bk2BkExpFunctionStr =
-        functionStrFactory(table, focusedFitPeaksTableName, i, startX, endX);
-
-    g_log.debug() << "startX: " + startX + " . endX: " + endX << '\n';
-
-    currentPeakOutWS = "__engggui_fitting_single_peaks" + std::to_string(i);
-
-    // run EvaluateFunction algorithm with focused workspace to produce
-    // the correct fit function
-    // focusedWSName is not going to change as its always going to be from
-    // single workspace
-    runEvaluateFunctionAlg(Bk2BkExpFunctionStr, focusedWSName, currentPeakOutWS,
-                           startX, endX);
-
-    // crop workspace so only the correct workspace index is plotted
-    runCropWorkspaceAlg(currentPeakOutWS);
-
-    // apply the same binning as a focused workspace
-    runRebinToWorkspaceAlg(currentPeakOutWS);
-
-    // if the first peak
-    if (i == size_t(0)) {
-
-      // create a workspace clone of bank focus file
-      // this will import all information of the previous file
-      runCloneWorkspaceAlg(focusedWSName, single_peak_out_WS);
-
-      setDataToClonedWS(currentPeakOutWS, single_peak_out_WS);
-      ADS.remove(currentPeakOutWS);
-    } else {
-      const std::string currentPeakClonedWS =
-          "__engggui_fitting_cloned_peaks" + std::to_string(i);
-
-      runCloneWorkspaceAlg(focusedWSName, currentPeakClonedWS);
-
-      setDataToClonedWS(currentPeakOutWS, currentPeakClonedWS);
-
-      // append all peaks in to single workspace & remove
-      runAppendSpectraAlg(single_peak_out_WS, currentPeakClonedWS);
-      ADS.remove(currentPeakOutWS);
-      ADS.remove(currentPeakClonedWS);
-    }
-  }
-
-  convertUnits(g_focusedFittingWSName);
-
-  // convert units for both workspaces to dSpacing from ToF
-  if (rowCount > size_t(0)) {
-    auto swks = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
-    //setDifcTzero(swks);
-    convertUnits(single_peak_out_WS);
-  } else {
-    g_log.error() << "The engggui_fitting_fitpeaks_params table produced is"
-                     "empty. Please try again!\n";
-  }
-
+  m_model.createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
 
-std::string EnggDiffFittingPresenter::functionStrFactory(
-    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
-    size_t row, std::string &startX, std::string &endX) {
-  const double windowLeft = 9;
-  const double windowRight = 12;
+void EnggDiffFittingPresenter::runLoadAlg(
+	const std::string &focusedFile,
+	Mantid::API::MatrixWorkspace_sptr &focusedWS) {
+	// load the focused workspace file to perform single peak fits
+	try {
+		auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
+		load->initialize();
+		load->setPropertyValue("Filename", focusedFile);
+		load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
+		load->execute();
 
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
-
-  double A0 = paramTableWS->cell<double>(row, size_t(1));
-  double A1 = paramTableWS->cell<double>(row, size_t(3));
-  double I = paramTableWS->cell<double>(row, size_t(13));
-  double A = paramTableWS->cell<double>(row, size_t(7));
-  double B = paramTableWS->cell<double>(row, size_t(9));
-  double X0 = paramTableWS->cell<double>(row, size_t(5));
-  double S = paramTableWS->cell<double>(row, size_t(11));
-
-  startX = boost::lexical_cast<std::string>(X0 - (windowLeft * S));
-  endX = boost::lexical_cast<std::string>(X0 + (windowRight * S));
-
-  std::string functionStr =
-      "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
-      ",A1=" + boost::lexical_cast<std::string>(A1) +
-      ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
-      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
-      boost::lexical_cast<std::string>(B) + ",X0=" +
-      boost::lexical_cast<std::string>(X0) + ",S=" +
-      boost::lexical_cast<std::string>(S);
-
-  return functionStr;
+		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+		focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+	}
+	catch (std::runtime_error &re) {
+		g_log.error()
+			<< "Error while loading focused data. "
+			"Could not run the algorithm Load successfully for the Fit "
+			"peaks (file name: " +
+			focusedFile + "). Error description: " + re.what() +
+			" Please check also the previous log messages for details.";
+		return;
+	}
 }
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
@@ -1248,89 +1129,16 @@ std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
 }
 
 void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
-  std::ofstream outfile(fileDir.c_str());
-  if (!outfile) {
-    m_view->userWarning("File not found",
-                        "File " + fileDir +
-                            " , could not be found. Please try again!");
-  } else {
-    auto expPeaks = m_view->fittingPeaksData();
-    outfile << expPeaks;
-  }
-}
-
-void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
-    const std::string &bk2BkExpFunction, const std::string &InputName,
-    const std::string &OutputName, const std::string &startX,
-    const std::string &endX) {
-
-  auto evalFunc =
-      Mantid::API::AlgorithmManager::Instance().create("EvaluateFunction");
-  g_log.notice() << "EvaluateFunction algorithm has started\n";
-  try {
-    evalFunc->initialize();
-    evalFunc->setProperty("Function", bk2BkExpFunction);
-    evalFunc->setProperty("InputWorkspace", InputName);
-    evalFunc->setProperty("OutputWorkspace", OutputName);
-    evalFunc->setProperty("StartX", startX);
-    evalFunc->setProperty("EndX", endX);
-    evalFunc->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
-  auto cropWS =
-      Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  try {
-    cropWS->initialize();
-    cropWS->setProperty("InputWorkspace", workspaceName);
-    cropWS->setProperty("OutputWorkspace", workspaceName);
-    cropWS->setProperty("StartWorkspaceIndex", 1);
-    cropWS->setProperty("EndWorkspaceIndex", 1);
-    cropWS->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm CropWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
-                                                   std::string workspace2Name) {
-  auto appendSpec =
-      Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-  try {
-    appendSpec->initialize();
-    appendSpec->setProperty("InputWorkspace1", workspace1Name);
-    appendSpec->setProperty("InputWorkspace2", workspace2Name);
-    appendSpec->setProperty("OutputWorkspace", workspace1Name);
-    appendSpec->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm AppendWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
-    std::string workspaceName) {
-  auto RebinToWs =
-      Mantid::API::AlgorithmManager::Instance().create("RebinToWorkspace");
-  try {
-    RebinToWs->initialize();
-    RebinToWs->setProperty("WorkspaceToRebin", workspaceName);
-    RebinToWs->setProperty("WorkspaceToMatch", g_focusedFittingWSName);
-    RebinToWs->setProperty("OutputWorkspace", workspaceName);
-    RebinToWs->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm RebinToWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
+	std::ofstream outfile(fileDir.c_str());
+	if (!outfile) {
+		m_view->userWarning("File not found",
+			"File " + fileDir +
+			" , could not be found. Please try again!");
+	}
+	else {
+		auto expPeaks = m_view->fittingPeaksData();
+		outfile << expPeaks;
+	}
 }
 
 /**
