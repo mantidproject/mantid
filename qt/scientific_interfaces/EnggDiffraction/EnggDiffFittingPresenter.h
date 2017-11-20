@@ -85,18 +85,6 @@ public:
 
   void plotFitPeaksCurves();
 
-  void convertUnits(std::string workspaceName);
-  void runConvertUnitsAlg(std::string workspaceName);
-  void runAlignDetectorsAlg(std::string workspaceName);
-
-  void getDifcTzero(Mantid::API::MatrixWorkspace_const_sptr wks, double &difc,
-                    double &difa, double &tzero) const;
-
-  void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            const std::string &outputWorkspace);
-
-  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
-
   void setBankItems(const std::vector<std::string> &bankFiles);
 
   void setRunNoItems(const std::vector<std::string> &runNumVector,
