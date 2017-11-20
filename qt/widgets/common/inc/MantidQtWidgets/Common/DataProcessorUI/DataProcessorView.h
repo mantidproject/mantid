@@ -83,8 +83,12 @@ public:
   // Select all rows/groups
   virtual void selectAll() = 0;
 
-  // Update enabled/disabled state of the menu items
+  // Update enabled/disabled state of menu items and widgets
   virtual void updateMenuEnabledState(const bool isProcessing) = 0;
+  virtual void setProcessButtonEnabled(const bool enabled) = 0;
+  virtual void setInstrumentComboEnabled(const bool enabled) = 0;
+  virtual void setTreeEnabled(const bool enabled) = 0;
+  virtual void setOutputNotebookEnabled(const bool enabled) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const QString &instruments,

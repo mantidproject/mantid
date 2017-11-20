@@ -104,6 +104,10 @@ public:
 
   // Update enabled/disabled state of widgets
   void updateMenuEnabledState(const bool isProcessing) override;
+  void setProcessButtonEnabled(const bool enabled) override;
+  void setInstrumentComboEnabled(const bool enabled) override;
+  void setTreeEnabled(const bool enabled) override;
+  void setOutputNotebookEnabled(const bool enabled) override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;

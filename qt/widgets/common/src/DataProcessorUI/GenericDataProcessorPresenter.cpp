@@ -1550,6 +1550,11 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::updateWidgetEnabledState(const bool isProcessing) const {
   m_view->updateMenuEnabledState(isProcessing);
+
+  m_view->setProcessButtonEnabled(!isProcessing);
+  m_view->setInstrumentComboEnabled(!isProcessing);
+  m_view->setTreeEnabled(!isProcessing);
+  m_view->setOutputNotebookEnabled(!isProcessing);
 }
 
 /**

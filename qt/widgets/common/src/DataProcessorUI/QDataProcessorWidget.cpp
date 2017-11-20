@@ -299,14 +299,52 @@ Select all rows/groups
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
-* Update widgets on the view to be enabled/disabled according to
-* whether processing is in progress or not
+* Update menu items to be enabled/disabled according to whether processing
+* is in progress or not
 * @param isProcessing :: true if processing is in progress
 */
 void QDataProcessorWidget::updateMenuEnabledState(const bool isProcessing) {
   for (const auto &command : m_commands) {
     command->updateEnabledState(isProcessing);
   }
+}
+
+/**
+* Sets the "Process" button to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setProcessButtonEnabled(const bool enabled) {
+  ui.buttonProcess->setEnabled(enabled);
+}
+
+/**
+* Sets the "Instrument" combo to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setInstrumentComboEnabled(const bool enabled) {
+  ui.comboProcessInstrument->setEnabled(enabled);
+}
+
+/**
+* Sets the table/tree widget to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
+  static const auto editTriggers = ui.viewTable->editTriggers();
+
+  if (enabled)
+    ui.viewTable->setEditTriggers(editTriggers);
+  else
+    ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+}
+
+/**
+* Sets the "Output Notebook" widget to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setOutputNotebookEnabled(const bool enabled) {
+  ui.checkEnableNotebook->setEnabled(enabled);
 }
 
 /**

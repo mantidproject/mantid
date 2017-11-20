@@ -52,6 +52,10 @@ public:
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
   MOCK_METHOD1(updateMenuEnabledState, void(const bool));
+  MOCK_METHOD1(setProcessButtonEnabled, void(const bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(const bool));
+  MOCK_METHOD1(setTreeEnabled, void(const bool));
+  MOCK_METHOD1(setOutputNotebookEnabled, void(const bool));
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
