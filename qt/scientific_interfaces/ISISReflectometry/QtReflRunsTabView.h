@@ -81,6 +81,8 @@ public:
   void clearCommands() override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
+  void setTransferButtonEnabled(bool enabled) override;
+  void setInstrumentComboEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

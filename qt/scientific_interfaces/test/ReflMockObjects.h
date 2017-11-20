@@ -64,6 +64,8 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(setTransferButtonEnabled, void(bool));
+  MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

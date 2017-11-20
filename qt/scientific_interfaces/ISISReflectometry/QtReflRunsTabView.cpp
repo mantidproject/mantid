@@ -194,6 +194,24 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 }
 
 /**
+* Sets the "Transfer" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
+
+  ui.buttonTransfer->setEnabled(enabled);
+}
+
+/**
+* Sets the "Instrument" combo box enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
+
+  ui.comboSearchInstrument->setEnabled(enabled);
+}
+
+/**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */

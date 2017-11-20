@@ -459,24 +459,33 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable all 'process' buttons and disable the 'pause' button
-* when data reduction is paused
-*/
-/// @todo These should probably call pause/resume functions on the view and
-/// leave it up to the view to enable/disable menus/buttons accordingly
-void ReflRunsTabPresenter::pause() const {
+/** Tells the view to update the enabled/disabled state of all relevant widgets
+ * based on whether processing is in progress or not.
+ * @param isProcessing :: true if processing is in progress
+ *
+ */
+void ReflRunsTabPresenter::updateWidgetEnabledState(const bool isProcessing) const {
+  // Update the menus
+  m_view->updateMenuEnabledState(isProcessing);
 
-  m_view->updateMenuEnabledState(false);
-  m_view->setAutoreduceButtonEnabled(true);
+  // Update specific buttons
+  m_view->setAutoreduceButtonEnabled(!isProcessing);
+  m_view->setTransferButtonEnabled(!isProcessing);
+  m_view->setInstrumentComboEnabled(!isProcessing);
 }
 
-/** Tells view to disable the 'process' button and enable the 'pause' button
-* when data reduction is resumed
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is not in progress
+*/
+void ReflRunsTabPresenter::pause() const {
+  updateWidgetEnabledState(false);
+}
+
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is in progress
 */
 void ReflRunsTabPresenter::resume() const {
-
-  m_view->updateMenuEnabledState(true);
-  m_view->setAutoreduceButtonEnabled(false);
+  updateWidgetEnabledState(true);
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
