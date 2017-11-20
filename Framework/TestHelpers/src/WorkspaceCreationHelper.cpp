@@ -12,7 +12,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -520,7 +519,7 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
  * @return a component pointer
  */
 ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
-                           std::string name = "component") {
+                           const std::string &name) {
   ObjComponent *component = new ObjComponent(name);
   component->setPos(position);
   instrument->add(component);
@@ -534,7 +533,7 @@ ObjComponent *addComponent(Instrument_sptr &instrument, const V3D &position,
  * @param name :: name of the source
  */
 void addSource(Instrument_sptr &instrument, const V3D &position,
-               std::string name = "source") {
+               const std::string &name) {
   auto source = addComponent(instrument, position, name);
   instrument->markAsSource(source);
 }
@@ -546,7 +545,7 @@ void addSource(Instrument_sptr &instrument, const V3D &position,
  * @param name :: name of the sample
  */
 void addSample(Instrument_sptr &instrument, const V3D &position,
-               std::string name = "some-surface-holder") {
+               const std::string &name) {
   auto sample = addComponent(instrument, position, name);
   instrument->markAsSamplePos(sample);
 }
@@ -559,7 +558,7 @@ void addSample(Instrument_sptr &instrument, const V3D &position,
  * @param name :: name of the monitor
  */
 void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
-                std::string name = "Monitor") {
+                const std::string &name) {
   Detector *monitor = new Detector(name, ID, nullptr);
   monitor->setPos(position);
   instrument->add(monitor);
@@ -574,7 +573,7 @@ void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
  * @param name :: name of the detector
  */
 void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
-                 std::string name = "point-detector") {
+                 const std::string &name) {
   // Where 0.01 is half detector width etc.
   Detector *detector = new Detector(
       name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03),
@@ -633,10 +632,10 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(up, along, Handedness::Left, "0,0,0"));
 
-  addSource(instrument, sourcePos);
-  addMonitor(instrument, monitorPos, 1);
-  addSample(instrument, samplePos);
-  addDetector(instrument, detectorPos, 2);
+  addSource(instrument, sourcePos, "source");
+  addMonitor(instrument, monitorPos, 1, "Monitor");
+  addSample(instrument, samplePos, "some-surface-holder");
+  addDetector(instrument, detectorPos, 2, "point-detector");
   auto slit1 = addComponent(instrument, slit1Pos, "slit1");
   auto slit2 = addComponent(instrument, slit2Pos, "slit2");
 
@@ -671,19 +670,19 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
 
-  addSource(instrument, V3D(0, 0, 0));
-  addSample(instrument, V3D(15, 0, 0));
-  addMonitor(instrument, V3D(14, 0, 0), 1);
+  addSource(instrument, V3D(0, 0, 0), "source");
+  addSample(instrument, V3D(15, 0, 0), "some-surface-holder");
+  addMonitor(instrument, V3D(14, 0, 0), 1, "Monitor");
 
   // Place the central detector at 45 degrees (i.e. the distance
   // from the sample in Y is the same as the distance in X).
   const double posX = 20;
   const double posY = posX - 15;
-  addDetector(instrument, V3D(posX, posY - detSize, 0),
-              2);                                 // offset below centre
-  addDetector(instrument, V3D(posX, posY, 0), 3); // at centre
-  addDetector(instrument, V3D(posX, posY + detSize, 0),
-              4); // offset above centre
+  addDetector(instrument, V3D(posX, posY - detSize, 0), 2,
+              "point-detector"); // offset below centre
+  addDetector(instrument, V3D(posX, posY, 0), 3, "point-detector"); // at centre
+  addDetector(instrument, V3D(posX, posY + detSize, 0), 4,
+              "point-detector"); // offset above centre
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
@@ -701,7 +700,7 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
-  addSource(instrument, sourcePosition);
+  addSource(instrument, sourcePosition, "source");
   addSample(instrument, samplePosition, "sample");
 
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {

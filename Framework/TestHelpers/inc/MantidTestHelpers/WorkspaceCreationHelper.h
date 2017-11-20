@@ -14,8 +14,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -33,6 +33,7 @@ namespace DataObjects {
 class PeaksWorkspace;
 }
 namespace Kernel {
+class Logger;
 class V3D;
 }
 }
@@ -108,7 +109,7 @@ struct EPPTableRow {
 
 /// Adds a workspace to the ADS
 void storeWS(const std::string &name, Mantid::API::Workspace_sptr ws);
-/// Deletes a workspce
+/// Deletes a workspace
 void removeWS(const std::string &name);
 /// Returns a workspace of a given type
 template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
