@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
-
+import mantid
 import unittest
 import sys
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.common.enums import FindDirectionEnum
+from sans.common.enums import FindDirectionEnum,SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter, find_beam_centre
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
 if sys.version_info.major == 3:
@@ -15,55 +15,71 @@ else:
 
 class BeamCentrePresenterTest(unittest.TestCase):
 
+    def setUp(self):
+        self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
+        self.parent_presenter._file_information = mock.MagicMock()
+        self.parent_presenter._file_information.get_instrument = mock.MagicMock(return_value = SANSInstrument.LARMOR)
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
+        self.view = create_mock_beam_centre_tab()
+
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.WorkHandler')
     def test_that_on_run_clicked_calls_find_beam_centre(self, work_handler_mock):
-        parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
-        presenter = BeamCentrePresenter(parent_presenter)
-        view = create_mock_beam_centre_tab()
-        presenter.set_view(view)
-
-        presenter.on_run_clicked()
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
+        self.presenter.set_view(self.view)
+        self.presenter.on_run_clicked()
 
         self.assertTrue(work_handler_mock.return_value.process.call_count == 1)
         self.assertTrue(work_handler_mock.return_value.process.call_args[0][1] == find_beam_centre)
-        self.assertTrue(work_handler_mock.return_value.process.call_args[0][3] == presenter._beam_centre_model)
+        self.assertTrue(work_handler_mock.return_value.process.call_args[0][3] == self.presenter._beam_centre_model)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
-        parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
-        presenter = BeamCentrePresenter(parent_presenter)
-        view = create_mock_beam_centre_tab()
-        view.left_right = False
-        view.lab_pos_1 = 100
-        view.lab_pos_2 = -100
-        presenter.set_view(view)
-        presenter.on_run_clicked()
-        self.assertFalse(presenter._beam_centre_model.left_right)
-        self.assertEqual(presenter._beam_centre_model.lab_pos_1, 0.1)
-        self.assertEqual(presenter._beam_centre_model.lab_pos_2, -0.1)
+        self.view.left_right = False
+        self.view.lab_pos_1 = 100
+        self.view.lab_pos_2 = -100
+        self.presenter.set_view(self.view)
+
+        self.presenter.on_run_clicked()
+
+        self.assertFalse(self.presenter._beam_centre_model.left_right)
+        self.assertEqual(self.presenter._beam_centre_model.lab_pos_1, 0.1)
+        self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -0.1)
 
     def test_that_set_options_is_called_on_update_rows(self):
-        parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
-        parent_presenter._file_information = None
-        presenter = BeamCentrePresenter(parent_presenter)
-        view = create_mock_beam_centre_tab()
+        self.presenter.set_view(self.view)
 
-        presenter.set_view(view)
-        view.set_options.assert_called_once_with(presenter._beam_centre_model)
+        self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
 
-        presenter.on_update_rows()
-        self.assertTrue(view.set_options.call_count == 2)
+        self.presenter.on_update_rows()
+        self.assertTrue(self.view.set_options.call_count == 2)
 
-    def test_that_on_processing_finished_updates_view(self):
-        parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
-        presenter = BeamCentrePresenter(parent_presenter)
-        view = create_mock_beam_centre_tab()
-        presenter.set_view(view)
+    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
+    def test_that_set_scaling_is_called_on_update_rows_when_file_information_exists(self, beam_centre_model_mock):
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
+        self.presenter.set_view(self.view)
+
+        self.presenter.on_update_rows()
+        self.presenter._beam_centre_model.set_scaling.assert_called_once_with(SANSInstrument.LARMOR)
+
+    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
+    def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self, beam_centre_model_mock):
+        self.parent_presenter._file_information = mock.MagicMock(return_value = None)
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
+        self.presenter.set_view(self.view)
+
+        self.presenter.on_update_rows()
+        self.presenter._beam_centre_model.set_scaling.assert_not_called()
+
+    def test_that_on_processing_finished_updates_view_and_model(self):
+        self.presenter.set_view(self.view)
         result = {'pos1': 0.1, 'pos2': -0.1}
 
-        presenter.on_processing_finished_centre_finder(result)
+        self.presenter.on_processing_finished_centre_finder(result)
 
-        self.assertEqual(view.lab_pos_1, presenter._beam_centre_model.scale_1*result['pos1'])
-        self.assertEqual(view.lab_pos_2, presenter._beam_centre_model.scale_2*result['pos2'])
+        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
+        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
+        self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])
+        self.assertEqual(self.view.lab_pos_2, self.presenter._beam_centre_model.scale_2*result['pos2'])
+        self.view.set_run_button_to_normal.assert_called_once_with()
 
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.SANSCentreFinder')
     def test_that_find_beam_centre_initiates_centre_finder_with_correct_parameters(self, centre_finder_mock):

@@ -32,6 +32,9 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.connect_signals()
         self._beam_centre_tab_listeners = []
 
+        # Attach validators
+        self._attach_validators()
+
     def _setup_log_widget(self):
         self.log_widget = MantidQt.MantidWidgets.MessageDisplay(self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
@@ -58,6 +61,26 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
     def on_run_clicked(self):
         self._call_beam_centre_tab_listeners(lambda listener: listener.on_run_clicked())
 
+    def _attach_validators(self):
+        # Setup the list of validators
+        double_validator = QtGui.QDoubleValidator()
+        positive_double_validator = QtGui.QDoubleValidator()
+        positive_double_validator.setBottom(0.0)
+        positive_integer_validator = QtGui.QIntValidator()
+        positive_integer_validator.setBottom(1)
+
+        self.lab_pos_1_line_edit.setValidator(double_validator)
+        self.lab_pos_2_line_edit.setValidator(double_validator)
+        self.hab_pos_1_line_edit.setValidator(double_validator)
+        self.hab_pos_2_line_edit.setValidator(double_validator)
+
+        self.r_min_line_edit.setValidator(positive_double_validator)
+        self.r_max_line_edit.setValidator(positive_double_validator)
+
+        self.max_iterations_line_edit.setValidator(positive_integer_validator)
+        self.tolerance_line_edit.setValidator(positive_double_validator)
+
+
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------------------------------------------------------
@@ -70,9 +93,8 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.up_down = options.up_down
 
     def update_simple_line_edit_field(self, line_edit, value):
-        if value:
-            gui_element = getattr(self, line_edit)
-            gui_element.setText(str(value))
+        gui_element = getattr(self, line_edit)
+        gui_element.setText(str(value))
 
     def get_simple_line_edit_field(self, expected_type, line_edit):
         gui_element = getattr(self, line_edit)

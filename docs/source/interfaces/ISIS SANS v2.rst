@@ -666,11 +666,11 @@ finder.
 | **6** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
 |       |                          | conclude its search.                                                                    |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **7** | **Left/Right**           | Controls whether the algorithm searches for the centre in the left/right direction.     |
+| **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the left/right direction.     |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **8** | **Up/Down**              | Controls whether the algorithm searches for the centre in the up/down direction.        |
+| **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the up/down direction.        |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **9** | **Run**                  | Runs the SANSBeamCentreFinder algorithm the boxes **1** and **2** are updated with new  |
+| **9** | **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new  |
 |       |                          | values upon completion.                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 

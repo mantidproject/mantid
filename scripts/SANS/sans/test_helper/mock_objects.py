@@ -27,23 +27,11 @@ def create_mock_masking_table():
     view.get_current_row = mock.MagicMock(return_value=3)
     return view
 
-def create_mock_beam_centre_tab(model = None):
+
+def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
-    if model:
-        view.max_iterations = model.max_iterations
-        view.r_min = model.r_min
-        view.r_max = model.r_max
-        view.left_right = model.left_right
-        view.up_down = model.up_down
-        view.tolerance = model.tolerance
-        view.lab_pos_1 = 100
-        view.lab_pos_2 = -100
-        view.hab_pos_2 = -100
-        view.hab_pos_1 = 100
-        view.scale_1 = model.scale_1
-        view.scale_2 = model.scale_2
     return view
+
 
 def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa

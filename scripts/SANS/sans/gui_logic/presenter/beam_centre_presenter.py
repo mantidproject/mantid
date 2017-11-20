@@ -13,7 +13,6 @@ from sans.common.enums import FindDirectionEnum
 class BeamCentrePresenter(object):
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
-            super(BeamCentrePresenter.ConcreteBeamCentreListener, self).__init__()
             self._presenter = presenter
 
         def on_run_clicked(self):
