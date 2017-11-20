@@ -26,6 +26,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -626,11 +627,10 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
     double startX, V3D slit1Pos, V3D slit2Pos, double vg1, double vg2,
     V3D sourcePos, V3D monitorPos, V3D samplePos, V3D detectorPos,
-    PointingAlong up, PointingAlong along, const int nSpectra, const int nBins,
-    const double deltaX) {
+    const int nSpectra, const int nBins, const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(up, along, Handedness::Left, "0,0,0"));
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      PointingAlong::Y, PointingAlong::X, Handedness::Left, "0,0,0"));
 
   addSource(instrument, sourcePos, "source");
   addMonitor(instrument, monitorPos, 1, "Monitor");
@@ -667,8 +667,9 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     double startX, const double detSize, const int nSpectra, const int nBins,
     const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
+      "0,0,0"));
 
   addSource(instrument, V3D(0, 0, 0), "source");
   addSample(instrument, V3D(15, 0, 0), "some-surface-holder");
