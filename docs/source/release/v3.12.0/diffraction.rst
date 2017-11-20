@@ -22,6 +22,9 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- :ref:`algm-GSASIIRefineFitPeaks>` has been re-integrated with the
+  latest version of GSAS-II, allowing Rietveld and Pawley refinement
+  within Mantid.
 - Usability improvements in the GUI:
   - The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message
   - Improved progress reporting for Calibration and Focus
