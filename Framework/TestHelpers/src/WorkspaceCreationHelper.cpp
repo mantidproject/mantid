@@ -618,8 +618,6 @@ DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
  * @param monitorPos :: monitor position
  * @param samplePos :: sample position
  * @param detectorPos :: detector position
- * @param up :: pointing up axis
- * @param along :: pointing along beam axis
  * @param nSpectra :: number of spectra
  * @param nBins :: number of bins
  * @param deltaX :: TOF delta x-value
