@@ -145,16 +145,33 @@ void EnggDiffFittingModel::createFittedPeaksWS(
 			setDataToClonedWS(singlePeakWSName, fittedPeaksWSName);
 		}
 		else {
-			appendSpectra(fittedPeaksWSName, singlePeakWSName);
+			const std::string clonedWSName = "__engggui_cloned_peaks_" + std::to_string(i);
+			cloneWorkspace(focusedWS, clonedWSName);
+			setDataToClonedWS(singlePeakWSName, clonedWSName);
+
+			appendSpectra(fittedPeaksWSName, clonedWSName);
 		}
 	}
 
-	alignDetectors(getWorkspace(runNumber, bank));
-	alignDetectors(fittedPeaksWSName);
+	const std::string alignedWSName = FOCUSED_WS_NAME + "_d";
+	alignDetectors(getWorkspace(runNumber, bank), alignedWSName);
+	alignDetectors(fittedPeaksWSName, fittedPeaksWSName);
 
 	const auto &ADS = Mantid::API::AnalysisDataService::Instance();
+
 	const auto fittedPeaksWS = ADS.retrieveWS<Mantid::API::MatrixWorkspace>(fittedPeaksWSName);
 	addToRunMap(runNumber, bank, m_fittedPeaksMap, fittedPeaksWS);
+
+	const auto alignedFocusedWS = ADS.retrieveWS<Mantid::API::MatrixWorkspace>(alignedWSName);
+	addToRunMap(runNumber, bank, m_alignedWorkspaceMap, alignedFocusedWS);
+}
+
+Mantid::API::MatrixWorkspace_sptr EnggDiffFittingModel::getAlignedWorkspace(const int runNumber, const size_t bank){
+	return getFromRunMap(runNumber, bank, m_alignedWorkspaceMap);
+}
+
+Mantid::API::MatrixWorkspace_sptr EnggDiffFittingModel::getFittedPeaksWS(const int runNumber, const size_t bank){
+	return getFromRunMap(runNumber, bank, m_fittedPeaksMap);
 }
 
 void EnggDiffFittingModel::evaluateFunction(
@@ -224,7 +241,7 @@ void EnggDiffFittingModel::appendSpectra(const std::string & ws1Name,
 	appendSpectraAlg->initialize();
 	appendSpectraAlg->setProperty("InputWorkspace1", ws1Name);
 	appendSpectraAlg->setProperty("InputWorkspace2", ws2Name);
-	appendSpectraAlg->setProperty("OutputWorksace", ws1Name);
+	appendSpectraAlg->setProperty("OutputWorkspace", ws1Name);
 	appendSpectraAlg->execute();
 }
 
@@ -269,13 +286,15 @@ void EnggDiffFittingModel::convertFromDistribution(
 	convertFromDistAlg->execute();
 }
 
-void EnggDiffFittingModel::alignDetectors(const std::string & wsName){
+void EnggDiffFittingModel::alignDetectors(const std::string &inputWSName,
+	const std::string &outputWSName){
 	const auto &ADS = Mantid::API::AnalysisDataService::Instance();
-	const auto inputWS = ADS.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-	alignDetectors(inputWS);
+	const auto inputWS = ADS.retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);
+	alignDetectors(inputWS, outputWSName);
 }
 
-void EnggDiffFittingModel::alignDetectors(Mantid::API::MatrixWorkspace_sptr inputWS){
+void EnggDiffFittingModel::alignDetectors(
+	Mantid::API::MatrixWorkspace_sptr inputWS, const std::string &outputWSName){
 	const auto calibrationParamsTable = createCalibrationParamsTable(inputWS);
 
 	if (inputWS->isDistribution()) {
@@ -285,7 +304,7 @@ void EnggDiffFittingModel::alignDetectors(Mantid::API::MatrixWorkspace_sptr inpu
 	auto alignDetAlg = Mantid::API::AlgorithmManager::Instance().create("AlignDetectors");
 	alignDetAlg->initialize();
 	alignDetAlg->setProperty("InputWorkspace", inputWS);
-	alignDetAlg->setProperty("OutputWorkspace", inputWS);
+	alignDetAlg->setProperty("OutputWorkspace", outputWSName);
 	alignDetAlg->setProperty("CalibrationWorkspace", calibrationParamsTable);
 	alignDetAlg->execute();
 }

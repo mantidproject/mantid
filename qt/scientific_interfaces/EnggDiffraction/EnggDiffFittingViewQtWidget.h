@@ -109,6 +109,8 @@ public:
 
   std::string getFittingListWidgetCurrentValue() const override;
 
+  bool listWidgetHasSelectedRow() const override;
+
   void setFittingListWidgetCurrentRow(int idx) const override;
 
   std::string fittingPeaksData() const override;
