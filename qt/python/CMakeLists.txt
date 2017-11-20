@@ -7,6 +7,7 @@ add_subdirectory ( mantidqtpython )
 
 # mantidqt is run from the source directory so just add tests
 set ( PYTHON_TEST_FILES
+  mantidqt/test/algorithmselector_test.py
   mantidqt/test/import_test.py
 )
 

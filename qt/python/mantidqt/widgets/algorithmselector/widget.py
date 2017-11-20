@@ -1,7 +1,27 @@
 from __future__ import absolute_import
 from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
-from qtpy.QtWidgets import QTreeWidgetItem
-from .presenter import IAlgorithmSelectorView
+from qtpy.QtWidgets import QTreeWidgetItem, QInputDialog
+from qtpy.QtCore import QModelIndex
+from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
+from mantidqt.utility import block_signals
+import re
+
+
+def get_name_and_version_from_item_label(item_label):
+    """
+    Extract algorithm name and version from a tree widget item label.
+    It must have the format:
+
+        AlgorithmName v.n
+
+    where n in v.n is a number
+    :param item_label: A label of a TreeWidgetItem
+    :return: SelectedAlgorithm tuple or None if the format is wrong.
+    """
+    match = re.match(r'(\w+) v\.(\d+)', item_label)
+    if match:
+        return SelectedAlgorithm(name=match.group(1), version=int(match.group(2)))
+    return None
 
 
 class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
@@ -12,9 +32,13 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         self.execute_button = None
         self.search_box = None
         self.tree = None
-        # self.algorithm_key = ''
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self)
+
+    def _make_execute_button(self):
+        button = QPushButton('Execute')
+        button.clicked.connect(self.on_click)
+        return button
 
     def _make_search_box(self):
         """
@@ -24,6 +48,8 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
+        search_box.setObjectName('SearchBox')
+        search_box.editTextChanged.connect(self._on_search_box_selection_changed)
         return search_box
 
     def _make_tree_widget(self):
@@ -45,22 +71,50 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
             Model.get_algorithm_data()
         :return: None
         """
-        for key, value in sorted(algorithm_data.items()):
+        for key, sub_tree in sorted(algorithm_data.items()):
             if key == self.algorithm_key:
-                for name in value:
-                    item_list.append(QTreeWidgetItem([name]))
+                for name, versions in sub_tree.items():
+                    versions = sorted(versions)
+                    default_version_item = QTreeWidgetItem(['{0} v.{1}'.format(name, versions[-1])])
+                    item_list.append(default_version_item)
+                    if len(versions) > 1:
+                        for v in versions[:-1]:
+                            default_version_item.addChild(QTreeWidgetItem(['{0} v.{1}'.format(name, v)]))
             else:
                 cat_item = QTreeWidgetItem([key])
                 item_list.append(cat_item)
                 cat_item_list = []
-                self._add_tree_items(cat_item_list, value)
+                self._add_tree_items(cat_item_list, sub_tree)
                 cat_item.addChildren(cat_item_list)
+
+    def _get_selected_tree_item(self):
+        items = self.tree.selectedItems()
+        if len(items) == 0:
+            return None
+        selected_algorithm = get_name_and_version_from_item_label(items[0].text(0))
+        if selected_algorithm is not None:
+            return selected_algorithm
+        return None
+
+    def _get_search_box_selection(self):
+        i = self.search_box.currentIndex()
+        if i < 0:
+            return None
+        return SelectedAlgorithm(name=self.search_box.currentText(), version=-1)
+
+    def _on_search_box_selection_changed(self, text):
+        with block_signals(self.tree):
+            self.tree.setCurrentIndex(QModelIndex())
+        with block_signals(self.search_box):
+            i = self.search_box.findText(text)
+            if i >= 0:
+                self.search_box.setCurrentIndex(i)
 
     def init_ui(self):
         """
         Create and layout the GUI elements.
         """
-        self.execute_button = QPushButton('Execute')
+        self.execute_button = self._make_execute_button()
         self.search_box = self._make_search_box()
         self.tree = self._make_tree_widget()
 
@@ -84,3 +138,17 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         item_list = []
         self._add_tree_items(item_list, data[1])
         self.tree.insertTopLevelItems(0, item_list)
+
+    def get_selected_algorithm(self):
+        """
+        Get algorithm selected by the user.
+        :return: A SelectedAlgorithm namedtuple.
+        """
+        selected_algorithm = self._get_selected_tree_item()
+        if selected_algorithm is not None:
+            return selected_algorithm
+        return self._get_search_box_selection()
+
+    def on_click(self):
+        text = QInputDialog.getText(self, 'STUFF', 'stuff')
+        print text

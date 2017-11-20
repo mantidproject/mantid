@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 from mantid import AlgorithmFactory
-import yaml
 
 
 class Model(object):
@@ -65,5 +64,4 @@ class Model(object):
             if name not in d:
                 d[name] = []
             d[name].append(version)
-        # print yaml.dump(data)
         return algorithm_names, data

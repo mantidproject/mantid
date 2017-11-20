@@ -1,21 +1,37 @@
 import sys
+import time
 from qtpy.QtWidgets import QApplication, QPushButton
-from qtpy.QtCore import Qt, QTimer
+from qtpy.QtCore import Qt, QTimer, QPoint
 from qtpy.QtTest import QTest
 
 
-class Worker(object):
+class Tester(object):
 
     def __init__(self, widget):
         self.widget = widget
+        self.input_text = None
+        self.timer = None
 
     def __call__(self):
-        print self.widget
-        button = self.widget.findChild(QPushButton, "The Button")
-        print button.pos()
-        # time.sleep(3)
-        QTest.mouseMove(self.widget)
-        QTest.mouseClick(button, Qt.LeftButton)
+        widget = self.widget
+        items = widget.tree.findItems('Squares v.1', Qt.MatchExactly | Qt.MatchRecursive)
+        print items
+        widget.tree.setCurrentItem(items[0])
+        print widget.get_selected_algorithm()
+
+        # self.widget.close()
+
+    def idle(self):
+        modal_widget = QApplication.activeModalWidget()
+        if modal_widget is not None:
+            modal_widget.setTextValue('Hello')
+            modal_widget.accept()
+
+    def start(self):
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.idle)
+        self.timer.start()
+        QTimer.singleShot(0, self)
 
 
 def import_widget(widget_path):
@@ -44,8 +60,8 @@ def open_in_window(widget_name):
     w.setWindowTitle(widget_name)
     w.show()
 
-    # Worker(w)()
-    # QTimer.singleShot(0, Worker(w))
+    tester = Tester(w)
+    tester.start()
 
     sys.exit(app.exec_())
 

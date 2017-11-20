@@ -1,5 +1,9 @@
 from __future__ import absolute_import
+from collections import namedtuple
 from .model import Model
+
+
+SelectedAlgorithm = namedtuple('SelectedAlgorithm', ['name', 'version'])
 
 
 class IAlgorithmSelectorView(object):
@@ -19,6 +23,9 @@ class IAlgorithmSelectorView(object):
         raise NotImplementedError('Method has to be implemented in a subclass')
 
     def populate_ui(self, data):
+        raise NotImplementedError('Method has to be implemented in a subclass')
+
+    def get_selected_algorithm(self):
         raise NotImplementedError('Method has to be implemented in a subclass')
 
 
