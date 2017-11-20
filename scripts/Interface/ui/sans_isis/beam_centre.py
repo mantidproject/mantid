@@ -80,7 +80,6 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.max_iterations_line_edit.setValidator(positive_integer_validator)
         self.tolerance_line_edit.setValidator(positive_double_validator)
 
-
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------------------------------------------------------
