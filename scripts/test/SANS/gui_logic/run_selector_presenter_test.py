@@ -1,3 +1,4 @@
+import mantid
 import unittest
 import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter

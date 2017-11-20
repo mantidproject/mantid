@@ -1,6 +1,6 @@
 from mantidqtpython import MantidQt
 from mantid import ConfigService
-from sans.gui_logic.models.summation_settings_model import SummationSettings
+from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
 from copy import copy
 
@@ -47,7 +47,6 @@ class SummationSettingsPresenter(object):
         if self._summation_settings.has_additional_time_shifts():
             self._summation_settings.additional_time_shifts = self.view.additional_time_shifts()
 
-    @property
     def settings(self):
         return self._summation_settings
 

@@ -1,7 +1,14 @@
+import mantid
 import unittest
 import sys
-from sans.gui_logic.presenter.add_runs_presenter import SummationSettingsPresenter
+from mantid import ConfigService
+from ui.sans_isis.add_runs_page import AddRunsPage
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
+from sans.gui_logic.models.binning_type import BinningType
+from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from fake_signal import FakeSignal
 
 if sys.version_info.major == 3:
@@ -9,69 +16,80 @@ if sys.version_info.major == 3:
 else:
      import mock
 
-class SummationSettingsPresenterTest(unittest.TestCase):
+
+class AddRunsPagePresenterTest(unittest.TestCase):
     def setUp(self):
+        self.run_summation = self._make_mock_run_summation()
+        self.run_selector_presenter = self._make_mock_run_selector_presenter()
+        self.summation_settings_presenter = self._make_mock_summation_settings_presenter()
         self.view = self._make_mock_view()
-        self.summation_settings = self._make_mock_settings()
-        self.presenter = self._make_presenter(self.summation_settings, self.view)
+        self.presenter = self._make_presenter(self.run_summation, \
+                                              self.run_selector_presenter, \
+                                              self.summation_settings_presenter, \
+                                              self.view)
+
+    def _make_presenter(self, run_summation, run_selector_presenter, summation_settings_presenter, view):
+        return AddRunsPagePresenter(run_summation,
+                                    lambda view, parent: run_selector_presenter, \
+                                    lambda view, parent: summation_settings_presenter,
+                                    view, \
+                                    None)
 
     def _make_mock_view(self):
-        mock_view = mock.create_autospec(SummationSettingsWidget, spec_set=True)
-        mock_view.binningTypeChanged = FakeSignal()
-        mock_view.preserveEventsChanged = FakeSignal()
-        mock_view.additionalTimeShiftsChanged = FakeSignal()
-        mock_view.binSettingsChanged = FakeSignal()
+        mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
         mock_view.sum = FakeSignal()
         return mock_view
 
-    def _make_mock_settings(self):
-        return mock.create_autospec(SummationSettings)
+    def _make_mock_run_selector_presenter(self):
+        return mock.create_autospec(RunSelectorPresenter, spec_set=True)
 
-    def _make_presenter(self, summation_settings, view):
-        return SummationSettingsPresenter(summation_settings, view, None)
+    def _make_mock_summation_settings_presenter(self):
+        return mock.create_autospec(SummationSettingsPresenter, spec_set=True)
 
-    def test_sets_binning_type_when_changed(self):
-        new_binning_type = BinningType.Custom
-        self.view.binningTypeChanged.emit(new_binning_type)
-        self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.Custom)
+    def _make_mock_run_summation(self):
+        return mock.create_autospec(RunSummation, spec_set=True)
 
-    def test_retrieves_additional_time_shifts_when_changed(self):
-        self.view.additionalTimeShiftsChanged.emit()
-        self.view.additional_time_shifts.assert_called()
+    def test_creates_run_selector_with_child_of_view(self):
+        fake_run_selector_view = 'Fake Run Selector View'
+        self.view.run_selector_view.return_value = fake_run_selector_view
 
-    def test_retrieves_bin_settings_when_changed(self):
-        self.view.binSettingsChanged.emit()
-        self.view.bin_settings.assert_called()
+        make_run_selector_presenter = mock.Mock(return_value=self.run_selector_presenter)
 
-    def test_updates_model_when_bin_settings_changed(self):
-        new_bin_settings = 'bin settings'
-        self.view.bin_settings.return_value = new_bin_settings
-        self.view.binSettingsChanged.emit()
-        self.assertEqual(new_bin_settings, self.summation_settings.bin_settings)
+        self.presenter = AddRunsPagePresenter(self.run_summation,
+                                              make_run_selector_presenter,
+                                              (lambda view, parent: self.summation_settings_presenter),
+                                              self.view,
+                                              None)
+        make_run_selector_presenter.assert_called_with(fake_run_selector_view, self.view)
 
-    def test_updates_model_when_additional_time_shifts_changed(self):
-        new_additional_time_shifts = '213221.123123'
-        self.view.additional_time_shifts.return_value = new_additional_time_shifts
-        self.view.additionalTimeShiftsChanged.emit()
-        self.assertEqual(new_additional_time_shifts, self.summation_settings.additional_time_shifts)
+    def test_creates_summation_settings_with_child_of_view(self):
+        fake_summation_settings_view = 'Fake Summation Settings View'
+        self.view.summation_settings_view.return_value = fake_summation_settings_view
 
-    def test_refreshes_view_when_binning_type_changed(self):
-        new_binning_type = BinningType.Custom
-        self.view.binningTypeChanged.emit(new_binning_type)
-        self.assertEqual(2, self.view.apply_settings.call_count)
-        self.view.apply_settings.assert_called_with(self.summation_settings)
+        make_summation_settings_presenter = mock.Mock(return_value=self.run_selector_presenter)
+        self.presenter = AddRunsPagePresenter(self.run_summation,
+                                              (lambda view, parent: self.run_selector_presenter),
+                                              make_summation_settings_presenter,
+                                              self.view,
+                                              None)
+        make_summation_settings_presenter.assert_called_with(fake_summation_settings_view, self.view)
 
-    def test_refreshes_view_when_overlay_event_workspaces_changed(self):
-        self.view.preserveEventsChanged.emit(True)
-        self.assertEqual(2, self.view.apply_settings.call_count)
-        self.view.apply_settings.assert_called_with(self.summation_settings)
+    def test_invokes_model_when_summation_requested(self):
+        run_summation = mock.Mock()
+        self.presenter = AddRunsPagePresenter(run_summation,
+                                              (lambda view, parent: self.run_selector_presenter),
+                                              (lambda view, parent: self.summation_settings_presenter),
+                                              self.view,
+                                              None)
+        fake_run_selection = ['1', '2', '3']
+        fake_summation_settings = SummationSettings(BinningType.SaveAsEventData)
+        self.run_selector_presenter.run_selection.return_value = fake_run_selection
+        self.summation_settings_presenter.settings.return_value = fake_summation_settings
+        self.view.sum.emit()
+        run_summation.assert_called_with(fake_run_selection,
+                                         ConfigService.getString("default.instrument"),
+                                         fake_summation_settings)
 
-    def test_enables_overlay_workspace_when_enabled(self):
-        self.view.preserveEventsChanged.emit(True)
-        self.summation_settings.enable_overlay_event_workspaces.assert_called()
 
-    def test_disabled_overay_workspace_when_disabled(self):
-        self.view.preserveEventsChanged.emit(False)
-        self.summation_settings.disable_overlay_event_workspaces.assert_called()
 
 if __name__ == '__main__': unittest.main()

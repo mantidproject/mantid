@@ -29,7 +29,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, ge
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import RunFinder
-from sans.gui_logic.models.summation_settings_model import SummationSettings
+from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
 
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
@@ -143,9 +143,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                                                        _make_run_selector, \
                                                        _make_run_summation_settings_presenter,
                                                        self.add_runs_page, self)
-
-
-
 
     def setup_layout(self):
         """

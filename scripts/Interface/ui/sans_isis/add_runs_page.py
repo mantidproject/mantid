@@ -16,5 +16,11 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
 
+    def run_selector_view():
+        return self.run_selector
+
+    def summation_settings_view():
+        return self.summation_settings_view
+
     def setupUi(self, other):
         ui_add_runs_page.Ui_AddRunsPage.setupUi(self, other)

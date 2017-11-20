@@ -4,18 +4,18 @@ from run_selector_presenter import RunSelectorPresenter
 from summation_settings_presenter import SummationSettingsPresenter
 
 class AddRunsPagePresenter(object):
-    def __init__(self, \
-                 sum_runs, \
-                 make_run_selector_presenter, \
-                 make_run_summation_presenter, \
-                 view, \
+    def __init__(self,
+                 sum_runs,
+                 make_run_selector_presenter,
+                 make_run_summation_presenter,
+                 view,
                  parent_view):
         self._view = view
         self._sum_runs = sum_runs
         self._run_selector_presenter = \
-            make_run_selector_presenter(view.run_selector, view)
+            make_run_selector_presenter(view.run_selector_view(), view)
         self._summation_settings_presenter = \
-            make_run_summation_presenter(view.summation_settings, view) \
+            make_run_summation_presenter(view.summation_settings_view(), view) \
 
         self._connect_to_view(view)
 
@@ -27,9 +27,9 @@ class AddRunsPagePresenter(object):
         view.sum.connect(self._handle_sum)
 
     def _handle_sum(self):
-        self._sum_runs(self._run_selector_presenter.run_selection, \
+        self._sum_runs(self._run_selector_presenter.run_selection(), \
                        self._default_instrument(), \
-                       self._summation_settings_presenter.settings)
+                       self._summation_settings_presenter.settings())
 
     def _default_instrument(self):
-        return ConfigService.getString("default.instument")
+        return ConfigService.getString("default.instrument")

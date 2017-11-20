@@ -1,6 +1,7 @@
+import mantid
 import unittest
 import sys
-from sans.gui_logic.models.summation_settings_model import SummationSettings
+from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
 
 class SummationSettingsTestCase(unittest.TestCase):

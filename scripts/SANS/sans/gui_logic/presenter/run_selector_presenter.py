@@ -11,7 +11,6 @@ class RunSelectorPresenter(object):
         self._connect_to_view(view)
         self.refresh()
 
-    @property
     def run_selection(self):
         return self._run_selection
 

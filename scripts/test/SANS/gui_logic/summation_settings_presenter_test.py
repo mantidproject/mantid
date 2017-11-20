@@ -1,7 +1,8 @@
+import mantid
 import unittest
 import sys
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
-from sans.gui_logic.models.summation_settings_model import SummationSettings
+from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 from fake_signal import FakeSignal
@@ -23,7 +24,6 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         mock_view.preserveEventsChanged = FakeSignal()
         mock_view.additionalTimeShiftsChanged = FakeSignal()
         mock_view.binSettingsChanged = FakeSignal()
-        mock_view.sum = FakeSignal()
         return mock_view
 
     def _make_mock_settings(self):
