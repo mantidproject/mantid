@@ -64,6 +64,9 @@ protected:
   void saveDiffFittingAscii(const int runNumber, const size_t bank,
 	  const std::string &filename);
 
+  void createFittedPeaksWS(const int runNumber, 
+	  const size_t bank);
+
 private:
   static const size_t MAX_BANKS = 2;
   static const double DEFAULT_DIFC;
@@ -131,8 +134,6 @@ private:
 
   void groupWorkspaces(const std::vector<std::string> &workspaceNames,
                        const std::string &outputWSName);
-
-  size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr) const;
 };
 
 } // namespace CustomInterfaces

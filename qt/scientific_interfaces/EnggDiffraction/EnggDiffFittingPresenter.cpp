@@ -841,11 +841,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     // doFitting()
     // WORK OUT WHAT TO DO HERE
-<<<<<<< 8fb1a9a6e1c6402aa676f39c4c57bb97151c5391
     // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
-=======
-	//startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
->>>>>>> Re #21171 Added missing parameters to doFitting
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
@@ -964,12 +960,46 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
                            "_Single_Peak_Fitting.csv";
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
+<<<<<<< 4c2ce26a0ae547786f833f7d319211ace7edc007
   m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
   
   m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
 
+=======
+  m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
+
+  m_model.createFittedPeaksWS(runNumber, bank);
+  m_fittingFinishedOK = true;
+}
+
+void EnggDiffFittingPresenter::runLoadAlg(
+	const std::string &focusedFile,
+	Mantid::API::MatrixWorkspace_sptr &focusedWS) {
+	// load the focused workspace file to perform single peak fits
+	try {
+		auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
+		load->initialize();
+		load->setPropertyValue("Filename", focusedFile);
+		load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
+		load->execute();
+
+		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+		focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+	}
+	catch (std::runtime_error &re) {
+		g_log.error()
+			<< "Error while loading focused data. "
+			"Could not run the algorithm Load successfully for the Fit "
+			"peaks (file name: " +
+			focusedFile + "). Error description: " + re.what() +
+			" Please check also the previous log messages for details.";
+		return;
+	}
+}
+
+>>>>>>> Re #21171 Move fit WS generation to the model
 void EnggDiffFittingPresenter::browsePeaksToFit() {
   try {
     auto prevPath = m_view->focusingDir();
