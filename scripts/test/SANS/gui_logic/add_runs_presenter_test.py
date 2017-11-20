@@ -24,16 +24,17 @@ class AddRunsPagePresenterTest(unittest.TestCase):
         self.summation_settings_presenter = self._make_mock_summation_settings_presenter()
         self.view = self._make_mock_view()
         self.presenter = self._make_presenter(self.run_summation,
-                                              self.run_selector_presenter,
-                                              self.summation_settings_presenter,
-                                              self.view)
+                                              self._just_use(self.run_selector_presenter),
+                                              self._just_use(self.summation_settings_presenter))
 
-    def _make_presenter(self, run_summation, run_selector_presenter, summation_settings_presenter, view):
+    def _make_presenter(self, run_summation, make_run_selector_presenter, make_summation_settings_presenter):
         return AddRunsPagePresenter(run_summation,
-                                    lambda view, parent: run_selector_presenter,
-                                    lambda view, parent: summation_settings_presenter,
-                                    view,
+                                    make_run_selector_presenter,
+                                    make_summation_settings_presenter,
+                                    self.view,
                                     None)
+    def _just_use(presenter):
+        return lambda view, parent: presenter
 
     def _make_mock_view(self):
         mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
@@ -55,11 +56,9 @@ class AddRunsPagePresenterTest(unittest.TestCase):
 
         make_run_selector_presenter = mock.Mock(return_value=self.run_selector_presenter)
 
-        self.presenter = AddRunsPagePresenter(self.run_summation,
+        self.presenter = self._make_presenter(self.run_summation,
                                               make_run_selector_presenter,
-                                              (lambda view, parent: self.summation_settings_presenter),
-                                              self.view,
-                                              None)
+                                              self._just_use(self.summation_settings_presenter))
         make_run_selector_presenter.assert_called_with(fake_run_selector_view, self.view)
 
     def test_creates_summation_settings_with_child_of_view(self):
@@ -67,20 +66,16 @@ class AddRunsPagePresenterTest(unittest.TestCase):
         self.view.summation_settings_view.return_value = fake_summation_settings_view
 
         make_summation_settings_presenter = mock.Mock(return_value=self.run_selector_presenter)
-        self.presenter = AddRunsPagePresenter(self.run_summation,
-                                              (lambda view, parent: self.run_selector_presenter),
-                                              make_summation_settings_presenter,
-                                              self.view,
-                                              None)
+        self.presenter = self._make_presenter(self.run_summation,
+                                              self._just_use(self.run_selector_presenter),
+                                              make_summation_settings_presenter)
         make_summation_settings_presenter.assert_called_with(fake_summation_settings_view, self.view)
 
-    def test_invokes_model_when_summation_requested(self):
+    def test_invokes_model_with_config_when_summation_requested(self):
         run_summation = mock.Mock()
         self.presenter = AddRunsPagePresenter(run_summation,
-                                              (lambda view, parent: self.run_selector_presenter),
-                                              (lambda view, parent: self.summation_settings_presenter),
-                                              self.view,
-                                              None)
+                                              self._just_use(self.run_selector_presenter),
+                                              self._just_use(self.summation_settings_presenter))
         fake_run_selection = ['1', '2', '3']
         fake_summation_settings = SummationSettings(BinningType.SaveAsEventData)
         self.run_selector_presenter.run_selection.return_value = fake_run_selection
