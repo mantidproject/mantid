@@ -67,6 +67,10 @@ protected:
   void createFittedPeaksWS(const int runNumber, 
 	  const size_t bank);
 
+  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const int runNumber, const size_t bank);
+
+  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const int runNumber, const size_t bank);
+
 private:
   static const size_t MAX_BANKS = 2;
   static const double DEFAULT_DIFC;

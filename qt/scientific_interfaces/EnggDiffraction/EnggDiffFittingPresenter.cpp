@@ -852,11 +852,17 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
 void EnggDiffFittingPresenter::processFitPeaks() {
   if (!m_view->listWidgetHasSelectedRow()) {
+<<<<<<< bfb7dcf54979d8f52f273340bb6170a403ec18db
     m_view->userWarning("No run selected",
                         "Please select a run to fit from the list");
     return;
   }
 
+=======
+	  m_view->userWarning("No run selected", "Please select a run to fit from the list");
+	  return;
+  }
+>>>>>>> Re #21171 Enable plotting in d of focused workspace and fitted peaks
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   int runNumber;
   size_t bank;
@@ -960,46 +966,12 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
                            "_Single_Peak_Fitting.csv";
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
-<<<<<<< 4c2ce26a0ae547786f833f7d319211ace7edc007
   m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
   
   m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
 
-=======
-  m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
-
-  m_model.createFittedPeaksWS(runNumber, bank);
-  m_fittingFinishedOK = true;
-}
-
-void EnggDiffFittingPresenter::runLoadAlg(
-	const std::string &focusedFile,
-	Mantid::API::MatrixWorkspace_sptr &focusedWS) {
-	// load the focused workspace file to perform single peak fits
-	try {
-		auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
-		load->initialize();
-		load->setPropertyValue("Filename", focusedFile);
-		load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-		load->execute();
-
-		AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-		focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-	}
-	catch (std::runtime_error &re) {
-		g_log.error()
-			<< "Error while loading focused data. "
-			"Could not run the algorithm Load successfully for the Fit "
-			"peaks (file name: " +
-			focusedFile + "). Error description: " + re.what() +
-			" Please check also the previous log messages for details.";
-		return;
-	}
-}
-
->>>>>>> Re #21171 Move fit WS generation to the model
 void EnggDiffFittingPresenter::browsePeaksToFit() {
   try {
     auto prevPath = m_view->focusingDir();
@@ -1226,6 +1198,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
     const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
+
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
