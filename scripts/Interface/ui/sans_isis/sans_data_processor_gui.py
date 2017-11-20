@@ -36,16 +36,19 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 
+
 def _make_run_selector(run_selector_view, parent_view):
     return RunSelectorPresenter(RunSelection(),
                                 RunFinder(),
                                 run_selector_view,
                                 parent_view)
 
+
 def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
     return SummationSettingsPresenter(SummationSettings(BinningType.Custom),
                                       summation_settings_view,
                                       parent_view)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Gui Classes

@@ -12,9 +12,9 @@ from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from fake_signal import FakeSignal
 
 if sys.version_info.major == 3:
-     from unittest import mock
+    from unittest import mock
 else:
-     import mock
+    import mock
 
 
 class AddRunsPagePresenterTest(unittest.TestCase):
@@ -27,13 +27,16 @@ class AddRunsPagePresenterTest(unittest.TestCase):
                                               self._just_use(self.run_selector_presenter),
                                               self._just_use(self.summation_settings_presenter))
 
-    def _make_presenter(self, run_summation, make_run_selector_presenter, make_summation_settings_presenter):
+    def _make_presenter(self,
+                        run_summation,
+                        make_run_selector_presenter,
+                        make_summation_settings_presenter):
         return AddRunsPagePresenter(run_summation,
                                     make_run_selector_presenter,
                                     make_summation_settings_presenter,
                                     self.view,
                                     None)
-    def _just_use(presenter):
+    def _just_use(self, presenter):
         return lambda view, parent: presenter
 
     def _make_mock_view(self):

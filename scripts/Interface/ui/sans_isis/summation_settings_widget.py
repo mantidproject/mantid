@@ -1,18 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
-from abc import ABCMeta, abstractmethod
-
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
 
 import ui_summation_settings_widget
 from sans.gui_logic.models.binning_type import BinningType
-import types
+
 
 def set_checked_without_signal(checkable, should_be_checked):
     checkable.blockSignals(True)
     checkable.setChecked(should_be_checked)
     checkable.blockSignals(False)
+
 
 class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_SummationSettingsWidget):
     binningTypeChanged = pyqtSignal(BinningType)
@@ -81,10 +80,10 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         if settings.has_overlay_event_workspaces():
             self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
-            set_checked_without_signal(\
+            set_checked_without_signal(
                 self.overlayEventWorkspacesCheckbox, should_be_checked)
         else:
-            set_checked_without_signal(\
+            set_checked_without_signal(
                 self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
 

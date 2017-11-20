@@ -1,9 +1,7 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
-
 import ui_add_runs_page
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+
 
 class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     sum = pyqtSignal()
@@ -16,10 +14,10 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
 
-    def run_selector_view():
+    def run_selector_view(self):
         return self.run_selector
 
-    def summation_settings_view():
+    def summation_settings_view(self):
         return self.summation_settings_view
 
     def setupUi(self, other):

@@ -1,14 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-from abc import ABCMeta, abstractmethod
-
 from PyQt4 import QtGui, QtCore
-from six import with_metaclass
 
 import ui_run_selector_widget
 from PyQt4.QtCore import pyqtSignal
 from sans.gui_logic.models.binning_type import BinningType
 from mantidqtpython import MantidQt
+
 
 class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidget):
     manageDirectories = pyqtSignal()
@@ -57,15 +55,14 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         return previous_directories
 
     def run_not_found(self):
-        QtGui.QMessageBox.warning(self, "Run Not Found!",\
-            "Could not find one or more of the runs specified.")
+        QtGui.QMessageBox.warning(self, "Run Not Found!",
+                                  "Could not find one or more of the runs specified.")
 
     def invalid_run_query(self, message):
-        QtGui.QMessageBox.warning(self, "Invalid Run Query!",\
-            message)
+        QtGui.QMessageBox.warning(self, "Invalid Run Query!", message)
 
     def previous_or_default_directory(self, settings, default):
-        directory = settings.value("InPath", default)
+        return settings.value("InPath", default)
 
     def store_previous_directory(self, settings, path):
         previous_file = QtCore.QFileInfo(path)
@@ -85,7 +82,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         return self.runLineEdit.text()
 
     def selected_runs(self):
-        selected = [runModel.row() for runModel in\
+        selected = [runModel.row() for runModel in
                     self.runList.selectedIndexes()]
         return selected
 
