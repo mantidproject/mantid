@@ -323,20 +323,13 @@ Select all rows/groups
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
-Handle interface when data reduction paused
+* Update widgets on the view to be enabled/disabled according to
+* whether processing is in progress or not
+* @param isProcessing :: true if processing is in progress
 */
-void QDataProcessorWidget::pause() {
+void QDataProcessorWidget::updateMenuEnabledState(const bool isProcessing) {
   for (const auto &command : m_commands) {
-    command->updateEnabledState(false);
-  }
-}
-
-/**
-Handle interface when data reduction resumed
-*/
-void QDataProcessorWidget::resume() {
-  for (const auto &command : m_commands) {
-    command->updateEnabledState(true);
+    command->updateEnabledState(isProcessing);
   }
 }
 

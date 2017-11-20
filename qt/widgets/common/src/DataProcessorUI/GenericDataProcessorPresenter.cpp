@@ -289,8 +289,8 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // The view should currently be in the paused state
-  m_view->pause();
+  // Update enabled/disabled states on the view (processing is not yet in progress)
+  m_view->updateMenuEnabledState(false);
 }
 
 bool GenericDataProcessorPresenter::areOptionsUpdated() {
@@ -1557,7 +1557,8 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  m_view->pause();
+  m_view->updateMenuEnabledState(false);
+
   m_mainPresenter->pause();
 
   m_pauseReduction = true;
@@ -1567,7 +1568,7 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  m_view->resume();
+  m_view->updateMenuEnabledState(true);
   m_mainPresenter->resume();
 
   m_pauseReduction = false;

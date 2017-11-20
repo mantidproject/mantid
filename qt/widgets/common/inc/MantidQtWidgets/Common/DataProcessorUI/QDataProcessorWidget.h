@@ -102,9 +102,8 @@ public:
   // Select all rows/groups
   void selectAll() override;
 
-  // Handle pause/resume of data reduction
-  void pause() override;
-  void resume() override;
+  // Update enabled/disabled state of widgets
+  void updateMenuEnabledState(const bool isProcessing) override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;

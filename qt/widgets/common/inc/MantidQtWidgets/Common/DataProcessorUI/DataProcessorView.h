@@ -83,9 +83,8 @@ public:
   // Select all rows/groups
   virtual void selectAll() = 0;
 
-  // Handle pause/resume of data reduction
-  virtual void pause() = 0;
-  virtual void resume() = 0;
+  // Update enabled/disabled state of the menu items
+  virtual void updateMenuEnabledState(const bool isProcessing) = 0;
 
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;
