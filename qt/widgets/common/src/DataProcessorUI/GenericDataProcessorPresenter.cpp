@@ -314,6 +314,15 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   return settingsChanged;
 }
 
+bool GenericDataProcessorPresenter::rowOutputExists(RowItem const& row) const {
+    for(auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+        auto outputWorkspaceName = getReducedWorkspaceName(row.second, m_processor.prefix(i));
+        if(!workspaceExists(outputWorkspaceName))
+            return false;
+    }
+    return true;
+}
+
 /**
 Process selected data
 */
@@ -363,12 +372,7 @@ void GenericDataProcessorPresenter::process() {
       // Set group as unprocessed if settings have changed or the expected
       // output
       // workspaces cannot be found
-      bool rowOutputFound = true;
-      for (auto i = 0u;
-           i < m_processor.numberOfOutputProperties() && rowOutputFound; i++) {
-        rowOutputFound = workspaceExists(
-            getReducedWorkspaceName(row.second, m_processor.prefix(i)));
-      }
+      auto rowOutputFound = rowOutputExists(row);
 
       if (settingsHaveChanged || !rowOutputFound)
         m_manager->setProcessed(false, row.first, group.first);
@@ -681,7 +685,7 @@ Returns the name of the reduced workspace for a given row
 */
 QString
 GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) {
+                                                       const QString &prefix) const {
   if (data.size() != static_cast<int>(m_whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 

@@ -145,7 +145,7 @@ public:
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
-                                  const QString &prefix = "");
+                                  const QString &prefix = "") const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -204,6 +204,7 @@ protected:
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
+  bool rowOutputExists(RowItem const& row) const;
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
