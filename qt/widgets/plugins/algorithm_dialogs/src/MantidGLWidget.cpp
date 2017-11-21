@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <QtOpenGL>
 #include <QMessageBox>

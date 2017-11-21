@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <QMenu>
 #include <QLabel>
