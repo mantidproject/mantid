@@ -21,6 +21,7 @@ from setuptools import setup
 # The most basic setup possible to be able to use setup.py develop
 setup(
     name="workbench",
+    install_requires=['mantidqt'],
     entry_points={
         'gui_scripts': [
             'workbench = workbench.app.mainwindow:main'
