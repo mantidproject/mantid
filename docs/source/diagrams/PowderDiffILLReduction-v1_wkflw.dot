@@ -21,7 +21,7 @@ digraph PowderDiffILLReduction {
     Observable
     CalibrationFile
     OutputWorkspace
-    RebinToWidth
+    ScanAxisBinWidth
     ROCCorrectionFile
     Unit
   }
@@ -33,7 +33,6 @@ digraph PowderDiffILLReduction {
     SortXAxis
     ConvertSpectrumAxis
     Transpose
-    Rebin
     Calibrate [label="Multiply"]
     ROCCorrect [label="Multiply"]
     NormaliseToMonitor [label="Divide"]
@@ -47,6 +46,7 @@ digraph PowderDiffILLReduction {
     $process_style
     crop_negative_2theta
     treat_zero_counting_cells
+    group_spectra
   }
 
   Run -> LoadILLDiffraction
@@ -76,8 +76,8 @@ digraph PowderDiffILLReduction {
   crop_negative_2theta -> treat_zero_counting_cells
   treat_zero_counting_cells -> ConvertSpectrumAxis
   Unit -> ConvertSpectrumAxis
-  ConvertSpectrumAxis -> Rebin
-  RebinToWidth -> Rebin
-  Rebin -> Transpose
-  Transpose -> OutputWorkspace
+  ConvertSpectrumAxis -> Transpose
+  ScanAxisBinWidth -> group_spectra
+  Transpose -> group_spectra
+  group_spectra -> OutputWorkspace
 }

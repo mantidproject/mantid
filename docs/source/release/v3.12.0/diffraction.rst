@@ -17,6 +17,7 @@ Powder Diffraction
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
+- :ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` and :ref:`PowderDiffILLCalibration <algm-PowderDiffILLCalibration>` enable the basic data reduction for D20 scanning powder diffractometer at ILL.
 
 Engineering Diffraction
 -----------------------
