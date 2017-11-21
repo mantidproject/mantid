@@ -1,6 +1,7 @@
 #include "EnggDiffFittingViewQtWidget.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "EnggDiffFittingModel.h"
 #include "EnggDiffFittingPresenter.h"
@@ -56,7 +57,8 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
   initLayout();
 
   m_presenter.reset(new EnggDiffFittingPresenter(
-      this, std::make_unique<EnggDiffFittingModel>(), mainCalib, mainParam));
+      this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+      mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
