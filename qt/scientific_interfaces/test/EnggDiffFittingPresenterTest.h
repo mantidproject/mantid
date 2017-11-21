@@ -24,8 +24,8 @@ class EnggDiffFittingPresenterNoThread : public EnggDiffFittingPresenter {
 public:
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
       : EnggDiffFittingPresenterNoThread(
-            view,
-            std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>()) {}
+            view, Mantid::Kernel::make_unique<
+                      testing::NiceMock<MockEnggDiffFittingModel>>()) {}
 
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view,
                                    std::unique_ptr<IEnggDiffFittingModel> model)
@@ -61,8 +61,8 @@ public:
 
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
-    auto mockModel =
-        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
 
     m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
         m_view.get(), std::move(mockModel), nullptr, nullptr));
@@ -99,8 +99,8 @@ public:
 
   void test_load_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel =
-        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
@@ -126,8 +126,8 @@ public:
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel =
-        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
@@ -180,8 +180,8 @@ public:
   // produce a warning
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel =
-        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
@@ -693,8 +693,8 @@ public:
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
-        &mockView,
-        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView, Mantid::Kernel::make_unique<
+                       testing::NiceMock<MockEnggDiffFittingModel>>(),
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
