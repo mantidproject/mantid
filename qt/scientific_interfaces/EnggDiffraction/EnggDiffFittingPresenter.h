@@ -1,8 +1,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "DllConfig.h"
 #include "EnggDiffFittingModel.h"
 #include "IEnggDiffFittingPresenter.h"
@@ -107,8 +105,6 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  size_t findBankID(Mantid::API::MatrixWorkspace_sptr ws) const;
-
   bool isDigit(const std::string &text) const;
 
   void warnFileNotFound(const std::exception &ex);
