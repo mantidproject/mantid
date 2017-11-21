@@ -93,8 +93,6 @@ def find_sans_file(file_name):
     :return: the full path.
     """
     full_path = find_full_file_path(file_name)
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     if not full_path:
         # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
         #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
