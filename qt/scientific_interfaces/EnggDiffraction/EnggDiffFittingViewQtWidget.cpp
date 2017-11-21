@@ -56,7 +56,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
   initLayout();
 
   m_presenter.reset(new EnggDiffFittingPresenter(
-	  this, std::make_unique<EnggDiffFittingModel>(), mainCalib, mainParam));
+      this, std::make_unique<EnggDiffFittingModel>(), mainCalib, mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 

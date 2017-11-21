@@ -14,39 +14,39 @@ namespace CustomInterfaces {
 class IEnggDiffFittingModel {
 
 public:
-	virtual ~IEnggDiffFittingModel() = default;
+  virtual ~IEnggDiffFittingModel() = default;
 
-	virtual Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(
-		const int runNumber, const size_t bank) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getFocusedWorkspace(const int runNumber, const size_t bank) const = 0;
 
-	virtual Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(
-		const int runNumber, const size_t bank) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getAlignedWorkspace(const int runNumber, const size_t bank) const = 0;
 
-	virtual Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(
-		const int runNumber, const size_t bank) const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr
+  getFittedPeaksWS(const int runNumber, const size_t bank) const = 0;
 
-	virtual Mantid::API::ITableWorkspace_sptr getFitResults(const int runNumber,
-		                                                    const size_t bank)
-		const = 0;
+  virtual Mantid::API::ITableWorkspace_sptr
+  getFitResults(const int runNumber, const size_t bank) const = 0;
 
-	virtual std::string getWorkspaceFilename(const int runNumber,
-		                                     const size_t bank) const = 0;
+  virtual std::string getWorkspaceFilename(const int runNumber,
+                                           const size_t bank) const = 0;
 
-	virtual void loadWorkspaces(const std::string &filenames) = 0;
+  virtual void loadWorkspaces(const std::string &filenames) = 0;
 
-	virtual std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs() 
-		const = 0;
+  virtual std::vector<std::pair<int, size_t>>
+  getRunNumbersAndBankIDs() const = 0;
 
-	virtual void setDifcTzero(const int runNumber, const size_t bank,
-		const std::vector<GSASCalibrationParms> &calibParams) = 0;
+  virtual void
+  setDifcTzero(const int runNumber, const size_t bank,
+               const std::vector<GSASCalibrationParms> &calibParams) = 0;
 
-	virtual void enggFitPeaks(const int runNumber, const size_t bank,
-		                      const std::string &expectedPeaks) = 0;
+  virtual void enggFitPeaks(const int runNumber, const size_t bank,
+                            const std::string &expectedPeaks) = 0;
 
-	virtual void saveDiffFittingAscii(const int runNumber, const size_t bank,
-		                              const std::string &filename) const = 0;
+  virtual void saveDiffFittingAscii(const int runNumber, const size_t bank,
+                                    const std::string &filename) const = 0;
 
-	virtual void createFittedPeaksWS(const int runNumber, const size_t bank) = 0;
+  virtual void createFittedPeaksWS(const int runNumber, const size_t bank) = 0;
 };
 
 } // namespace MantidQt

@@ -21,12 +21,13 @@ using testing::Return;
 // uses signals/slots.
 class EnggDiffFittingPresenterNoThread : public EnggDiffFittingPresenter {
 public:
-	EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
-		: EnggDiffFittingPresenterNoThread(view,
-			std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>()) {}
+  EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
+      : EnggDiffFittingPresenterNoThread(
+            view,
+            std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>()) {}
 
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view,
-	                               std::unique_ptr<IEnggDiffFittingModel> model)
+                                   std::unique_ptr<IEnggDiffFittingModel> model)
       : EnggDiffFittingPresenter(view, std::move(model), nullptr, nullptr) {}
 
 private:
@@ -59,10 +60,10 @@ public:
 
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
-	auto mockModel = 
-		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
 
-	m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
+    m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
         m_view.get(), std::move(mockModel), nullptr, nullptr));
 
     // default banks
@@ -97,45 +98,43 @@ public:
 
   void test_load_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-	auto mockModel = 
-		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
-	auto *mockModel_ptr = mockModel.get();
-	MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
-		                                                      std::move(mockModel),
-                                                              nullptr, nullptr);
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
+        &mockView, std::move(mockModel), nullptr, nullptr);
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
 
-	EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-	EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
-	// Should never get as far as trying to load
-	EXPECT_CALL(*mockModel_ptr, loadWorkspaces(testing::_)).Times(0);
+    // Should never get as far as trying to load
+    EXPECT_CALL(*mockModel_ptr, loadWorkspaces(testing::_)).Times(0);
 
     pres.notify(IEnggDiffFittingPresenter::Load);
     TSM_ASSERT(
         "View mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
-	TSM_ASSERT(
-		"Model mock not used as expected. Some EXPECT_CALL conditions were not "
-		"satisfied.",
-		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
-
+    TSM_ASSERT(
+        "Model mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
   }
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-	auto mockModel = std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, 
-		                                                      std::move(mockModel),
-                                                              nullptr, nullptr);
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
+        &mockView, std::move(mockModel), nullptr, nullptr);
 
     EXPECT_CALL(mockView, listWidgetHasSelectedRow())
-		.Times(1)
-		.WillOnce(Return(false));
+        .Times(1)
+        .WillOnce(Return(false));
 
-	// should not get to the point where the status is updated
+    // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -161,7 +160,7 @@ public:
         .Times(1)
         .WillOnce(Return(false));
 
-	// should not get to the point where the status is updated
+    // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -180,25 +179,25 @@ public:
   // produce a warning
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-	auto mockModel = 
-		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
-	auto *mockModel_ptr = mockModel.get();
-	
-	EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
 
-	EXPECT_CALL(mockView, listWidgetHasSelectedRow())
-		.Times(1)
-		.WillOnce(Return(true));
-	EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
-		.Times(1)
-		.WillOnce(Return("123_1"));
-	EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
-		.Times(1)
-		.WillOnce(Return(""));
+    EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-	EXPECT_CALL(mockView, fittingPeaksData())
-		.Times(1)
-		.WillOnce(Return(",3.5,7.78,r43d"));
+    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
+        .Times(1)
+        .WillOnce(Return("123_1"));
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
+        .Times(1)
+        .WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     // should not get to the point where the status is updated
@@ -213,10 +212,10 @@ public:
         "View mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
-	TSM_ASSERT(
-		"Model mock not used as expected. Some EXPECT_CALL conditions were not "
-		"satisfied.",
-		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+    TSM_ASSERT(
+        "Model mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
   }
 
   // Fitting test begin here
@@ -425,7 +424,7 @@ public:
   // This would test the fitting tab with invalid expected peaks but should only
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
-	return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
+    return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
@@ -688,9 +687,10 @@ public:
 
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
-		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
-                                                              nullptr, nullptr);
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
+        &mockView,
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
+        nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
