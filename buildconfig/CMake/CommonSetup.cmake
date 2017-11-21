@@ -272,6 +272,8 @@ if ( CMAKE_VERSION GREATER "3.5" )
       message(AUTHOR_WARNING "clang-tidy not found!")
       set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
     endif()
+  else()
+    set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
   endif()
 endif()
 
