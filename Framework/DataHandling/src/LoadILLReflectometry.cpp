@@ -796,7 +796,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
     const double detectorAngle = doubleFromRun(m_detectorAngleName);
     const double detectorX = std::cos(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
     const double detectorY = std::sin(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
-    const double pixelOffset = Figaro::detectorRestY + m_pixelCentre * m_pixelWidth;
+    const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
     const double beamX = detectorX - pixelOffset * std::sin(inRad(detectorAngle));
     const double beamY = detectorY + pixelOffset * std::cos(inRad(detectorAngle));
     return std::hypot(beamX, beamY);
