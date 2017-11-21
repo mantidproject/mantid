@@ -48,6 +48,7 @@ int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
  * handle on the current calibration (produced and updated elsewhere).
  *
  * @param view the view that is attached to this presenter
+ * @param model the model that is attached to this presenter
  * @param mainCalib provides the current calibration parameters/status
  * @param mainParam provides current params and functions
  */
