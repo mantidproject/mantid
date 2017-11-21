@@ -56,6 +56,8 @@ function ( mtd_add_sip_module )
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
+  set(CMAKE_CXX_CLANG_TIDY "") # disable clang-tidy for sip generated code
+
   add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} )
   target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )

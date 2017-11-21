@@ -640,6 +640,7 @@ set_source_files_properties ( ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
                              PROPERTIES HEADER_FILE_ONLY true )
 set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc )
 
+supress_clang_tidy("${CMAKE_CURRENT_BINARY_DIR}/src/")
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 if ( WIN32 )
