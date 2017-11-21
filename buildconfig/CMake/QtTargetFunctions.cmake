@@ -75,8 +75,6 @@ endfunction()
 # keyword: INSTALL_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt version.
 # keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
 function (mtd_add_qt_target)
-  set(CMAKE_CXX_CLANG_TIDY "") # disable clang-tidy for qt generated code
-
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
     TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
