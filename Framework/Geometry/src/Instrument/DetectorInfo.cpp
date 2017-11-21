@@ -90,6 +90,10 @@ size_t DetectorInfo::scanSize() const { return m_detectorInfo->scanSize(); }
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 
+/// Returns true if the beamline has scanning detectors and they have all the
+/// same scan intervals.
+bool DetectorInfo::isSyncScan() const { return m_detectorInfo->isSyncScan(); }
+
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return m_detectorInfo->isMonitor(index);

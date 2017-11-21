@@ -89,9 +89,9 @@ Usage
     print("Run number for merged workspaces = list of all workspaces: {}".format(ws3.getRun().getLogData('run_number').value))
  
     # Monitor counts
-    print("Monitor counts for 1st workspace: {}".format(ws1.getRun().getLogData('monitor_counts').value))
-    print("Monitor counts for 2nd workspace: {}".format(ws2.getRun().getLogData('monitor_counts').value))
-    print("Monitor counts for merged workspaces = sum over all workspaces: {}".format(ws3.getRun().getLogData('monitor_counts').value))
+    print("Monitor counts for 1st workspace: {:.0f}".format(ws1.getRun().getLogData('monitor_counts').value))
+    print("Monitor counts for 2nd workspace: {:.0f}".format(ws2.getRun().getLogData('monitor_counts').value))
+    print("Monitor counts for merged workspaces = sum over all workspaces: {:.0f}".format(ws3.getRun().getLogData('monitor_counts').value))
    
 
 Output:
@@ -132,9 +132,10 @@ Output:
 
     group=GroupWorkspaces('ws1,ws2')
     groupmerged=TOFTOFMergeRuns(group)
-    print("Monitor counts for 1st workspace: {}".format(ws1.getRun().getLogData('monitor_counts').value))
-    print("Monitor counts for 2nd workspace: {}".format(ws2.getRun().getLogData('monitor_counts').value))
-    print("Monitor counts for merged workspaces = sum over all workspaces: {}".format(groupmerged.getRun().getLogData('monitor_counts').value))
+
+    print("Monitor counts for 1st workspace: {:.0f}".format(ws1.getRun().getLogData('monitor_counts').value))
+    print("Monitor counts for 2nd workspace: {:.0f}".format(ws2.getRun().getLogData('monitor_counts').value))
+    print("Monitor counts for merged workspaces = sum over all workspaces: {:.0f}".format(groupmerged.getRun().getLogData('monitor_counts').value))
 
 Output:
 

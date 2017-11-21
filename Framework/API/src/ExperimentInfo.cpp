@@ -66,8 +66,7 @@ Kernel::Logger g_log("ExperimentInfo");
 /** Constructor
  */
 ExperimentInfo::ExperimentInfo()
-    : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
-      m_run(new Run()), m_parmap(new ParameterMap()),
+    : m_moderatorModel(), m_choppers(), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()) {
   m_parmap->setInstrument(sptr_instrument.get());
 }
@@ -91,7 +90,7 @@ ExperimentInfo::~ExperimentInfo() = default;
  */
 void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   m_sample = other->m_sample;
-  m_run = other->m_run->clone();
+  m_run = other->m_run;
   this->setInstrument(other->getInstrument());
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
@@ -189,6 +188,14 @@ void checkDetectorInfoSize(const Instrument &instr,
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
+
+  // Detector IDs that were previously dropped because they were not part of the
+  // instrument may now suddenly be valid, so we have to reinitialize the
+  // detector grouping. Also the index corresponding to specific IDs may have
+  // changed.
+  if (sptr_instrument !=
+      (instr->isParametrized() ? instr->baseInstrument() : instr))
+    invalidateAllSpectrumDefinitions();
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     // We take a *copy* of the ParameterMap since we are modifying it by setting
@@ -200,12 +207,6 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = boost::make_shared<ParameterMap>();
   }
   m_parmap->setInstrument(sptr_instrument.get());
-
-  // Detector IDs that were previously dropped because they were not part of the
-  // instrument may now suddenly be valid, so we have to reinitialize the
-  // detector grouping. Also the index corresponding to specific IDs may have
-  // changed.
-  invalidateAllSpectrumDefinitions();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -484,6 +485,14 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   m_spectrumInfoWrapper = nullptr;
 }
 
+/** Returns the number of detector groups.
+ *
+ * For MatrixWorkspace this is equal to getNumberHistograms() (after
+ *initialization). */
+size_t ExperimentInfo::numberOfDetectorGroups() const {
+  return m_spectrumDefinitionNeedsUpdate.size();
+}
+
 /** Sets the detector grouping for the spectrum with the given `index`.
  *
  * This method should not need to be called explicitly. Groupings are updated
@@ -592,30 +601,17 @@ ChopperModel &ExperimentInfo::chopperModel(const size_t index) const {
 */
 const Sample &ExperimentInfo::sample() const {
   populateIfNotLoaded();
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_sample;
 }
 
 /** Get a reference to the Sample associated with this workspace.
 *  This non-const method will copy the sample if it is shared between
 *  more than one workspace, and the reference returned will be to the copy.
-*  Can ONLY be taken by reference!
 * @return reference to sample object
 */
 Sample &ExperimentInfo::mutableSample() {
   populateIfNotLoaded();
-  // Use a double-check for sharing so that we only
-  // enter the critical region if absolutely necessary
-  if (!m_sample.unique()) {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
-    // Check again because another thread may have taken copy
-    // and dropped reference count since previous check
-    if (!m_sample.unique()) {
-      boost::shared_ptr<Sample> oldData = m_sample;
-      m_sample = boost::make_shared<Sample>(*oldData);
-    }
-  }
-  return *m_sample;
+  return m_sample.access();
 }
 
 /** Get a constant reference to the Run object associated with this workspace.
@@ -623,30 +619,22 @@ Sample &ExperimentInfo::mutableSample() {
 */
 const Run &ExperimentInfo::run() const {
   populateIfNotLoaded();
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return *m_run;
 }
 
 /** Get a reference to the Run object associated with this workspace.
 *  This non-const method will copy the Run object if it is shared between
 *  more than one workspace, and the reference returned will be to the copy.
-*  Can ONLY be taken by reference!
 * @return reference to Run object
 */
 Run &ExperimentInfo::mutableRun() {
   populateIfNotLoaded();
-  // Use a double-check for sharing so that we only
-  // enter the critical region if absolutely necessary
-  if (!m_run.unique()) {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
-    // Check again because another thread may have taken copy
-    // and dropped reference count since previous check
-    if (!m_run.unique()) {
-      boost::shared_ptr<Run> oldData = m_run;
-      m_run = boost::make_shared<Run>(*oldData);
-    }
-  }
-  return *m_run;
+  return m_run.access();
+}
+
+/// Set the run object. Use in particular to clear run without copying old run.
+void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
+  m_run = std::move(run);
 }
 
 /**

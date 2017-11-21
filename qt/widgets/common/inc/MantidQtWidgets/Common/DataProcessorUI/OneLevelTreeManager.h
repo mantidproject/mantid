@@ -109,6 +109,13 @@ public:
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
 private:
+  bool isEmptyTable() const;
+  bool shouldProcessAll() const;
+  bool askUserIfShouldProcessAll() const;
+  std::set<int> allRows() const;
+  std::set<int> noRows() const;
+  std::set<int> getRowsToProcess(bool prompt) const;
+  TreeData handleEmptyTable(bool prompt);
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model

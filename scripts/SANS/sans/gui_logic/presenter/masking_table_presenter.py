@@ -78,21 +78,13 @@ def perform_load(serialized_state):
 
 
 def perform_move(state, workspace):
-    move_info = state.move
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
-                if DetectorType.to_string(DetectorType.HAB) in move_info.detectors else\
-                [DetectorType.to_string(DetectorType.LAB)]  # noqa
-
     serialized_state = state.property_manager
     move_name = "SANSMove"
     move_options = {"SANSState": serialized_state,
                     "Workspace": workspace,
                     "MoveType": "InitialMove"}
     move_alg = create_unmanaged_algorithm(move_name, **move_options)
-
-    for detector in detectors:
-        move_alg.setProperty("Component", detector)
-        move_alg.execute()
+    move_alg.execute()
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):

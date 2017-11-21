@@ -5,7 +5,7 @@ from six import types
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
 from SANSadd2 import add_runs
-from sans.sans_batch import SANSBatchReduction
+from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 from sans.command_interface.command_interface_functions import (print_message, warning_message)
 from sans.command_interface.command_interface_state_director import (CommandInterfaceStateDirector, DataCommand,
                                                                      DataCommandId, NParameterCommand, NParameterCommandId,
@@ -14,7 +14,7 @@ from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import (find_sans_file, find_full_file_path)
 from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
-                               ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode)
+                               ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
 
@@ -137,11 +137,6 @@ def TransWorkspace(sample, can=None):
 def createColetteScript(inputdata, format, reduced, centreit, plotresults, csvfile='', savepath=''):
     _, _, _, _, _, _, _ = inputdata, format, reduced, centreit, plotresults, csvfile, savepath  # noqa
     raise NotImplementedError("The creatColleteScript command is not implemented in SANS v2.")
-
-
-def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,  find_direction=None):
-    _, _, _, _, _, _, _ = rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction  # noqa
-    raise NotImplementedError("The FindBeamCentre command is not implemented in SANS v2.")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1008,6 +1003,16 @@ def PhiRanges(phis, plot=True):
 
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
+
+
+def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
+                   find_direction=FindDirectionEnum.All, reduction_method=True):
+    state = director.process_commands()
+    centre_finder = SANSCentreFinder()
+    centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
+    SetCentre(centre['pos1'], centre['pos2'], bank='rear')
+    SetCentre(centre['pos1'], centre['pos2'], bank='front')
+    return centre
 
 
 # ----------------------------------------------------------------------------------------------------------------------

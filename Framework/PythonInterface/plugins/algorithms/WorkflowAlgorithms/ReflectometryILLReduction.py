@@ -40,7 +40,8 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
-        self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
 

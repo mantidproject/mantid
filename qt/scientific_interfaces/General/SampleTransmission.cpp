@@ -48,7 +48,7 @@ void SampleTransmission::initLayout() {
  */
 void SampleTransmission::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("SampleTransmissionCalculator"));
+      nullptr, QString("Sample Transmission Calculator"));
 }
 
 /**

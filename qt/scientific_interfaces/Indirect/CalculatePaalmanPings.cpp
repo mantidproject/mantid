@@ -371,7 +371,7 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
 
   try {
     m_uiForm.doubleEfixed->setValue(getEFixed(ws));
-  } catch (std::runtime_error) {
+  } catch (std::runtime_error &) {
     // do nothing if there is no efixed
   }
 

@@ -5,9 +5,9 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
 from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits, CropWorkspace,
-                              Divide, ExtractMonitors, GroupDetectors, LoadILLReflectometry, MergeRuns, Minus, mtd,
-                              NormaliseToMonitor, Scale, Transpose)
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits, CreateEmptyTableWorkspace,
+                              CropWorkspace, Divide, ExtractMonitors, Fit, GroupDetectors, Integration, LoadILLReflectometry, MergeRuns,
+                              Minus, mtd, NormaliseToMonitor, Scale, Transpose)
 import numpy
 import os.path
 import ReflectometryILL_common as common
@@ -93,13 +93,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
-        self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
         ws, beamPosWS = self._inputWS()
 
-        self._outputBeamPosition(beamPosWS)
-
         ws, monWS = self._extractMonitors(ws)
+        
+        if beamPosWS is None:
+            beamPosWS = self._findLine(ws)
+        self._outputBeamPosition(beamPosWS)
 
         ws = self._waterCalibration(ws)
 
@@ -280,6 +283,40 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
+    def _findLine(self, ws):
+        """Return a peak position workspace."""
+        # TODO There should be a better algorithm in Mantid to achieve this.
+        integratedWSName = self._names.withSuffix('integrated')
+        integratedWS = Integration(InputWorkspace=ws,
+                                   OutputWorkspace=integratedWSName,
+                                   EnableLogging=self._subalgLogging)
+        transposedWSName = self._names.withSuffix('transposed')
+        transposedWS = Transpose(InputWorkspace=integratedWS,
+                                 OutputWorkspace=transposedWSName,
+                                 EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(integratedWS)
+        # Convert spectrum numbers to WS indices.
+        wsIndices = numpy.arange(0, ws.getNumberHistograms())
+        xs = transposedWS.dataX(0)
+        ys = transposedWS.readY(0)
+        numpy.copyto(xs, wsIndices)
+        indexOfMax = ys.argmax()
+        heightGuess = ys[indexOfMax]
+        posGuess = xs[indexOfMax]
+        sigmaGuess = 3
+        f = 'name=Gaussian, PeakCentre={}, Height={}, Sigma={}'.format(posGuess, heightGuess, sigmaGuess)
+        fitResult = Fit(Function=f,
+                        InputWorkspace=transposedWS,
+                        EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(transposedWS)
+        peakPos = fitResult.Function.PeakCentre
+        posTableName = self._names.withSuffix('peak_position_table')
+        posTable = CreateEmptyTableWorkspace(OutputWorkspace=posTableName,
+                                             EnableLogging=self._subalgLogging)
+        posTable.addColumn('double', 'PeakCentre')
+        posTable.addRow((peakPos,))
+        return posTable
+
     def _flatBkgRanges(self, ws, peakPosWS):
         """Return ranges for flat background fitting."""
         peakPos = self._foregroundCentre(ws, peakPosWS)
@@ -302,7 +339,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _foregroundCentre(self, ws, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
         if self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
-            return int(numpy.rint(beamPosWS.cell('FittedPeakCentre', 0)))
+            return int(numpy.rint(beamPosWS.cell('PeakCentre', 0)))
         spectrumNo = self.getProperty(Prop.FOREGROUND_CENTRE).value
         return ws.getIndexFromSpectrumNumber(spectrumNo)
 
@@ -368,8 +405,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return (mergedWS, beamPosWS)
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)
-        beamPosWS = self.getProperty(Prop.BEAM_POS).value
-        self._cleanup.protect(beamPosWS)
+        if not self.getProperty(Prop.BEAM_POS).isDefault:
+            beamPosWS = self.getProperty(Prop.BEAM_POS).value
+            self._cleanup.protect(beamPosWS)
+        else:
+            beamPosWS = None
         return (ws, beamPosWS)
 
     def _normaliseToFlux(self, detWS, monWS):
@@ -450,6 +490,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                         OutputWorkspace=transposedBkgWSName,
                                                         Degree=polynomialDegree,
                                                         XRanges=ranges,
+                                                        CostFunction='Unweighted least squares',
                                                         EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(transposedWS)
         bkgWSName = self._names.withSuffix('flat_background')
@@ -472,8 +513,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return ws
         elif method == Summation.COHERENT:
             ws = self._groupForeground(ws, peakPosWS)
-            ConvertToDistribution(Workspace=ws,
-                                  EnableLogging=self._subalgLogging)
+            if not ws.isDistribution():
+                ConvertToDistribution(Workspace=ws,
+                                      EnableLogging=self._subalgLogging)
             return ws
         else:
             raise RuntimeError('Selected output summation method is not implemented.')

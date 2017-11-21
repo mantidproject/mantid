@@ -42,6 +42,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <utility>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;
@@ -105,11 +106,13 @@ Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
   const size_t yValsSize = yAxis.size();
   if (isHistogram) {
     BinEdges xAxis(yValsSize + 1, LinearGenerator(1, 1));
-    Histogram histo{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram histo{std::move(xAxis), std::forward<YType>(yAxis),
+                    std::forward<EType>(eAxis)};
     return histo;
   } else {
     Points xAxis(yValsSize, LinearGenerator(1, 1));
-    Histogram pointsHisto{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram pointsHisto{std::move(xAxis), std::forward<YType>(yAxis),
+                          std::forward<EType>(eAxis)};
     return pointsHisto;
   }
 }

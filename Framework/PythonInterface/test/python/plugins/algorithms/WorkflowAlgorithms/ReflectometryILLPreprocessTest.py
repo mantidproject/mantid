@@ -52,7 +52,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             if i != 49:
                 numpy.testing.assert_equal(ys, 0)
             else:
-                numpy.testing.assert_equal(ys, 10)
+                xs = outWS.readX(i)
+                dx = xs[1] - xs[0]
+                numpy.testing.assert_almost_equal(ys, 10 / dx)
 
     def testForegroundBackgroundRanges(self):
         inWSName = 'ReflectometryILLPreprocess_test_ws'
