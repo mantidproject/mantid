@@ -57,7 +57,7 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_viewHasClosed(false), m_model(std::move(model)) {}
+      m_model(std::move(model)), m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
