@@ -14,30 +14,32 @@ using RunMap = std::array<std::unordered_map<int, T>, S>;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel: public IEnggDiffFittingModel {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel
+    : public IEnggDiffFittingModel {
 
 public:
-  Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(const int runNumber,
-                                                 const size_t bank) const override;
+  Mantid::API::MatrixWorkspace_sptr
+  getFocusedWorkspace(const int runNumber, const size_t bank) const override;
 
-  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const int runNumber,
-	  const size_t bank) const override;
+  Mantid::API::MatrixWorkspace_sptr
+  getAlignedWorkspace(const int runNumber, const size_t bank) const override;
 
-  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const int runNumber,
-	  const size_t bank) const override;
+  Mantid::API::MatrixWorkspace_sptr
+  getFittedPeaksWS(const int runNumber, const size_t bank) const override;
 
-  Mantid::API::ITableWorkspace_sptr getFitResults(const int runNumber,
-                                                  const size_t bank) const override;
+  Mantid::API::ITableWorkspace_sptr
+  getFitResults(const int runNumber, const size_t bank) const override;
 
-  std::string getWorkspaceFilename(const int runNumber, const size_t bank) const override;
+  std::string getWorkspaceFilename(const int runNumber,
+                                   const size_t bank) const override;
 
   void loadWorkspaces(const std::string &filenames) override;
 
   std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs() const override;
 
-  void setDifcTzero(const int runNumber, const size_t bank,
-                    const std::vector<GSASCalibrationParms> &calibParams)
-	                override;
+  void
+  setDifcTzero(const int runNumber, const size_t bank,
+               const std::vector<GSASCalibrationParms> &calibParams) override;
 
   void enggFitPeaks(const int runNumber, const size_t bank,
                     const std::string &expectedPeaks) override;
@@ -48,8 +50,8 @@ public:
   void createFittedPeaksWS(const int runNumber, const size_t bank) override;
 
   void addFocusedWorkspace(const int runNumber, const size_t bank,
-	  const Mantid::API::MatrixWorkspace_sptr ws,
-	  const std::string &filename);
+                           const Mantid::API::MatrixWorkspace_sptr ws,
+                           const std::string &filename);
 
 private:
   static const size_t MAX_BANKS = 2;
