@@ -1,5 +1,5 @@
 import unittest
-from qtpy.QtCore import Qt
+from PyQt4.QtCore import Qt
 from collections import Counter
 from mantidqt.widgets.algorithmselector.model import Model
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget

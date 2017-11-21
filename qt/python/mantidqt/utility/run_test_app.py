@@ -1,8 +1,6 @@
 import sys
-import time
-from qtpy.QtWidgets import QApplication, QPushButton
-from qtpy.QtCore import Qt, QTimer, QPoint
-from qtpy.QtTest import QTest
+from PyQt4.QtGui import QApplication
+from PyQt4.QtCore import Qt, QTimer
 
 
 class Tester(object):

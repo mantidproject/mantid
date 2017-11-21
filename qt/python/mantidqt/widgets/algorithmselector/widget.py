@@ -1,7 +1,7 @@
 from __future__ import absolute_import
-from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
-from qtpy.QtWidgets import QTreeWidgetItem, QInputDialog
-from qtpy.QtCore import QModelIndex
+from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
+from PyQt4.QtGui import QTreeWidgetItem, QInputDialog
+from PyQt4.QtCore import QModelIndex
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 from mantidqt.utility import block_signals
 import re

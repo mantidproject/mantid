@@ -1,5 +1,5 @@
 import types
-from qtpy.QtWidgets import QApplication
+from PyQt4.QtGui import QApplication
 
 
 def gui_test(test):
