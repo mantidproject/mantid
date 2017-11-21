@@ -368,7 +368,7 @@ void EnggDiffFittingPresenter::processSelectRun() {
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
-  const auto ws = m_model.getWorkspace(runNumber, bank);
+  const auto ws = m_model.getFocusedWorkspace(runNumber, bank);
   plotFocusedFile(false, ws);
 }
 
@@ -746,7 +746,7 @@ void EnggDiffFittingPresenter::processLoad() {
     return;
   }
 
-  const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
+  const auto runNoBankPairs = m_model.getRunNumbersAndBankIDs();
   std::vector<std::string> listWidgetLabels;
   std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
                  std::back_inserter(listWidgetLabels),
