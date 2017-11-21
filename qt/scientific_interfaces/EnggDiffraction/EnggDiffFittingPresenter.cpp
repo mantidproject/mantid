@@ -885,8 +885,8 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
-                 << "single peak fits into workspace '" << outWSName
-                 << "'. This may take some seconds... \n";
+                 << "single peak fits into workspace '"
+                 << outWSName << "'. This may take some seconds... \n";
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
