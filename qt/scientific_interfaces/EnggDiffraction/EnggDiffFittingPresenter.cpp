@@ -55,12 +55,12 @@ int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
  * @param mainParam provides current params and functions
  */
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
-    IEnggDiffFittingView *view,
+    IEnggDiffFittingView *view, IEnggDiffFittingModel *model,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
-      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_viewHasClosed(false) {}
+      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view), 
+	  m_model(model), m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -372,7 +372,7 @@ void EnggDiffFittingPresenter::processSelectRun() {
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
-  const auto ws = m_model.getFocusedWorkspace(runNumber, bank);
+  const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
   plotFocusedFile(false, ws);
 }
 
@@ -763,7 +763,7 @@ void EnggDiffFittingPresenter::processLoad() {
   const std::string filenames = m_view->getFittingRunNo();
 
   try {
-    m_model.loadWorkspaces(filenames);
+    m_model->loadWorkspaces(filenames);
   } catch (Poco::PathSyntaxException &ex) {
     warnFileNotFound(ex);
     return;
@@ -775,7 +775,7 @@ void EnggDiffFittingPresenter::processLoad() {
     return;
   }
 
-  const auto runNoBankPairs = m_model.getRunNumbersAndBankIDs();
+  const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
   std::vector<std::string> listWidgetLabels;
   std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
                  std::back_inserter(listWidgetLabels),
@@ -861,7 +861,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-  const auto filename = m_model.getWorkspaceFilename(runNumber, bank);
+  const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
   std::string fittingPeaks = m_view->fittingPeaksData();
 
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
@@ -986,20 +986,20 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   // load the focused workspace file to perform single peak fits
 
   // apply calibration to the focused workspace
-  m_model.setDifcTzero(runNumber, bank, currentCalibration());
+  m_model->setDifcTzero(runNumber, bank, currentCalibration());
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
-  m_model.enggFitPeaks(runNumber, bank, expectedPeaks);
+  m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
 
   const auto outFilename = m_view->getCurrentInstrument() +
                            std::to_string(runNumber) +
                            "_Single_Peak_Fitting.csv";
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
-  m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
+  m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
 
-  m_model.createFittedPeaksWS(runNumber, bank);
+  m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
 
@@ -1305,14 +1305,14 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     int runNumber;
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-    const auto ws = m_model.getAlignedWorkspace(runNumber, bank);
+    const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
 
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
-      auto singlePeaksWS = m_model.getFittedPeaksWS(runNumber, bank);
+      auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");

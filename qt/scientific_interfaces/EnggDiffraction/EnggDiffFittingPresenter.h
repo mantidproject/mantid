@@ -4,7 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "DllConfig.h"
-#include "EnggDiffFittingModel.h"
+#include "IEnggDiffFittingModel.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
 #include "IEnggDiffractionCalibration.h"
@@ -56,7 +56,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
 
 public:
   EnggDiffFittingPresenter(
-      IEnggDiffFittingView *view,
+      IEnggDiffFittingView *view, IEnggDiffFittingModel *model,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
       boost::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
@@ -191,7 +191,7 @@ private:
   IEnggDiffFittingView *const m_view;
 
   /// Associated model for this presenter
-  EnggDiffFittingModel m_model;
+  IEnggDiffFittingModel *const m_model;
 
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;
