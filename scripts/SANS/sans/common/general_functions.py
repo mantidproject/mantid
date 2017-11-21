@@ -607,6 +607,11 @@ def get_output_name(state, reduction_mode, is_group, suffix=""):
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
 
+    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
+    if (state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
+            and user_specified_output_name:
+        use_reduction_mode_as_suffix = True
+
     # An output name requires special attention when the workspace is part of a multi-period reduction
     # or slice event scan
     # If user specified output name is not none then we use it for the base name
