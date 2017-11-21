@@ -132,6 +132,16 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo->relativeRotation(componentIndex));
 }
 
+void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
+                                const Kernel::V3D &newPosition) {
+  m_componentInfo->setPosition(index, Kernel::toVector3d(newPosition));
+}
+
+void ComponentInfo::setRotation(const std::pair<size_t, size_t> index,
+                                const Kernel::Quat &newRotation) {
+  m_componentInfo->setRotation(index, Kernel::toQuaterniond(newRotation));
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return m_componentInfo->parent(componentIndex);
 }
@@ -340,6 +350,11 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 
 bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
   return m_componentInfo->isStructuredBank(componentIndex);
+}
+
+void ComponentInfo::setScanInterval(
+    const std::pair<int64_t, int64_t> &interval) {
+  m_componentInfo->setScanInterval(interval);
 }
 
 } // namespace Geometry

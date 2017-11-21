@@ -455,6 +455,33 @@ public:
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
   }
+
+  void test_scanning_non_bank_throws() {
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    const auto &componentInfo = std::get<0>(wrappers);
+    componentInfo->setScanInterval({0, 1});
+    std::pair<size_t, size_t> temporalSourceIndex(
+        componentInfo->source(), 0); // Source index with time component
+    TSM_ASSERT_THROWS(
+        "Source is NOT allowed to time-scan",
+        componentInfo->setPosition(temporalSourceIndex, V3D(0, 0, 0)),
+        std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source position set as time-constant allowed",
+        componentInfo->setPosition(componentInfo->source(), V3D(0, 0, 0)));
+    TSM_ASSERT_THROWS("Source is NOT allowed to time-scan",
+                      componentInfo->setRotation(temporalSourceIndex, Quat()),
+                      std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source rotation set as time-constant allowed",
+        componentInfo->setRotation(componentInfo->source(), Quat()));
+  }
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */

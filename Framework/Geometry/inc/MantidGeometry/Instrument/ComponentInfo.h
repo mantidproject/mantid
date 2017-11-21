@@ -94,6 +94,10 @@ public:
   Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
+  void setPosition(const std::pair<size_t, size_t> index,
+                   const Kernel::V3D &newPosition);
+  void setRotation(const std::pair<size_t, size_t> index,
+                   const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
@@ -119,6 +123,7 @@ public:
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
   bool isStructuredBank(const size_t componentIndex) const;
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   friend class Instrument;
 };
 
