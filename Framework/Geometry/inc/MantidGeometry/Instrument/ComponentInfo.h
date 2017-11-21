@@ -89,7 +89,9 @@ public:
   size_t indexOf(Geometry::IComponent *id) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> index) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> index) const;
   Kernel::V3D relativePosition(const size_t componentIndex) const;
   Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
@@ -124,6 +126,8 @@ public:
                           const BoundingBox *reference = nullptr) const;
   bool isStructuredBank(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  void merge(const ComponentInfo &other);
+  size_t scanSize() const;
   friend class Instrument;
 };
 
