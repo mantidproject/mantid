@@ -33,6 +33,16 @@ Mantid::Kernel::Logger g_log("MultiDatasetFit");
 /// plotting them against a dataset index.
 void formatParametersForPlotting(const Mantid::API::IFunction &function,
                                  const std::string &parametersPropertyName) {
+
+  const auto nDomains = function.getNumberDomains();
+
+  if (nDomains < 2) {
+    // Single domain fit: nothing to plot.
+    return;
+  }
+
+  // function must be MultiDomainFunction by the logic of the interface.
+  // If it's not the cast error will tell us about it.
   const auto &mdFunction =
       dynamic_cast<const Mantid::API::MultiDomainFunction &>(function);
 
@@ -42,13 +52,12 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
     return;
   }
 
+  assert(nDomains == mdFunction.nFunctions());
+
   auto table =
       Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   auto col = table->addColumn("double", "Dataset");
   col->setPlotType(1); // X-values inplots
-
-  auto nDomains = mdFunction.getNumberDomains();
-  assert(nDomains == mdFunction.nFunctions());
 
   // Add columns for parameters and their errors
   const auto &fun = *mdFunction.getFunction(0);
