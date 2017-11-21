@@ -91,7 +91,8 @@ endif()
 add_library ( RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
 
 # Set the name of the generated library
-set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms )
+set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( RemoteAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

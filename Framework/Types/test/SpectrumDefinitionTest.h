@@ -16,6 +16,23 @@ public:
   }
   static void destroySuite(SpectrumDefinitionTest *suite) { delete suite; }
 
+  void test_default_construct() {
+    SpectrumDefinition def;
+    TS_ASSERT_EQUALS(def.size(), 0);
+  }
+
+  void test_construct_no_time() {
+    SpectrumDefinition def(42);
+    TS_ASSERT_EQUALS(def.size(), 1);
+    TS_ASSERT_EQUALS(def[0], (std::pair<size_t, size_t>(42, 0)));
+  }
+
+  void test_construct() {
+    SpectrumDefinition def(42, 7);
+    TS_ASSERT_EQUALS(def.size(), 1);
+    TS_ASSERT_EQUALS(def[0], (std::pair<size_t, size_t>(42, 7)));
+  }
+
   void test_size() {
     SpectrumDefinition def;
     TS_ASSERT_EQUALS(def.size(), 0);

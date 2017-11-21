@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "DllConfig.h"
+#include "EnggDiffFittingModel.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
 #include "IEnggDiffractionCalibration.h"
@@ -87,7 +88,8 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
-  void plotFocusedFile(bool plotSinglePeaks);
+  void plotFocusedFile(bool plotSinglePeaks,
+                       Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
   void plotFitPeaksCurves();
 
@@ -145,7 +147,11 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
+  size_t findBankID(Mantid::API::MatrixWorkspace_sptr ws) const;
+
   bool isDigit(const std::string &text) const;
+
+  void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
   virtual void
@@ -225,8 +231,14 @@ private:
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
 
+  /// Associated model for this presenter
+  MantidQT::CustomInterfaces::EnggDiffFittingModel m_model;
+
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;
+
+  /// Handle the user selecting a different run to plot
+  void processSelectRun();
 };
 
 } // namespace CustomInterfaces

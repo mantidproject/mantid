@@ -41,7 +41,9 @@ public:
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
   /// Algorithm's category for search and find. @see Algorithm::category
-  const std::string category() const override { return "DataHandling\\Nexus"; }
+  const std::string category() const override {
+    return "DataHandling\\Nexus;ILL\\Reflectometry";
+  }
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
     return "Loads an ILL reflectometry Nexus file (instrument D17 or "

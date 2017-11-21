@@ -77,7 +77,7 @@ Description          : Preferences dialog
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
-#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MdPlottingCmapsProvider.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
 
@@ -796,7 +796,7 @@ void ConfigDialog::initMdPlottingGeneralTab() {
   generalTabLayout->addWidget(label);
 
   // Set the color maps
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   QStringList colorMapNames;
   QStringList colorMapFiles;
   mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames,
@@ -879,7 +879,7 @@ void ConfigDialog::initMdPlottingVsiTab() {
 
   // Set the color map selection for the VSI
   QStringList maps;
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   mdPlottingCmapsProvider.getColorMapsForVSI(maps);
 
   MantidQt::API::MdConstants mdConstants;

@@ -118,11 +118,8 @@ The following parameters may also be optionally set:
 
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
+- :ref:`suffix_polaris_isis-powder-diffraction-ref`
 
-If :ref:`sample_empty_polaris_isis_powder-diffraction-ref` is 
-set then the following parameter is also required:
-
-- :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
 
 Example
 =======
@@ -509,7 +506,7 @@ Please visit the above page for more details.
 
 *Note: If this parameter is set to* **True**
 :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
-*must also be set.*
+*must also be set.* This is set to 1.0 by default.
 
 Example Input:
 
@@ -520,25 +517,20 @@ Example Input:
   # Or a range of numbers
   polaris_example.focus(sample_empty="100-110", ...)
 
+.. _suffix_polaris_isis-powder-diffraction-ref:
+  
+suffix
+^^^^^^
+*Optional*
 
-.. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
-
-sample_empty_scale
-^^^^^^^^^^^^^^^^^^
-Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
-is set to **True**
-
-Sets a factor to scale the sample empty run(s) to before
-subtracting. This value is multiplied after summing the 
-sample empty runs and before subtracting the empty from
-the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+This parameter specifies a suffix to append the names of output files
+during a focus.
 
 Example Input:
 
-..  code-block:: python
+.. code-block:: python
 
-  # Scale sample empty to 90% of original
-  polaris_example.focus(sample_empty_scale=0.9, ...)
+  polaris_example.focus(suffix="-corr", ...) 
 
 .. _user_name_polaris_isis-powder-diffraction-ref:
 
@@ -614,8 +606,8 @@ On POLARIS this is set to the following:
 
 .. _masking_file_name_polaris_isis-powder-diffraction-ref:
 
-masking_file_name
-^^^^^^^^^^^^^^^^^^
+vanadium_peaks_masking_file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Determines the name of the masking file containing the 
 masks to remove Bragg peaks on Polaris. This file must 
 be located within the top level of the
@@ -625,7 +617,26 @@ On POLARIS this is set to the following:
 
 ..  code-block:: python
 
-  masking_file_name: "VanaPeaks.dat"
+  vanadium_peaks_masking_file: "VanaPeaks.dat"
+
+.. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
+
+sample_empty_scale
+^^^^^^^^^^^^^^^^^^
+Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
+is set to **True**
+
+Sets a factor to scale the sample empty run(s) to before
+subtracting. This value is multiplied after summing the 
+sample empty runs and before subtracting the empty from
+the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+
+Example Input:
+
+..  code-block:: python
+
+  # Scale sample empty to 90% of original
+  polaris_example.focus(sample_empty_scale=0.9, ...)
 
 .. _raw_data_cropping_values_polaris_isis-powder-diffraction-ref:
 
@@ -727,7 +738,7 @@ On POLARIS this is set to the following:
 
 .. code-block:: python
 		
-  cylinder_sample_radius = 0.4
+  cylinder_sample_radius = 0.25
 
 cylinder_position
 =================

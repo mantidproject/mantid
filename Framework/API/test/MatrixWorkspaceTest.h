@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -402,6 +403,17 @@ public:
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
   }
 
+  void testCloneClearsWorkspaceName() {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(1, 1, 1);
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
+  }
+
   void testGetSetTitle() {
     TS_ASSERT_EQUALS(ws->getTitle(), "");
     ws->setTitle("something");
@@ -728,6 +740,16 @@ public:
       ws.maskBin(0, i);
       TS_ASSERT_EQUALS(ws.y(0)[i], 0.);
     }
+  }
+
+  void testSetMaskedBins() {
+    auto ws = makeWorkspaceWithDetectors(2, 2);
+    ws->flagMasked(0, 1);
+    ws->flagMasked(1, 0);
+    ws->setMaskedBins(1, ws->maskedBins(0));
+    TS_ASSERT(ws->hasMaskedBins(1));
+    TS_ASSERT_EQUALS(ws->maskedBins(1).size(), 1);
+    TS_ASSERT_EQUALS(ws->maskedBins(0).begin()->first, 1);
   }
 
   void testSize() {

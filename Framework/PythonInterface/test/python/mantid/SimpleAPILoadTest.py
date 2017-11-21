@@ -91,5 +91,10 @@ class SimpleAPILoadTest(unittest.TestCase):
         self.assertEqual(wkspace.name(), expected_name)
         self.assertTrue(expected_name in mtd)
 
+    def test_magic_keywords(self):
+        magicws = Load('IRS21360.raw', EnableLogging=False, StoreInADS=False)
+        self.assertFalse('magicws' in mtd)
+        self.assertTrue(magicws)
+
 if __name__ == '__main__':
     unittest.main()
