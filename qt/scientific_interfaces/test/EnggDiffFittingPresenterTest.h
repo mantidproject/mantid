@@ -2,10 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 
 #include "MantidAPI/FrameworkManager.h"
-<<<<<<< d0e8bd66971df0265b39b58a06561a03cb1ebfb0
 #include "MantidKernel/make_unique.h"
-=======
->>>>>>> Re #21171 Implement mock for enggdifffittingmodel
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 
@@ -120,18 +117,19 @@ public:
         "View mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
-    TSM_ASSERT(
-        "Model mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+	TSM_ASSERT(
+		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"satisfied.",
+		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+
   }
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
-        &mockView, std::move(mockModel), nullptr, nullptr);
+	auto mockModel = std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, 
+		                                                      std::move(mockModel),
+                                                              nullptr, nullptr);
 
     EXPECT_CALL(mockView, listWidgetHasSelectedRow())
         .Times(1)
@@ -214,10 +212,10 @@ public:
         "View mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
-    TSM_ASSERT(
-        "Model mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+	TSM_ASSERT(
+		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"satisfied.",
+		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
   }
 
   // Fitting test begin here
