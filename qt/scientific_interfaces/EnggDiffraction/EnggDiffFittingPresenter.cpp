@@ -37,6 +37,7 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
                                                 const size_t bank) {
   return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
+}
 
 // Remove commas at the start and end of the string,
 // as well as any adjacent to another (eg ,, gets corrected to ,)
@@ -1076,8 +1077,14 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
                         "File " + fileDir +
                             " , could not be found. Please try again!");
   } else {
+<<<<<<< 48455abe9c2463f233fe6923e936ae760f2c5d79
     auto expPeaks = m_view->getExpectedPeaksInput();
     outfile << expPeaks;
+=======
+    auto expPeaks = m_view->fittingPeaksData();
+    outfile << expPeaks;
+  }
+>>>>>>> Re #21171 Clang-format
 }
 
 void EnggDiffFittingPresenter::setBankItems(

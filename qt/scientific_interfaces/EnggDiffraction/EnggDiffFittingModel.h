@@ -56,20 +56,21 @@ protected:
 
   void addFitResults(const int runNumber, const size_t bank,
                      const Mantid::API::ITableWorkspace_sptr ws);
-  
+
   void setDifcTzero(const int runNumber, const size_t bank,
-	  const std::vector<GSASCalibrationParms> &calibParams);
+                    const std::vector<GSASCalibrationParms> &calibParams);
   void enggFitPeaks(const int runNumber, const size_t bank,
-	                const std::string &expectedPeaks);
+                    const std::string &expectedPeaks);
   void saveDiffFittingAscii(const int runNumber, const size_t bank,
-	  const std::string &filename);
+                            const std::string &filename);
 
-  void createFittedPeaksWS(const int runNumber, 
-	  const size_t bank);
+  void createFittedPeaksWS(const int runNumber, const size_t bank);
 
-  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const int runNumber, const size_t bank);
+  Mantid::API::MatrixWorkspace_sptr getAlignedWorkspace(const int runNumber,
+                                                        const size_t bank);
 
-  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const int runNumber, const size_t bank);
+  Mantid::API::MatrixWorkspace_sptr getFittedPeaksWS(const int runNumber,
+                                                     const size_t bank);
 
 private:
   static const size_t MAX_BANKS = 2;
