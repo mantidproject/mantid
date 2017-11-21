@@ -2,6 +2,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "EnggDiffFittingModel.h"
 #include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
@@ -54,7 +55,8 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
+  m_presenter.reset(new EnggDiffFittingPresenter(
+	  this, std::make_unique<EnggDiffFittingModel>(), mainCalib, mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 

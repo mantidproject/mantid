@@ -14,7 +14,7 @@ using RunMap = std::array<std::unordered_map<int, T>, S>;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel: IEnggDiffFittingModel {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel: public IEnggDiffFittingModel {
 
 public:
   Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(const int runNumber,

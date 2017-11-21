@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "IEnggDiffFittingModel.h"
 #include "EnggDiffFittingPresWorker.h"
 
 #include <boost/algorithm/string.hpp>
@@ -55,12 +56,13 @@ int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
  * @param mainParam provides current params and functions
  */
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
-    IEnggDiffFittingView *view, IEnggDiffFittingModel *model,
+    IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view), 
-	  m_model(model), m_viewHasClosed(false) {}
+	  m_viewHasClosed(false), m_model(std::move(model))
+      {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
