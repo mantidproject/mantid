@@ -112,12 +112,12 @@ public:
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
                                                               nullptr, nullptr);
 
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+		.Times(1)
+		.WillOnce(Return(false));
 
+	// should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
-
-    // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. There will be an error log from the algorithms
