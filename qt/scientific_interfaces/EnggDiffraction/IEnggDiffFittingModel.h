@@ -14,6 +14,8 @@ namespace CustomInterfaces {
 class IEnggDiffFittingModel {
 
 public:
+	virtual ~IEnggDiffFittingModel() = default;
+
 	virtual Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(
 		const int runNumber, const size_t bank) const = 0;
 
