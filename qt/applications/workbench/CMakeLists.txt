@@ -1,5 +1,5 @@
 # Creates egg link to binary output directory
-add_python_package ( workbench )
+add_python_package ( workbench EXECUTABLE )
 add_dependencies ( workbench mantidqt )
 
 # ctest targets
