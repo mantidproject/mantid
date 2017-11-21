@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>949</width>
-    <height>734</height>
+    <width>522</width>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,9 +75,24 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="loPlotsLayout">
+          <layout class="QVBoxLayout" name="loPlotsLayout" stretch="5,3">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetNoConstraint</enum>
+           </property>
            <item>
             <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>125</height>
+              </size>
+             </property>
              <property name="showLegend" stdset="0">
               <bool>true</bool>
              </property>
@@ -97,6 +112,18 @@
            </item>
            <item>
             <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>1</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>75</height>
+              </size>
+             </property>
              <property name="showLegend" stdset="0">
               <bool>true</bool>
              </property>
