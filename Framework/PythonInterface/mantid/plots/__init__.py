@@ -20,4 +20,4 @@
 # This file should be left free of PyQt imports to allow quick importing
 # of the main package.
 
-from mantid.plots.functions import *
+from mantid.plots._functions import *
