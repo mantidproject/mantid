@@ -83,5 +83,10 @@ class PowderDiffILLReductionTest(unittest.TestCase):
         self.assertTrue(red)
         self.assertEquals(red.blocksize(), 3002)
 
+    def test_rebin(self):
+        red = PowderDiffILLReduction(Run=self._runs,ScanAxisBinWidth=12,SortObservableAxis=True)
+        self.assertEquals(red.getNumberHistograms(), 1)
+        self.assertAlmostEqual(red.getAxis(1).extractValues()[0], 248.372, 5)
+
 if __name__ == '__main__':
     unittest.main()

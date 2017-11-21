@@ -3,9 +3,9 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, \
-    FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion
+    FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
-    FileAction, Progress, MatrixWorkspaceProperty
+    FileAction, Progress, MatrixWorkspaceProperty, NumericAxis
 from mantid.simpleapi import *
 
 
@@ -21,7 +21,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _progress = None
     _crop_negative = None
     _zero_counting_option = None
-    _rebin_params = None
+    _rebin_width = None
     _region_of_interest = []
     _zero_cells = []
 
@@ -42,10 +42,10 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        rebin = self.getProperty('RebinParams').value
+        rebin = self.getProperty('ScanAxisBinWidth').value
         sort = self.getProperty('SortObservableAxis').value
-        if rebin and not sort:
-            issues['SortObservableAxis'] = 'Axis must be sorted if Rebin is requested.'
+        if rebin != 0 and not sort:
+            issues['SortObservableAxis'] = 'Axis must be sorted if rebin is requested.'
         return issues
 
     def PyInit(self):
@@ -82,8 +82,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the scanning observable axis.')
 
-        self.declareProperty(FloatArrayProperty('RebinParams', values=[]),
-                             doc='Rebin params for the observable axis. Default is to not rebin.')
+        self.declareProperty(name='ScanAxisBinWidth', defaultValue=0., validator=FloatBoundedValidator(lower=0.),
+                             doc='Rebin the observable axis to this width. Default is to not rebin.')
 
         self.declareProperty(name='CropNegative2Theta', defaultValue=True,
                              doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
@@ -171,11 +171,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
             target = 'ElasticDSpacing'
 
         ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target=target)
-
-        if self._rebin_params:
-            Rebin(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Params=self._rebin_params)
-
         Transpose(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
+
+        if self._rebin_width > 0:
+            self._group_spectra(joined_ws)
+
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
@@ -227,7 +227,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._unit = self.getPropertyValue('Unit')
         self._crop_negative = self.getProperty('CropNegative2Theta').value
         self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
-        self._rebin_params = self.getPropertyValue('RebinParams')
+        self._rebin_width = self.getProperty('ScanAxisBinWidth').value
         if self._normalise_option == 'ROI':
             self._region_of_interest = self.getProperty('ROI').value
 
@@ -315,7 +315,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         """
             Parses the regions of interest string from 2theta ranges to workspace indices
             @param ws : input workspace with 2theta as spectrum axis
-            Returns: roi as workspace indices, e.g. 7-20,100-123
+            @returns: roi as workspace indices, e.g. 7-20,100-123
         """
         result = ''
         axis = mtd[ws].getAxis(1).extractValues()
@@ -330,6 +330,35 @@ class PowderDiffILLReduction(PythonAlgorithm):
             index += 2
         self.log().information('ROI summing pattern is '+result[:-1])
         return result[:-1]
+
+    def _group_spectra(self, ws):
+        """
+            Groups the spectrum axis by summing spectra
+            @param ws : the input workspace
+        """
+        new_axis = []
+        start_index = 0
+        axis = mtd[ws].getAxis(1).extractValues()
+        grouped = self._hide('grouped')
+        name = grouped
+        while start_index < len(axis):
+            end = axis[start_index] + self._rebin_width
+            end_index = np.argwhere(axis < end)[-1][0]
+            SumSpectra(InputWorkspace=ws, OutputWorkspace=name,
+                       StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
+            count = end_index - start_index + 1
+            Scale(InputWorkspace=name, OutputWorkspace=name, Factor=1./count)
+            new_axis.append(np.sum(axis[start_index:end_index + 1]) / count)
+            if name != grouped:
+                AppendSpectra(InputWorkspace1=grouped, InputWorkspace2=name, OutputWorkspace=grouped)
+                DeleteWorkspace(name)
+            start_index = end_index + 1
+            name = self._hide('ws_{0}'.format(start_index))
+        spectrum_axis = NumericAxis.create(len(new_axis))
+        for i in range(len(new_axis)):
+            spectrum_axis.setValue(i, new_axis[i])
+        mtd[grouped].replaceAxis(1, spectrum_axis)
+        RenameWorkspace(InputWorkspace=grouped, OutputWorkspace=ws)
 
 # Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderDiffILLReduction)
