@@ -17,13 +17,14 @@ set ( INC_FILES
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
 )
 
 set ( MOC_FILES
-    EnggDiffFittingModel.h
+    IEnggDiffFittingModel.h
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h

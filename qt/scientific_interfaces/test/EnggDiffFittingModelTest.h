@@ -22,12 +22,14 @@ void addSampleWorkspaceToModel(const int runNumber, const int bank,
                                EnggDiffFittingModel &model) {
   API::MatrixWorkspace_sptr ws =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-  model.addWorkspace(runNumber, bank, ws);
+  model.addFocusedWorkspace(runNumber, bank, ws, std::to_string(runNumber) + 
+	                        "_" + std::to_string(bank));
 }
 
 } // anonymous namespace
 
 class EnggDiffFittingModelTest : public CxxTest::TestSuite {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -42,27 +44,12 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     const int runNumber = 100;
     const int bank = 1;
-    TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runNumber, bank, ws));
-    const auto retrievedWS = model.getWorkspace(runNumber, bank);
+    TS_ASSERT_THROWS_NOTHING(model.addFocusedWorkspace(runNumber, bank, ws, 
+		                     "workspace_filename"));
+    const auto retrievedWS = model.getFocusedWorkspace(runNumber, bank);
 
     TS_ASSERT(retrievedWS != nullptr);
     TS_ASSERT_EQUALS(ws, retrievedWS);
-  }
-
-  void test_getAllRunNumbers() {
-    auto model = EnggDiffFittingModel();
-
-    addSampleWorkspaceToModel(123, 1, model);
-    addSampleWorkspaceToModel(456, 2, model);
-    addSampleWorkspaceToModel(789, 1, model);
-    addSampleWorkspaceToModel(123, 2, model);
-
-    const auto runNumbers = model.getAllRunNumbers();
-
-    TS_ASSERT_EQUALS(runNumbers.size(), 3);
-    TS_ASSERT_EQUALS(runNumbers[0], 123);
-    TS_ASSERT_EQUALS(runNumbers[1], 456);
-    TS_ASSERT_EQUALS(runNumbers[2], 789);
   }
 
   void test_getRunNumbersAndBankIDs() {
@@ -73,7 +60,7 @@ public:
     addSampleWorkspaceToModel(789, 1, model);
     addSampleWorkspaceToModel(123, 2, model);
 
-    const auto runNoBankPairs = model.getRunNumbersAndBanksIDs();
+    const auto runNoBankPairs = model.getRunNumbersAndBankIDs();
 
     TS_ASSERT_EQUALS(runNoBankPairs.size(), 4);
     TS_ASSERT_EQUALS(runNoBankPairs[0], RunBankPair(123, 1));
