@@ -1,4 +1,3 @@
-import mantid
 import unittest
 import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
@@ -9,9 +8,11 @@ from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
 if sys.version_info.major == 3:
-     from unittest import mock
+    from unittest import mock
 else:
-     import mock
+    import mock
+    from assert_called import assert_called
+
 
 class RunSelectorPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -75,7 +76,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.run_finder.find_all_from_query.return_value = ('', [])
 
         self.view.addRuns.emit()
-        self.view.run_not_found.assert_called()
+        assert_called(self.view.run_not_found)
 
     def test_adds_multiple_search_results_to_model_when_add_run_pressed(self):
         run_names = ['1', '009', '12']
@@ -111,14 +112,14 @@ class RunSelectorPresenterTest(unittest.TestCase):
 
     def test_clears_all_runs_from_model_when_clear_pressed(self):
         self.view.removeAllRuns.emit()
-        self.run_selection.clear_all_runs.assert_called()
+        assert_called(self.run_selection.clear_all_runs)
 
     def test_manage_directories_launches_dialog(self):
         self.view.manageDirectories.emit()
-        self.view.show_directories_manager.assert_called()
+        assert_called(self.view.show_directories_manager)
 
     def test_browse_to_directory(self):
         self.view.browse.emit()
-        self.view.show_file_picker.assert_called()
+        assert_called(self.view.show_file_picker)
 
 if __name__ == '__main__': unittest.main()

@@ -1,4 +1,3 @@
-import mantid
 import unittest
 import sys
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
@@ -8,9 +7,11 @@ from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 from fake_signal import FakeSignal
 
 if sys.version_info.major == 3:
-     from unittest import mock
+    from unittest import mock
 else:
-     import mock
+    import mock
+    from assert_called import assert_called
+
 
 class SummationSettingsPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -39,11 +40,11 @@ class SummationSettingsPresenterTest(unittest.TestCase):
 
     def test_retrieves_additional_time_shifts_when_changed(self):
         self.view.additionalTimeShiftsChanged.emit()
-        self.view.additional_time_shifts.assert_called()
+        assert_called(self.view.additional_time_shifts)
 
     def test_retrieves_bin_settings_when_changed(self):
         self.view.binSettingsChanged.emit()
-        self.view.bin_settings.assert_called()
+        assert_called(self.view.bin_settings)
 
     def test_updates_model_when_bin_settings_changed(self):
         new_bin_settings = 'bin settings'
@@ -70,10 +71,10 @@ class SummationSettingsPresenterTest(unittest.TestCase):
 
     def test_enables_overlay_workspace_when_enabled(self):
         self.view.preserveEventsChanged.emit(True)
-        self.summation_settings.enable_overlay_event_workspaces.assert_called()
+        assert_called(self.summation_settings.enable_overlay_event_workspaces)
 
     def test_disabled_overay_workspace_when_disabled(self):
         self.view.preserveEventsChanged.emit(False)
-        self.summation_settings.disable_overlay_event_workspaces.assert_called()
+        assert_called(self.summation_settings.disable_overlay_event_workspaces.call_count)
 
 if __name__ == '__main__': unittest.main()

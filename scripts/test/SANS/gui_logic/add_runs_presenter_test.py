@@ -1,4 +1,3 @@
-import mantid
 import unittest
 import sys
 from mantid import ConfigService
@@ -36,6 +35,7 @@ class AddRunsPagePresenterTest(unittest.TestCase):
                                     make_summation_settings_presenter,
                                     self.view,
                                     None)
+
     def _just_use(self, presenter):
         return lambda view, parent: presenter
 
@@ -76,7 +76,7 @@ class AddRunsPagePresenterTest(unittest.TestCase):
 
     def test_invokes_model_with_config_when_summation_requested(self):
         run_summation = mock.Mock()
-        self.presenter = AddRunsPagePresenter(run_summation,
+        self.presenter = self._make_presenter(run_summation,
                                               self._just_use(self.run_selector_presenter),
                                               self._just_use(self.summation_settings_presenter))
         fake_run_selection = ['1', '2', '3']
@@ -87,7 +87,6 @@ class AddRunsPagePresenterTest(unittest.TestCase):
         run_summation.assert_called_with(fake_run_selection,
                                          ConfigService.getString("default.instrument"),
                                          fake_summation_settings)
-
 
 
 if __name__ == '__main__': unittest.main()
