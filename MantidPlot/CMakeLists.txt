@@ -824,6 +824,8 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
 endif ()
 
+set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
+
 ###########################################################################
 # Custom Info.plist file for OS X
 ###########################################################################
