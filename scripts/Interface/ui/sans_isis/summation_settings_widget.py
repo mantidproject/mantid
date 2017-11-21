@@ -14,7 +14,7 @@ def set_checked_without_signal(checkable, should_be_checked):
 
 
 class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_SummationSettingsWidget):
-    binningTypeChanged = pyqtSignal(BinningType)
+    binningTypeChanged = pyqtSignal(int)
     preserveEventsChanged = pyqtSignal(bool)
     binSettingsChanged = pyqtSignal()
     additionalTimeShiftsChanged = pyqtSignal()
