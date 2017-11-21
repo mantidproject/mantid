@@ -154,7 +154,7 @@ def _compare_ws(reference_file_name, results):
     is_valid = len(results) > 0
 
     for ws, ref in zip(results, ref_ws):
-        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
+        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)[0]):
             is_valid = False
             print (ws.getName() + " was not equal to: " + ref.getName())
 
