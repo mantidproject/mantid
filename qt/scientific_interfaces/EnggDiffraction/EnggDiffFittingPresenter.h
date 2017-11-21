@@ -54,7 +54,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
 
 public:
   EnggDiffFittingPresenter(
-      IEnggDiffFittingView *view, IEnggDiffFittingModel *model,
+      IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
       boost::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
@@ -187,7 +187,7 @@ private:
   IEnggDiffFittingView *const m_view;
 
   /// Associated model for this presenter
-  IEnggDiffFittingModel *const m_model;
+  std::unique_ptr<IEnggDiffFittingModel> m_model;
 
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;
