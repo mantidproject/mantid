@@ -18,7 +18,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return self.run_selector
 
     def summation_settings_view(self):
-        return self.summation_settings_view
+        return self.summation_settings
 
     def setupUi(self, other):
         ui_add_runs_page.Ui_AddRunsPage.setupUi(self, other)
