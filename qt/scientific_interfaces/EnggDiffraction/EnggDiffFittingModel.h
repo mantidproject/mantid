@@ -2,14 +2,11 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGMODEL_H_
 
 #include "DllConfig.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IEnggDiffFittingModel.h"
 #include "IEnggDiffractionCalibration.h"
 
 #include <array>
 #include <unordered_map>
-#include <vector>
 
 template <size_t S, typename T>
 using RunMap = std::array<std::unordered_map<int, T>, S>;
