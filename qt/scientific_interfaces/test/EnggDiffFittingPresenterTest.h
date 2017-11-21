@@ -8,6 +8,7 @@
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
@@ -58,8 +59,11 @@ public:
 
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
-    m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
-        m_view.get(), nullptr, nullptr, nullptr));
+	auto mockModel = 
+		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+
+	m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
+        m_view.get(), std::move(mockModel), nullptr, nullptr));
 
     // default banks
     m_ex_enginx_banks.push_back(true);
@@ -93,11 +97,17 @@ public:
 
   void test_load_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, nullptr,
+	auto mockModel = 
+		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+	auto *mockModel_ptr = mockModel.get();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, 
+		                                                      std::move(mockModel),
                                                               nullptr, nullptr);
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
-
+	EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+		.Times(1)
+		.WillOnce(Return(std::vector<std::pair<int, size_t>>()));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
 
     // should not get to the point where the status is updated
@@ -112,11 +122,18 @@ public:
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
+	TSM_ASSERT(
+		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"satisfied.",
+		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+
   }
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, nullptr,
+	auto mockModel = std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView, 
+		                                                      std::move(mockModel),
                                                               nullptr, nullptr);
 
     EXPECT_CALL(mockView, listWidgetHasSelectedRow())
@@ -200,6 +217,11 @@ public:
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
+	TSM_ASSERT(
+		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"satisfied.",
+		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
+
   }
 
   // Fitting test begin here
