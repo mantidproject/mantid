@@ -188,6 +188,16 @@ function (mtd_add_qt_target)
     endif()
     install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
   endif()
+
+  # Group into folder for VS
+  set_target_properties ( ${_target} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}" )
+  # Target encompassing all Qt-based dependencies
+  set ( _alltarget "AllQt${PARSED_QT_VERSION}" )
+  if ( TARGET ${_alltarget} )
+    add_dependencies ( ${_alltarget} ${_target} )
+  else ()
+    add_custom_target ( ${_alltarget} DEPENDS ${_target} )
+  endif()
 endfunction()
 
 function (mtd_add_qt_tests)
@@ -262,6 +272,11 @@ function (mtd_add_qt_test_executable)
   foreach (_dep ${PARSED_PARENT_DEPENDENCIES})
     add_dependencies (${_dep} ${_target_name})
   endforeach()
+
+  # set folder
+  if ( CMAKE_GENERATOR MATCHES "Visual Studio" )
+    set_target_properties ( ${_target_name} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}Tests" )
+  endif()
 endfunction ()
 
 # Given a list of arguments decide which Qt versions

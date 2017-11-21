@@ -60,9 +60,6 @@ private:
   QtProperty *createFitType(QtProperty *, const bool & = true);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
-  void populateFunction(Mantid::API::IFunction_sptr func,
-                        Mantid::API::IFunction_sptr comp, QtProperty *group,
-                        const std::string &pref, bool tie);
   QString fitTypeString() const;
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;

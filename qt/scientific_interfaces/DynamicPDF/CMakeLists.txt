@@ -5,7 +5,6 @@ set ( SRC_FILES
 	DPDFFitOptionsBrowser.cpp
 	DPDFFourierTransform.cpp
 	DPDFInputDataControl.cpp
-	DisplayCurveFitTest.cpp
 	SliceSelector.cpp
 )
 
@@ -19,12 +18,10 @@ set ( INC_FILES
 	DPDFFitOptionsBrowser.h
 	DPDFFourierTransform.h
 	DPDFInputDataControl.h
-	DisplayCurveFitTest.h
 	SliceSelector.h
 )
 
-set ( MOC_FILES
-    DisplayCurveFitTest.h
+set ( MOC_FILES 
     DPDFBackgroundRemover.h
     DPDFDisplayControl.h
     DPDFFitControl.h
@@ -34,8 +31,8 @@ set ( MOC_FILES
     SliceSelector.h
 )
 
-set ( UI_FILES
-    DisplayCurveFitTest.ui
+
+set ( UI_FILES 
     DPDFBackgroundRemover.ui
     DPDFFitControl.ui
     DPDFFourierTransform.ui
@@ -68,8 +65,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
 )
-
-if ( MSVC_IDE )
-  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesDynamicPDFQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()

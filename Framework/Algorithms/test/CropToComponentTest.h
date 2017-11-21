@@ -91,6 +91,9 @@ public:
     auto inputWorkspace =
         getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
     std::vector<std::string> componentNames = {"bank3"};
+    // Clearing some IDs in bank2 should not cause issues, compare
+    // test_throws_if_no_spectrum_for_detector.
+    inputWorkspace->getSpectrum(9).clearDetectorIDs();
 
     // Act
     Mantid::Algorithms::CropToComponent crop;
@@ -108,6 +111,29 @@ public:
     size_t expectedNumberOfHistograms = 9;
     std::vector<Mantid::detid_t> expectedIDs(expectedNumberOfHistograms);
     std::iota(expectedIDs.begin(), expectedIDs.end(), 27);
+  }
+
+  void test_throws_if_no_spectrum_for_detector() {
+    // Arrange
+    int numberOfBanks = 4;
+    int numberOfPixelsPerBank = 3;
+
+    auto inputWorkspace =
+        getSampleWorkspace(numberOfBanks, numberOfPixelsPerBank);
+    std::vector<std::string> componentNames = {"bank3"};
+    // Clear some IDs in bank3.
+    inputWorkspace->getSpectrum(18).clearDetectorIDs();
+
+    // Act
+    Mantid::Algorithms::CropToComponent crop;
+    crop.setChild(true);
+    crop.initialize();
+    crop.setProperty("InputWorkspace", inputWorkspace);
+    crop.setProperty("OutputWorkspace", "dummy");
+    crop.setProperty("ComponentNames", componentNames);
+    TS_ASSERT_THROWS_EQUALS(
+        crop.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some of the requested detectors do not have a corresponding spectrum");
   }
 
   void test_that_incorrect_component_name_is_not_accepeted() {
