@@ -147,6 +147,9 @@ private:
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
                                      DataBlockComposite &dataBlockComposite);
 
+  /// Check if any of the spectra block ranges overlap
+  void checkOverlappingSpectraRange();
+
   /// The name and path of the input file
   std::string m_filename;
   /// The instrument name from Nexus

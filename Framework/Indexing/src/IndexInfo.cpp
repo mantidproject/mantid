@@ -14,13 +14,13 @@ namespace Mantid {
 namespace Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
-/// 1 and no detector IDs.
+/// 1 and no spectrum definitions.
 IndexInfo::IndexInfo(const size_t globalSize,
                      const Parallel::StorageMode storageMode)
     : IndexInfo(globalSize, storageMode, Parallel::Communicator{}) {}
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
-/// 1 and no detector IDs.
+/// 1 and no spectrum definitions.
 IndexInfo::IndexInfo(const size_t globalSize,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
@@ -33,15 +33,15 @@ IndexInfo::IndexInfo(const size_t globalSize,
   makeSpectrumNumberTranslator(std::move(specNums));
 }
 
-/// Construct with given spectrum number and vector of detector IDs for each
-/// index.
+/// Construct with given spectrum number for each index and no spectrum
+/// definitions.
 IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Parallel::StorageMode storageMode)
     : IndexInfo(std::move(spectrumNumbers), storageMode,
                 Parallel::Communicator{}) {}
 
-/// Construct with given spectrum number and vector of detector IDs for each
-/// index.
+/// Construct with given spectrum number for each index and no spectrum
+/// definitions.
 IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Parallel::StorageMode storageMode,
                      const Parallel::Communicator &communicator)
@@ -49,6 +49,30 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
       m_communicator(
           Kernel::make_unique<Parallel::Communicator>(communicator)) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
+}
+
+/** Construct with given index subset of parent.
+ *
+ * The template argument IndexType can be SpectrumNumber or GlobalSpectrumIndex.
+ * The parent defines the partitioning of the spectrum numbers, i.e., the
+ * partition assigned to a given spectrum number in the constructed IndexInfo is
+ * given by the partition that spectrum number has in parent. This is used to
+ * extract spectrum numbers while maintaining the partitioning, avoiding the
+ * need to redistribute data between partitions (MPI ranks). Throws if any of
+ * the spectrum numbers is not present in parent. */
+template <class IndexType>
+IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
+    : m_storageMode(parent.m_storageMode),
+      m_communicator(
+          Kernel::make_unique<Parallel::Communicator>(*parent.m_communicator)) {
+  if (const auto parentSpectrumDefinitions = parent.spectrumDefinitions()) {
+    m_spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>();
+    auto &specDefs = m_spectrumDefinitions.access();
+    for (const auto i : parent.makeIndexSet(indices))
+      specDefs.push_back(parentSpectrumDefinitions->operator[](i));
+  }
+  m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
+      std::move(indices), *parent.m_spectrumNumberTranslator);
 }
 
 IndexInfo::IndexInfo(const IndexInfo &other)
@@ -254,7 +278,7 @@ bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
 Parallel::StorageMode IndexInfo::storageMode() const { return m_storageMode; }
 
 /// Returns the communicator used in MPI runs.
-Parallel::Communicator IndexInfo::communicator() const {
+const Parallel::Communicator &IndexInfo::communicator() const {
   return *m_communicator;
 }
 
@@ -285,6 +309,11 @@ void IndexInfo::makeSpectrumNumberTranslator(
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(spectrumNumbers), std::move(partitioner), partition);
 }
+
+template MANTID_INDEXING_DLL IndexInfo::IndexInfo(std::vector<SpectrumNumber>,
+                                                  const IndexInfo &);
+template MANTID_INDEXING_DLL
+IndexInfo::IndexInfo(std::vector<GlobalSpectrumIndex>, const IndexInfo &);
 
 } // namespace Indexing
 } // namespace Mantid

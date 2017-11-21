@@ -10,7 +10,7 @@ from mantid.kernel import PropertyManagerDataService
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
 
@@ -104,7 +104,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert certain function calls
         self.assertTrue(view.get_user_file_path.call_count == 3)
         self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertTrue(view.get_cell.call_count == 60)
+        self.assertTrue(view.get_cell.call_count == 64)
 
         self.assertTrue(view.get_number_of_rows.call_count == 6)
 
@@ -201,6 +201,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Check some entries
         self.assertTrue(state0.slice.start_time is None)
         self.assertTrue(state0.slice.end_time is None)
+
         self.assertTrue(state0.reduction.reduction_dimensionality is ReductionDimensionality.OneDim)
 
         # Clean up
@@ -226,6 +227,22 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+    def test_that_can_get_states_from_row_user_file(self):
+        # Arrange
+        row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2, row_user_file_path)
+
+        presenter.on_user_file_load()
+        presenter.on_batch_file_load()
+
+        # Act
+        state = presenter.get_state_for_row(1)
+        state0 = presenter.get_state_for_row(0)
+
+        # Assert
+        self.assertTrue(state.convert_to_q.use_gravity is False)
+        self.assertTrue(state0.convert_to_q.use_gravity is True)
 
     def test_that_returns_none_when_index_does_not_exist(self):
         # Arrange
@@ -354,10 +371,10 @@ class RunTabPresenterTest(unittest.TestCase):
                 PropertyManagerDataService.remove(element)
 
     @staticmethod
-    def _get_files_and_mock_presenter(content):
+    def _get_files_and_mock_presenter(content, row_user_file_path = ""):
         batch_file_path = save_to_csv(content)
         user_file_path = create_user_file(sample_user_file)
-        view, _, _ = create_mock_view(user_file_path, batch_file_path)
+        view, _, _ = create_mock_view(user_file_path, batch_file_path, row_user_file_path)
         # We just use the sample_user_file since it exists.
         view.get_mask_file = mock.MagicMock(return_value=user_file_path)
         presenter = RunTabPresenter(SANSFacility.ISIS)

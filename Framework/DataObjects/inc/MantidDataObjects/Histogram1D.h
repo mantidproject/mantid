@@ -48,6 +48,8 @@ public:
   Histogram1D &operator=(Histogram1D &&) = default;
   Histogram1D &operator=(const ISpectrum &rhs);
 
+  void copyDataFrom(const ISpectrum &source) override;
+
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;
@@ -85,6 +87,9 @@ public:
   }
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(Histogram1D &sink) const override;
+
   void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
