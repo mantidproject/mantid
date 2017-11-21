@@ -24,7 +24,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES
-    EnggDiffFittingModel.h
+    IEnggDiffFittingModel.h
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
