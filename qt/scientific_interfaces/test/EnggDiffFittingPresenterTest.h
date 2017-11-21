@@ -138,17 +138,12 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
-    const std::string mockFname = "";
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
         .Times(1)
-        .WillOnce(Return(mockFname));
-    EXPECT_CALL(mockView, fittingPeaksData())
-        .Times(1)
-        .WillOnce(Return("2.57,,4.88,5.78"));
+        .WillOnce(Return(false));
 
-    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
-
-    // should not get to the point where the status is updated
+	// should not get to the point where the status is updated
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // No errors/1 warnings. There will be an error log from the algorithms
