@@ -9,16 +9,24 @@
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <utility>
 
 namespace {
 /// String constants for algorithm's properties.
 namespace Prop {
+const static std::string COST_FUNCTION = "CostFunction";
 const static std::string INPUT_WS = "InputWorkspace";
 const static std::string OUTPUT_WS = "OutputWorkspace";
 const static std::string POLY_DEGREE = "Degree";
 const static std::string XRANGES = "XRanges";
+}
+
+/// String constants for cost function options.
+namespace CostFunc {
+const static std::string UNWEIGHTED_LEAST_SQUARES = "Unweighted least squares";
+const static std::string WEIGHTED_LEAST_SQUARES = "Least squares";
 }
 
 /** Filters ranges completely outside the histogram X values.
@@ -155,11 +163,10 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @param ranges a vector defining the fitting intervals
  *  @return a vector of final fitted parameters
  */
-std::vector<double> executeFit(Mantid::API::Algorithm &fit,
-                               const std::string &function,
-                               Mantid::API::MatrixWorkspace_sptr &ws,
-                               const size_t wsIndex,
-                               const std::vector<double> &ranges) {
+std::vector<double>
+executeFit(Mantid::API::Algorithm &fit, const std::string &function,
+           Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
+           const std::vector<double> &ranges, const std::string &costFunction) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -168,6 +175,8 @@ std::vector<double> executeFit(Mantid::API::Algorithm &fit,
   fit.setProperty("StartX", fitRanges.front());
   fit.setProperty("EndX", fitRanges.back());
   fit.setProperty("Exclude", excludedRanges);
+  fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fit.setProperty(Prop::COST_FUNCTION, costFunction);
   fit.setProperty("CreateOutput", true);
   fit.executeAsChildAlg();
   Mantid::API::ITableWorkspace_sptr fitResult =
@@ -268,6 +277,12 @@ void CalculatePolynomialBackground::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
+  std::array<std::string, 2> costFuncOpts{
+      {CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES}};
+  declareProperty(
+      Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(),
+      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
+      "The cost function to be passed to the Fit algorithm.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -279,6 +294,7 @@ void CalculatePolynomialBackground::exec() {
   API::MatrixWorkspace_sptr outWS{
       DataObjects::create<DataObjects::Workspace2D>(*inWS)};
   const std::vector<double> inputRanges = getProperty(Prop::XRANGES);
+  const std::string costFunction = getProperty(Prop::COST_FUNCTION);
   const auto polyDegree =
       static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
@@ -290,7 +306,8 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERUPT_REGION
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
-    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges);
+    const auto parameters =
+        executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction);
     const auto bkgFunction = makeFunctionString(parameters);
     evaluateInPlace(bkgFunction, *outWS, i);
     progress.report();

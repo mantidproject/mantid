@@ -54,6 +54,10 @@ public:
     m_histogram.setCountStandardDeviations(0);
   }
 
+  void copyDataFrom(const ISpectrum &other) override {
+    other.copyDataInto(*this);
+  }
+
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X)
       override {
     m_histogram.setX(X);
@@ -93,6 +97,11 @@ protected:
   Mantid::HistogramData::Histogram m_histogram;
 
 private:
+  using ISpectrum::copyDataInto;
+  void copyDataInto(SpectrumTester &other) const override {
+    other.m_histogram = m_histogram;
+  }
+
   const Mantid::HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }

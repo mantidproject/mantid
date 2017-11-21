@@ -1,6 +1,5 @@
 import sys
 
-import mantid #noqa
 from  Muon import load_utils
 from  Muon import fft_presenter
 from  Muon import fft_view

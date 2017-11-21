@@ -1,6 +1,5 @@
 import sys
 
-import mantid #noqa
 from  Muon import fft_model
 
 import unittest

@@ -451,6 +451,7 @@ public:
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
