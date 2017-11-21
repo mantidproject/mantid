@@ -20,6 +20,14 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 
 namespace {
+/// Component coordinates for Figaro, in meter.
+namespace Figaro {
+// TODO: Consider moving these to the IPF.
+constexpr double detectorRestY{0.509};
+constexpr double DH1X{1.135}; //Motor DH1 horzontal position
+constexpr double DH2X{2.077}; //Motor DH2 horzontal position
+}
+
 /// A struct for information needed for detector angle calibration.
 struct PeakInfo {
   double detectorAngle;
@@ -322,7 +330,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   m_instrumentName[0] = char((std::toupper(m_instrumentName[0])));
   g_log.debug() << "Instrument name: " << m_instrumentName << '\n';
   if (m_instrumentName == "D17") {
-    m_detectorDistance = "det";
+    m_detectorDistanceName = "det";
     m_detectorAngleName = "dan.value";
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
@@ -331,11 +339,9 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrumentName == "Figaro") {
-    // TODO Figaro's detector position should be calculated from
-    // some motor positions, not from DTR and some offset value.
-    m_detectorDistance = "DTR";
-    // TODO Figaro's detector angle may need to be calculated
-    // from some motor positions instead.
+    // For Figaro, the DTR field contains the sample-to-detector distance
+    // when the detector is at the horizontal position (angle = 0).
+    m_detectorDistanceName = "DTR";
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
@@ -700,19 +706,18 @@ double LoadILLReflectometry::fitReflectometryPeak() {
 std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
   const double peakCentre = fitReflectometryPeak();
-  const double nominalDetectorAngle = doubleFromRun(m_detectorAngleName);
   g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName
-                << ": " << nominalDetectorAngle << '\n';
+                << ": " << m_detectorAngle << '\n';
   if (!isDefault("OutputBeamPosition")) {
     PeakInfo p;
-    p.detectorAngle = nominalDetectorAngle;
-    p.detectorDistance = sampleDetectorDistance();
+    p.detectorAngle = m_detectorAngle;
+    p.detectorDistance = m_detectorDistance;
     p.peakCentre = peakCentre;
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
   const double userAngle = getProperty("BraggAngle");
   const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth,
-                                    m_detectorDistanceValue);
+                                    m_detectorDistance);
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
     if (posTable) {
@@ -722,15 +727,15 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     return std::make_pair(userDetectorAngle, userAngle);
   }
   if (!posTable) {
-    const double bragg = (nominalDetectorAngle + offset) / 2;
-    return std::make_pair(nominalDetectorAngle, bragg);
+    const double bragg = (m_detectorAngle + offset) / 2;
+    return std::make_pair(m_detectorAngle, bragg);
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
                                       m_pixelWidth, dbPeak.detectorDistance);
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
-      nominalDetectorAngle - dbPeak.detectorAngle - dbOffset;
+      m_detectorAngle - dbPeak.detectorAngle - dbOffset;
   m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
                 << '\n';
   const double bragg = (detectorAngle + offset) / 2;
@@ -740,12 +745,9 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  double dist = doubleFromRun(m_detectorDistance + ".value");
-  m_detectorDistanceValue = inMeter(dist);
-  // TODO offset_value cannot be used like this for Figaro.
-  if (m_instrumentName == "Figaro")
-    dist += doubleFromRun(m_detectorDistance + ".offset_value");
-  g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue
+  m_detectorDistance = sampleDetectorDistance();
+  m_detectorAngle = doubleFromRun(m_detectorAngleName);
+  g_log.debug() << "Sample-detector distance: " << m_detectorDistance
                 << "m.\n";
   double detectorAngle;
   double braggAngle;
@@ -765,7 +767,7 @@ void LoadILLReflectometry::placeDetector() {
       return RotationPlane::horizontal;
   }();
   const auto newpos =
-      detectorPosition(rotPlane, m_detectorDistanceValue, detectorAngle);
+      detectorPosition(rotPlane, m_detectorDistance, detectorAngle);
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const auto rotation = detectorFaceRotation(rotPlane, detectorAngle);
@@ -785,11 +787,21 @@ void LoadILLReflectometry::placeSource() {
  *  @return the sample to detector distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  // TODO This is incorrect for Figaro.
-  double dist = inMeter(doubleFromRun(m_detectorDistance + ".value"));
-  if (m_instrumentName == "Figaro")
-    dist -= inMeter(doubleFromRun(m_detectorDistance + ".offset_value"));
-  return dist;
+  // For Figaro, dist is the sample-to-detector distance when the detector
+  // is at rest, i.e. at horizontal position.
+  if (m_instrumentName == "Figaro") {
+    const double detectorRestX = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+    // Motor DH1 vertical coordinate.
+    const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+    const double detectorAngle = doubleFromRun(m_detectorAngleName);
+    const double detectorX = std::cos(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
+    const double detectorY = std::sin(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
+    const double pixelOffset = Figaro::detectorRestY + m_pixelCentre * m_pixelWidth;
+    const double beamX = detectorX - pixelOffset * std::sin(inRad(detectorAngle));
+    const double beamY = detectorY + pixelOffset * std::cos(inRad(detectorAngle));
+    return std::hypot(beamX, beamY);
+  }
+  return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
 }
 
 /** Return the source to sample distance for the current instrument.

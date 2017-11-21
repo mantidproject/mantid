@@ -88,14 +88,15 @@ private:
   // number of tubes (always 1) times number of pixels per tube
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
-  std::string m_detectorDistance;
+  std::string m_detectorDistanceName;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
-  double m_detectorDistanceValue{0.0};
+  double m_detectorAngle{0.0};
+  double m_detectorDistance{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
