@@ -1,6 +1,6 @@
-from mantidqtpython import MantidQt
 from mantid import ConfigService
 from sans.gui_logic.models.run_file import RunFile
+
 
 class RunSelectorPresenter(object):
     def __init__(self, run_selection, run_finder, view, parent_view):

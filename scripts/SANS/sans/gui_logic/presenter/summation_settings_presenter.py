@@ -1,9 +1,3 @@
-from mantidqtpython import MantidQt
-from mantid import ConfigService
-from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
-from copy import copy
-
 class SummationSettingsPresenter(object):
     def __init__(self, summation_settings, view, parent_view):
         self._summation_settings = summation_settings

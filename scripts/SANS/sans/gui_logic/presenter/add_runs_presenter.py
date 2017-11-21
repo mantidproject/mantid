@@ -1,7 +1,5 @@
-from mantidqtpython import MantidQt
 from mantid import ConfigService
-from run_selector_presenter import RunSelectorPresenter
-from summation_settings_presenter import SummationSettingsPresenter
+
 
 class AddRunsPagePresenter(object):
     def __init__(self,
@@ -19,7 +17,7 @@ class AddRunsPagePresenter(object):
 
         self._connect_to_view(view)
 
-    def _init_views(view, parent_view):
+    def _init_views(self, view, parent_view):
         self._view = view
         self._parent = parent_view
 
@@ -27,8 +25,8 @@ class AddRunsPagePresenter(object):
         view.sum.connect(self._handle_sum)
 
     def _handle_sum(self):
-        self._sum_runs(self._run_selector_presenter.run_selection(), \
-                       self._default_instrument(), \
+        self._sum_runs(self._run_selector_presenter.run_selection(),
+                       self._default_instrument(),
                        self._summation_settings_presenter.settings())
 
     def _default_instrument(self):
