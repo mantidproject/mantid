@@ -1,9 +1,5 @@
 #include "EnggDiffFittingPresenter.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 #include "EnggDiffFittingPresWorker.h"
@@ -733,31 +729,6 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 }
 
 void EnggDiffFittingPresenter::processStart() {}
-
-size_t EnggDiffFittingPresenter::findBankID(
-    Mantid::API::MatrixWorkspace_sptr ws) const {
-  // MOVE THIS TO THE MODEL
-  size_t bankID = 1;
-
-  auto name = ws->getName();
-  std::vector<std::string> chunks;
-  boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      bankID = boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain focused " +
-          m_view->getCurrentInstrument() + " workspace?");
-    }
-  }
-  return bankID;
-}
 
 void EnggDiffFittingPresenter::processLoad() {
   const std::string filenames = m_view->getFittingRunNo();
