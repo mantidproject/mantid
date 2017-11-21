@@ -1,5 +1,6 @@
 from binning_type import BinningType
 
+
 class OverlayEventWorkspaces(object):
     def __init__(self, enabled_by_default):
         self._overlay_event_workspaces = enabled_by_default
@@ -12,6 +13,7 @@ class OverlayEventWorkspaces(object):
 
     def disable_overlay_event_workspaces(self):
         self._overlay_event_workspaces = False
+
 
 class CustomBinning(object):
     def __init__(self):
@@ -33,6 +35,7 @@ class CustomBinning(object):
 
     def has_overlay_event_workspaces(self):
         return False
+
 
 class SaveAsEventData(OverlayEventWorkspaces):
     def __init__(self):
@@ -56,6 +59,7 @@ class SaveAsEventData(OverlayEventWorkspaces):
     def has_overlay_event_workspaces(self):
         return True
 
+
 class BinningFromMonitors(object):
     def has_bin_settings(self):
         return False
@@ -65,6 +69,7 @@ class BinningFromMonitors(object):
 
     def has_overlay_event_workspaces(self):
         return False
+
 
 class SummationSettings(object):
     def __init__(self, initial_type):

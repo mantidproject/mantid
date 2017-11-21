@@ -1,6 +1,7 @@
 from mantid import FileFinder
 from run_file import RunFile
 
+
 class RunFinder(object):
     def find_all_from_query(self, query_string):
         try:

@@ -1,5 +1,6 @@
 import os
 
+
 class RunFile(object):
     def __init__(self, path):
         self._path = path
