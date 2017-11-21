@@ -67,8 +67,9 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   }
 
   // Fill in the columns
+  table->setRowCount(nDomains);
   for (size_t iData = 0; iData < nDomains; ++iData) {
-    Mantid::API::TableRow row = table->appendRow();
+    Mantid::API::TableRow row = table->getRow(iData);
     row << static_cast<double>(iData);
     const auto &fun = *mdFunction.getFunction(iData);
     for (size_t iPar = 0; iPar < fun.nParams(); ++iPar) {
