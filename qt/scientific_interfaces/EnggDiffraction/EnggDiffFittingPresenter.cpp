@@ -962,7 +962,6 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
   m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
-  
   m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
 }
