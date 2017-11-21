@@ -22,19 +22,20 @@ namespace CustomInterfaces {
 namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 
-std::pair<int, size_t> runAndBankNumberFromListWidgetLabel(const std::string &listLabel) {
-	const size_t underscorePosition = listLabel.find_first_of("_");
-	const auto runNumber = listLabel.substr(0, underscorePosition);
-	const auto bank = listLabel.substr(underscorePosition + 1);
-	
-	return std::pair<int, size_t>(std::atoi(runNumber.c_str()), 
-		                          std::atoi(bank.c_str()));
+std::pair<int, size_t>
+runAndBankNumberFromListWidgetLabel(const std::string &listLabel) {
+  const size_t underscorePosition = listLabel.find_first_of("_");
+  const auto runNumber = listLabel.substr(0, underscorePosition);
+  const auto bank = listLabel.substr(underscorePosition + 1);
+
+  return std::pair<int, size_t>(std::atoi(runNumber.c_str()),
+                                std::atoi(bank.c_str()));
 }
 
-std::string listWidgetLabelFromRunAndBankNumber(const int runNumber, const size_t bank) {
-	return std::to_string(runNumber) + "_" + std::to_string(bank);
+std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
+                                                const size_t bank) {
+  return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
-
 }
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
@@ -195,9 +196,10 @@ void EnggDiffFittingPresenter::fittingFinished() {
       // should now plot the focused workspace when single peak fitting
       // process fails
       const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-	  int runNumber;
-	  size_t bank;
-	  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+      int runNumber;
+      size_t bank;
+      std::tie(runNumber, bank) =
+          runAndBankNumberFromListWidgetLabel(listLabel);
 
       plotFitPeaksCurves();
 
@@ -746,17 +748,17 @@ void EnggDiffFittingPresenter::processLoad() {
 
   const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
   std::vector<std::string> listWidgetLabels;
-  std::transform(
-      runNoBankPairs.begin(), runNoBankPairs.end(),
-      std::back_inserter(listWidgetLabels), [](const std::pair<int, size_t> &pair) {
-        return listWidgetLabelFromRunAndBankNumber(pair.first, pair.second);
-      });
+  std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+                 std::back_inserter(listWidgetLabels),
+                 [](const std::pair<int, size_t> &pair) {
+                   return listWidgetLabelFromRunAndBankNumber(pair.first,
+                                                              pair.second);
+                 });
   m_view->enableFittingListWidget(true);
   m_view->clearFittingListWidget();
-  std::for_each(listWidgetLabels.begin(), listWidgetLabels.end(),
-                [&](const std::string &listLabel) {
-                  m_view->addRunNoItem(listLabel);
-                });
+  std::for_each(
+      listWidgetLabels.begin(), listWidgetLabels.end(),
+      [&](const std::string &listLabel) { m_view->addRunNoItem(listLabel); });
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -811,7 +813,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     // startAsyncFittingWorker
     // doFitting()
     // WORK OUT WHAT TO DO HERE
-	//startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+    // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
@@ -822,8 +824,9 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
 void EnggDiffFittingPresenter::processFitPeaks() {
   if (!m_view->listWidgetHasSelectedRow()) {
-	  m_view->userWarning("No run selected", "Please select a run to fit from the list");
-	  return;
+    m_view->userWarning("No run selected",
+                        "Please select a run to fit from the list");
+    return;
   }
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
   int runNumber;
@@ -946,8 +949,8 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
 void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
                                          const std::string &expectedPeaks) {
   g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
-                 << runNumber << " and bank " << bank 
-	             << ". This may take a few seconds... \n";
+                 << runNumber << " and bank " << bank
+                 << ". This may take a few seconds... \n";
 
   m_fittingFinishedOK = false;
 
@@ -960,8 +963,9 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
   // requires unit in Time of Flight
   m_model.enggFitPeaks(runNumber, bank, expectedPeaks);
 
-  const auto outFilename = m_view->getCurrentInstrument() + std::to_string(runNumber) +
-	  "_Single_Peak_Fitting.csv";
+  const auto outFilename = m_view->getCurrentInstrument() +
+                           std::to_string(runNumber) +
+                           "_Single_Peak_Fitting.csv";
   auto saveDirectory = outFilesUserDir("SinglePeakFitting");
   saveDirectory.append(outFilename);
   m_model.saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
@@ -1074,16 +1078,15 @@ std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
 }
 
 void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
-	std::ofstream outfile(fileDir.c_str());
-	if (!outfile) {
-		m_view->userWarning("File not found",
-			"File " + fileDir +
-			" , could not be found. Please try again!");
-	}
-	else {
-		auto expPeaks = m_view->fittingPeaksData();
-		outfile << expPeaks;
-	}
+  std::ofstream outfile(fileDir.c_str());
+  if (!outfile) {
+    m_view->userWarning("File not found",
+                        "File " + fileDir +
+                            " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_view->fittingPeaksData();
+    outfile << expPeaks;
+  }
 }
 
 void EnggDiffFittingPresenter::setBankItems(
@@ -1267,20 +1270,20 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
   try {
 
     // detaches previous plots from canvas
-	  m_view->resetCanvas();
+    m_view->resetCanvas();
 
-	const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-	int runNumber;
-	size_t bank;
-	std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-	const auto ws = m_model.getAlignedWorkspace(runNumber, bank);
+    const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+    int runNumber;
+    size_t bank;
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+    const auto ws = m_model.getAlignedWorkspace(runNumber, bank);
 
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
-	  auto singlePeaksWS = m_model.getFittedPeaksWS(runNumber, bank);
+      auto singlePeaksWS = m_model.getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");
