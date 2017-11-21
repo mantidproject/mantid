@@ -116,21 +116,21 @@ bool ComponentInfo::isDetector(const size_t componentIndex) const {
 }
 
 Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
-    return Kernel::toV3D(m_componentInfo->position(componentIndex));
+  return Kernel::toV3D(m_componentInfo->position(componentIndex));
 }
 
-Kernel::V3D ComponentInfo::position(const std::pair<size_t, size_t> index) const
-{
-    return Kernel::toV3D(m_componentInfo->position(index));
+Kernel::V3D
+ComponentInfo::position(const std::pair<size_t, size_t> index) const {
+  return Kernel::toV3D(m_componentInfo->position(index));
 }
 
 Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
-    return Kernel::toQuat(m_componentInfo->rotation(componentIndex));
+  return Kernel::toQuat(m_componentInfo->rotation(componentIndex));
 }
 
-Kernel::Quat ComponentInfo::rotation(const std::pair<size_t, size_t> index) const
-{
-    return Kernel::toQuat(m_componentInfo->rotation(index));
+Kernel::Quat
+ComponentInfo::rotation(const std::pair<size_t, size_t> index) const {
+  return Kernel::toQuat(m_componentInfo->rotation(index));
 }
 
 Kernel::V3D ComponentInfo::relativePosition(const size_t componentIndex) const {
@@ -364,18 +364,14 @@ bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
 
 void ComponentInfo::setScanInterval(
     const std::pair<int64_t, int64_t> &interval) {
-    m_componentInfo->setScanInterval(interval);
+  m_componentInfo->setScanInterval(interval);
 }
 
-void ComponentInfo::merge(const ComponentInfo &other)
-{
-    m_componentInfo->merge(*other.m_componentInfo);
+void ComponentInfo::merge(const ComponentInfo &other) {
+  m_componentInfo->merge(*other.m_componentInfo);
 }
 
-size_t ComponentInfo::scanSize() const
-{
-    return m_componentInfo->scanSize();
-}
+size_t ComponentInfo::scanSize() const { return m_componentInfo->scanSize(); }
 
 } // namespace Geometry
 } // namespace Mantid

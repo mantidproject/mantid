@@ -483,7 +483,7 @@ public:
         componentInfo->setRotation(componentInfo->source(), Quat()));
   }
 
-  void test_merge_sync_scan(){
+  void test_merge_sync_scan() {
 
     const V3D sourcePos(-1, 0, 0);
     const V3D samplePos(0, 0, 0);
@@ -499,15 +499,17 @@ public:
 
     infoScan1->setScanInterval({0, 1});
     infoScan2->setScanInterval({1, 2});
-    infoScan1->setPosition(0/*detector index*/, V3D(0,0,0));
+    infoScan1->setPosition(0 /*detector index*/, V3D(0, 0, 0));
 
     infoScan1->merge(*infoScan2);
 
-    TS_ASSERT_EQUALS(infoScan1->scanSize(), infoScan1->size() + infoScan2->size());
-    TS_ASSERT_EQUALS(infoScan1->position({0/*detector index*/, 0}), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(infoScan1->position({0/*detector index*/, 1}), detectorPos);
+    TS_ASSERT_EQUALS(infoScan1->scanSize(),
+                     infoScan1->size() + infoScan2->size());
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 0}),
+                     V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
+                     detectorPos);
   }
-
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */

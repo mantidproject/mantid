@@ -743,51 +743,6 @@ public:
                !compInfo.isScanning());
   }
 
-  void test_set_sync_interval_then_async_interval_throws() {
-    auto infos = makeTreeExample();
-    auto &compInfo = *std::get<0>(infos);
-    // Using the indexed overload implies a non-sync scan
-    std::pair<int64_t, int64_t> interval{1000, 1001};
-    // Set the scanning up to be synchronous (no index provided)
-    compInfo.setScanInterval(interval);
-    // Now try setting an asynchronous scan point.
-    TS_ASSERT_THROWS(compInfo.setScanInterval(0 /*index used*/, interval),
-                     std::runtime_error &);
-  }
-
-  void test_set_async_interval_then_sync_interval_throws() {
-    auto infos = makeTreeExample();
-    auto &compInfo = *std::get<0>(infos);
-    // Using the indexed overload implies a non-sync scan
-    std::pair<int64_t, int64_t> interval{1000, 1001};
-    // Set the scanning up to be synchronous (no index provided)
-    compInfo.setScanInterval(0 /*index used*/, interval);
-    // Now try setting an asynchronous scan point.
-    TS_ASSERT_THROWS(compInfo.setScanInterval(interval), std::runtime_error &);
-  }
-
-  void test_set_scan_interval_sync_scan() {
-    auto infos = makeTreeExample();
-    auto &compInfo = *std::get<0>(infos);
-    auto interval = std::pair<int64_t, int64_t>{10000, 10001};
-    compInfo.setScanInterval(interval);
-    auto outInterval1 = compInfo.scanInterval(std::pair<size_t, size_t>{0, 0});
-    auto outInterval2 = compInfo.scanInterval(std::pair<size_t, size_t>{1, 0});
-    TS_ASSERT_EQUALS(interval, outInterval1);
-    TS_ASSERT_EQUALS(interval, outInterval2);
-  }
-
-  void test_set_scan_interval_async_scan() {
-    auto infos = makeTreeExample();
-    auto &compInfo = *std::get<0>(infos);
-    auto interval1 = std::pair<int64_t, int64_t>{10000, 10001};
-    auto interval2 = std::pair<int64_t, int64_t>{10001, 10002};
-    compInfo.setScanInterval(0, interval1);
-    compInfo.setScanInterval(1, interval2);
-    TS_ASSERT_EQUALS(interval1, compInfo.scanInterval({0, 0}));
-    TS_ASSERT_EQUALS(interval2, compInfo.scanInterval({1, 0}));
-  }
-
   void test_setPosition_single_scan() {
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
@@ -821,11 +776,11 @@ public:
     auto infos = makeTreeExample();
     auto &compInfo = *std::get<0>(infos);
     TS_ASSERT_THROWS_EQUALS(
-        compInfo.setScanInterval(0, {1, 1}), const std::runtime_error &e,
+        compInfo.setScanInterval({1, 1}), const std::runtime_error &e,
         std::string(e.what()),
         "ComponentInfo: cannot set scan interval with start >= end");
     TS_ASSERT_THROWS_EQUALS(
-        compInfo.setScanInterval(0, {2, 1}), const std::runtime_error &e,
+        compInfo.setScanInterval({2, 1}), const std::runtime_error &e,
         std::string(e.what()),
         "ComponentInfo: cannot set scan interval with start >= end");
   }
@@ -836,9 +791,9 @@ public:
     auto infos2 = makeFlat(PosVec(2), RotVec(2));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
-    a.setScanInterval(0, {0, 1});
-    b.setScanInterval(0, {0, 1});
-    b.setScanInterval(1, {0, 1});
+    a.setScanInterval({0, 1});
+    b.setScanInterval({0, 1});
+    b.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: size mismatch");
@@ -854,33 +809,14 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         a.merge(b), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge ComponentInfo: scan intervals not defined");
-    c.setScanInterval(0, {0, 1});
+    c.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(
         a.merge(c), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge ComponentInfo: scan intervals not defined");
-    a.setScanInterval(0, {0, 1});
+    a.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(
         a.merge(b), const std::runtime_error &e, std::string(e.what()),
         "Cannot merge ComponentInfo: scan intervals not defined");
-  }
-
-  void test_merge_fail_sync_async_mismatch() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1), RotVec(1));
-    auto &a = *std::get<0>(infos1);
-    auto &b = *std::get<0>(infos2);
-    a.setScanInterval(0, {0, 1});
-    b.setScanInterval({0, 1});
-    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "Cannot merge ComponentInfo: "
-                            "both or none of the scans "
-                            "must be synchronous");
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "Cannot merge ComponentInfo: "
-                            "both or none of the scans "
-                            "must be synchronous");
   }
 
   void test_merge_identical_async() {
@@ -888,13 +824,13 @@ public:
                            RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
                                          0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &a = *std::get<0>(infos1);
-    a.setScanInterval(0, {0, 10});
+    a.setScanInterval({0, 10});
 
     auto infos2 = makeFlat(PosVec(1, Eigen::Vector3d(0, 0, 0)),
                            RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
                                          0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &b = *std::get<0>(infos2);
-    b.setScanInterval(0, {0, 10});
+    b.setScanInterval({0, 10});
 
     TSM_ASSERT_EQUALS("Scan size should be 1", b.scanCount(0), 1);
     b.merge(a);
@@ -906,7 +842,7 @@ public:
   void test_merge_identical_interval_failures() {
     auto infos1 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
-    a.setScanInterval(a.root(), {0, 1});
+    a.setScanInterval({0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     Eigen::Quaterniond rot1(
@@ -944,22 +880,25 @@ public:
   void test_merge_fail_partial_overlap() {
     auto infos1 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
-    a.setScanInterval(a.root(), {0, 10});
+    a.setScanInterval({0, 10});
 
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
-    b.setScanInterval(b.root(), {-1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
-    b.setScanInterval(b.root(), {1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
-    b.setScanInterval(b.root(), {1, 11});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge ComponentInfo: scan intervals overlap but not identical");
+    b.setScanInterval({-1, 5});
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "overlap but not identical");
+    b.setScanInterval({1, 5});
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "overlap but not identical");
+    b.setScanInterval({1, 11});
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "overlap but not identical");
   }
 
   void test_merge_detectors_async() {
@@ -974,12 +913,12 @@ public:
     b.setPosition(0, pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(0, interval1);
-    b.setScanInterval(0, interval2);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 3);
+    TS_ASSERT_EQUALS(a.scanSize(), a.size() + b.size());
     TS_ASSERT_EQUALS(a.scanCount(0), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -991,8 +930,6 @@ public:
     TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
     TS_ASSERT_EQUALS(a.position(index1), pos1);
     TS_ASSERT_EQUALS(a.position(index2), pos2);
-    // Root is not scanning
-    TS_ASSERT_EQUALS(a.scanCount(1), a.root());
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
@@ -1002,9 +939,7 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
   }
 
-  template <typename SetScanIntervalFunctor>
-  void
-  do_test_merge_root_with_offset(SetScanIntervalFunctor applySetScanInterval) {
+  void test_merge_root_with_offset() {
     auto infos1 = makeFlat(PosVec(1), RotVec(1));
     auto infos2 = makeFlat(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
@@ -1020,8 +955,8 @@ public:
     b.setPosition(b.root(), pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    applySetScanInterval(a, a.root(), interval1);
-    applySetScanInterval(b, b.root(), interval2);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1051,9 +986,7 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.position({0, 1}), rootOffsetB + detPosB);
   }
 
-  template <typename SetScanIntervalFunction>
-  void do_test_merge_root_with_rotation(
-      SetScanIntervalFunction applySetScanInterval) {
+  void test_merge_root_with_rotation() {
     auto detPos = Eigen::Vector3d{1, 0, 0};
     auto infos1 = makeFlat(PosVec(1, detPos), RotVec(1));
     auto infos2 = makeFlat(PosVec(1, detPos), RotVec(1));
@@ -1068,8 +1001,8 @@ public:
     b.setRotation(b.root(), rot2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    applySetScanInterval(a, a.root(), interval1);
-    applySetScanInterval(b, b.root(), interval2);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
@@ -1101,9 +1034,7 @@ public:
         mergeDetectorInfo.position({0, 1}).isApprox(Eigen::Vector3d{0, 0, 1}));
   }
 
-  template <typename SetScanIntervalFunctor>
-  void
-  do_test_merge_root_multiple(SetScanIntervalFunctor applySetScanInterval) {
+  void test_merge_root_multiple() {
     auto infos1 = makeFlat(PosVec(1), RotVec(1));
     auto infos2 = makeFlat(PosVec(1), RotVec(1));
     auto infos3 = makeFlat(PosVec(1), RotVec(1));
@@ -1119,9 +1050,9 @@ public:
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
-    applySetScanInterval(a, a.root(), interval1);
-    applySetScanInterval(b, b.root(), interval2);
-    applySetScanInterval(c, c.root(), interval3);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    c.setScanInterval(interval3);
     b.merge(c); // Execute the merge
     a.merge(b); // Merge again
     TS_ASSERT(a.isScanning());
@@ -1149,54 +1080,6 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 2}), interval3);
-  }
-
-  void test_merge_root_with_rotation_sync() {
-    auto setScanIntervalSync =
-        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
-          info.setScanInterval(interval);
-        };
-    do_test_merge_root_with_rotation(setScanIntervalSync);
-  }
-
-  void test_merge_root_with_rotation_async() {
-    auto setScanIntervalAsync = [](ComponentInfo &info, size_t index,
-                                   std::pair<int64_t, int64_t> interval) {
-      info.setScanInterval(index, interval);
-    };
-    do_test_merge_root_with_rotation(setScanIntervalAsync);
-  }
-
-  void test_merge_root_with_offset_sync() {
-    auto setScanIntervalSync =
-        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
-          info.setScanInterval(interval);
-        };
-    do_test_merge_root_with_offset(setScanIntervalSync);
-  }
-
-  void test_merge_root_with_offset_async() {
-    auto setScanIntervalAsync = [](ComponentInfo &info, size_t index,
-                                   std::pair<int64_t, int64_t> interval) {
-      info.setScanInterval(index, interval);
-    };
-    do_test_merge_root_with_offset(setScanIntervalAsync);
-  }
-
-  void test_merge_root_multiple_sync() {
-    auto setIntervalSync =
-        [](ComponentInfo &info, size_t, std::pair<int64_t, int64_t> interval) {
-          info.setScanInterval(interval);
-        };
-    do_test_merge_root_multiple(setIntervalSync);
-  }
-
-  void test_merge_root_multiple_async() {
-    auto setIntervalAsync = [](ComponentInfo &info, size_t index,
-                               std::pair<int64_t, int64_t> interval) {
-      info.setScanInterval(index, interval);
-    };
-    do_test_merge_root_multiple(setIntervalAsync);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

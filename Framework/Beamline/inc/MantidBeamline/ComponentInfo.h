@@ -59,8 +59,7 @@ private:
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
-  Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
-  bool m_isSyncScan{true};
+  size_t m_scanCounts = 1;
   Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
       nullptr};
   /// For (component index, time index) -> linear index conversions
@@ -69,10 +68,8 @@ private:
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   void failIfDetectorInfoScanning() const;
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
-  void initScanCounts();
   void initScanIntervals();
   void checkNoTimeDependence() const;
-  std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
   std::vector<bool> buildMergeIndicesSync(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
@@ -151,8 +148,6 @@ public:
   bool isScanning() const;
   std::pair<int64_t, int64_t>
   scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(const size_t index,
-                       const std::pair<int64_t, int64_t> &interval);
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
 
