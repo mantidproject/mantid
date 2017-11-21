@@ -90,9 +90,8 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
-      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view), 
-	  m_viewHasClosed(false), m_model(std::move(model))
-      {}
+      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
+      m_viewHasClosed(false), m_model(std::move(model)) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -760,9 +759,8 @@ void EnggDiffFittingPresenter::processStart() {}
 void EnggDiffFittingPresenter::processLoad() {
   const std::string filenames = m_view->getFittingRunNo();
   if (filenames.empty()) {
-	  m_view->userWarning("No file selected", 
-		                  "Please enter filename(s) to load");
-	  return;
+    m_view->userWarning("No file selected", "Please enter filename(s) to load");
+    return;
   }
 
   try {
@@ -886,8 +884,8 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
-                 << "single peak fits into workspace '"
-                 << outWSName << "'. This may take some seconds... \n";
+                 << "single peak fits into workspace '" << outWSName
+                 << "'. This may take some seconds... \n";
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads

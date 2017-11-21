@@ -71,8 +71,8 @@ EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
 }
 
 Mantid::API::ITableWorkspace_sptr
-EnggDiffFittingModel::getFitResults(const int runNumber, const size_t bank) 
-                                    const {
+EnggDiffFittingModel::getFitResults(const int runNumber,
+                                    const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_fitParamsMap);
 }
 
@@ -131,10 +131,8 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
   }
 }
 
-void EnggDiffFittingModel::saveDiffFittingAscii(const int runNumber,
-                                                const size_t bank,
-                                                const std::string &filename)
-	                                            const {
+void EnggDiffFittingModel::saveDiffFittingAscii(
+    const int runNumber, const size_t bank, const std::string &filename) const {
   const auto ws = getFitResults(runNumber, bank);
   auto saveAlg =
       Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
@@ -206,8 +204,8 @@ EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
 }
 
 Mantid::API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getFittedPeaksWS(const int runNumber, const size_t bank) 
-                                       const {
+EnggDiffFittingModel::getFittedPeaksWS(const int runNumber,
+                                       const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_fittedPeaksMap);
 }
 
@@ -358,8 +356,8 @@ void EnggDiffFittingModel::alignDetectors(
 }
 
 API::MatrixWorkspace_sptr
-EnggDiffFittingModel::getFocusedWorkspace(const int runNumber, 
-	                                      const size_t bank) const {
+EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
+                                          const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_focusedWorkspaceMap);
 }
 

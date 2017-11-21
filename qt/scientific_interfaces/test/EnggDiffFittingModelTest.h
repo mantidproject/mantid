@@ -48,8 +48,9 @@ void addSampleWorkspaceToModel(const int runNumber, const int bank,
                                EnggDiffFittingModelAddWSExposed &model) {
   API::MatrixWorkspace_sptr ws =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-  model.addFocusedWorkspace(runNumber, bank, ws, std::to_string(runNumber) + 
-	                        "_" + std::to_string(bank));
+  model.addFocusedWorkspace(runNumber, bank, ws, std::to_string(runNumber) +
+                                                     "_" +
+                                                     std::to_string(bank));
 }
 
 API::ITableWorkspace_sptr createFitParamsTable() {
@@ -120,8 +121,8 @@ public:
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     const int runNumber = 100;
     const int bank = 1;
-    TS_ASSERT_THROWS_NOTHING(model.addFocusedWorkspace(runNumber, bank, ws, 
-		                     "workspace_filename"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.addFocusedWorkspace(runNumber, bank, ws, "workspace_filename"));
     const auto retrievedWS = model.getFocusedWorkspace(runNumber, bank);
 
     TS_ASSERT(retrievedWS != nullptr);

@@ -49,29 +49,9 @@ public:
 
   void createFittedPeaksWS(const int runNumber, const size_t bank) override;
 
-protected:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            const Mantid::API::MatrixWorkspace_sptr ws,
                            const std::string &filename);
-
-  void addFitResults(const int runNumber, const size_t bank,
-                     const Mantid::API::ITableWorkspace_sptr ws);
-
-  void setDifcTzero(const int runNumber, const size_t bank,
-                    const std::vector<GSASCalibrationParms> &calibParams)
-	                override;
-
-  void enggFitPeaks(const int runNumber, const size_t bank,
-                    const std::string &expectedPeaks) override;
-
-  void saveDiffFittingAscii(const int runNumber, const size_t bank,
-                            const std::string &filename) const override;
-
-  void createFittedPeaksWS(const int runNumber, const size_t bank) override;
-
-  void addFocusedWorkspace(const int runNumber, const size_t bank,
-	  const Mantid::API::MatrixWorkspace_sptr ws,
-	  const std::string &filename);
 
 private:
   static const size_t MAX_BANKS = 2;
