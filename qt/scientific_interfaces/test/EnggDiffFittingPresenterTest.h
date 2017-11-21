@@ -118,7 +118,7 @@ public:
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
 	TSM_ASSERT(
-		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"Model mock not used as expected. Some EXPECT_CALL conditions were not "
 		"satisfied.",
 		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
 
@@ -180,7 +180,8 @@ public:
   // produce a warning
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-	auto mockModel = std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
+	auto mockModel = 
+		std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
 	auto *mockModel_ptr = mockModel.get();
 	
 	EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
@@ -213,7 +214,7 @@ public:
         "satisfied.",
         testing::Mock::VerifyAndClearExpectations(&mockView))
 	TSM_ASSERT(
-		"Mock not used as expected. Some EXPECT_CALL conditions were not "
+		"Model mock not used as expected. Some EXPECT_CALL conditions were not "
 		"satisfied.",
 		testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
   }
@@ -424,7 +425,7 @@ public:
   // This would test the fitting tab with invalid expected peaks but should only
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
-    return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
+	return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 

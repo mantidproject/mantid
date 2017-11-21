@@ -760,8 +760,9 @@ void EnggDiffFittingPresenter::processStart() {}
 void EnggDiffFittingPresenter::processLoad() {
   const std::string filenames = m_view->getFittingRunNo();
   if (filenames.empty()) {
-    m_view->userWarning("No file selected", "Please enter filename(s) to load");
-    return;
+	  m_view->userWarning("No file selected", 
+		                  "Please enter filename(s) to load");
+	  return;
   }
 
   try {
