@@ -517,7 +517,7 @@ EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
 }
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
-	return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
+  return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
