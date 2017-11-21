@@ -883,8 +883,8 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
-                    "single peak fits into workspace '" +
-                        outWSName + "'. This may take some seconds... \n";
+                 << "single peak fits into workspace '"
+                 << outWSName << "'. This may take some seconds... \n";
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
@@ -962,9 +962,9 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
     }
 
     size_t strLength = expectedPeaks.length() - 1;
-    if (expectedPeaks.at(size_t(0)) == ',') {
-      expectedPeaks.erase(size_t(0), 1);
-      strLength -= size_t(1);
+    if (expectedPeaks.at(0) == ',') {
+      expectedPeaks.erase(0, 1);
+      strLength -= 1;
     }
 
     if (expectedPeaks.at(strLength) == ',') {
