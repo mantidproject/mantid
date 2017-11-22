@@ -113,7 +113,7 @@ public:
 
   void setFittingListWidgetCurrentRow(int idx) const override;
 
-  std::string fittingPeaksData() const override;
+  std::string getExpectedPeaksInput() const override;
 
   void setPeakList(const std::string &peakList) const override;
 
