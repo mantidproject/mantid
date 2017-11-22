@@ -807,8 +807,15 @@ void EnggDiffFittingPresenter::processLogMsg() {
 void EnggDiffFittingPresenter::processFitAllPeaks() {
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
+<<<<<<< bfcdbff77a0c3dde579a8cdeb083d73206b79cb8
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
+=======
+  std::string fittingPeaks = m_view->getExpectedPeaksInput();
+
+  // validate fitting data as it will remain the same through out
+  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
+>>>>>>> Re #21238 rename fittingPeaksData to getExpectedPeaksInput
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &dir : g_multi_run_directories) {
@@ -862,7 +869,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-  
+
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
