@@ -14,8 +14,9 @@ Reflectometry
 
 Small Angle Scattering
 ----------------------
+- Have added the functionality to show diagnostic transmission workspaces to new GUI.
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
 - Fixed a bug in the old GUI where loading files on UNIX systems would not work unless the file name was in uppercase letters.
-
+- Fixed an issue where merged or all reductions were overwriting each other as they were beng given the same name.
 
 :ref:`Release 3.12.0 <v3.12.0>`
