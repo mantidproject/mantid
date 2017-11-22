@@ -152,6 +152,7 @@ function (mtd_add_qt_target)
     set_target_properties ( ${_target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${_output_dir}
       RUNTIME_OUTPUT_DIRECTORY ${_output_dir} )
   endif()
+  set_target_properties( ${_target} PROPERTIES CXX_CLANG_TIDY "" )
   _disable_suggest_override( ${PARSED_QT_VERSION} ${_target} )
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
