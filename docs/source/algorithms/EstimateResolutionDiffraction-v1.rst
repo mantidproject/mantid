@@ -22,7 +22,7 @@ Starting from the Bragg equation for T.O.F. diffractometer,
 
 as
 
-.. math:: \Delta d = \sqrt{(\Delta T)^2 + (\Delta L)^2 + (\Delta\theta)^2}
+.. math:: \Delta d = \sqrt{\left(\Delta T \frac{\partial d}{\partial T}\right)^2 + \left(\Delta L \frac{\partial d}{\partial L}\right)^2 + \left(\Delta \theta \frac{\partial d}{\partial \theta}\right)^2}
 
 and thus
 
@@ -46,6 +46,8 @@ angle of the detectors. :ref:`EstimateDivergence
 functions where ``_tof`` is the time-of-flight term, ``_length`` is
 the path length term, and ``_angle`` is the angular term. Note that
 the total resolution is these terms added in quadriture.
+
+Note that :math:`\frac{\Delta d}{d} = \frac{\Delta Q}{Q}`.
 
 Factor Sheet
 ------------

@@ -4,6 +4,8 @@
 #include "IndirectDataAnalysisTab.h"
 #include "ui_MSDFit.h"
 
+#include "MantidAPI/IFunction.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -31,23 +33,21 @@ private slots:
   void plotClicked();
   void algorithmComplete(bool error);
   void modelSelection(int selected);
-  void updatePlot(int specNo);
-  void updatePlotRange();
+  void updatePlot();
   void updateProperties(int specNo);
+  void plotGuess();
 
 private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               long specMin, long specMax);
+                                               int specMin, int specMax);
   QtProperty *createModel(const QString &modelName,
                           const std::vector<QString> &modelParameters);
-  void plotResult(const std::string &groupWsName, size_t specNo);
   QHash<QString, QString> createParameterToPropertyMap(const QString &model);
   std::string modelToAlgorithmProperty(const QString &model);
+  Mantid::API::IFunction_sptr createFunction(const QString &modelName);
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
-  size_t m_runMin;
-  size_t m_runMax;
 
   QHash<QString, QHash<size_t, double>> m_parameterValues;
   QHash<QString, QString> m_parameterToProperty;

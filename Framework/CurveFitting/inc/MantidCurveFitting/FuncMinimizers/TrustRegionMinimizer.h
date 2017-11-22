@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
-/** A base class for least squares trust region minimizers.
+/** Trust Region minimizer class using the DTRS method of GALAHAD.
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
@@ -48,6 +48,8 @@ public:
   bool iterate(size_t) override;
   /// Return current value of the cost function
   double costFunctionVal() override;
+  /// Name of the minimizer.
+  std::string name() const override;
 
 private:
   /// Evaluate the fitting function and calculate the residuals.
@@ -58,12 +60,10 @@ private:
   void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
               DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
-  virtual void
-  calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
-                double Delta, DoubleFortranVector &d, double &normd,
-                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
-                NLLS::calculate_step_work &w) = 0;
+  void calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                     const DoubleFortranMatrix &hf, double Delta,
+                     DoubleFortranVector &d, double &normd,
+                     const NLLS::nlls_options &options);
 
   /// Stored cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
@@ -81,6 +81,12 @@ private:
   NLLS::nlls_inform m_inform;
   /// Temporary and helper objects
   NLLS::NLLS_workspace m_workspace;
+
+  // Used for calculating step in DTRS method
+  DoubleFortranMatrix m_A, m_ev;
+  DoubleFortranVector m_ew, m_v, m_v_trans, m_d_trans;
+  NLLS::all_eig_symm_work m_all_eig_symm_ws;
+  DoubleFortranVector m_scale;
 };
 
 } // namespace FuncMinimisers

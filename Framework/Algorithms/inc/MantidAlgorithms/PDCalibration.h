@@ -67,6 +67,8 @@ private:
                            const std::vector<double> &tof,
                            const std::vector<double> &height2, double &difc,
                            double &t0, double &difa);
+  API::MatrixWorkspace_sptr calculateResolutionTable();
+
   API::ITableWorkspace_sptr
   sortTableWorkspace(API::ITableWorkspace_sptr &table);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
