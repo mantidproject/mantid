@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -58,6 +59,8 @@ public:
     return new EnggDiffFittingModelTest();
   }
   static void destroySuite(EnggDiffFittingModelTest *suite) { delete suite; }
+
+  EnggDiffFittingModelTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void test_addAndGetWorkspace() {
     auto model = EnggDiffFittingModelAddWSExposed();
