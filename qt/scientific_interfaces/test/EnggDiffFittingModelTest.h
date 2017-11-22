@@ -33,7 +33,8 @@ public:
 };
 
 inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
-    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
+    const int runNumber, const size_t bank,
+    Mantid::API::MatrixWorkspace_sptr ws) {
   addFocusedWorkspace(runNumber, bank, ws,
                       std::to_string(runNumber) + "_" + std::to_string(bank));
 }
@@ -42,11 +43,6 @@ inline void EnggDiffFittingModelAddWSExposed::addFitParams(
     const int runNumber, const size_t bank,
     Mantid::API::ITableWorkspace_sptr ws) {
   addFitResults(runNumber, bank, ws);
-}
-
-inline void EnggDiffFittingModelAddWSExposed::addFitParams(const int runNumber, 
-	const size_t bank, Mantid::API::ITableWorkspace_sptr ws) {
-	addFitResults(runNumber, bank, ws);
 }
 
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
@@ -151,11 +147,16 @@ public:
   void test_loadWorkspaces() {
     auto model = EnggDiffFittingModel();
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+<<<<<<< 1547d01c3f0f8d1e17743534d1c085ad26947cb8
     API::MatrixWorkspace_sptr ws;
+=======
+    Mantid::API::MatrixWorkspace_sptr ws;
+>>>>>>> Re #21171 Apply clang-format changes
     TS_ASSERT_THROWS_NOTHING(
         ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
+<<<<<<< 1547d01c3f0f8d1e17743534d1c085ad26947cb8
   }
 
   void test_setDifcTzero() {
@@ -191,6 +192,11 @@ public:
                                  FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
     TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
   }
+=======
+  }
+
+  void test_createFittedPeaksWS() {}
+>>>>>>> Re #21171 Apply clang-format changes
 
 private:
   const static std::string FOCUSED_WS_FILENAME;

@@ -58,9 +58,10 @@ void EnggDiffFittingModel::addFocusedWorkspace(
   addToRunMap(runNumber, bank, m_wsFilenameMap, filename);
 }
 
-void EnggDiffFittingModel::addFitResults(const int runNumber, const size_t bank, 
-	                                     const Mantid::API::ITableWorkspace_sptr ws){
-	addToRunMap(runNumber, bank, m_fitParamsMap, ws);
+void EnggDiffFittingModel::addFitResults(
+    const int runNumber, const size_t bank,
+    const Mantid::API::ITableWorkspace_sptr ws) {
+  addToRunMap(runNumber, bank, m_fitParamsMap, ws);
 }
 
 std::string
