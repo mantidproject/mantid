@@ -1,6 +1,5 @@
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
