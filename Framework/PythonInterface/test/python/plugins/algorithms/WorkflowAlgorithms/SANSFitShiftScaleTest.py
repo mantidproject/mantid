@@ -1,9 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import AlgorithmManager, MatrixWorkspace
+from mantid.api import AlgorithmManager
 import numpy as np
 from SANSFitShiftScale import ErrorTransferFromModelToData
+
 
 class SANSFitShiftScaleTest(unittest.TestCase):
     def test_initalize(self):
@@ -173,7 +174,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         self.assertEquals(out_scale_factor, 1.0)
         self.assertEquals(out_shift_factor, -5.0)
 
-    def do_test_scale_both(self, hab_range):
+    def do_test_scale_both(self, hab_range, min_x = 0.0, max_x = 1000.0):
         create_alg = AlgorithmManager.create('CreateWorkspace')
         create_alg.setChild(True)
         create_alg.initialize()
@@ -205,7 +206,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg.setProperty('LABWorkspace', lab_workspace)
         alg.setProperty('ShiftFactor', -7.6)
         alg.setProperty('ScaleFactor', 2.4)
-
+        alg.setProperty("FitMin", min_x)
+        alg.setProperty("FitMax", max_x)
         alg.execute()
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
@@ -222,6 +224,14 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         hab_range[6] = np.nan
         hab_range[7] = np.nan
         self.assertRaises(RuntimeError, self.do_test_scale_both, hab_range)
+
+    def test_scale_both_with_q_range(self):
+        hab_range = list(range(5, 14))
+        hab_range[0] = 15000
+        self.do_test_scale_both(hab_range, min_x = 1, max_x = 10)
+        hab_range = list(range(5, 14))
+        hab_range[8] = 15000
+        self.do_test_scale_both(hab_range, min_x=0, max_x=6)
 
 
 class TestErrorTransferFromModelToData(unittest.TestCase):

@@ -102,6 +102,12 @@ size_t DetectorInfo::scanSize() const {
   return m_positions->size();
 }
 
+/**
+ * Returns true if all of the detectors all have the same scan interval. Will
+ * return false if DetectorInfo is not scanning.
+ */
+bool DetectorInfo::isSyncScan() const { return isScanning() && m_isSyncScan; }
+
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   // No check for time dependence since monitor flags are not time dependent.

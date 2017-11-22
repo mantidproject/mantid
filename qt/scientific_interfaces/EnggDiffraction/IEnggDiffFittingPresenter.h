@@ -52,6 +52,7 @@ public:
     savePeaks,    ///< Save the peaks list
     ShutDown,     ///< closing the interface
     LogMsg,       ///< need to send a message to the Mantid log system
+    selectRun,    ///< update plot with new run selected from list widget
   };
 
   /**

@@ -76,7 +76,6 @@ public:
         ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             inWSName));
     std::size_t num_events = ws->getNumberEvents();
-
     RemovePromptPulse alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -89,8 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired
-    // type
+    // Retrieve the workspace from data service.
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             outWSName));
@@ -99,8 +97,8 @@ public:
       return;
 
     // Verify the results
-    TS_ASSERT_EQUALS(num_events,
-                     ws->getNumberEvents()); // should not drop events
+    // drop events 36 spectra, 2 events/bin, 10 bins/pulse, 9 pulses
+    TS_ASSERT_EQUALS(num_events - 36 * 2 * 10 * 9, ws->getNumberEvents());
 
     AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSName);

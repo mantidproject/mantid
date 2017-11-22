@@ -8,7 +8,12 @@
 
 #include <set>
 
+class SpectrumTester;
 namespace Mantid {
+namespace DataObjects {
+class Histogram1D;
+class EventList;
+}
 namespace API {
 class MatrixWorkspace;
 
@@ -53,6 +58,9 @@ public:
   virtual ~ISpectrum() = default;
 
   void copyInfoFrom(const ISpectrum &other);
+
+  /// Copy data from another ISpectrum with double-dynamic dispatch.
+  virtual void copyDataFrom(const ISpectrum &source) = 0;
 
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
   virtual MantidVec &dataX() = 0;
@@ -241,6 +249,10 @@ public:
   }
 
   void setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index);
+
+  virtual void copyDataInto(DataObjects::EventList &) const;
+  virtual void copyDataInto(DataObjects::Histogram1D &) const;
+  virtual void copyDataInto(SpectrumTester &) const;
 
 protected:
   virtual void checkAndSanitizeHistogram(HistogramData::Histogram &){};

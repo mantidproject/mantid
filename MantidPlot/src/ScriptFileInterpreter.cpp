@@ -9,7 +9,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <qscilexer.h>
+#include <Qsci/qscilexer.h>
 
 #include <stdexcept>
 
