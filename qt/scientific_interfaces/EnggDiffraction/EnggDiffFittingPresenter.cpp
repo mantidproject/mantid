@@ -855,8 +855,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
-        validateFittingInputs(g_multi_run_directories[i],
-                              normalisedPeakCentres);
+        validateFittingInputs(g_multi_run_directories[i], 
+			                  normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
                             ia.what());
