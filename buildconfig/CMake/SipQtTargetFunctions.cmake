@@ -52,7 +52,7 @@ function ( mtd_add_sip_module )
       -I ${PARSED_SIP_SRC_DIR} -I ${_pyqt_sip_dir}
       ${_pyqt_sip_flags}
       -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -e ${_module_spec}
-    DEPENDS ${_module_spec} ${SIP_SRCS} ${PARSED_HEADER_DEPS}
+    DEPENDS ${_module_spec} ${SIP_SRCS} ${PARSED_HEADER_DEPS} ${SIP_INCLUDE_DIR}/sip.h
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
@@ -64,6 +64,7 @@ function ( mtd_add_sip_module )
   # Set all required properties on the target
   set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES
     LIBRARY_OUTPUT_NAME ${PARSED_MODULE_NAME} )
+  set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES CXX_CLANG_TIDY "" )
 
   if ( PARSED_MODULE_OUTPUT_DIR )
     set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES

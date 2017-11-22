@@ -8,6 +8,9 @@
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
+namespace Indexing {
+class IndexInfo;
+}
 namespace API {
 
 /** IndexProperty : Implementation of a property type which returns a
@@ -40,7 +43,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int> {
+class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int64_t> {
 public:
   IndexProperty(const std::string &name,
                 const IWorkspaceProperty &workspaceProp,
@@ -50,17 +53,20 @@ public:
 
   IndexProperty *clone() const override;
 
-  using Kernel::ArrayProperty<int>::operator=;
+  using Kernel::ArrayProperty<int64_t>::operator=;
 
   bool isDefault() const override;
   std::string isValid() const override;
   std::string operator=(const std::string &rhs);
   operator Indexing::SpectrumIndexSet() const;
   Indexing::SpectrumIndexSet getIndices() const;
+  Indexing::IndexInfo getFilteredIndexInfo() const;
 
   static std::string generatePropertyName(const std::string &name = "");
 
 private:
+  const Indexing::IndexInfo &getIndexInfoFromWorkspace() const;
+
   const IWorkspaceProperty &m_workspaceProp;
   const IndexTypeProperty &m_indexTypeProp;
   mutable Indexing::SpectrumIndexSet m_indices;

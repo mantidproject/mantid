@@ -1,4 +1,5 @@
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
@@ -218,6 +219,26 @@ EventList::~EventList() {
 
   // this->events.clear();
   // std::vector<TofEvent>().swap(events); //Trick to release the vector memory.
+}
+
+/// Copy data from another EventList, via ISpectrum reference.
+void EventList::copyDataFrom(const ISpectrum &source) {
+  source.copyDataInto(*this);
+}
+
+/// Used by copyDataFrom for dynamic dispatch for its `source`.
+void EventList::copyDataInto(EventList &sink) const {
+  sink.m_histogram = m_histogram;
+  sink.events = events;
+  sink.weightedEvents = weightedEvents;
+  sink.weightedEventsNoTime = weightedEventsNoTime;
+  sink.eventType = eventType;
+  sink.order = order;
+}
+
+/// Used by Histogram1D::copyDataFrom for dynamic dispatch for `other`.
+void EventList::copyDataInto(Histogram1D &sink) const {
+  sink.setHistogram(histogram());
 }
 
 // --------------------------------------------------------------------------
