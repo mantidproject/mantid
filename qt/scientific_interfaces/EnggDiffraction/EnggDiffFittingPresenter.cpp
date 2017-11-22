@@ -37,6 +37,41 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
                                                 const size_t bank) {
   return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
+
+// Remove commas at the start and end of the string, 
+// as well as any adjacent to another (eg ,, gets corrected to ,)
+std::string stripExtraCommas(std::string &expectedPeaks) {
+	if (!expectedPeaks.empty()) {
+
+		g_log.debug() << "Validating the expected peak list.\n";
+
+		const auto comma = ',';
+
+		for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+			size_t j = i + 1;
+
+			if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
+				expectedPeaks.erase(j, 1);
+				i--;
+
+			}
+			else {
+				++j;
+			}
+		}
+
+		size_t strLength = expectedPeaks.length() - 1;
+		if (expectedPeaks.at(0) == ',') {
+			expectedPeaks.erase(0, 1);
+			strLength -= 1;
+		}
+
+		if (expectedPeaks.at(strLength) == ',') {
+			expectedPeaks.erase(strLength, 1);
+		}
+	}
+	return expectedPeaks;
+}
 }
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
@@ -785,9 +820,10 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   // validate fitting data as it will remain the same through out
-  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
+  const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
+  m_view->setPeakList(normalisedPeakCentres);
 
-  g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
+  g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &dir : g_multi_run_directories) {
     g_log.debug() << dir << '\n';
   }
@@ -797,7 +833,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
 
-        inputChecksBeforeFitting(g_multi_run_directories[i], fitPeaksData);
+        inputChecksBeforeFitting(g_multi_run_directories[i], normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
                             ia.what());
@@ -841,12 +877,13 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
-  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
+  const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
+  m_view->setPeakList(normalisedPeakCentres);
 
-  g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
+  g_log.debug() << "the expected peaks are: " << normalisedPeakCentres << '\n';
 
   try {
-    inputChecksBeforeFitting(filename, fitPeaksData);
+    inputChecksBeforeFitting(filename, normalisedPeakCentres);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
@@ -865,7 +902,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
 
-  startAsyncFittingWorker(runNumber, bank, fitPeaksData);
+  startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
 }
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
@@ -913,43 +950,6 @@ std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
   std::vector<std::string> splitBaseName;
   boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
   return splitBaseName;
-}
-
-std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
-    std::string &expectedPeaks) const {
-
-  if (!expectedPeaks.empty()) {
-
-    g_log.debug() << "Validating the expected peak list.\n";
-
-    auto *comma = ",";
-
-    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
-      size_t j = i + 1;
-
-      if (expectedPeaks[i] == *comma && expectedPeaks[i] == expectedPeaks[j]) {
-        expectedPeaks.erase(j, 1);
-        i--;
-
-      } else {
-        ++j;
-      }
-    }
-
-    size_t strLength = expectedPeaks.length() - 1;
-    if (expectedPeaks.at(0) == ',') {
-      expectedPeaks.erase(0, 1);
-      strLength -= 1;
-    }
-
-    if (expectedPeaks.at(strLength) == ',') {
-      expectedPeaks.erase(strLength, 1);
-    }
-
-    m_view->setPeakList(expectedPeaks);
-  }
-
-  return expectedPeaks;
 }
 
 void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
