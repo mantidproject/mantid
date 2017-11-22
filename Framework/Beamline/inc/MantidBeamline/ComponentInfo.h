@@ -79,7 +79,7 @@ private:
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
   /// Copy constructor is private because of the way DetectorInfo stored
-  ComponentInfo(const ComponentInfo &other) = default;
+  ComponentInfo(const ComponentInfo &) = default;
 
 public:
   ComponentInfo();

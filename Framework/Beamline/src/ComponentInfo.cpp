@@ -58,14 +58,13 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
   }
-  if (m_rotations->size() != m_positions->size()) {
+  if (m_positions->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should have as many positions "
-                                "as rotations ranges");
+                                "as number of components");
   }
   if (m_rotations->size() != nonDetectorSize()) {
-    throw std::invalid_argument("ComponentInfo should have as many positions "
-                                "and rotations as assembly sorted component "
-                                "ranges");
+    throw std::invalid_argument("ComponentInfo should have as many rotations "
+                                "as number of components ");
   }
   if (m_assemblySortedComponentIndices->size() +
           m_assemblySortedDetectorIndices->size() !=
@@ -289,8 +288,6 @@ void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
     size_t offsetIndex = compOffsetIndex(index);
     m_positions.access()[offsetIndex] += offset;
   }
-
-  m_positions.access()[linearIndex(index)] = newPosition;
 }
 
 /**
