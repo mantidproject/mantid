@@ -707,8 +707,7 @@ double LoadILLReflectometry::fitReflectometryPeak() {
 std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
   const double peakCentre = fitReflectometryPeak();
-  g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName
-                << ": " << m_detectorAngle << '\n';
+  g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle << '\n';
   if (!isDefault("OutputBeamPosition")) {
     PeakInfo p;
     p.detectorAngle = m_detectorAngle;
@@ -747,7 +746,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   m_detectorDistance = sampleDetectorDistance();
-  m_detectorAngle = doubleFromRun(m_detectorAngleName);
+  m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance
                 << "m.\n";
   double detectorAngle;
@@ -795,6 +794,16 @@ void LoadILLReflectometry::placeSource() {
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
+double LoadILLReflectometry::detectorAngle() const
+{
+  if (m_instrumentName != "Figaro") {
+    return doubleFromRun(m_detectorAngleName);
+  }
+  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+  const double DH2Y = inMeter(doubleFromRun("DH2.value"));
+  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X));
+}
+
 /** Return the sample to detector distance for the current instrument.
  *  @return the sample to detector distance in meters
  */
@@ -805,12 +814,12 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double detectorRestX = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
-  const double detectorAngle = doubleFromRun(m_detectorAngleName);
-  const double detectorX = std::cos(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
-  const double detectorY = std::sin(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
+  const double detAngle = detectorAngle();
+  const double detectorX = std::cos(inRad(detAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
+  const double detectorY = std::sin(inRad(detAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
-  const double beamX = detectorX - pixelOffset * std::sin(inRad(detectorAngle));
-  const double beamY = detectorY + pixelOffset * std::cos(inRad(detectorAngle));
+  const double beamX = detectorX - pixelOffset * std::sin(inRad(detAngle));
+  const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
   return std::hypot(beamX, beamY);
 }
 

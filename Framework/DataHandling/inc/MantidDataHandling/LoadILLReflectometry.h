@@ -77,6 +77,7 @@ private:
   void placeSample();
   void placeSource();
 
+  double detectorAngle() const;
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
