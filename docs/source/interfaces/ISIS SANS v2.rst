@@ -131,25 +131,26 @@ Run Summation
 
 .. _Run_Summation:
 
-The Run Summation tab is used to perform addition of two or more runs, saving the output to a single
-file.
+The Run Summation tab is used to perform addition of two or more run files, saving the output to a single
+file. The user builds a list of multiple histogram or event files (but not mixed) before pressing the sum
+button to produce a single output file in the mantid output directory.
 
 Files To Sum
 ^^^^^^^^^^^^
 
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
-| **1** | **Run Query Box**         | This box is used to add runs to the summation table below. Enter one or more comma      |
-|       |                           | separated run numbers and press **Add** or the Enter key to search for runs with a      |
-|       |                           | matching number.                                                                        |
+| **1** | **Run Query Box**         | This box is used to add runs to the summation table below. The user can enter one or    |
+|       |                           | more comma separated run numbers and press **Add** or the enter key to search for runs  |
+|       |                           | with a matching number.                                                                 |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Run Summation Table**   | This table contains the list of all the files to be summed.                             |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
-| **3** | **Browse**                | Click this button to select one or more nexus files to be added to the summation table. |
-|       |                           |                                                                                         |
+| **3** | **Browse**                | This button is used to select one or more nexus files to be added to the summation      |
+|       |                           | table.                                                                                  |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
-| **4** | **Manage Directories**    | Opens the 'Manage User Directories' window allowing you to add/remove directories from  |
-|       |                           | the mantid search path, and to set the output folder where the summation result will be |
-|       |                           | saved.                                                                                  |
+| **4** | **Manage Directories**    | Opens the 'Manage User Directories' window allowing the user to add/remove directories  |
+|       |                           | from the mantid search path and to set the output folder where the summation result     |
+|       |                           | will be saved.                                                                          |
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
 | **5** | **Remove**                | Removes an entry from the summation table. Note, this does not remove the file itself   |
 |       |                           | just removes it from the list of files to be summed.                                    |
@@ -161,20 +162,89 @@ Files To Sum
 Histogram Binning
 ^^^^^^^^^^^^^^^^^
 
-This panel allows you to specify the binning parameters to be applied when summing event data.
+This panel allows the user to specify the binning parameters to be applied when summing event data.
+There are three different ways to add files containing event data [#no-effect-when-non-event]_.
 
 Custom Binning
 """"""""""""""
 
+If this option is chosen a line edit field becomes available in which the user can use to set the
+prefered binning boundaries. The format of this input is identical to the fromat required by the
+`Rebin Algorithm <http://docs.mantidproject.org/nightly/algorithms/Rebin-v1.html>`_.
+
+    A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be
+    followed by a comma and more widths and last boundary pairs. Optionally this can also be a single
+    number, which is the bin width. In this case, the boundary of binning will be determined by minimum
+    and maximum TOF values among all events, or previous binning boundary, in case of event Workspace,
+    or non-event Workspace, respectively. Negative width values indicate logarithmic binning.
+
 Use Binning From Monitors
 """""""""""""""""""""""""
-This panel has no options, summing in this mode uses the binning settings applied to the monitor
-runs.
+
+If this option is chosen the binning is taken from the monitors.
 
 Save As Event Data
 """"""""""""""""""
-Ticking 'Overlay Event Workspaces' allows you to specify Additional Time Shifts.
 
+If this option is chosen, the output file will contain event data. The output is not an event
+workspace but rather a group workspace which contains two child event workspaces one for the
+added event data and one for the added monitor data.
+
+
+With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event data
+of the different files is added using the
+`Plus Algorithm <http://docs.mantidproject.org/nightly/algorithms/Plus-v1.html>`__. Timestamps of
+the events and of the logs are not changed as indicated in the image below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_no_overlay.png
+   :align: center
+   :width: 600px
+
+   Simple addition of event data
+
+With **'Overlay Event Workspaces' Enabled** and **no Additional Time Shifts** specified, the event data of
+the different files is shifted on top of each other.
+
+In the case of two workspaces the time difference between them it is determined by the difference
+between their first entry in the proton charge log. This time difference is then applied to all
+timestamps of the second workspace. The second workspace is essentially layed on top of the first
+workspace. The same principle applies if more than two workspaces are involved as this is a pairwise
+operation. The working principle is illustrated below:
+
+.. figure:: ../images/sans_isis_v2_add_tabs_overlay.png
+   :align: center
+   :width: 600px
+
+   Adding two workspaces by overlaying them
+
+Note that the underlying mechanism for time shifting is provided by the
+`ChangeTimeZero <http://docs.mantidproject.org/nightly/algorithms/ChangeTimeZero-v1.html>`__
+algorithm. Using this option will result in a change to the history of the underlying data.
+
+With **Overlay Event Workspaces Enabled** you can specify **Additional Time Shifts**. To add *N* files
+one needs to provide exactly *N-1* comma-separated time shifts. The shifts need to be specified in
+seconds.
+
+Similar to the case above the workspaces are overlaid. This specified time shift is in addition to
+the actual overlay operation. A positive time shift will shift the second workspace into the future,
+whereas a negative time shift causes a shift into the past. This allows the user to fine tune the
+overlay mechanism. Both situations are illustrated below.
+
+.. figure:: ../images/sans_isis_v2_add_tabs_pos_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a positive time shift (into the future).
+
+.. figure:: ../images/sans_isis_v2_add_tabs_neg_time_shift.png
+   :align: center
+   :width: 500px
+
+   Overlaid workspaces with a negative time shift (into the past).
+
+Just as above, using this option means that the history of the underlying data will be changed.
+
+.. [#no-effect-when-non-event] These options have no effect when adding non-event data files.
 
 Settings
 --------
