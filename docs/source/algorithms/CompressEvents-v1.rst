@@ -19,7 +19,7 @@ Without pulsetime resolution
 ============================
 
 This algorithm starts by sorting the event lists by TOF (or whatever
-the independent axis is) and ignoring the pusletime. Therefore you may
+the independent axis is) and ignoring the pulsetime. Therefore you may
 gain speed by calling :ref:`algm-SortEvents` beforehand.  Starting
 from the smallest TOF, all events within ``Tolerance`` in a spectrum
 are considered to be identical. A :py:obj:`weighted event without time
@@ -63,7 +63,10 @@ effectively filtered on a bin of the form:
 The ``StartTime`` property is only used in pulsetime resolution
 mode. Any events that occur before it in a run are ignored and do not
 appear in the ``OutputWorkspace``. If it is not specified, then the
-:py:obj:`Run.startTime <mantid.api.Run.startTime>` is used.
+:py:obj:`Run.startTime <mantid.api.Run.startTime>` is used. An example
+`ISO8601 <https://www.iso.org/iso-8601-date-and-time-format.html>`_
+format for the ``StartTime`` is ``2010-09-14T04:20:12``. Normally this
+parameter can be left unset.
 
 Usage
 -----

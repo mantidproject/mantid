@@ -45,16 +45,17 @@ void CompressEvents::init() {
   declareProperty(
       make_unique<PropertyWithValue<double>>("WallClockTolerance", EMPTY_DBL(),
                                              mustBePositive, Direction::Input),
-      "The tolerance on the wall-clock time for comparison. Unset means "
-      "compressing all wall-clock times together.");
+      "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
+      "means compressing all wall-clock times together disabling pulsetime "
+      "resolution.");
 
   auto dateValidator = boost::make_shared<DateTimeValidator>();
   dateValidator->allowEmpty(true);
   declareProperty(
       "StartTime", "", dateValidator,
       "An ISO formatted date/time string specifying the timestamp for "
-      "starting filtering (e.g 2010-09-14T04:20:12). Ignored if "
-      "WallClockTolerance is not specified. Default is start of run",
+      "starting filtering. Ignored if WallClockTolerance is not specified. "
+      "Default is start of run",
       Direction::Input);
 }
 
