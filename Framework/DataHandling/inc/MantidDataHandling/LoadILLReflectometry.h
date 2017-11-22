@@ -74,6 +74,7 @@ private:
   double peakOffsetAngle();
   std::pair<double, double> detectorAndBraggAngles();
   void placeDetector();
+  void placeSample();
   void placeSource();
 
   double sampleDetectorDistance() const;
@@ -99,6 +100,7 @@ private:
   double m_detectorDistance{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
+  double m_sampleZOffset{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
 };
 

@@ -284,10 +284,11 @@ void LoadILLReflectometry::exec() {
   loadData(firstEntry, monitorsData, getXValues());
   root.close();
   firstEntry.close();
-  // position the source
+  // Move components as if the sample was at the origin (it usually is).
   placeSource();
-  // position the detector
   placeDetector();
+  // When other components are in-place
+  placeSample();
   convertTofToWavelength();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -774,6 +775,17 @@ void LoadILLReflectometry::placeDetector() {
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
+/// Update sample position.
+void LoadILLReflectometry::placeSample() {
+  if (m_instrumentName != "Figaro") {
+    // Accept the sample position defined in the IDF.
+    return;
+  }
+  m_sampleZOffset = inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
+  const V3D newPos{0.0, 0.0, m_sampleZOffset};
+  m_loader.moveComponent(m_localWorkspace, "sample_position", newPos);
+}
+
 /// Update source position.
 void LoadILLReflectometry::placeSource() {
   const double dist = sourceSampleDistance();
@@ -787,21 +799,19 @@ void LoadILLReflectometry::placeSource() {
  *  @return the sample to detector distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  // For Figaro, dist is the sample-to-detector distance when the detector
-  // is at rest, i.e. at horizontal position.
-  if (m_instrumentName == "Figaro") {
-    const double detectorRestX = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
-    // Motor DH1 vertical coordinate.
-    const double DH1Y = inMeter(doubleFromRun("DH1.value"));
-    const double detectorAngle = doubleFromRun(m_detectorAngleName);
-    const double detectorX = std::cos(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
-    const double detectorY = std::sin(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
-    const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
-    const double beamX = detectorX - pixelOffset * std::sin(inRad(detectorAngle));
-    const double beamY = detectorY + pixelOffset * std::cos(inRad(detectorAngle));
-    return std::hypot(beamX, beamY);
+  if (m_instrumentName != "Figaro") {
+    return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
-  return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double detectorRestX = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  // Motor DH1 vertical coordinate.
+  const double DH1Y = inMeter(doubleFromRun("DH1.value"));
+  const double detectorAngle = doubleFromRun(m_detectorAngleName);
+  const double detectorX = std::cos(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
+  const double detectorY = std::sin(inRad(detectorAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
+  const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
+  const double beamX = detectorX - pixelOffset * std::sin(inRad(detectorAngle));
+  const double beamY = detectorY + pixelOffset * std::cos(inRad(detectorAngle));
+  return std::hypot(beamX, beamY);
 }
 
 /** Return the source to sample distance for the current instrument.
