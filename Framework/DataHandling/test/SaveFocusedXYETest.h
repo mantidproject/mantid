@@ -206,7 +206,7 @@ public:
     int lineNumber = 0;
     while (getline(filestrm, line)) {
       lineNumber++;
-      if (lineNumber <= 6 || line[0] == '#')
+      if (lineNumber <= MAX_HEADER_LENGTH || line[0] == '#')
         continue;
       double x(0.0), y(0.0), e(0.);
       std::istringstream is(line);
@@ -457,7 +457,7 @@ public:
     int lineNumber = 0;
     while (getline(filestrm, line)) {
       lineNumber++;
-      if (lineNumber <= 6)
+      if (lineNumber <= MAX_HEADER_LENGTH)
         continue;
       double x(0.0), y(0.0), e(0.);
       std::istringstream is(line);
