@@ -36,6 +36,9 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 
+DEFAULT_BIN_SETTINGS = \
+    '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
 
 def _make_run_selector(run_selector_view, parent_view):
     return RunSelectorPresenter(RunSelection(),
@@ -45,7 +48,9 @@ def _make_run_selector(run_selector_view, parent_view):
 
 
 def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
-    return SummationSettingsPresenter(SummationSettings(BinningType.Custom),
+    summation_settings = SummationSettings(BinningType.Custom)
+    summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
+    return SummationSettingsPresenter(summation_settings,
                                       summation_settings_view,
                                       parent_view)
 
