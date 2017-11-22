@@ -101,6 +101,8 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
+        self.assertFalse(view.compatibility_mode)
+        self.assertFalse(view.show_transmission)
 
         # Assert certain function calls
         self.assertTrue(view.get_user_file_path.call_count == 3)
