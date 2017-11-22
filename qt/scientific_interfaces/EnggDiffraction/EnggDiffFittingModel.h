@@ -49,6 +49,7 @@ public:
 
   void createFittedPeaksWS(const int runNumber, const size_t bank) override;
 
+protected:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            const Mantid::API::MatrixWorkspace_sptr ws,
                            const std::string &filename);
