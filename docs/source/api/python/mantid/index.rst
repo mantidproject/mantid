@@ -23,3 +23,5 @@ Submodules
    kernel/index
    geometry/index
    api/index
+   simpleapi
+   fitfunctions
