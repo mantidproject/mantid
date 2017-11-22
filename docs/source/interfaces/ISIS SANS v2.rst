@@ -122,6 +122,60 @@ Save Options
 |       |                          | data reduction considerably. It is recommended to have this option enabled.             |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
+Run Summation
+-------------
+
+.. image:: ../images/sans_isis_v2_summation_page_whole.png
+   :align: right
+   :width: 800px
+
+.. _Run_Summation:
+
+The Run Summation tab is used to perform addition of two or more runs, saving the output to a single
+file.
+
+Files To Sum
+^^^^^^^^^^^^
+
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **Run Query Box**         | This box is used to add runs to the summation table below. Enter one or more comma      |
+|       |                           | separated run numbers and press **Add** or the Enter key to search for runs with a      |
+|       |                           | matching number.                                                                        |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Run Summation Table**   | This table contains the list of all the files to be summed.                             |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Browse**                | Click this button to select one or more nexus files to be added to the summation table. |
+|       |                           |                                                                                         |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Manage Directories**    | Opens the 'Manage User Directories' window allowing you to add/remove directories from  |
+|       |                           | the mantid search path, and to set the output folder where the summation result will be |
+|       |                           | saved.                                                                                  |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Remove**                | Removes an entry from the summation table. Note, this does not remove the file itself   |
+|       |                           | just removes it from the list of files to be summed.                                    |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Remove All**            | Removes all entries from the summation table. As above, this will only remove the       |
+|       |                           | entries from the table, not the files themselves.                                       |
++-------+---------------------------+-----------------------------------------------------------------------------------------+
+
+Histogram Binning
+^^^^^^^^^^^^^^^^^
+
+This panel allows you to specify the binning parameters to be applied when summing event data.
+
+Custom Binning
+""""""""""""""
+
+Use Binning From Monitors
+"""""""""""""""""""""""""
+This panel has no options, summing in this mode uses the binning settings applied to the monitor
+runs.
+
+Save As Event Data
+""""""""""""""""""
+Ticking 'Overlay Event Workspaces' allows you to specify Additional Time Shifts.
+
+
 Settings
 --------
 
