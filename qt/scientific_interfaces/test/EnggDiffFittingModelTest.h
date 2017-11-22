@@ -23,22 +23,24 @@ namespace {
 // This means we can test the workspace maps without having to run Load
 class EnggDiffFittingModelAddWSExposed : public EnggDiffFittingModel {
 public:
-	void addWorkspace(const int runNumber, const size_t bank,
-		Mantid::API::MatrixWorkspace_sptr ws);
+  void addWorkspace(const int runNumber, const size_t bank,
+                    Mantid::API::MatrixWorkspace_sptr ws);
 
-	void addFitParams(const int runNumber, const size_t bank,
-		Mantid::API::ITableWorkspace_sptr ws);
+  void addFitParams(const int runNumber, const size_t bank,
+                    Mantid::API::ITableWorkspace_sptr ws);
 };
 
 inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
-	const int runNumber, const size_t bank, Mantid::API::MatrixWorkspace_sptr ws) {
-	addFocusedWorkspace(runNumber, bank, ws,
-		                std::to_string(runNumber) + "_" + std::to_string(bank));
+    const int runNumber, const size_t bank,
+    Mantid::API::MatrixWorkspace_sptr ws) {
+  addFocusedWorkspace(runNumber, bank, ws,
+                      std::to_string(runNumber) + "_" + std::to_string(bank));
 }
 
-inline void EnggDiffFittingModelAddWSExposed::addFitParams(const int runNumber, 
-	const size_t bank, Mantid::API::ITableWorkspace_sptr ws) {
-	addFitResults(runNumber, bank, ws);
+inline void EnggDiffFittingModelAddWSExposed::addFitParams(
+    const int runNumber, const size_t bank,
+    Mantid::API::ITableWorkspace_sptr ws) {
+  addFitResults(runNumber, bank, ws);
 }
 
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
@@ -93,28 +95,25 @@ public:
   }
 
   void test_loadWorkspaces() {
-	  auto model = EnggDiffFittingModel();
-	  TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
-	  Mantid::API::MatrixWorkspace_sptr ws;
-	  TS_ASSERT_THROWS_NOTHING(
-		  ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER,
-			                             FOCUSED_WS_BANK));
-	  TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-	  TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
+    auto model = EnggDiffFittingModel();
+    TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+    Mantid::API::MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
   }
 
-  void test_createFittedPeaksWS() {
-
-  }
+  void test_createFittedPeaksWS() {}
 
 private:
-	const static std::string FOCUSED_WS_FILENAME;
-	const static int FOCUSED_WS_RUN_NUMBER;
-	const static size_t FOCUSED_WS_BANK;
+  const static std::string FOCUSED_WS_FILENAME;
+  const static int FOCUSED_WS_RUN_NUMBER;
+  const static size_t FOCUSED_WS_BANK;
 };
 
-const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME = 
-      "ENGINX_277208_focused_bank_2.nxs";
+const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME =
+    "ENGINX_277208_focused_bank_2.nxs";
 
 const int EnggDiffFittingModelTest::FOCUSED_WS_RUN_NUMBER = 277208;
 
