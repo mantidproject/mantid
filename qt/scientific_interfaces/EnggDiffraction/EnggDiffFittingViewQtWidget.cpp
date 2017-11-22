@@ -571,7 +571,7 @@ void EnggDiffFittingViewQtWidget::showToolTipHelp() {
   QCoreApplication::sendEvent(m_ui.pushButton_tooltip, toolTipEvent);
 }
 
-std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
+std::string EnggDiffFittingViewQtWidget::getExpectedPeaksInput() const {
 
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
 }
