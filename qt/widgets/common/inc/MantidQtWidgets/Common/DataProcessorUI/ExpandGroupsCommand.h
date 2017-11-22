@@ -49,6 +49,7 @@ public:
         "all collapsed groups, revealing their individual runs.");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }
