@@ -41,7 +41,8 @@ DEFAULT_BIN_SETTINGS = \
 
 
 def _make_run_selector(run_selector_view, parent_view):
-    return RunSelectorPresenter(RunSelection(),
+    return RunSelectorPresenter('Runs To Sum',
+                                RunSelection(),
                                 RunFinder(),
                                 run_selector_view,
                                 parent_view)

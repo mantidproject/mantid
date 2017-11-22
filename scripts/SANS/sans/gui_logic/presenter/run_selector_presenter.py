@@ -3,10 +3,11 @@ from sans.gui_logic.models.run_file import RunFile
 
 
 class RunSelectorPresenter(object):
-    def __init__(self, run_selection, run_finder, view, parent_view):
+    def __init__(self, title, run_selection, run_finder, view, parent_view):
         self._run_selection = run_selection
         self._run_finder = run_finder
         self.view = view
+        self.view.title = title
         self.parent_view = parent_view
         self._connect_to_view(view)
         self.refresh()

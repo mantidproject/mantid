@@ -4,7 +4,6 @@ from PyQt4 import QtGui, QtCore
 
 import ui_run_selector_widget
 from PyQt4.QtCore import pyqtSignal
-from sans.gui_logic.models.binning_type import BinningType
 from mantidqtpython import MantidQt
 
 
@@ -18,41 +17,42 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
     def __init__(self, parent=None):
         super(RunSelectorWidget, self).__init__(parent)
         self.setupUi(self)
-        self.connect_signals()
+        self._connect_signals()
 
     def setupUi(self, other):
         ui_run_selector_widget.Ui_RunSelectorWidget.setupUi(self, other)
         self.runList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
-    def connect_signals(self):
-        self.addRunButton.pressed.connect(self.on_add_pressed)
-        self.runLineEdit.returnPressed.connect(self.on_add_pressed)
-        self.removeRunButton.pressed.connect(self.on_remove_pressed)
-        self.removeAllRunsButton.pressed.connect(self.on_remove_all_pressed)
-        self.manageDirectoriesButton.pressed.connect(self.on_manage_directories)
-        self.browseFileButton.pressed.connect(self.on_browse_files)
+    def show_file_picker(self, extensions, search_directories):
+        previous_directories = self._previous_directory_settings()
+        default_directory = search_directories[0]
+        directory = self._previous_or_default_directory(previous_directories, default_directory)
+        file_filter = self._filter_for_extensions(extensions)
+        chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
+        if chosen_files:
+            self._store_previous_directory(previous_directories, chosen_files[0])
+        return chosen_files
 
-    def binning_type_index_to_type(self, index):
-        if index == 0:
-            return BinningType.Custom
-        elif index == 1:
-            return BinningType.FromMonitors
-        elif index == 2:
-            return BinningType.SaveAsEventData
+    def _previous_directory_settings(self):
+        previous_directories = QtCore.QSettings()
+        previous_directories.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns")
+        return previous_directories
 
-    def show_directories_manager(self):
-        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+    def _previous_or_default_directory(self, settings, default):
+        return settings.value("InPath", default)
 
-    def filter_for_extensions(self, extensions):
+    def _store_previous_directory(self, settings, path):
+        previous_file = QtCore.QFileInfo(path)
+        settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
+
+    def _filter_for_extensions(self, extensions):
         if extensions:
             return "Files ( *" + " *".join(extensions) + ")"
         else:
             return "Files ()"
 
-    def previous_directory_settings(self):
-        previous_directories = QtCore.QSettings()
-        previous_directories.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns")
-        return previous_directories
+    def _show_directories_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
 
     def run_not_found(self):
         QtGui.QMessageBox.warning(self, "Run Not Found!",
@@ -60,23 +60,6 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
 
     def invalid_run_query(self, message):
         QtGui.QMessageBox.warning(self, "Invalid Run Query!", message)
-
-    def previous_or_default_directory(self, settings, default):
-        return settings.value("InPath", default)
-
-    def store_previous_directory(self, settings, path):
-        previous_file = QtCore.QFileInfo(path)
-        settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
-
-    def show_file_picker(self, extensions, search_directories):
-        previous_directories = self.previous_directory_settings()
-        default_directory = search_directories[0]
-        directory = self.previous_or_default_directory(previous_directories, default_directory)
-        file_filter = self.filter_for_extensions(extensions)
-        chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
-        if chosen_files:
-            self.store_previous_directory(previous_directories, chosen_files[0])
-        return chosen_files
 
     def run_list(self):
         return self.runLineEdit.text()
@@ -94,17 +77,33 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
             model.appendRow(item)
         self.runList.setModel(model)
 
-    def on_add_pressed(self):
+    @property
+    def title(self):
+        self.runsGroup.getTitle()
+
+    @title.setter
+    def title(self, new_title):
+        self.runsGroup.setTitle(new_title)
+
+    def _handle_add_run(self):
         self.addRuns.emit()
 
-    def on_remove_all_pressed(self):
+    def _handle_remove_all_runs(self):
         self.removeAllRuns.emit()
 
-    def on_remove_pressed(self):
+    def _handle_remove_run(self):
         self.removeRuns.emit()
 
-    def on_manage_directories(self):
+    def _handle_manage_directories(self):
         self.manageDirectories.emit()
 
-    def on_browse_files(self):
+    def _handle_browse_files(self):
         self.browse.emit()
+
+    def _connect_signals(self):
+        self.addRunButton.pressed.connect(self._handle_add_run)
+        self.runLineEdit.returnPressed.connect(self._handle_add_run)
+        self.removeRunButton.pressed.connect(self._handle_remove_run)
+        self.removeAllRunsButton.pressed.connect(self._handle_remove_all_runs)
+        self.manageDirectoriesButton.pressed.connect(self._handle_manage_directories)
+        self.browseFileButton.pressed.connect(self._handle_browse_files)
