@@ -41,6 +41,11 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" 
 endif()
 
 ###########################################################################
+# Qt5 is always in the same place
+###########################################################################
+set ( Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5 )
+
+###########################################################################
 # On Windows we want to bundle Python.
 ###########################################################################
 set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION} )
