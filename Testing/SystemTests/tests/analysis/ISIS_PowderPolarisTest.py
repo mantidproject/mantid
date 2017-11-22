@@ -53,7 +53,9 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return calibration_validator(self.calibration_results)
+        splined_ws, unsplined_ws = self.calibration_results
+        return unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs", \
+               splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs"
 
     def cleanup(self):
         try:
@@ -78,7 +80,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
         try:
@@ -132,33 +134,6 @@ def run_focus():
     return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
-
-
-def calibration_validator(results):
-    splined_ws, unsplined_ws = results
-    # Get the name of the grouped workspace list
-    splined_reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
-    unsplined_reference_file_name = "ISIS_Powder-POLARIS00098533_unsplined.nxs"
-    return _compare_ws(reference_file_name=splined_reference_file_name, results=splined_ws) and \
-        _compare_ws(reference_file_name=unsplined_reference_file_name, results=unsplined_ws)
-
-
-def focus_validation(results):
-    reference_file_name = "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-
-    is_valid = len(results) > 0
-
-    for ws, ref in zip(results, ref_ws):
-        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)[0]):
-            is_valid = False
-            print (ws.getName() + " was not equal to: " + ref.getName())
-
-    return is_valid
 
 
 def setup_mantid_paths():
