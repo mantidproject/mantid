@@ -1,13 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "../EnggDiffraction/EnggDiffFittingModel.h"
 
+#include <cxxtest/TestSuite.h>
 #include <vector>
 
 // Lets us have pairs inside assertion macros
@@ -24,12 +24,20 @@ class EnggDiffFittingModelAddWSExposed : public EnggDiffFittingModel {
 public:
 	void addWorkspace(const int runNumber, const size_t bank,
 		Mantid::API::MatrixWorkspace_sptr ws);
+
+	void addFitParams(const int runNumber, const size_t bank,
+		Mantid::API::ITableWorkspace_sptr ws);
 };
 
-void EnggDiffFittingModelAddWSExposed::addWorkspace(
+inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
 	const int runNumber, const size_t bank, Mantid::API::MatrixWorkspace_sptr ws) {
 	addFocusedWorkspace(runNumber, bank, ws,
 		                std::to_string(runNumber) + "_" + std::to_string(bank));
+}
+
+inline void EnggDiffFittingModelAddWSExposed::addFitParams(const int runNumber, 
+	const size_t bank, Mantid::API::ITableWorkspace_sptr ws) {
+	addFitResults(runNumber, bank, ws);
 }
 
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
@@ -80,6 +88,33 @@ public:
     TS_ASSERT_EQUALS(runNoBankPairs[2], RunBankPair(456, 2));
     TS_ASSERT_EQUALS(runNoBankPairs[3], RunBankPair(789, 1));
   }
+
+  void test_loadWorkspaces() {
+	  auto model = EnggDiffFittingModel();
+	  TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+	  Mantid::API::MatrixWorkspace_sptr ws;
+	  TS_ASSERT_THROWS_NOTHING(
+		  ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER,
+			                             FOCUSED_WS_BANK));
+	  TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+	  TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
+  }
+
+  void test_createFittedPeaksWS() {
+
+  }
+
+private:
+	const static std::string FOCUSED_WS_FILENAME;
+	const static int FOCUSED_WS_RUN_NUMBER;
+	const static size_t FOCUSED_WS_BANK;
 };
+
+const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME = 
+      "ENGINX_277208_focused_bank_2.nxs";
+
+const int EnggDiffFittingModelTest::FOCUSED_WS_RUN_NUMBER = 277208;
+
+const size_t EnggDiffFittingModelTest::FOCUSED_WS_BANK = 2;
 
 #endif
