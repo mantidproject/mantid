@@ -1,5 +1,6 @@
 import numpy
 
+
 def _getWkspIndexDistAndLabel(workspace, kwargs):
     # get the special arguments out of kwargs
     specNum = kwargs.get('specNum', None)
@@ -29,7 +30,10 @@ def _getWkspIndexDistAndLabel(workspace, kwargs):
 
     return (wkspIndex, distribution, kwargs)
 
+
 def _getDistribution(workspace, kwargs):
+    '''Determine whether or not the data is a distribution. The value in
+    the kwargs wins.'''
     distribution = kwargs.get('distribution', None)
     if 'distribution' in kwargs:
         del kwargs['distribution']
@@ -43,7 +47,9 @@ def _getDistribution(workspace, kwargs):
 
     return (distribution, kwargs)
 
+
 def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
+    '''Extract a single spectrum and process the data into a frequency'''
     x = workspace.readX(wkspIndex)
     y = workspace.readY(wkspIndex)
     dy = None
@@ -60,6 +66,7 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         x = .5*(x[0:-1]+x[1:])
 
     return (x,y,dy,dx)
+
 
 def plot(axes, workspace, *args, **kwargs):
     '''Unpack mantid workspace and render it with matplotlib. ``args`` and
@@ -82,6 +89,7 @@ def plot(axes, workspace, *args, **kwargs):
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     axes.plot(x, y, *args, **kwargs)
 
+
 def errorbar(axes, workspace, *args, **kwargs):
     '''Unpack mantid workspace and render it with matplotlib. ``args`` and
     ``kwargs`` are passed to :meth:matplotlib.axes.Axes.errorbar after special
@@ -102,6 +110,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
     axes.errorbar(x, y, dy, dx, *args, **kwargs)
+
 
 def scatter(axes, workspace, *args, **kwargs):
     '''Unpack mantid workspace and render it with matplotlib. ``args`` and
@@ -124,6 +133,7 @@ def scatter(axes, workspace, *args, **kwargs):
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
     axes.scatter(x, y, *args, **kwargs)
 
+
 def _getContour(workspace, distribution):
     x = workspace.extractX()
     z = workspace.extractY()
@@ -143,6 +153,7 @@ def _getContour(workspace, distribution):
 
     return (x,y,z)
 
+
 def contour(axes, workspace, *args, **kwargs):
     '''Essentially the same as :meth:`matplotlib.axes.Axes.contour`
     but calculates the countour levels. Currently this only works with
@@ -158,6 +169,7 @@ def contour(axes, workspace, *args, **kwargs):
     (x,y,z) = _getContour(workspace, distribution)
 
     axes.contour(x, y, z, *args, **kwargs)
+
 
 def contourf(axes, workspace, *args, **kwargs):
     '''Essentially the same as :meth:`matplotlib.axes.Axes.contourf`
