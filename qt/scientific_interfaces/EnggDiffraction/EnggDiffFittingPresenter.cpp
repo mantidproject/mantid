@@ -74,41 +74,6 @@ std::string stripExtraCommas(std::string &expectedPeaks) {
 }
 }
 
-// Remove commas at the start and end of the string,
-// as well as any adjacent to another (eg ,, gets corrected to ,)
-std::string stripExtraCommas(std::string &expectedPeaks) {
-  if (!expectedPeaks.empty()) {
-
-    g_log.debug() << "Validating the expected peak list.\n";
-
-    const auto comma = ',';
-
-    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
-      size_t j = i + 1;
-
-      if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
-        expectedPeaks.erase(j, 1);
-        i--;
-
-      } else {
-        ++j;
-      }
-    }
-
-    size_t strLength = expectedPeaks.length() - 1;
-    if (expectedPeaks.at(0) == ',') {
-      expectedPeaks.erase(0, 1);
-      strLength -= 1;
-    }
-
-    if (expectedPeaks.at(strLength) == ',') {
-      expectedPeaks.erase(strLength, 1);
-    }
-  }
-  return expectedPeaks;
-}
-}
-
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
 /**
@@ -898,7 +863,10 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+<<<<<<< 5bbf443fecb1b4c1ed3dc778039d004e6a02f238
 
+=======
+>>>>>>> Re #21238 Removed unused field
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
