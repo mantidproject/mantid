@@ -128,13 +128,13 @@ struct comparePulseTimeTOFDelta {
   explicit comparePulseTimeTOFDelta(const Types::Core::DateAndTime &start,
                                     const double seconds)
       : startNano(start.totalNanoseconds()),
-        deltaNano(static_cast<int64_t>(seconds * 1.e9)) {}
+        deltaNano(static_cast<int64_t>(seconds * SEC_TO_NANO)) {}
 
   bool operator()(const TofEvent &e1, const TofEvent &e2) {
     // get the pulse times converted into bin number from start time
-    int64_t e1Pulse =
+    const int64_t e1Pulse =
         (e1.pulseTime().totalNanoseconds() - startNano) / deltaNano;
-    int64_t e2Pulse =
+    const int64_t e2Pulse =
         (e2.pulseTime().totalNanoseconds() - startNano) / deltaNano;
 
     // compare with the calculated bin information
@@ -971,7 +971,7 @@ void EventList::sort(const EventSortType order) const {
     this->sortPulseTimeTOF();
   } else if (order == PULSETIMETOF_DELTA_SORT) {
     throw std::invalid_argument("sorting by pulse time with delta requires "
-                                "extraparameters. Use sortPulseTimeTOFDelta "
+                                "extra parameters. Use sortPulseTimeTOFDelta "
                                 "instead.");
   } else if (order == TIMEATSAMPLE_SORT) {
     throw std::invalid_argument("sorting by time at sample requires extra "
@@ -1559,8 +1559,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   // If you have over-allocated by more than 5%, reduce the size.
   size_t excess_limit = out.size() / 20;
   if ((out.capacity() - out.size()) > excess_limit) {
-    // Note: This forces a copy!
-    std::vector<WeightedEventNoTime>(out).swap(out);
+    out.shrink_to_fit();
   }
 }
 
@@ -1669,7 +1668,7 @@ inline void EventList::compressFatEventsHelper(
   double totalTof = 0;
 
   // pulsetime bin information - stored as int nanoseconds because it
-  // implementation type for DateAndTime object
+  // is the implementation type for DateAndTime object
   const int64_t pulsetimeStart = timeStart.totalNanoseconds();
   const int64_t pulsetimeDelta = static_cast<int64_t>(seconds * SEC_TO_NANO);
 
@@ -1680,7 +1679,10 @@ inline void EventList::compressFatEventsHelper(
   double weight = 0;
   double errorSquared = 0;
 
-  // move up to first event that has a large enough pusletime
+  // Move up to first event that has a large enough pulsetime. This is just in
+  // case someone starts from after the starttime of the run. It is expected
+  // that users will normally use the default which means this will only check
+  // the first event.
   auto it = events.cbegin();
   for (; it != events.cend(); ++it) {
     if (it->m_pulsetime >= timeStart)
@@ -1735,8 +1737,7 @@ inline void EventList::compressFatEventsHelper(
   // If you have over-allocated by more than 5%, reduce the size.
   size_t excess_limit = out.size() / 20;
   if ((out.capacity() - out.size()) > excess_limit) {
-    // Note: This forces a copy!
-    std::vector<WeightedEvent>(out).swap(out);
+    out.shrink_to_fit();
   }
 }
 
@@ -1751,47 +1752,50 @@ inline void EventList::compressFatEventsHelper(
  *be == this.
  */
 void EventList::compressEvents(double tolerance, EventList *destination) {
-  this->sortTof();
-  switch (eventType) {
-  case TOF:
-    //      if (parallel)
-    //        compressEventsParallelHelper(this->events,
-    //        destination->weightedEventsNoTime, tolerance);
-    //      else
-    compressEventsHelper(this->events, destination->weightedEventsNoTime,
-                         tolerance);
-    break;
+  if (!this->empty()) {
+    this->sortTof();
+    switch (eventType) {
+    case TOF:
+      //      if (parallel)
+      //        compressEventsParallelHelper(this->events,
+      //        destination->weightedEventsNoTime, tolerance);
+      //      else
+      compressEventsHelper(this->events, destination->weightedEventsNoTime,
+                           tolerance);
+      break;
 
-  case WEIGHTED:
-    //      if (parallel)
-    //        compressEventsParallelHelper(this->weightedEvents,
-    //        destination->weightedEventsNoTime, tolerance);
-    //      else
-    compressEventsHelper(this->weightedEvents,
-                         destination->weightedEventsNoTime, tolerance);
-
-    break;
-
-  case WEIGHTED_NOTIME:
-    if (destination == this) {
-      // Put results in a temp output
-      std::vector<WeightedEventNoTime> out;
-      //        if (parallel)
-      //          compressEventsParallelHelper(this->weightedEventsNoTime, out,
-      //          tolerance);
-      //        else
-      compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
-      // Put it back
-      this->weightedEventsNoTime.swap(out);
-    } else {
-      //        if (parallel)
-      //          compressEventsParallelHelper(this->weightedEventsNoTime,
-      //          destination->weightedEventsNoTime, tolerance);
-      //        else
-      compressEventsHelper(this->weightedEventsNoTime,
+    case WEIGHTED:
+      //      if (parallel)
+      //        compressEventsParallelHelper(this->weightedEvents,
+      //        destination->weightedEventsNoTime, tolerance);
+      //      else
+      compressEventsHelper(this->weightedEvents,
                            destination->weightedEventsNoTime, tolerance);
+
+      break;
+
+    case WEIGHTED_NOTIME:
+      if (destination == this) {
+        // Put results in a temp output
+        std::vector<WeightedEventNoTime> out;
+        //        if (parallel)
+        //          compressEventsParallelHelper(this->weightedEventsNoTime,
+        //          out,
+        //          tolerance);
+        //        else
+        compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+        // Put it back
+        this->weightedEventsNoTime.swap(out);
+      } else {
+        //        if (parallel)
+        //          compressEventsParallelHelper(this->weightedEventsNoTime,
+        //          destination->weightedEventsNoTime, tolerance);
+        //        else
+        compressEventsHelper(this->weightedEventsNoTime,
+                             destination->weightedEventsNoTime, tolerance);
+      }
+      break;
     }
-    break;
   }
   // In all cases, you end up WEIGHTED_NOTIME.
   destination->eventType = WEIGHTED_NOTIME;
@@ -1806,7 +1810,7 @@ void EventList::compressFatEvents(
     const double seconds, EventList *destination) {
 
   // only worry about non-empty EventLists
-  if (this->getNumberEvents() > 0) {
+  if (!this->empty()) {
     switch (eventType) {
     case WEIGHTED_NOTIME:
       throw std::invalid_argument(
