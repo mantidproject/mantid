@@ -100,6 +100,10 @@ function (mtd_add_qt_target)
   set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   set ( _all_defines ${PARSED_DEFS};${PARSED_QT${PARSED_QT_VERSION}_DEFS} )
   if (PARSED_QT_VERSION EQUAL 4)
+    # Workaround Qt compiler detection
+    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+    # https://bugreports.qt.io/browse/QTBUG-39142
+    list ( APPEND _all_defines Q_COMPILER_INITIALIZER_LISTS )
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp ( 4 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT4_SRC} ${MOC_GENERATED})
