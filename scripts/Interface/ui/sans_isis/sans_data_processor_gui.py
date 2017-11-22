@@ -620,6 +620,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
 
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -718,6 +726,32 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def merge_q_range_stop(self, value):
         if value is not None:
             self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
+
+    @property
+    def merge_mask(self):
+        return self.merge_mask_check_box.isChecked()
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.merge_mask_check_box.setChecked(value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_max_line_edit", value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_min_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
@@ -1363,6 +1397,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_scale_line_edit.setValidator(double_validator)
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
+        self.merged_max_line_edit.setValidator(double_validator)
+        self.merged_min_line_edit.setValidator(double_validator)
 
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1417,6 +1453,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.merged_q_range_start_line_edit.setText("")
         self.merged_q_range_stop_line_edit.setText("")
+        self.merged_max_line_edit.setText("")
+        self.merged_min_line_edit.setText("")
         self.merged_scale_line_edit.setText("")
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)
