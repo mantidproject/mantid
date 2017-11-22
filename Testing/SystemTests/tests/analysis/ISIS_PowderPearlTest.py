@@ -58,7 +58,6 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
                "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined_{}.nxs".format(self.focus_mode)
 
-
     def cleanup(self):
         try:
             _try_delete(output_dir)

@@ -54,8 +54,8 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
 
     def validate(self):
         splined_ws, unsplined_ws = self.calibration_results
-        return unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs", \
-               splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs"
+        return (unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
+                splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs")
 
     def cleanup(self):
         try:
