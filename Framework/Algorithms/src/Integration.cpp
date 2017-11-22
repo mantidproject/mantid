@@ -257,7 +257,8 @@ void Integration::exec() {
         // Workspace has fractional area information, need to take into account
         const MantidVec &F = rebinned_input->readF(i);
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
-        Fmin = F[distmin - 1];
+        if (distmin > 0)
+          Fmin = F[distmin - 1];
         Fmax = F[distmax];
       }
       if (!is_distrib) {
