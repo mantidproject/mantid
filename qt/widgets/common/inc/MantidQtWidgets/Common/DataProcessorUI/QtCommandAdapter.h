@@ -54,21 +54,10 @@ public:
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChild()) {
-      // We are dealing with a submenu
-      // Add the submenu
-      QMenu *submenu =
-          menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
-      // Add the actions
-      auto &child = m_adaptee->getChild();
-      for (auto &ch : child) {
-        m_adapter.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
-            submenu, std::move(ch)));
-      }
+      createSubmenu(menu);
     } else {
       // We are dealing with an action
-      /// @todo Generalise m_action to include submenus
-      m_action = createAction();
-      menu->addAction(m_action);
+      createAction(menu);
     }
   };
 
@@ -79,12 +68,12 @@ public:
   QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
-    if (!m_adaptee->hasChild()) {
-      // Sub-menus cannot be added to a toolbar
+    // Sub-menus cannot be added to a toolbar
+    if (m_adaptee->hasChild())
+      return;
 
-      m_action = createAction(true);
-      toolbar->addAction(m_action);
-    }
+    // We are dealing with an action
+    createAction(toolbar, true);
   };
 
   /** Set the action to be enabled/disabled according
@@ -94,6 +83,12 @@ public:
    * @param isProcessing :: true if processing is in progress
    * */
   void updateEnabledState(const bool isProcessing) {
+    // Recurse through any child items
+    for (auto &child : m_childAdapters)
+      child->updateEnabledState(isProcessing);
+
+    // Update the action (nothing to do if this is a submenu rather
+    // than an action)
     if (!m_action)
       return;
 
@@ -108,39 +103,59 @@ public:
   }
 
   QAction *getAction() {
-    return m_action;
+    return m_action.get();
   }
 
 private:
   /**
-   * Creates the action
+   * Creates a submenu
    *
+   * @param menu : the parent menu to add the submenu to
+   */
+  void createSubmenu(QMenu *menu) {
+    // We are dealing with a submenu
+    // Add the submenu. Note that menu takes ownership of submenu.
+    QMenu *submenu =
+      menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
+    // Add the actions
+    auto &child = m_adaptee->getChild();
+    for (auto &ch : child) {
+      m_childAdapters.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
+          submenu, std::move(ch)));
+    }
+  }
+
+  /**
+   * Creates an action and adds it to a widget
+   *
+   * @param widget : The widget to add the action to
    * @param shortcut : Whether or not to add a shortcut
    */
-  QAction *createAction(bool shortcut = false) {
-    QAction *action = new QAction(m_adaptee->name(), this);
-    action->setIcon(QIcon(m_adaptee->icon()));
-    action->setSeparator(m_adaptee->isSeparator());
-    action->setToolTip(m_adaptee->tooltip());
-    action->setWhatsThis(m_adaptee->whatsthis());
+  void createAction(QWidget *widget, bool shortcut = false) {
+    m_action = Mantid::Kernel::make_unique<QAction>(m_adaptee->name(), this);
+    m_action->setIcon(QIcon(m_adaptee->icon()));
+    m_action->setSeparator(m_adaptee->isSeparator());
+    m_action->setToolTip(m_adaptee->tooltip());
+    m_action->setWhatsThis(m_adaptee->whatsthis());
     if (shortcut)
-      action->setShortcut(QKeySequence(m_adaptee->shortcut()));
-    connect(action, SIGNAL(triggered()), this, SLOT(call()));
+      m_action->setShortcut(QKeySequence(m_adaptee->shortcut()));
+    connect(m_action.get(), SIGNAL(triggered()), this, SLOT(call()));
 
-    return action;
+    // The widget does not take ownership of the action so we retain ownership
+    widget->addAction(m_action.get());
   };
 
 public slots:
   void call() { m_adaptee->execute(); }
 
 private:
-  QAction *m_action;
+  // The menu item's action. May be null for a parent menu item.
+  std::unique_ptr<QAction> m_action;
   // The adaptee
   Command_uptr m_adaptee;
-  std::vector<std::unique_ptr<QtCommandAdapter>> m_adapter;
+  // The child adaptors
+  std::vector<std::unique_ptr<QtCommandAdapter>> m_childAdapters;
 };
-
-using QtCommandAdapter_uptr = std::unique_ptr<QtCommandAdapter>;
 }
 }
 }

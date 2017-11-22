@@ -162,15 +162,15 @@ private:
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
   boost::shared_ptr<AbstractTreeModel> m_model;
-  // the interface
+  // Command adapters
+  std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
+  // the interface (uses actions owned by m_commands)
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   QString m_toOpen;
   // the context menu
   QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
-  // Command adapters
-  std::vector<std::unique_ptr<QtCommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);

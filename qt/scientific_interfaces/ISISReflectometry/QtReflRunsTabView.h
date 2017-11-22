@@ -110,12 +110,12 @@ private:
   std::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
-  // the interface
+  // Command adapters
+  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
+  // the interface (uses actions owned by m_commands)
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
-  // Command adapters
-  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();
