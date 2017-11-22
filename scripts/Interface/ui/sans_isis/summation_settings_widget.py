@@ -39,9 +39,9 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
             self.binningType.addItem(binningType)
 
     def _connect_signals(self):
-        self.binningType.currentIndexChanged.connect(self._on_binning_type_changed)
-        self.overlayEventWorkspacesCheckbox.stateChanged.connect(self._on_overlay_ews_changed)
-        self.binningOptionsLineEdit.editingFinished.connect(self._on_binning_options_line_edit_changed)
+        self.binningType.currentIndexChanged.connect(self._handle_binning_type_changed)
+        self.overlayEventWorkspacesCheckbox.stateChanged.connect(self._handle_overlay_ews_changed)
+        self.binningOptionsLineEdit.editingFinished.connect(self._handle_binning_options_line_edit_changed)
 
     def _binning_type_index_to_type(self, index):
         if index == 0:
@@ -51,18 +51,18 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         elif index == 2:
             return BinningType.SaveAsEventData
 
-    def _on_binning_type_changed(self, index):
+    def _handle_binning_type_changed(self, index):
         binning_type = self._binning_type_index_to_type(index)
         self.binningTypeChanged.emit(binning_type)
 
-    def _on_binning_options_line_edit_changed(self):
+    def _handle_binning_options_line_edit_changed(self):
         # Since the text box is shared we don't
         # know which of these was actually changed.
         # The presenter can work it out.
         self.binSettingsChanged.emit()
         self.additionalTimeShiftsChanged.emit()
 
-    def _on_overlay_ews_changed(self, state):
+    def _handle_overlay_ews_changed(self, state):
         self.preserveEventsChanged.emit(state != 0)
 
     def apply_settings(self, settings):
