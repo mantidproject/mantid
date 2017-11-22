@@ -1,4 +1,4 @@
-from binning_type import BinningType
+from sans.gui_logic.models.binning_type import BinningType
 
 
 class OverlayEventWorkspaces(object):
