@@ -46,6 +46,8 @@ class SampleDetails(object):
                                                         exception_msg="The following argument is required but was not"
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
+        temperature = common.dictionary_key_helper(dictionary=kwargs, key="temperature", throws=False)
+        pressure = common.dictionary_key_helper(dictionary=kwargs, key="pressure", throws=False)
 
         if self.material_object is not None:
             self.print_sample_details()
@@ -53,7 +55,8 @@ class SampleDetails(object):
                                " have not been set they can be modified with 'set_material_properties()'. Otherwise"
                                " to change the material call 'reset_sample_material()'")
 
-        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density)
+        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
+                                         temperature=temperature, pressure=pressure)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -143,7 +146,7 @@ class SampleDetails(object):
 
 
 class _Material(object):
-    def __init__(self, chemical_formula, number_density=None):
+    def __init__(self, chemical_formula, number_density=None, temperature=None, pressure=None):
         self.chemical_formula = chemical_formula
 
         # If it is not an element Mantid requires us to provide the number density
@@ -152,11 +155,19 @@ class _Material(object):
                 raise ValueError("A number density formula must be set on a chemical formula which is not elemental."
                                  " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The number"
                                  " density can be set using the following key: number_density")
-        if number_density:
-            # Always check value is sane if user has given one
-            _check_value_is_physical(property_name="number_density", value=number_density)
+
+        # Check numerical properties are valid
+        numeric_properties = {'number_density': number_density,
+                              'temperature': temperature,
+                              'pressure': pressure}
+        for key, value in iteritems(numeric_properties):
+            print('checking property {}, of value {}'.format(key, value))
+            if value:
+                _check_value_is_physical(property_name=key, value=value)
 
         self.number_density = number_density
+        self.temperature = temperature
+        self.pressure = pressure
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -174,6 +185,10 @@ class _Material(object):
             print("Number Density: {}".format(self.number_density))
         else:
             print("Number Density: Set from elemental properties by Mantid")
+        if self.temperature:
+            print("Temperature: {}".format(self.temperature))
+        if self.pressure:
+            print("Pressure: {}".format(self.pressure))
         self._print_material_properties()
 
     def _print_material_properties(self):
