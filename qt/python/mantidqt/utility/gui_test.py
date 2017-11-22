@@ -51,3 +51,38 @@ def meta_gui_test(name, bases, dic):
             dic[name] = gui_test(attr)
     cls = type(name, bases, dic)
     return cls
+
+
+def gui_test_case(cls):
+    """
+    Converts a unittest.TestCase class to a GUI test case by wrapping all
+    test methods in gui_test decorator. Usage:
+
+        @gui_test_case
+        class MyWidgetTest(unittest.TestCase):
+
+            def test_something(self):
+                ...
+
+            def test_something_else(self):
+                ...
+
+    Which is equivalent to the definition:
+
+        class MyWidgetTest(unittest.TestCase):
+
+            @gui_test
+            def test_something(self):
+                ...
+
+            @gui_test
+            def test_something_else(self):
+                ...
+
+    :param cls: Class instance
+    """
+    for name in dir(cls):
+        attr = getattr(cls, name)
+        if isinstance(attr, types.MethodType) and name.startswith('test'):
+            setattr(cls, name, gui_test(attr))
+    return cls

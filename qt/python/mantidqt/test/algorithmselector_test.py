@@ -3,7 +3,7 @@ from PyQt4.QtCore import Qt
 from collections import Counter
 from mantidqt.widgets.algorithmselector.model import Model
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
-from mantidqt.utility.gui_test import meta_gui_test
+from mantidqt.utility.gui_test import meta_gui_test, gui_test_case
 
 
 class ModelTest(unittest.TestCase):
@@ -20,9 +20,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(counter['FindEPP'], 1)
 
 
+@gui_test_case
 class WidgetTest(unittest.TestCase):
-
-    __metaclass__ = meta_gui_test
 
     def _select_in_tree(self, widget, item_label):
         items = widget.tree.findItems(item_label, Qt.MatchExactly | Qt.MatchRecursive)
