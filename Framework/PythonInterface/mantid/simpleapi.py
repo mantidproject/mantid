@@ -8,7 +8,7 @@
 
     The Rebin algorithm is mapped to this Python function:
 
-        Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
+       Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
 
     It returns the output workspace and this workspace has the same name as
     the variable it is assigned to, i.e.
