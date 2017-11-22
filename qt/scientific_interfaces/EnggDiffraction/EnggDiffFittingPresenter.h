@@ -153,9 +153,6 @@ private:
   processFullPathInput(const Poco::Path &pocoFilePath,
                        const std::vector<std::string> &splitBaseName);
 
-  // whether to use AlignDetectors to convert units
-  static const bool g_useAlignDetectors;
-
   static int g_fitting_runno_counter;
 
   // name of the workspace with the focused ws being used for fitting

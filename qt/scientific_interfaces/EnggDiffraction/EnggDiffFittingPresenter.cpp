@@ -74,8 +74,6 @@ std::string stripExtraCommas(std::string &expectedPeaks) {
 }
 }
 
-const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
-
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
 /**
@@ -816,10 +814,8 @@ void EnggDiffFittingPresenter::processLogMsg() {
 }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
-
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
-  // validate fitting data as it will remain the same through out
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
 
@@ -852,7 +848,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     // disable GUI to avoid any double threads
     m_view->enableCalibrateFocusFitUserActions(false);
     m_view->enableFitAllButton(false);
-    // startAsyncFittingWorker
+
     // doFitting()
     // WORK OUT WHAT TO DO HERE
     // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
@@ -874,7 +870,6 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-  const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -882,6 +877,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   g_log.debug() << "the expected peaks are: " << normalisedPeakCentres << '\n';
 
+  const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
   try {
     validateFittingInputs(filename, normalisedPeakCentres);
   } catch (std::invalid_argument &ia) {
