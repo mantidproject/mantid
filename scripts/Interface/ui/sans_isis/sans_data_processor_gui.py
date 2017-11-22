@@ -655,6 +655,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
 
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB

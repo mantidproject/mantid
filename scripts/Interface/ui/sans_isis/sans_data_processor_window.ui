@@ -1124,7 +1124,30 @@ QGroupBox::title {
                        <property name="title">
                         <string>Fit</string>
                        </property>
+                       <property name="flat">
+                        <bool>false</bool>
+                       </property>
+                       <property name="checkable">
+                        <bool>false</bool>
+                       </property>
                        <layout class="QGridLayout" name="gridLayout_22">
+                        <item row="1" column="0">
+                         <widget class="QComboBox" name="fit_selection_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects if fit options should be the same (Both) for Sample and Can, or if the user should be able to set them separately (Separate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string>Both</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Separate</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
                         <item row="2" column="3">
                          <widget class="QComboBox" name="fit_can_fit_type_combo_box">
                           <property name="toolTip">
@@ -1163,21 +1186,50 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="1" column="0">
-                         <widget class="QComboBox" name="fit_selection_combo_box">
+                        <item row="1" column="5">
+                         <widget class="QGroupBox" name="fit_sample_wavelength_combo_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects if fit options should be the same (Both) for Sample and Can, or if the user should be able to set them separately (Separate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
-                          <item>
-                           <property name="text">
-                            <string>Both</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>Separate</string>
-                           </property>
-                          </item>
+                          <property name="title">
+                           <string>Use custom wavelength range [Å]</string>
+                          </property>
+                          <property name="checkable">
+                           <bool>true</bool>
+                          </property>
+                          <property name="checked">
+                           <bool>false</bool>
+                          </property>
+                          <layout class="QGridLayout" name="gridLayout_23">
+                           <item row="0" column="1">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_min_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="2">
+                            <widget class="QLabel" name="fit_sample_to_label">
+                             <property name="text">
+                              <string>to</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="0">
+                            <widget class="QLabel" name="fit_sample_from_label">
+                             <property name="text">
+                              <string>from</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="3">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_max_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
                          </widget>
                         </item>
                         <item row="2" column="5">
@@ -1233,62 +1285,6 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="1" column="2">
-                         <widget class="QCheckBox" name="fit_sample_use_fit_check_box">
-                          <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                          <property name="text">
-                           <string>Use fit</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="5">
-                         <widget class="QGroupBox" name="fit_sample_wavelength_combo_box">
-                          <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                          <property name="title">
-                           <string>Use custom wavelength range [Å]</string>
-                          </property>
-                          <property name="checkable">
-                           <bool>true</bool>
-                          </property>
-                          <property name="checked">
-                           <bool>false</bool>
-                          </property>
-                          <layout class="QGridLayout" name="gridLayout_23">
-                           <item row="0" column="1">
-                            <widget class="QLineEdit" name="fit_sample_wavelength_min_line_edit">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="2">
-                            <widget class="QLabel" name="fit_sample_to_label">
-                             <property name="text">
-                              <string>to</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="0">
-                            <widget class="QLabel" name="fit_sample_from_label">
-                             <property name="text">
-                              <string>from</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="3">
-                            <widget class="QLineEdit" name="fit_sample_wavelength_max_line_edit">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </widget>
-                        </item>
                         <item row="1" column="4">
                          <widget class="QSpinBox" name="fit_sample_polynomial_order_spin_box">
                           <property name="toolTip">
@@ -1319,6 +1315,23 @@ QGroupBox::title {
                           </property>
                           <property name="maximum">
                            <number>6</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="2">
+                         <widget class="QCheckBox" name="fit_sample_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="0">
+                         <widget class="QCheckBox" name="show_transmission_view">
+                          <property name="text">
+                           <string>Show Transmission</string>
                           </property>
                          </widget>
                         </item>
