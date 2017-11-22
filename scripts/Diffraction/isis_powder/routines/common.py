@@ -576,9 +576,5 @@ def generate_sample_material(sample_details):
         material_json["AttenuationXSection"] = material.absorption_cross_section
     if material.scattering_cross_section:
         material_json["ScatteringXSection"] = material.scattering_cross_section
-    if material.temperature:
-        material_json["Temperature"] = material.temperature
-    if material.pressure:
-        material_json["Pressure"] = material.pressure
 
     return material_json
