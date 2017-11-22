@@ -1,5 +1,48 @@
 import numpy
 
+def _getWkspIndexDistAndLabel(workspace, kwargs):
+    # get the special arguments out of kwargs
+    specNum = kwargs.get('specNum', None)
+    if 'specNum' in kwargs:
+        del kwargs['specNum']
+    wkspIndex = kwargs.get('wkspIndex', None)
+    if 'wkspIndex' in kwargs:
+        del kwargs['wkspIndex']
+
+    # error check input parameters
+    if (specNum is not None) and (wkspIndex is not None):
+        raise RuntimeError('Must specify only specNum or wkspIndex')
+    if (specNum is None) and (wkspIndex is None):
+        raise RuntimeError('Must specify either specNum or wkspIndex')
+
+    # convert the spectrum number to a workspace index and vice versa
+    if specNum is not None:
+        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
+    else:
+        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
+
+    # create a label if it isn't already specified
+    if 'label' not in kwargs:
+        kwargs['label'] = 'spec {0}'.format(specNum)
+
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+
+    return (wkspIndex, distribution, kwargs)
+
+def _getDistribution(workspace, kwargs):
+    distribution = kwargs.get('distribution', None)
+    if 'distribution' in kwargs:
+        del kwargs['distribution']
+
+    # fix up the distribution flag
+    if workspace.isHistogramData():
+        if distribution is None:
+            distribution = workspace.isDistribution()
+        else:
+            distribution = bool(distribution)
+
+    return (distribution, kwargs)
+
 def plot(axes, workspace, *args, **kwargs):
     '''Unpack mantid workspace and render it with matplotlib. ``args`` and
     ``kwargs`` are passed to :meth:matplotlib.axes.Axes.plot after special
@@ -17,40 +60,11 @@ def plot(axes, workspace, *args, **kwargs):
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
     both will generate a :class:`exceptions.RuntimeError`.
     '''
-    # get the special arguments out of kwargs
-    specNum = kwargs.get('specNum', None)
-    if 'specNum' in kwargs:
-        del kwargs['specNum']
-    wkspIndex = kwargs.get('wkspIndex', None)
-    if 'wkspIndex' in kwargs:
-        del kwargs['wkspIndex']
-    distribution = kwargs.get('distribution', None)
-    if 'distribution' in kwargs:
-        del kwargs['distribution']
-
-    # error check input parameters
-    if (specNum is not None) and (wkspIndex is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
-    if (specNum is None) and (wkspIndex is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
-
-    # convert the spectrum number to a workspace index and vice versa
-    if specNum is not None:
-        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
-    else:
-        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
-
-    if 'label' not in kwargs:
-        kwargs['label'] = 'spec {0}'.format(specNum)
+    (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
 
     x = workspace.readX(wkspIndex)
     y = workspace.readY(wkspIndex)
     if workspace.isHistogramData():
-        if distribution is None:
-            distribution = workspace.isDistribution()
-        else:
-            distribution = bool(distribution)
-
         if not distribution:
             y = y / (x[1:] - x[0:-1])
 
@@ -75,42 +89,13 @@ def errorbar(axes, workspace, *args, **kwargs):
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
     both will generate a :class:`exceptions.RuntimeError`.
     '''
-    # get the special arguments out of kwargs
-    specNum = kwargs.get('specNum', None)
-    if 'specNum' in kwargs:
-        del kwargs['specNum']
-    wkspIndex = kwargs.get('wkspIndex', None)
-    if 'wkspIndex' in kwargs:
-        del kwargs['wkspIndex']
-    distribution = kwargs.get('distribution', None)
-    if 'distribution' in kwargs:
-        del kwargs['distribution']
-
-    # error check input parameters
-    if (specNum is not None) and (wkspIndex is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
-    if (specNum is None) and (wkspIndex is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
-
-    # convert the spectrum number to a workspace index and vice versa
-    if specNum is not None:
-        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
-    else:
-        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
-
-    if 'label' not in kwargs:
-        kwargs['label'] = 'spec {0}'.format(specNum)
+    (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
 
     x = workspace.readX(wkspIndex)
     y = workspace.readY(wkspIndex)
+    # TODO should extract dx but EventWorkspace does the wrong thing
     dy = workspace.readE(wkspIndex)
     if workspace.isHistogramData():
-        # TODO should extract dx but EventWorkspace does the wrong thing
-        if distribution is None:
-            distribution = workspace.isDistribution()
-        else:
-            distribution = bool(distribution)
-
         if not distribution:
             y = y / (x[1:] - x[0:-1])
             dy = dy / (x[1:] - x[0:-1])
@@ -130,19 +115,12 @@ def contour(axes, workspace, *args, **kwargs):
     means divide by bin width. True means do not divide by bin width.
     Applies only when the the workspace is a histogram.
     '''
-    distribution = kwargs.get('distribution', None)
-    if 'distribution' in kwargs:
-        del kwargs['distribution']
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
 
     x = workspace.extractX()
     z = workspace.extractY()
 
     if workspace.isHistogramData():
-        if distribution is None:
-            distribution = workspace.isDistribution()
-        else:
-            distribution = bool(distribution)
-
         if not distribution:
             z = z / (x[:,1:] - x[:,0:-1])
         x = .5*(x[:,0:-1]+x[:,1:])
@@ -168,19 +146,12 @@ def contourf(axes, workspace, *args, **kwargs):
     means divide by bin width. True means do not divide by bin width.
     Applies only when the the workspace is a histogram.
     '''
-    distribution = kwargs.get('distribution', None)
-    if 'distribution' in kwargs:
-        del kwargs['distribution']
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
 
     x = workspace.extractX()
     z = workspace.extractY()
 
     if workspace.isHistogramData():
-        if distribution is None:
-            distribution = workspace.isDistribution()
-        else:
-            distribution = bool(distribution)
-
         if not distribution:
             z = z / (x[:,1:] - x[:,0:-1])
         x = .5*(x[:,0:-1]+x[:,1:])
