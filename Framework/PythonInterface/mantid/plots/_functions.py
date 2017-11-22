@@ -100,7 +100,10 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
 
     if withDy:
         dy = workspace.readE(wkspIndex)
-    # TODO should extract dx but EventWorkspace does the wrong thing
+    # TODO should make extracting dx optional
+    if withDx and workspace.getSpectrum(wkspIndex).hasDx():
+        dy = workspace.readDx(wkspIndex)
+
     if workspace.isHistogramData():
         if not distribution:
             y = y / (x[1:] - x[0:-1])
