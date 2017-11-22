@@ -58,6 +58,11 @@ void EnggDiffFittingModel::addFocusedWorkspace(
   addToRunMap(runNumber, bank, m_wsFilenameMap, filename);
 }
 
+void EnggDiffFittingModel::addFitResults(const int runNumber, const size_t bank, 
+	                                     const Mantid::API::ITableWorkspace_sptr ws){
+	addToRunMap(runNumber, bank, m_fitParamsMap, ws);
+}
+
 std::string
 EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const {
@@ -117,8 +122,7 @@ void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
     API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
     const auto fitResultsTable =
         ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
-    addToRunMap(runNumber, bank, m_fitParamsMap, fitResultsTable);
-    m_fitParamsMap[bank - 1][runNumber] = fitResultsTable;
+    addFitResults(runNumber, bank, fitResultsTable);
   } catch (std::exception) {
     throw std::runtime_error(
         "Could not run the algorithm EnggFitPeaks successfully.");
