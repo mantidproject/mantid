@@ -19,9 +19,7 @@ add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
 # /W3     - Warning Level 3 (This is also the default)
-# /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
-#           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling

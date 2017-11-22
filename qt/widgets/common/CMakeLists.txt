@@ -266,6 +266,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
+	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
