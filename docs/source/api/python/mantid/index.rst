@@ -23,3 +23,4 @@ Submodules
    kernel/index
    geometry/index
    api/index
+   plots/index

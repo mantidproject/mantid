@@ -1,3 +1,19 @@
+#  This file is part of the mantid package
+#
+#  Copyright (C) 2017 mantidproject
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
 
 
@@ -69,21 +85,22 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
 
 
 def plot(axes, workspace, *args, **kwargs):
-    '''Unpack mantid workspace and render it with matplotlib. ``args`` and
-    ``kwargs`` are passed to :meth:matplotlib.axes.Axes.plot after special
+    '''
+    Unpack mantid workspace and render it with matplotlib. ``args`` and
+    ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.plot` after special
     keyword arguments are removed. This will automatically label the
     line according to the spectrum number unless specified otherwise.
 
-    @param workspace :: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    @param specNum :: spectrum number to plot
-    @param wkspIndex :: workspace index to plot
-    @param axes :: :class:`matplotlib.axes.Axes` object that will do the plotting
-    @param distribution :: None (default) asks the workspace. False
-    means divide by bin width. True means do not divide by bin width.
-    Applies only when the the workspace is a histogram.
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param specNum:   spectrum number to plot
+    :param wkspIndex: workspace index to plot
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
 
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`exceptions.RuntimeError`.
+    both will generate a :class:`RuntimeError`.
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
@@ -91,21 +108,22 @@ def plot(axes, workspace, *args, **kwargs):
 
 
 def errorbar(axes, workspace, *args, **kwargs):
-    '''Unpack mantid workspace and render it with matplotlib. ``args`` and
-    ``kwargs`` are passed to :meth:matplotlib.axes.Axes.errorbar after special
+    '''
+    Unpack mantid workspace and render it with matplotlib. ``args`` and
+    ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.errorbar` after special
     keyword arguments are removed. This will automatically label the
     line according to the spectrum number unless specified otherwise.
 
-    @param workspace :: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    @param specNum :: spectrum number to plot
-    @param wkspIndex :: workspace index to plot
-    @param axes :: :class:`matplotlib.axes.Axes` object that will do the plotting
-    @param distribution :: None (default) asks the workspace. False
-    means divide by bin width. True means do not divide by bin width.
-    Applies only when the the workspace is a histogram.
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param specNum:   spectrum number to plot
+    :param wkspIndex: workspace index to plot
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
 
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`exceptions.RuntimeError`.
+    both will generate a :class:`RuntimeError`.
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
@@ -113,21 +131,22 @@ def errorbar(axes, workspace, *args, **kwargs):
 
 
 def scatter(axes, workspace, *args, **kwargs):
-    '''Unpack mantid workspace and render it with matplotlib. ``args`` and
-    ``kwargs`` are passed to :meth:matplotlib.axes.Axes.scatter after special
+    '''
+    Unpack mantid workspace and render it with matplotlib. ``args`` and
+    ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.scatter` after special
     keyword arguments are removed. This will automatically label the
     line according to the spectrum number unless specified otherwise.
 
-    @param workspace :: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    @param specNum :: spectrum number to plot
-    @param wkspIndex :: workspace index to plot
-    @param axes :: :class:`matplotlib.axes.Axes` object that will do the plotting
-    @param distribution :: None (default) asks the workspace. False
-    means divide by bin width. True means do not divide by bin width.
-    Applies only when the the workspace is a histogram.
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param specNum:   spectrum number to plot
+    :param wkspIndex: workspace index to plot
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
 
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`exceptions.RuntimeError`.
+    both will generate a :class:`RuntimeError`.
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
@@ -155,15 +174,16 @@ def _getContour(workspace, distribution):
 
 
 def contour(axes, workspace, *args, **kwargs):
-    '''Essentially the same as :meth:`matplotlib.axes.Axes.contour`
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.contour`
     but calculates the countour levels. Currently this only works with
     workspaces that have a constant number of bins between spectra.
 
-    @param workspace :: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    @param axes :: :class:`matplotlib.axes.Axes` object that will do the plotting
-    @param distribution :: None (default) asks the workspace. False
-    means divide by bin width. True means do not divide by bin width.
-    Applies only when the the workspace is a histogram.
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
     '''
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)
@@ -172,15 +192,16 @@ def contour(axes, workspace, *args, **kwargs):
 
 
 def contourf(axes, workspace, *args, **kwargs):
-    '''Essentially the same as :meth:`matplotlib.axes.Axes.contourf`
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.contourf`
     but calculates the countour levels. Currently this only works with
     workspaces that have a constant number of bins between spectra.
 
-    @param workspace :: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    @param axes :: :class:`matplotlib.axes.Axes` object that will do the plotting
-    @param distribution :: None (default) asks the workspace. False
-    means divide by bin width. True means do not divide by bin width.
-    Applies only when the the workspace is a histogram.
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
     '''
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)

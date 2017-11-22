@@ -1,4 +1,4 @@
-#  This file is part of the mantidqt package
+#  This file is part of the mantid package
 #
 #  Copyright (C) 2017 mantidproject
 #
@@ -14,7 +14,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Functionality for unpacking mantid objects for plotting with matplotlib.
+"""
+Functionality for unpacking mantid objects for plotting with matplotlib.
 """
 
 # This file should be left free of PyQt imports to allow quick importing
