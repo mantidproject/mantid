@@ -91,6 +91,7 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * is easily visualized. The Rebin and Integration algorithms will have to
  * undo this in order to properly treat the data.
  * @param hasSqrdErrs :: does the workspace have squared errors?
+ * @param force :: ignore finalize flag or not?
  */
 void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
   if (m_finalized && !force)
@@ -122,6 +123,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
  * This function "unfinalizes" the workspace by taking the data/error arrays
  * and multiplying them by the corresponding fractional area array.
  * @param hasSqrdErrs :: does the workspace have squared errors?
+ * @param force :: ignore finalize flag or not?
  */
 void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
   if (!m_finalized && !force)
