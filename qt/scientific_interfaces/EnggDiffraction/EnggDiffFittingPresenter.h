@@ -115,8 +115,6 @@ private:
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
-  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
-
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
