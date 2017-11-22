@@ -66,7 +66,8 @@ class RunTabPresenter(object):
 
         # Logger
         self.sans_logger = Logger("SANS")
-
+        # Name of grpah to output to
+        self.output_graph = 'SANS-Latest'
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
@@ -255,8 +256,8 @@ class RunTabPresenter(object):
             self._set_indices()
 
             # 4. Create the graph if continuous output is specified
-            if self._view.plot_results:
-                mantidplot.newGraph('SANS-Latest')
+            if self._view.plot_results and not mantidplot.graph(self.output_graph):
+                mantidplot.newGraph(self.output_graph)
         except:
             self._view.halt_process_flag()
             raise
@@ -370,12 +371,15 @@ class RunTabPresenter(object):
         global_options += ","
         global_options += output_mode_selection
 
-        # Check is results should be plotted
+        # Check if results should be plotted
         plot_results_selection = "PlotResults=1" if self._view.plot_results else "PlotResults=0"
         global_options += ","
         global_options += plot_results_selection
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
+        # Get the name of the graph to output to
+        output_graph_selection = "OutputGraph={}".format(self.output_graph)
+        global_options += ","
+        global_options += output_graph_selection
         return global_options
 
     # ------------------------------------------------------------------------------------------------------------------
