@@ -170,7 +170,7 @@ Custom Binning
 
 If this option is chosen a line edit field becomes available in which the user can use to set the
 prefered binning boundaries. The format of this input is identical to the fromat required by the
-`Rebin Algorithm <http://docs.mantidproject.org/nightly/algorithms/Rebin-v1.html>`_.
+:doc:`Rebin Algorithm <../algorithms/Rebin-v1>`.
 
     A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be
     followed by a comma and more widths and last boundary pairs. Optionally this can also be a single
@@ -191,10 +191,9 @@ workspace but rather a group workspace which contains two child event workspaces
 added event data and one for the added monitor data.
 
 
-With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event data
-of the different files is added using the
-`Plus Algorithm <http://docs.mantidproject.org/nightly/algorithms/Plus-v1.html>`__. Timestamps of
-the events and of the logs are not changed as indicated in the image below.
+With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event
+data of the different files is added using the :doc:`Plus Algorithm <../algorithms/Plus-v1>`.
+Timestamps of the events and of the logs are not changed as indicated in the image below.
 
 .. figure:: ../images/sans_isis_v2_add_tabs_no_overlay.png
    :align: center
@@ -218,10 +217,10 @@ operation. The working principle is illustrated below:
    Adding two workspaces by overlaying them
 
 Note that the underlying mechanism for time shifting is provided by the
-`ChangeTimeZero <http://docs.mantidproject.org/nightly/algorithms/ChangeTimeZero-v1.html>`__
-algorithm. Using this option will result in a change to the history of the underlying data.
+:doc:`ChangeTimeZero Algorithm <../algorithms/ChangeTimeZero-v1>`. Using this option will result in a
+change to the history of the underlying data.
 
-With **Overlay Event Workspaces Enabled** you can specify **Additional Time Shifts**. To add *N* files
+With **'Overlay Event Workspaces' Enabled** you can specify **Additional Time Shifts**. To add *N* files
 one needs to provide exactly *N-1* comma-separated time shifts. The shifts need to be specified in
 seconds.
 
