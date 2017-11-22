@@ -92,8 +92,8 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * undo this in order to properly treat the data.
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
-void RebinnedOutput::finalize(bool hasSqrdErrs) {
-  if (m_finalized)
+void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
+  if (m_finalized && !force)
     return;
   int nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
@@ -123,8 +123,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
  * and multiplying them by the corresponding fractional area array.
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
-void RebinnedOutput::unfinalize(bool hasSqrdErrs) {
-  if (!m_finalized)
+void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
+  if (!m_finalized && !force)
     return;
   int nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))

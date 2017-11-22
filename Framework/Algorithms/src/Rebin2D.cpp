@@ -158,7 +158,7 @@ void Rebin2D::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (useFractionalArea) {
-    boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize();
+    boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize(true, true);
   }
 
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);

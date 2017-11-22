@@ -62,8 +62,8 @@ public:
   virtual const MantidVec &dataF(const std::size_t index) const;
 
   /// Create final representation
-  void finalize(bool hasSqrdErrs = true);
-  void unfinalize(bool hasSqrdErrs = false);
+  void finalize(bool hasSqrdErrs = true, bool force = false);
+  void unfinalize(bool hasSqrdErrs = false, bool force = false);
 
   /// Returns if finalize has been called
   bool isFinalized() const { return m_finalized; }
