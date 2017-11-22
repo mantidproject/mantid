@@ -45,6 +45,10 @@ __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD", "IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
+# The "magic" keyword to run as a child algorithm explicitly without storing on ADS
+__STORE_KEYWORD__ = "StoreInADS"
+# This is the default value for __STORE_KEYWORD__
+__STORE_ADS_DEFAULT__ = True
 
 
 def specialization_exists(name):
@@ -156,6 +160,7 @@ def Load(*args, **kwargs):
     algm = _create_algorithm_object('Load', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
@@ -253,12 +258,13 @@ def StartLiveData(*args, **kwargs):
     """
     instrument, = _get_mandatory_args('StartLiveData', ["Instrument"], *args, **kwargs)
 
-    # Create algorithm
+    # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
     algm = _create_algorithm_object('StartLiveData',
                                     startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
 
     # Some properties have side effects and must be set separately
     def handleSpecialProperty(name, value=None):
@@ -313,7 +319,7 @@ def fitting_algorithm(inout=False):
     """
     def inner_fitting_algorithm(f):
         """
-        :param f: algorithm calling Fit 
+        :param f: algorithm calling Fit
         """
         def wrapper(*args, **kwargs):
             function, input_workspace = _get_mandatory_args(function_name,
@@ -336,6 +342,7 @@ def fitting_algorithm(inout=False):
             # Create and execute
             algm = _create_algorithm_object(function_name)
             _set_logging_option(algm, kwargs)
+            _set_store_ads(algm, kwargs)
             if 'EvaluationType' in kwargs:
                 algm.setProperty('EvaluationType', kwargs['EvaluationType'])
                 del kwargs['EvaluationType']
@@ -514,6 +521,7 @@ def CutMD(*args, **kwargs):
     algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
 
     # Now check that all the kwargs we've got are correct
     for key in kwargs.keys():
@@ -598,7 +606,12 @@ def RenameWorkspace(*args, **kwargs):
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
     algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
                                     endProgress=_endProgress)
-    _set_logging_option(algm, kwargs)
+    _set_logging_option(algm, arguments)
+    algm.setAlwaysStoreInADS(True)
+    # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+        raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
+
     for key, val in arguments.items():
         algm.setProperty(key, val)
 
@@ -773,7 +786,7 @@ def _is_workspace_property(prop):
 def _is_function_property(prop):
     """
     Returns True if the property is a fit function
-    
+
     :param prop: A property object
     :type Property
     :return:  True if the property is considered a fit function
@@ -878,19 +891,21 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
         if ignore_property(name, ignore_regex):
             continue
         prop = algm_obj.getProperty(name)
-        # Parent algorithms store their workspaces in the ADS
-        # Child algorithms should store their workspaces in the property
-        # but they don't at the moment while the issues with history recording Python Child Algs
-        # is resolved: ticket #5157
+
         if _is_workspace_property(prop):
-            value_str = prop.valueAsStr
-            try:
-                retvals[name] = _api.AnalysisDataService[value_str]
-            except KeyError:
-                if not prop.isOptional():
-                    raise RuntimeError("Internal error. Output workspace property '%s' on "
-                                       "algorithm '%s' has not been stored correctly."
-                                       "Please contact development team." % (name,  algm_obj.name()))
+            value = None
+            if hasattr(prop, 'value'):
+                value = prop.value
+            if value is not None:
+                retvals[name] = value
+            else:
+                try:
+                    value_str = prop.valueAsStr
+                    retvals[name] = _api.AnalysisDataService[value_str]
+                except KeyError:
+                    if not prop.isOptional() and prop.direction == _kernel.Direction.InOut:
+                        raise RuntimeError("Mandatory InOut workspace property '%s' on "
+                                           "algorithm '%s' has not been set correctly. " % (name,  algm_obj.name()))
         elif _is_function_property(prop):
             retvals[name] = FunctionWrapper(prop.value)
         else:
@@ -940,6 +955,20 @@ def _set_logging_option(algm_obj, kwargs):
         del kwargs[__LOGGING_KEYWORD__]
 
 
+def _set_store_ads(algm_obj, kwargs):
+    """
+        Sets to always store in ADS, unless StoreInADS=False
+
+        :param algm_obj: An initialised algorithm object
+        :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
+    """
+    if __STORE_KEYWORD__ in kwargs:
+        algm_obj.setAlwaysStoreInADS(kwargs[__STORE_KEYWORD__])
+        del kwargs[__STORE_KEYWORD__]
+    else:
+        algm_obj.setAlwaysStoreInADS(__STORE_ADS_DEFAULT__)
+
+
 def set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm. There is no guarantee of
@@ -951,11 +980,7 @@ def set_properties(alg_object, *args, **kwargs):
     def do_set_property(name, new_value):
         if new_value is None:
             return
-        # The correct parent/child relationship is not quite set up yet: #5157
-        # ChildAlgorithms in Python are marked as children but their output is in the
-        # ADS meaning we cannot just set DataItem properties by new_value. At the moment
-        # they are just set with strings
-        if isinstance(new_value, _kernel.DataItem):
+        if isinstance(new_value, _kernel.DataItem) and new_value.name():
             alg_object.setPropertyValue(key, new_value.name())
         else:
             alg_object.setProperty(key, new_value)
@@ -1007,6 +1032,7 @@ def _create_algorithm_function(name, version, algm_object):
 
         algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
+        _set_store_ads(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
@@ -1065,12 +1091,7 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
             kwargs['startProgress'] = float(startProgress)
             kwargs['endProgress'] = float(endProgress)
         alg = parent.createChildAlgorithm(name, **kwargs)
-
         alg.setLogging(parent.isLogging())  # default is to log if parent is logging
-
-        # Historic: simpleapi functions always put stuff in the ADS
-        #           If we change this we culd potentially break many users' algorithms
-        alg.setAlwaysStoreInADS(True)
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically

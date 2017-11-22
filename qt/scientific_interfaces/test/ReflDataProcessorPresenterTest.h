@@ -5,10 +5,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "../ISISReflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "../ISISReflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -27,17 +27,15 @@ class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 private:
   ITableWorkspace_sptr createWorkspace(const QString &wsName,
                                        const WhiteList &whitelist) {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-    const int ncols = static_cast<int>(whitelist.size());
+    auto ws = WorkspaceFactory::Instance().createTable();
 
     auto colGroup = ws->addColumn("str", "Group");
     colGroup->setPlotType(0);
 
-    for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn(
-          "str", whitelist.colNameFromColIndex(col).toStdString());
-      column->setPlotType(0);
+    for (auto const &column : whitelist) {
+      auto newWorkspaceColumn =
+          ws->addColumn("str", column.name().toStdString());
+      newWorkspaceColumn->setPlotType(0);
     }
 
     if (wsName.length() > 0)

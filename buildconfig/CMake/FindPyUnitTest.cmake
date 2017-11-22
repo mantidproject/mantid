@@ -1,56 +1,51 @@
 #
 # PYUNITTEST_ADD_TEST (public macro to add unit tests)
 #   Adds a set of python tests based upon the unittest module
+#
 #   Parameters:
-#       _test_src_dir :: The directory where the src files reside
+#       _test_src_dir_base :: A base directory when added to the relative test paths gives
+#                             an absolute path to that test. This directory is added to the
+#                             PYTHONPATH when tests are executed
 #       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
 #                           ${_testname_prefix}_TestName
 #       ${ARGN} :: List of test files
-macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
+function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Property for the module directory
   set ( _working_dir ${CMAKE_BINARY_DIR}/bin/Testing )
-  if ( MSVC )
-    set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
-    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
+  if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG> )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
+  endif()
+  set ( _test_runner ${_module_dir}/mantidpython )
+  if ( WIN32 )
+    set ( _test_runner ${_test_runner}.bat )
+  endif ()
+  set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+  # Environment
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};$ENV{PYTHONPATH} )
+    # cmake list separator and Windows environment seprator are the same so escape the cmake one
+    string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
+  else()
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
   foreach ( part ${ARGN} )
-    get_filename_component( _filename ${part} NAME )
+    set ( _filename ${part} )
     get_filename_component( _suitename ${part} NAME_WE )
     # We duplicate the suitename so that it matches the junit output name
     set ( _pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}" )
-
-    if ( MSVC )
-      # Debug
-      add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
-                 COMMAND ${_module_dir_debug}/mantidpython.bat --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
-      # Set the PYTHONPATH so that the built modules can be found
-      set_tests_properties ( ${_pyunit_separate_name}_Debug PROPERTIES
-                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
-                             WORKING_DIRECTORY ${_working_dir}
-                             TIMEOUT ${TESTING_TIMEOUT} )
-      # Release
-      add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
-                 COMMAND ${_module_dir}/mantidpython.bat --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
-      # Set the PYTHONPATH so that the built modules can be found
-      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
-                             WORKING_DIRECTORY ${_working_dir}
-                             TIMEOUT ${TESTING_TIMEOUT} )
-    else()
-      add_test ( NAME ${_pyunit_separate_name}
-                 COMMAND ${_module_dir}/mantidpython --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
-      # Set the PYTHONPATH so that the built modules can be found
-      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
-                             WORKING_DIRECTORY ${_working_dir}
-                             TIMEOUT ${TESTING_TIMEOUT} )
-    endif()
+    add_test ( NAME ${_pyunit_separate_name}
+               COMMAND ${_test_runner} --classic ${_test_runner_module} ${_test_src_dir}/${_filename} )
+    # Set the PYTHONPATH so that the built modules can be found
+    set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                           ENVIRONMENT "PYTHONPATH=${_python_path}"
+                           WORKING_DIRECTORY ${_working_dir}
+                           TIMEOUT ${TESTING_TIMEOUT} )
   endforeach ( part ${ARGN} )
-endmacro ( PYUNITTEST_ADD_TEST )
+endfunction ()
 
 #=============================================================
 # main()

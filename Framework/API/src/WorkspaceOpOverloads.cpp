@@ -38,23 +38,28 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   alg->setRethrows(rethrow);
   alg->initialize();
 
-  if (child) {
+  if (lhs->getName().empty()) {
     alg->setProperty<LHSType>("LHSWorkspace", lhs);
+  } else {
+    alg->setPropertyValue("LHSWorkspace", lhs->getName());
+  }
+  if (rhs->getName().empty()) {
     alg->setProperty<RHSType>("RHSWorkspace", rhs);
-    // Have to set a text name for the output workspace if the algorithm is a
-    // child even
-    // though it will not be used.
-    alg->setPropertyValue("OutputWorkspace", "��NotApplicable");
-    if (lhsAsOutput) {
+  } else {
+    alg->setPropertyValue("RHSWorkspace", rhs->getName());
+  }
+  if (lhsAsOutput) {
+    if (!lhs->getName().empty()) {
+      alg->setPropertyValue("OutputWorkspace", lhs->getName());
+    } else {
+      alg->setAlwaysStoreInADS(false);
+      alg->setPropertyValue("OutputWorkspace", "dummy-output-name");
       alg->setProperty<LHSType>("OutputWorkspace", lhs);
     }
-  }
-  // If this is not a child algorithm then we need names for the properties
-  else {
-    alg->setPropertyValue("LHSWorkspace", lhs->getName());
-    alg->setPropertyValue("RHSWorkspace", rhs->getName());
-    if (lhsAsOutput) {
-      alg->setPropertyValue("OutputWorkspace", lhs->getName());
+  } else {
+    if (name.empty()) {
+      alg->setAlwaysStoreInADS(false);
+      alg->setPropertyValue("OutputWorkspace", "dummy-output-name");
     } else {
       alg->setPropertyValue("OutputWorkspace", name);
     }
@@ -68,8 +73,10 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   }
 
   // Get the output workspace property
-  if (child) {
-    return alg->getProperty("OutputWorkspace");
+  if (!alg->getAlwaysStoreInADS()) {
+    API::MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<typename ResultType::element_type>(
+        result);
   } else {
     API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
         alg->getPropertyValue("OutputWorkspace"));
@@ -405,8 +412,9 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs,
  *  @return True if the bins match
  */
 bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
-  if (!WS.blocksize() || WS.getNumberHistograms() < 2)
+  if (WS.getNumberHistograms() < 2 || WS.size() == 0)
     return true;
+
   // Quickest check is to see if they are actually all the same vector
   if (sharedXData(WS))
     return true;

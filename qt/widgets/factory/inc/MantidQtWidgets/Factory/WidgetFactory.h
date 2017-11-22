@@ -6,9 +6,8 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
-#include "qapplication.h"
 #include <Qsci/qscilexer.h>
-#include <QtCore/QtCore>
+#include <QPointer>
 #include <QVector>
 
 namespace MantidQt {

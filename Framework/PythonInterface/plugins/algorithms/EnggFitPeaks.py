@@ -1,4 +1,3 @@
-#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import math
 
@@ -33,8 +32,8 @@ class EnggFitPeaks(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),
                              "A list of dSpacing values to be translated into TOF to find expected peaks.")
 
-        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
-                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile", defaultValue="",
+                                          action=FileAction.OptionalLoad, extensions=[".csv"]),
                              "Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
@@ -44,11 +43,11 @@ class EnggFitPeaks(PythonAlgorithm):
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
 
         self.declareProperty('OutFittedPeaksTable', '', direction=Direction.Input,
-                             doc = 'Name for a table workspace with the parameters of the peaks found and '
+                             doc='Name for a table workspace with the parameters of the peaks found and '
                              'fitted. If not given, the table workspace is not created.')
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
-                             doc = "Information on fitted peaks. The table contains, for every peak fitted "
+                             doc="Information on fitted peaks. The table contains, for every peak fitted "
                              "the expected peak value (in d-spacing), and the parameters fitted. The expected "
                              "values are given in the column labelled 'dSpacing'. When fitting "
                              "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
@@ -66,19 +65,19 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get expected peaks in TOF for the detector
         in_wks = self.getProperty("InputWorkspace").value
-        dimType = in_wks.getXDimension().name
-        if self.EXPECTED_DIM_TYPE != dimType:
+        dim_type = in_wks.getXDimension().name
+        if self.EXPECTED_DIM_TYPE != dim_type:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
-                             "the X dimension of the input workspace is: '%s'" % (self.EXPECTED_DIM_TYPE, dimType))
+                             "the X dimension of the input workspace is: '%s'" % (self.EXPECTED_DIM_TYPE, dim_type))
 
         wks_index = self.getProperty("WorkspaceIndex").value
 
         # FindPeaks will return a list of peaks sorted by the centre found. Sort the peaks as well,
         # so we can match them with fitted centres later.
-        expected_peaks_ToF = sorted(self._expected_peaks_in_ToF(expected_peaks_dsp, in_wks, wks_index))
+        expected_peaks_tof = sorted(self._expected_peaks_in_tof(expected_peaks_dsp, in_wks, wks_index))
 
-        found_peaks = self._peaks_from_find_peaks(in_wks, expected_peaks_ToF, wks_index)
-        if found_peaks.rowCount() < len(expected_peaks_ToF):
+        found_peaks = self._peaks_from_find_peaks(in_wks, expected_peaks_tof, wks_index)
+        if found_peaks.rowCount() < len(expected_peaks_tof):
             txt = "Peaks effectively found: " + str(found_peaks)[1:-1]
             self.log().warning("Some peaks from the list of expected peaks were not found by the algorithm "
                                "FindPeaks which this algorithm uses to check that the data has the the "
@@ -96,7 +95,6 @@ class EnggFitPeaks(PythonAlgorithm):
         Gets default peaks for Engg algorithms. Values from CeO2
         """
         import EnggUtils
-
         return EnggUtils.default_ceria_expected_peaks()
 
     def _estimate_start_end_fitting_range(self, center, width):
@@ -162,12 +160,12 @@ class EnggFitPeaks(PythonAlgorithm):
             # and it should be clarified when the role of FindPeaks etc. is fixed (trac ticket #10907)
             width = initial_params[2]
             if width <= 0.:
-                detailTxt = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
-                             ", width: %s, height: %s"%(initial_params[0], width, initial_params[1]))
+                failure_msg = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
+                               ", width: %s, height: %s" % (initial_params[0], width, initial_params[1]))
                 self.log().notice('For workspace index ' + str(wks_index) + ', a peak that is in the list of '
                                   'expected peaks and was found by FindPeaks has not been fitted correctly. '
                                   'It will be ignored. ' + "Expected, dSpacing: {0}. Details: {1}".
-                                  format(peaks[1][i], detailTxt))
+                                  format(peaks[1][i], failure_msg))
                 continue
 
             try:
@@ -194,12 +192,12 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Check if we were able to really fit any peak
         if 0 == fitted_peaks.rowCount():
-            detailTxt = ("Could find " + str(len(found_peaks)) + " peaks using the algorithm FindPeaks but " +
-                         "then it was not possible to fit any peak starting from these peaks found and using '" +
-                         self.PEAK_TYPE + "' as peak function.")
+            failure_msg = ("Could find " + str(len(found_peaks)) + " peaks using the algorithm FindPeaks but " +
+                           "then it was not possible to fit any peak starting from these peaks found and using '" +
+                           self.PEAK_TYPE + "' as peak function.")
             self.log().warning('Could not fit any peak. Please check the list of expected peaks, as it does not '
                                'seem to be appropriate for the workspace given. More details: ' +
-                               detailTxt)
+                               failure_msg)
 
             raise RuntimeError('Could not fit any peak.  Failed to fit peaks with peak type ' +
                                self.PEAK_TYPE + ' even though FindPeaks found ' + str(found_peaks.rowCount()) +
@@ -251,14 +249,14 @@ class EnggFitPeaks(PythonAlgorithm):
         param_table = fit_alg.getProperty('OutputParameters').value
         chi_over_dof = fit_alg.getProperty('OutputChi2overDoF').value
 
-        return (param_table, chi_over_dof)
+        return param_table, chi_over_dof
 
-    def _peaks_from_find_peaks(self, in_wks, expected_peaks_ToF, wks_index):
+    def _peaks_from_find_peaks(self, in_wks, expected_peaks_tof, wks_index):
         """
         Use the algorithm FindPeaks to check that the expected peaks are there.
 
         @param in_wks data workspace
-        @param expected_peaks_ToF vector/list of expected peak values
+        @param expected_peaks_tof vector/list of expected peak values
         @param wks_index workspace index
 
         @return list of peaks found by FindPeaks. If there are no issues, the length
@@ -268,14 +266,14 @@ class EnggFitPeaks(PythonAlgorithm):
         # Find approximate peak positions, asumming Gaussian shapes
         find_peaks_alg = self.createChildAlgorithm('FindPeaks')
         find_peaks_alg.setProperty('InputWorkspace', in_wks)
-        find_peaks_alg.setProperty('PeakPositions', expected_peaks_ToF)
+        find_peaks_alg.setProperty('PeakPositions', expected_peaks_tof)
         find_peaks_alg.setProperty('PeakFunction', 'Gaussian')
         find_peaks_alg.setProperty('WorkspaceIndex', wks_index)
         find_peaks_alg.execute()
         found_peaks = find_peaks_alg.getProperty('PeaksList').value
         return found_peaks
 
-    def _expected_peaks_in_ToF(self, expected_peaks, in_wks, wks_index):
+    def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
         """
         Converts expected peak dSpacing values to TOF values for the
         detector. Implemented by using the Mantid algorithm ConvertUnits. A
@@ -306,10 +304,6 @@ class EnggFitPeaks(PythonAlgorithm):
         run = in_wks.getRun()
         if 1 == in_wks.getNumberHistograms() and run.hasProperty('difc'):
             difc = run.getLogData('difc').value
-            #if run.hasProperty('difa'):
-            #    _difa = run.getLogData('difa').value
-            #else:
-            #    _difa = 0
             if run.hasProperty('tzero'):
                 tzero = run.getLogData('tzero').value
             else:
@@ -333,13 +327,13 @@ class EnggFitPeaks(PythonAlgorithm):
         # which is approximately what ConverUnits will do
         # remember the -1, we must produce a histogram data workspace, which is what
         # for example EnggCalibrate expects
-        yVals = [1] * (len(expected_peaks) - 1)
+        y_vals = [1] * (len(expected_peaks) - 1)
         # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
         #                                         ParentWorkspace=self.getProperty("InputWorkspace").value)
         create_alg = self.createChildAlgorithm("CreateWorkspace")
         create_alg.setProperty("UnitX", 'dSpacing')
         create_alg.setProperty("DataX", expected_peaks)
-        create_alg.setProperty("DataY", yVals)
+        create_alg.setProperty("DataY", y_vals)
         create_alg.setProperty("ParentWorkspace", in_wks)
         create_alg.execute()
 
@@ -351,21 +345,21 @@ class EnggFitPeaks(PythonAlgorithm):
         target_units = 'TOF'
         conv_alg.setProperty("Target", target_units)
         # note: this implicitly uses default property "EMode" value 'Elastic'
-        goodExec = conv_alg.execute()
+        good_exec = conv_alg.execute()
 
-        if not goodExec:
+        if not good_exec:
             raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for {0} "
                                "peaks. Details: {1}".format(len(expected_peaks), expected_peaks))
 
-        wsTo = conv_alg.getProperty('OutputWorkspace').value
-        peaks_ToF = wsTo.readX(0)
-        if len(peaks_ToF) != len(expected_peaks):
+        output_ws = conv_alg.getProperty('OutputWorkspace').value
+        peaks_tof = output_ws.readX(0)
+        if len(peaks_tof) != len(expected_peaks):
             raise RuntimeError("Conversion of units went wrong. Converted {0} peaks from the "
                                "original list of {1} peaks. The instrument definition might be "
                                "incomplete for the original workspace / file.".
-                               format(len(peaks_ToF), len(expected_peaks)))
+                               format(len(peaks_tof), len(expected_peaks)))
 
-        tof_values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
+        tof_values = [peaks_tof[i] for i in range(0,len(peaks_tof))]
         # catch potential failures because of geometry issues, etc.
         if tof_values == expected_peaks:
             vals = self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
@@ -404,7 +398,6 @@ class EnggFitPeaks(PythonAlgorithm):
 
         @param tbl_name :: name of the table workspace (can be empty)
         """
-        table = None
         if not tbl_name:
             alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
             alg.execute()
@@ -444,7 +437,7 @@ class EnggFitPeaks(PythonAlgorithm):
         spec_x_axis = wks.readX(wks_index)
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
-        return (center >= spec_x_axis.min() and center <= spec_x_axis.max() and
+        return (spec_x_axis.min() <= center <= spec_x_axis.max() and
                 intensity > 0 and
                 fitted_params['Chi'] < 10 and self._b2bexp_is_acceptable(fitted_params))
 
@@ -509,7 +502,7 @@ class EnggFitPeaks(PythonAlgorithm):
         @param param_map :: map where to add the fitting parameters
         @param param_table :: table with parameters from a Fit algorithm run
         """
-        for i in range(param_table.rowCount() - 1): # Skip the last (fit goodness) row
+        for i in range(param_table.rowCount() - 1):  # Skip the last (fit goodness) row
             row = param_table.row(i)
 
             # Get local func. param name. E.g., not f1.A0, but just A0

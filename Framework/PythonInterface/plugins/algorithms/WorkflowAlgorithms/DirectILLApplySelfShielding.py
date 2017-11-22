@@ -40,7 +40,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
 
     def category(self):
         """Return the algorithm's category."""
-        return 'Workflow\\Inelastic'
+        return common.CATEGORIES
 
     def name(self):
         """Return the algorithm's name."""

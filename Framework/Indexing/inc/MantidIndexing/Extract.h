@@ -8,6 +8,7 @@
 namespace Mantid {
 namespace Indexing {
 class IndexInfo;
+class SpectrumIndexSet;
 
 /** Functions for extracting spectra. A new IndexInfo with the desired spectra
   is created based on an existing one.
@@ -36,6 +37,8 @@ class IndexInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+MANTID_INDEXING_DLL IndexInfo
+extract(const IndexInfo &source, const SpectrumIndexSet &indices);
 MANTID_INDEXING_DLL IndexInfo
 extract(const IndexInfo &source, const std::vector<size_t> &indices);
 MANTID_INDEXING_DLL IndexInfo

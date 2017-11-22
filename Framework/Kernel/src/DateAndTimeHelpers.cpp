@@ -34,18 +34,6 @@ Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date) {
   return Types::Core::DateAndTime(verifyAndSanitizeISO8601(date));
 }
 
-/** Check if a string is iso8601 format.
- *
- * @param date :: string to check
- * @return true if the string conforms to ISO 860I, false otherwise.
- */
-bool stringIsISO8601(const std::string &date) {
-  Poco::DateTime dt;
-  int tz_diff;
-  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                        date, dt, tz_diff);
-}
-
 /** Verifies whether or not a string conforms to ISO8601. Corrects the string
  *if it does not and is of the ARGUS file date/time format.
  *e.g 2009-07- 8T10:23:50 becomes 2009-07-08T10:23:50.
