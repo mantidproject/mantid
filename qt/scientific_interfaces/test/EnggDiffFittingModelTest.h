@@ -44,6 +44,11 @@ inline void EnggDiffFittingModelAddWSExposed::addFitParams(
   addFitResults(runNumber, bank, ws);
 }
 
+inline void EnggDiffFittingModelAddWSExposed::addFitParams(const int runNumber, 
+	const size_t bank, Mantid::API::ITableWorkspace_sptr ws) {
+	addFitResults(runNumber, bank, ws);
+}
+
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
                                EnggDiffFittingModelAddWSExposed &model) {
   API::MatrixWorkspace_sptr ws =
