@@ -104,7 +104,7 @@ def plot(axes, workspace, *args, **kwargs):
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
-    axes.plot(x, y, *args, **kwargs)
+    return axes.plot(x, y, *args, **kwargs)
 
 
 def errorbar(axes, workspace, *args, **kwargs):
@@ -127,7 +127,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
-    axes.errorbar(x, y, dy, dx, *args, **kwargs)
+    return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 
 def scatter(axes, workspace, *args, **kwargs):
@@ -150,7 +150,7 @@ def scatter(axes, workspace, *args, **kwargs):
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
-    axes.scatter(x, y, *args, **kwargs)
+    return axes.scatter(x, y, *args, **kwargs)
 
 
 def _getContour(workspace, distribution):
@@ -188,7 +188,7 @@ def contour(axes, workspace, *args, **kwargs):
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)
 
-    axes.contour(x, y, z, *args, **kwargs)
+    return axes.contour(x, y, z, *args, **kwargs)
 
 
 def contourf(axes, workspace, *args, **kwargs):
@@ -206,4 +206,4 @@ def contourf(axes, workspace, *args, **kwargs):
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)
 
-    axes.contourf(x, y, z, *args, **kwargs)
+    return axes.contourf(x, y, z, *args, **kwargs)
