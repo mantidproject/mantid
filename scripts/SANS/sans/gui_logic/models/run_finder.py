@@ -1,5 +1,5 @@
 from mantid import FileFinder
-from run_file import RunFile
+from sans.gui_logic.models.run_file import RunFile
 
 
 class RunFinder(object):
