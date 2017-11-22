@@ -33,8 +33,7 @@ public:
 };
 
 inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
-    const int runNumber, const size_t bank,
-    Mantid::API::MatrixWorkspace_sptr ws) {
+    const int runNumber, const size_t bank, API::MatrixWorkspace_sptr ws) {
   addFocusedWorkspace(runNumber, bank, ws,
                       std::to_string(runNumber) + "_" + std::to_string(bank));
 }
@@ -56,10 +55,11 @@ API::ITableWorkspace_sptr createFitParamsTable() {
   const size_t numColumns = 16;
   const size_t numRows = 4;
   auto table = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  const std::array<std::string, numColumns> headings({{
+  const std::array<std::string, numColumns> headings({
       "dSpacing[Y]", "A0[Y]", "A0_Err[yEr]", "A1[Y]", "A1_Err[yEr]", "X0[Y]",
       "X0_Err[yEr]", "A[Y]", "A_Err[yEr]", "B[Y]", "B_Err[yEr]", "S[Y]",
-      "S_Err[yEr]", "I[Y]", "I_Err[yEr]", "Chi[Y]", }});
+      "S_Err[yEr]", "I[Y]", "I_Err[yEr]", "Chi[Y]",
+  });
 
   for (const auto &columnHeading : headings) {
     table->addColumn("double", columnHeading);
@@ -147,16 +147,12 @@ public:
   void test_loadWorkspaces() {
     auto model = EnggDiffFittingModel();
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
-<<<<<<< 1547d01c3f0f8d1e17743534d1c085ad26947cb8
     API::MatrixWorkspace_sptr ws;
-=======
-    Mantid::API::MatrixWorkspace_sptr ws;
->>>>>>> Re #21171 Apply clang-format changes
+
     TS_ASSERT_THROWS_NOTHING(
         ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_NUMBER);
-<<<<<<< 1547d01c3f0f8d1e17743534d1c085ad26947cb8
   }
 
   void test_setDifcTzero() {
@@ -192,11 +188,40 @@ public:
                                  FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
     TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
   }
-=======
+
+void test_setDifcTzero() {
+    auto model = EnggDiffFittingModel();
+    TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+
+    TS_ASSERT_THROWS_NOTHING(
+        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
+                           std::vector<GSASCalibrationParms>()));
+    auto ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK);
+    auto run = ws->run();
+    TS_ASSERT(run.hasProperty("difa"));
+    TS_ASSERT(run.hasProperty("difc"));
+    TS_ASSERT(run.hasProperty("tzero"));
   }
 
-  void test_createFittedPeaksWS() {}
->>>>>>> Re #21171 Apply clang-format changes
+  void test_createFittedPeaksWS() {
+    auto model = EnggDiffFittingModelAddWSExposed();
+
+    const auto fitParams = createFitParamsTable();
+    TS_ASSERT_THROWS_NOTHING(
+        model.addFitParams(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK, fitParams));
+    TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+
+    TS_ASSERT_THROWS_NOTHING(
+        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
+                           std::vector<GSASCalibrationParms>()));
+    TS_ASSERT_THROWS_NOTHING(
+        model.createFittedPeaksWS(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+
+    API::MatrixWorkspace_sptr fittedPeaksWS;
+    TS_ASSERT_THROWS_NOTHING(fittedPeaksWS = model.getFittedPeaksWS(
+                                 FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+    TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
+  }
 
 private:
   const static std::string FOCUSED_WS_FILENAME;
