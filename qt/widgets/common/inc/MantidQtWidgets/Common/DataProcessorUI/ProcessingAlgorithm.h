@@ -41,11 +41,11 @@ class EXPORT_OPT_MANTIDQT_COMMON ProcessingAlgorithm
 public:
   ProcessingAlgorithm();
   // Constructor
-  ProcessingAlgorithm(const QString &name, const std::vector<QString> &prefix,
-                      const std::set<QString> &blacklist = std::set<QString>());
+  ProcessingAlgorithm(QString name, std::vector<QString> prefix,
+                      std::set<QString> blacklist = std::set<QString>());
   // Delegating constructor
-  ProcessingAlgorithm(const QString &name, const QString &prefix,
-                      const QString &blacklist = "");
+  ProcessingAlgorithm(QString name, QString const &prefix,
+                      QString const &blacklist = "");
   // Destructor
   virtual ~ProcessingAlgorithm();
   // The number of output properties

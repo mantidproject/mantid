@@ -4,7 +4,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/Common/QwtHelper.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 using namespace Mantid::API;
 

@@ -14,16 +14,16 @@ The probability of neutron detection by each detector in the
 energy, angle between their path and the detector axis, detector gas
 pressure, radius and wall thickness. The detectors must be cylindrical
 and their :sup:`3`\ He partial pressure, wall thickness and radius
-are attached to the instrument stored in the input workspace, 
-The first parameter is in atmospheres and the last two in metres. 
+are attached to the instrument stored in the input workspace,
+The first parameter is in atmospheres and the last two in metres.
 That workspace then needs to be converted so that its
 X-values are in :ref:`units <Unit Factory>` of energy transfer, e.g. using
 the :ref:`algm-ConvertUnits` algorithm.
 
 To estimate the true number of neutrons that entered the detector the
 counts in each bin are divided by the detector efficiency of that
-detector at that energy. The efficiency iteslef is calculated from 
-the forumula, tabulated within the algorithm. 
+detector at that energy. The efficiency iteslef is calculated from
+the forumula, tabulated within the algorithm.
 
 The numbers of counts are then multiplied by the value of
 :math:`k_i/k_f` for each bin. In that formula :math:`k_i` is the
@@ -41,8 +41,8 @@ Note: it is not possible to use this :ref:`algorithm <algorithm>` to
 correct for the detector efficiency alone. One solution to this is to
 divide the output of the algorithm by :math:`k_i/k_f` calculated as above.
 
-See also :ref:`algm-DetectorEfficiencyCorUser` algorithm, which may provide
-more instrument specific efficiency corrections.
+.. seealso:: :ref:`algm-DetectorEfficiencyCorUser` algorithm, which may provide
+             more instrument specific efficiency corrections.
 
 Usage
 -----
@@ -54,9 +54,9 @@ Usage
     # Simulates Load of a workspace with all necessary parameters #################
     detWS = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-50,2,50],UnitX='DeltaE')
     detWS.dataE(0)[range(0,50)]=1
-    AddSampleLog(detWS,LogName='Ei',LogText='52.',LogType='Number');    
-    
-    # Correct detectors efficiency 
+    AddSampleLog(detWS,LogName='Ei',LogText='52.',LogType='Number');
+
+    # Correct detectors efficiency
     corWS = DetectorEfficiencyCor(detWS)
     corWS = CorrectKiKf(corWS,EMode='Direct')
 
@@ -71,7 +71,7 @@ Usage
 .. testcleanup:: ExDetectorEfficiencyCorr
 
    DeleteWorkspace(detWS)
-   DeleteWorkspace(corWS)   
+   DeleteWorkspace(corWS)
 
 **Output:**
 

@@ -1,6 +1,7 @@
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -56,13 +57,7 @@ void CompressEvents::exec() {
 
   // Are we making a copy of the input workspace?
   if (!inplace) {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS,
-                                                           false);
+    outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
     tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),

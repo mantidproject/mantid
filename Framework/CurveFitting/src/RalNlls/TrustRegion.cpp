@@ -10,34 +10,36 @@
 #include <limits>
 #include <string>
 
+#include <cmath>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace NLLS {
 
-/// Too small values don't work well with numerical derivatives.
-const double epsmch = std::numeric_limits<double>::epsilon();
+/** Too small values don't work well with numerical derivatives. */
+const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 
-///  Takes an m x n matrix J and forms the
-///  n x n matrix A given by
-///  A = J' * J
-/// @param J :: The matrix.
-/// @param A :: The result.
+/**  Takes an m x n matrix J and forms the
+ *   n x n matrix A given by
+ *   A = J' * J
+ *  @param J :: The matrix.
+ *  @param A :: The result.
+ */
 void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
   gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
 }
 
-///  Given an (m x n)  matrix J held by columns as a vector,
-///  this routine returns the largest and smallest singular values
-///  of J.
-/// @param J :: The matrix.
-/// @param s1 :: The largest sv.
-/// @param sn :: The smalles sv.
+/**  Given an (m x n)  matrix J held by columns as a vector,
+ *   this routine returns the largest and smallest singular values
+ *   of J.
+ *  @param J :: The matrix.
+ *  @param s1 :: The largest sv.
+ *  @param sn :: The smalles sv.
+ */
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 
   auto n = J.len2();
@@ -50,19 +52,21 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
   sn = S(n);
 }
 
-/// Compute the 2-norm of a vector which is a square root of the
-/// sum of squares of its elements.
-/// @param v :: The vector.
+/** Compute the 2-norm of a vector which is a square root of the
+ *  sum of squares of its elements.
+ *  @param v :: The vector.
+ */
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
   return gsl_blas_dnrm2(v.gsl());
 }
 
-/// Multiply a matrix by a vector.
-/// @param J :: The matrix.
-/// @param x :: The vector.
-/// @param Jx :: The result vector.
+/** Multiply a matrix by a vector.
+ *  @param J :: The matrix.
+ *  @param x :: The vector.
+ *  @param Jx :: The result vector.
+ */
 void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
            DoubleFortranVector &Jx) {
   // dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
@@ -72,10 +76,11 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
   gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
 }
 
-/// Multiply a transposed matrix by a vector.
-/// @param J :: The matrix.
-/// @param x :: The vector.
-/// @param Jtx :: The result vector.
+/** Multiply a transposed matrix by a vector.
+ *  @param J :: The matrix.
+ *  @param x :: The vector.
+ *  @param Jtx :: The result vector.
+ */
 void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
             DoubleFortranVector &Jtx) {
   // dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
@@ -85,27 +90,29 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
   gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
 }
 
-/// Dot product of two vectors.
+/** Dot product of two vectors.
+ */
 double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) {
   return x.dot(y);
 }
 
-/// Input:
-/// f = f(x_k), J = J(x_k),
-/// hf = \\sum_{i=1}^m f_i(x_k) \\nabla^2 f_i(x_k) (or an approx)
-///
-/// We have a model
-///      m_k(d) = 0.5 f^T f  + d^T J f + 0.5 d^T (J^T J + HF) d
-///
-/// This subroutine evaluates the model at the point d
-/// This value is returned as the scalar
-///       md :=m_k(d)
-/// @param f :: Vector of the residuals (at d = 0).
-/// @param J :: The Jacobian matrix at d = 0.
-/// @param hf :: The Hessian matrix at d = 0.
-/// @param d :: The point where to evaluate the model.
-/// @param options :: The options.
-/// @param w :: The work struct.
+/** Input:
+ *  f = f(x_k), J = J(x_k),
+ *  hf = \\sum_{i=1}^m f_i(x_k) \\nabla^2 f_i(x_k) (or an approx)
+ *
+ *  We have a model
+ *       m_k(d) = 0.5 f^T f  + d^T J f + 0.5 d^T (J^T J + HF) d
+ *
+ *  This subroutine evaluates the model at the point d
+ *  This value is returned as the scalar
+ *        md :=m_k(d)
+ *  @param f :: Vector of the residuals (at d = 0).
+ *  @param J :: The Jacobian matrix at d = 0.
+ *  @param hf :: The Hessian matrix at d = 0.
+ *  @param d :: The point where to evaluate the model.
+ *  @param options :: The options.
+ *  @param w :: The work struct.
+ */
 double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
                      const DoubleFortranMatrix &hf,
                      const DoubleFortranVector &d, const nlls_options &options,
@@ -133,39 +140,41 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
   return md;
 }
 
-/// Calculate the quantity
-///         0.5||f||^2 - 0.5||fnew||^2     actual_reduction
-///   rho = -------------------------- = -------------------
-///             m_k(0)  - m_k(d)         predicted_reduction
-///
-/// if model is good, rho should be close to one
-/// @param normf :: The 2-norm of the residuals vector at d = 0.
-/// @param normfnew :: The 2-norm of the residuals vector at d != 0.
-/// @param md :: The value of the model at the same d as normfnew.
-/// @param options :: The options.
+/** Calculate the quantity
+ *          0.5||f||^2 - 0.5||fnew||^2     actual_reduction
+ *    rho = -------------------------- = -------------------
+ *              m_k(0)  - m_k(d)         predicted_reduction
+ *
+ *  if model is good, rho should be close to one
+ *  @param normf :: The 2-norm of the residuals vector at d = 0.
+ *  @param normfnew :: The 2-norm of the residuals vector at d != 0.
+ *  @param md :: The value of the model at the same d as normfnew.
+ *  @param options :: The options.
+ */
 double calculateRho(double normf, double normfnew, double md,
                     const nlls_options &options) {
   UNUSED_ARG(options);
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
   double rho = 0.0;
-  if (fabs(actual_reduction) < 10 * epsmch) {
-    rho = one;
-  } else if (fabs(predicted_reduction) < 10 * epsmch) {
-    rho = one;
+  if (fabs(actual_reduction) < 10 * EPSILON_MCH) {
+    rho = ONE;
+  } else if (fabs(predicted_reduction) < 10 * EPSILON_MCH) {
+    rho = ONE;
   } else {
     rho = actual_reduction / predicted_reduction;
   }
   return rho;
 }
 
-/// Update the Hessian matrix without actually evaluating it (quasi-Newton?)
-/// @param hf :: The matrix to update.
-/// @param w :: The work struct.
+/** Update the Hessian matrix without actually evaluating it (quasi-Newton?)
+ *  @param hf :: The matrix to update.
+ *  @param w :: The work struct.
+ */
 void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   auto yts = dotProduct(w.d, w.y);
-  if (fabs(yts) < sqrt(10 * epsmch)) {
+  if (fabs(yts) < sqrt(10 * EPSILON_MCH)) {
     //! safeguard: skip this update
     return;
   }
@@ -178,7 +187,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // now, let's scale hd (Nocedal and Wright, Section 10.2)
   auto dSks = fabs(dotProduct(w.d, w.Sks));
   auto alpha = fabs(dotProduct(w.d, w.y_sharp)) / dSks;
-  alpha = std::min(one, alpha);
+  alpha = std::min(ONE, alpha);
   hf *= alpha;
 
   // update S_k (again, as in N&W, Section 10.2)
@@ -196,23 +205,23 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
 }
 
-/// Update the trust region radius which is hidden in NLLS_workspace w
-/// (w.Delta).
-/// @param rho :: The rho calculated by calculateRho(...). It may also be
-/// updated.
-/// @param options :: The options.
-/// @param inform :: The information.
-/// @param w :: The work struct containing the radius that is to be updated
-/// (w.Delta).
+/** Update the trust region radius which is hidden in NLLS_workspace w
+ *  (w.Delta).
+ *  @param rho :: The rho calculated by calculateRho(...). It may also be
+ *  updated.
+ *  @param options :: The options.
+ *  @param w :: The work struct containing the radius that is to be updated
+ *  (w.Delta).
+ */
 void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             nlls_inform &inform, NLLS_workspace &w) {
+                             NLLS_workspace &w) {
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function
     if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
+      rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
       w.Delta =
@@ -238,7 +247,7 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
     if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
+      rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
@@ -254,11 +263,12 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
     }
     break;
   default:
-    inform.status = NLLS_ERROR::BAD_TR_STRATEGY;
+    throw std::runtime_error("Bad strategy.");
   }
 }
 
-/// Test the convergence.
+/** Test the convergence.
+ */
 void testConvergence(double normF, double normJF, double normF0, double normJF0,
                      const nlls_options &options, nlls_inform &inform) {
 
@@ -275,33 +285,33 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
   }
 }
 
-///  Apply_scaling
-///  input  Jacobian matrix, J
-///  ouput  scaled Hessisan, H, and J^Tf, v.
-///
-///  Calculates a diagonal scaling W, stored in w.diag
-///  updates v(i) -> (1/W_i) * v(i)
-///          A(i,j) -> (1 / (W_i * W_j)) * A(i,j)
-/// @param J :: The Jacobian.
-/// @param A :: The Hessian.
-/// @param v :: The gradient (?).
-/// @param w :: Stored scaling data.
-/// @param options :: The options.
-/// @param inform :: The information.
+/**  Apply_scaling
+ *   input  Jacobian matrix, J
+ *   ouput  scaled Hessisan, H, and J^Tf, v.
+ *
+ *   Calculates a diagonal scaling W, stored in w.diag
+ *   updates v(i) -> (1/W_i) * v(i)
+ *           A(i,j) -> (1 / (W_i * W_j)) * A(i,j)
+ *  @param J :: The Jacobian.
+ *  @param A :: The Hessian.
+ *  @param v :: The gradient (?).
+ *  @param scale :: Stored scaling data.
+ *  @param options :: The options.
+ */
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, apply_scaling_work &w,
-                  const nlls_options &options, nlls_inform &inform) {
+                  DoubleFortranVector &v, DoubleFortranVector &scale,
+                  const nlls_options &options) {
   auto m = J.len1();
   auto n = J.len2();
-  if (w.diag.len() != n) {
-    w.diag.allocate(n);
+  if (scale.len() != n) {
+    scale.allocate(n);
   }
 
   switch (options.scale) {
   case 1:
   case 2:
     for (int ii = 1; ii <= n; ++ii) { // do ii = 1,n
-      double temp = zero;
+      double temp = ZERO;
       if (options.scale == 1) {
         //! use the scaling present in gsl:
         //! scale by W, W_ii = ||J(i,:)||_2^2
@@ -319,32 +329,31 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
         if (options.scale_trim_min) {
           temp = options.scale_min;
         } else {
-          temp = one;
+          temp = ONE;
         }
       } else if (temp > options.scale_max) {
         if (options.scale_trim_max) {
           temp = options.scale_max;
         } else {
-          temp = one;
+          temp = ONE;
         }
       }
       temp = sqrt(temp);
       if (options.scale_require_increase) {
-        w.diag(ii) = std::max(temp, w.diag(ii));
+        scale(ii) = std::max(temp, scale(ii));
       } else {
-        w.diag(ii) = temp;
+        scale(ii) = temp;
       }
     }
     break;
   default:
-    inform.status = NLLS_ERROR::BAD_SCALING;
-    return;
+    throw std::runtime_error("Scaling error.");
   }
 
   // Now we have the w.diagonal scaling matrix, actually scale the
   // Hessian approximation and J^Tf
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-    double temp = w.diag(ii);
+    double temp = scale(ii);
     v(ii) = v(ii) / temp;
     for (int jj = 1; jj <= n; ++jj) { // for_do(jj,1,n)
       A(ii, jj) = A(ii, jj) / temp;
@@ -353,10 +362,11 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
   }
 }
 
-/// Calculate all the eigenvalues of a symmetric matrix.
-/// @param A :: The input matrix.
-/// @param ew :: The output eigenvalues.
-/// @param ev :: The output eigenvectors.
+/** Calculate all the eigenvalues of a symmetric matrix.
+ *  @param A :: The input matrix.
+ *  @param ew :: The output eigenvalues.
+ *  @param ev :: The output eigenvectors.
+ */
 void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
                 DoubleFortranMatrix &ev) {
   auto M = A;
