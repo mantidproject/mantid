@@ -55,7 +55,7 @@ protected:
                            const std::string &filename);
 
   void addFitResults(const int runNumber, const size_t bank,
-	                 const Mantid::API::ITableWorkspace_sptr ws);
+                     const Mantid::API::ITableWorkspace_sptr ws);
 
 private:
   static const size_t MAX_BANKS = 2;
