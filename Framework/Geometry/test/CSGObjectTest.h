@@ -57,7 +57,7 @@ public:
 };
 }
 
-class ObjectTest : public CxxTest::TestSuite {
+class CSGObjectTest : public CxxTest::TestSuite {
 
 public:
   void testDefaultObjectHasEmptyMaterial() {
@@ -1516,16 +1516,16 @@ private:
 // -----------------------------------------------------------------------------
 // Performance tests
 // -----------------------------------------------------------------------------
-class ObjectTestPerformance : public CxxTest::TestSuite {
+class CSGObjectTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ObjectTestPerformance *createSuite() {
-    return new ObjectTestPerformance();
+  static CSGObjectTestPerformance *createSuite() {
+    return new CSGObjectTestPerformance();
   }
-  static void destroySuite(ObjectTestPerformance *suite) { delete suite; }
+  static void destroySuite(CSGObjectTestPerformance *suite) { delete suite; }
 
-  ObjectTestPerformance()
+  CSGObjectTestPerformance()
       : rng(200000), solid(ComponentCreationHelper::createSphere(0.1)),
         shell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
 
