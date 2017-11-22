@@ -37,6 +37,41 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
                                                 const size_t bank) {
   return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
+
+// Remove commas at the start and end of the string, 
+// as well as any adjacent to another (eg ,, gets corrected to ,)
+std::string stripExtraCommas(std::string &expectedPeaks) {
+	if (!expectedPeaks.empty()) {
+
+		g_log.debug() << "Validating the expected peak list.\n";
+
+		const auto comma = ',';
+
+		for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+			size_t j = i + 1;
+
+			if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
+				expectedPeaks.erase(j, 1);
+				i--;
+
+			}
+			else {
+				++j;
+			}
+		}
+
+		size_t strLength = expectedPeaks.length() - 1;
+		if (expectedPeaks.at(0) == ',') {
+			expectedPeaks.erase(0, 1);
+			strLength -= 1;
+		}
+
+		if (expectedPeaks.at(strLength) == ',') {
+			expectedPeaks.erase(strLength, 1);
+		}
+	}
+	return expectedPeaks;
+}
 }
 
 // Remove commas at the start and end of the string,
@@ -807,15 +842,9 @@ void EnggDiffFittingPresenter::processLogMsg() {
 void EnggDiffFittingPresenter::processFitAllPeaks() {
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
-<<<<<<< bfcdbff77a0c3dde579a8cdeb083d73206b79cb8
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
-=======
-  std::string fittingPeaks = m_view->getExpectedPeaksInput();
-
-  // validate fitting data as it will remain the same through out
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
->>>>>>> Re #21238 rename fittingPeaksData to getExpectedPeaksInput
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &dir : g_multi_run_directories) {

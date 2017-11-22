@@ -110,8 +110,13 @@ private:
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
+<<<<<<< 4e7dcf6af0a6cfa50c3a2acc2921be259e9e0c02
   void validateFittingInputs(const std::string &focusedRunNo,
                              const std::string &expectedPeaks);
+=======
+  void inputChecksBeforeFitting(const std::string &focusedRunNo,
+                                const std::string &expectedPeaks);
+>>>>>>> Re #21238 Renamed peak input normalisation
 
   // TODO make this const when the global is removed
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
