@@ -860,7 +860,7 @@ class RunTabPresenter(object):
 
     def _create_row_state(self, director, states, row):
         try:
-            state = gui_state_director.create_state(row)
+            state = director.create_state(row)
             states.update({row: state})
         except (ValueError, RuntimeError) as e:
             raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
