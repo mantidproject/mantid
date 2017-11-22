@@ -832,8 +832,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
-
-        inputChecksBeforeFitting(g_multi_run_directories[i], normalisedPeakCentres);
+        validateFittingInputs(g_multi_run_directories[i], 
+			                  normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
                             ia.what());
@@ -883,7 +883,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   g_log.debug() << "the expected peaks are: " << normalisedPeakCentres << '\n';
 
   try {
-    inputChecksBeforeFitting(filename, normalisedPeakCentres);
+    validateFittingInputs(filename, normalisedPeakCentres);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
@@ -905,8 +905,8 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
 }
 
-void EnggDiffFittingPresenter::inputChecksBeforeFitting(
-    const std::string &focusedRunFilename, const std::string &expectedPeaks) {
+void EnggDiffFittingPresenter::validateFittingInputs(
+	const std::string &focusedRunFilename, const std::string &expectedPeaks) {
   if (focusedRunFilename.empty()) {
     throw std::invalid_argument(
         "Focused run filename cannot be empty and must be a valid file");

@@ -115,8 +115,8 @@ private:
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
-  void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &expectedPeaks);
+  void validateFittingInputs(const std::string &focusedRunNo,
+                             const std::string &expectedPeaks);
 
   // TODO make this const when the global is removed
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
