@@ -18,13 +18,25 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
+// Helper class that exposes addFocusedWorkspace
+// This means we can test the workspace maps without having to run Load
+class EnggDiffFittingModelAddWSExposed : public EnggDiffFittingModel {
+public:
+	void addWorkspace(const int runNumber, const size_t bank,
+		Mantid::API::MatrixWorkspace_sptr ws);
+};
+
+void EnggDiffFittingModelAddWSExposed::addWorkspace(
+	const int runNumber, const size_t bank, Mantid::API::MatrixWorkspace_sptr ws) {
+	addFocusedWorkspace(runNumber, bank, ws,
+		                std::to_string(runNumber) + "_" + std::to_string(bank));
+}
+
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
-                               EnggDiffFittingModel &model) {
+                               EnggDiffFittingModelAddWSExposed &model) {
   API::MatrixWorkspace_sptr ws =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
-  model.addFocusedWorkspace(runNumber, bank, ws, std::to_string(runNumber) +
-                                                     "_" +
-                                                     std::to_string(bank));
+  model.addWorkspace(runNumber, bank, ws);
 }
 
 } // anonymous namespace
@@ -40,13 +52,12 @@ public:
   static void destroySuite(EnggDiffFittingModelTest *suite) { delete suite; }
 
   void test_addAndGetWorkspace() {
-    auto model = EnggDiffFittingModel();
+    auto model = EnggDiffFittingModelAddWSExposed();
     API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
     const int runNumber = 100;
     const int bank = 1;
-    TS_ASSERT_THROWS_NOTHING(
-        model.addFocusedWorkspace(runNumber, bank, ws, "workspace_filename"));
+    TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runNumber, bank, ws));
     const auto retrievedWS = model.getFocusedWorkspace(runNumber, bank);
 
     TS_ASSERT(retrievedWS != nullptr);
@@ -54,7 +65,7 @@ public:
   }
 
   void test_getRunNumbersAndBankIDs() {
-    auto model = EnggDiffFittingModel();
+    auto model = EnggDiffFittingModelAddWSExposed();
 
     addSampleWorkspaceToModel(123, 1, model);
     addSampleWorkspaceToModel(456, 2, model);
