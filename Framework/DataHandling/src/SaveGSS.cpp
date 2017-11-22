@@ -103,7 +103,7 @@ SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
 void SaveGSS::init() {
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
-                  "The input workspace, which must be in time-of-flight");
+                  "The input workspace");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save),
