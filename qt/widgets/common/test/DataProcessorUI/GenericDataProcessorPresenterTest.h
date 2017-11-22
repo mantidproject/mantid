@@ -387,7 +387,6 @@ public:
     // We don't the view we will handle yet, so none of the methods below should
     // be
     // called
-    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
@@ -418,8 +417,6 @@ public:
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(Exactly(1));
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
-    // Expect that the list of tables is populated
-    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
     std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
@@ -3211,7 +3208,6 @@ public:
 
     // We don't know the view we will handle yet, so none of the methods below
     // should be called
-    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     // Constructor (no pre-processing)
 
@@ -3232,8 +3228,6 @@ public:
     // When the presenter accepts the views, expect the following:
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
-    // Expect that the list of tables is populated
-    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the autocompletion hints are populated
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
         .Times(Exactly(1));
