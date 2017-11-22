@@ -345,7 +345,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             end = axis[start_index] + self._rebin_width
             end_index = np.argwhere(axis < end)[-1][0]
             SumSpectra(InputWorkspace=ws, OutputWorkspace=name,
-                       StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
+                       StartWorkspaceIndex=int(start_index), EndWorkspaceIndex=int(end_index))
             count = end_index - start_index + 1
             Scale(InputWorkspace=name, OutputWorkspace=name, Factor=1./count)
             new_axis.append(np.sum(axis[start_index:end_index + 1]) / count)
