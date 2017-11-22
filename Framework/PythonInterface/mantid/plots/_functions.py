@@ -26,6 +26,11 @@ def _getWkspIndexDistAndLabel(workspace, kwargs):
     if 'wkspIndex' in kwargs:
         del kwargs['wkspIndex']
 
+    # don't worry if there is only one spectrum
+    if workspace.getNumberHistograms() == 1:
+        specNum = None
+        wkspIndex = 0
+
     # error check input parameters
     if (specNum is not None) and (wkspIndex is not None):
         raise RuntimeError('Must specify only specNum or wkspIndex')
@@ -63,6 +68,28 @@ def _getDistribution(workspace, kwargs):
 
     return (distribution, kwargs)
 
+
+def getAxesLabels(workspace):
+    axes = [workspace.YUnit()]
+    for index in range(workspace.axes()):
+        axis = workspace.getAxis(index)
+        unit = axis.getUnit()
+        if len(str(unit.symbol())) > 0:
+            unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
+        else:
+            unit = unit.caption()
+        axes.append(unit)
+    return tuple(axes)
+
+def _setLabels1D(axes, workspace):
+    labels = getAxesLabels(workspace)
+    axes.set_xlabel(labels[1])
+    axes.set_ylabel(labels[0])
+
+def _setLabels2D(axes, workspace):
+    labels = getAxesLabels(workspace)
+    axes.set_xlabel(labels[1])
+    axes.set_ylabel(labels[2])
 
 def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
     '''Extract a single spectrum and process the data into a frequency'''
@@ -104,6 +131,7 @@ def plot(axes, workspace, *args, **kwargs):
     '''
     (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
     (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
+    _setLabels1D(axes, workspace)
     return axes.plot(x, y, *args, **kwargs)
 
 
@@ -162,12 +190,10 @@ def _getContour(workspace, distribution):
             z = z / (x[:,1:] - x[:,0:-1])
         x = .5*(x[:,0:-1]+x[:,1:])
 
-    # y axis is spectrum number
-    y = numpy.zeros(workspace.getNumberHistograms(), dtype=float)
-    for index in range(workspace.getNumberHistograms()):
-        specNum = workspace.getSpectrum(index).getSpectrumNo()
-        y[index] = float(specNum)
-
+    # y axis is held differently
+    y = workspace.getAxis(1).extractValues()
+    if len(y) == x.shape[0]+1:
+        y = .5*(y[0:-1]+y[1:])
     y = numpy.tile(y, (x.shape[1], 1)).transpose()
 
     return (x,y,z)
@@ -187,6 +213,7 @@ def contour(axes, workspace, *args, **kwargs):
     '''
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
 
     return axes.contour(x, y, z, *args, **kwargs)
 
@@ -205,5 +232,60 @@ def contourf(axes, workspace, *args, **kwargs):
     '''
     (distribution, kwargs) = _getDistribution(workspace, kwargs)
     (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
 
     return axes.contourf(x, y, z, *args, **kwargs)
+
+def pcolor(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolor`
+    but calculates the countour levels. Currently this only works with
+    workspaces that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.pcolor(x, y, z, *args, **kwargs)
+
+def pcolorfast(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolorfast`
+    but calculates the countour levels. Currently this only works with
+    workspaces that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.pcolorfast(x, y, z, *args, **kwargs)
+
+def pcolormesh(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`
+    but calculates the countour levels. Currently this only works with
+    workspaces that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.pcolormesh(x, y, z, *args, **kwargs)
