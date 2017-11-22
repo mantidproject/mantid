@@ -166,7 +166,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         runs_icon = QtGui.QIcon(runs_icon_path)
         _ = QtGui.QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "run.png")
+        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
         add_runs_page_icon = QtGui.QIcon(add_runs_page_icon_path)
         _ = QtGui.QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
