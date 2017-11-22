@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -11,7 +12,9 @@
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QMessageBox>
+
 #include <boost/algorithm/string/find.hpp>
+#include <boost/pointer_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -825,6 +828,21 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
     columnValues[spectraIndices[i]] = column->toDouble(i);
   }
   return columnValues;
+}
+
+QHash<QString, size_t>
+IndirectTab::extractAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
+                               const size_t &axisIndex) const {
+  Axis *axis = workspace->getAxis(axisIndex);
+  if (!axis->isText())
+    return QHash<QString, size_t>();
+
+  TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  QHash<QString, size_t> labels;
+
+  for (size_t i = 0; i < textAxis->length(); ++i)
+    labels[QString::fromStdString(textAxis->label(i))] = i;
+  return labels;
 }
 
 /*

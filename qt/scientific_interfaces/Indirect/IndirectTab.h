@@ -8,10 +8,10 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
@@ -180,6 +180,12 @@ protected:
   extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
                          const std::string &columnName,
                          const std::vector<size_t> &spectraIndices);
+
+  /// Extracts the labels from the axis at the specified index in the
+  /// specified workspace.
+  QHash<QString, size_t>
+  extractAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
+                    const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,
