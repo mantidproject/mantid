@@ -6,11 +6,11 @@ from sans.gui_logic.models.binning_type import BinningType
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 from fake_signal import FakeSignal
 
+from assert_called import assert_called
 if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-    from assert_called import assert_called
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):

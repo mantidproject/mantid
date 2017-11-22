@@ -7,11 +7,11 @@ from sans.gui_logic.models.run_file import RunFile
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
+from assert_called import assert_called
 if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-    from assert_called import assert_called
 
 
 class RunSelectorPresenterTest(unittest.TestCase):
