@@ -36,6 +36,7 @@ from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+import mantidplot
 
 
 class RunTabPresenter(object):
@@ -252,6 +253,10 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
+
+            # 4. Create the graph if continuous output is specified
+            if self._view.plot_results:
+                mantidplot.newGraph('SANS-Latest')
         except:
             self._view.halt_process_flag()
             raise
@@ -365,6 +370,12 @@ class RunTabPresenter(object):
         global_options += ","
         global_options += output_mode_selection
 
+        # Check is results should be plotted
+        plot_results_selection = "PlotResults=1" if self._view.plot_results else "PlotResults=0"
+        global_options += ","
+        global_options += plot_results_selection
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         return global_options
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
 
-    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS):
+    def __call__(self, states, use_optimizations=True, output_mode=OutputMode.PublishToADS, plot_results = False):
         """
         This is the start of any reduction.
 
@@ -22,17 +22,17 @@ class SANSBatchReduction(object):
                             2. SaveToFile
                             3. Both
         """
-        self.validate_inputs(states, use_optimizations, output_mode)
+        self.validate_inputs(states, use_optimizations, output_mode, plot_results)
 
-        self._execute(states, use_optimizations, output_mode)
+        self._execute(states, use_optimizations, output_mode, plot_results)
 
     @staticmethod
-    def _execute(states, use_optimizations, output_mode):
+    def _execute(states, use_optimizations, output_mode, plot_results):
         # Iterate over each state, load the data and perform the reduction
         for state in states:
-            single_reduction_for_batch(state, use_optimizations, output_mode)
+            single_reduction_for_batch(state, use_optimizations, output_mode, plot_results)
 
-    def validate_inputs(self, states, use_optimizations, output_mode):
+    def validate_inputs(self, states, use_optimizations, output_mode, plot_results):
         # We are strict about the types here.
         # 1. states has to be a list of sans state objects
         # 2. use_optimizations has to be bool
@@ -48,6 +48,10 @@ class SANSBatchReduction(object):
         if not isinstance(use_optimizations, bool):
             raise RuntimeError("The optimization has to be a boolean. The provided type is"
                                " {0}".format(type(use_optimizations)))
+
+        if not isinstance(plot_results, bool):
+            raise RuntimeError("The plot_result has to be a boolean. The provided type is"
+                               " {0}".format(type(plot_results)))
 
         if output_mode is not OutputMode.PublishToADS and output_mode is not OutputMode.SaveToFile and\
                         output_mode is not OutputMode.Both:  # noqa

@@ -592,6 +592,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.use_optimizations_checkbox.setChecked(value)
 
     @property
+    def plot_results(self):
+        return self.plot_results_checkbox.isChecked()
+
+    @plot_results.setter
+    def plot_results(self, value):
+        self.plot_results_checkbox.setChecked(value)
+
+    @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
             return OutputMode.PublishToADS
