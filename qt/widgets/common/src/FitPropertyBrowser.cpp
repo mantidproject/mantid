@@ -2096,8 +2096,6 @@ void FitPropertyBrowser::deleteTie() {
       Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(),
                                                    i);
       Mantid::API::IFunction *function = parameterRef.getLocalFunction();
-	  auto tmp = function->parameterName(
-		  static_cast<int>(parameterRef.getLocalIndex()));
       // Pick out parameters with the same name as the one we're tying from
       if (function->parameterName(
               static_cast<int>(parameterRef.getLocalIndex())) == parName) {
