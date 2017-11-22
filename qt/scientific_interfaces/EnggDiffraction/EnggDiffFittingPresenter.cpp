@@ -782,7 +782,7 @@ void EnggDiffFittingPresenter::processLogMsg() {
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
 
-  std::string fittingPeaks = m_view->fittingPeaksData();
+  std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   // validate fitting data as it will remain the same through out
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
@@ -839,7 +839,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
   const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
-  std::string fittingPeaks = m_view->fittingPeaksData();
+  std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
 
@@ -1013,7 +1013,7 @@ void EnggDiffFittingPresenter::addPeakToList() {
     stream << std::fixed << std::setprecision(4) << peakCentre;
     auto strPeakCentre = stream.str();
 
-    auto curExpPeaksList = m_view->fittingPeaksData();
+    auto curExpPeaksList = m_view->getExpectedPeaksInput();
 
     std::string comma = ",";
 
@@ -1090,7 +1090,7 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
                         "File " + fileDir +
                             " , could not be found. Please try again!");
   } else {
-    auto expPeaks = m_view->fittingPeaksData();
+    auto expPeaks = m_view->getExpectedPeaksInput();
     outfile << expPeaks;
   }
 }

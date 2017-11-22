@@ -61,7 +61,7 @@ public:
    *
    * @return list of dSpacing values as std::string
    */
-  virtual std::string fittingPeaksData() const = 0;
+  virtual std::string getExpectedPeaksInput() const = 0;
 
   /**
    * Sets the peak list according to the string given
