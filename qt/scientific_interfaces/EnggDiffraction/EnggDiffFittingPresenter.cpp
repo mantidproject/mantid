@@ -383,12 +383,6 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   const bool singleRunMode = m_view->getFittingSingleRunMode();
   // if not run mode or bank mode: to avoid recreating widgets
   if (!multiRunMode && !singleRunMode) {
-
-    // add bank to the combo-box
-    setBankItems(foundFullFilePaths);
-    // set the bank widget according to selected bank file
-    setDefaultBank(splitBaseName, filePath.toString());
-
     // Skips this step if it is multiple run because widget already
     // updated
     setRunNoItems(foundRunNumbers, false);
@@ -573,9 +567,6 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   // add bank to the combo-box and list view
   // recreates bank widget for every run (multi-run) depending on
   // number of banks file found for given run number in folder
-
-  setBankItems(foundFilePaths);
-  setDefaultBank(splitBaseName, userInputBasename);
 
   return foundFilePaths;
 }
@@ -1091,56 +1082,6 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
   }
 }
 
-void EnggDiffFittingPresenter::setBankItems(
-    const std::vector<std::string> &bankFiles) {
-
-  if (bankFiles.empty()) {
-    // upon invalid file
-    // disable the widgets when only one related file found
-    m_view->enableFittingComboBox(false);
-
-    m_view->clearFittingComboBox();
-    return;
-  }
-
-  // delete previous bank added to the list
-  m_view->clearFittingComboBox();
-
-  try {
-    // Keep track of current loop iteration for banks
-    int index = 0;
-    for (const auto &filePath : bankFiles) {
-
-      const Poco::Path bankFile(filePath);
-      const std::string strVecFile = bankFile.toString();
-      // split the directory from m_fitting_runno_dir_vec
-      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
-
-      // get the last split in vector which will be bank
-      std::string bankID = (vecFileSplit.back());
-
-      bool digit = isDigit(bankID);
-
-      if (digit || bankID == "cropped") {
-        m_view->addBankItem(bankID);
-      } else {
-        QString qBank = QString("Bank %1").arg(index + 1);
-        m_view->addBankItem(qBank.toStdString());
-        ++index;
-      }
-    }
-
-    m_view->enableFittingComboBox(true);
-
-  } catch (std::runtime_error &re) {
-    m_view->userWarning("Unable to insert items: ",
-                        "Could not add banks to "
-                        "combo-box or list widget; " +
-                            static_cast<std::string>(re.what()) +
-                            ". Please try again");
-  }
-}
-
 void EnggDiffFittingPresenter::setRunNoItems(
     const std::vector<std::string> &runNumVector, bool multiRun) {
   try {
@@ -1194,33 +1135,6 @@ void EnggDiffFittingPresenter::setRunNoItems(
                             static_cast<std::string>(re.what()) +
                             ". Please try again");
   }
-}
-
-void EnggDiffFittingPresenter::setDefaultBank(
-    const std::vector<std::string> &splittedBaseName,
-    const std::string &selectedFile) {
-
-  if (!splittedBaseName.empty()) {
-
-    std::string bankID = (splittedBaseName.back());
-    auto combo_data = m_view->getFittingComboIdx(bankID);
-
-    if (combo_data > -1) {
-      m_view->setBankIdComboBox(combo_data);
-    } else {
-      m_view->setFittingRunNo(selectedFile);
-    }
-  }
-  // check if the vector is not empty so that the first directory
-  // can be assigned to text-field when number is given
-  else if (!m_view->getFittingRunNumVec().empty()) {
-    auto firstDir = m_view->getFittingRunNumVec().at(0);
-    const auto &intialDir = firstDir;
-    m_view->setFittingRunNo(intialDir);
-  }
-  // if nothing found related to text-field input
-  else if (!m_view->getFittingRunNo().empty())
-    m_view->setFittingRunNo(selectedFile);
 }
 
 bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {

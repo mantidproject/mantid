@@ -80,13 +80,8 @@ public:
 
   void plotFitPeaksCurves();
 
-  void setBankItems(const std::vector<std::string> &bankFiles);
-
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
-
-  void setDefaultBank(const std::vector<std::string> &splittedBaseName,
-                      const std::string &selectedFile);
 
 protected:
   void processStart();
