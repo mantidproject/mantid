@@ -267,7 +267,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
 	inc/MantidGeometry/Objects/CSGObject.h
-	inc/MantidGeometry/objects/IObject.h
+	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
