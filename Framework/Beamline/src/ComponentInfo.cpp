@@ -508,13 +508,14 @@ std::string ComponentInfo::name(const size_t componentIndex) const {
 }
 
 size_t ComponentInfo::indexOf(const std::string &name) const {
-  auto it = std::find(m_names->begin(), m_names->end(), name);
-  if (it == m_names->end()) {
+  // Reverse iterate to hit top level components sooner
+  auto it = std::find(m_names->rbegin(), m_names->rend(), name);
+  if (it == m_names->rend()) {
     std::stringstream buffer;
     buffer << name << " does not exist";
     throw std::invalid_argument(buffer.str());
   }
-  return std::distance(m_names->begin(), it);
+  return std::distance(m_names->begin(), it.base() - 1);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex,
