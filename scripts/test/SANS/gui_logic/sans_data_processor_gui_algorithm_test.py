@@ -19,7 +19,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_the_properties_with_periods_can_be_provided(self):
         props = create_properties()
-        self.assertTrue(len(props) == 16)
+        self.assertEqual(len(props), 17)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleScatterPeriod", "column_name": "ssp"},
@@ -35,16 +35,17 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "CanDirectPeriod", "column_name": "cdp"},
                     {"algorithm_property": "UseOptimizations", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
+                    {"algorithm_property": "UserFile", "column_name": "User File"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
                     {"algorithm_property": "OutputMode", "column_name": ""}]
 
         for index, element in enumerate(props):
-            self.assertTrue(element.algorithm_property == expected[index]["algorithm_property"])
-            self.assertTrue(element.column_name == expected[index]["column_name"])
+            self.assertEqual(element.algorithm_property, expected[index]["algorithm_property"])
+            self.assertEqual(element.column_name, expected[index]["column_name"])
 
     def test_that_the_properties_without_periods_can_be_provided(self):
         props = create_properties(show_periods=False)
-        self.assertTrue(len(props) == 10)
+        self.assertEqual(len(props), 11)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleTransmission", "column_name": "SampleTrans"},
@@ -54,12 +55,13 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "CanDirect", "column_name": "CanDirect"},
                     {"algorithm_property": "UseOptimizations", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
+                    {"algorithm_property": "UserFile", "column_name": "User File"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
                     {"algorithm_property": "OutputMode", "column_name": ""}]
 
         for index, element in enumerate(props):
-            self.assertTrue(element.algorithm_property == expected[index]["algorithm_property"])
-            self.assertTrue(element.column_name == expected[index]["column_name"])
+            self.assertEqual(element.algorithm_property, expected[index]["algorithm_property"])
+            self.assertEqual(element.column_name, expected[index]["column_name"])
 
     def test_that_gets_gui_algorithm_name(self):
         alg_name = get_gui_algorithm_name(SANSFacility.ISIS)
@@ -71,7 +73,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_white_list_contains_all_properties(self):
         white_list = get_white_list()
-        self.assertTrue(len(white_list) == 16)
+        self.assertEqual(len(white_list), 17)
 
     def test_that_black_list_contains_input_and_output_ws(self):
         black_list = get_black_list()
