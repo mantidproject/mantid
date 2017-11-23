@@ -118,7 +118,9 @@ public:
     loadSpecific(m_d17File, m_outWSName, emptyProperties());
   }
 
-  // D17
+  void testExecFigaro() {
+    loadSpecific(m_figaroFile, m_outWSName, emptyProperties());
+  }
 
   void testTOFD17() {
     MatrixWorkspace_sptr output;
