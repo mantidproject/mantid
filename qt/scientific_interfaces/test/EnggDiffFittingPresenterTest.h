@@ -667,7 +667,9 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(0.0133));
 
-    EXPECT_CALL(mockView, getExpectedPeaksInput()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // string should be "0.133," instead
     EXPECT_CALL(mockView, setPeakList("0.0133")).Times(0);

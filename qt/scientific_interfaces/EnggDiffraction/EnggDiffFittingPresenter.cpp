@@ -38,39 +38,38 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
   return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
 
-// Remove commas at the start and end of the string, 
+// Remove commas at the start and end of the string,
 // as well as any adjacent to another (eg ,, gets corrected to ,)
 std::string stripExtraCommas(std::string &expectedPeaks) {
-	if (!expectedPeaks.empty()) {
+  if (!expectedPeaks.empty()) {
 
-		g_log.debug() << "Validating the expected peak list.\n";
+    g_log.debug() << "Validating the expected peak list.\n";
 
-		const auto comma = ',';
+    const auto comma = ',';
 
-		for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
-			size_t j = i + 1;
+    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+      size_t j = i + 1;
 
-			if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
-				expectedPeaks.erase(j, 1);
-				i--;
+      if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
+        expectedPeaks.erase(j, 1);
+        i--;
 
-			}
-			else {
-				++j;
-			}
-		}
+      } else {
+        ++j;
+      }
+    }
 
-		size_t strLength = expectedPeaks.length() - 1;
-		if (expectedPeaks.at(0) == ',') {
-			expectedPeaks.erase(0, 1);
-			strLength -= 1;
-		}
+    size_t strLength = expectedPeaks.length() - 1;
+    if (expectedPeaks.at(0) == ',') {
+      expectedPeaks.erase(0, 1);
+      strLength -= 1;
+    }
 
-		if (expectedPeaks.at(strLength) == ',') {
-			expectedPeaks.erase(strLength, 1);
-		}
-	}
-	return expectedPeaks;
+    if (expectedPeaks.at(strLength) == ',') {
+      expectedPeaks.erase(strLength, 1);
+    }
+  }
+  return expectedPeaks;
 }
 }
 
@@ -820,8 +819,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
-        validateFittingInputs(g_multi_run_directories[i], 
-			                  normalisedPeakCentres);
+        validateFittingInputs(g_multi_run_directories[i],
+                              normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
                             ia.what());
