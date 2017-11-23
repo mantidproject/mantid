@@ -708,6 +708,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
   const double peakCentre = fitReflectometryPeak();
   g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle << '\n';
+  const double deflection = collimationAngle();
   if (!isDefault("OutputBeamPosition")) {
     PeakInfo p;
     p.detectorAngle = m_detectorAngle;
@@ -727,8 +728,12 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     return std::make_pair(userDetectorAngle, userAngle);
   }
   if (!posTable) {
-    const double bragg = (m_detectorAngle + offset) / 2;
-    return std::make_pair(m_detectorAngle, bragg);
+    if (deflection != 0) {
+      g_log.debug() << "Using incident deflection angle (degrees): " << deflection << '\n';
+    }
+    const double detectorAngle = m_detectorAngle + deflection;
+    const double bragg = (detectorAngle + offset) / 2;
+    return std::make_pair(detectorAngle, bragg);
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
@@ -794,16 +799,23 @@ void LoadILLReflectometry::placeSource() {
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
+double LoadILLReflectometry::collimationAngle() const
+{
+  if (m_instrumentName != "Figaro") {
+    return 0;
+  }
+  return doubleFromRun("CollAngle.actual_coll_angle");
+}
+
 double LoadILLReflectometry::detectorAngle() const
 {
   if (m_instrumentName != "Figaro") {
     return doubleFromRun(m_detectorAngleName);
   }
   // Take the bent beam into account.
-  const double collimation = doubleFromRun("CollAngle.actual_coll_angle");
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
-  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X)) + collimation;
+  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X));
 }
 
 /** Return the sample to detector distance for the current instrument.

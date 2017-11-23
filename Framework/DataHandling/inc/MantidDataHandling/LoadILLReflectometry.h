@@ -76,7 +76,7 @@ private:
   void placeDetector();
   void placeSample();
   void placeSource();
-
+  double collimationAngle() const;
   double detectorAngle() const;
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
