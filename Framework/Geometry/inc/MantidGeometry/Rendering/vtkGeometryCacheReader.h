@@ -58,7 +58,7 @@ private:
 
 public:
   vtkGeometryCacheReader(std::string filename);
-  ~vtkGeometryCacheReader(); 
+  ~vtkGeometryCacheReader();
   void readCacheForObject(IObject *obj);
 };
 

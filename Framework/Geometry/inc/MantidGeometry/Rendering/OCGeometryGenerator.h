@@ -54,7 +54,7 @@ class Torus;
 */
 class MANTID_GEOMETRY_DLL OCGeometryGenerator {
 private:
-  const CSGObject *Obj;        ///< Input Object
+  const CSGObject *Obj;     ///< Input Object
   TopoDS_Shape *ObjSurface; ///< Storage for the output surface
   /// Analyze the object
   void AnalyzeObject();

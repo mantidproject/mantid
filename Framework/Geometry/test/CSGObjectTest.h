@@ -116,7 +116,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
-    CSGObject lhs;      // initialize
+    CSGObject lhs;   // initialize
     lhs = *original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;

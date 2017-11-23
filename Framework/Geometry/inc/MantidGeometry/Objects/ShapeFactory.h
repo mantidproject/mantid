@@ -90,9 +90,9 @@ public:
                                             bool addTypeTag = true);
 
   boost::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf,
-                                                  double xrf, double xrb,
-                                                  double ylb, double ylf,
-                                                  double yrf, double yrb);
+                                                     double xrf, double xrb,
+                                                     double ylb, double ylf,
+                                                     double yrf, double yrb);
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,
@@ -154,7 +154,8 @@ private:
                                               const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
-  void createGeometryHandler(Poco::XML::Element *, boost::shared_ptr<CSGObject>);
+  void createGeometryHandler(Poco::XML::Element *,
+                             boost::shared_ptr<CSGObject>);
 };
 
 } // namespace Geometry

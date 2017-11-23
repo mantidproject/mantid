@@ -138,8 +138,8 @@ private:
   Kernel::V3D m_beamDir;                  // Directional vector for beam
   double m_srcR2;                         // beam penumbra radius (m)
   double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
-  Geometry::CSGObject const *m_sampleShape;  // sample shape
-  SampleComptonProperties *m_sampleProps; // description of sample properties
+  Geometry::CSGObject const *m_sampleShape; // sample shape
+  SampleComptonProperties *m_sampleProps;   // description of sample properties
   double m_detHeight, m_detWidth, m_detThick; // (m)
   double m_tmin, m_tmax, m_delt;              // min, max & dt TOF value
   double m_foilRes;                           // resolution in energy of foil

@@ -23,7 +23,8 @@ CacheGeometryHandler::CacheGeometryHandler(boost::shared_ptr<CSGObject> obj)
   Renderer = new CacheGeometryRenderer();
 }
 
-CacheGeometryHandler::CacheGeometryHandler(CSGObject *obj) : GeometryHandler(obj) {
+CacheGeometryHandler::CacheGeometryHandler(CSGObject *obj)
+    : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj);
   Renderer = new CacheGeometryRenderer();
 }

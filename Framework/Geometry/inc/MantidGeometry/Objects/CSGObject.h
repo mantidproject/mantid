@@ -80,7 +80,7 @@ public:
   void setID(const std::string &id) { m_id = id; }
   inline const std::string &id() const { return m_id; }
 
-  void setName(const int nx) override { ObjNum = nx; }  ///< Set Name
+  void setName(const int nx) override { ObjNum = nx; } ///< Set Name
   int getName() const override { return ObjNum; }      ///< Get Name
 
   void setMaterial(const Kernel::Material &material) override;
@@ -106,7 +106,8 @@ public:
   virtual void print() const;
   void printTree() const;
 
-  bool isValid(const Kernel::V3D &) const override; ///< Check if a point is valid
+  bool
+  isValid(const Kernel::V3D &) const override; ///< Check if a point is valid
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
@@ -114,7 +115,9 @@ public:
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
-  const std::vector<const Surface *> &getSurfacePtr() const { return m_SurList; }
+  const std::vector<const Surface *> &getSurfacePtr() const {
+    return m_SurList;
+  }
   /// Get the list of surfaces
   std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
 
@@ -176,9 +179,11 @@ public:
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) override;
+  void setVtkGeometryCacheWriter(
+      boost::shared_ptr<vtkGeometryCacheWriter>) override;
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) override;
+  void setVtkGeometryCacheReader(
+      boost::shared_ptr<vtkGeometryCacheReader>) override;
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
   /// Getter for the shape xml
@@ -261,8 +266,8 @@ private:
   std::unique_ptr<Kernel::Material> m_material;
 
 protected:
-  std::vector<const Surface *>
-      m_SurList; ///< Full surfaces (make a map including complementary object ?)
+  std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
+                                          ///including complementary object ?)
 };
 
 /// Typdef for a shared pointer

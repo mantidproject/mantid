@@ -55,7 +55,7 @@ private:
   OCGeometryGenerator *
       Triangulator; ///< Geometry generator to triangulate Object
 public:
-  OCGeometryHandler(IObjComponent *comp);           ///< Constructor
+  OCGeometryHandler(IObjComponent *comp);              ///< Constructor
   OCGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
   OCGeometryHandler(CSGObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler>

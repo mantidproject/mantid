@@ -51,49 +51,48 @@ class vtkGeometryCacheWriter;
 /**
  * Interface for Geometry Objects
  */
-  class MANTID_GEOMETRY_DLL IObject {
-  public:
-    virtual bool isValid(const Kernel::V3D &) const = 0;
-    virtual bool isOnSide(const Kernel::V3D &) const = 0;
-    virtual bool hasValidShape() const = 0;
-    virtual int setObject(const int ON, const std::string &Ln) = 0;
-    virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
+class MANTID_GEOMETRY_DLL IObject {
+public:
+  virtual bool isValid(const Kernel::V3D &) const = 0;
+  virtual bool isOnSide(const Kernel::V3D &) const = 0;
+  virtual bool hasValidShape() const = 0;
+  virtual int setObject(const int ON, const std::string &Ln) = 0;
+  virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
 
-    virtual int getName() const = 0;
-    virtual void setName(const int nx) = 0;
+  virtual int getName() const = 0;
+  virtual void setName(const int nx) = 0;
 
-    virtual int interceptSurface(Geometry::Track &) const = 0;
-    // Solid angle
-    virtual double solidAngle(const Kernel::V3D &observer) const = 0;
-    // Solid angle with a scaling of the object
-    virtual double solidAngle(const Kernel::V3D &observer,
-      const Kernel::V3D &scaleFactor) const = 0;
-    /// Return cached value of axis-aligned bounding box
-    virtual const BoundingBox &getBoundingBox() const = 0;
+  virtual int interceptSurface(Geometry::Track &) const = 0;
+  // Solid angle
+  virtual double solidAngle(const Kernel::V3D &observer) const = 0;
+  // Solid angle with a scaling of the object
+  virtual double solidAngle(const Kernel::V3D &observer,
+                            const Kernel::V3D &scaleFactor) const = 0;
+  /// Return cached value of axis-aligned bounding box
+  virtual const BoundingBox &getBoundingBox() const = 0;
 
-    virtual int getPointInObject(Kernel::V3D &point) const = 0;
-    virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-      double &myradius, double &myheight) const = 0;
-    virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
+  virtual int getPointInObject(Kernel::V3D &point) const = 0;
+  virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+                             double &myradius, double &myheight) const = 0;
+  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
 
-    // Rendering
-    virtual void draw() const = 0;
-    virtual void initDraw() const = 0;
-    //VTK cache
-    virtual void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
-    virtual void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) = 0;
+  // Rendering
+  virtual void draw() const = 0;
+  virtual void initDraw() const = 0;
+  // VTK cache
+  virtual void
+      setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>) = 0;
+  virtual void
+      setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>) = 0;
 
-    virtual void setMaterial(const Kernel::Material &material) = 0;
-    virtual const Kernel::Material material() const = 0 ;
+  virtual void setMaterial(const Kernel::Material &material) = 0;
+  virtual const Kernel::Material material() const = 0;
+};
 
-
-
-  };
-
-  /// Typdef for a shared pointer
-  typedef boost::shared_ptr<IObject> IObject_sptr;
-  /// Typdef for a shared pointer to a const object
-  typedef boost::shared_ptr<const IObject> IObject_const_sptr;
+/// Typdef for a shared pointer
+typedef boost::shared_ptr<IObject> IObject_sptr;
+/// Typdef for a shared pointer to a const object
+typedef boost::shared_ptr<const IObject> IObject_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

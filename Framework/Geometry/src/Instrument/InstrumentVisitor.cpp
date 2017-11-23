@@ -81,8 +81,9 @@ InstrumentVisitor::InstrumentVisitor(
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
       m_nullShape(boost::make_shared<const CSGObject>()),
-      m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const IObject>>>(
-          m_orderedDetectorIds->size(), m_nullShape)),
+      m_shapes(
+          boost::make_shared<std::vector<boost::shared_ptr<const IObject>>>(
+              m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
       m_isStructuredBank(boost::make_shared<std::vector<bool>>()) {

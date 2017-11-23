@@ -312,8 +312,8 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
 * @retval 1 :: A rule has been combined
 */
 int CSGObject::procPair(std::string &Ln,
-                     std::map<int, std::unique_ptr<Rule>> &Rlist,
-                     int &compUnit) const
+                        std::map<int, std::unique_ptr<Rule>> &Rlist,
+                        int &compUnit) const
 
 {
   unsigned int Rstart;
@@ -378,7 +378,8 @@ int CSGObject::procPair(std::string &Ln,
 * @param RItem :: to encapsulate
 * @returns the complementary group
 */
-std::unique_ptr<CompGrp> CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
+std::unique_ptr<CompGrp>
+CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
   if (!RItem)
     return Mantid::Kernel::make_unique<CompGrp>();
 
@@ -449,7 +450,7 @@ bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
 * @retval 0 :: success
 */
 int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
-                              const Kernel::V3D &Nm) const {
+                                 const Kernel::V3D &Nm) const {
   int status(0);
   Kernel::V3D tmp = C + Nm * (Kernel::Tolerance * 5.0);
   status = (!isValid(tmp)) ? 1 : -1;
@@ -560,7 +561,7 @@ int CSGObject::removeSurface(const int SurfN) {
 * @return number of surfaces substituted
 */
 int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
-                           const boost::shared_ptr<Surface> &SPtr) {
+                              const boost::shared_ptr<Surface> &SPtr) {
   if (!TopRule)
     return 0;
   const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);
@@ -787,7 +788,7 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
 * @retval -1 :: Exit Point
 */
 int CSGObject::calcValidType(const Kernel::V3D &Pt,
-                          const Kernel::V3D &uVec) const {
+                             const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
   const Kernel::V3D testA(Pt - shift);
   const Kernel::V3D testB(Pt + shift);
@@ -822,7 +823,7 @@ double CSGObject::solidAngle(const Kernel::V3D &observer) const {
 * triangulation quality.
 */
 double CSGObject::solidAngle(const Kernel::V3D &observer,
-                          const Kernel::V3D &scaleFactor) const
+                             const Kernel::V3D &scaleFactor) const
 
 {
   return triangleSolidAngle(observer, scaleFactor);
@@ -960,8 +961,9 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
 * @param observer :: point from which solid angle is required
 * @return :: solid angle of triangle in Steradians.
 */
-double CSGObject::getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
-                                     const V3D &observer) const {
+double CSGObject::getTriangleSolidAngle(const V3D &a, const V3D &b,
+                                        const V3D &c,
+                                        const V3D &observer) const {
   const V3D ao = a - observer;
   const V3D bo = b - observer;
   const V3D co = c - observer;
@@ -1069,7 +1071,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
 * @return the solid angle
 */
 double CSGObject::triangleSolidAngle(const V3D &observer,
-                                  const V3D &scaleFactor) const {
+                                     const V3D &scaleFactor) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
   // outward normal
@@ -1151,8 +1153,8 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
 * @return :: solid angle of sphere
 */
 double CSGObject::SphereSolidAngle(const V3D observer,
-                                const std::vector<Kernel::V3D> vectors,
-                                const double radius) const {
+                                   const std::vector<Kernel::V3D> vectors,
+                                   const double radius) const {
   const double distance = (observer - vectors[0]).norm();
   const double tol = Kernel::Tolerance;
   if (distance > radius + tol) {
@@ -1173,8 +1175,9 @@ double CSGObject::SphereSolidAngle(const V3D observer,
 * the cuboid
 * @return :: solid angle of cuboid - good accuracy
 */
-double CSGObject::CuboidSolidAngle(const V3D observer,
-                                const std::vector<Kernel::V3D> vectors) const {
+double
+CSGObject::CuboidSolidAngle(const V3D observer,
+                            const std::vector<Kernel::V3D> vectors) const {
   // Build bounding points, then set up map of 12 bounding
   // triangles defining the 6 surfaces of the bounding box. Using a consistent
   // ordering of points the "away facing" triangles give -ve contributions to
@@ -1253,10 +1256,10 @@ double CSGObject::CuboidSolidAngle(const V3D observer,
 * @returns The solid angle value
 */
 double CSGObject::CylinderSolidAngle(const V3D &observer,
-                                  const Mantid::Kernel::V3D &centre,
-                                  const Mantid::Kernel::V3D &axis,
-                                  const double radius,
-                                  const double height) const {
+                                     const Mantid::Kernel::V3D &centre,
+                                     const Mantid::Kernel::V3D &axis,
+                                     const double radius,
+                                     const double height) const {
   // The cylinder is triangulated along its axis EXCLUDING the end caps so that
   // stacked cylinders
   // give the correct value of solid angle (i.e shadowing is losely taken into
@@ -1334,9 +1337,10 @@ double CSGObject::CylinderSolidAngle(const V3D &observer,
 * @returns The solid angle value
 */
 double CSGObject::ConeSolidAngle(const V3D &observer,
-                              const Mantid::Kernel::V3D &centre,
-                              const Mantid::Kernel::V3D &axis,
-                              const double radius, const double height) const {
+                                 const Mantid::Kernel::V3D &centre,
+                                 const Mantid::Kernel::V3D &axis,
+                                 const double radius,
+                                 const double height) const {
   // The cone is broken down into three pieces and then in turn broken down into
   // triangles. Any triangle
   // that has a normal facing away from the observer gives a negative solid
@@ -1579,7 +1583,7 @@ double CSGObject::monteCarloVolume() const {
  * @returns The simulated volume of this object.
  */
 double CSGObject::singleShotMonteCarloVolume(const int shotSize,
-                                          const size_t seed) const {
+                                             const size_t seed) const {
   const auto &boundingBox = getBoundingBox();
   if (boundingBox.isNull()) {
     throw std::runtime_error("Cannot calculate volume: invalid bounding box.");
@@ -1883,7 +1887,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
 * @param zmin :: Minimum value for the bounding box in z direction
 */
 void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
-                            double &xmin, double &ymin, double &zmin) const {
+                               double &xmin, double &ymin, double &zmin) const {
   if (!TopRule) { // If no rule defined then return zero boundbing box
     xmax = ymax = zmax = xmin = ymin = zmin = 0.0;
     return;
@@ -1926,8 +1930,8 @@ void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
 * @param zMin :: Minimum value for the bounding box in z direction
 */
 void CSGObject::defineBoundingBox(const double &xMax, const double &yMax,
-                               const double &zMax, const double &xMin,
-                               const double &yMin, const double &zMin) {
+                                  const double &zMax, const double &xMin,
+                                  const double &yMin, const double &zMin) {
   BoundingBox::checkValid(xMax, yMax, zMax, xMin, yMin, zMin);
 
   AABBxMax = xMax;
@@ -1986,7 +1990,7 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @return The generated point
  */
 V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                  const size_t maxAttempts) const {
+                                     const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
   if (bbox.isNull()) {
     throw std::runtime_error("Object::generatePointInObject() - Invalid "
@@ -2006,8 +2010,8 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @return The newly generated point
  */
 V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                  const BoundingBox &activeRegion,
-                                  const size_t maxAttempts) const {
+                                     const BoundingBox &activeRegion,
+                                     const size_t maxAttempts) const {
   size_t attempts(0);
   while (attempts < maxAttempts) {
     const double r1 = rng.nextValue();
@@ -2174,7 +2178,7 @@ int *CSGObject::getTriangleFaces() const {
 * get info on standard shapes
 */
 void CSGObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                           double &myradius, double &myheight) const {
+                              double &myradius, double &myheight) const {
   type = 0;
   if (m_handler == nullptr)
     return;

@@ -14,8 +14,8 @@ void export_Object() {
   register_ptr_to_python<boost::shared_ptr<CSGObject>>();
 
   class_<CSGObject, boost::noncopyable>("Object", no_init)
-      .def("getBoundingBox",
-           (const BoundingBox &(CSGObject::*)() const) & CSGObject::getBoundingBox,
+      .def("getBoundingBox", (const BoundingBox &(CSGObject::*)() const) &
+                                 CSGObject::getBoundingBox,
            arg("self"), return_value_policy<copy_const_reference>(),
            "Return the axis-aligned bounding box for this shape")
 

@@ -42,7 +42,7 @@ namespace Geometry {
 class CSGObject;
 class MANTID_GEOMETRY_DLL CacheGeometryGenerator {
 private:
-  CSGObject *Obj;        ///< Input Object
+  CSGObject *Obj;     ///< Input Object
   int mNoOfVertices;  ///< number of vertices
   int mNoOfTriangles; ///< number of triangles
   double *mPoints;    ///<double array or points

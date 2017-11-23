@@ -78,7 +78,7 @@ struct MANTID_GEOMETRY_DLL Link {
   Kernel::V3D exitPoint;   ///< Exit point
   double distFromStart;    ///< Total distance from track beginning
   double distInsideObject; ///< Total distance covered inside object
-  const IObject *object;    ///< The object that was intersected
+  const IObject *object;   ///< The object that was intersected
   ComponentID componentID; ///< ComponentID of the intersected component
                            //@}
 };
@@ -104,7 +104,8 @@ struct IntersectionPoint {
   * @param obj :: A reference to the object that was intersected
   */
   inline IntersectionPoint(const int flag, const Kernel::V3D &end,
-                           const double distFromStartOfTrack, const CSGObject &obj,
+                           const double distFromStartOfTrack,
+                           const CSGObject &obj,
                            const ComponentID compID = nullptr)
       : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
         object(&obj), componentID(compID) {}
@@ -130,7 +131,7 @@ struct IntersectionPoint {
   int directionFlag;       ///< Directional flag
   Kernel::V3D endPoint;    ///< Point
   double distFromStart;    ///< Total distance from track begin
-  const CSGObject *object;    ///< The object that was intersected
+  const CSGObject *object; ///< The object that was intersected
   ComponentID componentID; ///< Unique component ID
                            //@}
 };

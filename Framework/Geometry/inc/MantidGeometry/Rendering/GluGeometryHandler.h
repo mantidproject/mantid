@@ -71,7 +71,7 @@ private:
       type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 public:
   GluGeometryHandler(const GluGeometryHandler &other);
-  GluGeometryHandler(IObjComponent *comp);           ///< Constructor
+  GluGeometryHandler(IObjComponent *comp);              ///< Constructor
   GluGeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
   GluGeometryHandler(CSGObject *obj);                   ///< Constructor
   boost::shared_ptr<GeometryHandler> clone() const override;

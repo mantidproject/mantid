@@ -96,7 +96,8 @@ bool ObjComponent::isOnSide(const V3D &point) const {
 * found)
 *  @returns The number of track segments added (i.e. 1 if the track enters and
 * exits the Iobject once each)
-*  @throw NullPointerException if the underlying geometrical IObject has not been
+*  @throw NullPointerException if the underlying geometrical IObject has not
+* been
 * set
 */
 int ObjComponent::interceptSurface(Track &track) const {

@@ -280,10 +280,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::IObject *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -295,10 +295,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::IObject *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -307,10 +307,10 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        this->shapeCache.insert(
-            std::pair<const Geometry::IObject *, std::pair<double, Kernel::V3D>>(
-                shape_sptr.get(),
-                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
+        this->shapeCache.insert(std::pair<const Geometry::IObject *,
+                                          std::pair<double, Kernel::V3D>>(
+            shape_sptr.get(),
+            std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }

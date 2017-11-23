@@ -125,8 +125,9 @@ Geometry::CSGObject AnyShapeAbsorption::constructGaugeVolume() {
                     "the input workspace");
 
   // Retrieve and create the gauge volume shape
-  boost::shared_ptr<const Geometry::CSGObject> volume = ShapeFactory().createShape(
-      m_inputWS->run().getProperty("GaugeVolume")->value());
+  boost::shared_ptr<const Geometry::CSGObject> volume =
+      ShapeFactory().createShape(
+          m_inputWS->run().getProperty("GaugeVolume")->value());
   // Although DefineGaugeVolume algorithm will have checked validity of XML, do
   // so again here
   if (!(volume->topRule()) && volume->getSurfacePtr().empty()) {

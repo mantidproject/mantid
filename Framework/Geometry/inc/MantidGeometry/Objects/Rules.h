@@ -297,7 +297,7 @@ Care must be taken to avoid a cyclic loop
 
 class MANTID_GEOMETRY_DLL CompObj : public Rule {
 private:
-  int objN;    ///< Object number
+  int objN;       ///< Object number
   CSGObject *key; ///< Object Pointer
   CompObj *doClone() const override;
 
@@ -323,7 +323,7 @@ public:
   } ///< Always returns true (1)
 
   void setObjN(const int Ky); ///< set object Number
-  void setObj(CSGObject *);      ///< Set a Object state
+  void setObj(CSGObject *);   ///< Set a Object state
   bool isValid(const Kernel::V3D &) const override;
   bool isValid(const std::map<int, int> &) const override;
   /// Get object number of component
