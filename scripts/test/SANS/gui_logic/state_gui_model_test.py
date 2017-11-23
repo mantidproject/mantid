@@ -129,6 +129,31 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.reduction_mode is ISISReductionMode.All)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Reduction range
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_merge_mask_is_false_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertFalse(state_gui_model.merge_mask)
+
+    def test_that_merge_mask_can_be_set_to_something_else(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_mask = True
+        self.assertTrue(state_gui_model.merge_mask)
+
+    def test_that_merge_min_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_min == None)
+
+    def test_that_merge_max_is_None_by_default(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.merge_max == None)
+
+    def test_that_merge_min_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.merge_min = 78.9
+        self.assertTrue(state_gui_model.merge_min == 78.9)
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Reduction dimensionality
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_defaults_for_merge_are_empty_and_false(self):
