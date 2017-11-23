@@ -558,7 +558,9 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1);
 
-    EXPECT_CALL(mockView, getExpectedPeaksInput()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
+        .Times(1)
+        .WillOnce(Return(""));
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 

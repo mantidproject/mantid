@@ -186,9 +186,9 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
         fit_max = reduction_info.merge_range_max
     else:
         fit_max = None
+
     return reduction_info.merge_shift, reduction_info.merge_scale, reduction_info.merge_fit_mode, fit_min, fit_max,\
         reduction_info.merge_mask, reduction_info.merge_min, reduction_info.merge_max
-
 
 
 def is_sample(x):

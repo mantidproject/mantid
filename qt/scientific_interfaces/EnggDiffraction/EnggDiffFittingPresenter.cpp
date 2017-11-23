@@ -808,7 +808,6 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
-  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &dir : g_multi_run_directories) {
@@ -862,10 +861,6 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-<<<<<<< 5bbf443fecb1b4c1ed3dc778039d004e6a02f238
-
-=======
->>>>>>> Re #21238 Removed unused field
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
