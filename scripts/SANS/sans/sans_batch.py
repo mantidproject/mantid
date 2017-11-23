@@ -22,7 +22,7 @@ class SANSBatchReduction(object):
                             2. SaveToFile
                             3. Both
         """
-        self.validate_inputs(states, use_optimizations, output_mode, plot_results)
+        self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
         self._execute(states, use_optimizations, output_mode, plot_results, output_graph)
 
@@ -32,7 +32,7 @@ class SANSBatchReduction(object):
         for state in states:
             single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph)
 
-    def validate_inputs(self, states, use_optimizations, output_mode, plot_results):
+    def validate_inputs(self, states, use_optimizations, output_mode, plot_results, output_graph):
         # We are strict about the types here.
         # 1. states has to be a list of sans state objects
         # 2. use_optimizations has to be bool
@@ -52,6 +52,10 @@ class SANSBatchReduction(object):
         if not isinstance(plot_results, bool):
             raise RuntimeError("The plot_result has to be a boolean. The provided type is"
                                " {0}".format(type(plot_results)))
+
+        if plot_results and not output_graph:
+            raise RuntimeError("The output_graph must be set if plot_results is true. The provided value is"
+                               " {0}".format(output_graph))
 
         if output_mode is not OutputMode.PublishToADS and output_mode is not OutputMode.SaveToFile and\
                         output_mode is not OutputMode.Both:  # noqa
