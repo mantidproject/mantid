@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/Crystal/SymmetryOperationSymbolParser.cpp
 	src/Crystal/UnitCell.cpp
 	src/Crystal/V3R.cpp
+	src/GeometryRenderer.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
@@ -50,8 +51,8 @@ set ( SRC_FILES
 	src/Instrument/ComponentInfo.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
-	src/Instrument/DetectorInfo.cpp
 	src/Instrument/DetectorGroup.cpp
+	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
 	src/Instrument/IDFObject.cpp
@@ -194,6 +195,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/Crystal/V3R.h
 	inc/MantidGeometry/DllConfig.h
+	inc/MantidGeometry/GeometryRenderer.h
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
