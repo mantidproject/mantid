@@ -288,7 +288,8 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_can_get_states_from_row_user_file(self):
         # Arrange
         row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2, row_user_file_path)
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2,
+                                                                                           row_user_file_path = row_user_file_path)
 
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
