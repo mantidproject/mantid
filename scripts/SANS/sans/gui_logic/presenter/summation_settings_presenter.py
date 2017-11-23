@@ -45,4 +45,4 @@ class SummationSettingsPresenter(object):
         return self._summation_settings
 
     def _refresh(self):
-        self.view.apply_settings(self._summation_settings)
+        self.view.draw_settings(self._summation_settings)

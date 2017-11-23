@@ -61,13 +61,13 @@ class SummationSettingsPresenterTest(unittest.TestCase):
     def test_refreshes_view_when_binning_type_changed(self):
         new_binning_type = BinningType.Custom
         self.view.binningTypeChanged.emit(new_binning_type)
-        self.assertEqual(2, self.view.apply_settings.call_count)
-        self.view.apply_settings.assert_called_with(self.summation_settings)
+        self.assertEqual(2, self.view.draw_settings.call_count)
+        self.view.draw_settings.assert_called_with(self.summation_settings)
 
     def test_refreshes_view_when_overlay_event_workspaces_changed(self):
         self.view.preserveEventsChanged.emit(True)
-        self.assertEqual(2, self.view.apply_settings.call_count)
-        self.view.apply_settings.assert_called_with(self.summation_settings)
+        self.assertEqual(2, self.view.draw_settings.call_count)
+        self.view.draw_settings.assert_called_with(self.summation_settings)
 
     def test_enables_overlay_workspace_when_enabled(self):
         self.view.preserveEventsChanged.emit(True)
