@@ -53,16 +53,13 @@ private slots:
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
-  createFunction(bool tieCentres = false);
+  createFunction(bool tieCentres = false, bool addQValues = false);
   double
   getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);
   QtProperty *createFitType(QtProperty *, const bool & = true);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
-  void populateFunction(Mantid::API::IFunction_sptr func,
-                        Mantid::API::IFunction_sptr comp, QtProperty *group,
-                        const std::string &pref, bool tie);
   QString fitTypeString() const;
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
@@ -70,7 +67,6 @@ private:
   QVector<QString> indexToFitFunctions(const int &fitTypeIndex);
   void updateProperties(int specNo, const QString &fitFunction);
   void updatePlotOptions();
-  void plotOutput(std::string const &outputWs, int specNo);
   void addDefaultParametersToTree(const QVector<QString> &currentFitFunction);
   void addSampleLogsToWorkspace(const std::string &workspaceName,
                                 const std::string &logName,
@@ -101,10 +97,7 @@ private:
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   bool m_confitResFileType;
-  QString m_singleFitOutputName;
   QString m_baseName;
-  int m_runMin;
-  int m_runMax;
 
   // ShortHand Naming for fit functions
   QStringList m_fitStrings;

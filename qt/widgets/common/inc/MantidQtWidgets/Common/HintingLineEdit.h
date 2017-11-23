@@ -64,6 +64,9 @@ protected:
 protected slots:
   void updateHints(const QString &text);
   void hideHints();
+
+private:
+  static QPalette createFixedPalette();
 };
 } // namespace MantidWidgets
 } // namepsace MantidQt

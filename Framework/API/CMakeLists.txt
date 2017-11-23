@@ -112,6 +112,7 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+	src/ParallelAlgorithm.cpp
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
@@ -307,6 +308,7 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h

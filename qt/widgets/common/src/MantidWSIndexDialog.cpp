@@ -41,7 +41,7 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
  * @param showTiledOption :: true if tiled plot enabled
  * @param isAdvanced :: true if advanced plotting has been selected
  */
-MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showTiledOption,
@@ -457,7 +457,7 @@ void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
   const QString wsIndices = m_wsIndexIntervals.toQString();
   const QString label = "Enter Workspace Indices: " + wsIndices;
-  m_wsMessage = new QLabel(tr(label.toLatin1().constData()));
+  m_wsMessage = new QLabel(tr(qPrintable(label)));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
@@ -481,7 +481,7 @@ void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
   const QString spectraNumbers = m_spectraNumIntervals.toQString();
   const QString label = "Enter Spectra Numbers: " + spectraNumbers;
-  m_spectraMessage = new QLabel(tr(label.toLatin1().constData()));
+  m_spectraMessage = new QLabel(tr(qPrintable(label)));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
@@ -788,7 +788,7 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showTiledOption :: If true the "Tiled" option is created
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,

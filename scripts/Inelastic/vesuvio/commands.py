@@ -11,7 +11,7 @@ import re
 import numpy as np
 
 from mantid import mtd
-from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
+from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceFactory, TextAxis)
 from mantid.kernel import MaterialBuilder
 from vesuvio.instrument import VESUVIO
 
@@ -26,7 +26,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     """
     The main entry point for user scripts fitting in TOF.
 
-    :param runs: A string specifying the runs to process
+    :param runs: A string specifying the runs to process, or a workspace containing
+                 the loaded runs
     :param flags: A dictionary of flags to control the processing
     :param iterations: Maximum number of iterations to perform
     :param convergence_threshold: Maximum difference in the cost
@@ -39,20 +40,46 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise ValueError('Must perform at least one iteration')
 
     # Load
-    spectra = flags['spectra']
     fit_mode = flags['fit_mode']
-    sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
-                                     flags['diff_mode'], fit_mode,
-                                     flags.get('bin_parameters', None))
+    back_banks = VESUVIO().backward_banks
+
+    if isinstance(runs, MatrixWorkspace):
+        sample_data = runs
+        flags['runs'] = runs.getName()
+        flags['spectra'] = sample_data.getAxis(0).extractValues()
+        flags['back_scattering'] = any([lower <= flags['spectra'][0] <= upper for lower, upper in back_banks])
+    else:
+        spectra = flags['spectra']
+        sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
+                                         flags['diff_mode'], fit_mode,
+                                         flags.get('bin_parameters', None))
+        flags['runs'] = runs
+        if spectra == 'backward' or spectra == 'forward':
+            flags['back_scattering'] = spectra == 'backward'
+        else:
+            try:
+                first_spec = int(spectra.split("-")[0])
+                flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
+            except:
+                raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
+                                   "'backward' or specified with the syntax 'a-b'.")
 
     # Load container runs if provided
     container_data = None
     if flags.get('container_runs', None) is not None:
-        container_data = load_and_crop_data(flags['container_runs'], spectra,
-                                            flags['ip_file'],
-                                            flags['diff_mode'], fit_mode,
-                                            flags.get('bin_parameters', None))
 
+        if isinstance(flags['container_runs'], MatrixWorkspace):
+            container_data = flags['container_runs']
+        else:
+            container_data = load_and_crop_data(flags['container_runs'], spectra,
+                                                flags['ip_file'],
+                                                flags['diff_mode'], fit_mode,
+                                                flags.get('bin_parameters', None))
+
+    return fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold)
+
+
+def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold):
     # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
 
@@ -66,19 +93,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
                            "to false, in order to disable multiple scattering corrections.")
 
-    if spectra == 'backward' or spectra == 'forward':
-        flags['back_scattering'] = spectra == 'backward'
-    else:
-        try:
-            first_spec = int(spectra.split("-")[0])
-            back_banks = VESUVIO().backward_banks
-            flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
-        except:
-            raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
-                               "'backward' or specified with the syntax 'a-b'.")
-
     last_results = None
-
     exit_iteration = 0
 
     index_to_symbol_map = filter(lambda x: 'symbol' in x[1], enumerate(flags['masses']))
@@ -88,7 +103,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     if flags['back_scattering']:
         hydrogen_indices = {int(k) for k, _ in filter(lambda x: x[1] == 'H',
                                                       index_to_symbol_map.items())}
-
         symbols = set()
         for symbol in flags['ms_flags']['HydrogenConstraints']:
             symbols.add(symbol)
@@ -110,7 +124,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                                                    ignore_indices=hydrogen_indices)
 
         print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
+        results = fit_tof_iteration(sample_data, container_data, iteration_flags)
         exit_iteration += 1
 
         if last_results is not None and convergence_threshold is not None:
@@ -130,14 +144,13 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
 
-def fit_tof_iteration(sample_data, container_data, runs, flags):
+def fit_tof_iteration(sample_data, container_data, flags):
     """
     Performs a single iterations of the time of flight corrections and fitting
     workflow.
 
     :param sample_data: Loaded sample data workspaces
     :param container_data: Loaded container data workspaces
-    :param runs: A string specifying the runs to process
     :param flags: A dictionary of flags to control the processing
     :return: Tuple of (workspace group name, pre correction fit parameters,
              final fit parameters, chi^2 values)
@@ -172,6 +185,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     chi2_values = []
     data_workspaces = []
     result_workspaces = []
+    runs = flags['runs']
     group_name = runs + '_result'
 
     # Create function for retrieving profiles by index outside of loop,

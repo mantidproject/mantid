@@ -1,19 +1,20 @@
 #ifndef TESTTABLEWORKSPACE_
 #define TESTTABLEWORKSPACE_
 
-#include <vector>
-#include <algorithm>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ColumnFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "PropertyManagerHelper.h"
 
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <limits>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -313,6 +314,16 @@ public:
     TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
     TS_ASSERT_EQUALS("b", cloned->getColumn(1)->cell<std::string>(0));
     TS_ASSERT_EQUALS("c", cloned->getColumn(2)->cell<std::string>(0));
+  }
+
+  void testCloneClearsWorkspaceName() {
+    auto ws = boost::make_shared<TableWorkspace>();
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
   }
 
   void testCloneColumns() {
