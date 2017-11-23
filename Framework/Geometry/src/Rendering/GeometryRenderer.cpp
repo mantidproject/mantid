@@ -49,6 +49,63 @@ namespace Geometry {
 using Kernel::Quat;
 using Kernel::V3D;
 
+void GeometryRenderer::renderIObjComponent(IObjComponent *objComp,
+                                           RenderMode mode) const {
+  render(mode, objComp);
+}
+
+void GeometryRenderer::renderTriangulated(int noPts, int noFaces,
+                                          double *points, int *faces,
+                                          RenderMode mode) const {
+  render(mode, noPts, noFaces, points, faces);
+}
+
+void GeometryRenderer::renderOpenCascade(TopoDS_Shape *objSurf,
+                                         RenderMode mode) const {
+  render(mode, objSurf);
+}
+
+void GeometryRenderer::renderSphere(const Kernel::V3D &center, double radius,
+                                    RenderMode mode) const {
+  render(mode, center, radius);
+}
+
+void GeometryRenderer::renderCuboid(const Kernel::V3D &Point1,
+                                    const Kernel::V3D &Point2,
+                                    const Kernel::V3D &Point3,
+                                    const Kernel::V3D &Point4,
+                                    RenderMode mode) const {
+  render(mode, Point1, Point2, Point3, Point4);
+}
+
+void GeometryRenderer::renderHexahedron(const std::vector<Kernel::V3D> &points,
+                                        RenderMode mode) const {
+  render(mode, points);
+}
+
+void GeometryRenderer::renderCone(const Kernel::V3D &center,
+                                  const Kernel::V3D &axis, double radius,
+                                  double height, RenderMode mode) const {
+  render(mode, center, axis, radius, height);
+}
+
+void GeometryRenderer::renderCylinder(const Kernel::V3D &center,
+                                      const Kernel::V3D &axis, double radius,
+                                      double height, bool segmented,
+                                      RenderMode mode) const {
+  render(mode, center, axis, radius, height, segmented);
+}
+
+void GeometryRenderer::renderBitmap(const RectangularDetector *rectDet,
+                                    RenderMode mode) const {
+  render(mode, rectDet);
+}
+
+void GeometryRenderer::renderStructured(const StructuredDetector *structDet,
+                                        RenderMode mode) const {
+  render(mode, structDet);
+}
+
 // Render IObjectComponent
 void GeometryRenderer::doRender(IObjComponent *ObjComp) const {
   glPushMatrix();
@@ -332,7 +389,7 @@ void GeometryRenderer::doRender(const RectangularDetector *rectDet) const {
 
   glEnd();
   if (glGetError() > 0)
-    std::cout << "OpenGL error in BitmapGeometryHandler::Render \n";
+    std::cout << "OpenGL error in BitmapGeometryHandler::render \n";
 
   glDisable(
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
@@ -379,7 +436,7 @@ void GeometryRenderer::doRender(const StructuredDetector *structDet) const {
   glEnd();
 
   if (glGetError() > 0)
-    std::cout << "OpenGL error in StructuredGeometryHandler::Render \n";
+    std::cout << "OpenGL error in StructuredGeometryHandler::render \n";
 
   glDisable(
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
