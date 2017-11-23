@@ -119,7 +119,6 @@ class SummationSettings(object):
         self._settings.bin_settings = bin_settings
 
     def _settings_from_type(self, type):
-        lookup = {BinningType.SaveAsEventData: self._save_as_event_data,
-                  BinningType.Custom: self._custom_binning,
-                  BinningType.FromMonitors: self._binning_from_monitors}
-        return lookup[type]
+        return {BinningType.SaveAsEventData: self._save_as_event_data,
+                BinningType.Custom: self._custom_binning,
+                BinningType.FromMonitors: self._binning_from_monitors}[type]

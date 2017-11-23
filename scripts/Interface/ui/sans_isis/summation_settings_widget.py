@@ -65,10 +65,10 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
     def _handle_overlay_ews_changed(self, state):
         self.preserveEventsChanged.emit(state != 0)
 
-    def apply_settings(self, settings):
-        self._apply_bin_settings(settings)
-        self._apply_additional_time_shifts(settings)
-        self._apply_overlay_event_workspaces(settings)
+    def draw_settings(self, settings):
+        self._draw_bin_settings(settings)
+        self._draw_additional_time_shifts(settings)
+        self._draw_overlay_event_workspaces(settings)
 
     def bin_settings(self):
         return self.binningOptionsLineEdit.text()
@@ -76,7 +76,7 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
     def additional_time_shifts(self):
         return self.binningOptionsLineEdit.text()
 
-    def _apply_overlay_event_workspaces(self, settings):
+    def _draw_overlay_event_workspaces(self, settings):
         if settings.has_overlay_event_workspaces():
             self.overlayEventWorkspacesCheckbox.setVisible(True)
             should_be_checked = settings.is_overlay_event_workspaces_enabled()
@@ -87,13 +87,13 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
                 self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
 
-    def _apply_bin_settings(self, settings):
+    def _draw_bin_settings(self, settings):
         if settings.has_bin_settings():
             self._activate_line_edit('Custom Bin Boundaries:', settings.bin_settings)
         elif not settings.has_additional_time_shifts():
             self._deactivate_line_edit()
 
-    def _apply_additional_time_shifts(self, settings):
+    def _draw_additional_time_shifts(self, settings):
         if settings.has_additional_time_shifts():
             self._activate_line_edit('Additional Time Shifts:', settings.additional_time_shifts)
         elif not settings.has_bin_settings():
