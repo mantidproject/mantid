@@ -209,6 +209,13 @@ void addErrors(Mantid::HistogramData::Histogram &h, const Factor tag) {
   }();
   h.mutableE() = (h.y() * f).rawData();
 }
+
+/// Sets the Y and X units for ws.
+void setUnits(Mantid::API::MatrixWorkspace &ws) {
+  auto xAxis = ws.getAxis(0);
+  xAxis->setUnit("Wavelength");
+  ws.setYUnit("Polarization efficiency");
+}
 }
 
 namespace Mantid {
@@ -304,6 +311,8 @@ void LoadILLPolarizationFactors::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   outWS->replaceAxis(1, outVertAxis.release());
+  setUnits(*outWS);
+  outWS->setTitle("Polarization efficiency factors");
   setProperty(Prop::OUT_WS, outWS);
 }
 
