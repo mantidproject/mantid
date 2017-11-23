@@ -15,9 +15,12 @@ Powder Diffraction
 - Some new functionality for POLARIS in the ISIS Powder scripts. Adjusted some default parameters and output unsplined vanadium workspace by default
 - ISIS_Powder scripts for PEARL now support creation of grouping .cal files from ceria run(s)
 - The ``CalibrationFile`` is now optional in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`. In this case time focussing will use :ref:`ConvertUnits <algm-ConvertUnits>` and the instrument geometry. Care must be taken to supply a ``GroupingFile`` otherwise all of the spectra will be kept separate.
+- :ref:`SaveGSS <algm-SaveGSS>` is relaxed to accept non-TOF point data workspaces as well.
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
+- ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
+
 
 Engineering Diffraction
 -----------------------

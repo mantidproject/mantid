@@ -461,6 +461,7 @@ class RunTabPresenter(object):
         self._set_on_view("reduction_mode")
         self._set_on_view("event_slices")
         self._set_on_view("event_binning")
+        self._set_on_view("merge_mask")
 
         self._set_on_view("wavelength_step_type")
         self._set_on_view("wavelength_min")
@@ -485,6 +486,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
+        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -634,6 +636,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("merge_shift_fit", state_model)
         self._set_on_state_model("merge_q_range_start", state_model)
         self._set_on_state_model("merge_q_range_stop", state_model)
+        self._set_on_state_model("merge_mask", state_model)
+        self._set_on_state_model("merge_max", state_model)
+        self._set_on_state_model("merge_min", state_model)
 
         # Settings tab
         self._set_on_state_model("reduction_dimensionality", state_model)
@@ -664,6 +669,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
+        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
@@ -1148,6 +1149,15 @@ public:
     TS_ASSERT(!h.sharedY());
     TS_ASSERT(!h.sharedE());
     TS_ASSERT(!h.sharedDx());
+  }
+
+  void test_that_can_iterate_histogram() {
+    Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
+    double total = 0;
+    for (const auto &item : hist) {
+      total += item.counts();
+    }
+    TS_ASSERT_EQUALS(total, 7)
   }
 };
 
