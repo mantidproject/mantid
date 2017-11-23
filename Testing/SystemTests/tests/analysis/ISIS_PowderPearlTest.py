@@ -42,6 +42,7 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     existing_config = config['datasearch.directories']
     focus_mode = None
+    tolerance = None
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -55,8 +56,9 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
-               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined_{}.nxs".format(self.focus_mode)
+        self.tolerance = 1e-6
+        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),\
+               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined_all.nxs"
 
     def cleanup(self):
         try:
