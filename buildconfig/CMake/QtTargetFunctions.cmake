@@ -256,11 +256,17 @@ function (mtd_add_qt_test_executable)
   # libraries
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
   if (PARSED_QT_VERSION EQUAL 4)
-   set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
+    set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
+    # Workaround Qt compiler detection
+    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+    # https://bugreports.qt.io/browse/QTBUG-39142
+    set_target_properties ( ${_target_name} PROPERTIES 
+      COMPILE_DEFINITIONS Q_COMPILER_INITIALIZER_LISTS
+    )
   elseif (PARSED_QT_VERSION EQUAL 5)
-   set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
+    set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
   else ()
-   message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
+    message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})
