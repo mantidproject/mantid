@@ -58,7 +58,7 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 1e-6
         return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),\
-               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined_all.nxs"
+               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
 
     def cleanup(self):
         try:
