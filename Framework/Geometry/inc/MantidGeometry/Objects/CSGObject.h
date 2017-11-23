@@ -267,7 +267,7 @@ private:
 
 protected:
   std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
-                                          ///including complementary object ?)
+  /// including complementary object ?)
 };
 
 /// Typdef for a shared pointer
