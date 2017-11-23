@@ -64,7 +64,6 @@ class RunTabPresenter(object):
 
         def on_manage_directories(self):
             self._presenter.on_manage_directories()
-            
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
