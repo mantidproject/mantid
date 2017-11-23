@@ -11,7 +11,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <algorithm>
-#include <boost/optional.hpp>
 #include <numeric>
 
 using namespace Mantid;
