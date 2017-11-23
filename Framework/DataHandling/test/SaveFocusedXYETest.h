@@ -203,7 +203,7 @@ public:
     std::ifstream filestrm(filename.c_str());
     std::string line;
     int bin_no(1);
-    int lineNumber = 0;
+    size_t lineNumber = 0;
     while (getline(filestrm, line)) {
       lineNumber++;
       if (lineNumber <= MAX_HEADER_LENGTH || line[0] == '#')
@@ -454,7 +454,7 @@ public:
     std::string line;
     int bin_no(1);
     double x_value = 1.0;
-    int lineNumber = 0;
+    size_t lineNumber = 0;
     while (getline(filestrm, line)) {
       lineNumber++;
       if (lineNumber <= MAX_HEADER_LENGTH)
