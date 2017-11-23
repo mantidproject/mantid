@@ -354,7 +354,7 @@ void EnggDiffFittingModel::alignDetectors(
   alignDetAlg->execute();
 }
 
-void EnggDiffFittingModel::loadWorkspace(const std::string &filename, 
+void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
                                          const std::string &wsName) {
   auto loadAlg = API::AlgorithmManager::Instance().create("Load");
   loadAlg->setProperty("Filename", filename);
@@ -362,7 +362,7 @@ void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
   loadAlg->execute();
 }
 
-void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS, 
+void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS,
                                            const std::string &newName) {
   auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
   renameAlg->setProperty("InputWorkspace", inputWS);
@@ -371,8 +371,8 @@ void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS,
 }
 
 void EnggDiffFittingModel::groupWorkspaces(
-  const std::vector<std::string> &workspaceNames,
-  const std::string & outputWSName){
+    const std::vector<std::string> &workspaceNames,
+    const std::string &outputWSName) {
   auto groupAlg = API::AlgorithmManager::Instance().create("GroupWorkspaces");
   groupAlg->setProperty("InputWorkspaces", workspaceNames);
   groupAlg->setProperty("OutputWorkspace", outputWSName);
@@ -411,7 +411,6 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   boost::split(filenameSegments, filename, boost::is_any_of("."));
   return filenameSegments[0];
 }
-
 }
 
 void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
@@ -437,15 +436,16 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
 
   if (collectedRunBankPairs.size() == 1) {
     auto ws = getFocusedWorkspace(collectedRunBankPairs[0].first,
-      collectedRunBankPairs[0].second);
+                                  collectedRunBankPairs[0].second);
     renameWorkspace(ws, FOCUSED_WS_NAME);
   } else {
     std::vector<std::string> workspaceNames;
     std::transform(collectedRunBankPairs.begin(), collectedRunBankPairs.end(),
-                   std::back_inserter(workspaceNames), 
-      [&](const std::pair<int, size_t> &runBankPair) {
-      return getFocusedWorkspace(runBankPair.first, runBankPair.second)->getName();
-    });
+                   std::back_inserter(workspaceNames),
+                   [&](const std::pair<int, size_t> &runBankPair) {
+                     return getFocusedWorkspace(runBankPair.first,
+                                                runBankPair.second)->getName();
+                   });
     groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
   }
 }
