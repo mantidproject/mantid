@@ -799,9 +799,11 @@ double LoadILLReflectometry::detectorAngle() const
   if (m_instrumentName != "Figaro") {
     return doubleFromRun(m_detectorAngleName);
   }
+  // Take the bent beam into account.
+  const double collimation = doubleFromRun("CollAngle.actual_coll_angle");
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
-  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X));
+  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X)) + collimation;
 }
 
 /** Return the sample to detector distance for the current instrument.
