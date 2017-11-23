@@ -14,6 +14,7 @@ from sans.test_helper.user_file_test_helper import (create_user_file, sample_use
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
 
+
 if sys.version_info.major == 3:
     from unittest import mock
 else:

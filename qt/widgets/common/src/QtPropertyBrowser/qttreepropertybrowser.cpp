@@ -131,7 +131,12 @@ QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel)
 void QtPropertyEditorView::drawRow(QPainter *painter,
                                    const QStyleOptionViewItem &option,
                                    const QModelIndex &index) const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QStyleOptionViewItemV3 opt = option;
+#else
+  QStyleOptionViewItem opt = option;
+#endif
+
   bool hasValue = true;
   if (m_editorPrivate) {
     QtProperty *property = m_editorPrivate->indexToProperty(index);
@@ -308,7 +313,12 @@ void QtPropertyEditorDelegate::paint(QPainter *painter,
     if (property)
       hasValue = property->hasValue();
   }
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QStyleOptionViewItemV3 opt = option;
+#else
+  QStyleOptionViewItem opt = option;
+#endif
   if ((m_editorPrivate && index.column() == 0) || !hasValue) {
     QtProperty *property = m_editorPrivate->indexToProperty(index);
     if (property && property->isModified()) {
