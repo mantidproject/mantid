@@ -55,12 +55,12 @@ CSGObject::CSGObject() : CSGObject("") {}
 CSGObject::CSGObject(const std::string &shapeXML)
     : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
       AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
-      handle(), bGeometryCaching(false),
+      m_handler(), bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  handle = boost::make_shared<CacheGeometryHandler>(this);
+  m_handler = boost::make_shared<CacheGeometryHandler>(this);
 }
 
 /**
@@ -85,7 +85,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
     ObjNum = A.ObjNum;
-    handle = A.handle->clone();
+    m_handler = A.m_handler->clone();
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
     vtkCacheWriter = A.vtkCacheWriter;
@@ -126,7 +126,7 @@ const Kernel::Material CSGObject::material() const {
 */
 bool CSGObject::hasValidShape() const {
   // Assume invalid shape if object has no 'TopRule' or surfaces
-  return (TopRule != nullptr && !SurList.empty());
+  return (TopRule != nullptr && !m_SurList.empty());
 }
 
 /**
@@ -143,7 +143,7 @@ int CSGObject::setObject(const int ON, const std::string &Ln) {
 
   if (procString(Ln)) // this currently does not fail:
   {
-    SurList.clear();
+    m_SurList.clear();
     ObjNum = ON;
     return 1;
   }
@@ -235,7 +235,7 @@ int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
 
   ObjNum = Cnum;
   if (procString(Part)) {
-    SurList.clear();
+    m_SurList.clear();
     Ln.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
     std::ostringstream CompCell;
     CompCell << Cnum << " ";
@@ -416,7 +416,7 @@ bool CSGObject::isOnSide(const Kernel::V3D &Pt) const {
   std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
 
   std::vector<const Surface *>::const_iterator vc;
-  for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
+  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     if ((*vc)->onSurface(Pt)) {
       Snorms.push_back((*vc)->surfaceNormal(Pt));
       // can check direct normal here since one success
@@ -487,7 +487,7 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
 * @return 1 (should be number of surfaces)
 */
 int CSGObject::createSurfaceList(const int outFlag) {
-  SurList.clear();
+  m_SurList.clear();
   std::stack<const Rule *> TreeLine;
   TreeLine.push(TopRule.get());
   while (!TreeLine.empty()) {
@@ -503,20 +503,20 @@ int CSGObject::createSurfaceList(const int outFlag) {
     } else {
       const SurfPoint *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
-        SurList.push_back(SurX->getKey());
+        m_SurList.push_back(SurX->getKey());
       }
     }
   }
   // Remove duplicates
-  sort(SurList.begin(), SurList.end());
-  auto sc = unique(SurList.begin(), SurList.end());
-  if (sc != SurList.end()) {
-    SurList.erase(sc, SurList.end());
+  sort(m_SurList.begin(), m_SurList.end());
+  auto sc = unique(m_SurList.begin(), m_SurList.end());
+  if (sc != m_SurList.end()) {
+    m_SurList.erase(sc, m_SurList.end());
   }
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
-    for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
+    for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
       std::cerr << "Point == " << *vc << '\n';
       std::cerr << (*vc)->getName() << '\n';
     }
@@ -530,7 +530,7 @@ int CSGObject::createSurfaceList(const int outFlag) {
 */
 std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
-  transform(SurList.begin(), SurList.end(),
+  transform(m_SurList.begin(), m_SurList.end(),
             std::insert_iterator<std::vector<int>>(out, out.begin()),
             std::mem_fun(&Surface::getName));
   return out;
@@ -757,7 +757,7 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
   // Loop over all the surfaces.
   LineIntersectVisit LI(UT.startPoint(), UT.direction());
   std::vector<const Surface *>::const_iterator vc;
-  for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
+  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     (*vc)->acceptVisitor(LI);
   }
   const auto &IPts(LI.getPoints());
@@ -1750,7 +1750,7 @@ void CSGObject::calcBoundingBoxByVertices() {
  */
 void CSGObject::calcBoundingBoxByGeometry() {
   // Must have a GeometryHandler for this to work
-  if (!handle)
+  if (!m_handler)
     return;
 
   // Extent of bounding box
@@ -1763,7 +1763,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
   double height;
 
   // Will only work for shapes handled by GluGeometryHandler
-  handle->GetObjectGeom(type, vectors, radius, height);
+  m_handler->GetObjectGeom(type, vectors, radius, height);
   GluGeometryHandler::GeometryType gluType =
       static_cast<GluGeometryHandler::GeometryType>(type);
 
@@ -2057,7 +2057,7 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
 void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
   if (h == nullptr)
     return;
-  handle = h;
+  m_handler = h;
 }
 
 /**
@@ -2065,10 +2065,10 @@ void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
 * function does nothing.
 */
 void CSGObject::draw() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return;
   // Render the Object
-  handle->Render();
+  m_handler->Render();
 }
 
 /**
@@ -2077,10 +2077,10 @@ void CSGObject::draw() const {
 * If the handler is not set then this function does nothing.
 */
 void CSGObject::initDraw() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return;
   // Render the Object
-  handle->Initialize();
+  m_handler->Initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2106,7 +2106,7 @@ void CSGObject::setVtkGeometryCacheReader(
 boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
-  return handle;
+  return m_handler;
 }
 
 /**
@@ -2117,9 +2117,9 @@ void CSGObject::updateGeometryHandler() {
     return;
   bGeometryCaching = true;
   // Check if the Geometry handler can be handled for cache
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return;
-  if (!handle->canTriangulate())
+  if (!m_handler->canTriangulate())
     return;
   // Check if the reader exist then read the cache
   if (vtkCacheReader.get() != nullptr) {
@@ -2138,36 +2138,36 @@ void CSGObject::updateGeometryHandler() {
 * @return the number of triangles
 */
 int CSGObject::NumberOfTriangles() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return 0;
-  return handle->NumberOfTriangles();
+  return m_handler->NumberOfTriangles();
 }
 
 /**
 * get number of points
 */
 int CSGObject::NumberOfPoints() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return 0;
-  return handle->NumberOfPoints();
+  return m_handler->NumberOfPoints();
 }
 
 /**
 * get vertices
 */
 double *CSGObject::getTriangleVertices() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return nullptr;
-  return handle->getTriangleVertices();
+  return m_handler->getTriangleVertices();
 }
 
 /**
 * get faces
 */
 int *CSGObject::getTriangleFaces() const {
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return nullptr;
-  return handle->getTriangleFaces();
+  return m_handler->getTriangleFaces();
 }
 
 /**
@@ -2176,9 +2176,9 @@ int *CSGObject::getTriangleFaces() const {
 void CSGObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                            double &myradius, double &myheight) const {
   type = 0;
-  if (handle == nullptr)
+  if (m_handler == nullptr)
     return;
-  handle->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
 }
 
 /** Getter for the shape xml

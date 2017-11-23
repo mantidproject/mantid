@@ -49,7 +49,7 @@ class vtkGeometryCacheWriter;
 */
 
 /**
- * Class initially empty
+ * Interface for Geometry Objects
  */
   class MANTID_GEOMETRY_DLL IObject {
   public:

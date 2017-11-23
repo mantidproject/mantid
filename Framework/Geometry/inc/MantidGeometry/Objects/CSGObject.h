@@ -114,9 +114,9 @@ public:
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
-  const std::vector<const Surface *> &getSurfacePtr() const { return SurList; }
+  const std::vector<const Surface *> &getSurfacePtr() const { return m_SurList; }
   /// Get the list of surfaces
-  std::vector<const Surface *> &getSurfacePtr() { return SurList; }
+  std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
 
   std::string cellCompStr() const;
   std::string cellStr(const std::map<int, CSGObject> &) const;
@@ -239,7 +239,7 @@ private:
   /// Creation number
   int ObjNum;
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> handle;
+  boost::shared_ptr<GeometryHandler> m_handler;
   friend class CacheGeometryHandler;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
@@ -262,7 +262,7 @@ private:
 
 protected:
   std::vector<const Surface *>
-      SurList; ///< Full surfaces (make a map including complementary object ?)
+      m_SurList; ///< Full surfaces (make a map including complementary object ?)
 };
 
 /// Typdef for a shared pointer
