@@ -11,7 +11,12 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.state.data import StateData
-import mantidplot
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+    # this should happen when this is called from outside Mantidplot and only then,
+    # the result is that attempting to plot will raise an exception
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -89,7 +94,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                "OutputWorkspaceHABCanCount")
         reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
                                                                               "OutputWorkspaceHABCanNorm")
-        if plot_results:
+        if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped

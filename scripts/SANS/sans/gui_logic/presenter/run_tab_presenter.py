@@ -36,7 +36,12 @@ from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-import mantidplot
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+    # this should happen when this is called from outside Mantidplot and only then,
+    # the result is that attempting to plot will raise an exception
 
 
 class RunTabPresenter(object):
@@ -256,8 +261,9 @@ class RunTabPresenter(object):
             self._set_indices()
 
             # 4. Create the graph if continuous output is specified
-            if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                mantidplot.newGraph(self.output_graph)
+            if mantidplot:
+                if self._view.plot_results and not mantidplot.graph(self.output_graph):
+                    mantidplot.newGraph(self.output_graph)
         except:
             self._view.halt_process_flag()
             raise
