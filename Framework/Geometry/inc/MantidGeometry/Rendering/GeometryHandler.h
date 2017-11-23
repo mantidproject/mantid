@@ -5,6 +5,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidGeometry/Rendering/GeometryRenderer.h"
 #include <vector>
 
 namespace Mantid {
@@ -13,6 +14,7 @@ namespace Geometry {
 class IObjComponent;
 class ObjComponent;
 class Object;
+class GeometryRenderer;
 
 /**
    \class GeometryHandler
@@ -48,6 +50,7 @@ private:
   static Kernel::Logger &PLog; ///< The official logger
 
 protected:
+  GeometryRenderer m_renderer;
   IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
   Object *Obj;            ///< Object that uses this geometry handler
   bool boolTriangulated;  ///< state of the geometry triangulation
