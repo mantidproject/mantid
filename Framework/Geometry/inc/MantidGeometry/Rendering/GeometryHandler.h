@@ -6,8 +6,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
-#include <memory>
+#include "MantidGeometry/Rendering/GeometryRenderer.h"
 #include <vector>
 
 namespace Mantid {
@@ -19,6 +18,7 @@ class MeshObject;
 namespace detail {
 class GeometryTriangulator;
 }
+class GeometryRenderer;
 
 /**
 \class GeometryHandler

@@ -42,7 +42,6 @@ set ( SRC_FILES
 	src/Crystal/SymmetryOperationSymbolParser.cpp
 	src/Crystal/UnitCell.cpp
 	src/Crystal/V3R.cpp
-	src/GeometryRenderer.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
@@ -184,7 +183,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/Crystal/V3R.h
 	inc/MantidGeometry/DllConfig.h
-	inc/MantidGeometry/GeometryRenderer.h
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
@@ -267,6 +265,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/GeometryHandler.h
     	inc/MantidGeometry/Rendering/RenderingHelpers.h
     	inc/MantidGeometry/Rendering/ShapeInfo.h
+        inc/MantidGeometry/Rendering/GeometryRenderer.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
