@@ -90,7 +90,7 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
 // Local function used within validateInputWorkspaces() below in a call to
 // std::list::sort(compare) to order the input workspaces by the start of their
 // frame (i.e. the first X value).
-static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
+static bool compare(MatrixWorkspace_sptr &first, MatrixWorkspace_sptr &second) {
   return (first->x(0).front() < second->x(0).front());
 }
 /// @endcond
@@ -113,21 +113,14 @@ RunCombinationHelper::validateInputWorkspaces(
   for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
     MatrixWorkspace_sptr ws;
     // Fetch the next input workspace - throw an error if it's not there
-    try {
-      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        inputWorkspaces[i]);
+    if (!ws) {
+      throw std::runtime_error(
+          "Could not find a MatrixWorkspace with the name " +
           inputWorkspaces[i]);
-      if (!ws) {
-        g_log.error() << "Input workspace " << inputWorkspaces[i]
-                      << " not found.\n";
-        throw Kernel::Exception::NotFoundError("Data Object",
-                                               inputWorkspaces[i]);
-      }
-      inWS.push_back(ws);
-    } catch (Exception::NotFoundError &) {
-      g_log.error() << "Input workspace " << inputWorkspaces[i]
-                    << " not found.\n";
-      throw;
     }
+    inWS.push_back(ws);
     // Check that it has common binning
     if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
       g_log.error("Input workspaces must have common binning for all spectra");

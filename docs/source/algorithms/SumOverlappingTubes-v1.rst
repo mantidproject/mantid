@@ -16,7 +16,7 @@ This algorithm is written for the geometry of D2B, where the detector tubes have
 General Behavior
 #################
 
-For the output workspace a grid is made, the x-axis is the scattering angle and the y-axis is the tube height. Counts from the input workspaces are then put onto this grid. Where one of the entries in the scattering angle is between two angles the count are split between the two, unless the ScatteringAngleTolerance option is set.
+For the output workspace a grid is made, the x-axis is the scattering angle and the y-axis is vertical distance from the centre of the tube (referred to as the tube height). Counts from the input workspaces are then put onto this grid. Where one of the entries in the scattering angle is between two angles the count are split between the two, unless the ScatteringAngleTolerance option is set.
 
 If the Normalise option is set then the counts for each point in the OutputWorkspace are divided by the number of contributing points to that pixel. The scaling goes as
 
