@@ -1,6 +1,6 @@
 import sys
-from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QApplication, QContextMenuEvent, QAction
+from PyQt4.QtCore import Qt, QTimer, QPoint
 
 
 class Tester(object):
@@ -16,6 +16,8 @@ class Tester(object):
         print items
         widget.tree.setCurrentItem(items[0])
         print widget.get_selected_algorithm()
+        event = QContextMenuEvent(QContextMenuEvent.Mouse, QPoint())
+        QApplication.postEvent(widget.search_box, event)
 
         # self.widget.close()
 
@@ -24,12 +26,30 @@ class Tester(object):
         if modal_widget is not None:
             modal_widget.setTextValue('Hello')
             modal_widget.accept()
+        pop_up = QApplication.activePopupWidget()
+        if pop_up is not None:
+            print pop_up
+            for action in pop_up.children():
+                if isinstance(action, QAction):
+                    print action.text()
+                    if action.text() == '&Paste	Ctrl+V':
+                        action.activate(QAction.Trigger)
+            pop_up.close()
 
     def start(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.idle)
         self.timer.start()
         QTimer.singleShot(0, self)
+
+
+def monitor_modals():
+    modal_widget = QApplication.activeModalWidget()
+    if modal_widget is not None:
+        print modal_widget
+    pop_up = QApplication.activePopupWidget()
+    if pop_up is not None:
+        print pop_up
 
 
 def import_widget(widget_path):
@@ -60,6 +80,10 @@ def open_in_window(widget_name):
 
     # tester = Tester(w)
     # tester.start()
+
+    # timer = QTimer()
+    # timer.timeout.connect(monitor_modals)
+    # timer.start()
 
     sys.exit(app.exec_())
 
