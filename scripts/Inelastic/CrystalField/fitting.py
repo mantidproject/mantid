@@ -1175,7 +1175,7 @@ class CrystalFieldFit(object):
         for row in range(self._estimated_parameters.rowCount()):
             name = self._estimated_parameters.cell(row, 0)
             value = self._estimated_parameters.cell(row, index)
-            model_pname = name if isinstance(self.model, CrystalFieldMultiSite) else [name.split('.')[-1]]
+            model_pname = name if isinstance(self.model, CrystalFieldMultiSite) else name.split('.')[-1]
             self.model[model_pname] = value
             if self._function is not None:
                 self._function.setParameter(name, value)
