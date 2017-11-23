@@ -107,6 +107,8 @@ Requires: graphviz
 Requires: python3-setuptools
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
+Requires: python-qt5-devel
+Requires: python3-QtPy
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
