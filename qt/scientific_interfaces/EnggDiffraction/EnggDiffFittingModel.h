@@ -117,6 +117,14 @@ private:
   void alignDetectors(Mantid::API::MatrixWorkspace_sptr inputWS,
                       const std::string &outputWSName);
 
+  void loadWorkspace(const std::string &filename, const std::string &wsName);
+
+  void renameWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
+                       const std::string &newName);
+
+  void groupWorkspaces(const std::vector<std::string> &workspaceNames, 
+                       const std::string &outputWSName);
+
   size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr) const;
 };
 

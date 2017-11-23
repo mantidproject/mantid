@@ -11,6 +11,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <algorithm>
+#include <boost/optional.hpp>
 #include <numeric>
 
 using namespace Mantid;
@@ -354,6 +355,31 @@ void EnggDiffFittingModel::alignDetectors(
   alignDetAlg->execute();
 }
 
+void EnggDiffFittingModel::loadWorkspace(const std::string &filename, 
+                                         const std::string &wsName) {
+  auto loadAlg = API::AlgorithmManager::Instance().create("Load");
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setProperty("OutputWorkspace", wsName);
+  loadAlg->execute();
+}
+
+void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS, 
+                                           const std::string &newName) {
+  auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
+  renameAlg->setProperty("InputWorkspace", inputWS);
+  renameAlg->setProperty("OutputWorkspace", newName);
+  renameAlg->execute();
+}
+
+void EnggDiffFittingModel::groupWorkspaces(
+  const std::vector<std::string> &workspaceNames,
+  const std::string & outputWSName){
+  auto groupAlg = API::AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->setProperty("InputWorkspaces", workspaceNames);
+  groupAlg->setProperty("OutputWorkspace", outputWSName);
+  groupAlg->execute();
+}
+
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
                                           const size_t bank) const {
@@ -376,29 +402,52 @@ std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
   return runNumbers;
 }
 
-void EnggDiffFittingModel::loadWorkspaces(const std::string &filename) {
-  auto loadAlg = API::AlgorithmManager::Instance().create("Load");
-  loadAlg->initialize();
+namespace {
 
-  loadAlg->setPropertyValue("Filename", filename);
-  loadAlg->setPropertyValue("OutputWorkspace", FOCUSED_WS_NAME);
-  loadAlg->execute();
+std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
+  std::vector<std::string> directories;
+  boost::split(directories, fullyQualifiedFilename, boost::is_any_of("\\/"));
+  const std::string filename = directories.back();
+  std::vector<std::string> filenameSegments;
+  boost::split(filenameSegments, filename, boost::is_any_of("."));
+  return filenameSegments[0];
+}
 
-  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  if (filename.find(",") == std::string::npos) { // Only 1 run loaded
-    const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(FOCUSED_WS_NAME);
-    addFocusedWorkspace(ws->getRunNumber(), guessBankID(ws), ws, filename);
+}
+
+void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
+  std::vector<std::string> filenames;
+  boost::split(filenames, filenamesString, boost::is_any_of(","));
+
+  std::vector<std::pair<int, size_t>> collectedRunBankPairs;
+
+  for (const auto &filename : filenames) {
+    // Set ws name to filename first, in case we need to guess bank ID from it
+    const std::string temporaryWSName = stripWSNameFromFilename(filename);
+    loadWorkspace(filename, temporaryWSName);
+
+    API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+    const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(temporaryWSName);
+
+    const auto bank = guessBankID(ws);
+    const int runNumber = ws->getRunNumber();
+
+    addFocusedWorkspace(runNumber, bank, ws, filename);
+    collectedRunBankPairs.push_back(std::make_pair(runNumber, bank));
+  }
+
+  if (collectedRunBankPairs.size() == 1) {
+    auto ws = getFocusedWorkspace(collectedRunBankPairs[0].first,
+      collectedRunBankPairs[0].second);
+    renameWorkspace(ws, FOCUSED_WS_NAME);
   } else {
-    const auto group_ws = ADS.retrieveWS<API::WorkspaceGroup>(FOCUSED_WS_NAME);
-    std::vector<std::string> filenames;
-    boost::split(filenames, filename, boost::is_any_of(","));
-
-    for (int i = 0; i != group_ws->getNumberOfEntries(); ++i) {
-      const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          group_ws->getItem(i));
-      addFocusedWorkspace(ws->getRunNumber(), guessBankID(ws), ws,
-                          filenames[i]);
-    }
+    std::vector<std::string> workspaceNames;
+    std::transform(collectedRunBankPairs.begin(), collectedRunBankPairs.end(),
+                   std::back_inserter(workspaceNames), 
+      [&](const std::pair<int, size_t> &runBankPair) {
+      return getFocusedWorkspace(runBankPair.first, runBankPair.second)->getName();
+    });
+    groupWorkspaces(workspaceNames, FOCUSED_WS_NAME);
   }
 }
 
@@ -420,14 +469,15 @@ EnggDiffFittingModel::getRunNumbersAndBankIDs() const {
 
 size_t
 EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
-  if (ws->run().hasProperty("bankid")) {
+  const static std::string bankIDName = "bankid";
+  if (ws->run().hasProperty(bankIDName)) {
     const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(
-        ws->run().getLogData("bankid"));
+        ws->run().getLogData(bankIDName));
     return boost::lexical_cast<size_t>(log->value());
   }
 
   // couldn't get it from sample logs - try using the old naming convention
-  auto name = ws->getName();
+  const std::string name = ws->getName();
   std::vector<std::string> chunks;
   boost::split(chunks, name, boost::is_any_of("_"));
   bool isNum = isDigit(chunks.back());
