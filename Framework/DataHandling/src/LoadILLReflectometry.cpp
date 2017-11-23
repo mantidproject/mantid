@@ -116,19 +116,6 @@ PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   return p;
 }
 
-/** Calculate the offset angle between detector center and peak.
- *  @param peakCentre peak centre in pixels.
- *  @param detectorCentre detector centre in pixels.
- *  @param pixelWidth pixel width in meters.
- *  @param detectorDistance detector-sample distance in meters.
- *  @return the offset angle.
- */
-double offsetAngle(const double peakCentre, const double detectorCentre,
-                   const double pixelWidth, const double detectorDistance) {
-  const double offsetWidth = (detectorCentre - peakCentre) * pixelWidth;
-  return inDeg(std::atan2(offsetWidth, detectorDistance));
-}
-
 /** Fill the X values of the first histogram of ws with values 0, 1, 2,...
  *  @param ws a workspace to modify
  */
@@ -717,7 +704,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
   const double userAngle = getProperty("BraggAngle");
-  const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth,
+  const double offset = offsetAngle(peakCentre, m_pixelCentre,
                                     m_detectorDistance);
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
@@ -737,7 +724,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
-                                      m_pixelWidth, dbPeak.detectorDistance);
+                                      dbPeak.detectorDistance);
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
@@ -816,6 +803,22 @@ double LoadILLReflectometry::detectorAngle() const
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
   return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X));
+}
+
+/** Calculate the offset angle between detector center and peak.
+ *  @param peakCentre peak centre in pixels.
+ *  @param detectorCentre detector centre in pixels.
+ *  @param pixelWidth pixel width in meters.
+ *  @param detectorDistance detector-sample distance in meters.
+ *  @return the offset angle.
+ */
+double LoadILLReflectometry::offsetAngle(const double peakCentre, const double detectorCentre,
+                                         const double detectorDistance) const {
+  // Sign depends on the definition of detector angle and which way
+  // spectrum numbers increase.
+  const auto sign = m_instrumentName == "D17" ? 1. : -1.;
+  const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
+  return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
 /** Return the sample to detector distance for the current instrument.
