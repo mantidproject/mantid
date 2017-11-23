@@ -1,7 +1,7 @@
 #ifndef PEAKSVIEWER_H
 #define PEAKSVIEWER_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
@@ -28,7 +28,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget,
                                                     public UpdateableOnDemand {
   Q_OBJECT
 public:
-  PeaksViewer(QWidget *parent = 0);
+  PeaksViewer(QWidget *parent = nullptr);
   void setPeaksWorkspaces(const SetPeaksWorkspaces &workspaces);
   void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
   void performUpdate() override;

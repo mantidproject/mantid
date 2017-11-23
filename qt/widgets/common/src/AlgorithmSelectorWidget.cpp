@@ -4,6 +4,14 @@
 
 #include "boost/algorithm/string.hpp"
 
+#include <QApplication>
+#include <QCompleter>
+#include <QDrag>
+#include <QHBoxLayout>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QPushButton>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -14,7 +22,8 @@ namespace MantidWidgets {
 /** Constructor
  */
 AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
-    : QWidget(parent), m_tree(NULL), m_findAlg(NULL), m_execButton(NULL),
+    : QWidget(parent), m_tree(nullptr), m_findAlg(nullptr),
+      m_execButton(nullptr),
       m_updateObserver(*this,
                        &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
       m_updateInProgress(false) {

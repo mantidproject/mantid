@@ -6,9 +6,9 @@
 #include "ApplicationWindow.h"
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
-#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "Plot.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <QWidget>
@@ -52,10 +52,10 @@ GridDetails::GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
 
   rightLayout->addWidget(new QLabel(tr("Line Color")), 1, 0);
 
-  m_cboxColorMajor = new ColorBox(0);
+  m_cboxColorMajor = new ColorBox(nullptr);
   rightLayout->addWidget(m_cboxColorMajor, 1, 1);
 
-  m_cboxColorMinor = new ColorBox(0);
+  m_cboxColorMinor = new ColorBox(nullptr);
   m_cboxColorMinor->setDisabled(true);
   rightLayout->addWidget(m_cboxColorMinor, 1, 2);
 

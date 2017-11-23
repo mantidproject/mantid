@@ -50,7 +50,7 @@ Usage
 
   ws = Load('INTER00013460')
   res = NRCalculateSlitResolution(Workspace = ws, TwoTheta = 0.7 * 2)
-  print("Resolution: %.4f" % res)
+  print("Resolution: {:.4f}".format(res))
 
 .. testoutput::
 

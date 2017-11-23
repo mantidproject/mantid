@@ -43,7 +43,8 @@ void WorkspaceAlgorithm::exec() {
     auto &YValues = workspace->y(i);
     auto &EValues = workspace->e(i);
 
-    for (size_t j = 0; j < workspace->blocksize(); ++j) {
+    const auto numBins = YValues.size();
+    for (size_t j = 0; numBins; ++j) {
       g_log.information() << "Point number " << count++
                           << " values: " << XValues[j] << ' ' << YValues[j]
                           << ' ' << EValues[j] << std::endl;

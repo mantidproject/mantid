@@ -7,16 +7,23 @@ cmake_minimum_required ( VERSION 3.5 )
 # Define the project name.
 project ( Mantid )
 
+# Policy settings
+if (POLICY CMP0022)
+  cmake_policy (SET CMP0022 NEW)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & components")
+# TODO: Switch this on by default when the builders all have Qt5 installed
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
 
-SET (CPACK_INSTALL_CMAKE_PROJECTS
-     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+set ( CPACK_INSTALL_CMAKE_PROJECTS
+      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
@@ -28,7 +35,10 @@ if( DATA_TARGETS_ONLY )
   return()
 endif()
 
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+###########################################################################
+# Packaging configuration
+###########################################################################
+set ( CPACK_PACKAGE_SUFFIX "unstable" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
 #Set package name here
@@ -43,7 +53,6 @@ include ( Eigen )
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
-
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -74,13 +83,6 @@ endif ()
 include ( CommonSetup )
 
 ###########################################################################
-# Check for Qt (DarwinSetup below needs a variable from this)
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
-endif ()
-
-###########################################################################
 # Find OpenGL
 ###########################################################################
 find_package ( OpenGL REQUIRED )
@@ -100,23 +102,31 @@ if (COVERALLS)
 endif()
 
 ###########################################################################
-# Find qwt. Needs to be version 5
+# Qt/Qwt/PyQt/sip
 ###########################################################################
 if (ENABLE_MANTIDPLOT)
-  find_package ( Qwt REQUIRED )
-  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-      QWT_VERSION VERSION_GREATER 6.0 )
-    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
-  endif()
-endif()
+  set ( QT_USE_IMPORTED_TARGETS ON )
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
 
-###########################################################################
-# Find PyQt & sip
-###########################################################################
-if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt5 REQUIRED )
+  if( QWT5_VERSION VERSION_LESS 5.0 OR QWT5_VERSION VERSION_EQUAL 6.0 OR
+      QWT5_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}" )
+  endif()
+
   find_package ( PyQt4 REQUIRED )
   find_package ( SIP REQUIRED )
   separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
+
+if ( ENABLE_WORKBENCH )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets REQUIRED )
+  if ( Qt5_FOUND )
+    message ( STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}" )
+  endif()
+  find_package ( PyQt5 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT5_SIP_FLAGS )
 endif()
 
 ###########################################################################
@@ -149,16 +159,6 @@ include_directories ( Framework/Types/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 
-if (ENABLE_MANTIDPLOT)
-  # Add a target for all GUI tests
-  add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidQtCommonTest)
-  add_dependencies ( check GUITests )
-  # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
-endif()
-
 if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
   if (NOT APPLE)
@@ -187,15 +187,22 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
-if (ENABLE_MANTIDPLOT)
+if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
+  add_custom_target ( GUITests )
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
   add_subdirectory ( qt )
+endif()
 
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( MantidPlot )
 endif()
 
 add_subdirectory ( scripts )
 
-if (ENABLE_MANTIDPLOT)
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( docs )
 endif()
 
@@ -263,10 +270,10 @@ if ( ENABLE_CPACK )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
       # let people know what is coming out the other end
-      message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+      message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
@@ -344,7 +351,7 @@ if ( ENABLE_CPACK )
       endif()
       # soft requirement of tcmalloc if selected
       IF ( USE_TCMALLOC )
-        message ( STATUS " Adding gperftools to the package requirements" )
+        message ( STATUS "Adding gperftools to the package requirements" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
       ENDIF ( )

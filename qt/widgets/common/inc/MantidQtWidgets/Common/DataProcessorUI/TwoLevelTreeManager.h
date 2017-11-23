@@ -39,16 +39,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager
-    : public TreeManager {
+class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager : public TreeManager {
 public:
   /// Constructor
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                                   Mantid::API::ITableWorkspace_sptr table,
-                                   const WhiteList &whitelist);
+                      Mantid::API::ITableWorkspace_sptr table,
+                      const WhiteList &whitelist);
   /// Constructor (no table ws given)
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                                   const WhiteList &whitelist);
+                      const WhiteList &whitelist);
   /// Destructor
   ~TwoLevelTreeManager() override;
 

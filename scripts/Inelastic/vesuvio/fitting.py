@@ -40,6 +40,7 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 
     return FittingOptions(mass_profiles, background, constraints)
 
+
 # --------------------------------------------------------------------------------
 # FittingOptions - Used internally
 # --------------------------------------------------------------------------------
@@ -59,7 +60,7 @@ class FittingOptions(object):
                 self.intensity_constraints = intensity_constraints
             else:
                 # trailing comma is important or the list gets undone
-                self.intensity_constraints = [intensity_constraints,]
+                self.intensity_constraints = [intensity_constraints, ]
         else:
             self.intensity_constraints = None
         self.background = background

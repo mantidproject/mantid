@@ -7,10 +7,10 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <QDoubleValidator>
 #include <QMap>
@@ -75,7 +75,8 @@ class DLLExport IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent = 0);
+  IndirectDataReductionTab(IndirectDataReduction *idrUI,
+                           QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
 public slots:

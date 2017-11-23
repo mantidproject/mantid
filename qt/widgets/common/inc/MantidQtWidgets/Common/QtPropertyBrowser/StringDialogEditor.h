@@ -17,7 +17,7 @@ class StringDialogEditorFactory
     : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  StringDialogEditorFactory(QObject *parent = 0)
+  StringDialogEditorFactory(QObject *parent = nullptr)
       : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:

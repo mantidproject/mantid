@@ -8,6 +8,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
+#include <chrono>
 #include <functional>
 #include <istream>
 #include <map>
@@ -67,8 +68,9 @@ public:
   template <typename... T>
   Request isend(int source, int dest, int tag, T &&... args);
 
-  template <typename... T>
-  Request irecv(int dest, int source, int tag, T &&... args);
+  template <typename T> Request irecv(int dest, int source, int tag, T &&data);
+  template <typename T>
+  Request irecv(int dest, int source, int tag, T *data, const size_t count);
 
 private:
   int m_size{1};
@@ -76,6 +78,38 @@ private:
            std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
   std::mutex m_mutex;
 };
+
+namespace detail {
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa, const T &data) {
+  oa.operator<<(data);
+}
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa,
+                  const std::vector<T> &data) {
+  oa.operator<<(data);
+}
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa, const T *data,
+                  const size_t count) {
+  for (size_t i = 0; i < count; ++i)
+    oa.operator<<(data[i]);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
+  ia.operator>>(data);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, std::vector<T> &data) {
+  ia.operator>>(data);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, T *data,
+                    const size_t count) {
+  for (size_t i = 0; i < count; ++i)
+    ia.operator>>(data[i]);
+}
+}
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
@@ -90,7 +124,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
     // though, since it is *not* writing to the buffer, somehow the oarchive
     // destructor must be doing something that requires the buffer.
     boost::archive::binary_oarchive oa(os);
-    oa.operator<<(std::forward<T>(args)...);
+    detail::saveToStream(oa, std::forward<T>(args)...);
   }
   std::lock_guard<std::mutex> lock(m_mutex);
   m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
@@ -101,6 +135,9 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   const auto key = std::make_tuple(source, dest, tag);
   std::unique_ptr<std::stringbuf> buf;
   while (true) {
+    // Sleep to reduce lock contention. Without this execution times can grow
+    // enormously on Windows.
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_buffer.find(key);
     if (it == m_buffer.end())
@@ -114,7 +151,7 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   }
   std::istream is(buf.get());
   boost::archive::binary_iarchive ia(is);
-  ia.operator>>(std::forward<T>(args)...);
+  detail::loadFromStream(ia, std::forward<T>(args)...);
 }
 
 template <typename... T>
@@ -123,10 +160,18 @@ Request ThreadingBackend::isend(int source, int dest, int tag, T &&... args) {
   return Request{};
 }
 
-template <typename... T>
-Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
-  return Request(std::bind(&ThreadingBackend::recv<T...>, this, dest, source,
-                           tag, std::ref(std::forward<T>(args)...)));
+template <typename T>
+Request ThreadingBackend::irecv(int dest, int source, int tag, T &&data) {
+  return Request(std::bind(&ThreadingBackend::recv<T>, this, dest, source, tag,
+                           std::ref(std::forward<T>(data))));
+}
+template <typename T>
+Request ThreadingBackend::irecv(int dest, int source, int tag, T *data,
+                                const size_t count) {
+  // Pass (pointer) by value since reference to it may go out of scope.
+  return Request([this, dest, source, tag, data, count]() mutable {
+    recv(dest, source, tag, data, count);
+  });
 }
 
 } // namespace detail

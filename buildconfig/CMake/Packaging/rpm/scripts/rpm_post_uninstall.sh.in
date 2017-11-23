@@ -20,6 +20,9 @@ if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh  ]; then
 	if [ -h /etc/profile.d/mantid.csh ]; then
 	    rm /etc/profile.d/mantid.csh
 	fi
+	if [ -h @PYTHON_SITE@/mantid.pth ]; then
+	    rm @PYTHON_SITE@/mantid.pth
+	fi
     fi
 
     if [ -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then

@@ -32,14 +32,12 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
-	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
@@ -58,6 +56,13 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldControl.cpp
+	src/Functions/CrystalFieldFunction.cpp
+	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
+	src/Functions/CrystalFieldPeakUtils.cpp
+	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldHeatCapacity.cpp
 	src/Functions/CrystalFieldMagnetisation.cpp
 	src/Functions/CrystalFieldMoment.cpp
@@ -189,14 +194,12 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
@@ -215,6 +218,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldControl.h
+	inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
 	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
@@ -355,6 +360,7 @@ set ( TEST_FILES
 	FuncMinimizers/LevenbergMarquardtTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
+	FuncMinimizers/TrustRegionMinimizerTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
@@ -369,7 +375,9 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldControlTest.h
 	Functions/CrystalFieldEnergiesTest.h
+	Functions/CrystalFieldFunctionTest.h
 	Functions/CrystalFieldHeatCapacityTest.h
 	Functions/CrystalFieldMagnetisationTest.h
 	Functions/CrystalFieldMomentTest.h
@@ -468,7 +476,8 @@ enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting 
-                                     COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING )
+  COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

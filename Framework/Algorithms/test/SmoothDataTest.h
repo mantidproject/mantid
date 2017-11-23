@@ -164,7 +164,7 @@ public:
     TS_ASSERT_DELTA(E[0], sqrt(Y[0] / 3.0), 0.0001);
     TS_ASSERT_EQUALS(Y[1], 2.5);
     TS_ASSERT_DELTA(E[1], sqrt(Y[1] / 4.0), 0.0001);
-    for (size_t i = 2; i < output->blocksize() - 2; ++i) {
+    for (size_t i = 2; i < Y.size() - 2; ++i) {
       TS_ASSERT_EQUALS(Y[i], static_cast<double>(i) + 1.0);
       TS_ASSERT_DELTA(E[i], sqrt(Y[i] / 5.0), 0.0001);
     }

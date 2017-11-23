@@ -49,7 +49,7 @@
 #endif
 #include "AxesDialog.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotToolInterface.h"
@@ -159,7 +159,7 @@ class Graph : public QWidget {
 
 public:
   Graph(int x = 0, int y = 0, int width = 500, int height = 400,
-        QWidget *parent = 0, Qt::WFlags f = 0);
+        QWidget *parent = nullptr, Qt::WFlags f = nullptr);
   ~Graph() override;
 
   enum Ticks { NoTicks = 0, Out = 1, InOut = 2, In = 3 };
@@ -448,7 +448,7 @@ public slots:
   //! \name Zoom
   //@{
   void zoomed(const QwtDoubleRect &);
-  void zoom(bool on);
+  void zoomMode(bool on);
   void zoomOut();
   bool zoomOn();
   //@}
@@ -685,7 +685,7 @@ public slots:
    * the generic
    * tool interface.
    */
-  bool enableRangeSelectors(const QObject *status_target = NULL,
+  bool enableRangeSelectors(const QObject *status_target = nullptr,
                             const char *status_slot = "");
   /// Check if the gange selectors are active
   bool areRangeSelectorsOn() const { return !d_range_selector.isNull(); }

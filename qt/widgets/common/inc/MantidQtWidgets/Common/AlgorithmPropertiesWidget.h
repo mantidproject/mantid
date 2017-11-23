@@ -2,19 +2,24 @@
 #define MANTID_API_ALGORITHMPROPERTIESWIDGET_H_
 
 #include "DllOption.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qgridlayout.h>
-#include <QtCore/qvariant.h>
-#include <QtGui/qwidget.h>
-#include <QtGui>
+#include <QWidget>
+
+class QGridLayout;
+class QGroupBox;
+class QScrollArea;
+
+namespace Mantid {
+namespace Kernel {
+class Property;
+}
+}
 
 namespace MantidQt {
 namespace API {
+class PropertyWidget;
 
 /** Widget that contains dynamically generated
  * PropertyWidget's for each property of an algorithm,
@@ -48,7 +53,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmPropertiesWidget : public QWidget {
   Q_PROPERTY(QString algorithmName READ getAlgorithmName WRITE setAlgorithmName)
 
 public:
-  AlgorithmPropertiesWidget(QWidget *parent = NULL);
+  AlgorithmPropertiesWidget(QWidget *parent = nullptr);
   ~AlgorithmPropertiesWidget() override;
 
   void

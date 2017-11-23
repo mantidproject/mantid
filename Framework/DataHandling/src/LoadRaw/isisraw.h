@@ -11,9 +11,6 @@ struct ISISCRPT_STRUCT;
 #include "item_struct.h"
 #include <cstdlib>
 #include <cstring>
-#ifdef _WIN32 /* _WIN32 */
-#include <time.h>
-#endif
 #include "MantidKernel/System.h"
 
 /// Run header (80 bytes)

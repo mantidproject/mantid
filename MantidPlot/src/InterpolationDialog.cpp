@@ -43,7 +43,7 @@
 #include <QLayout>
 
 InterpolationDialog::InterpolationDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(NULL) {
+    : QDialog(parent, fl), graph(nullptr) {
   setObjectName("InterpolationDialog");
   setWindowTitle(tr("MantidPlot - Interpolation Options"));
 

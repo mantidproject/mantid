@@ -37,7 +37,7 @@ class DLLExport ILLEnergyTransfer : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
   void setup() override;

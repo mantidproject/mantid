@@ -7,10 +7,9 @@
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
-#include <QtGui/QMainWindow>
-#include <QtGui/QSplitter>
-#include <QtGui/qdialog.h>
-#include <qmainwindow.h>
+#include <QMainWindow>
+#include <QSplitter>
+#include <QDialog>
 #include <QShowEvent>
 #include "DllOption.h"
 #include "MantidKernel/VMD.h"
@@ -32,7 +31,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
 
 public:
   SliceViewerWindow(const QString &wsName, const QString &label = QString(),
-                    Qt::WFlags f = 0);
+                    Qt::WindowFlags f = nullptr);
   ~SliceViewerWindow() override;
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();

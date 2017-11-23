@@ -11,9 +11,8 @@ Description
 
 Saves a focused data set into a three column GSAS format containing
 X\_i, Y\_i\*step, and E\_I\*step. Exclusively for the crystallography
-package `GSAS <http://www.ccp14.ac.uk/solution/gsas/index.html>`__ and
-data needs to be in time-of-flight. For data where the focusing routine
-has generated several spectra (for example, multi-bank instruments), the
+package `GSAS <http://www.ccp14.ac.uk/solution/gsas/index.html>`__ .
+For data where the focusing routine has generated several spectra (for example, multi-bank instruments), the
 option is provided for saving all spectra into a single file, separated
 by headers, or into several files that will be named
 "workspaceName\_"+workspace\_index\_number.
@@ -35,7 +34,7 @@ From the GSAS manual a description of the format options:
    the size of each step beyond BCOEF(3).
 
 The format is limited to saving 99 spectra in total. Trying to save more
-will generate an error.
+will generate an error, unless `SplitFiles` is on.
 
 Usage
 -----
@@ -55,7 +54,7 @@ Usage
 
     # Does the file exist
     path = os.path.join(os.path.expanduser("~"), file_name)
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -93,8 +92,8 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveGSS(ws, path, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
 
-    print os.path.isfile(path)
-        
+    print(os.path.isfile(path))
+
 Output:
 
 .. testoutput:: ExSaveGSSOptions

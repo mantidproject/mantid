@@ -26,9 +26,9 @@ void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}
  */
 void removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
-  if (layout != 0) {
+  if (layout != nullptr) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != 0) {
+    while ((item = layout->takeAt(0)) != nullptr) {
       layout->removeItem(item);
       delete item->widget();
     }
@@ -142,7 +142,7 @@ void PeaksViewer::clearPeaksModeRequest(
   EditMode mode = None;
   if (on) {
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       // For all but the most recently selected peaks workspace. Exit clear
@@ -167,7 +167,7 @@ void PeaksViewer::addPeaksModeRequest(
   EditMode mode = None;
   if (on) {
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       // For all but the most recently selected peaks workspace. Exit clear
@@ -197,7 +197,7 @@ void PeaksViewer::loadFromProject(const std::string &lines) {
     return;
 
   // load presented workspaces
-  for (auto section : tsv.sections("peaksworkspace"))
+  for (const auto &section : tsv.sections("peaksworkspace"))
     loadPresentedWorkspace(section);
 
   // Apply zooming/peak selection
@@ -280,7 +280,7 @@ std::string PeaksViewer::saveToProject() const {
 
   // save all workspaces
   auto workspaces = m_presenter->presentedWorkspaces();
-  for (auto ws : workspaces)
+  for (const auto &ws : workspaces)
     tsv.writeSection("peaksworkspace", savePresentedWorkspace(ws));
 
   // save zoom a particular peak
@@ -425,7 +425,7 @@ void PeaksViewer::performUpdate() {
 
     // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
@@ -465,7 +465,7 @@ void PeaksViewer::updatePeaksWorkspace(
 
   // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
   QList<PeaksWorkspaceWidget *> children =
-      qFindChildren<PeaksWorkspaceWidget *>(this);
+      this->findChildren<PeaksWorkspaceWidget *>();
 
   for (int i = 0; i < children.size(); ++i) {
     PeaksWorkspaceWidget *candidateWidget = children.at(i);
@@ -496,7 +496,7 @@ bool PeaksViewer::removePeaksWorkspace(
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
 
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
@@ -524,7 +524,7 @@ bool PeaksViewer::removePeaksWorkspace(const std::string &toRemove) {
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
-        qFindChildren<PeaksWorkspaceWidget *>(this);
+        this->findChildren<PeaksWorkspaceWidget *>();
 
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);

@@ -3,15 +3,16 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QDesktopWidget>
+#include <QThreadPool>
 #include <Poco/Path.h>
 
 #include "MantidEV.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 namespace MantidQt {
-using API::MantidDesktopServices;
+using MantidQt::API::HelpWindow;
 
 namespace CustomInterfaces {
 
@@ -264,7 +265,7 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.actionShow_UB, SIGNAL(triggered()), this,
                    SLOT(showUB_slot()));
 
-  QObject::connect(m_uiForm.actionOnline_Help_Page, SIGNAL(triggered()), this,
+  QObject::connect(m_uiForm.actionHelp_Page, SIGNAL(triggered()), this,
                    SLOT(help_slot()));
 
   QObject::connect(m_uiForm.EventFileName_ledt, SIGNAL(editingFinished()), this,
@@ -490,12 +491,11 @@ void MantidEV::setDefaultState_slot() {
 }
 
 /**
- * Go to MantidEV web page when help menu item is chosen
+ * Go to MantidEV help page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/"
-           "SCD_Event_Data_Reduction_Interface_(MantidEV)"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      NULL, QString("SCD Event Data Reduction"));
 }
 
 /**
@@ -761,8 +761,8 @@ void MantidEV::getSavePeaksFileName() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"), 0,
-      QFileDialog::DontConfirmOverwrite);
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"),
+      nullptr, QFileDialog::DontConfirmOverwrite);
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();

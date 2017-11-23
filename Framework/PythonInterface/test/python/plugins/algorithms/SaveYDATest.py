@@ -219,12 +219,12 @@ class SaveYDATest(unittest.TestCase):
             return ws
         if not yAxMt and not yAxSpec:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
-            LoadInstrument(ws, False, InstrumentName="TOFTOF")
+            LoadInstrument(ws, True, InstrumentName="TOFTOF")
             ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target="theta", EMode="Direct")
             return ws
         if not yAxSpec and yAxMt:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
-            LoadInstrument(ws, False, InstrumentName="TOFTOF")
+            LoadInstrument(ws, True, InstrumentName="TOFTOF")
             self._add_all_sample_logs(ws)
             ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace="ws2", Target ="ElasticQ", EMode="Direct")
             ws2 = mtd["ws2"]
@@ -232,10 +232,12 @@ class SaveYDATest(unittest.TestCase):
         if not sample:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
             LoadInstrument(ws, False, InstrumentName="TOFTOF")
+            for i in range(ws.getNumberHistograms()):
+                ws.getSpectrum(i).setDetectorID(i+1)
             return ws
         else:
             ws = CreateWorkspace(DataX=self.data_x, DataY=self.data_y, DataE=np.sqrt(self.data_y), NSpec=1, UnitX="DeltaE")
-            LoadInstrument(ws, False, InstrumentName="TOFTOF")
+            LoadInstrument(ws, True, InstrumentName="TOFTOF")
             self._add_all_sample_logs(ws)
             return ws
 

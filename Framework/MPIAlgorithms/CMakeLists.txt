@@ -20,7 +20,9 @@ endif()
 # Add the target for this directory
 add_library ( MPIAlgorithms ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms )
+set_target_properties ( MPIAlgorithms PROPERTIES
+  OUTPUT_NAME MantidMPIAlgorithms
+)
 # Add to the 'Framework' group in VS
 set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 

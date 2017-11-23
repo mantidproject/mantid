@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "ScaleDraw.h"
 #include "MyParser.h"
-#include "MantidQtWidgets/Common/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "Graph.h"
 
 #include <QPainter>
@@ -370,15 +370,15 @@ ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
   }
   //}
   QwtScaleDiv scDiv = scaleDiv();
-  QwtValueList majTicks = scDiv.ticks(QwtScaleDiv::MajorTick);
+  const QwtValueList &majTicks = scDiv.ticks(QwtScaleDiv::MajorTick);
   if (majTicks.contains(value) && (d_majTicks == In || d_majTicks == None))
     return;
 
-  QwtValueList medTicks = scDiv.ticks(QwtScaleDiv::MediumTick);
+  const QwtValueList &medTicks = scDiv.ticks(QwtScaleDiv::MediumTick);
   if (medTicks.contains(value) && (d_minTicks == In || d_minTicks == None))
     return;
 
-  QwtValueList minTicks = scDiv.ticks(QwtScaleDiv::MinorTick);
+  const QwtValueList &minTicks = scDiv.ticks(QwtScaleDiv::MinorTick);
   if (minTicks.contains(value) && (d_minTicks == In || d_minTicks == None))
     return;
 

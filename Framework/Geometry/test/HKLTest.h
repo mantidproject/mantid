@@ -27,12 +27,12 @@ public:
     std::unique_ptr<Mantid::Kernel::MDUnit> badUnit =
         Mantid::Kernel::make_unique<Mantid::Kernel::LabelUnit>("MeV");
 
-    HKL *testHKL = NULL;
+    HKL *testHKL = nullptr;
     TSM_ASSERT_THROWS("Input unit for this frame must be a QUnit",
                       testHKL = new HKL(badUnit), std::invalid_argument &);
-    TSM_ASSERT("Construction should not have succeeded", testHKL == NULL);
+    TSM_ASSERT("Construction should not have succeeded", testHKL == nullptr);
     TSM_ASSERT("Ownership of input should not have changed",
-               badUnit.get() != NULL);
+               badUnit.get() != nullptr);
   }
 
   void test_name() {

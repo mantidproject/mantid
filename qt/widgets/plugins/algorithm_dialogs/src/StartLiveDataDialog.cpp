@@ -6,8 +6,8 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "qboxlayout.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <QtCore/qvariant.h>
-#include <QtCore/qstringlist.h>
+#include <QVariant>
+#include <QStringList>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
@@ -15,14 +15,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
-#include <QtGui>
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::ConfigService;
 
 namespace {
@@ -30,7 +29,7 @@ class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
   LiveDataAlgInputHistoryImpl()
       : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
-  ~LiveDataAlgInputHistoryImpl() {}
+  ~LiveDataAlgInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LiveDataAlgInputHistoryImpl>;
@@ -49,7 +48,7 @@ class LiveDataPostProcessingAlgInputHistoryImpl
 private:
   LiveDataPostProcessingAlgInputHistoryImpl()
       : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
-  ~LiveDataPostProcessingAlgInputHistoryImpl() {}
+  ~LiveDataPostProcessingAlgInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<
@@ -445,7 +444,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
       layout = listenerPropLayout;
     } else {
       QLayoutItem *child;
-      while ((child = layout->takeAt(0)) != NULL) {
+      while ((child = layout->takeAt(0)) != nullptr) {
         child->widget()->close();
         delete child;
       }

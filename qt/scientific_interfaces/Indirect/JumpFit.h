@@ -1,8 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "ui_JumpFit.h"
 #include "IndirectDataAnalysisTab.h"
+#include "ui_JumpFit.h"
+
+#include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -11,7 +13,7 @@ class DLLExport JumpFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  JumpFit(QWidget *parent = 0);
+  JumpFit(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;
@@ -36,20 +38,22 @@ private slots:
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
   /// Generates the plot guess data
-  void generatePlotGuess();
-  /// Add the plot guess to the mini plot
-  void plotGuess(bool error);
+  void plotGuess();
   /// Handles plotting and saving
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
+
+protected:
+  /// Creates the algorithm to use in fitting.
+  Mantid::API::IAlgorithm_sptr
+  createFitAlgorithm(Mantid::API::IFunction_sptr func);
 
 private:
   /// Gets a list of parameter names for a given fit function
   QStringList getFunctionParameters(const QString &functionName);
 
-  /// Generates the function string for fitting
-  std::string generateFunctionName(const QString &functionName);
+  /// Creates the function for fitting
+  Mantid::API::IFunction_sptr createFunction(const QString &functionName);
 
   /// Clears the mini plot of data excluding sample
   void clearPlot();
@@ -60,15 +64,12 @@ private:
   // The UI form
   Ui::JumpFit m_uiForm;
 
-  // Map of axis labels to spectrum number
+  /// Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
   QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
-
-  Mantid::API::MatrixWorkspace_sptr m_jfInputWS;
-  int m_specNo;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

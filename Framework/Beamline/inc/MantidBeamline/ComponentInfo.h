@@ -4,6 +4,7 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
 #include <vector>
 #include <utility>
 #include <cstddef>
@@ -39,23 +40,6 @@ class DetectorInfo;
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
-  class Range {
-  private:
-    const std::vector<size_t>::const_iterator m_begin;
-    const std::vector<size_t>::const_iterator m_end;
-
-  public:
-    Range(std::vector<size_t>::const_iterator &&begin,
-          std::vector<size_t>::const_iterator &&end)
-        : m_begin(std::move(begin)), m_end(std::move(end)) {}
-    bool empty() const { return m_begin == m_end; }
-    auto begin() const -> decltype(m_begin) { return m_begin; }
-    auto end() const -> decltype(m_end) { return m_end; }
-  };
-
-  Range detectorRangeInSubtree(const size_t index) const;
-  Range componentRangeInSubtree(const size_t index) const;
-
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
   /// Contains only indices of non-detector components
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
@@ -69,6 +53,8 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
+  Mantid::Kernel::cow_ptr<std::vector<bool>> m_isStructuredBank;
+
   const size_t m_size = 0;
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
@@ -90,6 +76,7 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+                boost::shared_ptr<std::vector<bool>> isStructuredBank,
                 int64_t sourceIndex, int64_t sampleIndex);
 
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
@@ -126,6 +113,31 @@ public:
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Eigen::Vector3d &scaleFactor);
+  bool isStructuredBank(const size_t componentIndex) const;
+
+  class Range {
+  private:
+    const std::vector<size_t>::const_iterator m_begin;
+    const std::vector<size_t>::const_iterator m_end;
+
+  public:
+    Range(std::vector<size_t>::const_iterator &&begin,
+          std::vector<size_t>::const_iterator &&end)
+        : m_begin(std::move(begin)), m_end(std::move(end)) {}
+    bool empty() const { return m_begin == m_end; }
+    auto begin() const -> decltype(m_begin) { return m_begin; }
+    auto end() const -> decltype(m_end) { return m_end; }
+    boost::reverse_iterator<std::vector<size_t>::const_iterator>
+    rbegin() const {
+      return boost::make_reverse_iterator(m_end);
+    }
+    boost::reverse_iterator<std::vector<size_t>::const_iterator> rend() const {
+      return boost::make_reverse_iterator(m_begin);
+    }
+  };
+
+  Range detectorRangeInSubtree(const size_t index) const;
+  Range componentRangeInSubtree(const size_t index) const;
 };
 } // namespace Beamline
 } // namespace Mantid

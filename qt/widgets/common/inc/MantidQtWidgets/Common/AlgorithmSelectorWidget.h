@@ -5,13 +5,19 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
 
+#include <QComboBox>
+#include <QPoint>
+#include <QString>
+#include <QTreeWidget>
+
 #include <vector>
 #include <Poco/NObserver.h>
 
-#include <QtGui>
 //------------------------------------------------------------------------------
 // Forward declaration
 //------------------------------------------------------------------------------
+class QPushButton;
+
 namespace Mantid {
 namespace API {
 struct Algorithm_descriptor;
@@ -44,8 +50,7 @@ struct SelectedAlgorithm {
 
   @date 2012-03-06
   */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE
                  showExecuteButton)

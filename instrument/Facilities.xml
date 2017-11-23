@@ -773,6 +773,10 @@
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
+
+  <instrument name="POWTEX">
+	<technique>Neutron Diffraction</technique>
+  </instrument>
 </facility>
 
 <!-- ANSTO -->
@@ -795,14 +799,14 @@
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="histo" address="localhost:56789" listener="ISISHistoDataListener" />
+      <connection name="histo" address="127.0.0.1:56789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
 
   <instrument name="ISIS_Event">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="event" address="localhost:59876" listener="ISISLiveEventDataListener" />
+      <connection name="event" address="127.0.0.1:59876" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
 

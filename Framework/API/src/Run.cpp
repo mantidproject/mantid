@@ -81,8 +81,8 @@ boost::shared_ptr<Run> Run::clone() {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void Run::filterByTime(const Kernel::DateAndTime start,
-                       const Kernel::DateAndTime stop) {
+void Run::filterByTime(const Types::Core::DateAndTime start,
+                       const Types::Core::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
   // Re-integrate proton charge
   this->integrateProtonCharge();
@@ -348,7 +348,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
 
   // write the histogram bins, if there are any
   if (!m_histoBins.empty()) {
-    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
+    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", true);
     file->writeData("value", m_histoBins);
     file->closeGroup();
   }
@@ -356,12 +356,12 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>("PeakRadius");
 
-    file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", true);
     file->writeData("value", values);
     file->closeGroup();
   }
   if (this->hasProperty("BackgroundInnerRadius")) {
-    file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", true);
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>(
             "BackgroundInnerRadius");
@@ -369,7 +369,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
     file->closeGroup();
   }
   if (this->hasProperty("BackgroundOuterRadius")) {
-    file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", true);
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>(
             "BackgroundOuterRadius");

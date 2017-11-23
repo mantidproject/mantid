@@ -346,7 +346,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
   std::vector<std::string> detectors;
 
   try {
-    for (const auto wsIndex : wsIndices) {
+    for (const auto &wsIndex : wsIndices) {
 
       size_t index = boost::lexical_cast<size_t>(wsIndex);
 
@@ -549,7 +549,7 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 
     IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
-    calcRes->setProperty("TwoTheta", theta);
+    calcRes->setProperty("TwoTheta", 2 * theta);
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {

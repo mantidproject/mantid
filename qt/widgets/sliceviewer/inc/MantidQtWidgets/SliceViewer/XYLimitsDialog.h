@@ -1,7 +1,7 @@
 #ifndef XYLIMITSDIALOG_H
 #define XYLIMITSDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "ui_XYLimitsDialog.h"
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -15,7 +15,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER XYLimitsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  XYLimitsDialog(QWidget *parent = 0);
+  XYLimitsDialog(QWidget *parent = nullptr);
   ~XYLimitsDialog() override;
 
   void setXDim(Mantid::Geometry::IMDDimension_const_sptr dim);

@@ -247,6 +247,30 @@ class StateGuiModel(object):
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_stop=value)
 
+    @property
+    def merge_mask(self):
+        return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.set_simple_element(element_id=OtherId.merge_mask, value=value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_element(element_id=OtherId.merge_max, default_value=None)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        self.set_simple_element(element_id=OtherId.merge_max, value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_element(element_id=OtherId.merge_min, default_value=None)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        self.set_simple_element(element_id=OtherId.merge_min, value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Event binning for compatibility mode
     # ------------------------------------------------------------------------------------------------------------------
@@ -395,13 +419,12 @@ class StateGuiModel(object):
     # ADJUSTMENT TAB
     # ==================================================================================================================
     # ==================================================================================================================
-    def _update_incident_spectrum_info(self, spectrum=None, interpolate=None, is_trans=False):
+    def _update_incident_spectrum_info(self, spectrum=None, interpolate=False, is_trans=False):
         if MonId.spectrum in self._user_file_items:
             settings = self._user_file_items[MonId.spectrum]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
-            # and if not we want it to fail.
-            settings = [monitor_spectrum(spectrum=-1, is_trans=is_trans, interpolate=is_trans)]
+            # If the entry does not already exist, then add it.
+            settings = [monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)]
 
         new_settings = []
         for setting in settings:
@@ -638,6 +661,14 @@ class StateGuiModel(object):
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
         self._set_transmission_fit(data_type=DataType.Can, stop=value)
+
+    @property
+    def show_transmission(self):
+        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=False)
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.set_simple_element(element_id=OtherId.show_transmission, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files

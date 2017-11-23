@@ -669,7 +669,7 @@ void InstrumentWidget::saveImage(QString filename) {
     filename += defaultExt;
     ext = QFileInfo(filename).completeSuffix();
   } else {
-    if (!formats.contains(ext.toAscii())) {
+    if (!formats.contains(ext.toLatin1())) {
       QString msg("Unsupported file extension. Choose one of the following: ");
       QListIterator<QByteArray> itr(formats);
       while (itr.hasNext()) {

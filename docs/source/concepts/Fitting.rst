@@ -159,6 +159,7 @@ implementation used for solving crystal structures from powder diffraction data.
     # For this demo example, just one fitting parameter is globally fitted, the peak center of a Gaussian peak
     # Please bear in mind the example here is to demonstrate this algorithm not provide a real global fitting problem
 
+    from __future__ import print_function
     from random import random
     from time import sleep
 
@@ -171,7 +172,7 @@ implementation used for solving crystal structures from powder diffraction data.
     # Set best very high value of the cost function to ensure lower is found at first attempt
     costFuncBest = 1e+100
 
-    # Do local minimization from randow starting positions
+    # Do local minimization from random starting positions
     numOfRandowAttempts = 10
     for i in range(10):
         # pick a randow value for the peak centre fitting parameter in the fitting interval
@@ -179,24 +180,25 @@ implementation used for solving crystal structures from powder diffraction data.
 
         # Do a fit from this starting value of the peak centre fitting parameter
         # Note choice of local minimizer will affect the outcome
-        d0, costFuncVal, d1, d2, d3 = Fit(InputWorkspace='data', WorkspaceIndex=0, \
-    	   StartX = startX, EndX=endX, Output='fit', \
-    	   Function='name=Gaussian,Height=10,PeakCentre='+tryCentre+',Sigma=20',
-    	   Minimizer='Conjugate gradient (Fletcher-Reeves imp.)')
+        fit_results = Fit(InputWorkspace='data', WorkspaceIndex=0, \
+                          StartX = startX, EndX=endX, Output='fit', \
+                          Function='name=Gaussian,Height=10,PeakCentre='+tryCentre+',Sigma=20',
+                          Minimizer='Conjugate gradient (Fletcher-Reeves imp.)')
+        costFuncVal = fit_results.OutputChi2overDoF
 
         # Here simply keep record of the best fit found, but this could easily be extended to
         # keep a record of all the minima found
         if costFuncVal < costFuncBest:
             costFuncBest = costFuncVal
             # here keep clone of best fit
-    	    CloneWorkspace(InputWorkspace='fit_Workspace',OutputWorkspace='fitBest')
+            CloneWorkspace(InputWorkspace='fit_Workspace', OutputWorkspace='fitBest')
 
         # Uncomment the sleep if would like to watch this algorithm trying to
         # find the global minima (graphically and/or from command line)
-        # print costFuncVal
+        # print(costFuncVal)
         # sleep(2)
 
-    print 'test'
+    print('test')
 
 .. testoutput:: LocalMinimizationRandowStartingPoints
     :hide:

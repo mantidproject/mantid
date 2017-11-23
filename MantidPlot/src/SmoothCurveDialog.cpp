@@ -43,8 +43,8 @@
 #include <QLayout>
 
 SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(NULL), boxPointsLeft(NULL),
-      boxPointsRight(NULL), boxOrder(NULL) {
+    : QDialog(parent, fl), graph(nullptr), boxPointsLeft(nullptr),
+      boxPointsRight(nullptr), boxOrder(nullptr) {
   smooth_method = method;
 
   setObjectName("SmoothCurveDialog");

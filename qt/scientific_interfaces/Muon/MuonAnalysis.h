@@ -82,7 +82,7 @@ public:
   static QString categoryInfo() { return "Muon"; }
 
   /// Default Constructor
-  explicit MuonAnalysis(QWidget *parent = 0);
+  explicit MuonAnalysis(QWidget *parent = nullptr);
 
   /// Destructor
   ~MuonAnalysis();
@@ -258,6 +258,7 @@ private slots:
   void updateNormalization(QString name);
 
 private:
+  bool getIfTFAsymmStore() const;
   /// Initialize local Python environment
   void initLocalPython() override;
 

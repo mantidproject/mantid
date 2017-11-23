@@ -31,15 +31,6 @@ namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
-const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
-    "A valid RB Number is required";
-const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
-    std::string("An experiment reference number (or so called \"RB "
-                "number\" at ISIS) is "
-                "required to effectively use this interface. \n") +
-    "The output calibration, focusing and fitting results will be "
-    "saved in directories named using the RB number entered.";
-
 const std::string EnggDiffractionPresenter::g_runNumberErrorStr =
     " cannot be empty, must be an integer number, valid ENGINX run number/s "
     "or "
@@ -354,8 +345,8 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum Nos cannot be empty, must be a"
-          "valid range or a Bank Name can be selected instead");
+          "The Spectrum Numbers field cannot be empty, must be a "
+          "valid range or a Bank Name can be selected instead.");
     }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for cropped calibration",
@@ -613,8 +604,7 @@ void EnggDiffractionPresenter::processRBNumberChange() {
   const std::string rbn = m_view->getRBNumber();
   auto valid = validateRBNumber(rbn);
   m_view->enableTabs(valid);
-  m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
-                        g_msgRBNumberRequired);
+  m_view->showInvalidRBNumber(valid);
   if (!valid) {
     m_view->showStatus("Valid RB number required");
   } else {
@@ -729,7 +719,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
   if (paths.empty() || paths.front().empty())
     return multi_run_number;
 
-  for (auto path : paths) {
+  for (const auto &path : paths) {
     std::string run_number;
     try {
       if (Poco::File(path).exists()) {
@@ -869,7 +859,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   ceriaNo = "";
 
   Poco::Path fullPath(path);
-  const std::string filename = fullPath.getFileName();
+  const std::string &filename = fullPath.getFileName();
   if (filename.empty()) {
     return;
   }
@@ -1084,8 +1074,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
   try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
     load->setPropertyValue("Filename", cerFileHint);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
@@ -1142,8 +1131,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "EnggCalibrate");
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().create("EnggCalibrate");
 
     alg->initialize();
     alg->setProperty("InputWorkspace", ceriaWS);
@@ -1326,8 +1315,9 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
-                                "focusing in 'cropped' mode.");
+    throw std::invalid_argument(
+        "The Spectrum Numbers field cannot be empty when "
+        "focusing in 'cropped' mode.");
   }
 
   inputChecksBanks(banks);
@@ -1791,8 +1781,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   } else {
     try {
-      auto load =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
       load->setPropertyValue("Filename", instStr + runNo);
       load->setPropertyValue("OutputWorkspace", inWSName);
@@ -1827,8 +1816,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     outWSName = "engggui_focusing_output_ws_cropped";
   }
   try {
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFocus");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("EnggFocus");
     alg->initialize();
     alg->setProperty("InputWorkspace", inWSName);
     alg->setProperty("OutputWorkspace", outWSName);
@@ -2131,7 +2119,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   // TODO?: maybe use setChild() and then
   // load->getProperty("OutputWorkspace");
 
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "EnggVanadiumCorrections");
   alg->initialize();
   alg->setProperty("VanadiumWorkspace", vanWS);

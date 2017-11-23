@@ -1,14 +1,42 @@
-###########################################################################
-# Now add the packages one-by-one, building up the dependencies as we go
-###########################################################################
-find_package ( QScintilla REQUIRED )
+find_package ( QScintillaQt4 REQUIRED )
 
-include ( UseQt4 )
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+# Utilities for defining targets
+include ( QtTargetFunctions )
 
-# Any MantidQt package can depend on widgets/common, so add the includes to the path here
-include_directories ( widgets/common/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
+# Function to create links to python packages in the source tree
+# If the EXECUTABLE option is provided then it additional build rules are
+# defined to ensure startup scripts are regenerated appropriately
+function ( add_python_package pkg_name )
+  # Create a setup.py file
+  set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
+  set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+  set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+  if ( ARGV0 EQUAL "EXECUTABLE" )
+      if ( WIN32 )
+        set ( _startup_script ${_egg_link_dir}/${pkg_name}-script.pyw )
+        set ( _startup_exe ${_egg_link_dir}/${pkg_name}.exe )
+      else ()
+        set ( _startup_script )
+        set ( _startup_exe ${_egg_link_dir}/${pkg_name} )
+      endif ()
+  endif ()
+  set ( _outputs "${_egg_link} ${_startup_script} ${_startup_exe}" )
+  add_custom_command ( OUTPUT ${_outputs}
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir}
+      ${PYTHON_EXECUTABLE} ${_setup_py} develop
+      --install-dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+      --script-dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${_setup_py}
+  )
+  add_custom_target ( ${pkg_name} ALL
+    DEPENDS ${_outputs}
+  )
+endfunction ()
+
+###########################################################################
+# Qt-based targets
+###########################################################################
 add_subdirectory ( widgets )
 add_subdirectory ( python )
 add_subdirectory ( scientific_interfaces )
@@ -16,28 +44,4 @@ if ( MAKE_VATES )
   add_subdirectory ( paraview_ext )
 endif ( MAKE_VATES )
 
-###########################################################################
-# Add a custom target to build all of the MantidQt packages
-###########################################################################
-
-if ( MSVC_IDE )
-#  # Add to the 'MantidQt' group in VS
-  set_property ( TARGET MantidQtWidgetsCommon PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsInstrumentView PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsSliceViewer PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsSpectrumViewer PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsRefDetectorView PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsFactory PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsPluginsDesigner PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET MantidQtWidgetsPluginsAlgorithmDialogs PROPERTY FOLDER "MantidQt" )
-  set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
-else ()
-  add_custom_target ( MantidQt DEPENDS MantidQtWidgetsCommon 
-                                       MantidQtWidgetsSliceViewer
-                                       MantidQtWidgetsSpectrumViewer
-                                       MantidQtWidgetsRefDetectorView
-                                       MantidQtWidgetsFactory
-                                       MantidQtWidgetsPluginsAlgorithmDialogs
-                                       mantidqtpython
-  )
-endif ()
+add_subdirectory ( applications )

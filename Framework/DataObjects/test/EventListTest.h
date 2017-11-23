@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
@@ -17,6 +19,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
@@ -51,6 +55,77 @@ public:
     mylist.push_back(TofEvent(3.5, 400));
     mylist.push_back(TofEvent(50, 60));
     el = EventList(mylist);
+  }
+
+  void test_copyDataFrom() {
+    Histogram1D histogram{Histogram::XMode::Points, Histogram::YMode::Counts};
+    histogram.setHistogram(Points(1), Counts(1));
+    EventList eventList;
+    eventList.setHistogram(BinEdges{0.0, 2.0});
+    eventList += TofEvent(1.0, 2);
+    std::unique_ptr<const ISpectrum> specHist =
+        Kernel::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<EventList>();
+
+    TS_ASSERT_THROWS_EQUALS(target->copyDataFrom(*specHist),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "Incompatible types in ISpectrum::copyDataFrom");
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+    TS_ASSERT_EQUALS(target->counts()[0], 1.0);
+  }
+
+  void test_copyDataFrom_does_not_copy_indices() {
+    EventList eventList;
+    eventList.setHistogram(BinEdges{0.0, 2.0});
+    eventList += TofEvent(1.0, 2);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<EventList>();
+    target->setSpectrumNo(37);
+    target->setDetectorID(42);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+    TS_ASSERT_EQUALS(target->counts()[0], 1.0);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+  }
+
+  void test_copyDataFrom_event_data_details() {
+    EventList eventList;
+    eventList.setHistogram(BinEdges{0.0, 2.0});
+    eventList += TofEvent(1.0, 2);
+    EventList target;
+
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::TOF)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_EQUALS(target.getEvents(), eventList.getEvents());
+    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+
+    eventList.switchTo(EventType::WEIGHTED);
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
+    TS_ASSERT_EQUALS(target.getWeightedEvents(), eventList.getWeightedEvents());
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+
+    eventList.switchTo(EventType::WEIGHTED_NOTIME);
+    target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED_NOTIME)
+    TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
+    TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(),
+                     eventList.getWeightedEventsNoTime());
   }
 
   //==================================================================================
@@ -2376,7 +2451,7 @@ public:
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
       el += TofEvent(rand() % 1000,
-                     time); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     time); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 
@@ -2393,7 +2468,7 @@ public:
       // All pulse times from 0 to 999 in seconds
       DateAndTime pulsetime(static_cast<int64_t>(time * 1000000));
       el += TofEvent(rand() % 1000,
-                     pulsetime); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     pulsetime); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 

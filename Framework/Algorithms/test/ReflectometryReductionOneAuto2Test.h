@@ -248,6 +248,14 @@ public:
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 
+    // Check default rebin params
+    const double qStep = alg.getProperty("MomentumTransferStep");
+    const double qMin = alg.getProperty("MomentumTransferMin");
+    const double qMax = alg.getProperty("MomentumTransferMax");
+    TS_ASSERT_DELTA(qStep, 0.034028, 1e-6);
+    TS_ASSERT_DELTA(qMin, out->x(0).front(), 1e-6);
+    TS_ASSERT_DELTA(qMax, out->x(0).back(), 1e-6);
+
     // Compare instrument components before and after
     auto instIn = inter->getInstrument();
     auto instOut = out->getInstrument();
@@ -510,6 +518,14 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    // Check the rebin params have not changed
+    const double qStep = alg.getProperty("MomentumTransferStep");
+    const double qMin = alg.getProperty("MomentumTransferMin");
+    const double qMax = alg.getProperty("MomentumTransferMax");
+    TS_ASSERT_EQUALS(qStep, -0.04);
+    TS_ASSERT_EQUALS(qMin, 1.0);
+    TS_ASSERT_EQUALS(qMax, 10.0);
 
     TS_ASSERT_EQUALS(outQbinned->getNumberHistograms(), 1);
     // blocksize = (10.0 - 1.0) / 0.04

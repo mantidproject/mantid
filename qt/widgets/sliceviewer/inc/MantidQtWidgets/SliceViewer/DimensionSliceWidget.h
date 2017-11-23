@@ -1,7 +1,7 @@
 #ifndef DIMENSIONSLICEWIDGET_H
 #define DIMENSIONSLICEWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_DimensionSliceWidget.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"
@@ -30,7 +30,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER DimensionSliceWidget : public QWidget {
   //  };
 
 public:
-  DimensionSliceWidget(QWidget *parent = 0);
+  DimensionSliceWidget(QWidget *parent = nullptr);
   ~DimensionSliceWidget() override;
 
   void setDimension(int index, Mantid::Geometry::IMDDimension_const_sptr dim);

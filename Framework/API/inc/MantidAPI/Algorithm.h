@@ -10,13 +10,11 @@
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
-#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <MantidIndexing/SpectrumIndexSet.h>
 
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
@@ -37,6 +35,9 @@ class Value;
 }
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumIndexSet;
+}
 namespace Parallel {
 class Communicator;
 }
@@ -201,7 +202,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const boost::shared_ptr<T1> &wksp,
                                    IndexType type, const T2 &list);
@@ -211,7 +212,7 @@ public:
                 std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
             typename = typename std::enable_if<
                 std::is_convertible<T2 *, std::string *>::value ||
-                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
+                std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
                                    const std::string &wsName, IndexType type,
                                    const T2 &list);
@@ -240,6 +241,7 @@ public:
   void enableHistoryRecordingForChild(const bool on) override;
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; }
   void setAlwaysStoreInADS(const bool doStore) override;
+  bool getAlwaysStoreInADS() const override;
   void setRethrows(const bool rethrow) override;
 
   /** @name Asynchronous Execution */
@@ -290,6 +292,10 @@ public:
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1);
+  void setupAsChildAlgorithm(boost::shared_ptr<Algorithm> algorithm,
+                             const double startProgress = -1.,
+                             const double endProgress = -1.,
+                             const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
@@ -402,13 +408,13 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
-  template <typename T, typename = typename std::enable_if<std::is_convertible<
-                            T *, MatrixWorkspace *>::value>::type>
-  void declareWorkspaceInputProperties(
-      const std::string &propertyName,
-      const int allowedIndexTypes = IndexType::WorkspaceIndex,
-      PropertyMode::Type optional = PropertyMode::Type::Mandatory,
-      LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "");
+  template <typename T, const int AllowedIndexTypes = IndexType::WorkspaceIndex,
+            typename... WSPropArgs,
+            typename = typename std::enable_if<
+                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  void declareWorkspaceInputProperties(const std::string &propertyName,
+                                       const std::string &doc,
+                                       WSPropArgs &&... wsPropArgs);
 
 private:
   template <typename T1, typename T2, typename WsType>
@@ -423,7 +429,7 @@ private:
 
   bool executeAsyncImpl(const Poco::Void &i);
 
-  bool doCallProcessGroups(Mantid::Kernel::DateAndTime &start_time);
+  bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,

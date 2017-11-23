@@ -1,7 +1,6 @@
 #include "MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/IFunction.h"
-
-#include "MDFEditLocalParameterDialog.h"
+#include "MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
 
@@ -43,8 +42,6 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
     connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
             SLOT(handleErrorsEnabled(bool)));
     connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
-    connect(fitBrowser, SIGNAL(functionLoaded(const QString &)), this,
-            SLOT(handleFunctionLoaded(const QString &)));
     connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
             SLOT(updateNumberOfDatasets(int)));
     connect(fitBrowser, SIGNAL(userChangedDatasetIndex(int)), this,
@@ -172,17 +169,6 @@ void MuonAnalysisFitFunctionPresenter::handleModelCleared() {
  */
 void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
   m_funcBrowser->setErrorsEnabled(enabled);
-}
-
-/**
- * Called when a saved setup is loaded into the fit property browser.
- * Update the function browser with this loaded function.
- * @param funcString :: [input] Loaded function as a string
- */
-void MuonAnalysisFitFunctionPresenter::handleFunctionLoaded(
-    const QString &funcString) {
-  m_funcBrowser->clear();
-  m_funcBrowser->setFunction(funcString);
 }
 
 /**

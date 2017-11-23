@@ -23,13 +23,13 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
 double calculateRho(double normf, double normfnew, double md,
                     const nlls_options &options);
 void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             nlls_inform &inform, NLLS_workspace &w);
+                             NLLS_workspace &w);
 void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w);
 void testConvergence(double normF, double normJF, double normF0, double normJF0,
                      const nlls_options &options, nlls_inform &inform);
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, apply_scaling_work &w,
-                  const nlls_options &options, nlls_inform &inform);
+                  DoubleFortranVector &v, DoubleFortranVector &scale,
+                  const nlls_options &options);
 void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
                 DoubleFortranMatrix &ev);
 // void apply_second_order_info(int n, int m, const DoubleFortranVector& X,

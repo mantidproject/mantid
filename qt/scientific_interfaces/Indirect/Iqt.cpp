@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <qwt_plot.h>
 
@@ -17,8 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_iqtTree(NULL), m_iqtResFileType(),
-      m_IqtInputWS() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 
@@ -341,14 +340,13 @@ void Iqt::plotInput(const QString &wsname) {
   try {
     workspace = Mantid::API::AnalysisDataService::Instance()
                     .retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
     return;
   }
 
-  m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
-
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
@@ -388,27 +386,11 @@ void Iqt::plotInput(const QString &wsname) {
       // set default value for width
       m_dblManager->setValue(m_properties["EWidth"], 0.005);
     }
-
-    // Set saved workspace
-    m_IqtInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        wsname.toStdString());
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
 
   calculateBinning();
-}
-
-/**
-* Plots the current spectrum displayed in the preview plot
-*/
-void Iqt::plotCurrentPreview() {
-
-  // Check whether an input workspace has been selected and exists
-  if (m_IqtInputWS) {
-    IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()),
-                              0, 0);
-  }
 }
 
 /**

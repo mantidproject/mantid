@@ -9,8 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
 #include "SampleActor.h"
 
@@ -344,7 +343,7 @@ private:
 class FindComponentVisitor : public GLActorVisitor {
 public:
   explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id), m_actor(NULL) {}
+      : m_id(id), m_actor(nullptr) {}
   using GLActorVisitor::visit;
   bool visit(GLActor *) override;
   ComponentActor *getActor() const { return m_actor; }

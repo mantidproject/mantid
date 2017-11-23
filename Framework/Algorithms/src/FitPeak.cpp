@@ -28,7 +28,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 

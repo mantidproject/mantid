@@ -18,6 +18,7 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 // Add A Fake 'Peak' to both the event data and to the peaks workspace

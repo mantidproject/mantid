@@ -2,7 +2,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(NULL), m_ElInputWS() {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -94,8 +94,11 @@ void Elwin::setup() {
 
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
           SLOT(newInputFiles()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this,
           SLOT(newPreviewFileSelected(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
   // Handle plot and save
@@ -347,8 +350,9 @@ void Elwin::newInputFiles() {
   // Default to the first file
   m_uiForm.cbPreviewFile->setCurrentIndex(0);
   QString wsname = m_uiForm.cbPreviewFile->currentText();
-  m_ElInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsname.toStdString());
+  setInputWorkspace(inputWs);
 }
 
 /**
@@ -378,45 +382,19 @@ void Elwin::newPreviewFileSelected(int index) {
 
   m_uiForm.spPreviewSpec->setMaximum(numHist);
   m_uiForm.spPreviewSpec->setValue(0);
-
-  plotInput();
 }
 
 /**
  * Replots the preview plot.
  */
 void Elwin::plotInput() {
-  QString wsName = m_uiForm.cbPreviewFile->currentText();
-
-  if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
-    g_log.error("Workspace not found in ADS. Try reloading input files.");
-    return;
-  }
-
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-
-  if (!ws) {
-    g_log.error("Failed to get input workspace from ADS.");
-    return;
-  }
-
-  int specNo = m_uiForm.spPreviewSpec->value();
-
-  try {
-    m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    auto rangeSelector =
-        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-    setPlotPropertyRange(rangeSelector, m_properties["IntegrationStart"],
-                         m_properties["IntegrationEnd"], range);
-
-    setDefaultResolution(ws, range);
-    setDefaultSampleLog(ws);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+  IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
+                                           m_uiForm.ppPlot, "IntegrationStart",
+                                           "IntegrationEnd");
+  setDefaultResolution(inputWorkspace(),
+                       m_uiForm.ppPlot->getCurveRange("Sample"));
+  setDefaultSampleLog(inputWorkspace());
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
@@ -493,7 +471,7 @@ void Elwin::plotClicked() {
     plotSpectrum(workspaceBaseName + "_elf");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   true))
+                                   true, false))
     plotSpectrum(workspaceBaseName + "_elt");
 }
 
@@ -518,23 +496,10 @@ void Elwin::saveClicked() {
     addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   false))
+                                   false, false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_elt");
 
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-/**
-* Plots the current spectrum displayed in the preview plot
-*/
-void Elwin::plotCurrentPreview() {
-
-  // Check whether a workspace has been selected
-  if (m_ElInputWS) {
-    int specNo = m_uiForm.spPreviewSpec->value();
-    IndirectTab::plotSpectrum(QString::fromStdString(m_ElInputWS->getName()),
-                              specNo, specNo);
-  }
 }
 
 } // namespace IDA
