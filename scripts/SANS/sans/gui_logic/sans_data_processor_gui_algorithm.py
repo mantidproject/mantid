@@ -270,4 +270,5 @@ class SANSGuiDataProcessorAlgorithm(DataProcessorAlgorithm):
 
         # 3. Run the sans_batch script
         sans_batch = SANSBatchReduction()
-        sans_batch(states=state, use_optimizations=use_optimizations, output_mode=output_mode, plot_results=plot_results, output_graph=output_graph)
+        sans_batch(states=state, use_optimizations=use_optimizations, output_mode=output_mode, plot_results=plot_results
+                   , output_graph=output_graph)
