@@ -1085,56 +1085,6 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
   }
 }
 
-void EnggDiffFittingPresenter::setBankItems(
-    const std::vector<std::string> &bankFiles) {
-
-  if (bankFiles.empty()) {
-    // upon invalid file
-    // disable the widgets when only one related file found
-    m_view->enableFittingComboBox(false);
-
-    m_view->clearFittingComboBox();
-    return;
-  }
-
-  // delete previous bank added to the list
-  m_view->clearFittingComboBox();
-
-  try {
-    // Keep track of current loop iteration for banks
-    int index = 0;
-    for (const auto &filePath : bankFiles) {
-
-      const Poco::Path bankFile(filePath);
-      const std::string strVecFile = bankFile.toString();
-      // split the directory from m_fitting_runno_dir_vec
-      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
-
-      // get the last split in vector which will be bank
-      std::string bankID = (vecFileSplit.back());
-
-      bool digit = isDigit(bankID);
-
-      if (digit || bankID == "cropped") {
-        m_view->addBankItem(bankID);
-      } else {
-        QString qBank = QString("Bank %1").arg(index + 1);
-        m_view->addBankItem(qBank.toStdString());
-        ++index;
-      }
-    }
-
-    m_view->enableFittingComboBox(true);
-
-  } catch (std::runtime_error &re) {
-    m_view->userWarning("Unable to insert items: ",
-                        "Could not add banks to "
-                        "combo-box or list widget; " +
-                            static_cast<std::string>(re.what()) +
-                            ". Please try again");
-  }
-}
-
 void EnggDiffFittingPresenter::setRunNoItems(
     const std::vector<std::string> &runNumVector, bool multiRun) {
   try {
