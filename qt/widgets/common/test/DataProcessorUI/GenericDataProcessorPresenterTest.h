@@ -3535,7 +3535,8 @@ public:
     // Expect the active view's widgets to be set in the paused state
     EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(false)).Times(1);
     EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(true)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(true)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(true))
+        .Times(1);
     EXPECT_CALL(mockDataProcessorView, setTreeEnabled(true)).Times(1);
     EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(true)).Times(1);
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);

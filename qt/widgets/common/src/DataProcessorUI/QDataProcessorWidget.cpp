@@ -336,7 +336,6 @@ void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
     ui.viewTable->setEditTriggers(editTriggers);
   else
     ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
 }
 
 /**

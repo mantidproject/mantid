@@ -156,7 +156,8 @@ void ReflRunsTabPresenter::pushCommands() {
 
   // The expected number of commands
   const size_t nCommands = 31;
-  auto commands = m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
+  auto commands =
+      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -397,7 +398,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
 
   UNUSED_ARG(workspaceList);
   pushCommands();
-  m_view->updateMenuEnabledState(m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
+  m_view->updateMenuEnabledState(
+      m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
 /** Requests property names associated with pre-processing values.
@@ -464,7 +466,8 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
  * @param isProcessing :: true if processing is in progress
  *
  */
-void ReflRunsTabPresenter::updateWidgetEnabledState(const bool isProcessing) const {
+void ReflRunsTabPresenter::updateWidgetEnabledState(
+    const bool isProcessing) const {
   // Update the menus
   m_view->updateMenuEnabledState(isProcessing);
 
@@ -477,16 +480,12 @@ void ReflRunsTabPresenter::updateWidgetEnabledState(const bool isProcessing) con
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::pause() const {
-  updateWidgetEnabledState(false);
-}
+void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is in progress
 */
-void ReflRunsTabPresenter::resume() const {
-  updateWidgetEnabledState(true);
-}
+void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
 * either the search number, transfer method or instrument has changed

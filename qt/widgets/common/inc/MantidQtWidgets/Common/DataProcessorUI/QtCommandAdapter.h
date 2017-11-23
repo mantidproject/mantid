@@ -102,9 +102,7 @@ public:
       m_action->setEnabled(isProcessing);
   }
 
-  QAction *getAction() {
-    return m_action.get();
-  }
+  QAction *getAction() { return m_action.get(); }
 
 private:
   /**
@@ -115,8 +113,7 @@ private:
   void createSubmenu(QMenu *menu) {
     // We are dealing with a submenu
     // Add the submenu. Note that menu takes ownership of submenu.
-    QMenu *submenu =
-      menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
+    QMenu *submenu = menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
     // Add the actions
     auto &child = m_adaptee->getChild();
     for (auto &ch : child) {

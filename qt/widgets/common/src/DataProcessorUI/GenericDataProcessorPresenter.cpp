@@ -288,7 +288,8 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // Update enabled/disabled states on the view (processing is not yet in progress)
+  // Update enabled/disabled states on the view (processing is not yet in
+  // progress)
   updateWidgetEnabledState(false);
 }
 
@@ -1548,7 +1549,8 @@ void GenericDataProcessorPresenter::addCommands() {
 Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
-void GenericDataProcessorPresenter::updateWidgetEnabledState(const bool isProcessing) const {
+void GenericDataProcessorPresenter::updateWidgetEnabledState(
+    const bool isProcessing) const {
   m_view->updateMenuEnabledState(isProcessing);
 
   m_view->setProcessButtonEnabled(!isProcessing);

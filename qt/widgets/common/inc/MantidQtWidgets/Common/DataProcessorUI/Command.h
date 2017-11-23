@@ -58,6 +58,7 @@ public:
   }
   virtual bool modifiesSettings() { return true; };
   virtual bool modifiesRunningProcesses() { return false; }
+
 protected:
   std::vector<std::unique_ptr<Command>> m_child;
 };
