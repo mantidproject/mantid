@@ -58,7 +58,7 @@ void BitmapGeometryHandler::Triangulate() {
 //----------------------------------------------------------------------------------------------
 ///< Render Object or ObjComponent
 void BitmapGeometryHandler::Render() {
-  m_renderer.Render(m_rectDet);
+  m_renderer.render(m_rectDet);
 }
 
 //----------------------------------------------------------------------------------------------
