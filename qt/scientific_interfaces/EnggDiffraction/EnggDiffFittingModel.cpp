@@ -354,31 +354,6 @@ void EnggDiffFittingModel::alignDetectors(
   alignDetAlg->execute();
 }
 
-void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
-                                         const std::string &wsName) {
-  auto loadAlg = API::AlgorithmManager::Instance().create("Load");
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setProperty("OutputWorkspace", wsName);
-  loadAlg->execute();
-}
-
-void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS,
-                                           const std::string &newName) {
-  auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
-  renameAlg->setProperty("InputWorkspace", inputWS);
-  renameAlg->setProperty("OutputWorkspace", newName);
-  renameAlg->execute();
-}
-
-void EnggDiffFittingModel::groupWorkspaces(
-    const std::vector<std::string> &workspaceNames,
-    const std::string &outputWSName) {
-  auto groupAlg = API::AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupAlg->setProperty("InputWorkspaces", workspaceNames);
-  groupAlg->setProperty("OutputWorkspace", outputWSName);
-  groupAlg->execute();
-}
-
 API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
                                           const size_t bank) const {

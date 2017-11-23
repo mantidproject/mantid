@@ -196,7 +196,7 @@ public:
         .Times(1)
         .WillOnce(Return(""));
 
-    EXPECT_CALL(mockView, fittingPeaksData())
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
@@ -403,7 +403,7 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
-    EXPECT_CALL(mockView, fittingPeaksData())
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
@@ -430,7 +430,7 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, fittingPeaksData())
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
@@ -536,7 +536,7 @@ public:
         .Times(1)
         .WillOnce(Return(dummyDir));
 
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(0);
+    EXPECT_CALL(mockView, getExpectedPeaksInput()).Times(0);
 
     // No errors/1 warnings. Dummy file entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -558,8 +558,9 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1);
 
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
-    ;
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
+        .Times(1)
+        .WillOnce(Return(""));
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
@@ -586,7 +587,7 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(0);
 
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(0);
+    EXPECT_CALL(mockView, getExpectedPeaksInput()).Times(0);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
 
@@ -613,7 +614,7 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(2.0684));
 
-    EXPECT_CALL(mockView, fittingPeaksData())
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("1.7906,2.0684,1.2676,"));
 
@@ -639,7 +640,7 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(3.0234));
 
-    EXPECT_CALL(mockView, fittingPeaksData())
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("2.0684,1.2676"));
 
@@ -668,7 +669,9 @@ public:
 
     EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(0.0133));
 
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getExpectedPeaksInput())
+        .Times(1)
+        .WillOnce(Return(""));
 
     // string should be "0.133," instead
     EXPECT_CALL(mockView, setPeakList("0.0133")).Times(0);

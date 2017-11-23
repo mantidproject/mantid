@@ -147,6 +147,7 @@ public:
     auto model = EnggDiffFittingModel();
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
     API::MatrixWorkspace_sptr ws;
+
     TS_ASSERT_THROWS_NOTHING(
         ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
@@ -154,6 +155,40 @@ public:
   }
 
   void test_setDifcTzero() {
+    auto model = EnggDiffFittingModel();
+    TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+
+    TS_ASSERT_THROWS_NOTHING(
+        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
+                           std::vector<GSASCalibrationParms>()));
+    auto ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK);
+    auto run = ws->run();
+    TS_ASSERT(run.hasProperty("difa"));
+    TS_ASSERT(run.hasProperty("difc"));
+    TS_ASSERT(run.hasProperty("tzero"));
+  }
+
+  void test_createFittedPeaksWS() {
+    auto model = EnggDiffFittingModelAddWSExposed();
+
+    const auto fitParams = createFitParamsTable();
+    TS_ASSERT_THROWS_NOTHING(
+        model.addFitParams(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK, fitParams));
+    TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
+
+    TS_ASSERT_THROWS_NOTHING(
+        model.setDifcTzero(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK,
+                           std::vector<GSASCalibrationParms>()));
+    TS_ASSERT_THROWS_NOTHING(
+        model.createFittedPeaksWS(FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+
+    API::MatrixWorkspace_sptr fittedPeaksWS;
+    TS_ASSERT_THROWS_NOTHING(fittedPeaksWS = model.getFittedPeaksWS(
+                                 FOCUSED_WS_RUN_NUMBER, FOCUSED_WS_BANK));
+    TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
+  }
+
+void test_setDifcTzero() {
     auto model = EnggDiffFittingModel();
     TS_ASSERT_THROWS_NOTHING(model.loadWorkspaces(FOCUSED_WS_FILENAME));
 

@@ -43,6 +43,9 @@ cmake --version
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
 fi
+if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+  CLEANBUILD=true
+fi
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
   PRBUILD=true

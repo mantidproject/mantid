@@ -61,7 +61,7 @@ public:
    *
    * @return list of dSpacing values as std::string
    */
-  virtual std::string fittingPeaksData() const = 0;
+  virtual std::string getExpectedPeaksInput() const = 0;
 
   /**
    * Sets the peak list according to the string given
@@ -69,13 +69,6 @@ public:
    * @param peakList list of expected peaks to be fitted as std::string
    */
   virtual void setPeakList(const std::string &peakList) const = 0;
-
-  /**
-   * adds the number of banks to the combo-box widget on the interface
-   *
-   * @param bankID the bank number to add to combo-box
-   */
-  virtual void addBankItem(std::string bankID) = 0;
 
   /**
    * enables the Fit All button when multi-run number given
@@ -91,40 +84,6 @@ public:
   * the list widget
   */
   virtual void addRunNoItem(std::string runNo) = 0;
-
-  /**
-   * emits the signal within view when run number/bank changed
-   */
-  virtual void setBankEmit() = 0;
-
-  /**
-   * sets the bank combo-box according to given index
-   *
-   * @param idx as int of the bank to set
-   */
-  virtual void setBankIdComboBox(int idx) = 0;
-
-  /**
-   * Deletes all items from the fitting combo-box widget
-   */
-  virtual void clearFittingComboBox() const = 0;
-
-  /**
-   * Enables or disables the fitting combo-box
-   *
-   * @param enable or disable the fitting combo-box widget
-   */
-  virtual void enableFittingComboBox(bool enable) const = 0;
-
-  /**
-  * gets the index of the bank according to text found
-  *
-  * @param bank as a std::string to find in widget
-  *
-  * @returns int index of the combo-box where the
-  * string is found
-  */
-  virtual int getFittingComboIdx(std::string bank) const = 0;
 
   /**
    * Deletes all items from the fitting list widget

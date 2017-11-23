@@ -42,8 +42,8 @@ public:
   // virtual std::string fittingRunNo() const;
   MOCK_CONST_METHOD0(getFittingRunNo, std::string());
 
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+  // virtual std::string getExpectedPeaksInput() const;
+  MOCK_CONST_METHOD0(getExpectedPeaksInput, std::string());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
