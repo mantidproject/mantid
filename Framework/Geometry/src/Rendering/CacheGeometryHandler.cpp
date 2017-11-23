@@ -2,7 +2,6 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
-#include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -14,23 +13,19 @@ namespace Geometry {
 CacheGeometryHandler::CacheGeometryHandler(IObjComponent *comp)
     : GeometryHandler(comp) {
   Triangulator = nullptr;
-  Renderer = new CacheGeometryRenderer();
 }
 
 CacheGeometryHandler::CacheGeometryHandler(boost::shared_ptr<Object> obj)
     : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj.get());
-  Renderer = new CacheGeometryRenderer();
 }
 
 CacheGeometryHandler::CacheGeometryHandler(Object *obj) : GeometryHandler(obj) {
   Triangulator = new CacheGeometryGenerator(obj);
-  Renderer = new CacheGeometryRenderer();
 }
 
 boost::shared_ptr<GeometryHandler> CacheGeometryHandler::clone() const {
   auto clone = boost::make_shared<CacheGeometryHandler>(*this);
-  clone->Renderer = new CacheGeometryRenderer(*(this->Renderer));
   if (this->Triangulator)
     clone->Triangulator = new CacheGeometryGenerator(this->Obj);
   else
@@ -41,8 +36,6 @@ boost::shared_ptr<GeometryHandler> CacheGeometryHandler::clone() const {
 CacheGeometryHandler::~CacheGeometryHandler() {
   if (Triangulator != nullptr)
     delete Triangulator;
-  if (Renderer != nullptr)
-    delete Renderer;
 }
 
 GeometryHandler *CacheGeometryHandler::createInstance(IObjComponent *comp) {
@@ -71,11 +64,11 @@ void CacheGeometryHandler::Render() {
   if (Obj != nullptr) {
     if (!boolTriangulated)
       Triangulate();
-    Renderer->Render(
+    m_renderer.renderTriangulated(
         Triangulator->getNumberOfPoints(), Triangulator->getNumberOfTriangles(),
         Triangulator->getTriangleVertices(), Triangulator->getTriangleFaces());
   } else if (ObjComp != nullptr) {
-    Renderer->Render(ObjComp);
+    m_renderer.render(ObjComp);
   }
 }
 
@@ -84,11 +77,11 @@ void CacheGeometryHandler::Initialize() {
     Obj->updateGeometryHandler();
     if (!boolTriangulated)
       Triangulate();
-    Renderer->Initialize(
+    m_renderer.renderTriangulated(
         Triangulator->getNumberOfPoints(), Triangulator->getNumberOfTriangles(),
         Triangulator->getTriangleVertices(), Triangulator->getTriangleFaces());
   } else if (ObjComp != nullptr) {
-    Renderer->Initialize(ObjComp);
+    m_renderer.render(ObjComp);
   }
 }
 

@@ -10,7 +10,6 @@ class V3D;
 }
 namespace Geometry {
 class GeometryHandler;
-class GluGeometryRenderer;
 class IObjComponent;
 class Object;
 /**
@@ -61,8 +60,6 @@ public:
 
 private:
   static Kernel::Logger &PLog;                   ///< The official logger
-  std::unique_ptr<GluGeometryRenderer> Renderer; ///< Geometry renderer variable
-                                                 /// used for rendering
   /// Object/ObjComponent
   std::vector<Kernel::V3D> m_points;
   double radius; ///<Radius for the sphere, cone and cylinder

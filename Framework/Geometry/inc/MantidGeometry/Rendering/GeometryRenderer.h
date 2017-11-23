@@ -41,25 +41,52 @@ class IObjComponent;
 class MANTID_GEOMETRY_DLL GeometryRenderer {
 public:
   enum class RenderMode { Basic, Volumetric };
-
-  enum class RenderShape {
-    Sphere,
-    Cube,
-    Cone,
-    Hexahedron,
-    Cylinder,
-    SegmentedCylinder
-  };
-
   GeometryRenderer() = default;
   ~GeometryRenderer() = default;
 
-  template <typename... Args> void Render(RenderMode mode, Args &&... args) &;
+  /// General method for rendering geometry
+  template <typename... Args>
+  void render(RenderMode mode, Args &&... args) const &;
 
-  template <typename... Args> void Render(Args &&... args) &;
+  /// Render Basic geometry without transparency (non-volumetric)
+  template <typename... Args> void render(Args &&... args) const &;
+
+  /// Render IObjComponent
+  void renderIObjComponent(IObjComponent *objComp,
+                           RenderMode mode = RenderMode::Basic) const;
+  /// Render Traingulated Surface
+  void renderTriangulated(int noPts, int noFaces, double *points, int *faces,
+                          RenderMode mode = RenderMode::Basic) const;
+  /// Render OpenCascade Shape
+  void renderOpenCascade(TopoDS_Shape *objSurf,
+                         RenderMode mode = RenderMode::Basic) const;
+  /// Renders a sphere
+  void renderSphere(const Kernel::V3D &center, double radius,
+                    RenderMode mode = RenderMode::Basic) const;
+  /// Renders a cuboid
+  void renderCuboid(const Kernel::V3D &Point1, const Kernel::V3D &Point2,
+                    const Kernel::V3D &Point3, const Kernel::V3D &Point4,
+                    RenderMode mode = RenderMode::Basic) const;
+  /// Renders a Hexahedron from the input values
+  void renderHexahedron(const std::vector<Kernel::V3D> &points,
+                        RenderMode mode = RenderMode::Basic) const;
+  /// Renders a Cone from the input values
+  void renderCone(const Kernel::V3D &center, const Kernel::V3D &axis,
+                  double radius, double height,
+                  RenderMode mode = RenderMode::Basic) const;
+  /// Renders a Cylinder/Segmented cylinder from the input values
+  void renderCylinder(const Kernel::V3D &center, const Kernel::V3D &axis,
+                      double radius, double height, bool segmented = false,
+                      RenderMode mode = RenderMode::Basic) const;
+  /// Renders a Bitmap (used for rendering RectangularDetector)
+  void renderBitmap(const RectangularDetector *rectDet,
+                    RenderMode mode = RenderMode::Basic) const;
+  /// Renders structured geometry (used for rendering StructuredDetector)
+  void renderStructured(const StructuredDetector *structDet,
+                        RenderMode mode = RenderMode::Basic) const;
 
 private:
-  RenderMode m_renderMode;
+  mutable RenderMode m_renderMode;
   // general geometry
   /// Render IObjComponent
   void doRender(IObjComponent *ObjComp) const;
@@ -81,7 +108,7 @@ private:
                 double radius, double height) const;
   /// Renders a Cylinder/Segmented cylinder from the input values
   void doRender(const Kernel::V3D &center, const Kernel::V3D &axis,
-                double radius, double height, bool segmented = false) const;
+                double radius, double height, bool segmented) const;
   /// Renders a Bitmap (used for rendering RectangularDetector)
   void doRender(const RectangularDetector *rectDet) const;
   /// Renders structured geometry (used for rendering StructuredDetector)
@@ -89,7 +116,7 @@ private:
 };
 
 template <typename... Args>
-void GeometryRenderer::Render(RenderMode mode, Args &&... args) & {
+void GeometryRenderer::render(RenderMode mode, Args &&... args) const & {
   // Wait for no OopenGL error
   while (glGetError() != GL_NO_ERROR)
     ;
@@ -97,9 +124,11 @@ void GeometryRenderer::Render(RenderMode mode, Args &&... args) & {
   doRender(std::forward<Args>(args)...);
 }
 
-template <typename... Args> void GeometryRenderer::Render(Args &&... args) & {
-  Render(RenderMode::Basic, std::forward<Args>(args)...);
+template <typename... Args>
+void GeometryRenderer::render(Args &&... args) const & {
+  render(RenderMode::Basic, std::forward<Args>(args)...);
 }
+
 } // namespace Geometry
 } // namespace Mantid
 

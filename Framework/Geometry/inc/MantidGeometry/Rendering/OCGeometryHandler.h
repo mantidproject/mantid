@@ -2,12 +2,12 @@
 #define OC_GEOMETRYHANDLER_H
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 
 namespace Mantid {
 
 namespace Geometry {
 class GeometryHandler;
-class OCGeometryRenderer;
 class OCGeometryGenerator;
 class IObjComponent;
 class Object;
@@ -50,8 +50,6 @@ class Object;
 class MANTID_GEOMETRY_DLL OCGeometryHandler : public GeometryHandler {
 private:
   static Kernel::Logger &PLog;  ///< The official logger
-  OCGeometryRenderer *Renderer; ///< Geometry renderer variable used for
-  /// rendering Object/ObjComponent
   OCGeometryGenerator *
       Triangulator; ///< Geometry generator to triangulate Object
 public:

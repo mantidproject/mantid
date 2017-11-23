@@ -164,6 +164,7 @@ void vtkGeometryCacheWriter::write() {
   writer.setOptions(XMLWriter::PRETTY_PRINT);
   std::ofstream file;
   try {
+    g_log.information("Writing Geometry Cache file to " + mFileName);
     file.open(mFileName.c_str(), std::ios::trunc);
     writer.writeNode(file, mDoc);
     file.close();
