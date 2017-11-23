@@ -1,4 +1,4 @@
-#include "MantidGeometry/GeometryRenderer.h"
+#include "MantidGeometry/Rendering/GeometryRenderer.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"

@@ -1,4 +1,5 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -7,7 +8,8 @@ namespace Geometry {
  *  @param[in] comp
  *  This geometry handler will be ObjComponent's geometry handler
  */
-GeometryHandler::GeometryHandler(IObjComponent *comp) : Obj() {
+GeometryHandler::GeometryHandler(IObjComponent *comp)
+    : Obj() {
   ObjComp = comp;
   boolTriangulated = true;
   boolIsInitialized = false;

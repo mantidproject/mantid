@@ -39,6 +39,7 @@ class IObjComponent;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL GeometryRenderer {
+public:
   enum class RenderMode { Basic, Volumetric };
 
   enum class RenderShape {
@@ -50,15 +51,15 @@ class MANTID_GEOMETRY_DLL GeometryRenderer {
     SegmentedCylinder
   };
 
-public:
   GeometryRenderer() = default;
   ~GeometryRenderer() = default;
 
-  template <typename... Args>
-  void Render(Args &&... args, RenderMode mode = RenderMode::Basic) const;
+  template <typename... Args> void Render(RenderMode mode, Args &&... args) &;
+
+  template <typename... Args> void Render(Args &&... args) &;
 
 private:
-  RenderMode m_RenderMode;
+  RenderMode m_renderMode;
   // general geometry
   /// Render IObjComponent
   void doRender(IObjComponent *ObjComp) const;
@@ -88,7 +89,7 @@ private:
 };
 
 template <typename... Args>
-void GeometryRenderer::Render(Args &&... args, RenderMode mode) const {
+void GeometryRenderer::Render(RenderMode mode, Args &&... args) & {
   // Wait for no OopenGL error
   while (glGetError() != GL_NO_ERROR)
     ;
@@ -96,6 +97,9 @@ void GeometryRenderer::Render(Args &&... args, RenderMode mode) const {
   doRender(std::forward<Args>(args)...);
 }
 
+template <typename... Args> void GeometryRenderer::Render(Args &&... args) & {
+  Render(RenderMode::Basic, std::forward<Args>(args)...);
+}
 } // namespace Geometry
 } // namespace Mantid
 
