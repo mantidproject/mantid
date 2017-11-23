@@ -7,7 +7,7 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Polaris
+from isis_powder import Polaris, SampleDetails
 
 DIRS = config['datasearch.directories'].split(';')
 
@@ -54,6 +54,8 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
 
     def validate(self):
         splined_ws, unsplined_ws = self.calibration_results
+        self.assertEqual(unsplined_ws[0].sample().getMaterial().name(), 'V')
+        self.assertEqual(splined_ws[0].sample().getMaterial().name(), 'V')
         return (unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
                 splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs")
 
@@ -80,6 +82,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
+        self.assertEqual(self.focus_results[0].sample().getMaterial().name(), 'Si')
         return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
@@ -145,6 +148,11 @@ def setup_inst_object(mode):
 
     inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
                        calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+
+    sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
+    sample_details.set_material(chemical_formula='Si')
+    inst_obj.set_sample_details(sample=sample_details)
+
     return inst_obj
 
 
