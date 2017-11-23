@@ -638,11 +638,13 @@ class SPowderSemiEmpiricalCalculator(object):
         Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies, rebined S
+        :returns: rebined frequencies
         """
-        maximum_index = min(len(array_x), len(array_y)) - 1
-        return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index],
-                            density=False)[0]
+        indices = array_x != self._bins[-1]
+        array_x = array_x[indices]
+        array_y = array_y[indices]
+        maximum_index = min(len(array_x), len(array_y))
+        return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index])[0]
 
     def _rebin_data_opt(self, array_x=None, array_y=None):
         """
