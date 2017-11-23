@@ -37,7 +37,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         return mock.create_autospec(RunFinder)
 
     def _make_presenter(self, run_selection, run_finder, view):
-        return RunSelectorPresenter(run_selection, run_finder, view, None)
+        return RunSelectorPresenter('some_title', run_selection, run_finder, view, None)
 
     def test_searches_for_runs_when_add_run_pressed(self):
         run_query = '1'

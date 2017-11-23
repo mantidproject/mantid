@@ -51,7 +51,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         else:
             return "Files ()"
 
-    def _show_directories_manager(self):
+    def show_directories_manager(self):
         MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
 
     def run_not_found(self):

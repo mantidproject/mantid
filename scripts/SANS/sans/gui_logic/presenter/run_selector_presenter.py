@@ -3,6 +3,8 @@ from sans.gui_logic.models.run_file import RunFile
 
 
 class RunSelectorPresenter(object):
+    file_extensions = ['.nxs']
+
     def __init__(self, title, run_selection, run_finder, view, parent_view):
         self._run_selection = run_selection
         self._run_finder = run_finder
@@ -10,7 +12,7 @@ class RunSelectorPresenter(object):
         self.view.title = title
         self.parent_view = parent_view
         self._connect_to_view(view)
-        self.refresh()
+        self._refresh()
 
     def run_selection(self):
         return self._run_selection
@@ -24,14 +26,14 @@ class RunSelectorPresenter(object):
 
     def _handle_remove_all_items(self):
         self._run_selection.clear_all_runs()
-        self.refresh()
+        self._refresh()
 
     def _handle_remove_items(self):
         selected = self.view.selected_runs()
         selected.sort(reverse=True)
         for index in selected:
             self._run_selection.remove_run(index)
-        self.refresh()
+        self._refresh()
 
     def _parse_runs_from_input(self, input):
         return self._run_finder.find_all_from_query(input.replace(':', '-'))
@@ -50,7 +52,7 @@ class RunSelectorPresenter(object):
     def _add_runs(self, runs):
         for run in runs:
             self._run_selection.add_run(run)
-        self.refresh()
+        self._refresh()
 
     def _refresh(self):
         self.view.draw_runs(self._run_selection)
@@ -60,7 +62,7 @@ class RunSelectorPresenter(object):
 
     def _handle_browse(self):
         search_directories = ConfigService.Instance().getDataSearchDirs()
-        files = self.view.show_file_picker([".nxs"], search_directories)
-        # TODO: Get file extensions from a reputable source.
+        files = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
+                                           search_directories)
         self._add_runs(RunFile(file) for file in files)
         self._refresh()
