@@ -18,7 +18,7 @@ set ( _plugin_filename ${CMAKE_SHARED_LIBRARY_PREFIX}NonOrthogonalSource${CMAKE_
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
   set ( _pv_library_output_dir ${ParaView_DIR}/bin )
   # add_custom_command doesn't support generator expressions for the OUTPUT argument
-  string ( REPLACE "<CONFIG>" "\${CMAKE_CFG_INTDIR}" _plugin_library_output ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY} )
+  string ( REPLACE "$<CONFIG>" "${CMAKE_CFG_INTDIR}" _plugin_library_output ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY} )
 else ()
   set ( _pv_library_output_dir ${ParaView_DIR}/lib )
   set ( _plugin_library_output ${PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY} )
