@@ -108,10 +108,21 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   if (m_multiple) {
     addColumnToTable(table, "str", "Label", PLOT_TYPE_LABEL);
   }
+  else {
+   addColumnToTable(table, "str", "workspace_Name", PLOT_TYPE_LABEL);
+
+  }
+ const auto valMap = m_logValues->value(m_logValues->keys()[0]);
   for (const auto &log : m_logs) {
-    // Despite type "str", this will still work for plotting if it contains a
-    // number (like "100")
-    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+
+	  auto val = valMap[log];
+	  if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+		  addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X); 
+
+	  }
+	  else {
+		  addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+	  }
   }
 
   // Cache the start time of the first run
@@ -462,6 +473,7 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 
   for (const auto &wsName : m_items) {
     Mantid::API::TableRow row = table->appendRow();
+	row << wsName.toStdString();
 
     // Get log values for this row
     const auto &logValues = m_logValues->value(wsName);
@@ -477,10 +489,22 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else {
+	  }
+	  else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+		  valueToWrite = QString::number(val.toDouble());
+	  }
+   else {
         valueToWrite = val.toString();
       }
-      row << valueToWrite.toStdString();
+
+	  if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+           row << valueToWrite.toDouble(); 
+	  }
+	  else {
+		  row << valueToWrite.toStdString();
+	  }
+
+
     }
 
     // Add param values (params same for all workspaces)
@@ -536,13 +560,23 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       valuesPerWorkspace.sort();
       const auto &min = valuesPerWorkspace.front().toStdString();
       const auto &max = valuesPerWorkspace.back().toStdString();
-      if (min == max) {
-        row << min;
-      } else {
-        std::ostringstream oss;
-        oss << min << '-' << max;
-        row << oss.str();
-      }
+	  const auto key = m_logValues->keys()[0];
+	  const bool isItDouble = m_logValues->value(key)[log].canConvert<double>();
+
+
+	  if (min == max)
+	  {
+		  valuesPerWorkspace.clear();
+		  valuesPerWorkspace.append(QString::fromStdString(min));
+	  }
+	  for (auto &value : valuesPerWorkspace) {
+		  if (isItDouble && !log.endsWith(" (text)")) {
+			  row << std::stod(min);
+		  }
+		  else {
+			  row << min;
+		  }
+      } 
       columnIndex++;
     }
 
