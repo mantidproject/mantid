@@ -149,6 +149,17 @@ void SumOverlappingTubes::getInputParameters() {
 
   m_outputType = getPropertyValue("OutputType");
 
+  // For D2B at the ILL the detectors are flipped when comparing with other
+  // powder diffraction instruments such as D20. It is still desired to show
+  // angles as positive however, so here we check if we need to multiple angle
+  // calculations by -1.
+  m_mirrorDetectors = 1;
+  auto mirrorDetectors =
+      m_workspaceList.front()->getInstrument()->getBoolParameter(
+          "mirror_detector_angles");
+  if (!mirrorDetectors.empty() && mirrorDetectors[0])
+    m_mirrorDetectors = -1;
+
   getScatteringAngleBinning();
   getHeightAxis();
 }
@@ -164,7 +175,8 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
       if (specInfo.isMonitor(i))
         continue;
       const auto &pos = specInfo.position(i);
-      double thetaAngle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      double thetaAngle =
+          m_mirrorDetectors * atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
       m_startScatteringAngle = std::min(m_startScatteringAngle, thetaAngle);
       m_endScatteringAngle = std::max(m_endScatteringAngle, thetaAngle);
     }
@@ -290,7 +302,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       double angle;
       if (m_outputType == "2D")
-        angle = -atan2(pos.X(), pos.Z());
+        angle = m_mirrorDetectors * atan2(pos.X(), pos.Z());
       else
         angle = specInfo.twoTheta(i);
       angle *= 180.0 / M_PI;

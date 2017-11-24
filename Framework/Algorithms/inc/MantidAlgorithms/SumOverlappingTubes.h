@@ -72,6 +72,8 @@ private:
   performBinning(API::MatrixWorkspace_sptr &outputWS);
 
   double distanceFromAngle(const int angleIndex, const double angle) const;
+
+  int m_mirrorDetectors;
 };
 
 } // namespace Algorithms
