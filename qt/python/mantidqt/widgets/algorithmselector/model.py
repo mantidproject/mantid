@@ -8,8 +8,14 @@ class AlgorithmSelectorModel(object):
     """
     algorithm_key = '_'
 
-    def __init__(self, presenter):
+    def __init__(self, presenter, include_hidden=False):
+        """
+        Initialise a new instance of AlgorithmSelectorModel
+        :param presenter: A presenter controlling this model.
+        :param include_hidden: If True the widget must include all hidden algorithms
+        """
         self.presenter = presenter
+        self.include_hidden = include_hidden
 
     def get_algorithm_data(self):
         """
@@ -41,7 +47,7 @@ class AlgorithmSelectorModel(object):
             Here self.algorithm_key == '_'
 
         """
-        descriptors = AlgorithmFactory.getDescriptors(False)
+        descriptors = AlgorithmFactory.getDescriptors(self.include_hidden)
         algorithm_names = []
         data = {}
         for descriptor in descriptors:

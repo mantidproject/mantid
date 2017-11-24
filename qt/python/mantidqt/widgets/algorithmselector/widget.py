@@ -28,12 +28,17 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
     """
     An algorithm selector view implemented with qtpy.
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, include_hidden=False):
+        """
+        Initialise a new instance of AlgorithmSelectorWidget
+        :param parent: A parent QWidget
+        :param include_hidden: If True the widget must include all hidden algorithms
+        """
         self.execute_button = None
         self.search_box = None
         self.tree = None
         QWidget.__init__(self, parent)
-        IAlgorithmSelectorView.__init__(self)
+        IAlgorithmSelectorView.__init__(self, include_hidden)
 
     def _make_execute_button(self):
         """

@@ -4,7 +4,7 @@ from collections import Counter
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utility.gui_test import *
-from mock import Mock, patch
+from mock import Mock, patch, call
 
 
 mock_get_algorithm_descriptors = Mock()
@@ -31,6 +31,12 @@ class ModelTest(unittest.TestCase):
         counter = Counter(names)
         self.assertEqual(counter['Rebin'], 1)
         self.assertEqual(counter['DoStuff'], 1)
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(False))
+
+    def test_include_hidden_algorithms(self):
+        model = AlgorithmSelectorModel(None, include_hidden=True)
+        model.get_algorithm_data()
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
 @gui_test_case

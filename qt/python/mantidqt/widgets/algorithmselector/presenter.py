@@ -11,13 +11,13 @@ class IAlgorithmSelectorView(object):
     The interface to the actual algorithm selector view.
     Presenter interacts with the view through this interface only.
     """
-    def __init__(self):
+    def __init__(self, include_hidden):
         # Actual view creates its ui elements
         self.init_ui()
         # A dict key for retrieving algorithms that have no sub-categories
         self.algorithm_key = AlgorithmSelectorModel.algorithm_key
         # The view will have a reference to the Presenter
-        self.presenter = AlgorithmSelectorPresenter(self)
+        self.presenter = AlgorithmSelectorPresenter(self, include_hidden)
 
     def init_ui(self):
         raise NotImplementedError('Method has to be implemented in a subclass')
@@ -39,8 +39,8 @@ class AlgorithmSelectorPresenter(object):
     Presents (controls) an algorithm selector view. This UI element allows the user
     to select and execute a Mantid algorithm.
     """
-    def __init__(self, view):
+    def __init__(self, view, include_hidden):
         self.view = view
-        self.model = AlgorithmSelectorModel(self)
+        self.model = AlgorithmSelectorModel(self, include_hidden)
         algorithm_data = self.model.get_algorithm_data()
         self.view.populate_ui(algorithm_data)
