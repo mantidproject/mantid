@@ -980,6 +980,48 @@ void GenericDataProcessorPresenter::setUserSpecifiedProperties(
   }
 }
 
+/** Some columns in the model should be updated with outputs
+ * from the algorithm if they were not set by the user. This is
+ * so that the view can be updated show the user what values were used.
+ */
+void GenericDataProcessorPresenter::updateModelFromAlgorithm(
+    IAlgorithm_sptr alg, RowData *data) {
+
+  auto newData = data;
+
+  if (alg->isExecuted()) {
+    auto runNumbersIt2 = data->constBegin();
+    auto newDataIt = newData->begin();
+    auto columnIt2 = m_whitelist.cbegin();
+
+    /* The reduction is complete, try to populate the columns */
+    for (; columnIt2 != m_whitelist.cend() - 2;
+         ++columnIt2, ++runNumbersIt2, ++newDataIt) {
+
+      auto column = *columnIt2;
+      auto runNumbers = *runNumbersIt2;
+
+      if (runNumbers.isEmpty() && !m_preprocessing.m_map.count(column.name())) {
+
+        QString propValue = QString::fromStdString(
+            alg->getPropertyValue(column.algorithmProperty().toStdString()));
+
+        if (m_options["Round"].toBool()) {
+          QString exp = (propValue.indexOf("e") != -1)
+                            ? propValue.right(propValue.indexOf("e"))
+                            : "";
+          propValue =
+              propValue.mid(0, propValue.indexOf(".") +
+                                   m_options["RoundPrecision"].toInt() + 1) +
+              exp;
+        }
+
+        (*newDataIt) = propValue;
+      }
+    }
+  }
+}
+
 /** Reduce a row
  *
  * @param data :: [input] The data in this row as a vector where elements
@@ -1018,38 +1060,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   /* Now run the processing algorithm */
   alg->execute();
 
-  auto newData = data;
-  if (alg->isExecuted()) {
-    auto runNumbersIt2 = data->constBegin();
-    auto newDataIt = newData->begin();
-    auto columnIt2 = m_whitelist.cbegin();
-
-    /* The reduction is complete, try to populate the columns */
-    for (; columnIt2 != m_whitelist.cend() - 2;
-         ++columnIt2, ++runNumbersIt2, ++newDataIt) {
-
-      auto column = *columnIt2;
-      auto runNumbers = *runNumbersIt2;
-
-      if (runNumbers.isEmpty() && !m_preprocessing.m_map.count(column.name())) {
-
-        QString propValue = QString::fromStdString(
-            alg->getPropertyValue(column.algorithmProperty().toStdString()));
-
-        if (m_options["Round"].toBool()) {
-          QString exp = (propValue.indexOf("e") != -1)
-                            ? propValue.right(propValue.indexOf("e"))
-                            : "";
-          propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
-              exp;
-        }
-
-        (*newDataIt) = propValue;
-      }
-    }
-  }
+  // Finally, update the model with results from the algorithm
+  updateModelFromAlgorithm(alg, data);
 }
 
 /**

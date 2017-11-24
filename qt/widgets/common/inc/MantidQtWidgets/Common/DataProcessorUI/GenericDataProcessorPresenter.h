@@ -199,6 +199,9 @@ protected:
   void setUserSpecifiedProperties(Mantid::API::IAlgorithm_sptr alg,
                                   RowData *data,
                                   const std::set<QString> &processedProps);
+  // Update the model with results from the algorithm
+  void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
+                                RowData *data);
   // Reduce a row
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
