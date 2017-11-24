@@ -749,14 +749,14 @@ public:
   }
 
   void test_name() {
-    auto infos = makeFlat(PosVec(1), RotVec(1));
+    auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
     TS_ASSERT_EQUALS(compInfo.name(compInfo.root()), "root");
     TS_ASSERT_EQUALS(compInfo.name(0), "det0");
   }
 
   void test_indexOf_name_throws_when_name_invalid() {
-    auto infos = makeFlat(PosVec(1), RotVec(1));
+    auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
     TSM_ASSERT_THROWS("Should throw, this name does not exist",
                       compInfo.indexOf("phantom"), std::invalid_argument &)
@@ -766,7 +766,7 @@ public:
   }
 
   void test_indexOf() {
-    auto infos = makeFlat(PosVec(1), RotVec(1));
+    auto infos = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &compInfo = *std::get<0>(infos);
     TS_ASSERT_EQUALS(compInfo.indexOf("det0"), 0);
     TS_ASSERT_EQUALS(compInfo.indexOf("root"), compInfo.root());
