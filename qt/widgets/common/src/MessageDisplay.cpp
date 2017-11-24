@@ -22,7 +22,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-using API::Message;
 
 //-------------------------------------------
 // Public member functions
@@ -33,7 +32,7 @@ using API::Message;
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
     : QWidget(parent), m_logLevelControl(DisableLogLevelControl),
-      m_logChannel(new API::QtSignalChannel),
+      m_logChannel(new QtSignalChannel),
       m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
@@ -56,7 +55,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
  */
 MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
     : QWidget(parent), m_logLevelControl(logLevelControl),
-      m_logChannel(new API::QtSignalChannel),
+      m_logChannel(new QtSignalChannel),
       m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)),
       m_loglevels(new QActionGroup(this)),
@@ -378,8 +377,7 @@ void MessageDisplay::setupTextArea() {
  * @param priority An enumeration for the log level
  * @return format for given log level
  */
-QTextCharFormat
-MessageDisplay::format(const API::Message::Priority priority) const {
+QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
 }

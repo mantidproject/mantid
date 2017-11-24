@@ -363,7 +363,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
   using MantidQt::MantidWidgets::MessageDisplay;
-  using MantidQt::API::Message;
+  using MantidQt::MantidWidgets::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog =
       new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
@@ -4704,7 +4704,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
     return true;
 
   if (m_bad_script_envs.contains(lang)) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     writeToLogWindow(
         Message("Previous initialization of " + lang + " failed, cannot retry.",
                 Message::Priority::PRIO_ERROR));
@@ -7976,7 +7976,7 @@ void ApplicationWindow::showResults(bool ok) {
       text = currentFolder()->logInfo();
     else
       text = "Sorry, there are no results to display!";
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(text, Message::Priority::PRIO_INFORMATION));
   }
   logWindow->setVisible(ok);
@@ -7986,7 +7986,7 @@ void ApplicationWindow::showResults(const QString &s, bool ok) {
   currentFolder()->appendLogInfo(s);
   QString logInfo = currentFolder()->logInfo();
   if (!logInfo.isEmpty()) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(logInfo, Message::Priority::PRIO_INFORMATION));
   }
   showResults(ok);
@@ -16052,7 +16052,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow *usr_win,
  * @param message :: A string containing the message
  * @param error :: A boolean indicating if this is an error
  */
-void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message &msg) {
+void ApplicationWindow::writeToLogWindow(
+    const MantidQt::MantidWidgets::Message &msg) {
   resultsLog->append(msg);
 }
 

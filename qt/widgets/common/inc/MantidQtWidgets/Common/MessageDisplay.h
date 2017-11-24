@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
 
-#include <QMap>
+#include <QHash>
 #include <QTextCharFormat>
 #include <QTextCursor>
 #include <QWidget>
@@ -26,10 +26,6 @@ class QPlainTextEdit;
 
 namespace MantidQt {
 namespace MantidWidgets {
-using API::Message; // So that the slots work
-                    //----------------------------------------------------------
-                    // Forward declarations
-                    //----------------------------------------------------------
 
 /** @class MessageDisplay
  * Provides a widget for display messages in a text box
@@ -109,26 +105,25 @@ private:
   /// Set the properties of the text display
   void setupTextArea();
   /// Return format for given log level
-  QTextCharFormat format(const API::Message::Priority priority) const;
+  QTextCharFormat format(const Message::Priority priority) const;
 
   /// Are we allowed to affect the log level
   LogLevelControl m_logLevelControl;
   /// A reference to the log channel
-  API::QtSignalChannel *m_logChannel;
+  QtSignalChannel *m_logChannel;
   /// A reference to the log channel
   Poco::FilterChannel *m_filterChannel;
   /// The actual widget holding the text
   QPlainTextEdit *m_textDisplay;
   /// Map priority to text formatting
-  QMap<API::Message::Priority, QTextCharFormat> m_formats;
+  QHash<Message::Priority, QTextCharFormat> m_formats;
   /// Mutually exclusive log actions
   QActionGroup *m_loglevels;
   /// Map action signal to log level parameter
   QSignalMapper *m_logLevelMapping;
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
-
-  // the name of the fliter channel
+  // Name of the channel when registered with Poco
   const std::string m_FilterChannelName = "MessageDisplayPriority";
 };
 }
