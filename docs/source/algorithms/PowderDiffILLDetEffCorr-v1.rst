@@ -23,7 +23,7 @@ It performs as follows:
 
 5. Repeat from Step 2 for the next cell and so on until the last cell.
 
-For the zero-counting cells, the calibration factor cannot be computed, and it will be set to 1.
+For the zero-counting cells, the calibration factor cannot be computed, and it will be set to 1. Cells are treated as zero-counting, if they count zero more than 80% of time.
 
 After the calibration factors are computed for all the cells, they are divided by the median of all the factors (excluding the zero counting cells),
 in order to absolutely normalise the calibration curve.
@@ -65,7 +65,7 @@ Optionally, the full absolute response resulted from the combination of the data
 Workflow
 --------
 
-.. diagram:: PowderDiffILLCalibration-v1_wkflw.dot
+.. diagram:: PowderDiffILLDetEffCorr-v1_wkflw.dot
 
 Related Algorithms
 ------------------
@@ -75,11 +75,11 @@ Related Algorithms
 Usage
 -----
 
-**Example - PowderDiffILLCalibration**
+**Example - PowderDiffILLDetEffCorr**
 
 .. code-block:: python
 
-   calib = PowderDiffILLCalibration(CalibrationRun='967076', OutputWorkspace='constants')
+   calib = PowderDiffILLDetEffCorr(CalibrationRun='967076', OutputWorkspace='constants')
    print("Reduced workspace contains {0} constants, one for each cell.".format(calib.getNumberHistograms()))
 
 Output:

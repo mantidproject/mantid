@@ -9,7 +9,7 @@ from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, Matr
 from mantid.simpleapi import *
 
 
-class PowderDiffILLCalibration(PythonAlgorithm):
+class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
     _out_name = None            # the name of the output workspace
     _input_file = None          # input file (numor), must be a detector scan
@@ -38,7 +38,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         return "Performs detector efficiency correction calculation for powder diffraction instrument D20 at ILL."
 
     def name(self):
-        return "PowderDiffILLCalibration"
+        return "PowderDiffILLDetEffCorr"
 
     def PyInit(self):
         self.declareProperty(FileProperty('CalibrationRun', '', action=FileAction.Load, extensions=['nxs']),
@@ -458,4 +458,4 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             self.setProperty('OutputResponseWorkspace', self._out_response)
 
 #Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderDiffILLCalibration)
+AlgorithmFactory.subscribe(PowderDiffILLDetEffCorr)

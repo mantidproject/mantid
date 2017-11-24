@@ -1,5 +1,5 @@
-digraph PowderDiffILLCalibration {
-  label="PowderDiffILLCalibration flowchart"
+digraph PowderDiffILLDetEffCorr {
+  label="PowderDiffILLDetEffCorr flowchart"
   $global_style
 
   subgraph values {
