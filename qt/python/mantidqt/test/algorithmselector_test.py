@@ -5,6 +5,7 @@ from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utility.gui_test import *
 from mock import Mock, patch, call
+from PyQt4.QtTest import QTest
 
 
 mock_get_algorithm_descriptors = Mock()
@@ -104,13 +105,20 @@ class WidgetTest(unittest.TestCase):
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
     def test_execute_signal(self):
-        def on_execute(name, version):
-            self.assertEqual(name, 'DoStuff')
-            self.assertEqual(version, 2)
+        slot = Mock()
         widget = AlgorithmSelectorWidget()
-        widget.execute_selected_algorithm.connect(on_execute)
+        widget.execute_selected_algorithm.connect(slot)
         self._select_in_tree(widget, 'DoStuff v.2')
         widget.execute_button.click()
+        slot.assert_called_once_with('DoStuff', 2)
+
+    def test_execute_return_press(self):
+        slot = Mock()
+        widget = AlgorithmSelectorWidget()
+        widget.execute_selected_algorithm.connect(slot)
+        self._select_in_tree(widget, 'DoStuff v.2')
+        QTest.keyClick(widget.search_box, Qt.Key_Return)
+        slot.assert_called_once_with('DoStuff', 2)
 
 
 if __name__ == '__main__':

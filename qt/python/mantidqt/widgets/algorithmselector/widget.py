@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem
-from PyQt4.QtCore import QModelIndex, pyqtSignal
+from PyQt4.QtCore import QModelIndex, pyqtSignal, Qt
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 from mantidqt.utility import block_signals
 import re
@@ -61,6 +61,7 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
         search_box.setInsertPolicy(QComboBox.NoInsert)
         search_box.editTextChanged.connect(self._on_search_box_selection_changed)
+        search_box.lineEdit().returnPressed.connect(self.execute_algorithm)
         return search_box
 
     def _make_tree_widget(self):
