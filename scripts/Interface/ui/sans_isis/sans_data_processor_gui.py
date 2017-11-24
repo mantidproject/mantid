@@ -61,6 +61,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_multi_period_selection(self):
+          pass
+        
+        @abstractmethod
+        def on_manage_directories(self):
             pass
 
     def __init__(self, main_presenter):
@@ -173,6 +177,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
@@ -480,6 +486,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
                   self.__mask_file_input_path_key,  self.get_mask_file)
@@ -492,6 +501,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         show_periods = self.multi_period_check_box.isChecked()
         self.create_data_table(show_periods=show_periods)
         self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
+
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model

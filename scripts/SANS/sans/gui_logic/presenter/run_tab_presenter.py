@@ -54,6 +54,9 @@ class RunTabPresenter(object):
 
         def on_multi_period_selection(self):
             self._presenter.on_multi_period_selection()
+            
+        def on_manage_directories(self):
+            self._presenter.on_manage_directories()
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
@@ -261,6 +264,9 @@ class RunTabPresenter(object):
     def on_multi_period_selection(self):
         multi_period = self._view.is_multi_period_view()
         self.table_index = generate_table_index(multi_period)
+
+    def on_manage_directories(self):
+        self._view.show_directory_manager()
 
     def on_mask_file_add(self):
         """
