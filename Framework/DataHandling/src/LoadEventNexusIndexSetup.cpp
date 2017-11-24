@@ -183,6 +183,7 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {
+    std::sort(m_range.begin(), m_range.end());
     const auto indices = indexInfo.makeIndexSet(
         std::vector<SpectrumNumber>(m_range.begin(), m_range.end()));
     m_min = static_cast<int32_t>(indexInfo.spectrumNumber(*indices.begin()));

@@ -742,6 +742,16 @@ public:
     }
   }
 
+  void testSetMaskedBins() {
+    auto ws = makeWorkspaceWithDetectors(2, 2);
+    ws->flagMasked(0, 1);
+    ws->flagMasked(1, 0);
+    ws->setMaskedBins(1, ws->maskedBins(0));
+    TS_ASSERT(ws->hasMaskedBins(1));
+    TS_ASSERT_EQUALS(ws->maskedBins(1).size(), 1);
+    TS_ASSERT_EQUALS(ws->maskedBins(0).begin()->first, 1);
+  }
+
   void testSize() {
     WorkspaceTester wkspace;
     wkspace.initialize(1, 4, 3);
