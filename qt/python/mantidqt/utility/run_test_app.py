@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function
 import sys
-import ast
 import traceback
 from PyQt4.QtGui import QApplication, QContextMenuEvent, QAction
 from PyQt4.QtCore import Qt, QTimer, QPoint

@@ -12,6 +12,7 @@ def gui_test(test):
     def _wrapper(self):
         app = QApplication([''])
         test(self)
+        app.closeAllWindows()
 
     return _wrapper
 
