@@ -1,8 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os.path
 import stresstesting
-import tempfile
 from mantid.simpleapi import PowderDiffILLReduction
 from mantid import config, mtd
 

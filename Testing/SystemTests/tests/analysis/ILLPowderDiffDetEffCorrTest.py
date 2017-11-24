@@ -1,8 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os.path
 import stresstesting
-import tempfile
 from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
 from mantid import config, mtd
 
@@ -33,6 +31,3 @@ class ILLPowderDiffDetEffCorrTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 0.0001
         return ['group', 'ILL_D20_calib_def.nxs']
-
-    def _get_tmp_file_name(self, name):
-        return os.path.join(tempfile.gettempdir(),tempfile.gettempprefix() + '_' + name)
