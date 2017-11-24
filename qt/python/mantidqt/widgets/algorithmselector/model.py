@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from mantid import AlgorithmFactory
 
 
-class Model(object):
+class AlgorithmSelectorModel(object):
     """
     This is a model for the algorithm selector widget.
     """

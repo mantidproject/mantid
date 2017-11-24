@@ -1,7 +1,7 @@
 from __future__ import print_function
 import unittest
 from collections import Counter
-from mantidqt.widgets.algorithmselector.model import Model
+from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utility.gui_test import *
 from mock import Mock, patch
@@ -20,14 +20,14 @@ mock_get_algorithm_descriptors.return_value = [['Rebin', 1, 'Transform', ''],
 class ModelTest(unittest.TestCase):
 
     def test_get_algorithm_data(self):
-        model = Model(None)
+        model = AlgorithmSelectorModel(None)
         names, descriptors = model.get_algorithm_data()
         self.assertTrue(isinstance(names, list))
         self.assertTrue(isinstance(descriptors, dict))
         self.assertTrue('Load' in names)
         self.assertTrue('Rebin' in names)
-        self.assertTrue('Rebin' in descriptors['Transform'][Model.algorithm_key])
-        self.assertTrue('Rebin' in descriptors['Transform']['Rebin'][Model.algorithm_key])
+        self.assertTrue('Rebin' in descriptors['Transform'][AlgorithmSelectorModel.algorithm_key])
+        self.assertTrue('Rebin' in descriptors['Transform']['Rebin'][AlgorithmSelectorModel.algorithm_key])
         counter = Counter(names)
         self.assertEqual(counter['Rebin'], 1)
         self.assertEqual(counter['DoStuff'], 1)
