@@ -78,17 +78,20 @@ convertStringToMapWithSet(const QString &properties) {
 
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
-  alg->setProperty(name, value);
+  if (!value.empty())
+    alg->setProperty(name, value);
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           std::string const &value) {
-  setAlgorithmProperty(alg, name.toStdString(), value);
+  if (!value.empty())
+    setAlgorithmProperty(alg, name.toStdString(), value);
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           QString const &value) {
-  setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
+  if (!value.isNull() && !value.isEmpty())
+    setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
 }
 
 bool workspaceExists(QString const &workspaceName) {
@@ -869,6 +872,75 @@ void GenericDataProcessorPresenter::setPropertiesFromKeyValueString(
           -> void { ::setAlgorithmProperty(alg, key, value); });
 }
 
+/** If a column value is empty, attempt to set it to a default value
+ *
+ */
+QString
+GenericDataProcessorPresenter::useDefaultIfEmpty(const QString &columnName,
+                                                 const QString &columnValueIn) {
+  auto columnValue = columnValueIn;
+
+  // Nothing to do if we already have a value
+  if (!columnValue.isEmpty())
+    return columnValue;
+
+  // Check if there is a default value available
+  if (m_preprocessing.m_map.empty())
+    return columnValue;
+
+  std::map<QString, QString> globalOptions =
+      convertStringToMap(m_preprocessing.m_options);
+  if (globalOptions.count(columnName) && !globalOptions[columnName].isEmpty()) {
+    auto tmpOptionsMap =
+        parseKeyValueString(globalOptions[columnName].toStdString());
+
+    QStringList valueList;
+    for (auto &optionMapEntry : tmpOptionsMap) {
+      valueList.append(QString::fromStdString(optionMapEntry.second));
+    }
+
+    columnValue = valueList.join(",");
+  }
+
+  return columnValue;
+}
+
+/** Preprocess the given property value if appropriate
+ */
+QString GenericDataProcessorPresenter::preprocessColumnValue(
+    const QString &columnName, const QString &columnValueIn,
+    std::set<QString> &processedProps) {
+
+  auto columnValue = columnValueIn;
+
+  // Check if preprocessing is required for this column
+  if (m_preprocessing.hasPreprocessing(columnName)) {
+    // We do not want the associated properties to be set again in
+    // processing
+    auto preProcessPropMap = convertStringToMapWithSet(
+        m_mainPresenter->getPreprocessingProperties());
+
+    if (preProcessPropMap.count(columnName) > 0) {
+      for (auto &prop : preProcessPropMap[columnName]) {
+        processedProps.insert(prop);
+      }
+    }
+
+    auto preprocessor = m_preprocessing.m_map.at(columnName);
+
+    std::map<QString, QString> globalOptions =
+        convertStringToMap(m_preprocessing.m_options);
+    auto const globalOptionsForColumn =
+        globalOptions.count(columnName) > 0 ? globalOptions.at(columnName) : "";
+
+    auto optionsMap = parseKeyValueString(globalOptionsForColumn.toStdString());
+    auto runWS = prepareRunWorkspace(columnValue, preprocessor, optionsMap);
+    columnValue = QString::fromStdString(runWS->getName());
+  }
+
+  return columnValue;
+}
+
 /** Reduce a row
  *
  * @param data :: [input] The data in this row as a vector where elements
@@ -882,89 +954,37 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   /* Read input properties from the table */
   /* excluding 'Group' and 'Options' */
 
-  // Global pre-processing options as a map
-  std::map<QString, QString> globalOptions;
-  if (!m_preprocessing.m_map.empty())
-    globalOptions = convertStringToMap(m_preprocessing.m_options);
-
-  // Pre-processing properties
-  auto preProcessPropMap =
-      convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
-
-  // Properties not to be used in processing
-  std::set<QString> restrictedProps;
+  // This is used to keep track of properties that have been processed in
+  // preprocessing
+  std::set<QString> processedProps;
 
   // Loop over all columns in the whitelist except 'Options' and 'Hidden
   // Options'
   auto columnIt = m_whitelist.cbegin();
-  auto runNumbersIt = data->constBegin();
-  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++runNumbersIt) {
+  auto columnValueIt = data->constBegin();
+  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
     auto column = *columnIt;
     auto &propertyName = column.algorithmProperty();
-    auto &columnName = column.name();
 
-    // The value for which preprocessing can be conducted on
-    QString preProcessValue;
+    auto columnValue = useDefaultIfEmpty(column.name(), *columnValueIt);
+    columnValue =
+        preprocessColumnValue(column.name(), columnValue, processedProps);
 
-    if (globalOptions.count(columnName) &&
-        !globalOptions[columnName].isEmpty()) {
-      auto tmpOptionsMap =
-          parseKeyValueString(globalOptions[columnName].toStdString());
-      QStringList valueList;
-      for (auto &optionMapEntry : tmpOptionsMap) {
-        valueList.append(QString::fromStdString(optionMapEntry.second));
-      }
-      preProcessValue = valueList.join(",");
-    } else if (!(*runNumbersIt).isEmpty()) {
-      preProcessValue = (*runNumbersIt);
-    } else {
-      continue;
-    }
-
-    if (m_preprocessing.hasPreprocessing(columnName)) {
-      // This column needs pre-processing
-
-      // We do not want the associated properties to be set again in
-      // processing
-      if (preProcessPropMap.count(columnName) > 0) {
-        for (auto &prop : preProcessPropMap[columnName]) {
-          restrictedProps.insert(prop);
-        }
-      }
-
-      auto preprocessor = m_preprocessing.m_map.at(columnName);
-
-      auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
-                                              ? globalOptions.at(columnName)
-                                              : "";
-
-      auto optionsMap =
-          parseKeyValueString(globalOptionsForColumn.toStdString());
-      auto runWS =
-          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
-      setAlgorithmProperty(alg.get(), propertyName.toStdString(),
-                           runWS->getName());
-    } else {
-      // No pre-processing needed
-      auto propertyValue = *runNumbersIt;
-      if (!propertyValue.isEmpty())
-        alg->setPropertyValue(propertyName.toStdString(),
-                              propertyValue.toStdString());
-    }
+    setAlgorithmProperty(alg.get(), propertyName, columnValue.toStdString());
   }
 
-  auto isUnrestrictedProperty =
-      [&restrictedProps](QString const &propertyName) -> bool {
-        return std::find(restrictedProps.begin(), restrictedProps.end(),
-                         propertyName) == restrictedProps.end();
-      };
+  auto propertyAlreadyProcessed =
+      [&processedProps](QString const &propertyName) -> bool {
+    return std::find(processedProps.begin(), processedProps.end(),
+                     propertyName) == processedProps.end();
+  };
 
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
       alg, m_processingOptions.toStdString(), "options",
       [&](Mantid::API::IAlgorithm *const alg, std::string key,
           std::string value) -> void {
-        if (isUnrestrictedProperty(QString::fromStdString(key)))
+        if (!propertyAlreadyProcessed(QString::fromStdString(key)))
           ::setAlgorithmProperty(alg, key, value);
       });
 
