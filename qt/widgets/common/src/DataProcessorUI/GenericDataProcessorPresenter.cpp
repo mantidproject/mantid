@@ -941,6 +941,45 @@ QString GenericDataProcessorPresenter::preprocessColumnValue(
   return columnValue;
 }
 
+/** Set algorithm properties based on user-specified values
+ */
+void GenericDataProcessorPresenter::setUserSpecifiedProperties(
+    IAlgorithm_sptr alg, RowData *data,
+    const std::set<QString> &processedProps) {
+
+  // This determines whether a property has already been processed
+  auto propertyAlreadyProcessed =
+      [&processedProps](QString const &propertyName) -> bool {
+    return std::find(processedProps.begin(), processedProps.end(),
+                     propertyName) == processedProps.end();
+  };
+
+  // First the user-specified values in the columns, excluding any that
+  // were already processed via pre-processed
+  ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
+      alg, m_processingOptions.toStdString(), "options",
+      [&](Mantid::API::IAlgorithm *const alg, std::string key,
+          std::string value) -> void {
+        if (!propertyAlreadyProcessed(QString::fromStdString(key)))
+          ::setAlgorithmProperty(alg, key, value);
+      });
+
+  // now the user-specified values in the options column
+  const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
+  setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
+
+  // finally the values in the hidden options column
+  const auto hiddenOptions = data->back();
+  setPropertiesFromKeyValueString(alg, hiddenOptions.toStdString(),
+                                  "hidden options");
+
+  // Set the properties for the output workspace names
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
+                         getReducedWorkspaceName(*data, m_processor.prefix(i)));
+  }
+}
+
 /** Reduce a row
  *
  * @param data :: [input] The data in this row as a vector where elements
@@ -973,33 +1012,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     setAlgorithmProperty(alg.get(), propertyName, columnValue.toStdString());
   }
 
-  auto propertyAlreadyProcessed =
-      [&processedProps](QString const &propertyName) -> bool {
-    return std::find(processedProps.begin(), processedProps.end(),
-                     propertyName) == processedProps.end();
-  };
-
   // Parse and set any user-specified options
-  ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
-      alg, m_processingOptions.toStdString(), "options",
-      [&](Mantid::API::IAlgorithm *const alg, std::string key,
-          std::string value) -> void {
-        if (!propertyAlreadyProcessed(QString::fromStdString(key)))
-          ::setAlgorithmProperty(alg, key, value);
-      });
-
-  const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
-  setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
-
-  const auto hiddenOptions = data->back();
-  setPropertiesFromKeyValueString(alg, hiddenOptions.toStdString(),
-                                  "hidden options");
-
-  /* We need to give a name to the output workspaces */
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
-                         getReducedWorkspaceName(*data, m_processor.prefix(i)));
-  }
+  setUserSpecifiedProperties(alg, data, processedProps);
 
   /* Now run the processing algorithm */
   alg->execute();

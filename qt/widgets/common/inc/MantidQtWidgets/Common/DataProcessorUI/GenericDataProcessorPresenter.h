@@ -195,6 +195,10 @@ protected:
   QString preprocessColumnValue(const QString &columnName,
                                 const QString &columnValueIn,
                                 std::set<QString> &processedProps);
+  // Set user specified properties on the algorithm
+  void setUserSpecifiedProperties(Mantid::API::IAlgorithm_sptr alg,
+                                  RowData *data,
+                                  const std::set<QString> &processedProps);
   // Reduce a row
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
