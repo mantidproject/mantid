@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem
-from PyQt4.QtCore import QModelIndex
+from PyQt4.QtCore import QModelIndex, pyqtSignal
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 from mantidqt.utility import block_signals
 import re
@@ -28,6 +28,8 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
     """
     An algorithm selector view implemented with qtpy.
     """
+    execute_selected_algorithm = pyqtSignal(str, int)
+
     def __init__(self, parent=None, include_hidden=False):
         """
         Initialise a new instance of AlgorithmSelectorWidget
@@ -185,3 +187,11 @@ class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
         if selected_algorithm is not None:
             return selected_algorithm
         return self._get_search_box_selection()
+
+    def execute_algorithm(self):
+        """
+        Send a signal to a subscriber to execute the selected algorithm
+        """
+        algorithm = self.get_selected_algorithm()
+        if algorithm is not None:
+            self.execute_selected_algorithm.emit(algorithm.name, algorithm.version)

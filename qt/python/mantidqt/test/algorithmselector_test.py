@@ -103,6 +103,15 @@ class WidgetTest(unittest.TestCase):
         self.assertTrue(widget.get_selected_algorithm() is None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
+    def test_execute_signal(self):
+        def on_execute(name, version):
+            self.assertEqual(name, 'DoStuff')
+            self.assertEqual(version, 2)
+        widget = AlgorithmSelectorWidget()
+        widget.execute_selected_algorithm.connect(on_execute)
+        self._select_in_tree(widget, 'DoStuff v.2')
+        widget.execute_button.click()
+
 
 if __name__ == '__main__':
     unittest.main()
