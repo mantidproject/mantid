@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
+#include "IReflSettingsTabPresenter.h"
 #include <string>
 
 namespace MantidQt {
@@ -45,7 +46,10 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
 
-  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+
+  virtual void acceptTabPresenter(IReflSettingsTabPresenter* tabPresenter) = 0;
+
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SettingsChangedFlag };
 
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;

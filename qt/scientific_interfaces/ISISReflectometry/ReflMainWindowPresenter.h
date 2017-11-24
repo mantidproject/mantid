@@ -81,6 +81,7 @@ public:
   /// Returns whether the Runs Tab is currently processing any runs
   bool checkIfProcessing() const override;
 
+  void settingsChanged() override;
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;

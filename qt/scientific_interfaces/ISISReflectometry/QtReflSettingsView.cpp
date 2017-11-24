@@ -36,6 +36,20 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
+
+  connectChangeListeners();
+}
+
+
+void QtReflSettingsView::connectChangeListeners() {
+  connect(m_ui.analysisModeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(notifySettingsChanged()));
+  connect(m_ui.directBeamEdit, SIGNAL(textChanged(const QString&)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::notifySettingsChanged() {
+  m_presenter->notify(IReflSettingsPresenter::SettingsChangedFlag);
 }
 
 /** Returns the presenter managing this view

@@ -41,9 +41,17 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   case IReflSettingsPresenter::InstDefaultsFlag:
     getInstDefaults();
     break;
+  case IReflSettingsPresenter::SettingsChangedFlag:
+    m_tabPresenter->settingsChanged();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+
+void ReflSettingsPresenter::acceptTabPresenter(IReflSettingsTabPresenter* tabPresenter) {
+  m_tabPresenter = tabPresenter;
 }
 
 /** Sets the current instrument name and changes accessibility status of

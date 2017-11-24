@@ -53,8 +53,10 @@ private slots:
                                      m_rowItem->second);
       m_presenter->m_manager->setProcessed(true, m_rowItem->first,
                                            m_groupIndex);
+      // m_presenter->m_progressReporter->report();
       emit finished(0);
     } catch (std::exception &ex) {
+      // m_presenter->m_progressReporter->clear();
       emit reductionErrorSignal(QString(ex.what()));
       emit finished(1);
     }

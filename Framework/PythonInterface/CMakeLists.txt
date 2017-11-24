@@ -48,7 +48,7 @@ find_package ( Numpy REQUIRED )
 include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
-add_definitions ( -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION )
+add_definitions ( -DBOOST_PYTHON_NO_LIB -DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION )
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
 
 ####################################################################################

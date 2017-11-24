@@ -110,10 +110,12 @@ public slots:
   void requestInstDefaults() const;
   /// Sets enabled status for polarisation corrections and parameters
   void setPolarisationOptionsEnabled(bool enable) const override;
+  void notifySettingsChanged();
 
 private:
   /// Initialise the interface
   void initLayout();
+  void connectChangeListeners();
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;

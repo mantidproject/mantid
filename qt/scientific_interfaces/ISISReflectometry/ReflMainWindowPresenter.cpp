@@ -4,6 +4,7 @@
 #include "IReflEventTabPresenter.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,7 +29,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
-  // Settings tab does not need a main presenter
+  m_settingsPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
@@ -53,6 +54,10 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+void ReflMainWindowPresenter::settingsChanged() {
+  std::cout << "The Settings Was Changed" << std::endl;
 }
 
 /** Returns values passed for 'Transmission run(s)'

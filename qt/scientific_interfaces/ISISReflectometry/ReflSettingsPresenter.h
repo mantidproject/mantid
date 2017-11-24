@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflSettingsPresenter.h"
+#include "IReflSettingsTabPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <vector>
@@ -65,6 +66,7 @@ public:
   std::string secondTransmissionRunLabelled(
       std::vector<std::string> const &runNumber) const;
 
+  void acceptTabPresenter(IReflSettingsTabPresenter* tabPresenter) override;
 private:
   void createStitchHints();
   void getExpDefaults();
@@ -76,6 +78,7 @@ private:
 
   /// The view we are managing
   IReflSettingsView *m_view;
+  IReflSettingsTabPresenter* m_tabPresenter;
   /// Name of the current instrument in use
   std::string m_currentInstrumentName;
 };
