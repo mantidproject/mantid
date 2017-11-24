@@ -17,8 +17,15 @@ namespace {
 using PosVec = std::vector<Eigen::Vector3d>;
 using RotVec = std::vector<Eigen::Quaterniond>;
 
+/*
+ * Makes a tree which in which all detectors are arranged in a single flat
+ *level. There just one non-detector component in this tree.
+ *
+ * The size of the Resultant ComponentInfo/DetectorInfo are set by the number of
+ *position and rotation elements in the collections arguments.
+ */
 std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
-makeFlat(PosVec detPositions, RotVec detRotations) {
+makeFlatTree(PosVec detPositions, RotVec detRotations) {
   std::vector<std::pair<size_t, size_t>> componentRanges;
   auto rootIndex = detPositions.size();
   componentRanges.push_back(
@@ -731,7 +738,7 @@ public:
     TS_ASSERT_EQUALS(info.scanCount(0), 1);
   }
 
-  void test_isScanning() {
+  void test_unmerged_is_not_scanning() {
     auto infos = makeTreeExample();
     auto &compInfo = *std::get<0>(infos);
 
@@ -787,8 +794,8 @@ public:
 
   void test_merge_fail_size() {
 
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(2), RotVec(2));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(2), RotVec(2));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
     a.setScanInterval({0, 1});
@@ -800,9 +807,9 @@ public:
   }
 
   void test_merge_fail_no_intervals() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1), RotVec(1));
-    auto infos3 = makeFlat(PosVec(1), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos3 = makeFlatTree(PosVec(1), RotVec(1));
     auto &a = *std::get<0>(infos1);
     auto &b = *std::get<0>(infos2);
     auto &c = *std::get<0>(infos3);
@@ -819,16 +826,16 @@ public:
         "Cannot merge ComponentInfo: scan intervals not defined");
   }
 
-  void test_merge_identical_async() {
-    auto infos1 = makeFlat(PosVec(1, Eigen::Vector3d(0, 0, 0)),
-                           RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                         0, Eigen::Vector3d::UnitY()))));
+  void test_merge_identical() {
+    auto infos1 = makeFlatTree(PosVec(1, Eigen::Vector3d(0, 0, 0)),
+                               RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                             0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 10});
 
-    auto infos2 = makeFlat(PosVec(1, Eigen::Vector3d(0, 0, 0)),
-                           RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                         0, Eigen::Vector3d::UnitY()))));
+    auto infos2 = makeFlatTree(PosVec(1, Eigen::Vector3d(0, 0, 0)),
+                               RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+                                             0, Eigen::Vector3d::UnitY()))));
     ComponentInfo &b = *std::get<0>(infos2);
     b.setScanInterval({0, 10});
 
@@ -840,7 +847,7 @@ public:
   }
 
   void test_merge_identical_interval_failures() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
@@ -878,7 +885,7 @@ public:
   }
 
   void test_merge_fail_partial_overlap() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 10});
 
@@ -901,9 +908,9 @@ public:
                             "overlap but not identical");
   }
 
-  void test_merge_detectors_async() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1), RotVec(1));
+  void test_merge_detectors() {
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -940,8 +947,8 @@ public:
   }
 
   void test_merge_root_with_offset() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -988,8 +995,8 @@ public:
 
   void test_merge_root_with_rotation() {
     auto detPos = Eigen::Vector3d{1, 0, 0};
-    auto infos1 = makeFlat(PosVec(1, detPos), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1, detPos), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1, detPos), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(1, detPos), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
 
     ComponentInfo &b = *std::get<0>(infos2);
@@ -1023,7 +1030,7 @@ public:
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
-    // Check detectors moved correcly as a result of root rotation
+    // Check detectors moved correctly as a result of root rotation
     // Detector at x=1,y=0,z=0 rotated around root at x=0,y=0,z=0 with rotation
     // vector y=1, 90 degrees
     TS_ASSERT(
@@ -1035,9 +1042,9 @@ public:
   }
 
   void test_merge_root_multiple() {
-    auto infos1 = makeFlat(PosVec(1), RotVec(1));
-    auto infos2 = makeFlat(PosVec(1), RotVec(1));
-    auto infos3 = makeFlat(PosVec(1), RotVec(1));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos3 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     ComponentInfo &c = *std::get<0>(infos3);

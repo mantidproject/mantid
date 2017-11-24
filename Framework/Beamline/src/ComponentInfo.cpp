@@ -381,7 +381,7 @@ void ComponentInfo::failIfDetectorInfoScanning() const {
 size_t
 ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // The most common case are beamlines with static components. In that case the
-  // time index is always 0 and we avoid expensive map lookups. Linear indices
+  // time index is always 0. Linear indices
   // are ordered such that the first block contains everything for time index 0
   // so even in the time dependent case no translation is necessary.
   if (index.second == 0)
