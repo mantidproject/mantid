@@ -131,8 +131,8 @@ private:
   QSignalMapper *m_logLevelMapping;
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
-  // Name of the channel when registered with Poco
-  const std::string m_FilterChannelName = "MessageDisplayPriority";
+  /// Name of the filter channel registered with Poco
+  std::string m_filterChannelName;
 };
 }
 }

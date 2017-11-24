@@ -20,6 +20,11 @@
 #include <Poco/Message.h>
 #include <Poco/SplitterChannel.h>
 
+namespace {
+// Track number of attachments to generate a unique channel name
+int ATTACH_COUNT = 0;
+}
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -77,7 +82,7 @@ MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
       m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)),
       m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)) {
+      m_debug(new QAction(tr("&Debug"), this)), m_filterChannelName() {
   initActions();
   initFormats();
   setupTextArea();
@@ -108,15 +113,13 @@ void MessageDisplay::attachLoggingChannel() {
     Poco::Logger::setChannel(rootLogger.name(), m_filterChannel);
   }
   m_filterChannel->addChannel(m_logChannel);
-
-
+  m_filterChannelName = "MessageDisplayChannel" + std::to_string(ATTACH_COUNT);
   auto &configService = Mantid::Kernel::ConfigService::Instance();
-  configService.registerLoggingFilterChannel(m_FilterChannelName,
+  configService.registerLoggingFilterChannel(m_filterChannelName,
                                              m_filterChannel);
-  configService.setFilterChannelLogLevel(m_FilterChannelName, priority);
-
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
+  ++ATTACH_COUNT;
 }
 
 /**
@@ -297,11 +300,8 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * enumeration
  */
 void MessageDisplay::setGlobalLogLevel(int priority) {
-  // set Local filter level
-
   Mantid::Kernel::ConfigService::Instance().setFilterChannelLogLevel(
-      m_FilterChannelName, priority);
-  m_filterChannel->setPriority(priority);
+      m_filterChannelName, priority);
 }
 
 //-----------------------------------------------------------------------------
