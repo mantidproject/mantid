@@ -137,8 +137,8 @@ void MaxEnt::init() {
       "of this property.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTarget", 1.0, mustBeNonNegative, Direction::Input),
-                  "Target value of Chi-square");
+                      "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
+                  "Target value of Chi-square divided by the number of data points (N)");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),
@@ -221,7 +221,7 @@ void MaxEnt::exec() {
   // Background (default level, sky background, etc)
   const double background = getProperty("A");
   // Chi target
-  const double chiTarget = getProperty("ChiTarget");
+  const double ChiTargetOverN = getProperty("ChiTargetOverN");
   // Required precision for Chi arget
   const double chiEps = getProperty("ChiEps");
   // Maximum degree of non-parallelism between S and C
@@ -326,7 +326,7 @@ void MaxEnt::exec() {
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
       auto coeffs = maxentCalculator.getQuadraticCoefficients();
-      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
+      auto delta = move(coeffs, ChiTargetOverN / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
       delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
@@ -341,7 +341,7 @@ void MaxEnt::exec() {
       evolTest[it] = currAngle;
 
       // Stop condition, solution found
-      if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
+      if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
         g_log.information() << "Stopped after " << it << " iterations"
                             << std::endl;
@@ -420,14 +420,14 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 
 /** Bisection method to move delta one step closer towards the solution
 * @param coeffs :: [input] The current quadratic coefficients
-* @param chiTarget :: [input] The requested Chi target
+* @param ChiTargetOverN :: [input] The requested Chi target over N
 * @param chiEps :: [input] Precision required for Chi target
 * @param alphaIter :: [input] Maximum number of iterations in the bisection
 * method (alpha chop)
 * @return : The increment length to be added to the current image
 */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
-                                 double chiTarget, double chiEps,
+                                 double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
 
   double aMin = 0.; // Minimum alpha
@@ -442,11 +442,11 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   double chiMin = calculateChi(coeffs, aMin, deltaMin); // Chi at alpha min
   double chiMax = calculateChi(coeffs, aMax, deltaMax); // Chi at alpha max
 
-  double dchiMin = chiMin - chiTarget; // max - target
-  double dchiMax = chiMax - chiTarget; // min - target
+  double dchiMin = chiMin - ChiTargetOverN; // max - target
+  double dchiMax = chiMax - ChiTargetOverN; // min - target
 
   if (dchiMin * dchiMax > 0) {
-    // ChiTarget could be outside the range [chiMin, chiMax]
+    // ChiTargetOverN could be outside the range [chiMin, chiMax]
 
     if (fabs(dchiMin) < fabs(dchiMax)) {
       return deltaMin;
@@ -464,12 +464,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   std::vector<double> delta(dim, 0); // delta at current alpha
 
-  while ((fabs(eps / chiTarget) > chiEps) && (iter < alphaIter)) {
+  while ((fabs(eps / ChiTargetOverN) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
     double chiMid = calculateChi(coeffs, aMid, delta);
 
-    eps = chiMid - chiTarget;
+    eps = chiMid - ChiTargetOverN;
 
     if (dchiMin * eps > 0) {
       aMin = aMid;
@@ -485,7 +485,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   }
 
   // Check if move was successful
-  if ((fabs(eps / chiTarget) > chiEps) || (iter > alphaIter)) {
+  if ((fabs(eps / ChiTargetOverN) > chiEps) || (iter > alphaIter)) {
     throw std::runtime_error("Error encountered when calculating solution "
                              "image. No convergence in alpha chop.\n");
   }

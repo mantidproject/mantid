@@ -138,7 +138,7 @@ class MaxEntView(QtGui.QWidget):
         inputs["ResolutionFactor"]=int(self.resolution_box.text())
         inputs["A"] = float(self.AConst.text())
         inputs["AutoShift"]=self.shift_box.checkState()
-        inputs["ChiTarget"]=float(self.chiTarget.text())
+        inputs["ChiTargetOverN"]=float(self.chiTarget.text())
         inputs["ChiEps"]=float(self.chiEps.text())
         inputs["DistancePenalty"]=float(self.dist.text())
         inputs["MaxAngle"]=float(self.angle.text())
