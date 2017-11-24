@@ -116,6 +116,12 @@ private:
   /// Initialise the interface
   void initLayout();
   void connectChangeListeners();
+  void connectExperimentSettingsChangeListeners();
+  void connectInstrumentSettingsChangeListeners();
+  void connectSettingsChange(QLineEdit *edit);
+  void connectSettingsChange(QComboBox *edit);
+  void connectSettingsChange(QCheckBox *edit);
+  void connectSettingsChange(QGroupBox *edit);
 
   /// The widget
   Ui::ReflSettingsWidget m_ui;

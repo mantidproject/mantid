@@ -40,12 +40,59 @@ void QtReflSettingsView::initLayout() {
   connectChangeListeners();
 }
 
+void QtReflSettingsView::connectSettingsChange(QLineEdit* edit) {
+  connect(edit, SIGNAL(textChanged(QString const&)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QComboBox* edit) {
+  connect(edit, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QCheckBox* edit) {
+  connect(edit, SIGNAL(stateChanged(int)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflSettingsView::connectSettingsChange(QGroupBox* edit) {
+  connect(edit, SIGNAL(toggled(bool)), this,
+          SLOT(notifySettingsChanged()));
+}
 
 void QtReflSettingsView::connectChangeListeners() {
-  connect(m_ui.analysisModeComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(notifySettingsChanged()));
-  connect(m_ui.directBeamEdit, SIGNAL(textChanged(const QString&)), this,
-          SLOT(notifySettingsChanged()));
+  connectExperimentSettingsChangeListeners();
+  connectInstrumentSettingsChangeListeners();
+}
+
+void QtReflSettingsView::connectInstrumentSettingsChangeListeners() {
+  connectSettingsChange(m_ui.instSettingsGroup);
+  connectSettingsChange(m_ui.intMonCheckBox);
+  connectSettingsChange(m_ui.monIntMinEdit);
+  connectSettingsChange(m_ui.monIntMaxEdit);
+  connectSettingsChange(m_ui.monBgMinEdit);
+  connectSettingsChange(m_ui.monBgMaxEdit);
+  connectSettingsChange(m_ui.lamMinEdit);
+  connectSettingsChange(m_ui.lamMaxEdit);
+  connectSettingsChange(m_ui.I0MonIndexEdit);
+  connectSettingsChange(m_ui.procInstEdit);
+  connectSettingsChange(m_ui.detectorCorrectionTypeComboBox);
+}
+
+void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
+  connectSettingsChange(m_ui.expSettingsGroup);
+  connectSettingsChange(m_ui.analysisModeComboBox);
+  connectSettingsChange(m_ui.directBeamEdit);
+  connectSettingsChange(m_ui.transmissionRunsEdit);
+  connectSettingsChange(m_ui.startOverlapEdit);
+  connectSettingsChange(m_ui.endOverlapEdit);
+  connectSettingsChange(m_ui.polCorrComboBox);
+  connectSettingsChange(m_ui.CRhoEdit);
+  connectSettingsChange(m_ui.CAlphaEdit);
+  connectSettingsChange(m_ui.CApEdit);
+  connectSettingsChange(m_ui.CPpEdit);
+  connectSettingsChange(m_ui.momentumTransferStepEdit);
+  connectSettingsChange(m_ui.scaleFactorEdit);
 }
 
 void QtReflSettingsView::notifySettingsChanged() {
