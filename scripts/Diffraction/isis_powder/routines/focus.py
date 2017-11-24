@@ -108,9 +108,14 @@ def _divide_one_spectrum_by_spline(spectrum, spline):
 def _divide_by_vanadium_splines(spectra_list, spline_file_path):
     vanadium_splines = mantid.LoadNexus(Filename=spline_file_path)
 
-    if isinstance(vanadium_splines, list):
+    if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
+        vanadium_splines = vanadium_splines.OutputWorkspace
+        if len(vanadium_splines) != len(spectra_list):
+            raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
+                               "\nThere are {} banks for vanadium but {} for the run".format(len(vanadium_splines),
+                                                                                             len(spectra_list)))
         output_list = []
-        for data_ws, van_ws in zip(spectra_list, vanadium_splines[1:]):
+        for data_ws, van_ws in zip(spectra_list, vanadium_splines):
             output_ws = _divide_one_spectrum_by_spline(data_ws, van_ws)
             output_list.append(output_ws)
         return output_list
