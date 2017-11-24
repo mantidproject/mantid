@@ -1,9 +1,9 @@
+from __future__ import print_function
 import unittest
-from PyQt4.QtCore import Qt
 from collections import Counter
 from mantidqt.widgets.algorithmselector.model import Model
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
-from mantidqt.utility.gui_test import gui_test_case
+from mantidqt.utility.gui_test import *
 from mock import Mock, patch
 
 
@@ -38,12 +38,10 @@ class ModelTest(unittest.TestCase):
 class WidgetTest(unittest.TestCase):
 
     def _select_in_tree(self, widget, item_label):
-        items = widget.tree.findItems(item_label, Qt.MatchExactly | Qt.MatchRecursive)
-        widget.tree.setCurrentItem(items[0])
+        select_item_in_tree(widget.tree, item_label)
 
     def _select_in_search_box(self, widget, item_text):
-        i = widget.search_box.findText(item_text)
-        widget.search_box.setCurrentIndex(i)
+        select_item_in_combo_box(widget.search_box, item_text)
 
     def test_tree_selection_single_version(self):
         widget = AlgorithmSelectorWidget()

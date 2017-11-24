@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 from collections import namedtuple
 from .model import Model
 
@@ -31,7 +31,7 @@ class IAlgorithmSelectorView(object):
     def execute_algorithm(self):
         algorithm = self.get_selected_algorithm()
         if algorithm is not None:
-            print 'Execute %s v.%s' % algorithm
+            print('Execute %s v.%s' % algorithm)
 
 
 class Presenter(object):

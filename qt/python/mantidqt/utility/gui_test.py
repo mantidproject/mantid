@@ -1,5 +1,6 @@
 import types
 from PyQt4.QtGui import QApplication
+from PyQt4.QtCore import Qt
 
 
 def gui_test(test):
@@ -86,3 +87,23 @@ def gui_test_case(cls):
         if isinstance(attr, types.MethodType) and name.startswith('test'):
             setattr(cls, name, gui_test(attr))
     return cls
+
+
+def select_item_in_tree(tree, item_label):
+    """
+    Select an item in a QTreeWidget with a given label.
+    :param tree: A QTreeWidget
+    :param item_label: A label text on the item to select.
+    """
+    items = tree.findItems(item_label, Qt.MatchExactly | Qt.MatchRecursive)
+    tree.setCurrentItem(items[0])
+
+
+def select_item_in_combo_box(combo_box, item_text):
+    """
+    Select an item in a QComboBox with a given text.
+    :param combo_box: A QComboBox.
+    :param item_text: A text of the item to select.
+    """
+    i = combo_box.findText(item_text)
+    combo_box.setCurrentIndex(i)

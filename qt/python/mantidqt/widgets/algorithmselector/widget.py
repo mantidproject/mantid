@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem, QInputDialog
 from PyQt4.QtCore import QModelIndex
