@@ -43,6 +43,9 @@ cmake --version
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
 fi
+if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+  CLEANBUILD=true
+fi
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
   PRBUILD=true
@@ -186,7 +189,9 @@ fi
 if [[ "$BUILDPKG" == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
-  if [[ ${ON_MACOS} != true ]]; then
+  if [[ "${ON_MACOS}" == true ]]; then
+    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+  else
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
        PACKAGE_SUFFIX=""

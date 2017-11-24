@@ -1,8 +1,12 @@
 #include "MantidDataHandling/CompressEvents.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateTimeValidator.h"
 
 #include "tbb/parallel_for.h"
 
@@ -37,13 +41,42 @@ void CompressEvents::init() {
       "The tolerance on each event's X value (normally TOF, but may be a "
       "different unit if you have used ConvertUnits).\n"
       "Any events within Tolerance will be summed into a single event.");
+
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("WallClockTolerance", EMPTY_DBL(),
+                                             mustBePositive, Direction::Input),
+      "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
+      "means compressing all wall-clock times together disabling pulsetime "
+      "resolution.");
+
+  auto dateValidator = boost::make_shared<DateTimeValidator>();
+  dateValidator->allowEmpty(true);
+  declareProperty(
+      "StartTime", "", dateValidator,
+      "An ISO formatted date/time string specifying the timestamp for "
+      "starting filtering. Ignored if WallClockTolerance is not specified. "
+      "Default is start of run",
+      Direction::Input);
 }
 
 void CompressEvents::exec() {
   // Get the input workspace
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  double tolerance = getProperty("Tolerance");
+  const double toleranceTof = getProperty("Tolerance");
+  const double toleranceWallClock = getProperty("WallClockTolerance");
+  const bool compressFat = !isEmpty(toleranceWallClock);
+  Types::Core::DateAndTime startTime;
+
+  if (compressFat) {
+    std::string startTimeProp = getProperty("StartTime");
+    if (startTimeProp.empty()) {
+      startTime = inputWS->run().startTime();
+    } else {
+      // the property returns ISO8601
+      startTime = DateAndTimeHelpers::createFromSanitizedISO8601(startTimeProp);
+    }
+  }
 
   // Some starting things
   bool inplace = (inputWS == outputWS);
@@ -51,49 +84,54 @@ void CompressEvents::exec() {
   Progress prog(this, 0.0, 1.0, noSpectra * 2);
 
   // Sort the input workspace in-place by TOF. This can be faster if there are
-  // few event lists.
-  inputWS->sortAll(TOF_SORT, &prog);
+  // few event lists. Compressing with wall clock does the sorting internally
+  if (!compressFat)
+    inputWS->sortAll(TOF_SORT, &prog);
 
   // Are we making a copy of the input workspace?
   if (!inplace) {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS,
-                                                           false);
+    outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
-                      [tolerance, &inputWS, &outputWS, &prog](
-                          const tbb::blocked_range<size_t> &range) {
-                        for (size_t index = range.begin(); index < range.end();
-                             ++index) {
-                          // The input event list
-                          EventList &input_el = inputWS->getSpectrum(index);
-                          // And on the output side
-                          EventList &output_el = outputWS->getSpectrum(index);
-                          // Copy other settings into output
-                          output_el.setX(input_el.ptrX());
-                          // The EventList method does the work.
-                          input_el.compressEvents(tolerance, &output_el);
-                          prog.report("Compressing");
-                        }
-                      });
-  } else {
     tbb::parallel_for(
         tbb::blocked_range<size_t>(0, noSpectra),
-        [tolerance, &outputWS, &prog](const tbb::blocked_range<size_t> &range) {
+        [compressFat, toleranceTof, startTime, toleranceWallClock, &inputWS,
+         &outputWS, &prog](const tbb::blocked_range<size_t> &range) {
+          for (size_t index = range.begin(); index < range.end(); ++index) {
+            // The input event list
+            EventList &input_el = inputWS->getSpectrum(index);
+            // And on the output side
+            EventList &output_el = outputWS->getSpectrum(index);
+            // Copy other settings into output
+            output_el.setX(input_el.ptrX());
+            // The EventList method does the work.
+            if (compressFat)
+              input_el.compressFatEvents(toleranceTof, startTime,
+                                         toleranceWallClock, &output_el);
+            else
+              input_el.compressEvents(toleranceTof, &output_el);
+            prog.report("Compressing");
+          }
+        });
+  } else { // inplace
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, noSpectra),
+        [compressFat, toleranceTof, startTime, toleranceWallClock, &outputWS,
+         &prog](const tbb::blocked_range<size_t> &range) {
           for (size_t index = range.begin(); index < range.end(); ++index) {
             // The input (also output) event list
             auto &output_el = outputWS->getSpectrum(index);
             // The EventList method does the work.
-            output_el.compressEvents(tolerance, &output_el);
+            if (compressFat)
+              output_el.compressFatEvents(toleranceTof, startTime,
+                                          toleranceWallClock, &output_el);
+            else
+              output_el.compressEvents(toleranceTof, &output_el);
             prog.report("Compressing");
           }
         });
   }
+
   // Cast to the matrixOutputWS and save it
   this->setProperty("OutputWorkspace", outputWS);
 }

@@ -1,7 +1,6 @@
 import numpy as np
 import unittest
 
-import mantid # noqa
 from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr

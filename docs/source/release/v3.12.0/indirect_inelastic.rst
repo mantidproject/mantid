@@ -14,6 +14,8 @@ New
 Improved
 ########
 
+- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process
+
 Vesuvio
 -------
 
@@ -37,6 +39,7 @@ New
 Improved
 ########
 - The Plot Guess Feature in the ConvFit Interface is now enabled for the diffusion functions.
+- The Plot Guess Feature in the MSDFit Interface is now implemented for the three models introduced in release v3.11 (MsdGauss, MsdPeters and MsdYi).
 
 Bugfixes
 ########

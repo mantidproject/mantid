@@ -12,7 +12,6 @@ using std::size_t;
 
 namespace Mantid {
 namespace DataObjects {
-using Kernel::Exception::NotImplementedError;
 using Types::Event::TofEvent;
 
 //==========================================================================
