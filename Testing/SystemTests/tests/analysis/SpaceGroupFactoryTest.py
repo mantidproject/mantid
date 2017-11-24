@@ -1,4 +1,5 @@
 # pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import re
 from mantid.simpleapi import *
@@ -81,7 +82,7 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
             if matchedSeparator is not None:
                 currentGroup = matchedSeparator.group(1)
 
-                print currentGroup
+                print(currentGroup)
 
                 spaceGroups[currentGroup] = set()
             else:

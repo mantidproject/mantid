@@ -26,7 +26,7 @@ Description          : General plot options dialog
 *   Boston, MA  02110-1301  USA                                           *
 *                                                                         *
 ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "AxesDialog.h"
 #include "ApplicationWindow.h"
 #include "TextDialog.h"
@@ -38,7 +38,7 @@ Description          : General plot options dialog
 #include "ColorButton.h"
 #include "TextFormatButtons.h"
 #include "Table.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "ScaleDraw.h"
 #include <float.h>
 
@@ -66,7 +66,7 @@ Description          : General plot options dialog
 
 #include <qwt_plot.h>
 #include <qwt_scale_widget.h>
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 
 /* XPM */
 static const char *bottom_scl_xpm[] = {

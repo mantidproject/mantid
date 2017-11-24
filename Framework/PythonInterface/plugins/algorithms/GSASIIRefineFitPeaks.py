@@ -984,4 +984,5 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         readers_list = gs2.ImportPowderReaderlist
         return readers_list
 
+
 AlgorithmFactory.subscribe(GSASIIRefineFitPeaks)

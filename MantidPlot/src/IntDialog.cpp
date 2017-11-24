@@ -30,7 +30,7 @@
 #include "ApplicationWindow.h"
 #include "Graph.h"
 #include "Integration.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <QGroupBox>
 #include <QSpinBox>

@@ -1,9 +1,9 @@
 #include "PeakPickerTool.h"
 #include "../FunctionCurve.h"
 #include "MantidMatrixCurve.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidUI.h"
 
 #include "MantidAPI/CompositeFunction.h"

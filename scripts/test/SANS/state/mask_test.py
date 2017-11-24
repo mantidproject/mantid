@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.state.mask import (StateMask, get_mask_builder)
+from sans.state.mask import (StateMaskSANS2D, get_mask_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, SANSInstrument, DetectorType)
 from state_test_helper import (assert_validate_error, assert_raises_nothing)
@@ -27,7 +27,7 @@ class StateMaskTest(unittest.TestCase):
 
     @staticmethod
     def _get_mask_state(general_entries, detector_entries):
-        state = StateMask()
+        state = StateMaskSANS2D()
         # Setup the general mask settings
         mask_settings = {"radius_min": 12., "radius_max": 17.,
                          "bin_mask_general_start": [1., 2., 3.], "bin_mask_general_stop": [2., 3., 4.],

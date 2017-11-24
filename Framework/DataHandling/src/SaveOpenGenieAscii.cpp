@@ -377,7 +377,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // First the parameter name
     outfile << "  " << '"' << std::get<0>(outTuple) << '"' << "\r\n";
 
-    const std::string outputType = std::get<1>(outTuple);
+    const std::string &outputType = std::get<1>(outTuple);
     outfile << "    " << outputType << "\r\n";
 
     // Then the data values - the formatting depends on data type

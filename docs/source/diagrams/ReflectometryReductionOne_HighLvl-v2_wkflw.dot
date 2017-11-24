@@ -5,27 +5,24 @@ label = "\n"
 subgraph params {
  $param_style
   inputWS       [label="InputWorkspace"]
-  wavMin        [label="WavelengthMin", group=gwav]
-  wavMax        [label="WavelengthMax", group=gwav]
   outputWSWL    [label="OutputWorkspaceWavelength"]
   outputWSFinal [label="OutputWorkspace"]
 }
 
 subgraph decisions {
  $decision_style
-  checkXUnit      [label="X axis in &lambda;?"]
+  checkSumDone  [label="Reduction required?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  cropWav       [label="CropWorkspace", group=g1]
 }
 
 subgraph processes {
  $process_style
-  convertUnits    [label="Convert to &lambda;,\noptionally sum in &lambda;, and\nnormalize by monitors"]
+  convertUnits    [label="Convert to &lambda;\nSum in &lambda;\nNormalize by monitors"]
   applyCorrTrans  [label="Apply transmission\n corrections"]
-  sumInQ          [label="Optionally sum in Q"]
+  sumInQ          [label="Sum in Q"]
   convertMom      [label="Convert to momentum\ntransfer"]
 }
 
@@ -33,14 +30,11 @@ subgraph values {
  $value_style
 }
 
-inputWS         -> checkXUnit
-checkXUnit      -> cropWav        [label="Yes"]
-checkXUnit      -> convertUnits   [label="No"]
-convertUnits    -> cropWav
-wavMin          -> cropWav
-wavMax          -> cropWav
+inputWS         -> checkSumDone
+checkSumDone    -> applyCorrTrans [label="No"]
+checkSumDone    -> convertUnits   [label="Yes"]
+convertUnits    -> applyCorrTrans
 
-cropWav         -> applyCorrTrans
 applyCorrTrans  -> sumInQ
 sumInQ          -> outputWSWL
 

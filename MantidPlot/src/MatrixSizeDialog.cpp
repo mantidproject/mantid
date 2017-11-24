@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "MatrixSizeDialog.h"
 #include "MatrixCommand.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <QPushButton>
 #include <QLabel>

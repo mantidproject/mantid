@@ -4,7 +4,7 @@
 #include "../UserFunction.h"
 #include "MantidMatrix.h"
 
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/HistogramX.h"
 

@@ -109,14 +109,14 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
                                          const size_t specNum,
                                          int expectedNumBins) {
   const auto xPointData = ws->points(specNum);
-  const auto yInputVals = ws->y(specNum);
-  const auto eInputVals = ws->e(specNum);
+  const auto &yInputVals = ws->y(specNum);
+  const auto &eInputVals = ws->e(specNum);
   const bool hasMaskedBins = ws->hasMaskedBins(specNum);
 
   // Mark masked bins to skip them later
   std::vector<bool> masked(yInputVals.size(), false);
   if (hasMaskedBins) {
-    const auto maskedBinsMap = ws->maskedBins(specNum);
+    const auto &maskedBinsMap = ws->maskedBins(specNum);
     for (const auto &maskedBin : maskedBinsMap) {
       masked[maskedBin.first] = true;
     }

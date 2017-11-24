@@ -77,7 +77,9 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                     indx = int(line_data[0]) - 1  # -1 to convert to zero based indexing
                     symbol = line_data[4]
                     ion = {"symbol": symbol,
-                           "fract_coord": np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])]),
+                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
+                                             float(line_data[2]) * file_data['unit_cell'][1] +
+                                             float(line_data[3]) * file_data['unit_cell'][2]),
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "sort": indx,
                            "mass": float(line_data[5])}
@@ -224,11 +226,25 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                     vectors = self._parse_phonon_eigenvectors(f_handle=f_handle)
                     eigenvectors.append(vectors)
 
+        # normalise eigenvectors:
+
+        # atomic displacements: [num_k, num_atom, num_freq, dim]
+        disp = np.asarray(eigenvectors)
+
+        # num_k: number of k-points
+        # num_atom: number of atoms
+        # num_freq: number of frequencies
+        # dim: dimension (atoms vibrate in 3D so dim=3)
+        # [num_k, num_atom, num_freq, dim] -> [num_k, num_atom, num_freq, dim, dim] -> [num_k, num_atom, num_freq]
+        # -> [num_k, num_freq]
+        norm = np.sum(np.trace(np.einsum('lkin, lkim->lkinm', disp, disp.conjugate()), axis1=3, axis2=4), axis=1)
+        factor = 1.0 / np.sqrt(norm)
+        disp = np.einsum('ijkl, ik-> ijkl', disp, factor)
+
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),
                           "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements":
-                              np.asarray(eigenvectors) * AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+                          "atomic_displacements": disp
                           })
 
         self._recover_symmetry_points(data=file_data)

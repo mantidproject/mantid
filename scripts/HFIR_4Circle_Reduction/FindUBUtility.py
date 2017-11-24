@@ -1,11 +1,12 @@
 """
 Containing a set of classes used for finding (calculating and refining) UB matrix
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 
-import ui_AddUBPeaksDialog
-import ui_UBSelectPeaksDialog
-import guiutility
+from . import ui_AddUBPeaksDialog
+from . import ui_UBSelectPeaksDialog
+from . import guiutility
 
 from PyQt4 import QtGui, QtCore
 

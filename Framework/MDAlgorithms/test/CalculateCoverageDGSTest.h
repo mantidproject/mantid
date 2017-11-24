@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 #define MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

@@ -1,6 +1,6 @@
 # pylint: disable=too-many-branches
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import *
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode, MatrixWorkspace
 from mantid.simpleapi import *
 from mantid.kernel import Direction
 import numpy as np
@@ -34,22 +34,19 @@ def mask_ws(ws_to_mask, xstart, xend):
 
 
 class MatchPeaks(PythonAlgorithm):
-    def __init__(self):
 
-        PythonAlgorithm.__init__(self)
+    # Mandatory workspaces
+    _input_ws = None
+    _output_ws = None
 
-        # Mandatory workspaces
-        self._input_ws = None
-        self._output_ws = None
+    # Optional workspace
+    _input_2_ws = None
+    _input_3_ws = None
+    _output_bin_range = None
 
-        # Optional workspace
-        self._input_2_ws = None
-        self._input_3_ws = None
-        self._output_bin_range = None
-
-        # Bool flags
-        self._masking = False
-        self._match_option = None
+    # Bool flags
+    _masking = False
+    _match_option = False
 
     def category(self):
         return "Transforms"
@@ -101,18 +98,22 @@ class MatchPeaks(PythonAlgorithm):
         self._input_2_ws = self.getPropertyValue('InputWorkspace2')
         self._input_3_ws = self.getPropertyValue('InputWorkspace3')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        self._masking = self.getProperty('MaskBins').value
-        self._match_option = self.getProperty('MatchInput2ToCenter').value
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
 
+        self._masking = self.getProperty('MaskBins').value
+        self._match_option = self.getProperty('MatchInput2ToCenter').value
+
         if self._input_ws:
-            ReplaceSpecialValues(self._input_ws,NaNValue=0,InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_ws, OutputWorkspace = self._input_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
         if self._input_2_ws:
-            ReplaceSpecialValues(self._input_2_ws, NaNValue=0, InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_2_ws, OutputWorkspace = self._input_2_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
         if self._input_3_ws:
-            ReplaceSpecialValues(self._input_3_ws, NaNValue=0, InfinityValue=0)
+            ReplaceSpecialValues(InputWorkspace = self._input_3_ws, OutputWorkspace = self._input_3_ws,
+                                 NaNValue = 0, InfinityValue = 0)
 
     def validateInputs(self):
         issues = dict()
@@ -208,7 +209,7 @@ class MatchPeaks(PythonAlgorithm):
         if self._masking:
             mask_ws(output_ws, min_bin, max_bin)
 
-        if self._output_bin_range != '':
+        if self._output_bin_range:
             # Create table with its columns containing bin range
             bin_range = CreateEmptyTableWorkspace(OutputWorkspace=self._output_bin_range)
             bin_range.addColumn(type="double", name='MinBin')
@@ -282,5 +283,6 @@ class MatchPeaks(PythonAlgorithm):
         DeleteWorkspace(fit_table)
 
         return peak_bin
+
 
 AlgorithmFactory.subscribe(MatchPeaks)

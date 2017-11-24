@@ -50,11 +50,10 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-	src/LoadILLDiffraction.cpp
-	src/LoadILLIndirect.cpp
+        src/LoadILLDiffraction.cpp
 	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
-  src/LoadILLSANS.cpp
+	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -95,6 +94,7 @@ set ( SRC_FILES
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
 	src/LoadSINQFocus.cpp
+	src/LoadSESANS.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
@@ -157,7 +157,8 @@ set ( SRC_FILES
 	src/SaveRKH.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
-        src/SaveSPE.cpp
+	src/SaveSESANS.cpp
+	src/SaveSPE.cpp
 	src/SaveTBL.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -223,11 +224,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-	inc/MantidDataHandling/LoadILLDiffraction.h
-	inc/MantidDataHandling/LoadILLIndirect.h
+        inc/MantidDataHandling/LoadILLDiffraction.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
-  inc/MantidDataHandling/LoadILLSANS.h
+	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -262,6 +262,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -326,7 +327,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
-        inc/MantidDataHandling/SaveSPE.h
+	inc/MantidDataHandling/SaveSESANS.h
+	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -392,11 +394,10 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLDiffractionTest.h
-	LoadILLIndirect2Test.h
-	LoadILLIndirectTest.h
+        LoadILLIndirect2Test.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
-  LoadILLTOF2Test.h
+	LoadILLTOF2Test.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
@@ -428,13 +429,14 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
+	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
-	LoadSpecTest.h
 	LoadSPETest.h
 	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
+	LoadSpecTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h
@@ -489,7 +491,8 @@ set ( TEST_FILES
 	SaveRKHTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
-        SaveSPETest.h
+	SaveSESANSTest.h
+	SaveSPETest.h
 	SaveTBLTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetBeamTest.h

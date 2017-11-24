@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QTreeView>
 #include <QTreeWidget>

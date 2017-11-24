@@ -30,11 +30,11 @@
 #define PYTHON_SCRIPT_H
 
 // Python headers have to go first!
-#include "MantidQtAPI/PythonSystemHeader.h"
-#include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 
 #include "Script.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <QFileInfo>
 #include <QDir>
@@ -105,7 +105,8 @@ private:
   /// Helper class to ensure the sys.path variable is updated correctly
   struct PythonPathHolder {
     /// Update the path with the given entry
-    explicit PythonPathHolder(const QString &entry) : m_path(entry) {
+    explicit PythonPathHolder(const QString &entry, const PythonScript &script)
+        : m_path(entry), m_script(script) {
       const QFileInfo filePath(m_path);
       if (filePath.exists()) {
         QDir directory = filePath.absoluteDir();
@@ -125,14 +126,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL pythonLock;
+      ScopedPythonGIL lock(m_script.gil());
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL pythonLock;
+      ScopedPythonGIL lock(m_script.gil());
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -141,15 +142,39 @@ private:
 
   private:
     QString m_path;
+    const PythonScript &m_script;
   };
 
-  inline PythonScripting *pythonEnv() const { return m_pythonEnv; }
+  inline PythonScripting *interp() const { return m_interp; }
+  PythonGIL &gil() const;
   void initialize(const QString &name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
 
-  // --------------------------- Script compilation/execution
-  // -----------------------------------
+  // Pre and post-processing options for recursive calls.
+  // The Python GILState api is supposed to be able to ensure
+  // that the current thread is ready to execute Python code
+  // regardless of the current interpreter thread state.
+  // However, we have a case with the ApplicationWindow::runPythonScript
+  // method where a script can be sent to that method to be run with
+  // async=false yet the script itself contains a runPythonScript(async=True)
+  // call. This causes recursion into the PythonGIL object where
+  // the initial GIL has not been released and a deadlock ensues.
+  // An example script sent to runPythonScript(async=False) would be
+  //
+  //    import mantidplot
+  //    for i in range(10):
+  //        mantidplot.runPythonScript('test=CreateSampleWorkspace()', True)
+  //
+  // To circumvent this we must release the GIL on the main thread
+  // before starting the async thread and then reaquire it when that thread
+  // has finished and the main thread must keep executing. These methods
+  // are used for this purpose and are NOT used by the general executeAsync
+  // methods where the GILState API functions can cope and there is no
+  // recursion.
+  virtual void recursiveAsyncSetup() override;
+  virtual void recursiveAsyncTeardown() override;
+
   /// Compile the code, returning true if it was successful, false otherwise
   bool compileImpl() override;
   /// Evaluate the current code and return a result as a QVariant
@@ -170,28 +195,10 @@ private:
   /// Compile to bytecode
   PyObject *compileToByteCode(bool for_eval = true);
 
-  // ---------------------------- Variable reference
-  // ---------------------------------------------
-  /// Listen to add notifications from the ADS
-  void addHandle(const std::string &wsName,
-                 const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to add/replace notifications from the ADS
-  void afterReplaceHandle(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to delete notifications
-  void postDeleteHandle(const std::string &wsName) override;
-  /// Listen to ADS clear notifications
-  void clearADSHandle() override;
-  /// Add/update a Python reference to the given workspace
-  void addPythonReference(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws);
-  /// Delete a Python reference to the given workspace name
-  void deletePythonReference(const std::string &wsName);
-
   /// Send out an error and clear it from python.
   void emit_error();
 
-  PythonScripting *m_pythonEnv;
+  PythonScripting *m_interp;
   PyObject *localDict, *stdoutSave, *stderrSave;
   PyObject *m_codeFileObject;
   long m_threadID; ///< Python thread id

@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 
@@ -213,8 +214,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
             # it will always label the first N ticks even image is zoomed in
             # FUTURE-VZ : The way to set up the Y-axis ticks is wrong!"
             # self.axes.set_yticklabels(yticklabels)
-            print '[Warning] The method to set up the Y-axis ticks to 2D image is ' \
-                  'wrong!'
+            print('[Warning] The method to set up the Y-axis ticks to 2D image is wrong!')
 
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')

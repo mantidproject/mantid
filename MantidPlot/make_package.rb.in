@@ -43,6 +43,8 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
                      "libboost_python-mt.dylib",
                      "libboost_serialization-mt.dylib",
+                     "libboost_filesystem-mt.dylib",
+                     "libboost_system-mt.dylib",
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",
@@ -131,10 +133,10 @@ if( "@MAKE_VATES@" == "ON" )
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
   vatesfiles = ["Contents/MacOS/MantidPlot",
-                "Contents/MacOS/libMantidQtAPI.dylib",
-                "Contents/MacOS/VatesSimpleGui",
+                "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
                 "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
+                "plugins/libMantidVatesAlgorithms.dylib",
                 "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
   vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["pvplugins/pvplugins/*.dylib"]
   vatesfiles.each do |file|
@@ -172,7 +174,7 @@ if( "@MAKE_VATES@" == "ON" )
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
-search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
+search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
@@ -194,8 +196,7 @@ end
 #We'll use macdeployqt to fix qt dependencies.
 Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib -executable=Contents/MacOS/libqscintilla2.dylib"
 if( "@MAKE_VATES@" == "ON" )
-  list = ["Contents/MacOS/VatesSimpleGui",
-          "Contents/Libraries/vtkParaViewWebCorePython.so",
+  list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
           "Contents/Libraries/vtkPVAnimationPython.so",
           "Contents/Libraries/vtkPVCatalystPython.so",
           "Contents/Libraries/vtkPVCinemaReaderPython.so",

@@ -218,4 +218,5 @@ class EnggFocus(PythonAlgorithm):
         alg.setProperty('Workspace', wks)
         alg.execute()
 
+
 AlgorithmFactory.subscribe(EnggFocus)

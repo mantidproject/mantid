@@ -756,6 +756,7 @@
   </instrument>
 
   <instrument name="TOFTOF">
+    <zeropadding size="8" startRunNumber="69750"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
@@ -806,12 +807,17 @@
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="ISIS_Kafka_Event">
     <technique>Test Listener</technique>
     <livedata>
       <connection name="kafka_event" address="sakura:9092" listener="KafkaEventListener" />
     </livedata>
+  </instrument>
+
+  <instrument name="ZOOM">
+    <technique>Small Angle Scattering</technique>
+    <zeropadding size="8"/>
   </instrument>
 
 </facility>

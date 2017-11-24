@@ -1,10 +1,11 @@
 #ifndef MANTID_KERNEL_ARRAYPROPERTY_H_
 #define MANTID_KERNEL_ARRAYPROPERTY_H_
 
-#include "PropertyWithValue.h"
+#include "DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
+#include "PropertyWithValue.h"
 #include <string>
 #include <vector>
 
@@ -41,7 +42,7 @@ namespace Kernel {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename T>
-class ArrayProperty : public PropertyWithValue<std::vector<T>> {
+class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
   ArrayProperty(const std::string &name, const std::vector<T> &vec,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
@@ -64,7 +65,19 @@ public:
   std::string setValue(const std::string &value) override;
   // May want to add specialisation the the class later, e.g. setting just one
   // element of the vector
+
+private:
+  // This method is a workaround for the C4661 compiler warning in visual
+  // studio. This allows the template declaration and definition to be separated
+  // in different files. See stack overflow article for a more detailed
+  // explanation:
+  // https://stackoverflow.com/questions/44160467/warning-c4661no-suitable-definition-provided-for-explicit-template-instantiatio
+  // https://stackoverflow.com/questions/33517902/how-to-export-a-class-derived-from-an-explicitly-instantiated-template-in-visual
+  void visualStudioC4661Workaround();
 };
+
+template <>
+MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
 
 } // namespace Kernel
 } // namespace Mantid

@@ -69,12 +69,17 @@ The number density is defined as
 
 .. math:: \rho_n = \frac{N_{atoms}ZParameter}{UnitCellVolume}
 
-It can can be generated in one of two ways:
+It can can be generated in one of three ways:
 
-1. Specifying it directly with ``SampleNumberDensity``
+1. Specifying it directly with ``SampleNumberDensity``.
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
    the algorithm calculate it from the OrientedLattice on the
    ``InputWorkspace``).
+3. Specifying the mass density. In this case the number density is calculated as
+
+.. math:: \rho_n = \frac{N_{atoms} \rho_m N_A}{M_r}
+
+where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_r` the relative molecular mass.
 
 Linear Absorption Coefficients
 ##############################

@@ -31,11 +31,11 @@
 #include "ApplicationWindow.h"
 #include "Graph.h"
 #include "MantidKernel/Strings.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MatrixCommand.h"
 #include "ScriptingEnv.h"
 #include "muParserScript.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>

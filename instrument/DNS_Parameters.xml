@@ -18,9 +18,9 @@
                         <value val="0,0.11,-0.5,0; 0,0.15,-0.5,0" />
                 </parameter>
 
-                <!-- Scaling factor to calculate the channel width in microseconds -->
+                <!-- Scaling factor to calculate the channel width in microseconds. Will be removed after comissioning. -->
                 <parameter name="channel_width_factor" type="string">
-                        <value val="20.0" />
+                        <value val="1.0" />
                 </parameter>
 
                 <!-- 2theta tolerance, degrees -->
@@ -53,9 +53,15 @@
                 </parameter>
 
                 <!-- Distance [m] between sample and equatorial line of the detector. Mandatory
-                        if you want to correct the flight paths. -->
+                     if you want to correct the flight paths. Also used by the loader to estimate EPP. -->
                 <parameter name="l2" type="string">
-                        <value val="0.80" />
+                        <value val="0.85" />
+                </parameter>
+
+                <!-- Influences the data loading. If yes, loader considers that the zero time channel is uncalibrated
+                     and shifts the data to get the elastic peak at right position. Set 'no' if it is not required. -->
+                <parameter name="tof_comissioning" type="string">
+                        <value val="yes" />
                 </parameter>
 
 	</component-link>

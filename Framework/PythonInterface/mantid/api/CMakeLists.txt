@@ -75,6 +75,7 @@ set ( EXPORT_FILES
   src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
+  src/Exports/MultiDomainFunction.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )

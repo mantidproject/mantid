@@ -136,6 +136,7 @@ class LoadDNSLegacy(PythonAlgorithm):
                                ". Values have been set to undefined.")
         ndet = 24
         unitX="Wavelength"
+        arr = data_array[0:ndet, 1:]
         if metadata.tof_channel_number < 2:
             dataX = np.zeros(2*ndet)
             dataX.fill(metadata.wavelength + 0.00001)
@@ -145,7 +146,9 @@ class LoadDNSLegacy(PythonAlgorithm):
 
             # get instrument parameters
             l1 = np.linalg.norm(self.instrument.getSample().getPos() - self.instrument.getSource().getPos())
+            l2 = float(self.instrument.getStringParameter("l2")[0])
             self.log().notice("L1 = {} m".format(l1))
+            self.log().notice("L2 = {} m".format(l2))
             dt_factor = float(self.instrument.getStringParameter("channel_width_factor")[0])
 
             # channel width
@@ -155,9 +158,23 @@ class LoadDNSLegacy(PythonAlgorithm):
             tof1 = 1e+06*l1/velocity        # microseconds
             self.log().debug("TOF1 = {} microseconds".format(tof1))
             self.log().debug("Delay time = {} microsecond".format(metadata.tof_delay_time))
+            tof2_elastic = 1e+06*l2/velocity
+            self.log().debug("TOF2 Elastic = {} microseconds".format(tof2_elastic))
+
+            # shift channels to keep elastic in the right position
+            if not metadata.tof_elastic_channel:
+                metadata.tof_elastic_channel = int(tof2_elastic/dt)
+
+            # required during the comissioning, since zero time channel is not yet calibrated
+            in_comissioning = self.instrument.getStringParameter("tof_comissioning")[0]
+            if in_comissioning.lower() == "yes":
+                # this will fail if inelastic peak is stronger than elastic
+                chmax = int(np.mean(arr.argmax(axis=1)))
+                self.log().debug("Elastic peak position old: {}".format(chmax))
+                arr = np.roll(arr, metadata.tof_elastic_channel - chmax, 1)
+
             # create dataX array
             x0 = tof1 + metadata.tof_delay_time
-            self.log().debug("TOF1 = {} microseconds".format(tof1))
             dataX = np.linspace(x0, x0+metadata.tof_channel_number*dt, metadata.tof_channel_number+1)
 
             # sample logs
@@ -194,8 +211,9 @@ class LoadDNSLegacy(PythonAlgorithm):
             if factor <= 0:
                 raise RuntimeError("Monitor counts are invalid for file " + filename + ". Cannot normalize.")
         # set values for dataY and dataE
-        dataY = data_array[0:ndet, 1:]/factor
-        dataE = np.sqrt(data_array[0:ndet, 1:])/factor
+        dataY = arr/factor
+        dataE = np.sqrt(arr)/factor
+
         # create workspace
         api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
                             DataE=dataE, NSpec=ndet, UnitX=unitX)

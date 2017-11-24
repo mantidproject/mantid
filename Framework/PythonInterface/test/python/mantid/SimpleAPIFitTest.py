@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -26,6 +26,12 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         testhelpers.assertRaisesNothing(self, Fit, "name=FlatBackground", self._raw_ws)
+        
+    def test_minimal_positional_arguments_with_functionwrapper_work(self):
+        if  platform.system() == 'Darwin': # crashes
+            return
+        fb = FunctionWrapper("FlatBackground")
+        testhelpers.assertRaisesNothing(self, Fit, fb, self._raw_ws)
 
     def test_function_positional_and_workspace_keyword_arguments_work(self):
         if  platform.system() == 'Darwin': # crashes

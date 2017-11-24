@@ -256,4 +256,5 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
 #############################################################################################
 
+
 AlgorithmFactory.subscribe(SANSBeamSpreaderTransmission)

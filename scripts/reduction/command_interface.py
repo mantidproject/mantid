@@ -2,7 +2,7 @@
 """
     List of user commands.
 """
-
+from __future__ import (absolute_import, division, print_function)
 from reduction.reducer import Reducer
 
 

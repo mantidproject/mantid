@@ -8,7 +8,7 @@ namespace {
 
 void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
                DataObjects::OffsetsWorkspace_sptr &offsetsWS,
-               const API::DetectorInfo &detectorInfo) {
+               const Geometry::DetectorInfo &detectorInfo) {
   DataObjects::SpecialWorkspace2D_sptr localWS =
       boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(outputWs);
 

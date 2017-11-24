@@ -1,8 +1,8 @@
 #include "ManageCustomMenus.h"
 #include "../ApplicationWindow.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <QtGui>

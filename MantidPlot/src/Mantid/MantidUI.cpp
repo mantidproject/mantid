@@ -1,5 +1,5 @@
 // Python header must go first
-#include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
@@ -10,20 +10,20 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidTable.h"
 #include "MantidUI.h"
 #include "ProjectSerialiser.h"
 
-#include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
+#include "ui_SequentialFitDialog.h"
 #include "../Folder.h"
 #include "../ScriptingWindow.h"
 #include "../Spectrogram.h"
 #include "../TiledWindow.h"
-#include "MantidQtAPI/pixmaps.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidAPI/Axis.h"
@@ -40,16 +40,15 @@
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
-#include "MantidQtMantidWidgets/MantidTreeWidget.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -59,6 +58,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <QListWidget>
@@ -91,10 +91,10 @@
 #include <Poco/Thread.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtFactory/WidgetFactory.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
 using namespace std;
@@ -420,7 +420,8 @@ void MantidUI::shutdown() {
 
   // If any python objects need to be cleared away then the GIL needs to be
   // held.
-  ScopedPythonGIL gil;
+  PythonGIL gil;
+  ScopedPythonGIL lock(gil);
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().shutdown();
@@ -1423,7 +1424,8 @@ Table *MantidUI::createDetectorTable(
             double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            double q = Mantid::Kernel::UnitConversion::convertToElasticQ(
+                usignTheta, efixed);
             colValues << QVariant(q);
           } catch (std::runtime_error &) {
             colValues << QVariant("No Efixed");
@@ -2216,7 +2218,8 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // If any python objects need to be cleared away then the GIL needs to be
   // held. This doesn't feel like
   // it is in the right place but it will do no harm
-  ScopedPythonGIL gil;
+  PythonGIL gil;
+  ScopedPythonGIL lock(gil);
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();

@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "LoadRaw/isisraw2.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
@@ -401,7 +401,7 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param pressure The new pressure value
  * @param thickness The new thickness value
  */
-void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
+void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo,
                                           const size_t detIndex,
                                           Geometry::ParameterMap &pmap,
                                           const double l2, const double theta,

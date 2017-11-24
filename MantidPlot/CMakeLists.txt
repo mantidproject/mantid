@@ -443,9 +443,10 @@ set( SRC_UNITY_IGNORE_FILES )
 # disabled. In order for VS2010 to to this correctly the second
 # custom command below is required along with the committed
 # src/sipqti.cpp.rule file.
+set ( MANTIDQTPYTHON_SIP_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython)
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
-                          -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
+                          -I ${PYQT4_SIP_DIR} -I ${MANTIDQTPYTHON_SIP_DIR}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
@@ -661,9 +662,6 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -696,16 +694,14 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
-include_directories ( ../QtPropertyBrowser/src )
-include_directories ( ../MantidQt/API/inc )
-include_directories ( ../MantidQt/MantidWidgets/inc )
-include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/SpectrumViewer/inc )
-include_directories ( ../MantidQt/Factory/inc )
+include_directories ( ../qt/widgets/common/inc )
+include_directories ( ../qt/widgets/instrumentview/inc )
+include_directories ( ../qt/widgets/sliceviewer/inc )
+include_directories ( ../qt/widgets/spectrumviewer/inc )
+include_directories ( ../qt/widgets/factory/inc )
 # ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
+include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/common )
+include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer )
 
 
 ###########################################################################
@@ -794,13 +790,11 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
-            API
-            MantidQtAPI
-            MantidWidgets
-            MantidQtSliceViewer
-            MantidQtFactory
-            MantidQtSpectrumViewer
-            QtPropertyBrowser
+            MantidQtWidgetsCommon
+            MantidQtWidgetsInstrumentView
+            MantidQtWidgetsSliceViewer
+            MantidQtWidgetsFactory
+            MantidQtWidgetsSpectrumViewer
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GSL_LIBRARIES}

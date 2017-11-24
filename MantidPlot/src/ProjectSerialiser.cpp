@@ -15,10 +15,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 
 #include <QTextCodec>
 #include <QTextStream>

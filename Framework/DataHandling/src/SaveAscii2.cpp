@@ -365,7 +365,7 @@ void SaveAscii2::populateQMetaData() {
       efixed = DBL_MIN;
     }
     // Convert to MomentumTransfer
-    auto qValue = Kernel::UnitConversion::run(theta, efixed);
+    auto qValue = Kernel::UnitConversion::convertToElasticQ(theta, efixed);
     auto qValueStr = boost::lexical_cast<std::string>(qValue);
     qValues.push_back(qValueStr);
   }

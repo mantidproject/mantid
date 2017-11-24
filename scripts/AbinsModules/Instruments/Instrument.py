@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from AbinsModules import AbinsParameters
+import AbinsModules
 import numpy as np
 
 
@@ -40,7 +40,7 @@ class Instrument(object):
         :param gaussian: gaussian-like function used to broaden peaks
         :return: frequencies for which peaks have been broadened, corresponding S
         """
-        fwhm = AbinsParameters.fwhm
+        fwhm = AbinsModules.AbinsParameters.fwhm
 
         # freq_num: number of transition energies for the given quantum order event
         # start[freq_num]
@@ -91,7 +91,8 @@ class Instrument(object):
         :return: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
-        return 1.0 / np.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
+        norm = AbinsModules.AbinsParameters.pkt_per_peak / (2 * AbinsModules.AbinsParameters.fwhm * sigma)
+        return 1.0 / (np.sqrt(sigma_factor * np.pi) * norm) * np.exp(-(points - center) ** 2 / sigma_factor)
 
     def __str__(self):
         return self._name

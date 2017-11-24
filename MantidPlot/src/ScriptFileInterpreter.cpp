@@ -1,7 +1,7 @@
 #include "ScriptFileInterpreter.h"
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
 #include <QFontDatabase>

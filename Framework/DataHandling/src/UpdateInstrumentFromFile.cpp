@@ -2,7 +2,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -421,11 +421,9 @@ void UpdateInstrumentFromFile::setDetectorPositions(
  * @param theta :: A single theta
  * @param phi :: A single phi
  */
-void UpdateInstrumentFromFile::setDetectorPosition(DetectorInfo &detectorInfo,
-                                                   const size_t index,
-                                                   const float l2,
-                                                   const float theta,
-                                                   const float phi) {
+void UpdateInstrumentFromFile::setDetectorPosition(
+    Geometry::DetectorInfo &detectorInfo, const size_t index, const float l2,
+    const float theta, const float phi) {
   if (m_ignoreMonitors && detectorInfo.isMonitor(index))
     return;
 

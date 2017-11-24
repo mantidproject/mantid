@@ -216,7 +216,8 @@ class TransformToIqt(PythonAlgorithm):
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
-        rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
+        # Float conversion to str differs in precision between python 2 and 3, this gives consistent results
+        rebin_param = '{:.14f},{:.14f},{:.14f}'.format(self._e_min, self._e_width, self._e_max)
         trans_prog.report('Rebinning Workspace')
         Rebin(InputWorkspace=self._sample,
               OutputWorkspace='__sam_data',

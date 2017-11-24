@@ -107,8 +107,9 @@ Explanation of Inputs
    ordered correctly with: :math:`0 < PeakSize \leq BackgroundInnerSize` and
    :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
--  The top 1% of the background events are removed so that there are no
-   intensity spikes near the edges.
+-  If *UseOnePercentBackgroundCorrection* is enabled, then the top 1% of the
+   background events are removed so that there are no intensity spikes near the
+   edges. This is enabled by default.
 
 -  *AdaptiveQMultiplier* can be used with *SpecifySize* for the radius to vary
    as a function of the modulus of Q. If the *AdaptiveQBackground* option is set
@@ -245,8 +246,11 @@ the detector.
 Sigma from the background
 ###################################
 The sigma from the background could be too small because the background contains
-events from other peaks.  In an effort to reduce this, all the background events
-are sorted and the top 1% are removed.
+events from other peaks. In an effort to reduce this, all the background events
+are sorted and the top 1% are removed. Note that this behaviour is optional and
+can be enabled if the property *UseOnePercentBackgroundCorrection* is enabled.
+It is enabled by default.
+
 
 Usage
 ------

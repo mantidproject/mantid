@@ -1,10 +1,15 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.eqsans_data_script import DataSets
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_sample_data
+
+if six.PY3:
+    unicode = str
 
 
 class DataSetsWidget(BaseWidget):

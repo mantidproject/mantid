@@ -1099,12 +1099,11 @@ class Mask_ISIS(ReductionStep):
         # opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors)
         instrum.view(wksp_name)
 
-    def display(self, wksp, reducer, counts=None):
+    def display(self, wksp, reducer):
         """
             Mask detectors in a workspace and display its show instrument
             @param wksp: this named workspace will be masked and displayed
             @param reducer: the reduction chain that contains all the settings
-            @param counts: optional workspace containing neutron counts data that the mask will be supperimposed on to
         """
         # apply masking to the current detector
         self.execute(reducer, wksp)
@@ -1117,49 +1116,6 @@ class Mask_ISIS(ReductionStep):
         self.execute(reducer, wksp)
         # reset the instrument to mask the current detector
         instrum.setDetector(original)
-
-        if counts:
-            Power(InputWorkspace=counts, OutputWorkspace='ones', Exponent=0)
-            Plus(LHSWorkspace=wksp, RHSWorkspace='ones', OutputWorkspace=wksp)
-
-        # Mark up "dead" detectors with error value
-        FindDeadDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, LiveValue=0, DeadValue=1)
-
-        # check if we have a workspace to superimpose the mask on to
-        if counts:
-            # the code below is a proto-type for the ISIS SANS group, to make it perminent it should be improved
-
-            # create a workspace where the masked spectra have a value
-            flags = mtd[wksp]
-            # normalise that value to the data in the workspace
-            vals = mtd[counts]
-            maxval = 0
-            Xs = []
-            Ys = []
-            Es = []
-            for i in range(0, flags.getNumberHistograms()):
-                Xs.append(flags.readX(i)[0])
-                Xs.append(flags.readX(i)[1])
-                Ys.append(flags.readY(i)[0])
-                Es.append(0)
-
-                if vals.readY(i)[0] > maxval:
-                    # don't include masked or monitors
-                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 5000):
-                        maxval = vals.readY(i)[0]
-
-            # now normalise to the max/5
-            maxval /= 5.0
-            for i in range(0, len(Ys)):
-                if Ys[i] != 0:
-                    Ys[i] = maxval * Ys[i] + vals.readY(i)[0]
-
-            CreateWorkspace(OutputWorkspace=wksp, DataX=Xs, DataY=Ys, DataE=Es, NSpec=len(Ys), UnitX='TOF')
-            # change the units on the workspace so it is compatible with the workspace containing counts data
-            Multiply(LHSWorkspace='ones', RHSWorkspace=wksp, OutputWorkspace='units')
-            # do the super-position and clean up
-            Minus(LHSWorkspace=counts, RHSWorkspace='units', OutputWorkspace=wksp)
-            reducer.deleteWorkspaces(['ones', 'units'])
 
         # opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors)
         instrum.view(wksp)

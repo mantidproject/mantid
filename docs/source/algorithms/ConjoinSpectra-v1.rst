@@ -17,6 +17,16 @@ workspace name, but you can specify the name of a log value to use as
 the label, e.g. Temp\_Sample. the LabelValue property allows control of
 how a single value is extracted from time series logs.
 
+ConjoinSpectra operation
+------------------------
+
++-----------------------------------------+------------------------------------------+
+|Example case with 3 input workspaces.    | .. image:: ../images/ConjoinSpectra.png  |
+|                                         |    :height: 150                          |
+|                                         |    :width: 400                           |
+|                                         |    :alt: ConjoinSpectra operation        |
++-----------------------------------------+------------------------------------------+
+
 Usage
 -----
 

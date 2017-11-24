@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"

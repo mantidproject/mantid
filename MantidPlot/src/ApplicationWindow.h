@@ -42,8 +42,8 @@ Description          : QtiPlot's main window
 #include <QSettings>
 #include <QSplitter>
 
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
 #include "Scripted.h"

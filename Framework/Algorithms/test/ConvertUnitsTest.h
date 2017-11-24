@@ -58,7 +58,8 @@ void setup_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -93,7 +94,8 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));

@@ -12,7 +12,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class DetectorInfo;
 }
 namespace MDAlgorithms {
@@ -42,7 +42,7 @@ private:
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
 
   /// Calculate if this Q is on a detector
-  void calculateE1(const API::DetectorInfo &detectorInfo);
+  void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

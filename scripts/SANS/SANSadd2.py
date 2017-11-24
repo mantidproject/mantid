@@ -376,5 +376,6 @@ def _copyLog(lastPath, logFile, pathout):
         print(error)
         logger.notice(error)
 
+
 if __name__ == '__main__':
     add_runs(('16183','16197'),'SANS2D','.nxs')

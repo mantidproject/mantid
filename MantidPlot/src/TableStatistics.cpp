@@ -29,10 +29,10 @@
  ***************************************************************************/
 #include "ApplicationWindow.h"
 #include "TableStatistics.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QList>
 #include <QHeaderView>

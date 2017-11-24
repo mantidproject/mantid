@@ -52,13 +52,13 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="DFTprogram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3"]),
                              doc="DFT program which was used for a phonon calculation.")
 
         self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
-                             extensions=["phonon", "out"]),
+                             extensions=["phonon", "out", "outmol"]),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -116,7 +116,8 @@ class Abins(PythonAlgorithm):
         """
 
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
-                                 "CRYSTAL": self._validate_crystal_input_file}
+                                 "CRYSTAL": self._validate_crystal_input_file,
+                                 "DMOL3": self._validate_dmol3_input_file}
 
         issues = dict()
 
@@ -165,7 +166,8 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data
-        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL}
+        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                       "DMOL3": AbinsModules.LoadDMOL3}
         dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
         dft_data = dft_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
@@ -337,8 +339,8 @@ class Abins(PythonAlgorithm):
         :param atom_name: name of atom (for example H for hydrogen)
         """
         if atom_name is not None:
-            width = AbinsModules.AbinsParameters.bin_width
-            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name) * width
+
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
 
         dim = 1
         length = s_points.size
@@ -594,6 +596,29 @@ class Abins(PythonAlgorithm):
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
+    def _validate_dmol3_input_file(self, filename_full_path=None):
+        """
+        Method to validate input file for DMOL3 DFT program.
+        @param filename_full_path: full path of a file to check.
+        @return: True if file is valid otherwise false.
+        """
+        logger.information("Validate DMOL3 phonon file: ")
+
+        output = {"Invalid": False, "Comment": ""}
+        msg_err = "Invalid %s file. " % filename_full_path
+        msg_rename = "Please rename your file and try again."
+
+        dft_program = self.getProperty("DFTprogram").value
+
+        # check  extension of a file
+        filename_ext = os.path.splitext(filename_full_path)[1]
+        if filename_ext != ".outmol":
+            return dict(Invalid=True,
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        " The expected extension of file is .outmol. Found: " + filename_ext + ". " +
+                        msg_rename)
+        return output
+
     def _validate_crystal_input_file(self, filename_full_path=None):
         """
         Method to validate input file for CRYSTAL DFT program.
@@ -606,12 +631,14 @@ class Abins(PythonAlgorithm):
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
+        dft_program = self.getProperty("DFTprogram").value
+
         # check  extension of a file
         filename_ext = os.path.splitext(filename_full_path)[1]
         if filename_ext != ".out":
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
-                        " The expected extension of file is .out . (found: " + filename_ext + ") " +
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        " The expected extension of file is .out. Found: " + filename_ext + ". " +
                         msg_rename)
         return output
 
@@ -631,12 +658,14 @@ class Abins(PythonAlgorithm):
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
+        dft_program = self.getProperty("DFTprogram").value
+
         # check  extension of a file
         filename_ext = os.path.splitext(filename_full_path)[1]
         if filename_ext != ".phonon":
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
-                        " The expected extension of file is .phonon . (found: " + filename_ext + ") " +
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        " The expected extension of file is .phonon. Found: " + filename_ext + ". " +
                         msg_rename)
 
         # check a structure of the header part of file.

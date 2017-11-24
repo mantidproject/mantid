@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import re
 import glob
 import os
@@ -20,6 +21,7 @@ def grep(patt,lines):
     else:
         return None
 
+
 #get alg names
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 regexs= {}
@@ -39,5 +41,5 @@ for filename in files:
             expr = regexs[alg]
             results = grep(expr, lines)
             if results:
-                print filename
-                print results
+                print(filename)
+                print(results)

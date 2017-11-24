@@ -32,23 +32,30 @@ using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
 
-// Constants required internally only, so make them static
+// Constants required internally only, so make them static. These are
+// Chebyshev expansion coefficients copied directly from Carpenter 1969 Table 1
+// clang-format off
 namespace { // anonymous
-static const double C[] = {
-    0.730284,  -0.249987, 0.019448,  -0.000006, 0.000249,  -0.000004, 0.848859,
-    -0.452690, 0.056557,  -0.000009, 0.000000,  -0.000006, 1.133129,  -0.749962,
-    0.118245,  -0.000018, -0.001345, -0.000012, 1.641112,  -1.241639, 0.226247,
-    -0.000045, -0.004821, -0.000030, 0.848859,  -0.452690, 0.056557,  -0.000009,
-    0.000000,  -0.000006, 1.000006,  -0.821100, 0.166645,  -0.012096, 0.000008,
-    -0.000126, 1.358113,  -1.358076, 0.348199,  -0.038817, 0.000022,  -0.000021,
-    0.0,       0.0,       0.0,       0.0,       0.0,       0.0,       1.133129,
-    -0.749962, 0.118245,  -0.000018, -0.001345, -0.000012, 1.358113,  -1.358076,
-    0.348199,  -0.038817, 0.000022,  -0.000021, 0.0,       0.0,       0.0,
-    0.0,       0.0,       0.0,       0.0,       0.0,       0.0,       0.0,
-    0.0,       0.0,       1.641112,  -1.241639, 0.226247,  -0.000045, -0.004821,
-    -0.000030, 0.0,       0.0,       0.0,       0.0,       0.0,       0.0,
-    0.0,       0.0,       0.0,       0.0,       0.0,       0.0,       0.0,
-    0.0,       0.0,       0.0,       0.0,       0.0};
+static const double CHEBYSHEV[] = {
+    // l= 0       1         2          3         4          5       // (m,n)
+    0.730284, -0.249987, 0.019448, -0.000006, 0.000249,  -0.000004, // (1,1)
+    0.848859, -0.452690, 0.056557, -0.000009, 0.000000,  -0.000006, // (1,2)
+    1.133129, -0.749962, 0.118245, -0.000018, -0.001345, -0.000012, // (1,3)
+    1.641112, -1.241639, 0.226247, -0.000045, -0.004821, -0.000030, // (1,4)
+    0.848859, -0.452690, 0.056557, -0.000009, 0.000000,  -0.000006, // (2,1)
+    1.000006, -0.821100, 0.166645, -0.012096, 0.000008,  -0.000126, // (2,2)
+    1.358113, -1.358076, 0.348199, -0.038817, 0.000022,  -0.000021, // (2,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (2,4)
+    1.133129, -0.749962, 0.118245, -0.000018, -0.001345, -0.000012, // (3,1)
+    1.358113, -1.358076, 0.348199, -0.038817, 0.000022,  -0.000021, // (3,2)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (3,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (3,4)
+    1.641112, -1.241639, 0.226247, -0.000045, -0.004821, -0.000030, // (4,1)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (4,2)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (4,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0        // (4,4)
+};
+// clang-format on
 
 static const int Z_size = 36; // Caution, this must be updated if the
                               // algorithm is changed to use a different
@@ -63,6 +70,9 @@ static const double Z_initial[] = {
 
 static const double LAMBDA_REF =
     1.81; ///< Wavelength that the calculations are based on
+// Badly named constants, no explanation of the origin of these
+// values. They appear to be used when calculating the multiple
+// scattering correction factor.
 static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
 } // end of anonymous
@@ -246,11 +256,11 @@ vector<double> createZ(const double angle_rad) {
       if (iplusj <= 5) {
         l = 0;
         J = 1 + l + 6 * (i - 1) + 6 * 4 * (j - 1);
-        sum = C[J - 1];
+        sum = CHEBYSHEV[J - 1];
 
         for (l = 1; l <= 5; l++) {
           J = 1 + l + 6 * (i - 1) + 6 * 4 * (j - 1);
-          sum = sum + C[J - 1] * cos(l * theta_rad);
+          sum = sum + CHEBYSHEV[J - 1] * cos(l * theta_rad);
         }
         J = 1 + i + 6 * j;
         Z[J - 1] = sum;
@@ -287,6 +297,11 @@ double calculate_msa_factor(const double radius, const double Q2,
 
   const double sigabs = Q2 * wavelength;
   const double sigir = (sigabs + sigsct) * radius;
+  /**
+  * By setting the incident and scattered cross sections to be equal
+  * we implicitly assume elastic scattering because in general these will
+  * vary with neutron energy.
+  **/
   const double sigsr = sigir;
 
   const double delta = COEFF4 * sigir + COEFF5 * sigir * sigir;

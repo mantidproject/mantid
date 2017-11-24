@@ -5,7 +5,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"

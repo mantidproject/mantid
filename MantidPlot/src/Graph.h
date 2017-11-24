@@ -48,8 +48,8 @@
 #include <qwt_plot_rescaler.h>
 #endif
 #include "AxesDialog.h"
-#include "MantidQtAPI/GraphOptions.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotToolInterface.h"

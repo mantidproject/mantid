@@ -1,6 +1,7 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
+#include <iterator>
 
 namespace Mantid {
 namespace Geometry {

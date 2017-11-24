@@ -69,7 +69,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # # Trans fit
         command = NParameterCommand(command_id=NParameterCommandId.trans_fit, values=[FitData.Can, 10.4, 12.54,
-                                                                                      FitType.Log, 0])
+                                                                                      FitType.Logarithmic, 0])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Front detector rescale
@@ -135,7 +135,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2
                         == 23.54/1000.)
         self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type
-                        is FitType.Log)
+                        is FitType.Logarithmic)
         self.assertTrue(state.adjustment.calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order
                         == 0)
 

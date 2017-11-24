@@ -9,8 +9,8 @@
 #include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
@@ -21,16 +21,19 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/RWLock.h>
-#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Void.h>
 
 #include <json/json.h>
 
 #include <map>
+
+// Index property handling template definitions
+#include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::Kernel;
 
@@ -54,7 +57,7 @@ public:
 private:
   const std::string &m_value;
 };
-}
+} // namespace
 
 // Doxygen can't handle member specialization at the moment:
 // https://bugzilla.gnome.org/show_bug.cgi?id=406027
@@ -128,15 +131,15 @@ void Algorithm::setExecuted(bool state) { m_isExecuted = state; }
 
 //---------------------------------------------------------------------------------------------
 /** To query whether algorithm is a child.
-*  @returns true - the algorithm is a child algorithm.  False - this is a full
-* managed algorithm.
-*/
+ *  @returns true - the algorithm is a child algorithm.  False - this is a full
+ * managed algorithm.
+ */
 bool Algorithm::isChild() const { return m_isChildAlgorithm; }
 
 /** To set whether algorithm is a child.
-*  @param isChild :: True - the algorithm is a child algorithm.  False - this is
-* a full managed algorithm.
-*/
+ *  @param isChild :: True - the algorithm is a child algorithm.  False - this
+ * is a full managed algorithm.
+ */
 void Algorithm::setChild(const bool isChild) { m_isChildAlgorithm = isChild; }
 
 /**
@@ -188,7 +191,7 @@ void Algorithm::removeObserver(const Poco::AbstractObserver &observer) const {
  * @param estimatedTime :: Optional estimated time to completion
  * @param progressPrecision :: optional, int number of digits after the decimal
  * point to show.
-*/
+ */
 void Algorithm::progress(double p, const std::string &msg, double estimatedTime,
                          int progressPrecision) {
   notificationCenter().postNotification(
@@ -244,13 +247,13 @@ const std::string Algorithm::workspaceMethodInputProperty() const { return ""; }
 
 //---------------------------------------------------------------------------------------------
 /** Initialization method invoked by the framework. This method is responsible
-*  for any bookkeeping of initialization required by the framework itself.
-*  It will in turn invoke the init() method of the derived algorithm,
-*  and of any Child Algorithms which it creates.
-*  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
-*initialised
-*
-*/
+ *  for any bookkeeping of initialization required by the framework itself.
+ *  It will in turn invoke the init() method of the derived algorithm,
+ *  and of any Child Algorithms which it creates.
+ *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
+ *initialised
+ *
+ */
 void Algorithm::initialize() {
   // Bypass the initialization if the algorithm has already been initialized.
   if (m_isInitialized)
@@ -416,15 +419,15 @@ void Algorithm::unlockWorkspaces() {
 
 //---------------------------------------------------------------------------------------------
 /** The actions to be performed by the algorithm on a dataset. This method is
-*  invoked for top level algorithms by the application manager.
-*  This method invokes exec() method.
-*  For Child Algorithms either the execute() method or exec() method
-*  must be EXPLICITLY invoked by  the parent algorithm.
-*
-*  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
-*executed
-*  @return true if executed successfully.
-*/
+ *  invoked for top level algorithms by the application manager.
+ *  This method invokes exec() method.
+ *  For Child Algorithms either the execute() method or exec() method
+ *  must be EXPLICITLY invoked by  the parent algorithm.
+ *
+ *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
+ *executed
+ *  @return true if executed successfully.
+ */
 bool Algorithm::execute() {
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
@@ -665,8 +668,9 @@ void Algorithm::executeAsChildAlg() {
 
 //---------------------------------------------------------------------------------------------
 /** Stores any output workspaces into the AnalysisDataService
-*  @throw std::runtime_error If unable to successfully store an output workspace
-*/
+ *  @throw std::runtime_error If unable to successfully store an output
+ * workspace
+ */
 void Algorithm::store() {
   const std::vector<Property *> &props = getProperties();
   std::vector<int> groupWsIndicies;
@@ -709,22 +713,22 @@ void Algorithm::store() {
 
 //---------------------------------------------------------------------------------------------
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
-*object.
-*  Using this mechanism instead of creating daughter
-*  algorithms directly via the new operator is prefered since then
-*  the framework can take care of all of the necessary book-keeping.
-*
-*  @param name ::           The concrete algorithm class of the Child Algorithm
-*  @param startProgress ::  The percentage progress value of the overall
-*algorithm where this child algorithm starts
-*  @param endProgress ::    The percentage progress value of the overall
-*algorithm where this child algorithm ends
-*  @param enableLogging ::  Set to false to disable logging from the child
-*algorithm
-*  @param version ::        The version of the child algorithm to create. By
-*default gives the latest version.
-*  @return shared pointer to the newly created algorithm object
-*/
+ *object.
+ *  Using this mechanism instead of creating daughter
+ *  algorithms directly via the new operator is prefered since then
+ *  the framework can take care of all of the necessary book-keeping.
+ *
+ *  @param name ::           The concrete algorithm class of the Child Algorithm
+ *  @param startProgress ::  The percentage progress value of the overall
+ *algorithm where this child algorithm starts
+ *  @param endProgress ::    The percentage progress value of the overall
+ *algorithm where this child algorithm ends
+ *  @param enableLogging ::  Set to false to disable logging from the child
+ *algorithm
+ *  @param version ::        The version of the child algorithm to create. By
+ *default gives the latest version.
+ *  @return shared pointer to the newly created algorithm object
+ */
 Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
                                                const double startProgress,
                                                const double endProgress,
@@ -793,9 +797,9 @@ std::string Algorithm::toString() const {
 }
 
 /**
-* Serialize this object to a json object)
-* @returns This object serialized as a json object
-*/
+ * Serialize this object to a json object)
+ * @returns This object serialized as a json object
+ */
 ::Json::Value Algorithm::toJson() const {
   ::Json::Value root;
 
@@ -848,12 +852,12 @@ IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory &history) {
 //--------------------------------------------------------------------------------------------
 /** De-serializes the algorithm from a string
  *
-* @param input :: An input string in the format. The format is
-*        AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is
-*not found the
-*        highest found is used.
-* @return A pointer to a managed algorithm object
-*/
+ * @param input :: An input string in the format. The format is
+ *        AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is
+ *not found the
+ *        highest found is used.
+ * @return A pointer to a managed algorithm object
+ */
 IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
   ::Json::Value root;
   ::Json::Reader reader;
@@ -896,7 +900,7 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
 }
 
 /** Fills History, Algorithm History and Algorithm Parameters
-*/
+ */
 void Algorithm::fillHistory() {
   // this is not a child algorithm. Add the history algorithm to the
   // WorkspaceHistory object.
@@ -949,14 +953,13 @@ void Algorithm::fillHistory() {
 }
 
 /**
-* Link the name of the output workspaces on this parent algorithm.
-* with the last child algorithm executed to ensure they match in the history.
-*
-* This solves the case where child algorithms use a temporary name and this
-* name needs to match the output name of the parent algorithm so the history can
-*be
-* re-run.
-*/
+ * Link the name of the output workspaces on this parent algorithm.
+ * with the last child algorithm executed to ensure they match in the history.
+ *
+ * This solves the case where child algorithms use a temporary name and this
+ * name needs to match the output name of the parent algorithm so the history
+ *can be re-run.
+ */
 void Algorithm::linkHistoryWithLastChild() {
   if (m_recordHistoryForChild) {
     // iterate over the algorithms output workspaces
@@ -1002,9 +1005,9 @@ void Algorithm::linkHistoryWithLastChild() {
 }
 
 /** Indicates that this algrithms history should be tracked regardless of if it
-* is a child.
-*  @param parentHist :: the parent algorithm history object the history in.
-*/
+ * is a child.
+ *  @param parentHist :: the parent algorithm history object the history in.
+ */
 void Algorithm::trackAlgorithmHistory(
     boost::shared_ptr<AlgorithmHistory> parentHist) {
   enableHistoryRecordingForChild(true);
@@ -1012,17 +1015,17 @@ void Algorithm::trackAlgorithmHistory(
 }
 
 /** Check if we are tracking history for thus algorithm
-*  @return if we are tracking the history of this algorithm
-*/
+ *  @return if we are tracking the history of this algorithm
+ */
 bool Algorithm::trackingHistory() {
   return (!isChild() || m_recordHistoryForChild);
 }
 
 /** Populate lists of the input & output workspace properties.
-*  (InOut workspaces go in both lists)
-*  @param inputWorkspaces ::  A reference to a vector for the input workspaces
-*  @param outputWorkspaces :: A reference to a vector for the output workspaces
-*/
+ *  (InOut workspaces go in both lists)
+ *  @param inputWorkspaces ::  A reference to a vector for the input workspaces
+ *  @param outputWorkspaces :: A reference to a vector for the output workspaces
+ */
 void Algorithm::findWorkspaceProperties(
     std::vector<Workspace_sptr> &inputWorkspaces,
     std::vector<Workspace_sptr> &outputWorkspaces) const {
@@ -1445,9 +1448,9 @@ void Algorithm::setOtherProperties(IAlgorithm *alg,
 
 //--------------------------------------------------------------------------------------------
 /** To query the property is a workspace property
-*  @param prop :: pointer to input properties
-*  @returns true if this is a workspace property
-*/
+ *  @param prop :: pointer to input properties
+ *  @returns true if this is a workspace property
+ */
 bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
   if (!prop) {
     return false;
@@ -1463,12 +1466,12 @@ bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
 //=============================================================================================
 namespace {
 /**
-* A object to set the flag marking asynchronous running correctly
-*/
+ * A object to set the flag marking asynchronous running correctly
+ */
 struct AsyncFlagHolder {
   /** Constructor
-  * @param A :: reference to the running flag
-  */
+   * @param A :: reference to the running flag
+   */
   explicit AsyncFlagHolder(bool &running_flag) : m_running_flag(running_flag) {
     m_running_flag = true;
   }
@@ -1481,12 +1484,12 @@ private:
   /// Running flag
   bool &m_running_flag;
 };
-}
+} // namespace
 
 //--------------------------------------------------------------------------------------------
 /**
-* Asynchronous execution
-*/
+ * Asynchronous execution
+ */
 Poco::ActiveResult<bool> Algorithm::executeAsync() {
   m_executeAsync = new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(
       this, &Algorithm::executeAsyncImpl);
@@ -1496,7 +1499,7 @@ Poco::ActiveResult<bool> Algorithm::executeAsync() {
 /**Callback when an algorithm is executed asynchronously
  * @param i :: Unused argument
  * @return true if executed successfully.
-*/
+ */
 bool Algorithm::executeAsyncImpl(const Poco::Void &) {
   AsyncFlagHolder running(m_runningAsync);
   return this->execute();
@@ -1513,8 +1516,8 @@ Poco::NotificationCenter &Algorithm::notificationCenter() const {
 }
 
 /** Handles and rescales child algorithm progress notifications.
-*  @param pNf :: The progress notification from the child algorithm.
-*/
+ *  @param pNf :: The progress notification from the child algorithm.
+ */
 void Algorithm::handleChildProgressNotification(
     const Poco::AutoPtr<ProgressNotification> &pNf) {
   double p = m_startChildProgress +
@@ -1632,7 +1635,7 @@ void Algorithm::reportCompleted(const double &duration,
 }
 
 /** Registers the usage of the algorithm with the UsageService
-*/
+ */
 void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
     std::ostringstream oss;
@@ -1654,6 +1657,11 @@ void Algorithm::setAlgStartupLogging(const bool enabled) {
 */
 bool Algorithm::getAlgStartupLogging() const {
   return m_isAlgStartupLoggingEnabled;
+}
+
+bool Algorithm::isCompoundProperty(const std::string &name) const {
+  return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) !=
+         m_reservedList.cend();
 }
 
 /// Runs the algorithm with the specified execution mode.
@@ -1912,6 +1920,6 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     throw std::runtime_error(message);
   }
 }
-}
+} // namespace Kernel
 
 } // namespace Mantid

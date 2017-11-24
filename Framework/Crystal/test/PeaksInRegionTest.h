@@ -2,7 +2,7 @@
 #define MANTID_CRYSTAL_PEAKSINREGIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

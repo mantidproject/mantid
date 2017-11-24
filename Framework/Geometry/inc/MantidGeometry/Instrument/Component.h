@@ -299,8 +299,10 @@ public:
 
   bool isParametrized() const override;
 
-  virtual void
+  virtual size_t
   registerContents(class ComponentVisitor &componentVisitor) const override;
+  bool hasComponentInfo() const;
+  size_t index() const;
 
 protected:
   /// Parent component in the tree

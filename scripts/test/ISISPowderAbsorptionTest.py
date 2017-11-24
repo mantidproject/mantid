@@ -17,7 +17,7 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
 
         ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
         ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
-                                                                sample_details_obj=sample_details)
+                                                                sample_details_obj=sample_details, is_vanadium=True)
 
         self.assertAlmostEqual(ws.dataY(0)[2], 1.16864808, delta=1e-8)
         self.assertAlmostEqual(ws.dataY(0)[5], 1.16872761, delta=1e-8)

@@ -136,9 +136,10 @@ public:
                           double req_tolerance, double min_vol);
 
   /// Get the vector in the direction of "c" given other unit cell information
-  static Kernel::V3D Make_c_dir(const Kernel::V3D &a_dir,
-                                const Kernel::V3D &b_dir, double c,
-                                double alpha, double beta, double gamma);
+  static Kernel::V3D makeCDir(const Kernel::V3D &a_dir,
+                              const Kernel::V3D &b_dir, const double c,
+                              const double cosAlpha, const double cosBeta,
+                              const double cosGamma, const double sinGamma);
 
   /// Construct a sublist of the specified list of a,b,c directions, by
   /// removing all directions that seem to be duplicates.

@@ -212,4 +212,5 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         DeleteWorkspace(dos2d)
         DeleteWorkspace(dos1d)
 
+
 AlgorithmFactory.subscribe(ComputeIncoherentDOS)

@@ -32,10 +32,10 @@
 #include "Table.h"
 #include "ApplicationWindow.h"
 #include "ImportASCIIDialog.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "SortDialog.h"
 #include "muParserScript.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>

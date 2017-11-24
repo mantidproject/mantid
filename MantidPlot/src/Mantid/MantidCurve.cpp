@@ -4,7 +4,7 @@
 #include <qwt_symbol.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Common/MantidQwtWorkspaceData.h"
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"

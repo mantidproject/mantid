@@ -82,5 +82,6 @@ class SANSWideAngleCorrection(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", trans_wc)
 
+
 #############################################################################################
 AlgorithmFactory.subscribe(SANSWideAngleCorrection)

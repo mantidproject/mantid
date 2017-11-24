@@ -309,6 +309,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
+  // there is a oddity here that y is evaluated from x=0, and x is from XMin
+  // changing it requires changing unit tests that use this algorithm
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
@@ -432,6 +434,7 @@ CreateSampleWorkspace::evalFunction(const std::string &functionString,
     std::string replaceStr = boost::lexical_cast<std::string>(replace_val);
     replaceAll(parsedFuncString, token, replaceStr);
   }
+  g_log.information(parsedFuncString);
 
   IFunction_sptr func_sptr =
       FunctionFactory::Instance().createInitialized(parsedFuncString);

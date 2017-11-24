@@ -22,6 +22,8 @@ from .FrequencyPowderGenerator import FrequencyPowderGenerator
 from .GeneralDFTProgram import GeneralDFTProgram
 from .LoadCASTEP import LoadCASTEP
 from .LoadCRYSTAL import LoadCRYSTAL
+from .LoadDMOL3 import LoadDMOL3
+from .GeneralDFTParser import GeneralDFTParser
 
 # Calculating modules
 from .CalculatePowder import CalculatePowder
@@ -47,3 +49,4 @@ from . import AbinsParameters
 from . import AbinsConstants
 from . import AbinsTestHelpers
 
+from .GeneralLoadDFTTester import GeneralLoadDFTTester

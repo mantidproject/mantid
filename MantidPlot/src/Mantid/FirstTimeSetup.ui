@@ -809,7 +809,7 @@ color: rgb(25,125,25);</string>
   <customwidget>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>
    <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+   <header>MantidQtWidgets/Common/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

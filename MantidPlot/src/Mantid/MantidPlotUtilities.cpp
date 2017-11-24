@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <MantidQtMantidWidgets/MantidDisplayBase.h>
+#include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::API::WorkspaceGroup_const_sptr;

@@ -3,7 +3,7 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -537,7 +537,10 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
     throw std::invalid_argument("Instrument component " + componentName +
                                 " not found");
   }
-  ws->mutableDetectorInfo().setPosition(*component, newPos);
+  auto &componentInfo = ws->mutableComponentInfo();
+  const auto componentIndex =
+      componentInfo.indexOf(component->getComponentID());
+  componentInfo.setPosition(componentIndex, newPos);
 }
 
 /**
@@ -556,7 +559,10 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
     throw std::invalid_argument("Instrument component " + componentName +
                                 " not found");
   }
-  ws->mutableDetectorInfo().setRotation(*component, rot);
+  auto &componentInfo = ws->mutableComponentInfo();
+  const auto componentIndex =
+      componentInfo.indexOf(component->getComponentID());
+  componentInfo.setRotation(componentIndex, rot);
 }
 
 /**

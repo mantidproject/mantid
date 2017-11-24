@@ -14,15 +14,12 @@ exclude =
     installers,
     instrument,
     MantidPlot,
-    MantidQt,
-    QtPropertyBrowser,
+    qt,
     scripts/test,
     Testing/PerformanceTests,
     Testing/SystemTests/lib,
     Testing/SystemTests/scripts,
     Testing/SystemTests/tests/analysis/reference,
     Testing/Tools,
-    Vates/ParaviewPlugins,
-    Vates/VatesSimpleGui
 max-complexity = 20
 max-line-length = 140

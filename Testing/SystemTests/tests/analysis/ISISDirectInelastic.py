@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
@@ -7,10 +8,11 @@ import shutil
 
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
+from six import with_metaclass
 
 
 #----------------------------------------------------------------------
-class ISISDirectInelasticReduction(stresstesting.MantidStressTest):
+class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply
@@ -27,7 +29,6 @@ class ISISDirectInelasticReduction(stresstesting.MantidStressTest):
         - sample_rmm: A float value for the sample rmm or None
         - hard_mask: An hard mask file or None
     """
-    __metaclass__ = ABCMeta # Mark as an abstract class
     tolerance=0.
     tolerance_is_reller=True
 

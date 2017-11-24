@@ -36,6 +36,7 @@ from .kernel.funcinspect import customise_func as _customise_func
 from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
+from .fitfunctions import *
 
 # ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
@@ -314,6 +315,10 @@ def fitting_algorithm(f):
         if type(function) == str and function in _api.AnalysisDataService:
             raise ValueError("Fit API has changed. The function must now come "
                              "first in the argument list and the workspace second.")
+        # Deal with case where function is a FunctionWrapper.
+        if isinstance(function,FunctionWrapper):
+            function = function.__str__()
+            
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
@@ -361,7 +366,8 @@ def Fit(*args, **kwargs):
     It can work with arbitrary data sources and therefore some options
     are only available when the function & workspace type are known.
 
-    This simple wrapper takes the Function (as a string) & the InputWorkspace
+    This simple wrapper takes the Function (as a string or a
+    FunctionWrapper object) and the InputWorkspace
     as the first two arguments. The remaining arguments must be
     specified by keyword.
 
@@ -376,7 +382,7 @@ def Fit(*args, **kwargs):
 @fitting_algorithm
 def CalculateChiSquared(*args, **kwargs):
     """
-    This function calculates chi squared claculation for a function and a data set.
+    This function calculates chi squared calculation for a function and a data set.
     The data set is defined in a way similar to Fit algorithm.
 
     Example:

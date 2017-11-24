@@ -978,9 +978,6 @@ def DisplayMask(mask_worksp=None):
         @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
         @return the name of the workspace that was displayed
     """
-    # this will be copied from a sample work space if one exists
-    counts_data = None
-
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = LAST_SAMPLE
@@ -993,18 +990,12 @@ def DisplayMask(mask_worksp=None):
                 CloneWorkspace(InputWorkspace=samp + "_monitors",
                                OutputWorkspace=mask_worksp + "_monitors")
                 su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
-
-            counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=mask_worksp, OutputWorkspace=counts_data)
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log=True, no_console=False)
             return
 
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
-    if counts_data:
-        DeleteWorkspace(counts_data)
-
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
     return mask_worksp
 
 

@@ -62,7 +62,7 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
       }
     }
   } else {
-    for (auto peak : m_peaks) {
+    for (const auto &peak : m_peaks) {
       newReflection.addPeak(peak);
     }
   }

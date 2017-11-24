@@ -1,12 +1,13 @@
+from __future__ import (absolute_import, division, print_function)
 try:
     from mantidplot import *
 except ImportError:
     canMantidPlot = False
 
-import ui_data_processor_window
 from PyQt4 import QtGui
-from mantid.simpleapi import *
 from mantidqtpython import MantidQt
+from ui.reflectometer.ui_data_processor_window import Ui_DataProcessorWindow
+
 
 canMantidPlot = True
 
@@ -62,7 +63,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
         self.gui.add_actions_to_menus(workspace_list)
 
 
-class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProcessorWindow):
+class DataProcessorGui(QtGui.QMainWindow, Ui_DataProcessorWindow):
 
     data_processor_table = None
     main_presenter = None

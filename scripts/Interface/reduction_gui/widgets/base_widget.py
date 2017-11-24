@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import os
 import types
@@ -230,9 +231,9 @@ class BaseWidget(QtGui.QWidget):
                 if hasattr(proxy, 'errors'):
                     if isinstance(proxy.errors, list):
                         for e in proxy.errors:
-                            print e
+                            print(e)
                     else:
-                        print proxy.errors
+                        print(proxy.errors)
                 QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         else:
             QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")

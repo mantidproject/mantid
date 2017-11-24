@@ -116,10 +116,11 @@ public:
   void calculateCentroid(coord_t * /*centroid*/,
                          const int /*runindex*/) const override{};
   coord_t *getCentroid() const override { return 0; };
-  void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
-                       const coord_t /*radiusSquared*/, signal_t & /*signal*/,
-                       signal_t & /*errorSquared*/,
-                       const coord_t /*innerRadiusSquared*/) const override{};
+  void integrateSphere(
+      Mantid::API::CoordTransform & /*radiusTransform*/,
+      const coord_t /*radiusSquared*/, signal_t & /*signal*/,
+      signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
+      const bool /*useOnePercentBackgroundCorrection*/) const override{};
   void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
                       const coord_t /*radiusSquared*/, coord_t *,
                       signal_t &) const override{};

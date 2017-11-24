@@ -1,5 +1,5 @@
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/IDTypes.h"

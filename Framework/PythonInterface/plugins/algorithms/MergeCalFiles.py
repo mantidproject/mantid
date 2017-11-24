@@ -141,5 +141,6 @@ class MergeCalFiles(PythonAlgorithm):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line
 
+
 #############################################################################################
 AlgorithmFactory.subscribe(MergeCalFiles())

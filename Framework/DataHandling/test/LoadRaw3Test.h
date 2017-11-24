@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -112,7 +112,7 @@ public:
     const auto detIndex = detectorInfo.indexOf(103);
     const auto &det103 = detectorInfo.detector(detIndex);
     TS_ASSERT_EQUALS(det103.getID(), 103);
-    TS_ASSERT_EQUALS(det103.getName(), "pixel");
+    TS_ASSERT_EQUALS(det103.getName(), "HET_non_PSDtube");
     TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.4013, 0.01);
     TS_ASSERT_DELTA(detectorInfo.position(detIndex).Z(), 2.4470, 0.01);
 
@@ -545,7 +545,7 @@ public:
     const auto &detector103 = detectorInfo.detector(detectorIndex);
 
     TS_ASSERT_EQUALS(detector103.getID(), 103);
-    TS_ASSERT_EQUALS(detector103.getName(), "pixel");
+    TS_ASSERT_EQUALS(detector103.getName(), "HET_non_PSDtube");
     TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).X(), 0.4013, 0.01);
     TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 2.4470, 0.01);
 

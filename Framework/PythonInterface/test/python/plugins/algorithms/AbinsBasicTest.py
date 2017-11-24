@@ -9,15 +9,11 @@ import numpy as np
 
 def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsTestHelpers.old_python()
-    if is_python_old:
-        logger.warning("Skipping AbinsBasicTest because Python is too old.")
-
     is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
     if is_numpy_old:
         logger.warning("Skipping AbinsBasicTest because numpy is too old.")
 
-    return is_python_old or is_numpy_old
+    return is_numpy_old
 
 
 def skip_if(skipping_criteria):
@@ -55,8 +51,8 @@ class AbinsBasicTest(unittest.TestCase):
     _tolerance = 0.0001
 
     def tearDown(self):
-        AbinsTestHelpers.remove_output_files(list_of_names=["Abins", "explicit",  "default", "total",
-                                                            "squaricn_scale", "benzene_exp", "experimental"])
+        AbinsTestHelpers.remove_output_files(list_of_names=["explicit",  "default", "total", "squaricn_sum_Abins",
+                                                            "squaricn_scale", "benzene_exp", "benzene_Abins", "experimental"])
         mtd.clear()
 
     def test_wrong_input(self):

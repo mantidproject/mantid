@@ -1,5 +1,5 @@
 #include "TextFileIO.h"
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
 
 #include <QApplication>
 #include <QFile>

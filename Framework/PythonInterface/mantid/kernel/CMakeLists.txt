@@ -75,6 +75,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
   src/Registry/MappingTypeHandler.cpp
+  src/Registry/PropertyManagerFactory.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
@@ -109,6 +110,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h

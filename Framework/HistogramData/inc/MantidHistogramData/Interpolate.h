@@ -49,6 +49,11 @@ MANTID_HISTOGRAMDATA_DLL void interpolateCSplineInplace(Histogram &inOut,
 
 MANTID_HISTOGRAMDATA_DLL void interpolateCSplineInplace(const Histogram &input,
                                                         Histogram &output);
+MANTID_HISTOGRAMDATA_DLL
+size_t minSizeForCSplineInterpolation();
+
+MANTID_HISTOGRAMDATA_DLL
+size_t minSizeForLinearInterpolation();
 
 } // namespace HistogramData
 } // namespace Mantid

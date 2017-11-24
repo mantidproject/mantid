@@ -2,7 +2,7 @@
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
@@ -87,6 +87,13 @@ void EQSANSLoad::init() {
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
                   "using the distance found in the meta data), in mm");
+  declareProperty("SampleOffset", EMPTY_DBL(),
+                  "Offset to be applied to the sample position (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty(
+      "DetectorOffset", EMPTY_DBL(),
+      "Offset to be applied to the detector position (use only when "
+      "using the distance found in the meta data), in mm");
   declareProperty("LoadMonitors", true,
                   "If true, the monitor workspace will be loaded");
   declareProperty("OutputMessage", "", Direction::Output);
@@ -547,11 +554,13 @@ void EQSANSLoad::exec() {
     }
   }
 
-  // Get the sample-detector distance
-  double sdd = 0.0;
-  const double sample_det_dist = getProperty("SampleDetectorDistance");
-  if (!isEmpty(sample_det_dist)) {
-    sdd = sample_det_dist;
+  // Get the sample flange-to-detector distance
+  // We have to call it "SampleDetectorDistance" in the workspace
+  double sfdd = 0.0;
+  double s2d = 0.0;
+  const double sampleflange_det_dist = getProperty("SampleDetectorDistance");
+  if (!isEmpty(sampleflange_det_dist)) {
+    sfdd = sampleflange_det_dist;
   } else {
     if (!dataWS->run().hasProperty("detectorZ")) {
       g_log.error()
@@ -569,27 +578,41 @@ void EQSANSLoad::exec() {
     if (!dp)
       throw std::runtime_error("Could not cast (interpret) the property " +
                                dzName + " as a time series property value.");
-    sdd = dp->getStatistics().mean;
+    sfdd = dp->getStatistics().mean;
+    s2d = sfdd;
 
-    // Modify SDD according to offset if given
+    // Modify SDD according to the DetectorDistance offset if given
+    const double sampleflange_det_offset = getProperty("DetectorOffset");
+    if (!isEmpty(sampleflange_det_offset))
+      sfdd += sampleflange_det_offset;
+
+    // Modify S2D according to the SampleDistance offset if given
+    // This assumes that a positive offset moves the sample toward the detector
+    const double sampleflange_sample_offset = getProperty("SampleOffset");
+    if (!isEmpty(sampleflange_sample_offset))
+      s2d = s2d - sampleflange_sample_offset + sampleflange_det_offset;
+
+    // Modify SDD according to SampleDetectorDistanceOffset offset if given
     const double sample_det_offset =
         getProperty("SampleDetectorDistanceOffset");
     if (!isEmpty(sample_det_offset))
-      sdd += sample_det_offset;
+      s2d += sample_det_offset;
   }
-  dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm",
+                                   true);
+  dataWS->mutableRun().addProperty("sample_detector_distance", s2d, "mm", true);
 
   // Move the detector to its correct position
   IAlgorithm_sptr mvAlg =
       createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
-  mvAlg->setProperty("Z", sdd / 1000.0);
+  mvAlg->setProperty("Z", sfdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters\n";
+  g_log.information() << "Moving detector to " << sfdd / 1000.0 << " meters\n";
   m_output_message += "   Detector position: " +
-                      Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
+                      Poco::NumberFormatter::format(sfdd / 1000.0, 3) + " m\n";
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
@@ -733,9 +756,11 @@ void EQSANSLoad::exec() {
   }
 
   // Convert to wavelength
+  // Checked on 8/10/17 - changed from "sdd" to "sfdd" as was done above
+  // sfdd + ssd gives total distance (corrected by offset) from the source
   const double ssd =
       fabs(dataWS->getInstrument()->getSource()->getPos().Z()) * 1000.0;
-  const double conversion_factor = 3.9560346 / (sdd + ssd);
+  const double conversion_factor = 3.9560346 / (sfdd + ssd);
   m_output_message += "   TOF to wavelength conversion factor: " +
                       Poco::NumberFormatter::format(conversion_factor) + "\n";
 

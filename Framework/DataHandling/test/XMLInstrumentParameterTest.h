@@ -5,10 +5,12 @@
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -59,12 +61,18 @@ public:
     TS_ASSERT_DELTA(pos1.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(pos1.Y(), 0.0081, 0.0001);
     // linear-detector is composite, i.e., not a detector and thus not stored in
-    // DetectorInfo, parameter is in map.
+    // DetectorInfo but in ComponentInfo
+    const auto &componentInfo = output1->componentInfo();
+    const auto &linearDetector = output1->getInstrument()
+                                     ->getComponentByName("linear-detector")
+                                     ->getComponentID();
+    const auto pos2 =
+        componentInfo.position(componentInfo.indexOf(linearDetector));
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
-    TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 1);
-    TS_ASSERT_DELTA(ret2[0].Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret2[0].X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret2[0].Z(), 0.1499, 0.0001);
+    TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 0);
+    TS_ASSERT_DELTA(pos2.Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos2.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos2.Z(), 0.1499, 0.0001);
     std::vector<double> ret3 = paramMap.getDouble("slit1", "vertical gap");
     TS_ASSERT_EQUALS(static_cast<int>(ret3.size()), 1);
     TS_ASSERT_DELTA(ret3[0], 0.5005, 0.0001);

@@ -186,6 +186,24 @@ class StateMoveLARMOR(StateMove):
         super(StateMoveLARMOR, self).validate()
 
 
+@rename_descriptor_names
+class StateMoveZOOM(StateMove):
+    lab_detector_default_sd_m = FloatParameter()
+
+    def __init__(self):
+        super(StateMoveZOOM, self).__init__()
+        self.lab_detector_default_sd_m = 0.0
+
+        # Set the monitor names
+        self.monitor_names = {}
+
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+
+    def validate(self):
+        super(StateMoveZOOM, self).validate()
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
@@ -227,6 +245,30 @@ class StateMoveSANS2DBuilder(object):
         #       in the IDF we should be able to parse it and get.
         invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8"]
         setup_idf_and_ipf_content(self.state, data_info, invalid_monitor_names=invalid_monitor_names)
+
+    def build(self):
+        self.state.validate()
+        return copy.copy(self.state)
+
+    def convert_pos1(self, value):
+        return value / 1000.
+
+    def convert_pos2(self, value):
+        return value / 1000.
+
+
+class StateMoveZOOMBuilder(object):
+    @automatic_setters(StateMoveZOOM, exclusions=["detector_name", "detector_name_short", "monitor_names"])
+    def __init__(self, data_info):
+        super(StateMoveZOOMBuilder, self).__init__()
+        self.state = StateMoveZOOM()
+        # TODO: At the moment we set the monitor names up manually here. In principle we have all necessary information
+        #       in the IDF we should be able to parse it and get.
+        invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
+        invalid_detector_types = [DetectorType.HAB]
+        setup_idf_and_ipf_content(self.state, data_info,
+                                  invalid_detector_types=invalid_detector_types,
+                                  invalid_monitor_names=invalid_monitor_names)
 
     def build(self):
         self.state.validate()
@@ -281,6 +323,8 @@ def get_move_builder(data_info):
         return StateMoveSANS2DBuilder(data_info)
     elif instrument is SANSInstrument.LARMOR:
         return StateMoveLARMORBuilder(data_info)
+    elif instrument is SANSInstrument.ZOOM:
+        return StateMoveZOOMBuilder(data_info)
     else:
         raise NotImplementedError("StateMoveBuilder: Could not find any valid move builder for the "
                                   "specified StateData object {0}".format(str(data_info)))

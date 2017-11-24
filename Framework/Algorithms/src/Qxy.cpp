@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"

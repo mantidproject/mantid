@@ -107,24 +107,6 @@ class AbstractInst(object):
         # the instrument override the optional behaviour
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
-    # Optional overrides
-    def _attenuate_workspace(self, input_workspace):
-        """
-        Applies an attenuation correction to the workspace
-        :param input_workspace: The workspace to correct
-        :return: The corrected workspace
-        """
-        return input_workspace
-
-    @staticmethod
-    def _can_auto_gen_vanadium_cal():
-        """
-        Can be overridden and returned true by instruments who can automatically run generate vanadium calculation
-        if the splines cannot be found during the focus routine
-        :return: False by default, True by instruments who can automatically generate these
-        """
-        return False
-
     def _crop_banks_to_user_tof(self, focused_banks):
         """
         Crops to a user specified TOF range on a bank-by-bank basis. This is called after focusing a sample and
@@ -168,17 +150,6 @@ class AbstractInst(object):
         :return: List of bin widths or None if no rebinning should take place
         """
         return None
-
-    def _generate_auto_vanadium_calibration(self, run_details):
-        """
-        Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
-        has indicated support by overriding can_auto_gen_vanadium_cal
-        :param run_details: The run details of the current run
-        :return: None
-        """
-        # If the instrument overrides can_auto_gen_vanadium_cal it needs to implement this method to perform the
-        # automatic calibration
-        raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")
 
     def _get_input_batching_mode(self):
         """

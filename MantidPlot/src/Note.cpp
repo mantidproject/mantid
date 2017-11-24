@@ -41,7 +41,7 @@
 #include <Qsci/qsciprinter.h>
 
 #include "ApplicationWindow.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
 
 // Register the window into the WindowFactory

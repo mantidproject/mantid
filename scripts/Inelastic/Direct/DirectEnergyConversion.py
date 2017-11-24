@@ -1914,6 +1914,8 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
 
     n_spectra = len(sp_list)
     return n_spectra
+
+
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass

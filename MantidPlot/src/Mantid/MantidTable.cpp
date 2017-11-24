@@ -296,12 +296,13 @@ void MantidTable::cellEdited(int row, int col) {
   std::istringstream textStream(text);
   const std::locale systemLocale("");
   textStream.imbue(systemLocale);
-  c->read(index, textStream);
+  c->read(index, textStream.str());
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
   s.imbue(systemLocale);
+
   // Avoid losing precision for numeric data
   if (c->type() == "double") {
     s.precision(std::numeric_limits<double>::max_digits10);

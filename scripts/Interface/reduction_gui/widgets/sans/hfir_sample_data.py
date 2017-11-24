@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,protected-access
+from __future__ import (absolute_import, division, print_function)
+import six
 import os
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
@@ -7,6 +9,9 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
+
+if six.PY3:
+    unicode = str
 
 
 class DirectBeam(BaseWidget):

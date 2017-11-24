@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "ScaleDraw.h"
 #include "MyParser.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "Graph.h"
 
 #include <QPainter>

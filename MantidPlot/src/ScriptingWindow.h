@@ -4,7 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
 #include <QMainWindow>
 

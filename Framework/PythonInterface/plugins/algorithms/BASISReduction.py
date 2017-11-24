@@ -421,5 +421,6 @@ class BASISReduction(PythonAlgorithm):
         maximumYvalue = workspace.dataY(0).max()
         sapi.Scale(InputWorkspace=wsName, OutputWorkspace=wsName, Factor=1./maximumYvalue, Operation="Multiply",)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)

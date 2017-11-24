@@ -7,8 +7,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtAPI/QwtWorkspaceBinData.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceBinData.h"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"

@@ -33,7 +33,7 @@
 #define MULTILAYER_H
 
 #include "Graph.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 #include <QLayout>
 #include <QPointer>

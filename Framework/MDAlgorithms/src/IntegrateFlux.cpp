@@ -191,6 +191,12 @@ void IntegrateFlux::integrateSpectraEvents(
       sum += evnt->weight();
       outY[i] = sum;
     }
+
+    while (x != X.end()) {
+      outY[i] = sum;
+      ++x;
+      ++i;
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 #ifndef FILECOMPARISONHELPER_H_
 #define FILECOMPARISONHELPER_H_
 
+#include <iterator>
 #include <iosfwd>
 #include <iterator>
 #include <string>

@@ -2,7 +2,7 @@
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidIndexing/IndexInfo.h"

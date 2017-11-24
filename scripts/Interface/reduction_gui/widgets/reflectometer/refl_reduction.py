@@ -1,9 +1,10 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import math
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from base_ref_reduction import BaseRefWidget
+from reduction_gui.widgets.reflectometer.base_ref_reduction import BaseRefWidget
 import ui.reflectometer.ui_data_refl_simple
 
 

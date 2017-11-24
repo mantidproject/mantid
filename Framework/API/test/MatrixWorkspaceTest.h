@@ -1,7 +1,6 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -10,9 +9,10 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
@@ -1641,9 +1641,18 @@ public:
     // Moving parent not possible since non-detector components do not have time
     // indices and thus DetectorInfo cannot tell which set of detector positions
     // to adjust.
-    TS_ASSERT_THROWS(detInfo.setPosition(*det.getParent(), V3D(1, 2, 3)),
+
+    auto &compInfo = merged->mutableComponentInfo();
+
+    // Try to move the parent
+    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          V3D(1, 2, 3)),
                      std::runtime_error);
-    TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
+    // Try to rotate the parent
+    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          Quat(1, 2, 3, 4)),
                      std::runtime_error);
   }
 
@@ -1833,9 +1842,9 @@ public:
     // future updates
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1859,9 +1868,9 @@ public:
     // future updates
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1876,9 +1885,9 @@ public:
     int count = 0;
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -1894,9 +1903,9 @@ public:
     int count = 0;
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();

@@ -36,7 +36,7 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
 

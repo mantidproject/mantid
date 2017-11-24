@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -17,6 +19,9 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
+if six.PY3:
+    unicode = str
 
 
 class DataReflSFCalculatorWidget(BaseRefWidget):

@@ -1,6 +1,8 @@
 # pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.geometry import *
+from six import iteritems
 
 
 class SpaceGroupUnitCellTest(stresstesting.MantidStressTest):
@@ -32,7 +34,7 @@ class SpaceGroupUnitCellTest(stresstesting.MantidStressTest):
                 self._check_spacegroup(sg, monoclinic_c_cells, monoclinic_c_compatiblity[lattice_system])
 
     def _check_spacegroup(self, sg, cells, compatible_metrics):
-        for system, cell in cells.iteritems():
+        for system, cell in iteritems(cells):
             is_allowed = sg.isAllowedUnitCell(cell)
             should_be_allowed = system in compatible_metrics
 
@@ -56,7 +58,7 @@ class SpaceGroupUnitCellTest(stresstesting.MantidStressTest):
         # This map specifies which metrics are compatible. A cell with cubic metric is for example compatible
         # with triclinic symmetry, but the opposite is not true.
         return {
-            PointGroup.LatticeSystem.Triclinic: cells.keys(),
+            PointGroup.LatticeSystem.Triclinic: list(cells.keys()),
             PointGroup.LatticeSystem.Monoclinic: [PointGroup.LatticeSystem.Monoclinic,
                                                   PointGroup.LatticeSystem.Orthorhombic,
                                                   PointGroup.LatticeSystem.Tetragonal,

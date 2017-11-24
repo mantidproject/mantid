@@ -8,9 +8,9 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CropWorkspace, LoadInstrument,
                               SetGoniometer, SetUB, ConvertToMD,
                               MDNormSCD, DivideMD, MinusMD, Load,
-                              DeleteWorkspace,
+                              DeleteWorkspace, RenameWorkspaces,
                               CreateSingleValuedWorkspace, LoadNexus,
-                              MultiplyMD, LoadIsawDetCal, MaskBTP)
+                              MultiplyMD, LoadIsawDetCal, LoadMask)
 from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction
 from mantid import logger
@@ -76,8 +76,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="DetCal",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".detcal"]),
                              "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`")
-
-        self.copyProperties('MaskBTP', ['Bank', 'Tube', 'Pixel'])
+        self.declareProperty(FileProperty(name="MaskFile",defaultValue="",action=FileAction.OptionalLoad,
+                                          extensions=[".xml",".msk"]),
+                             "Masking file for masking. Supported file format is XML and ISIS ASCII. See :ref:`LoadMask <algm-LoadMask>`")
 
         # SymmetryOps, name, group unmber or list symmetries
         self.declareProperty("SymmetryOps", "",
@@ -97,6 +98,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                              "Binning parameters for the 2nd dimension. Enter it as a"
                              "comma-separated list of values with the"
                              "format: 'minimum,maximum,number_of_bins'.")
+
+        self.declareProperty('KeepTemporaryWorkspaces', False,
+                             "If True the normalization and data workspaces in addition to the normalized data will be outputted")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
@@ -121,9 +125,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         # Corrections
         self.setPropertyGroup("LoadInstrument","Corrections")
         self.setPropertyGroup("DetCal","Corrections")
-        self.setPropertyGroup("Bank","Corrections")
-        self.setPropertyGroup("Tube","Corrections")
-        self.setPropertyGroup("Pixel","Corrections")
+        self.setPropertyGroup("MaskFile","Corrections")
 
         # Projection and binning
         self.setPropertyGroup("Uproj","Projection and binning")
@@ -156,12 +158,10 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         _background = bool(self.getProperty("Background").value)
         _load_inst = bool(self.getProperty("LoadInstrument").value)
         _detcal = bool(self.getProperty("DetCal").value)
+        _masking = bool(self.getProperty("MaskFile").value)
         _outWS_name = self.getPropertyValue("OutputWorkspace")
-        _masking = bool(self.getProperty("Bank").value) or bool(self.getProperty("Tube").value) or bool(self.getProperty("Pixel").value)
 
         UBList = self._generate_UBList()
-
-        progress = Progress(self, 0.0, 1.0, len(UBList)*len(self.getProperty("Filename").value))
 
         dim0_min, dim0_max, dim0_bins = self.getProperty('BinningDim0').value
         dim1_min, dim1_max, dim1_bins = self.getProperty('BinningDim1').value
@@ -176,10 +176,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace='__flux')
 
         if _masking:
-            MaskBTP(Workspace='__sa',
-                    Bank=self.getProperty("Bank").value,
-                    Tube=self.getProperty("Tube").value,
-                    Pixel=self.getProperty("Pixel").value)
+            LoadMask(Instrument=mtd['__sa'].getInstrument().getName(),
+                     InputFile=self.getProperty("MaskFile").value,
+                     OutputWorkspace='__mask')
+            MaskDetectors(Workspace='__sa',MaskedWorkspace='__mask')
+            DeleteWorkspace('__mask')
 
         XMin = mtd['__sa'].getXDimension().getMinimum()
         XMax = mtd['__sa'].getXDimension().getMaximum()
@@ -196,6 +197,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             MaskDetectors(Workspace='__bkg',MaskedWorkspace='__sa')
             ConvertUnits(InputWorkspace='__bkg',OutputWorkspace='__bkg',Target='Momentum')
             CropWorkspace(InputWorkspace='__bkg',OutputWorkspace='__bkg',XMin=XMin,XMax=XMax)
+
+        progress = Progress(self, 0.0, 1.0, len(UBList)*len(self.getProperty("Filename").value))
 
         for run in self.getProperty("Filename").value:
             logger.notice("Working on " + run)
@@ -224,7 +227,6 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                 mtd['__bkg'].run().getGoniometer().setR(mtd['__run'].run().getGoniometer().getR())
 
             for ub in UBList:
-                progress.report()
                 SetUB(Workspace='__run', UB=ub)
                 ConvertToMD(InputWorkspace='__run',
                             OutputWorkspace='__md',
@@ -275,21 +277,29 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                               AlignedDim1=mtd['__bkg_md'].getDimension(1).name+AlignedDim1,
                               AlignedDim2=mtd['__bkg_md'].getDimension(2).name+AlignedDim2)
                     DeleteWorkspace('__bkg_md')
+                progress.report()
             DeleteWorkspace('__run')
 
         if _background:
             # outWS = data / norm - bkg_data / bkg_norm * BackgroundScale
-            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name+'_data')
-            DivideMD(LHSWorkspace='__bkg_data',RHSWorkspace='__bkg_norm',OutputWorkspace=_outWS_name+'_background')
+            DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name+'_normalizedData')
+            DivideMD(LHSWorkspace='__bkg_data',RHSWorkspace='__bkg_norm',OutputWorkspace=_outWS_name+'_normalizedBackground')
             CreateSingleValuedWorkspace(OutputWorkspace='__scale', DataValue=self.getProperty('BackgroundScale').value)
-            MultiplyMD(LHSWorkspace=_outWS_name+'_background',
+            MultiplyMD(LHSWorkspace=_outWS_name+'_normalizedBackground',
                        RHSWorkspace='__scale',
                        OutputWorkspace='__scaled_background')
             DeleteWorkspace('__scale')
-            MinusMD(LHSWorkspace=_outWS_name+'_data',RHSWorkspace='__scaled_background',OutputWorkspace=_outWS_name)
+            MinusMD(LHSWorkspace=_outWS_name+'_normalizedData',RHSWorkspace='__scaled_background',OutputWorkspace=_outWS_name)
+            if self.getProperty('KeepTemporaryWorkspaces').value:
+                RenameWorkspaces(InputWorkspaces=['__data','__norm','__bkg_data','__bkg_norm'],
+                                 WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization',
+                                                 _outWS_name+'_background_data',_outWS_name+'_background_normalization'])
         else:
             # outWS = data / norm
             DivideMD(LHSWorkspace='__data',RHSWorkspace='__norm',OutputWorkspace=_outWS_name)
+            if self.getProperty('KeepTemporaryWorkspaces').value:
+                RenameWorkspaces(InputWorkspaces=['__data','__norm'],
+                                 WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization'])
 
         self.setProperty("OutputWorkspace", mtd[_outWS_name])
 

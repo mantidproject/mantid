@@ -58,7 +58,7 @@ void SaveIsawPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
-  const DetectorInfo &detectorInfo = ws->detectorInfo();
+  const auto &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
@@ -395,7 +395,7 @@ void SaveIsawPeaks::exec() {
 }
 
 bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
-                               const DetectorInfo &detectorInfo) {
+                               const Geometry::DetectorInfo &detectorInfo) {
   std::vector<Geometry::IComponent_const_sptr> children;
   boost::shared_ptr<const Geometry::ICompAssembly> asmb =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);

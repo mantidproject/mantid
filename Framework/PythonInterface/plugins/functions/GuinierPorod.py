@@ -172,5 +172,6 @@ class GuinierPorod(IFunction1D):
             jacobian.set(i,4, 1.0)
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(GuinierPorod)

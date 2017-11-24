@@ -17,8 +17,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include "MantidAPI/Algorithm.tcc"
 #include "tbb/parallel_for.h"
-
 #include <limits>
 #include <numeric>
 
@@ -31,7 +31,7 @@ namespace DataObjects {
 namespace {
 // static logger
 Kernel::Logger g_log("EventWorkspace");
-}
+} // namespace
 
 DECLARE_WORKSPACE(EventWorkspace)
 
@@ -666,6 +666,45 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 }
 
 } // namespace DataObjects
+} // namespace Mantid
+
+// Explicit Instantiations of IndexProperty Methods in Algorithm
+namespace Mantid {
+namespace API {
+template DLLExport void
+Algorithm::declareWorkspaceInputProperties<DataObjects::EventWorkspace>(
+    const std::string &propertyName, const int allowedIndexTypes,
+    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
+    const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
+    IndexType type, const std::vector<int> &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(
+    const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
+    IndexType type, const std::string &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
+    const std::string &name, const std::string &wsName, IndexType type,
+    const std::vector<int> &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(const std::string &name,
+                                                    const std::string &wsName,
+                                                    IndexType type,
+                                                    const std::string &list);
+
+template DLLExport std::tuple<boost::shared_ptr<DataObjects::EventWorkspace>,
+                              Indexing::SpectrumIndexSet>
+Algorithm::getWorkspaceAndIndices(const std::string &name) const;
+} // namespace API
 } // namespace Mantid
 
 namespace Mantid {
