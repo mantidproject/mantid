@@ -161,6 +161,8 @@ Therefore U is the rotation represented by the quaternion :math:`u`,
 which is the eigenvector corresponding to the largest eigenvalue of
 :math:`HS`.
 
+For more information see the documentation for :ref:`UB matrix <Lattice>`.
+
 .. categories::
 
 .. sourcelink::

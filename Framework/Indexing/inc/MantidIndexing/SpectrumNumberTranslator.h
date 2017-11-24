@@ -50,6 +50,11 @@ public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
                            std::unique_ptr<Partitioner> partitioner,
                            const PartitionIndex &partition);
+  SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
+                           const SpectrumNumberTranslator &parent);
+  SpectrumNumberTranslator(
+      const std::vector<GlobalSpectrumIndex> &globalIndices,
+      const SpectrumNumberTranslator &parent);
 
   size_t globalSize() const;
   size_t localSize() const;
@@ -70,6 +75,8 @@ private:
   void checkUniqueSpectrumNumbers() const;
   // Not thread-safe! Use only in combination with std::call_once!
   void setupSpectrumNumberToIndexMap() const;
+  std::vector<SpectrumNumber>
+  spectrumNumbers(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
@@ -78,6 +85,7 @@ private:
     }
   };
 
+  bool m_isPartitioned;
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_spectrumNumberToPartition;
@@ -89,6 +97,35 @@ private:
 
   mutable std::once_flag m_mapSetup;
 };
+
+/// Returns the global number of spectra.
+inline size_t SpectrumNumberTranslator::globalSize() const {
+  return m_globalSpectrumNumbers.size();
+}
+
+/// Returns the local number of spectra.
+inline size_t SpectrumNumberTranslator::localSize() const {
+  if (isPartitioned())
+    return m_spectrumNumbers.size();
+  return globalSize();
+}
+
+/// Returns the spectrum number for given index.
+inline SpectrumNumber
+SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
+  if (!isPartitioned())
+    return m_globalSpectrumNumbers[index];
+  return m_spectrumNumbers[index];
+}
+
+// Full set
+inline SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
+  return SpectrumIndexSet(localSize());
+}
+
+inline bool SpectrumNumberTranslator::isPartitioned() const {
+  return m_isPartitioned;
+}
 
 } // namespace Indexing
 } // namespace Mantid

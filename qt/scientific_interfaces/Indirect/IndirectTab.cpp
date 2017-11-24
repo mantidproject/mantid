@@ -8,7 +8,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QMessageBox>
 #include <boost/algorithm/string/find.hpp>
@@ -441,6 +441,19 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
 }
 
 /*
+ * Resizes the range (y-axis) of the specified plot preview given the specified
+ * range
+ *
+ * @param preview The plot preview whose range to resize.
+ * @param range   The range to resize to, as a pair of minimum and maximum value
+ */
+void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
+                                  QPair<double, double> range) {
+  preview->resizeX();
+  preview->setAxisRange(range, QwtPlot::yLeft);
+}
+
+/*
  * Updates the values of the function parameters for the function with the
  * specified name, in the parameters table.
  *
@@ -812,6 +825,23 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
     columnValues[spectraIndices[i]] = column->toDouble(i);
   }
   return columnValues;
+}
+
+/*
+ * Converts a standard vector of standard strings to a QVector of QStrings.
+ *
+ * @param stringVec The standard vector of standard strings to convert.
+ * @return          A QVector of QStrings.
+ */
+QVector<QString> IndirectTab::convertStdStringVector(
+    const std::vector<std::string> &stringVec) const {
+  QVector<QString> resultVec;
+  resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
+
+  for (auto &str : stringVec) {
+    resultVec.push_back(QString::fromStdString(str));
+  }
+  return resultVec;
 }
 
 } // namespace CustomInterfaces

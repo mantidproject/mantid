@@ -300,6 +300,7 @@ void TOPAZLiveEventDataListener::run() {
     // loop until the foreground thread tells us to stop
     while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
+      // cppcheck-suppress oppositeInnerCondition
       if (m_stopThread) {
         break;
       }

@@ -22,7 +22,7 @@
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 #include "MantidPlotUtilities.h"
 
@@ -619,9 +619,6 @@ private:
   std::string extractLogTime(Mantid::Types::Core::DateAndTime value,
                              bool useAbsoluteDate,
                              Mantid::Types::Core::DateAndTime start);
-
-  /// extracts the files from a mimedata object that have a .py extension
-  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
 
   // Whether new plots shoul re-use the same plot instance (for every
   // different

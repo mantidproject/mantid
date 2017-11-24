@@ -227,9 +227,11 @@ Usage
    MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0,
    MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0, Version=1)
 
-   print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-   print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-   print "Theta out is the same as theta in:",thetaOut
+   print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	  IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+   print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+          IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+   print("Theta out is the same as theta in: {}".format(thetaOut))
 
 
 Output:

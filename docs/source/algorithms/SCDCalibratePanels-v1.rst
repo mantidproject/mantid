@@ -89,7 +89,7 @@ Usage
     det1 = mtd['MANDI_801_event_DetCal'].getInstrument().getDetector(327680)
     det2 = mtd['MANDI_801_event_xml'].getInstrument().getDetector(327680)
     if det1.getPos() == det2.getPos():
-        print "matches"
+        print("matches")
     
 .. testcleanup:: SCDCalibratePanels
 

@@ -451,6 +451,7 @@ public:
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -558,8 +559,7 @@ protected:
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
-  virtual void init(const std::size_t &NVectors,
-                    const HistogramData::Histogram &histogram) = 0;
+  virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.

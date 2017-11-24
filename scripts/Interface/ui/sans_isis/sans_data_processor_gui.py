@@ -13,6 +13,7 @@ from PyQt4 import QtGui, QtCore
 
 from mantid.kernel import (Logger, config)
 from mantidqtpython import MantidQt
+
 try:
     from mantidplot import *
     canMantidPlot = True
@@ -22,7 +23,7 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
-from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
+from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
 
 
@@ -56,6 +57,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_processing_finished(self):
+            pass
+
+        @abstractmethod
+        def on_manage_directories(self):
             pass
 
     def __init__(self, main_presenter):
@@ -184,6 +189,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
 
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
+
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
         self._on_q_1d_step_type_has_changed()
@@ -236,6 +243,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         instrument_name = SANSInstrument.to_string(self._instrument)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
 
+        if instrument_name:
+            self._set_mantid_instrument(instrument_name)
+
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
@@ -287,8 +297,15 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         config.setString("default.instrument", instrument_string)
 
     def _handle_instrument_change(self):
+        # Set instrument as the default instrument
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
         self._set_mantid_instrument(instrument_string)
+
+        # Set the reduction mode
+        if instrument_string:
+            self._instrument = SANSInstrument.from_string(instrument_string)
+            reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+            self.set_reduction_modes(reduction_mode_list)
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -458,20 +475,22 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
-        self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                        self.__mask_file_input_path_key,  self.get_mask_file)
+        load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
+                  self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
+
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
     # ------------------------------------------------------------------------------------------------------------------
-    def handle_instrument_change(self):
-        # TODO need to read it and set it as the default instrument
-        pass
-
     def set_instrument_settings(self, instrument):
         if instrument:
             self._instrument = instrument
@@ -613,6 +632,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
 
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
+
     # ==================================================================================================================
     # ==================================================================================================================
     # General TAB
@@ -642,8 +669,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def reduction_mode(self, value):
         # There are two types of values that can be passed:
         # String: we look for string and we set it
-
         # Convert the value to the correct GUI string
+
+        # Set the correct selection of reduction modes which are available
+        reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+        self.set_reduction_modes(reduction_mode_list)
+
         reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
         if reduction_mode_as_string:
             index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)
@@ -707,6 +738,32 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def merge_q_range_stop(self, value):
         if value is not None:
             self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
+
+    @property
+    def merge_mask(self):
+        return self.merge_mask_check_box.isChecked()
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.merge_mask_check_box.setChecked(value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_max_line_edit", value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_min_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
@@ -1352,6 +1409,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_scale_line_edit.setValidator(double_validator)
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
+        self.merged_max_line_edit.setValidator(double_validator)
+        self.merged_min_line_edit.setValidator(double_validator)
 
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1406,6 +1465,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.merged_q_range_start_line_edit.setText("")
         self.merged_q_range_stop_line_edit.setText("")
+        self.merged_max_line_edit.setText("")
+        self.merged_min_line_edit.setText("")
         self.merged_scale_line_edit.setText("")
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)

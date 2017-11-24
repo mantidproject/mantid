@@ -4,9 +4,13 @@
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadAsciiDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
-#include <QValidator>
-#include <QtGui>
+#include <QComboBox>
+#include <QDir>
 #include <QFileInfo>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QValidator>
 
 namespace MantidQt {
 namespace CustomDialogs {

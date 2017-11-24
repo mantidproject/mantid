@@ -1,7 +1,7 @@
 #include "ALCPeakFittingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ErrorCurve.h"
+#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <QMessageBox>
 
@@ -130,7 +130,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
 }
 
 void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon_ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
 }
 
 void ALCPeakFittingView::displayError(const QString &message) {

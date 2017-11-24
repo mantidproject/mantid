@@ -144,18 +144,17 @@ Usage
 
 .. testcode:: ExPDFFouurierTransform
 
-    # Simulates Load of a workspace with all necessary parameters #################
+    # Simulates Load of a workspace with all necessary parameters
     import numpy as np;
-    xx= np.array(range(0,100))*0.1
-    yy = np.exp(-((xx)/.5)**2)
-    ws=CreateWorkspace(DataX=xx,DataY=yy,UnitX='MomentumTransfer')
-    Rt= PDFFourierTransform(ws,InputSofQType='S(Q)',PDFType='g(r)');   
-    #
-    # Look at sample results:
-    print 'part of S(Q) and its correlation function'
-    for i in xrange(0,10): 
-       print '! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i],yy[i],Rt.readX(0)[i],Rt.readY(0)[i])
+    xx = np.array(range(0,100))*0.1
+    yy = np.exp(-(2.0 * xx)**2)
+    ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
+    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)')   
 
+    # Look at sample results:
+    print('part of S(Q) and its correlation function')
+    for i in range(10): 
+       print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
 .. testcleanup:: ExPDFFouurierTransform

@@ -18,7 +18,6 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -371,7 +370,7 @@ def GetMismatchedDetList():
 # pylint: disable = too-many-branches
 
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, # noqa: C901
                       resetSetup=True, out_fit_settings=dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -516,7 +515,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             consider_can = False
 
         # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
 
         kwargs_stitch = {"HABCountsSample": Cf,
                          "HABNormSample": Nf,
@@ -534,6 +533,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                           "LABNormCan": Nr_can,
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
+
+        if rAnds.qRangeUserSelected:
+            q_range_stitch = {"FitMin": fit_min,
+                              "FitMax": fit_max}
+            kwargs_stitch.update(q_range_stitch)
 
         alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
         alg_stitch.execute()
@@ -1129,7 +1133,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+    beam_center_logger.report_status(0, COORD1NEW, COORD2NEW, resCoord1_old, resCoord2_old)
 
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.

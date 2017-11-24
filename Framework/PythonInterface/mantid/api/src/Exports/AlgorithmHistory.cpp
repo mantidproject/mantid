@@ -40,7 +40,7 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
  */
 boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
-  const auto histories = self.getProperties();
+  const auto &histories = self.getProperties();
   for (const auto &historie : histories) {
     names.append(historie);
   }

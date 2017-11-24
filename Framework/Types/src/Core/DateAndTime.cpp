@@ -1,5 +1,7 @@
 #include "MantidTypes/Core/DateAndTime.h"
 
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
 namespace Mantid {
 namespace Types {
 namespace Core {
@@ -14,14 +16,8 @@ const time_duration DateAndTime::ONE_SECOND =
     boost::posix_time::time_duration(0, 0, 1, 0);
 
 namespace {
-/// Max allowed nanoseconds in the time; 2^62-1
-const int64_t MAX_NANOSECONDS = 4611686018427387903LL;
-
 /// Max allowed seconds in the time
 const int64_t MAX_SECONDS = 4611686017LL;
-
-/// Min allowed nanoseconds in the time; -2^62+1
-const int64_t MIN_NANOSECONDS = -4611686018427387903LL;
 
 /// Min allowed seconds in the time
 const int64_t MIN_SECONDS = -4611686017LL;
@@ -119,24 +115,6 @@ time_t DateAndTime::utc_mktime(struct tm *utctime) {
     counter++;
   }
   return result;
-}
-
-//------------------------------------------------------------------------------------------------
-/** Default, empty constructor */
-DateAndTime::DateAndTime() : _nanoseconds(0) {}
-
-//------------------------------------------------------------------------------------------------
-/** Construct a date from nanoseconds.
- * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
- */
-DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
-  // Make sure that you cannot construct a date that is beyond the limits...
-  if (total_nanoseconds > MAX_NANOSECONDS)
-    _nanoseconds = MAX_NANOSECONDS;
-  else if (total_nanoseconds < MIN_NANOSECONDS)
-    _nanoseconds = MIN_NANOSECONDS;
-  else
-    _nanoseconds = total_nanoseconds;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -359,11 +337,17 @@ const DateAndTime &DateAndTime::defaultTime() {
 }
 
 //------------------------------------------------------------------------------------------------
-/** Sets the date and time using an ISO8601-formatted string
+/** Sets the date and time using an ISO8601 or Posix formatted string
  *
- * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ * @param str :: ISO8601 or posix format string:
+ *               "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz" or "yyy-MMM-dd hh:mm:ss.ssss"
  */
 void DateAndTime::setFromISO8601(const std::string &str) {
+  if (!DateAndTimeHelpers::stringIsISO8601(str) &&
+      !DateAndTimeHelpers::stringIsPosix(str)) {
+    throw std::invalid_argument("Error interpreting string '" + str +
+                                "' as a date/time.");
+  }
   // Make a copy
   std::string time = str;
 
@@ -604,14 +588,6 @@ bool DateAndTime::operator>=(const DateAndTime &rhs) const {
 }
 
 //------------------------------------------------------------------------------------------------
-/** + operator to add time.
- * @param nanosec :: number of nanoseconds to add
- * @return modified DateAndTime.
- */
-DateAndTime DateAndTime::operator+(const int64_t nanosec) const {
-  return DateAndTime(_nanoseconds + nanosec);
-}
-
 /** += operator to add time.
  * @param nanosec :: number of nanoseconds to add
  * @return modified DateAndTime.
@@ -680,13 +656,6 @@ DateAndTime &DateAndTime::operator-=(const time_duration &td) {
 }
 
 //------------------------------------------------------------------------------------------------
-/** + operator to add time.
- * @param sec :: duration to add
- * @return modified DateAndTime.
- */
-DateAndTime DateAndTime::operator+(const double sec) const {
-  return this->operator+(nanosecondsFromSeconds(sec));
-}
 
 /** += operator to add time.
  * @param sec :: duration to add
@@ -809,24 +778,6 @@ time_duration DateAndTime::durationFromNanoseconds(int64_t dur) {
   // Microsecond resolution
   return boost::posix_time::time_duration(0, 0, 0, dur / 1000);
 #endif
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Nanoseconds from seconds, with limits
- * @param sec :: duration in seconds, as a double
- * @return int64 of the number of nanoseconds
- */
-int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
-  const double nano = sec * 1e9;
-  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
-  // Use these limits to avoid integer overflows
-  if (nano > maximum)
-    return MAX_NANOSECONDS;
-  else if (nano < minimum)
-    return MIN_NANOSECONDS;
-  else
-    return int64_t(nano);
 }
 
 //-----------------------------------------------------------------------------------------------

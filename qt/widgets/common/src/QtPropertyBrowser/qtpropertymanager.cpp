@@ -87,18 +87,18 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
-#include <QtCore/QDateTime>
-#include <QtCore/QLocale>
-#include <QtCore/QMap>
-#include <QtCore/QTimer>
-#include <QtGui/QIcon>
-#include <QtCore/QMetaEnum>
-#include <QtGui/QFontDatabase>
-#include <QtGui/QStyleOption>
-#include <QtGui/QStyle>
-#include <QtGui/QApplication>
-#include <QtGui/QPainter>
-#include <QtGui/QLabel>
+#include <QDateTime>
+#include <QLocale>
+#include <QMap>
+#include <QTimer>
+#include <QIcon>
+#include <QMetaEnum>
+#include <QFontDatabase>
+#include <QStyleOption>
+#include <QStyle>
+#include <QApplication>
+#include <QPainter>
+#include <QLabel>
 
 #include <cfloat>
 #include <climits>
@@ -113,71 +113,6 @@
 QT_BEGIN_NAMESPACE
 #endif
 
-template <class PrivateData, class Value>
-static void setSimpleMinimumData(PrivateData *data, const Value &minVal) {
-  data->minVal = minVal;
-  if (data->maxVal < data->minVal)
-    data->maxVal = data->minVal;
-
-  if (data->val < data->minVal)
-    data->val = data->minVal;
-}
-
-template <class PrivateData, class Value>
-static void setSimpleMaximumData(PrivateData *data, const Value &maxVal) {
-  data->maxVal = maxVal;
-  if (data->minVal > data->maxVal)
-    data->minVal = data->maxVal;
-
-  if (data->val > data->maxVal)
-    data->val = data->maxVal;
-}
-
-template <class PrivateData, class Value>
-static void setSizeMinimumData(PrivateData *data, const Value &newMinVal) {
-  data->minVal = newMinVal;
-  if (data->maxVal.width() < data->minVal.width())
-    data->maxVal.setWidth(data->minVal.width());
-  if (data->maxVal.height() < data->minVal.height())
-    data->maxVal.setHeight(data->minVal.height());
-
-  if (data->val.width() < data->minVal.width())
-    data->val.setWidth(data->minVal.width());
-  if (data->val.height() < data->minVal.height())
-    data->val.setHeight(data->minVal.height());
-}
-
-template <class PrivateData, class Value>
-static void setSizeMaximumData(PrivateData *data, const Value &newMaxVal) {
-  data->maxVal = newMaxVal;
-  if (data->minVal.width() > data->maxVal.width())
-    data->minVal.setWidth(data->maxVal.width());
-  if (data->minVal.height() > data->maxVal.height())
-    data->minVal.setHeight(data->maxVal.height());
-
-  if (data->val.width() > data->maxVal.width())
-    data->val.setWidth(data->maxVal.width());
-  if (data->val.height() > data->maxVal.height())
-    data->val.setHeight(data->maxVal.height());
-}
-
-template <class SizeValue>
-static SizeValue qBoundSize(const SizeValue &minVal, const SizeValue &val,
-                            const SizeValue &maxVal) {
-  SizeValue croppedVal = val;
-  if (minVal.width() > val.width())
-    croppedVal.setWidth(minVal.width());
-  else if (maxVal.width() < val.width())
-    croppedVal.setWidth(maxVal.width());
-
-  if (minVal.height() > val.height())
-    croppedVal.setHeight(minVal.height());
-  else if (maxVal.height() < val.height())
-    croppedVal.setHeight(maxVal.height());
-
-  return croppedVal;
-}
-
 // Match the exact signature of qBound for VS 6.
 QSize qBound(QSize minVal, QSize val, QSize maxVal) {
   return qBoundSize(minVal, val, maxVal);
@@ -186,282 +121,6 @@ QSize qBound(QSize minVal, QSize val, QSize maxVal) {
 QSizeF qBound(QSizeF minVal, QSizeF val, QSizeF maxVal) {
   return qBoundSize(minVal, val, maxVal);
 }
-
-namespace {
-
-namespace {
-template <class Value> void orderBorders(Value &minVal, Value &maxVal) {
-  if (minVal > maxVal)
-    qSwap(minVal, maxVal);
-}
-
-template <class Value>
-static void orderSizeBorders(Value &minVal, Value &maxVal) {
-  Value fromSize = minVal;
-  Value toSize = maxVal;
-  if (fromSize.width() > toSize.width()) {
-    fromSize.setWidth(maxVal.width());
-    toSize.setWidth(minVal.width());
-  }
-  if (fromSize.height() > toSize.height()) {
-    fromSize.setHeight(maxVal.height());
-    toSize.setHeight(minVal.height());
-  }
-  minVal = fromSize;
-  maxVal = toSize;
-}
-
-void orderBorders(QSize &minVal, QSize &maxVal) {
-  orderSizeBorders(minVal, maxVal);
-}
-
-void orderBorders(QSizeF &minVal, QSizeF &maxVal) {
-  orderSizeBorders(minVal, maxVal);
-}
-}
-}
-////////
-
-template <class Value, class PrivateData>
-static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap,
-                     Value PrivateData::*data, const QtProperty *property,
-                     const Value &defaultValue = Value()) {
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::const_iterator PropertyToDataConstIterator;
-  const PropertyToDataConstIterator it = propertyMap.constFind(property);
-  if (it == propertyMap.constEnd())
-    return defaultValue;
-  return it.value().*data;
-}
-
-template <class Value, class PrivateData>
-static Value getValue(const QMap<const QtProperty *, PrivateData> &propertyMap,
-                      const QtProperty *property,
-                      const Value &defaultValue = Value()) {
-  return getData<Value>(propertyMap, &PrivateData::val, property, defaultValue);
-}
-
-template <class Value, class PrivateData>
-static Value
-getMinimum(const QMap<const QtProperty *, PrivateData> &propertyMap,
-           const QtProperty *property, const Value &defaultValue = Value()) {
-  return getData<Value>(propertyMap, &PrivateData::minVal, property,
-                        defaultValue);
-}
-
-template <class Value, class PrivateData>
-static Value
-getMaximum(const QMap<const QtProperty *, PrivateData> &propertyMap,
-           const QtProperty *property, const Value &defaultValue = Value()) {
-  return getData<Value>(propertyMap, &PrivateData::maxVal, property,
-                        defaultValue);
-}
-
-template <class ValueChangeParameter, class Value, class PropertyManager>
-static void setSimpleValue(
-    QMap<const QtProperty *, Value> &propertyMap, PropertyManager *manager,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &val) {
-  typedef QMap<const QtProperty *, Value> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
-  const PropertyToDataIterator it = propertyMap.find(property);
-  if (it == propertyMap.end())
-    return;
-
-  if (it.value() == val)
-    return;
-
-  it.value() = val;
-
-  emit(manager->*propertyChangedSignal)(property);
-  emit(manager->*valueChangedSignal)(property, val);
-}
-
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value>
-static void setValueInRange(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &val,
-    void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *,
-                                                        ValueChangeParameter)) {
-  typedef Q_TYPENAME PropertyManagerPrivate::Data PrivateData;
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
-  const PropertyToDataIterator it = managerPrivate->m_values.find(property);
-  if (it == managerPrivate->m_values.end())
-    return;
-
-  PrivateData &data = it.value();
-
-  if (data.val == val)
-    return;
-
-  const Value oldVal = data.val;
-
-  data.val = qBound(data.minVal, val, data.maxVal);
-
-  if (data.val == oldVal)
-    return;
-
-  if (setSubPropertyValue)
-    (managerPrivate->*setSubPropertyValue)(property, data.val);
-
-  emit(manager->*propertyChangedSignal)(property);
-  emit(manager->*valueChangedSignal)(property, data.val);
-}
-
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value>
-static void setBorderValues(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &minVal, const Value &maxVal,
-    void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter)) {
-  typedef Q_TYPENAME PropertyManagerPrivate::Data PrivateData;
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
-  const PropertyToDataIterator it = managerPrivate->m_values.find(property);
-  if (it == managerPrivate->m_values.end())
-    return;
-
-  Value fromVal = minVal;
-  Value toVal = maxVal;
-  orderBorders(fromVal, toVal);
-
-  PrivateData &data = it.value();
-
-  if (data.minVal == fromVal && data.maxVal == toVal)
-    return;
-
-  const Value oldVal = data.val;
-
-  data.setMinimumValue(fromVal);
-  data.setMaximumValue(toVal);
-
-  emit(manager->*rangeChangedSignal)(property, data.minVal, data.maxVal);
-
-  if (setSubPropertyRange)
-    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal,
-                                           data.val);
-
-  if (data.val == oldVal)
-    return;
-
-  emit(manager->*propertyChangedSignal)(property);
-  emit(manager->*valueChangedSignal)(property, data.val);
-}
-
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setBorderValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, Value (PrivateData::*getRangeVal)() const,
-    void (PrivateData::*setRangeVal)(ValueChangeParameter),
-    const Value &borderVal,
-    void (PropertyManagerPrivate::*setSubPropertyRange)(QtProperty *,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter,
-                                                        ValueChangeParameter)) {
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
-  const PropertyToDataIterator it = managerPrivate->m_values.find(property);
-  if (it == managerPrivate->m_values.end())
-    return;
-
-  PrivateData &data = it.value();
-
-  if ((data.*getRangeVal)() == borderVal)
-    return;
-
-  const Value oldVal = data.val;
-
-  (data.*setRangeVal)(borderVal);
-
-  emit(manager->*rangeChangedSignal)(property, data.minVal, data.maxVal);
-
-  if (setSubPropertyRange)
-    (managerPrivate->*setSubPropertyRange)(property, data.minVal, data.maxVal,
-                                           data.val);
-
-  if (data.val == oldVal)
-    return;
-
-  emit(manager->*propertyChangedSignal)(property);
-  emit(manager->*valueChangedSignal)(property, data.val);
-}
-
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setMinimumValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &minVal) {
-  void (PropertyManagerPrivate::*setSubPropertyRange)(
-      QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = nullptr;
-  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
-                 Value, PrivateData>(
-      manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
-      rangeChangedSignal, property, &PropertyManagerPrivate::Data::minimumValue,
-      &PropertyManagerPrivate::Data::setMinimumValue, minVal,
-      setSubPropertyRange);
-}
-
-template <class ValueChangeParameter, class PropertyManagerPrivate,
-          class PropertyManager, class Value, class PrivateData>
-static void setMaximumValue(
-    PropertyManager *manager, PropertyManagerPrivate *managerPrivate,
-    void (PropertyManager::*propertyChangedSignal)(QtProperty *),
-    void (PropertyManager::*valueChangedSignal)(QtProperty *,
-                                                ValueChangeParameter),
-    void (PropertyManager::*rangeChangedSignal)(QtProperty *,
-                                                ValueChangeParameter,
-                                                ValueChangeParameter),
-    QtProperty *property, const Value &maxVal) {
-  void (PropertyManagerPrivate::*setSubPropertyRange)(
-      QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = nullptr;
-  setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
-                 Value, PrivateData>(
-      manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
-      rangeChangedSignal, property, &PropertyManagerPrivate::Data::maximumValue,
-      &PropertyManagerPrivate::Data::setMaximumValue, maxVal,
-      setSubPropertyRange);
-}
-
-class QtMetaEnumWrapper : public QObject {
-  Q_OBJECT
-  Q_PROPERTY(QSizePolicy::Policy policy READ policy)
-public:
-  QSizePolicy::Policy policy() const { return QSizePolicy::Ignored; }
-
-private:
-  QtMetaEnumWrapper(QObject *parent) : QObject(parent) {}
-};
 
 class QtMetaEnumProvider {
 public:
@@ -2300,39 +1959,18 @@ void QtCharPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtLocalePropertyManager
 
-class QtLocalePropertyManagerPrivate {
-  QtLocalePropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtLocalePropertyManager)
-public:
-  QtLocalePropertyManagerPrivate();
-
-  void slotEnumChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  typedef QMap<const QtProperty *, QLocale> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtEnumPropertyManager *m_enumPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToLanguage;
-  QMap<const QtProperty *, QtProperty *> m_propertyToCountry;
-
-  QMap<const QtProperty *, QtProperty *> m_languageToProperty;
-  QMap<const QtProperty *, QtProperty *> m_countryToProperty;
-};
-
 QtLocalePropertyManagerPrivate::QtLocalePropertyManagerPrivate() {}
 
 void QtLocalePropertyManagerPrivate::slotEnumChanged(QtProperty *property,
                                                      int value) {
-  if (QtProperty *prop = m_languageToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_languageToProperty.value(property, 0)) {
     const QLocale loc = m_values[prop];
     QLocale::Language newLanguage = loc.language();
     QLocale::Country newCountry = loc.country();
     metaEnumProvider()->indexToLocale(value, 0, &newLanguage, nullptr);
     QLocale newLoc(newLanguage, newCountry);
     q_ptr->setValue(prop, newLoc);
-  } else if (QtProperty *prop = m_countryToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_countryToProperty.value(property, 0)) {
     const QLocale loc = m_values[prop];
     QLocale::Language newLanguage = loc.language();
     QLocale::Country newCountry = loc.country();
@@ -2346,12 +1984,11 @@ void QtLocalePropertyManagerPrivate::slotEnumChanged(QtProperty *property,
 
 void QtLocalePropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *subProp = m_languageToProperty.value(property, nullptr)) {
-    m_propertyToLanguage[subProp] = nullptr;
+  if (QtProperty *subProp = m_languageToProperty.value(property, 0)) {
+    m_propertyToLanguage[subProp] = 0;
     m_languageToProperty.remove(property);
-  } else if (QtProperty *subProp =
-                 m_countryToProperty.value(property, nullptr)) {
-    m_propertyToCountry[subProp] = nullptr;
+  } else if (QtProperty *subProp = m_countryToProperty.value(property, 0)) {
+    m_propertyToCountry[subProp] = 0;
     m_countryToProperty.remove(property);
   }
 }
@@ -2556,32 +2193,13 @@ void QtLocalePropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtPointPropertyManager
 
-class QtPointPropertyManagerPrivate {
-  QtPointPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtPointPropertyManager)
-public:
-  void slotIntChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  typedef QMap<const QtProperty *, QPoint> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToX;
-  QMap<const QtProperty *, QtProperty *> m_propertyToY;
-
-  QMap<const QtProperty *, QtProperty *> m_xToProperty;
-  QMap<const QtProperty *, QtProperty *> m_yToProperty;
-};
-
 void QtPointPropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                    int value) {
-  if (QtProperty *xprop = m_xToProperty.value(property, nullptr)) {
+  if (QtProperty *xprop = m_xToProperty.value(property, 0)) {
     QPoint p = m_values[xprop];
     p.setX(value);
     q_ptr->setValue(xprop, p);
-  } else if (QtProperty *yprop = m_yToProperty.value(property, nullptr)) {
+  } else if (QtProperty *yprop = m_yToProperty.value(property, 0)) {
     QPoint p = m_values[yprop];
     p.setY(value);
     q_ptr->setValue(yprop, p);
@@ -2590,11 +2208,11 @@ void QtPointPropertyManagerPrivate::slotIntChanged(QtProperty *property,
 
 void QtPointPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_xToProperty.value(property, nullptr)) {
-    m_propertyToX[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+    m_propertyToX[pointProp] = 0;
     m_xToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_yToProperty.value(property, nullptr)) {
-    m_propertyToY[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+    m_propertyToY[pointProp] = 0;
     m_yToProperty.remove(property);
   }
 }
@@ -2764,38 +2382,13 @@ void QtPointPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtPointFPropertyManager
 
-class QtPointFPropertyManagerPrivate {
-  QtPointFPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtPointFPropertyManager)
-public:
-  struct Data {
-    Data() : decimals(2) {}
-    QPointF val;
-    int decimals;
-  };
-
-  void slotDoubleChanged(QtProperty *property, double value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtDoublePropertyManager *m_doublePropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToX;
-  QMap<const QtProperty *, QtProperty *> m_propertyToY;
-
-  QMap<const QtProperty *, QtProperty *> m_xToProperty;
-  QMap<const QtProperty *, QtProperty *> m_yToProperty;
-};
-
 void QtPointFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
                                                        double value) {
-  if (QtProperty *prop = m_xToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_xToProperty.value(property, 0)) {
     QPointF p = m_values[prop].val;
     p.setX(value);
     q_ptr->setValue(prop, p);
-  } else if (QtProperty *prop = m_yToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_yToProperty.value(property, 0)) {
     QPointF p = m_values[prop].val;
     p.setY(value);
     q_ptr->setValue(prop, p);
@@ -2804,11 +2397,11 @@ void QtPointFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
 
 void QtPointFPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_xToProperty.value(property, nullptr)) {
-    m_propertyToX[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+    m_propertyToX[pointProp] = 0;
     m_xToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_yToProperty.value(property, nullptr)) {
-    m_propertyToY[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+    m_propertyToY[pointProp] = 0;
     m_yToProperty.remove(property);
   }
 }
@@ -3047,52 +2640,13 @@ void QtPointFPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtSizePropertyManager
 
-class QtSizePropertyManagerPrivate {
-  QtSizePropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtSizePropertyManager)
-public:
-  void slotIntChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-  void setValue(QtProperty *property, const QSize &val);
-  void setRange(QtProperty *property, const QSize &minVal, const QSize &maxVal,
-                const QSize &val);
-
-  struct Data {
-    Data()
-        : val(QSize(0, 0)), minVal(QSize(0, 0)),
-          maxVal(QSize(INT_MAX, INT_MAX)) {}
-    QSize val;
-    QSize minVal;
-    QSize maxVal;
-    QSize minimumValue() const { return minVal; }
-    QSize maximumValue() const { return maxVal; }
-    void setMinimumValue(const QSize &newMinVal) {
-      setSizeMinimumData(this, newMinVal);
-    }
-    void setMaximumValue(const QSize &newMaxVal) {
-      setSizeMaximumData(this, newMaxVal);
-    }
-  };
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToW;
-  QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-  QMap<const QtProperty *, QtProperty *> m_wToProperty;
-  QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
 void QtSizePropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                   int value) {
-  if (QtProperty *prop = m_wToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_wToProperty.value(property, 0)) {
     QSize s = m_values[prop].val;
     s.setWidth(value);
     q_ptr->setValue(prop, s);
-  } else if (QtProperty *prop = m_hToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
     QSize s = m_values[prop].val;
     s.setHeight(value);
     q_ptr->setValue(prop, s);
@@ -3100,11 +2654,11 @@ void QtSizePropertyManagerPrivate::slotIntChanged(QtProperty *property,
 }
 
 void QtSizePropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property) {
-  if (QtProperty *pointProp = m_wToProperty.value(property, nullptr)) {
-    m_propertyToW[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+    m_propertyToW[pointProp] = 0;
     m_wToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_hToProperty.value(property, nullptr)) {
-    m_propertyToH[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+    m_propertyToH[pointProp] = 0;
     m_hToProperty.remove(property);
   }
 }
@@ -3394,53 +2948,13 @@ void QtSizePropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtSizeFPropertyManager
 
-class QtSizeFPropertyManagerPrivate {
-  QtSizeFPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtSizeFPropertyManager)
-public:
-  void slotDoubleChanged(QtProperty *property, double value);
-  void slotPropertyDestroyed(QtProperty *property);
-  void setValue(QtProperty *property, const QSizeF &val);
-  void setRange(QtProperty *property, const QSizeF &minVal,
-                const QSizeF &maxVal, const QSizeF &val);
-
-  struct Data {
-    Data()
-        : val(QSizeF(0, 0)), minVal(QSizeF(0, 0)),
-          maxVal(QSizeF(INT_MAX, INT_MAX)), decimals(2) {}
-    QSizeF val;
-    QSizeF minVal;
-    QSizeF maxVal;
-    int decimals;
-    QSizeF minimumValue() const { return minVal; }
-    QSizeF maximumValue() const { return maxVal; }
-    void setMinimumValue(const QSizeF &newMinVal) {
-      setSizeMinimumData(this, newMinVal);
-    }
-    void setMaximumValue(const QSizeF &newMaxVal) {
-      setSizeMaximumData(this, newMaxVal);
-    }
-  };
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtDoublePropertyManager *m_doublePropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToW;
-  QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-  QMap<const QtProperty *, QtProperty *> m_wToProperty;
-  QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
 void QtSizeFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
                                                       double value) {
-  if (QtProperty *prop = m_wToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_wToProperty.value(property, 0)) {
     QSizeF s = m_values[prop].val;
     s.setWidth(value);
     q_ptr->setValue(prop, s);
-  } else if (QtProperty *prop = m_hToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
     QSizeF s = m_values[prop].val;
     s.setHeight(value);
     q_ptr->setValue(prop, s);
@@ -3449,11 +2963,11 @@ void QtSizeFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
 
 void QtSizeFPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_wToProperty.value(property, nullptr)) {
-    m_propertyToW[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+    m_propertyToW[pointProp] = 0;
     m_wToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_hToProperty.value(property, nullptr)) {
-    m_propertyToH[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+    m_propertyToH[pointProp] = 0;
     m_hToProperty.remove(property);
   }
 }
@@ -3810,40 +3324,9 @@ void QtSizeFPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtRectPropertyManager
 
-class QtRectPropertyManagerPrivate {
-  QtRectPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtRectPropertyManager)
-public:
-  void slotIntChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-  void setConstraint(QtProperty *property, const QRect &constraint,
-                     const QRect &val);
-
-  struct Data {
-    Data() : val(0, 0, 0, 0) {}
-    QRect val;
-    QRect constraint;
-  };
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToX;
-  QMap<const QtProperty *, QtProperty *> m_propertyToY;
-  QMap<const QtProperty *, QtProperty *> m_propertyToW;
-  QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-  QMap<const QtProperty *, QtProperty *> m_xToProperty;
-  QMap<const QtProperty *, QtProperty *> m_yToProperty;
-  QMap<const QtProperty *, QtProperty *> m_wToProperty;
-  QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
 void QtRectPropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                   int value) {
-  if (QtProperty *prop = m_xToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_xToProperty.value(property, 0)) {
     QRect r = m_values[prop].val;
     r.moveLeft(value);
     q_ptr->setValue(prop, r);
@@ -3851,7 +3334,7 @@ void QtRectPropertyManagerPrivate::slotIntChanged(QtProperty *property,
     QRect r = m_values[prop].val;
     r.moveTop(value);
     q_ptr->setValue(prop, r);
-  } else if (QtProperty *prop = m_wToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
     Data data = m_values[prop];
     QRect r = data.val;
     r.setWidth(value);
@@ -3860,7 +3343,7 @@ void QtRectPropertyManagerPrivate::slotIntChanged(QtProperty *property,
       r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
     }
     q_ptr->setValue(prop, r);
-  } else if (QtProperty *prop = m_hToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
     Data data = m_values[prop];
     QRect r = data.val;
     r.setHeight(value);
@@ -3873,17 +3356,17 @@ void QtRectPropertyManagerPrivate::slotIntChanged(QtProperty *property,
 }
 
 void QtRectPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property) {
-  if (QtProperty *pointProp = m_xToProperty.value(property, nullptr)) {
-    m_propertyToX[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+    m_propertyToX[pointProp] = 0;
     m_xToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_yToProperty.value(property, nullptr)) {
-    m_propertyToY[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+    m_propertyToY[pointProp] = 0;
     m_yToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_wToProperty.value(property, nullptr)) {
-    m_propertyToW[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+    m_propertyToW[pointProp] = 0;
     m_wToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_hToProperty.value(property, nullptr)) {
-    m_propertyToH[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+    m_propertyToH[pointProp] = 0;
     m_hToProperty.remove(property);
   }
 }
@@ -4222,49 +3705,17 @@ void QtRectPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtRectFPropertyManager
 
-class QtRectFPropertyManagerPrivate {
-  QtRectFPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtRectFPropertyManager)
-public:
-  void slotDoubleChanged(QtProperty *property, double value);
-  void slotPropertyDestroyed(QtProperty *property);
-  void setConstraint(QtProperty *property, const QRectF &constraint,
-                     const QRectF &val);
-
-  struct Data {
-    Data() : val(0, 0, 0, 0), decimals(2) {}
-    QRectF val;
-    QRectF constraint;
-    int decimals;
-  };
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtDoublePropertyManager *m_doublePropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToX;
-  QMap<const QtProperty *, QtProperty *> m_propertyToY;
-  QMap<const QtProperty *, QtProperty *> m_propertyToW;
-  QMap<const QtProperty *, QtProperty *> m_propertyToH;
-
-  QMap<const QtProperty *, QtProperty *> m_xToProperty;
-  QMap<const QtProperty *, QtProperty *> m_yToProperty;
-  QMap<const QtProperty *, QtProperty *> m_wToProperty;
-  QMap<const QtProperty *, QtProperty *> m_hToProperty;
-};
-
 void QtRectFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
                                                       double value) {
-  if (QtProperty *prop = m_xToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_xToProperty.value(property, 0)) {
     QRectF r = m_values[prop].val;
     r.moveLeft(value);
     q_ptr->setValue(prop, r);
-  } else if (QtProperty *prop = m_yToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_yToProperty.value(property, 0)) {
     QRectF r = m_values[prop].val;
     r.moveTop(value);
     q_ptr->setValue(prop, r);
-  } else if (QtProperty *prop = m_wToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_wToProperty.value(property, 0)) {
     Data data = m_values[prop];
     QRectF r = data.val;
     r.setWidth(value);
@@ -4273,7 +3724,7 @@ void QtRectFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
       r.moveLeft(data.constraint.left() + data.constraint.width() - r.width());
     }
     q_ptr->setValue(prop, r);
-  } else if (QtProperty *prop = m_hToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_hToProperty.value(property, 0)) {
     Data data = m_values[prop];
     QRectF r = data.val;
     r.setHeight(value);
@@ -4287,17 +3738,17 @@ void QtRectFPropertyManagerPrivate::slotDoubleChanged(QtProperty *property,
 
 void QtRectFPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_xToProperty.value(property, nullptr)) {
-    m_propertyToX[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_xToProperty.value(property, 0)) {
+    m_propertyToX[pointProp] = 0;
     m_xToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_yToProperty.value(property, nullptr)) {
-    m_propertyToY[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_yToProperty.value(property, 0)) {
+    m_propertyToY[pointProp] = 0;
     m_yToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_wToProperty.value(property, nullptr)) {
-    m_propertyToW[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_wToProperty.value(property, 0)) {
+    m_propertyToW[pointProp] = 0;
     m_wToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_hToProperty.value(property, nullptr)) {
-    m_propertyToH[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_hToProperty.value(property, 0)) {
+    m_propertyToH[pointProp] = 0;
     m_hToProperty.remove(property);
   }
 }
@@ -4978,32 +4429,9 @@ void QtEnumPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtFlagPropertyManager
 
-class QtFlagPropertyManagerPrivate {
-  QtFlagPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtFlagPropertyManager)
-public:
-  void slotBoolChanged(QtProperty *property, bool value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  struct Data {
-    Data() : val(-1) {}
-    int val;
-    QStringList flagNames;
-  };
-
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtBoolPropertyManager *m_boolPropertyManager;
-
-  QMap<const QtProperty *, QList<QtProperty *>> m_propertyToFlags;
-
-  QMap<const QtProperty *, QtProperty *> m_flagToProperty;
-};
-
 void QtFlagPropertyManagerPrivate::slotBoolChanged(QtProperty *property,
                                                    bool value) {
-  QtProperty *prop = m_flagToProperty.value(property, nullptr);
+  QtProperty *prop = m_flagToProperty.value(property, 0);
   if (prop == nullptr)
     return;
 
@@ -5026,12 +4454,12 @@ void QtFlagPropertyManagerPrivate::slotBoolChanged(QtProperty *property,
 }
 
 void QtFlagPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property) {
-  QtProperty *flagProperty = m_flagToProperty.value(property, nullptr);
+  QtProperty *flagProperty = m_flagToProperty.value(property, 0);
   if (flagProperty == nullptr)
     return;
 
   m_propertyToFlags[flagProperty].replace(
-      m_propertyToFlags[flagProperty].indexOf(property), nullptr);
+      m_propertyToFlags[flagProperty].indexOf(property), 0);
   m_flagToProperty.remove(property);
 }
 
@@ -5302,42 +4730,15 @@ void QtFlagPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtSizePolicyPropertyManager
 
-class QtSizePolicyPropertyManagerPrivate {
-  QtSizePolicyPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtSizePolicyPropertyManager)
-public:
-  QtSizePolicyPropertyManagerPrivate();
-
-  void slotIntChanged(QtProperty *property, int value);
-  void slotEnumChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  typedef QMap<const QtProperty *, QSizePolicy> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-  QtEnumPropertyManager *m_enumPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToHPolicy;
-  QMap<const QtProperty *, QtProperty *> m_propertyToVPolicy;
-  QMap<const QtProperty *, QtProperty *> m_propertyToHStretch;
-  QMap<const QtProperty *, QtProperty *> m_propertyToVStretch;
-
-  QMap<const QtProperty *, QtProperty *> m_hPolicyToProperty;
-  QMap<const QtProperty *, QtProperty *> m_vPolicyToProperty;
-  QMap<const QtProperty *, QtProperty *> m_hStretchToProperty;
-  QMap<const QtProperty *, QtProperty *> m_vStretchToProperty;
-};
-
 QtSizePolicyPropertyManagerPrivate::QtSizePolicyPropertyManagerPrivate() {}
 
 void QtSizePolicyPropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                         int value) {
-  if (QtProperty *prop = m_hStretchToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_hStretchToProperty.value(property, 0)) {
     QSizePolicy sp = m_values[prop];
     sp.setHorizontalStretch(static_cast<uchar>(value));
     q_ptr->setValue(prop, sp);
-  } else if (QtProperty *prop = m_vStretchToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_vStretchToProperty.value(property, 0)) {
     QSizePolicy sp = m_values[prop];
     sp.setVerticalStretch(static_cast<uchar>(value));
     q_ptr->setValue(prop, sp);
@@ -5346,11 +4747,11 @@ void QtSizePolicyPropertyManagerPrivate::slotIntChanged(QtProperty *property,
 
 void QtSizePolicyPropertyManagerPrivate::slotEnumChanged(QtProperty *property,
                                                          int value) {
-  if (QtProperty *prop = m_hPolicyToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_hPolicyToProperty.value(property, 0)) {
     QSizePolicy sp = m_values[prop];
     sp.setHorizontalPolicy(metaEnumProvider()->indexToSizePolicy(value));
     q_ptr->setValue(prop, sp);
-  } else if (QtProperty *prop = m_vPolicyToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_vPolicyToProperty.value(property, 0)) {
     QSizePolicy sp = m_values[prop];
     sp.setVerticalPolicy(metaEnumProvider()->indexToSizePolicy(value));
     q_ptr->setValue(prop, sp);
@@ -5359,20 +4760,17 @@ void QtSizePolicyPropertyManagerPrivate::slotEnumChanged(QtProperty *property,
 
 void QtSizePolicyPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_hStretchToProperty.value(property, nullptr)) {
-    m_propertyToHStretch[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_hStretchToProperty.value(property, 0)) {
+    m_propertyToHStretch[pointProp] = 0;
     m_hStretchToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_vStretchToProperty.value(property, nullptr)) {
-    m_propertyToVStretch[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_vStretchToProperty.value(property, 0)) {
+    m_propertyToVStretch[pointProp] = 0;
     m_vStretchToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_hPolicyToProperty.value(property, nullptr)) {
-    m_propertyToHPolicy[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_hPolicyToProperty.value(property, 0)) {
+    m_propertyToHPolicy[pointProp] = 0;
     m_hPolicyToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_vPolicyToProperty.value(property, nullptr)) {
-    m_propertyToVPolicy[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_vPolicyToProperty.value(property, 0)) {
+    m_propertyToVPolicy[pointProp] = 0;
     m_vPolicyToProperty.remove(property);
   }
 }
@@ -5637,48 +5035,6 @@ void QtSizePolicyPropertyManager::uninitializeProperty(QtProperty *property) {
 
 Q_GLOBAL_STATIC(QFontDatabase, fontDatabase)
 
-class QtFontPropertyManagerPrivate {
-  QtFontPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtFontPropertyManager)
-public:
-  QtFontPropertyManagerPrivate();
-
-  void slotIntChanged(QtProperty *property, int value);
-  void slotEnumChanged(QtProperty *property, int value);
-  void slotBoolChanged(QtProperty *property, bool value);
-  void slotPropertyDestroyed(QtProperty *property);
-  void slotFontDatabaseChanged();
-  void slotFontDatabaseDelayedChange();
-
-  QStringList m_familyNames;
-
-  typedef QMap<const QtProperty *, QFont> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-  QtEnumPropertyManager *m_enumPropertyManager;
-  QtBoolPropertyManager *m_boolPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToFamily;
-  QMap<const QtProperty *, QtProperty *> m_propertyToPointSize;
-  QMap<const QtProperty *, QtProperty *> m_propertyToBold;
-  QMap<const QtProperty *, QtProperty *> m_propertyToItalic;
-  QMap<const QtProperty *, QtProperty *> m_propertyToUnderline;
-  QMap<const QtProperty *, QtProperty *> m_propertyToStrikeOut;
-  QMap<const QtProperty *, QtProperty *> m_propertyToKerning;
-
-  QMap<const QtProperty *, QtProperty *> m_familyToProperty;
-  QMap<const QtProperty *, QtProperty *> m_pointSizeToProperty;
-  QMap<const QtProperty *, QtProperty *> m_boldToProperty;
-  QMap<const QtProperty *, QtProperty *> m_italicToProperty;
-  QMap<const QtProperty *, QtProperty *> m_underlineToProperty;
-  QMap<const QtProperty *, QtProperty *> m_strikeOutToProperty;
-  QMap<const QtProperty *, QtProperty *> m_kerningToProperty;
-
-  bool m_settingValue;
-  QTimer *m_fontDatabaseChangeTimer;
-};
-
 QtFontPropertyManagerPrivate::QtFontPropertyManagerPrivate()
     : m_settingValue(false), m_fontDatabaseChangeTimer(nullptr) {}
 
@@ -5686,7 +5042,7 @@ void QtFontPropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                   int value) {
   if (m_settingValue)
     return;
-  if (QtProperty *prop = m_pointSizeToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_pointSizeToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setPointSize(value);
     q_ptr->setValue(prop, f);
@@ -5697,7 +5053,7 @@ void QtFontPropertyManagerPrivate::slotEnumChanged(QtProperty *property,
                                                    int value) {
   if (m_settingValue)
     return;
-  if (QtProperty *prop = m_familyToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_familyToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setFamily(m_familyNames.at(value));
     q_ptr->setValue(prop, f);
@@ -5708,25 +5064,23 @@ void QtFontPropertyManagerPrivate::slotBoolChanged(QtProperty *property,
                                                    bool value) {
   if (m_settingValue)
     return;
-  if (QtProperty *prop = m_boldToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_boldToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setBold(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop = m_italicToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_italicToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setItalic(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop =
-                 m_underlineToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_underlineToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setUnderline(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop =
-                 m_strikeOutToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_strikeOutToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setStrikeOut(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop = m_kerningToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_kerningToProperty.value(property, 0)) {
     QFont f = m_values[prop];
     f.setKerning(value);
     q_ptr->setValue(prop, f);
@@ -5734,32 +5088,26 @@ void QtFontPropertyManagerPrivate::slotBoolChanged(QtProperty *property,
 }
 
 void QtFontPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property) {
-  if (QtProperty *pointProp = m_pointSizeToProperty.value(property, nullptr)) {
-    m_propertyToPointSize[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_pointSizeToProperty.value(property, 0)) {
+    m_propertyToPointSize[pointProp] = 0;
     m_pointSizeToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_familyToProperty.value(property, nullptr)) {
-    m_propertyToFamily[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_familyToProperty.value(property, 0)) {
+    m_propertyToFamily[pointProp] = 0;
     m_familyToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_boldToProperty.value(property, nullptr)) {
-    m_propertyToBold[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_boldToProperty.value(property, 0)) {
+    m_propertyToBold[pointProp] = 0;
     m_boldToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_italicToProperty.value(property, nullptr)) {
-    m_propertyToItalic[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_italicToProperty.value(property, 0)) {
+    m_propertyToItalic[pointProp] = 0;
     m_italicToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_underlineToProperty.value(property, nullptr)) {
-    m_propertyToUnderline[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_underlineToProperty.value(property, 0)) {
+    m_propertyToUnderline[pointProp] = 0;
     m_underlineToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_strikeOutToProperty.value(property, nullptr)) {
-    m_propertyToStrikeOut[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_strikeOutToProperty.value(property, 0)) {
+    m_propertyToStrikeOut[pointProp] = 0;
     m_strikeOutToProperty.remove(property);
-  } else if (QtProperty *pointProp =
-                 m_kerningToProperty.value(property, nullptr)) {
-    m_propertyToKerning[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_kerningToProperty.value(property, 0)) {
+    m_propertyToKerning[pointProp] = 0;
     m_kerningToProperty.remove(property);
   }
 }
@@ -6121,44 +5469,21 @@ void QtFontPropertyManager::uninitializeProperty(QtProperty *property) {
 
 // QtColorPropertyManager
 
-class QtColorPropertyManagerPrivate {
-  QtColorPropertyManager *q_ptr;
-  Q_DECLARE_PUBLIC(QtColorPropertyManager)
-public:
-  void slotIntChanged(QtProperty *property, int value);
-  void slotPropertyDestroyed(QtProperty *property);
-
-  typedef QMap<const QtProperty *, QColor> PropertyValueMap;
-  PropertyValueMap m_values;
-
-  QtIntPropertyManager *m_intPropertyManager;
-
-  QMap<const QtProperty *, QtProperty *> m_propertyToR;
-  QMap<const QtProperty *, QtProperty *> m_propertyToG;
-  QMap<const QtProperty *, QtProperty *> m_propertyToB;
-  QMap<const QtProperty *, QtProperty *> m_propertyToA;
-
-  QMap<const QtProperty *, QtProperty *> m_rToProperty;
-  QMap<const QtProperty *, QtProperty *> m_gToProperty;
-  QMap<const QtProperty *, QtProperty *> m_bToProperty;
-  QMap<const QtProperty *, QtProperty *> m_aToProperty;
-};
-
 void QtColorPropertyManagerPrivate::slotIntChanged(QtProperty *property,
                                                    int value) {
-  if (QtProperty *prop = m_rToProperty.value(property, nullptr)) {
+  if (QtProperty *prop = m_rToProperty.value(property, 0)) {
     QColor c = m_values[prop];
     c.setRed(value);
     q_ptr->setValue(prop, c);
-  } else if (QtProperty *prop = m_gToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_gToProperty.value(property, 0)) {
     QColor c = m_values[prop];
     c.setGreen(value);
     q_ptr->setValue(prop, c);
-  } else if (QtProperty *prop = m_bToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_bToProperty.value(property, 0)) {
     QColor c = m_values[prop];
     c.setBlue(value);
     q_ptr->setValue(prop, c);
-  } else if (QtProperty *prop = m_aToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop = m_aToProperty.value(property, 0)) {
     QColor c = m_values[prop];
     c.setAlpha(value);
     q_ptr->setValue(prop, c);
@@ -6167,17 +5492,17 @@ void QtColorPropertyManagerPrivate::slotIntChanged(QtProperty *property,
 
 void QtColorPropertyManagerPrivate::slotPropertyDestroyed(
     QtProperty *property) {
-  if (QtProperty *pointProp = m_rToProperty.value(property, nullptr)) {
-    m_propertyToR[pointProp] = nullptr;
+  if (QtProperty *pointProp = m_rToProperty.value(property, 0)) {
+    m_propertyToR[pointProp] = 0;
     m_rToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_gToProperty.value(property, nullptr)) {
-    m_propertyToG[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_gToProperty.value(property, 0)) {
+    m_propertyToG[pointProp] = 0;
     m_gToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_bToProperty.value(property, nullptr)) {
-    m_propertyToB[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_bToProperty.value(property, 0)) {
+    m_propertyToB[pointProp] = 0;
     m_bToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_aToProperty.value(property, nullptr)) {
-    m_propertyToA[pointProp] = nullptr;
+  } else if (QtProperty *pointProp = m_aToProperty.value(property, 0)) {
+    m_propertyToA[pointProp] = 0;
     m_aToProperty.remove(property);
   }
 }
@@ -6536,6 +5861,3 @@ void QtCursorPropertyManager::uninitializeProperty(QtProperty *property) {
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif
-
-#include "moc_qtpropertymanager.cpp"
-#include "qtpropertymanager.moc"

@@ -86,6 +86,8 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+    ws->getSpectrum(0).setDetectorID(1);
+    ws->getSpectrum(1).setDetectorID(2);
     return ws;
   }
 

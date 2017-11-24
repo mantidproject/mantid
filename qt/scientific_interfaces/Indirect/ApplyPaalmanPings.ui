@@ -388,7 +388,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
