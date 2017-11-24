@@ -98,15 +98,24 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     return output
 
 
+def _divide_one_spectrum_by_spline(spectrum, spline):
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum)
+    divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
+    common.remove_intermediate_workspace(rebinned_spline)
+    return divided
+
+
 def _divide_by_vanadium_splines(spectra_list, spline_file_path):
-    vanadium_ws_list = mantid.LoadNexus(Filename=spline_file_path)
-    output_list = []
-    for data_ws, van_ws in zip(spectra_list, vanadium_ws_list[1:]):
-        vanadium_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=data_ws)
-        output_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_ws)
-        output_list.append(output_ws)
-        common.remove_intermediate_workspace(vanadium_ws)
-    return output_list
+    vanadium_splines = mantid.LoadNexus(Filename=spline_file_path)
+
+    if isinstance(vanadium_splines, list):
+        output_list = []
+        for data_ws, van_ws in zip(spectra_list, vanadium_splines[1:]):
+            output_ws = _divide_one_spectrum_by_spline(data_ws, van_ws)
+            output_list.append(output_ws)
+        return output_list
+
+    return [_divide_one_spectrum_by_spline(vanadium_splines, spectra_list[0])]
 
 
 def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb):
