@@ -544,17 +544,16 @@ std::vector<double> LoadILLReflectometry::getXValues() {
                                 (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
-      xVals.emplace_back(t_TOF2 - 0.5 * m_channelWidth);
       for (int channelIndex = 0;
-           channelIndex < static_cast<int>(m_numberOfChannels);
+           channelIndex < static_cast<int>(m_numberOfChannels) + 1;
            ++channelIndex) {
-        const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth;
-        xVals.push_back(t_TOF1 + t_TOF2);
+        const double t_TOF1 = channelIndex * m_channelWidth;
+        xVals.emplace_back(t_TOF1 + t_TOF2);
       }
     } else {
       g_log.debug("Time channel index for axis description \n");
       for (size_t t = 0; t <= m_numberOfChannels; ++t)
-        xVals.push_back(double(t));
+        xVals.emplace_back(static_cast<double>(t));
     }
   } catch (std::runtime_error &e) {
     g_log.information() << "Unable to access NeXus file entry: " << e.what()

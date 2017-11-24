@@ -146,7 +146,7 @@ public:
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
     const auto tof0 =
-        tofDelay - 0.5 * channelWidth -
+        tofDelay -
         60e6 * (pOffset - 45 + chopper2Phase - chopper1Phase + openOffset) /
             (2 * 360 * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount);
