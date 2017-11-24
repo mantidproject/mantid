@@ -26,12 +26,48 @@ namespace MantidWidgets {
 //-------------------------------------------
 // Public member functions
 //-------------------------------------------
+
+/**
+ * Load settings from the persistent store. The client is expected to call
+ * this method with the QSettings object opened at the approriate group
+ * @param storage A pointer to an existing QSettings instance opened
+ * at the group containing the values
+ */
+void MessageDisplay::readSettings(const QSettings &storage) {
+  Mantid::Kernel::ConfigService::Instance().setFilterChannelLogLevel(
+      m_filterChannelName,
+      storage.value("MessageDisplayPriority", Message::Priority::PRIO_NOTICE)
+          .toInt(),
+      true);
+}
+
+/**
+ * Load settings from the persistent store. The client is expected to call
+ * this method with the QSettings object opened at the approriate group
+ * @param storage A pointer to an existing QSettings instance opened
+ * at the group where the values should be stored.
+ */
+void MessageDisplay::writeSettings(QSettings *storage) {
+  Q_ASSERT(storage);
+  storage->setValue("MessageDisplayPriority",
+                    static_cast<int>(m_filterChannel->getPriority()));
+}
+
 /**
  * Constructs a widget that does not allow control over the global log level
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
-    : QWidget(parent), m_logLevelControl(DisableLogLevelControl),
+    : MessageDisplay(DisableLogLevelControl, parent) {}
+
+/**
+ * @param logLevelControl Controls whether this display shows the right-click
+ * option to change
+ * the global log level
+ * @param parent An optional parent widget
+ */
+MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
+    : QWidget(parent), m_logLevelControl(logLevelControl),
       m_logChannel(new QtSignalChannel),
       m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
@@ -48,34 +84,8 @@ MessageDisplay::MessageDisplay(QWidget *parent)
 }
 
 /**
- * @param logLevelControl Controls whether this display shows the right-click
- * option to change
- * the global log level
- * @param parent An optional parent widget
- */
-MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
-    : QWidget(parent), m_logLevelControl(logLevelControl),
-      m_logChannel(new QtSignalChannel),
-      m_filterChannel(new Poco::FilterChannel),
-      m_textDisplay(new QPlainTextEdit(this)),
-      m_loglevels(new QActionGroup(this)),
-      m_logLevelMapping(new QSignalMapper(this)),
-      m_error(new QAction(tr("&Error"), this)),
-      m_warning(new QAction(tr("&Warning"), this)),
-      m_notice(new QAction(tr("&Notice"), this)),
-      m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)) {
-  initActions();
-  initFormats();
-  setupTextArea();
-}
-
-/**
  */
 MessageDisplay::~MessageDisplay() {
-  QSettings settings;
-  settings.setValue("MessageDisplayPriority",
-                    static_cast<int>(m_filterChannel->getPriority()));
   // The Channel class is ref counted and will
   // delete itself when required
   m_filterChannel->release();
@@ -99,9 +109,6 @@ void MessageDisplay::attachLoggingChannel() {
   }
   m_filterChannel->addChannel(m_logChannel);
 
-  QSettings settings;
-  int priority = settings.value(QString::fromStdString(m_FilterChannelName),
-                                Message::Priority::PRIO_NOTICE).toInt();
 
   auto &configService = Mantid::Kernel::ConfigService::Instance();
   configService.registerLoggingFilterChannel(m_FilterChannelName,
@@ -239,9 +246,9 @@ void MessageDisplay::scrollToBottom() {
       m_textDisplay->verticalScrollBar()->maximum());
 }
 
-//----------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Protected members
-//----------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // Private slot member functions
@@ -362,10 +369,9 @@ void MessageDisplay::setupTextArea() {
   m_textDisplay->setMouseTracking(true);
   m_textDisplay->setUndoRedoEnabled(false);
 
-  this->setLayout(new QHBoxLayout(this));
-  QLayout *layout = this->layout();
-  layout->setContentsMargins(0, 0, 0, 0);
-  layout->addWidget(m_textDisplay);
+  auto layoutBox = new QHBoxLayout(this);
+  layoutBox->setContentsMargins(0, 0, 0, 0);
+  layoutBox->addWidget(m_textDisplay);
 
   this->setFocusProxy(m_textDisplay);
   m_textDisplay->setContextMenuPolicy(Qt::CustomContextMenu);

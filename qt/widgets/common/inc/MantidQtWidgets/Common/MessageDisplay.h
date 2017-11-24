@@ -6,6 +6,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/FilterChannel.h"
+#include "MantidQtWidgets/Common/Configurable.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
 
@@ -19,10 +20,11 @@
 //----------------------------------------------------------
 class QAction;
 class QActionGroup;
+class QPlainTextEdit;
 class QPoint;
+class QSettings;
 class QShowEvent;
 class QSignalMapper;
-class QPlainTextEdit;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -33,9 +35,15 @@ namespace MantidWidgets {
  * a message is a framework Poco message or a simple string.
  * It can connect to the Mantid logging framework if required
  */
-class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
+                                                  public Configurable {
   Q_OBJECT
   Q_PROPERTY(QString source READ source WRITE setSource)
+
+public:
+  // Configurable interface
+  void readSettings(const QSettings &storage) override;
+  void writeSettings(QSettings *storage) override;
 
 public:
   /// Controls whether the display is allowed to set the log levels
