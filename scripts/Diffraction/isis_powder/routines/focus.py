@@ -120,7 +120,9 @@ def _divide_by_vanadium_splines(spectra_list, spline_file_path):
             output_list.append(output_ws)
         return output_list
 
-    return [_divide_one_spectrum_by_spline(vanadium_splines, spectra_list[0])]
+    output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]
+    common.remove_intermediate_workspace(vanadium_splines)
+    return output_list
 
 
 def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb):
