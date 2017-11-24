@@ -110,7 +110,6 @@ void ResizeRectangularDetector::exec() {
   // Add a parameter for the new scale factors
   pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
   pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
-  pmap.clearPositionSensitiveCaches();
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
   // positions there.

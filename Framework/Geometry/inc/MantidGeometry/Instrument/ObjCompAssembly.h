@@ -89,9 +89,6 @@ public:
   void printChildren(std::ostream &) const override;
   void printTree(std::ostream &) const override;
 
-  Kernel::Quat getRotation() const override;
-  Kernel::V3D getPos() const override;
-
   //! Set the outline of the assembly
   boost::shared_ptr<Object> createOutline();
   void setOutline(boost::shared_ptr<const Object> obj);

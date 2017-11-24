@@ -91,10 +91,6 @@ public:
   boost::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
-  Kernel::V3D getPos() const override;
-
-  Kernel::Quat getRotation() const override;
-
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
 

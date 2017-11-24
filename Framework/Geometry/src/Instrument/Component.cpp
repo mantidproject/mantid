@@ -357,16 +357,12 @@ Kernel::V3D Component::getPos() const {
 
         Quat parentRot;
         V3D parentPos;
-        if (!(m_map->getCachedLocation(baseParent, parentPos) &&
-              m_map->getCachedRotation(baseParent, parentRot))) {
-          // Couldn't get them from the cache, so I have to instantiate the
-          // class
-          boost::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-            parentPos = parParent->getPos();
-          }
+        boost::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
+          parentPos = parParent->getPos();
         }
+
         parentRot.rotate(absPos);
         absPos += parentPos;
         return absPos;
@@ -411,12 +407,10 @@ Kernel::Quat Component::getRotation() const {
         return getRelativeRot();
       } else {
         Quat parentRot;
-        if (!m_map->getCachedRotation(baseParent, parentRot)) {
-          // Get the parent's rotation
-          boost::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-          }
+        // Get the parent's rotation
+        boost::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
         }
         return parentRot * getRelativeRot();
       }
