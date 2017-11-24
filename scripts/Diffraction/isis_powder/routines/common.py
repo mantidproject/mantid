@@ -43,7 +43,9 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
 
     # Finally check the number of elements are equal
     if len(bank_list) != len(crop_values_list):
-        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n"
+                           "{} cropping windows were supplied for {} banks".format(len(crop_values_list), len(bank_list)
+                                                                                   ))
 
     output_list = []
     for spectra, cropping_values in zip(bank_list, crop_values_list):
