@@ -59,6 +59,9 @@ class RunTabPresenter(object):
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
 
+        def on_manage_directories(self):
+            self._presenter.on_manage_directories()
+
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
@@ -258,6 +261,9 @@ class RunTabPresenter(object):
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_manage_directories(self):
+        self._view.show_directory_manager()
 
     def on_mask_file_add(self):
         """
