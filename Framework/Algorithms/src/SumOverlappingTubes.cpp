@@ -54,6 +54,10 @@ void SumOverlappingTubes::init() {
       "also be a single number, which is the angle step size. In this case, "
       "the boundary of binning will be determined by minimum and maximum "
       "scattering angle present in the workspaces.");
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "CropNegativeScatteringAngles", true, Direction::Input),
+                  "If true the negative scattering angles are ignored. "
+                  "Otherwise they are included as normal.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ComponentForHeightAxis", "tube_1", Direction::Input),
                   "The name of the component to use for the height axis, that "
@@ -133,6 +137,9 @@ void SumOverlappingTubes::exec() {
   if (getProperty("Normalise"))
     for (size_t i = 0; i < m_numPoints; ++i)
       for (size_t j = 0; j < m_numHistograms; ++j) {
+        // Avoid spurious normalisation for low counting cells
+        if (normalisation[j][i] < 1e-15)
+          continue;
         outputWS->mutableY(j)[i] *= maxEntry / normalisation[j][i];
         outputWS->mutableE(j)[i] *= maxEntry / normalisation[j][i];
       }
@@ -202,8 +209,7 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     m_endScatteringAngle = scatteringBinning[2];
   }
 
-  if ((m_outputType == "2DStraight" || m_outputType == "1DStraight") &&
-      m_startScatteringAngle < 0)
+  if (getProperty("CropNegativeScatteringAngles") && m_startScatteringAngle < 0)
     m_startScatteringAngle = 0.0;
 
   m_numPoints = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
@@ -302,10 +308,10 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       double angle;
       if (m_outputType == "2D")
-        angle = m_mirrorDetectors * atan2(pos.X(), pos.Z());
+        angle = atan2(pos.X(), pos.Z());
       else
-        angle = specInfo.twoTheta(i);
-      angle *= 180.0 / M_PI;
+        angle = specInfo.signedTwoTheta(i);
+      angle *= m_mirrorDetectors * 180.0 / M_PI;
 
       int angleIndex =
           int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
