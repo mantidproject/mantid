@@ -174,6 +174,14 @@ public:
 
   Range detectorRangeInSubtree(const size_t index) const;
   Range componentRangeInSubtree(const size_t index) const;
+
+private:
+  void doSetPosition(const std::pair<size_t, size_t> &index,
+                     const Eigen::Vector3d &newPosition,
+                     const ComponentInfo::Range &detectorRange);
+  void doSetRotation(const std::pair<size_t, size_t> &index,
+                     const Eigen::Quaterniond &newRotation,
+                     const ComponentInfo::Range &detectorRange);
 };
 } // namespace Beamline
 } // namespace Mantid

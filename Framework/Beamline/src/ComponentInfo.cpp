@@ -224,8 +224,61 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
   }
 }
 
+void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index,
+                                  const Eigen::Vector3d &newPosition,
+                                  const ComponentInfo::Range &detectorRange) {
+
+  const auto componentIndex = index.first;
+  const auto timeIndex = index.second;
+  const Eigen::Vector3d offset = newPosition - position(componentIndex);
+  for (const auto &subIndex : detectorRange) {
+    m_detectorInfo->setPosition(
+        {subIndex, timeIndex},
+        m_detectorInfo->position({subIndex, timeIndex}) + offset);
+  }
+
+  for (const auto &subIndex : componentRangeInSubtree(componentIndex)) {
+    size_t offsetIndex = compOffsetIndex(subIndex);
+    m_positions.access()[offsetIndex] += offset;
+  }
+}
+
+void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index,
+                                  const Eigen::Quaterniond &newRotation,
+                                  const ComponentInfo::Range &detectorRange) {
+
+  const auto componentIndex = index.first;
+  const auto timeIndex = index.second;
+  const Eigen::Vector3d compPos = position(index);
+  const Eigen::Quaterniond currentRotInv = rotation(index).inverse();
+  const Eigen::Quaterniond rotDelta =
+      (newRotation * currentRotInv).normalized();
+  auto transform = Eigen::Matrix3d(rotDelta);
+
+  for (const auto &subDetIndex : detectorRange) {
+    auto newPos =
+        transform *
+            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
+        compPos;
+    auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
+    m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
+    m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
+  }
+
+  for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
+    auto newPos =
+        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
+    auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
+    const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
+    m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
+        newPos;
+    m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] =
+        newRot.normalized();
+  }
+}
+
 /**
- * Sets the rotation for a component described by target component index
+ * Sets the position for a component described by target component index
  *
  * This will propagate and apply the derived position offsets to all known
  *sub-components
@@ -241,53 +294,31 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setPosition(componentIndex, newPosition);
 
-  const Eigen::Vector3d offset = newPosition - position(componentIndex);
-
   // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
   // memory allocations.
   // Optimization: Split loop over detectors and other components.
-  const auto range = detectorRangeInSubtree(componentIndex);
-  if (!range.empty())
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+  if (!detectorRange.empty())
     failIfDetectorInfoScanning();
-  // Optimization: After failIfDetectorInfoScanning() we know that the time
-  // index is always
-  // 0 so we use faster access with index pair instead of only detector index.
-  for (const auto &index : range) {
-    m_detectorInfo->setPosition({index, 0},
-                                m_detectorInfo->position({index, 0}) + offset);
-  }
 
-  for (const auto &index : componentRangeInSubtree(componentIndex)) {
-    size_t offsetIndex = compOffsetIndex(index);
-    m_positions.access()[offsetIndex] += offset;
-  }
+  doSetPosition({componentIndex, 0}, newPosition, detectorRange);
 }
 
+/**
+ * Set the position for a component described by a component and time index
+ * This will propagate and apply the derived position offsets to all known
+ *sub-components
+ *
+ * @param index : Component, time index pair
+ * @param newPosition : Absolute position to set
+ */
 void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
                                 const Eigen::Vector3d &newPosition) {
 
-  auto componentIndex = index.first;
+  const auto componentIndex = index.first;
   checkSpecialIndices(componentIndex);
-  auto timeIndex = index.second;
-  if (isDetector(componentIndex)) {
-    return m_detectorInfo->setPosition(index, newPosition);
-  }
-  const Eigen::Vector3d offset = newPosition - position(index);
-
-  // Optimization: Not using detectorsInSubtree and componentsInSubtree to avoid
-  // memory allocations.
-  // Optimization: Split loop over detectors and other components.
-  const auto range = detectorRangeInSubtree(componentIndex);
-  for (const auto &subIndex : range) {
-    m_detectorInfo->setPosition(
-        {subIndex, timeIndex},
-        m_detectorInfo->position({subIndex, timeIndex}) + offset);
-  }
-
-  for (const auto &index : componentRangeInSubtree(componentIndex)) {
-    size_t offsetIndex = compOffsetIndex(index);
-    m_positions.access()[offsetIndex] += offset;
-  }
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+  doSetPosition(index, newPosition, detectorRange);
 }
 
 /**
@@ -309,67 +340,33 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   if (isDetector(componentIndex))
     return m_detectorInfo->setRotation(componentIndex, newRotation);
 
-  const Eigen::Vector3d compPos = position(componentIndex);
-  const Eigen::Quaterniond currentRotInv = rotation(componentIndex).inverse();
-  const Eigen::Quaterniond rotDelta =
-      (newRotation * currentRotInv).normalized();
-  auto transform = Eigen::Matrix3d(rotDelta);
-
-  const auto range = detectorRangeInSubtree(componentIndex);
-  if (!range.empty())
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+  if (!detectorRange.empty())
     failIfDetectorInfoScanning();
-  for (const auto &index : range) {
-    auto newPos =
-        transform * (m_detectorInfo->position({index, 0}) - compPos) + compPos;
-    auto newRot = rotDelta * m_detectorInfo->rotation({index, 0});
-    m_detectorInfo->setPosition({index, 0}, newPos);
-    m_detectorInfo->setRotation({index, 0}, newRot);
-  }
 
-  for (const auto &index : componentRangeInSubtree(componentIndex)) {
-    auto newPos = transform * (position(index) - compPos) + compPos;
-    auto newRot = rotDelta * rotation(index);
-    const size_t childCompIndexOffset = compOffsetIndex(index);
-    m_positions.access()[childCompIndexOffset] = newPos;
-    m_rotations.access()[childCompIndexOffset] = newRot.normalized();
-  }
+  doSetRotation({componentIndex, 0}, newRotation, detectorRange);
 }
 
+/**
+ * Sets the rotation for a component described by component and time index.
+ *
+ * This will propagate and apply the derived rotation to all known
+ *sub-components
+ * This will also update derived positions for target component and all
+ *sub-components
+ *
+ * @param index : Component and time index pair
+ * @param newRotation : Absolute rotation to set
+ */
 void ComponentInfo::setRotation(const std::pair<size_t, size_t> index,
                                 const Eigen::Quaterniond &newRotation) {
   const auto componentIndex = index.first;
   checkSpecialIndices(componentIndex);
-  const auto timeIndex = index.second;
   if (isDetector(componentIndex))
     return m_detectorInfo->setRotation(index, newRotation);
 
-  const Eigen::Vector3d compPos = position(index);
-  const Eigen::Quaterniond currentRotInv = rotation(index).inverse();
-  const Eigen::Quaterniond rotDelta =
-      (newRotation * currentRotInv).normalized();
-  auto transform = Eigen::Matrix3d(rotDelta);
-
-  const auto range = detectorRangeInSubtree(componentIndex);
-  for (const auto &subDetIndex : range) {
-    auto newPos =
-        transform *
-            (m_detectorInfo->position({subDetIndex, timeIndex}) - compPos) +
-        compPos;
-    auto newRot = rotDelta * m_detectorInfo->rotation({subDetIndex, timeIndex});
-    m_detectorInfo->setPosition({subDetIndex, timeIndex}, newPos);
-    m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
-  }
-
-  for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
-    auto newPos =
-        transform * (position({subCompIndex, timeIndex}) - compPos) + compPos;
-    auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
-    const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
-    m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] =
-        newPos;
-    m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] =
-        newRot.normalized();
-  }
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+  doSetRotation(index, newRotation, detectorRange);
 }
 
 void ComponentInfo::failIfDetectorInfoScanning() const {
