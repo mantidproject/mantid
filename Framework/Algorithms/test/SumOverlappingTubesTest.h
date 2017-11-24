@@ -53,6 +53,9 @@ public:
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
 
+    testWS->getInstrument()->getParameterMap()->addBool(
+        testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
+        true);
     return testWS;
   }
 
@@ -81,6 +84,10 @@ public:
     // This has to be added to the ADS so that it can be used with the string
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
+
+    testWS->getInstrument()->getParameterMap()->addBool(
+        testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
+        true);
 
     return testWS;
   }
@@ -464,6 +471,7 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("CropNegativeScatteringAngles", true);
     if (explicitHeightAxis)
       alg.setProperty("HeightAxis", "0.0, 0.0135");
     else

@@ -55,7 +55,7 @@ void SumOverlappingTubes::init() {
       "the boundary of binning will be determined by minimum and maximum "
       "scattering angle present in the workspaces.");
   declareProperty(make_unique<PropertyWithValue<bool>>(
-                      "CropNegativeScatteringAngles", true, Direction::Input),
+                      "CropNegativeScatteringAngles", false, Direction::Input),
                   "If true the negative scattering angles are ignored. "
                   "Otherwise they are included as normal.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
