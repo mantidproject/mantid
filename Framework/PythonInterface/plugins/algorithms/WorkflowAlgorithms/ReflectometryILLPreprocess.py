@@ -434,7 +434,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             self._cleanup.cleanup(detWS)
             return normalisedWS
         elif method == FluxNormMethod.TIME:
-            t = detWS.run().getProperty('duration').value
+            t = detWS.run().getProperty('time').value
             normalisedWSName = self._names.withSuffix('normalised_to_time')
             scaledWS = Scale(InputWorkspace=detWS,
                              OutputWorkspace=normalisedWSName,
