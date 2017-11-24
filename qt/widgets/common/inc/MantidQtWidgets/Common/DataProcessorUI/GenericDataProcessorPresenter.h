@@ -140,6 +140,8 @@ public:
   void setModel(QString const &name) override;
   bool hasPostprocessing() const;
 
+  void settingsChanged() override;
+
   // The following methods are public only for testing purposes
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };

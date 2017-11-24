@@ -32,8 +32,8 @@ void ReflSettingsTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
-void ReflSettingsTabPresenter::settingsChanged() {
-  m_mainPresenter->settingsChanged();
+void ReflSettingsTabPresenter::settingsChanged(int group) {
+  m_mainPresenter->settingsChanged(group);
 }
 
 /// Destructor

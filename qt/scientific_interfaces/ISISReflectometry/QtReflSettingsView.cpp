@@ -11,12 +11,12 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
 * @param parent :: [input] The parent of this widget
 */
-QtReflSettingsView::QtReflSettingsView(QWidget *parent) {
+QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
   UNUSED_ARG(parent);
   initLayout();
 
-  m_presenter.reset(new ReflSettingsPresenter(this));
+  m_presenter.reset(new ReflSettingsPresenter(this, group));
 }
 
 //----------------------------------------------------------------------------------------------

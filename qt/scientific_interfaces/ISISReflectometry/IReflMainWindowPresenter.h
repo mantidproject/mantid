@@ -65,7 +65,7 @@ public:
   /// Data processing check
   virtual bool checkIfProcessing() const = 0;
 
-  virtual void settingsChanged() = 0;
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

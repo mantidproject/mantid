@@ -47,7 +47,7 @@ public:
   /// Set current instrument name
   virtual void setInstrumentName(const std::string &instName) = 0;
   virtual void acceptMainPresenter(IReflMainWindowPresenter* mainPresenter) = 0;
-  virtual void settingsChanged() = 0;
+  virtual void settingsChanged(int group) = 0;
 };
 }
 }

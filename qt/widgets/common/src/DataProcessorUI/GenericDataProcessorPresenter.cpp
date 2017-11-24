@@ -314,6 +314,10 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   return settingsChanged;
 }
 
+void GenericDataProcessorPresenter::settingsChanged() {
+  std::cout << "GDPP says the settings have changed" << std::endl;
+}
+
 bool GenericDataProcessorPresenter::rowOutputExists(RowItem const& row) const {
     for(auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
         auto outputWorkspaceName = getReducedWorkspaceName(row.second, m_processor.prefix(i));

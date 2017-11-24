@@ -48,7 +48,7 @@ public:
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
-  void settingsChanged() override;
+  void settingsChanged(int group) override;
   void
   passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
 

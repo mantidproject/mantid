@@ -56,10 +56,8 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
-void ReflMainWindowPresenter::settingsChanged() {
-  static int i = 0;
-  ++i;
-  std::cout << "The Settings Was Changed " << i << " times." << std::endl;
+void ReflMainWindowPresenter::settingsChanged(int group) {
+  m_runsPresenter->settingsChanged(group);
 }
 
 /** Returns values passed for 'Transmission run(s)'

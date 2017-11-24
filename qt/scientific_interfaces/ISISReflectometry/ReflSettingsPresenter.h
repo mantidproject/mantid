@@ -44,7 +44,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSettingsPresenter
     : public IReflSettingsPresenter {
 public:
   /// Constructor
-  ReflSettingsPresenter(IReflSettingsView *view);
+  ReflSettingsPresenter(IReflSettingsView *view, int id);
   /// Destructor
   ~ReflSettingsPresenter() override;
   void notify(IReflSettingsPresenter::Flag flag) override;
@@ -71,6 +71,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  void handleSettingsChanged();
   void wrapWithQuotes(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
@@ -81,6 +82,7 @@ private:
   IReflSettingsTabPresenter* m_tabPresenter;
   /// Name of the current instrument in use
   std::string m_currentInstrumentName;
+  int m_group;
 };
 }
 }

@@ -115,6 +115,10 @@ void ReflRunsTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
+void ReflRunsTabPresenter::settingsChanged(int group) {
+  m_tablePresenters[group]->settingsChanged();
+}
+
 /**
 Used by the view to tell the presenter something has changed
 */

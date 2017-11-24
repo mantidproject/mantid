@@ -18,8 +18,8 @@ using namespace Mantid::Geometry;
 /** Constructor
 * @param view :: The view we are handling
 */
-ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
-    : m_view(view) {
+ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
+    : m_view(view), m_group(group) {
 
   // Create the 'HintingLineEdits'
   createStitchHints();
@@ -42,15 +42,19 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
     getInstDefaults();
     break;
   case IReflSettingsPresenter::SettingsChangedFlag:
-    m_tabPresenter->settingsChanged();
+    handleSettingsChanged();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
 }
 
+void ReflSettingsPresenter::handleSettingsChanged() {
+  m_tabPresenter->settingsChanged(m_group);
+}
 
-void ReflSettingsPresenter::acceptTabPresenter(IReflSettingsTabPresenter* tabPresenter) {
+void ReflSettingsPresenter::acceptTabPresenter(
+    IReflSettingsTabPresenter *tabPresenter) {
   m_tabPresenter = tabPresenter;
 }
 
