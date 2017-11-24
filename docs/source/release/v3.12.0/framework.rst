@@ -25,6 +25,8 @@ Algorithms
 Data Objects
 ------------
 
+A `bug <https://github.com/mantidproject/mantid/pull/20953>`_ in the handling of fractional bin weights in a specialised form (`RebinnedOutput <http://doxygen.mantidproject.org/nightly/d4/d31/classMantid_1_1DataObjects_1_1RebinnedOutput.html>`_) of :ref:`Workspace2D <Workspace2D>` has been fixed. This mainly affects the algorithms :ref:`algm-SofQWNormalisedPolygon` and :ref:`algm-Rebin2D`, which underlies the `SliceViewer <http://www.mantidproject.org/MantidPlot:_SliceViewer>`_.
+
 Python
 ------
 
