@@ -846,21 +846,17 @@ public:
                       b.scanCount(0), 1)
   }
 
-  void test_merge_identical_interval_failures() {
+  void test_merge_identical_interval_when_positions_differ() {
     auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
-    Eigen::Quaterniond rot1(
-        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    Eigen::Quaterniond rot2(
-        Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
     auto rootIndex = a.root();
     a.setPosition(rootIndex, pos1);
-    a.setRotation(rootIndex, rot1);
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
+    // Sanity check
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
     auto infos3 = cloneInfos(infos1);
@@ -873,11 +869,27 @@ public:
                             "positions differ");
     c.setPosition(rootIndex, pos1);
     TS_ASSERT_THROWS_NOTHING(c.merge(a));
+  }
 
-    auto infos4 = cloneInfos(infos1);
-    ComponentInfo &d = *std::get<0>(infos4);
-    d.setRotation(rootIndex, rot2);
-    TS_ASSERT_THROWS_EQUALS(d.merge(a), const std::runtime_error &e,
+  void test_merge_identical_interval_when_rotations_differ() {
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    ComponentInfo &a = *std::get<0>(infos1);
+    a.setScanInterval({0, 1});
+    Eigen::Quaterniond rot1(
+        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+    Eigen::Quaterniond rot2(
+        Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+    auto rootIndex = a.root();
+    a.setRotation(rootIndex, rot1);
+    auto infos2 = cloneInfos(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    // Sanity check
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+
+    auto infos3 = cloneInfos(infos1);
+    ComponentInfo &c = *std::get<0>(infos3);
+    c.setRotation(rootIndex, rot2);
+    TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
