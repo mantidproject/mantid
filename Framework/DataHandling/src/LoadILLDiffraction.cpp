@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
@@ -93,6 +94,22 @@ void LoadILLDiffraction::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
+  std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
+  declareProperty("DataType", "Auto",
+                  boost::make_shared<StringListValidator>(calibrationOptions),
+                  "Select the type of data, with or without calibration "
+                  "already applied. If Auto then the calibrated data is "
+                  "loaded if available, otherwise the raw data is loaded.");
+}
+
+std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (getPropertyValue("DataType") == "Calibrated" &&
+      !containsCalibratedData(getPropertyValue("Filename"))) {
+    issues["DataType"] = "Calibrated data requested, but only raw data exists "
+                         "in this NeXus file.";
+  }
+  return issues;
 }
 
 /**
@@ -102,7 +119,7 @@ void LoadILLDiffraction::exec() {
 
   Progress progress(this, 0, 1, 3);
 
-  m_fileName = getPropertyValue("Filename");
+  m_filename = getPropertyValue("Filename");
 
   progress.report("Loading the scanned variables");
   loadScanVars();
@@ -122,7 +139,7 @@ void LoadILLDiffraction::exec() {
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
-  NXRoot dataRoot(m_fileName);
+  NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   m_instName = firstEntry.getString("instrument/name");
@@ -131,8 +148,15 @@ void LoadILLDiffraction::loadDataScan() {
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
   // read the detector data
-  NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
-  NXUInt data = dataGroup.openUIntData();
+
+  std::string dataName;
+  if (getPropertyValue("DataType") == "Raw" &&
+      containsCalibratedData(m_filename))
+    dataName = "data_scan/detector_data/raw_data";
+  else
+    dataName = "data_scan/detector_data/data";
+  g_log.notice() << "Loading data from " + dataName;
+  NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
   data.load();
 
   // read the scan data
@@ -183,7 +207,6 @@ void LoadILLDiffraction::loadDataScan() {
   fillDataScanMetaData(scan);
 
   scanGroup.close();
-  dataGroup.close();
   firstEntry.close();
   dataRoot.close();
 }
@@ -193,16 +216,23 @@ void LoadILLDiffraction::loadDataScan() {
 */
 void LoadILLDiffraction::loadMetaData() {
 
-  m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+  auto &mutableRun = m_outWorkspace->mutableRun();
+  mutableRun.addProperty("Facility", std::string("ILL"));
 
   // Open NeXus file
   NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
+  NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     nxStat = NXclose(&nxHandle);
   }
+
+  if (mutableRun.hasProperty("Detector.calibration_file")) {
+    if (getPropertyValue("DataType") == "Raw")
+      mutableRun.getProperty("Detector.calibration_file")->setValue("none");
+  } else
+    mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
 
 /**
@@ -422,7 +452,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
  */
 void LoadILLDiffraction::loadScanVars() {
 
-  H5File h5file(m_fileName, H5F_ACC_RDONLY);
+  H5File h5file(m_filename, H5F_ACC_RDONLY);
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
@@ -450,15 +480,16 @@ void LoadILLDiffraction::loadScanVars() {
  */
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
+  auto &mutableRun = m_outWorkspace->mutableRun();
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
-      auto property =
-          Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
+      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(
+          m_scanVar[i].name + "." + m_scanVar[i].property);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      m_outWorkspace->mutableRun().addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property));
     }
   }
 }
@@ -699,6 +730,21 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
+}
+
+/**
+ * Returns true if the file contains calibrated data
+ *
+ * @param filename The filename to check
+ * @return True if the file contains calibrated data, false otherwise
+ */
+bool LoadILLDiffraction::containsCalibratedData(
+    const std::string &filename) const {
+  NexusDescriptor descriptor(filename);
+  // This is unintuitive, but if the file has calibrated data there are entries
+  // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
+  // present.
+  return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
 }
 
 } // namespace DataHandling

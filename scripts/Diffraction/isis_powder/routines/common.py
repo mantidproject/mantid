@@ -150,18 +150,18 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
-def generate_splined_name(vanadium_string, *args):
+def _generate_vanadium_name(vanadium_string, is_spline, *args):
     """
-    Generates a unique splined vanadium name which encapsulates
-    any properties passed into this method so that the vanadium
-    can be later loaded. This acts as a fingerprint for the vanadium
-    as some properties (such as offset file used) can impact
-    on the correct splined vanadium file to use.
-    :param vanadium_string: The name of this vanadium run
-    :param args: Any identifying properties to append to the name
-    :return: The splined vanadium name
+    :param vanadium_string: The number of the run being processed
+    :param is_spline: True if the workspace to save out is a spline
+    :param args: Any other strings to append to the filename
+    :return: A filename for the vanadium
     """
-    out_name = "VanSplined" + '_' + str(vanadium_string)
+    out_name = 'Van'
+    if is_spline:
+        out_name += 'Splined'
+
+    out_name += '_' + str(vanadium_string)
     for passed_arg in args:
         if isinstance(passed_arg, list):
             for arg in passed_arg:
@@ -173,6 +173,34 @@ def generate_splined_name(vanadium_string, *args):
     return out_name
 
 
+def generate_splined_name(vanadium_string, *args):
+    """
+    Generates a unique splined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    return _generate_vanadium_name(vanadium_string, True, *args)
+
+
+def generate_unsplined_name(vanadium_string, *args):
+    """
+    Generates a unique unsplined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    return _generate_vanadium_name(vanadium_string, False, *args)
+
+
 def get_first_run_number(run_number_string):
     """
     Takes a run number string and returns the first user specified run from that string
@@ -180,8 +208,11 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    if isinstance(run_numbers, list):
-        run_numbers = run_numbers[0]
+
+    if not run_numbers:
+        raise RuntimeError("Attempted to load empty set of workspaces. Please input at least one valid run number")
+
+    run_numbers = run_numbers[0]
 
     return run_numbers
 

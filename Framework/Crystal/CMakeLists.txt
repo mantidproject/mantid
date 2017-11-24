@@ -231,8 +231,9 @@ endif()
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal 
-                                           INSTALL_RPATH "@loader_path/../Contents/MacOS/")
+set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal
+  INSTALL_RPATH "@loader_path/../Contents/MacOS/"
+)
 # Add to the 'Framework' group in VS
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 

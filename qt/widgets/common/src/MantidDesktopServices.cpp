@@ -40,7 +40,7 @@ bool MantidDesktopServices::openUrl(const QUrl &url) {
   }
   auto status = QDesktopServices::openUrl(url);
   if (!ldpreload.isEmpty()) {
-    setenv(LDPRELOAD_ENV, ldpreload.toLatin1().constData(), 1 /* overwrite*/);
+    setenv(LDPRELOAD_ENV, qPrintable(ldpreload), 1 /* overwrite*/);
   }
   return status;
 #endif
@@ -69,29 +69,6 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme,
  */
 void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
   QDesktopServices::unsetUrlHandler(scheme);
-}
-
-/**
- * Pass through method to MantidDesktopServices::storageLocation. See Qt
- * documentation for
- * further details.
- * @param type File type
- */
-QString MantidDesktopServices::storageLocation(
-    QDesktopServices::StandardLocation type) {
-  return QDesktopServices::storageLocation(type);
-}
-
-/**
- * Pass through method to MantidDesktopServices::displayName. See Qt
- * documentation
- * for
- * further details.
- * @param type Location type
- */
-QString
-MantidDesktopServices::displayName(QDesktopServices::StandardLocation type) {
-  return QDesktopServices::displayName(type);
 }
 }
 }

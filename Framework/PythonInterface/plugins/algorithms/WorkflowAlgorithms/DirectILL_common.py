@@ -21,6 +21,8 @@ BKG_DIAGNOSTICS_AUTO = 'Bkg Diagnostics AUTO'
 BKG_DIAGNOSTICS_OFF = 'Bkg Diagnostics OFF'
 BKG_DIAGNOSTICS_ON = 'Bkg Diagnostics ON'
 
+CATEGORIES = 'ILL\\Direct;Inelastic\\Reduction;Workflow\\Inelastic'
+
 CLEANUP_OFF = 'Cleanup OFF'
 CLEANUP_ON = 'Cleanup ON'
 
