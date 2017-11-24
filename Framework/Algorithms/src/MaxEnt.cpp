@@ -136,9 +136,10 @@ void MaxEnt::init() {
       "Fourier data point the reconstruction will be insensitive to the choice "
       "of this property.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
-                  "Target value of Chi-square divided by the number of data points (N)");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "ChiTargetOverN", 1.0, mustBeNonNegative, Direction::Input),
+      "Target value of Chi-square divided by the number of data points (N)");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "ChiEps", 0.001, mustBeNonNegative, Direction::Input),

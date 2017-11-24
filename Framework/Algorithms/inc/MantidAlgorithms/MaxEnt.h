@@ -68,7 +68,8 @@ private:
                                const Kernel::DblMatrix &B);
   /// Moves the system one step closer towards the solution
   std::vector<double> move(const QuadraticCoefficients &coeffs,
-                           double ChiTargetOverN, double chiEps, size_t alphaIter);
+                           double ChiTargetOverN, double chiEps,
+                           size_t alphaIter);
   /// Applies a distance penalty
   std::vector<double> applyDistancePenalty(const std::vector<double> &beta,
                                            const QuadraticCoefficients &coeffs,
