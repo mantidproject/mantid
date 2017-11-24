@@ -4,6 +4,7 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::Geometry::IObject;
 using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::BoundingBox;
 using namespace boost::python;
@@ -13,7 +14,7 @@ GET_POINTER_SPECIALIZATION(CSGObject)
 void export_Object() {
   register_ptr_to_python<boost::shared_ptr<CSGObject>>();
 
-  class_<CSGObject, boost::noncopyable>("Object", no_init)
+  class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>("Object", no_init)
       .def("getBoundingBox", (const BoundingBox &(CSGObject::*)() const) &
                                  CSGObject::getBoundingBox,
            arg("self"), return_value_policy<copy_const_reference>(),

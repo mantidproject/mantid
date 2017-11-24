@@ -8,6 +8,7 @@ set ( EXPORT_FILES
   src/Exports/BoundingBox.cpp
   src/Exports/IComponent.cpp
   src/Exports/ICompAssembly.cpp
+  src/Exports/IObject.cpp
   src/Exports/IObjComponent.cpp
   src/Exports/IDetector.cpp
   src/Exports/IMDDimension.cpp
