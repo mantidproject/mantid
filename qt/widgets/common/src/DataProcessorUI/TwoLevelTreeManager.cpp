@@ -111,6 +111,12 @@ std::vector<Command_uptr> TwoLevelTreeManager::publishCommands() {
   return commands;
 }
 
+void TwoLevelTreeManager::invalidateAllProcessed() {
+  for (auto i = 0; i < m_model->rowCount(); i++) {
+    setProcessed(false, i);
+  }
+}
+
 /**
 Insert a row after the last selected row. If a group was selected, the new row
 is appended to that group. If nothing was selected, the new row is appended to

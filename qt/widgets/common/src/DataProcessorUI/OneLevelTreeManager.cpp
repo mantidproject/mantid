@@ -430,6 +430,12 @@ void OneLevelTreeManager::setProcessed(bool processed, int position) {
   m_model->setProcessed(processed, position);
 }
 
+void OneLevelTreeManager::invalidateAllProcessed() {
+  for (auto i = 0; i < m_model->rowCount(); i++) {
+    setProcessed(false, i);
+  }
+}
+
 /** Sets the 'process' status of a row
 * @param processed : True to set row as processed, false to set unprocessed
 * @param position : The index of the row to be set

@@ -120,8 +120,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
     std::map<QString, QString> postprocessMap, QString loader)
-    : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(std::move(loader)),
+    : WorkspaceObserver(), /*m_optionsUpdated(false),*/ m_view(nullptr),
+      m_progressView(nullptr), m_mainPresenter(), m_loader(std::move(loader)),
       m_postprocessing(postprocessor.name().isEmpty()
                            ? boost::optional<PostprocessingStep>()
                            : PostprocessingStep(QString(),
@@ -293,38 +293,25 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view->pause();
 }
 
-bool GenericDataProcessorPresenter::areOptionsUpdated() {
-  auto newPreprocessingOptions =
+void GenericDataProcessorPresenter::settingsChanged() {
+  m_preprocessing.m_options =
       m_mainPresenter->getPreprocessingOptionsAsString();
-  auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
-  auto newPostprocessingOptions = m_mainPresenter->getPostprocessingOptions();
+  m_processingOptions = m_mainPresenter->getProcessingOptions();
 
-  auto settingsChanged =
-      m_preprocessing.m_options != newPreprocessingOptions ||
-      m_processingOptions != newProcessingOptions ||
-      (hasPostprocessing() &&
-       m_postprocessing->m_options != newPostprocessingOptions);
-
-  m_preprocessing.m_options = newPreprocessingOptions;
-  m_processingOptions = newProcessingOptions;
+  m_manager->invalidateAllProcessed();
 
   if (hasPostprocessing())
-    m_postprocessing->m_options = newPostprocessingOptions;
-
-  return settingsChanged;
+    m_postprocessing->m_options = m_mainPresenter->getPostprocessingOptions();
 }
 
-void GenericDataProcessorPresenter::settingsChanged() {
-  std::cout << "GDPP says the settings have changed" << std::endl;
-}
-
-bool GenericDataProcessorPresenter::rowOutputExists(RowItem const& row) const {
-    for(auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-        auto outputWorkspaceName = getReducedWorkspaceName(row.second, m_processor.prefix(i));
-        if(!workspaceExists(outputWorkspaceName))
-            return false;
-    }
-    return true;
+bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    auto outputWorkspaceName =
+        getReducedWorkspaceName(row.second, m_processor.prefix(i));
+    if (!workspaceExists(outputWorkspaceName))
+      return false;
+  }
+  return true;
 }
 
 /**
@@ -345,7 +332,7 @@ void GenericDataProcessorPresenter::process() {
 
   // Set the global settings. If any have been changed, set all groups and rows
   // as unprocessed
-  auto settingsHaveChanged = areOptionsUpdated();
+  auto settingsHaveChanged = false; //areOptionsUpdated();
 
   // Clear the group queue
   m_group_queue = GroupQueue();
@@ -687,9 +674,8 @@ Returns the name of the reduced workspace for a given row
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) const {
+QString GenericDataProcessorPresenter::getReducedWorkspaceName(
+    const QStringList &data, const QString &prefix) const {
   if (data.size() != static_cast<int>(m_whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 

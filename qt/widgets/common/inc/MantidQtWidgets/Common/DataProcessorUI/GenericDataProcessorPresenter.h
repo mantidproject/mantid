@@ -214,7 +214,6 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  bool areOptionsUpdated();
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,
