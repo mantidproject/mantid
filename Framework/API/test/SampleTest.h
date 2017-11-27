@@ -30,18 +30,18 @@ public:
   //--------------------------------------------------------------------------------------------
 
   void testShape() {
-    Object_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
+    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
-    TS_ASSERT_THROWS_NOTHING(sample.setShape(*shape_sptr))
-    const CSGObject &sampleShape = sample.getShape();
+    TS_ASSERT_THROWS_NOTHING(sample.setShape(shape_sptr))
+    const IObject &sampleShape = sample.getShape();
     TS_ASSERT_EQUALS(shape_sptr->getName(), sampleShape.getName());
   }
 
   void test_Setting_Default_Shape_Is_Accepted() {
     Sample sample;
-    CSGObject object;
-    TS_ASSERT_EQUALS(object.hasValidShape(), false);
+    IObject_sptr object;
+    TS_ASSERT_EQUALS(object->hasValidShape(), false);
     TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
   }
 
@@ -259,8 +259,8 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    CSGObject shape;
-    shape.setMaterial(vanBlock);
+    IObject_sptr shape;
+    shape->setMaterial(vanBlock);
     sample.setShape(shape);
 
     const Material &mat = sample.getMaterial();
@@ -309,10 +309,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTest.nxs");
 
-    Object_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
+    IObject_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
-    sample.setShape(*shape_sptr);
+    sample.setShape(shape_sptr);
     sample.setName("NameOfASample");
     sample.setWidth(1.234);
     OrientedLattice latt(4, 5, 6, 90, 91, 92);
