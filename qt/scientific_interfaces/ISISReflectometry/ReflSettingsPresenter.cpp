@@ -86,6 +86,18 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     if (!qTransStep.empty()) {
       options.push_back("Params=" + qTransStep);
     }
+
+    // Add transmission runs
+    auto transRuns = this->getTransmissionRuns(true);
+    if (!transRuns.empty())
+      options.push_back("FirstTransmissionRun" + transRuns);
+//    if (!transRuns.empty()) {
+//      std::vector<std::string> splitRuns;
+//      boost::split(splitRuns, transRuns, boost::is_any_of(","));
+//      options.push_back(splitRuns[0]);
+//      if (splitRuns.size() > 1)
+//        options.push_back(splitRuns[1]);
+//    }
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -212,13 +224,15 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
     // Add transmission runs
     auto transRuns = this->getTransmissionRuns(true);
-    if (!transRuns.empty()) {
-      std::vector<std::string> splitRuns;
-      boost::split(splitRuns, transRuns, boost::is_any_of(","));
-      options.push_back(splitRuns[0]);
-      if (splitRuns.size() > 1)
-        options.push_back(splitRuns[1]);
-    }
+    if (!transRuns.empty())
+      options.push_back("FirstTransmissionRun" + transRuns);
+//    if (!transRuns.empty()) {
+//      std::vector<std::string> splitRuns;
+//      boost::split(splitRuns, transRuns, boost::is_any_of(","));
+//      options.push_back(splitRuns[0]);
+//      if (splitRuns.size() > 1)
+//        options.push_back(splitRuns[1]);
+//    }
   }
 
   if (m_view->instrumentSettingsEnabled()) {

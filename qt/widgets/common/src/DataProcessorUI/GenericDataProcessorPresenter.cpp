@@ -39,8 +39,18 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-std::map<QString, QString> convertStringToMap(const QString &options) {
-  std::map<QString, QString> optionsMap;
+/** Convert a  semi-colon-separated string of comma-separated values
+ *  into a map
+ * @param options : the string to convert
+ * @param optionsMap : the map to update (defaults to a new map)
+ * @return : the (new/updated) options map of key to value-list pairs
+ */
+std::map<QString, QString> convertStringToMap(
+    const QString &options,
+    std::map<QString, QString> optionsMap = std::map<QString, QString>()) {
+  if (options.isEmpty() || options.isNull())
+    return optionsMap;
+
   auto optionsVec = options.split(";");
 
   for (auto const &option : optionsVec) {
@@ -48,6 +58,28 @@ std::map<QString, QString> convertStringToMap(const QString &options) {
     auto const key = opt[0];
     opt.removeFirst();
     optionsMap[key] = opt.join(",");
+  }
+
+  return optionsMap;
+}
+
+/** Convert a key=value command-separated string into a map
+ * @param options : the string to convert
+ * @param optionsMap : the map to update (defaults to a new map)
+ * @return : the (new/updated) options map of key to value pairs
+ */
+std::map<QString, QString> convertKVPStringToMap(
+    const QString &options,
+    std::map<QString, QString> optionsMap = std::map<QString, QString>()) {
+  if (options.isEmpty() || options.isNull())
+    return optionsMap;
+  
+  auto optionsVec = options.split(",");
+
+  for (auto const &option : optionsVec) {
+    auto opt = option.split("=");
+    auto const key = opt[0];
+    optionsMap[key] = opt[1];
   }
 
   return optionsMap;
@@ -825,33 +857,6 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
   return alg;
 }
 
-namespace {
-template <typename SetProperty>
-void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
-                                     std::string const &properties,
-                                     std::string const &columnName,
-                                     SetProperty setProperty) {
-  auto propertiesMap = parseKeyValueString(properties);
-  for (const auto &kvp : propertiesMap) {
-    try {
-      setProperty(alg.get(), kvp.first, kvp.second);
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error("Invalid property in " + columnName +
-                               " column: " + kvp.first);
-    }
-  }
-}
-}
-
-void GenericDataProcessorPresenter::setPropertiesFromKeyValueString(
-    Mantid::API::IAlgorithm_sptr alg, std::string const &properties,
-    std::string const &columnName) {
-  ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
-      alg, properties, columnName,
-      [](Mantid::API::IAlgorithm *const alg, std::string key, std::string value)
-          -> void { ::setAlgorithmProperty(alg, key, value); });
-}
-
 /** Preprocess the given property value if appropriate
  */
 QString GenericDataProcessorPresenter::preprocessColumnValue(
@@ -928,29 +933,17 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
-  auto alg = createProcessingAlgorithm();
-
-  // First set any defaults from the global options
-  setPropertiesFromKeyValueString(alg, m_processingOptions.toStdString(),
-                                  "options");
-
-  // Now set any user-specified values in the options column (overrides
-  // previous)
+  // Create a map of property name : value from the global options,
+  // options column and hidden options column. The last one takes
+  // precedence if given multiple times.
   const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
-  setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
-
-  // Now set any values in the hidden options column (overrides previous)
   const auto hiddenOptions = data->back();
-  setPropertiesFromKeyValueString(alg, hiddenOptions.toStdString(),
-                                  "hidden options");
+  auto options = convertKVPStringToMap(m_processingOptions);
+  convertKVPStringToMap(userOptions, options);
+  convertKVPStringToMap(hiddenOptions, options);
 
-  // Set the properties for the output workspace names
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    setAlgorithmProperty(alg.get(), m_processor.outputPropertyName(i),
-                         getReducedWorkspaceName(*data, m_processor.prefix(i)));
-  }
-
-  // Now set user-specified properties from the columns (overrides previous)
+  // Now set user-specified options from the columns (overrides any values
+  // already set in the options map)
   auto columnIt = m_whitelist.cbegin();
   auto columnValueIt = data->constBegin();
   for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
@@ -960,11 +953,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     // Get the value from this column
     auto columnValue = *columnValueIt;
 
-    // If empty, use the default, if there is one. This will already have been
-    // set in the algorithm
+    // If empty, use the default which will already have been set in the
+    // options if there is one.
     if (columnValue.isEmpty() || columnValue.isNull())
-      columnValue = QString::fromStdString(
-          alg->getPropertyValue(propertyName.toStdString()));
+      columnValue = options[propertyName];
 
     // If no value, nothing to do
     if (columnValue.isEmpty() || columnValue.isNull())
@@ -973,11 +965,21 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     // Preprocess the value if necessary
     columnValue = preprocessColumnValue(column.name(), columnValue);
 
-    // Set the new value on the algorithm
-    setAlgorithmProperty(alg.get(), propertyName, columnValue.toStdString());
+    // Update it in the options map
+    options[propertyName] = columnValue;
   }
 
-  /* Now run the processing algorithm */
+  // Set the properties for the output workspace names
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    options[m_processor.outputPropertyName(i)] =
+        getReducedWorkspaceName(*data, m_processor.prefix(i));
+  }
+
+  // Create the algorithm, set the properties and execute it
+  auto alg = createProcessingAlgorithm();
+  for (auto &kvp : options) {
+    setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
+  }
   alg->execute();
 
   // Finally, update the model with results from the algorithm
