@@ -37,8 +37,8 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import QCoreApplication, Qt  # noqa
-from qtpy.QtWidgets import QApplication, QMainWindow  # noqa
+from qtpy.QtCore import (QByteArray, QCoreApplication, QPoint, QSize, Qt)  # noqa
+from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow)  # noqa
 from mantidqt.utils.qt import load_ui, plugins  # noqa
 
 # Pre-application startup
@@ -63,8 +63,15 @@ def qapplication():
         app = QApplication(['Mantid Workbench'])
     return app
 
+
 # Create the application object early
 MAIN_APP = qapplication()
+
+# -----------------------------------------------------------------------------
+# Utilities
+# -----------------------------------------------------------------------------
+from mantidqt.py3compat import qbytearray_to_str  # noqa
+from workbench.config.main import CONF  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -76,6 +83,108 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
         self._ui = load_ui(__file__, 'mainwindow.ui', baseinstance=self)
         MAIN_APP.setAttribute(Qt.AA_UseHighDpiPixmaps)
+
+        # Instance attributes
+        self.maximized_flag = None
+
+    def setup(self):
+        self.setup_layout()
+
+    def setup_layout(self):
+        settings = self.load_window_settings('window/')
+        hexstate = settings[0]
+        if hexstate is None:
+            # First execution:
+            self.setWindowState(Qt.WindowMaximized)
+        self.set_window_settings(*settings)
+
+    def load_window_settings(self, prefix, section='main'):
+        """Load window layout settings from userconfig-based configuration
+        with *prefix*, under *section*
+        default: if True, do not restore inner layout"""
+        get_func = CONF.get
+        window_size = get_func(section, prefix + 'size')
+        try:
+            hexstate = get_func(section, prefix + 'state')
+        except KeyError:
+            hexstate = None
+        pos = get_func(section, prefix + 'position')
+
+        # It's necessary to verify if the window/position value is valid
+        # with the current screen.
+        width = pos[0]
+        height = pos[1]
+        screen_shape = QApplication.desktop().geometry()
+        current_width = screen_shape.width()
+        current_height = screen_shape.height()
+        if current_width < width or current_height < height:
+            pos = CONF.get_default(section, prefix + 'position')
+
+        is_maximized = get_func(section, prefix + 'is_maximized')
+        is_fullscreen = get_func(section, prefix + 'is_fullscreen')
+        return hexstate, window_size, pos, is_maximized, \
+            is_fullscreen
+
+    def get_window_settings(self):
+        """Return current window settings
+        Symetric to the 'set_window_settings' setter"""
+        window_size = (self.window_size.width(), self.window_size.height())
+        is_fullscreen = self.isFullScreen()
+        if is_fullscreen:
+            is_maximized = self.maximized_flag
+        else:
+            is_maximized = self.isMaximized()
+        pos = (self.window_position.x(), self.window_position.y())
+        hexstate = qbytearray_to_str(self.saveState())
+        return (hexstate, window_size, pos, is_maximized,
+                is_fullscreen)
+
+    def set_window_settings(self, hexstate, window_size, pos,
+                            is_maximized, is_fullscreen):
+        """Set window settings
+        Symetric to the 'get_window_settings' accessor"""
+        self.setUpdatesEnabled(False)
+        self.window_size = QSize(window_size[0], window_size[1])  # width,height
+        self.window_position = QPoint(pos[0], pos[1])  # x,y
+        self.setWindowState(Qt.WindowNoState)
+        self.resize(self.window_size)
+        self.move(self.window_position)
+
+        # Window layout
+        if hexstate:
+            self.restoreState(QByteArray().fromHex(
+                str(hexstate).encode('utf-8')))
+            # QDockWidget objects are not painted if restored as floating
+            # windows, so we must dock them before showing the mainwindow.
+            for widget in self.children():
+                if isinstance(widget, QDockWidget) and widget.isFloating():
+                    self.floating_dockwidgets.append(widget)
+                    widget.setFloating(False)
+
+        # Is fullscreen?
+        if is_fullscreen:
+            self.setWindowState(Qt.WindowFullScreen)
+
+        # Is maximized?
+        if is_fullscreen:
+            self.maximized_flag = is_maximized
+        elif is_maximized:
+            self.setWindowState(Qt.WindowMaximized)
+        self.setUpdatesEnabled(True)
+
+    def save_current_window_settings(self, prefix, section='main'):
+        """Save current window settings with *prefix* in
+        the userconfig-based configuration, under *section*"""
+        win_size = self.window_size
+
+        CONF.set(section, prefix + 'size', (win_size.width(), win_size.height()))
+        CONF.set(section, prefix + 'is_maximized', self.isMaximized())
+        CONF.set(section, prefix + 'is_fullscreen', self.isFullScreen())
+        pos = self.window_position
+        CONF.set(section, prefix + 'position', (pos.x(), pos.y()))
+        self.maximize_dockwidget(restore=True)  # Restore non-maximized layout
+        qba = self.saveState()
+        CONF.set(section, prefix + 'state', qbytearray_to_str(qba))
 
 
 def initialize():
@@ -100,10 +209,8 @@ def start_workbench(app):
     show it and start the main event loop
     """
     main_window = MainWindow()
-    # do some pre-show setup...
+    main_window.setup()
     main_window.show()
-    # do some pre-show setup...
-
     # lift-off!
     app.exec_()
 

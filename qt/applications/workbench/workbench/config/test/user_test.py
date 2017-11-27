@@ -17,7 +17,7 @@
 from __future__ import absolute_import
 
 import os
-from unittest import TestCase
+from unittest import TestCase, main
 
 from workbench.config.user import UserConfig
 
@@ -28,7 +28,9 @@ class ConfigUserTest(TestCase):
     def setUpClass(cls):
         if not hasattr(cls, 'cfg'):
             defaults = {
-                'main': {'a-default-key': 100}
+                'main': {'a_default_key': 100,
+                         'bool_option': False
+                },
             }
             cls.cfg = UserConfig(cls.__name__, cls.__name__, defaults)
 
@@ -49,7 +51,10 @@ class ConfigUserTest(TestCase):
         self.assertEqual(1, self.cfg.get('main', 'key1'))
 
     def test_value_not_in_settings_retrieves_default_if_it_exists(self):
-        self.assertEqual(100, self.cfg.get('main', 'a-default-key'))
+        self.assertEqual(100, self.cfg.get('main', 'a_default_key'))
+
+    def test_boolean_with_default_false_can_be_retrieved(self):
+        self.assertEqual(False, self.cfg.get('main', 'bool_option'))
 
     # ----------------------------------------------
     # Failure tests
@@ -69,3 +74,7 @@ class ConfigUserTest(TestCase):
 
     def test_set_raises_error_with_invalid_option_type(self):
         self.assertRaises(RuntimeError, self.cfg.set, 'section', 1, 1)
+
+
+if __name__ == '__main__':
+    main()

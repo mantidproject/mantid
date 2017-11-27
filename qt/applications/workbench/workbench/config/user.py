@@ -57,8 +57,9 @@ class UserConfig(object):
     def get(self, section, option):
         """
         Return a value for an option in a given section. If not
-        specified in the saved settings then the defaults are
-        consulted. If no option is found then a KeyError is raised
+        specified in the saved settings then the initial
+        defaults are consulted. If no option is found then
+        a KeyError is raised
         :param section: A string section name
         :param option: A string option name
         :return: The value of the option
@@ -101,10 +102,11 @@ class UserConfig(object):
         """
         value = None
         if self.defaults and section in self.defaults:
-            value = self.defaults[section].get(option, None)
-        if not value:
-            raise KeyError("Unknown config item requested: " +
-                           self._settings_path(section, option))
+            try:
+                value = self.defaults[section][option]
+            except KeyError:
+                raise KeyError("Unknown config item requested: " +
+                               self._settings_path(section, option))
         return value
 
     def _settings_path(self, section, option):
