@@ -101,6 +101,7 @@ Requires: qt5-qtsvg
 Requires: qt5-qttools-devel
 Requires: qt5-qttools-libs-designer
 Requires: qt5-qtwebkit-devel
+Requires: qscintilla-qt5-devel
 %endif
 Requires: graphviz
 %if %{with_python3}
