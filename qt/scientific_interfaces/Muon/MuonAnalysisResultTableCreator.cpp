@@ -571,7 +571,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
 	  }
 	  for (auto &value : valuesPerWorkspace) {
 		  if (isItDouble && !log.endsWith(" (text)")) {
-			  row << std::stod(min);
+			  row << std::stod(value.toStdString());
 		  }
 		  else {
 			  row << min;
