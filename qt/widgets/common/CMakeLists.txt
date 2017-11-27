@@ -421,9 +421,25 @@ endif()
 ###########################################################################
 # Target
 ###########################################################################
-if (ENABLE_WORKBENCH)
+if ( ENABLE_WORKBENCH )
+  # Additional components for this module
   find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
-    WebKitWidgets REQUIRED )
+    REQUIRED )
+  # Prefer WebEngineWidgets over WebkitWidgets
+  unset ( Qt5_FOUND )
+  find_package ( Qt5 COMPONENTS WebEngineWidgets QUIET )
+  if ( Qt5_FOUND )
+    set ( _webwidgets_tgt Qt5::WebEngineWidgets )
+  else ()
+    find_package ( Qt5 COMPONENTS WebKitWidgets QUIET )
+    if ( Qt5_FOUND )
+      set ( _webwidgets_tgt Qt5::WebKitWidgets )
+      set ( _webengine_def USE_QTWEBKIT )
+    else ()
+      message ( FATAL_ERROR "Unable to find suitable module for web widgets. Tried: WebEnginewidgets, WebKitWidgets" )
+    endif ()
+  endif ()
+
   find_package ( QScintillaQt5 REQUIRED )
 endif()
 
@@ -433,7 +449,12 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS
-    IN_MANTIDQT_COMMON QSCINTILLA_DLL
+    IN_MANTIDQT_COMMON
+    QSCINTILLA_DLL
+  QT4_DEFS
+    USE_QTWEBKIT
+  QT5_DEFS
+    ${_webengine_def}
   INCLUDE_DIRS
     inc
     ${PYTHON_INCLUDE_PATH}
@@ -450,7 +471,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::Help
     Qt5::Network
     Qt5::PrintSupport
-    Qt5::WebKitWidgets
+    ${_webwidgets_tgt}
     Qt5::Qscintilla
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
