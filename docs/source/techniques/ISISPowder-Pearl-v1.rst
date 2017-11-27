@@ -111,9 +111,10 @@ The following parameter is required if
 
 - :ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
 
-The following parameter may also be optionally set:
+The following parameters may also be optionally set:
 
 - :ref:`file_ext_pearl_isis-powder-diffraction-ref`
+- :ref:`suffix_pearl_isis-powder-diffraction-ref`
   
 Example
 =======
@@ -517,6 +518,21 @@ Example Input:
   pearl_example.focus(run_number="1, 3, 5-7", ...)
   # Or just a single run
   pearl_example.focus(run_number=100, ...)
+
+.. _suffix_pearl_isis-powder-diffraction-ref:
+
+suffix
+^^^^^^
+*Optional*
+
+This parameter specifies a suffix to append the names of output files
+during a focus.
+
+Example Input:
+
+.. code-block:: python
+
+  pearl_example.focus(suffix="-corr", ...)
 
 .. _tt_mode_pearl_isis-powder-diffraction-ref:
 
