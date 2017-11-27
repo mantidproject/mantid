@@ -470,12 +470,8 @@ private:
         "f1.Omega", // no omega error as param is fixed
         "f1.Phi",   "f1.PhiError", "f1.Sigma",           "f1.SigmaError",
         "f1.Tau",   "f1.TauError", "Cost function value"};
-    const auto key = m_logValues.begin()->keys()[0];
-    int j=0;
     for (const auto &log : m_logs) {
-      //const bool isItDouble = m_logValues.value(key)[log].canConvert<double>();
-      table->addColumn("double", "tmp"+std::to_string(j));//log.toStdString());
-      j+=1;
+      table->addColumn("double", log.toStdString());
     }
     for (const auto &title : titles) {
       table->addColumn("double", title);

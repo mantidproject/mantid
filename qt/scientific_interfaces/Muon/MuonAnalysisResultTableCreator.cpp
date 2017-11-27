@@ -114,7 +114,8 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   for (const auto &log : m_logs) {
 
     auto val = valMap[log];
-    if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+    // multiple files use strings due to x-y format
+    if (val.canConvert<double>() && !log.endsWith(" (text)") && !m_multiple) {
       addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
 
     } else {
@@ -552,24 +553,14 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       valuesPerWorkspace.sort();
       const auto &min = valuesPerWorkspace.front().toStdString();
       const auto &max = valuesPerWorkspace.back().toStdString();
-
-	  const auto key = m_logValues->keys()[0];
-	  const bool isItDouble = m_logValues->value(key)[log].canConvert<double>();
-
-
 	  if (min == max)
 	  {
-		  valuesPerWorkspace.clear();
-		  valuesPerWorkspace.append(QString::fromStdString(min));
-	  }
-	  for (auto &value : valuesPerWorkspace) {
-		  if (isItDouble && !log.endsWith(" (text)")) {
-			  row << std::stod(value.toStdString());
-		  }
-		  else {
-			  row << min;
-		  }
-      } 
+                 row << min;
+          }else{
+          std::ostringstream oss;
+          oss << min<<"-"<<max;
+          row<<oss.str();
+          }
       columnIndex++;
     }
 
