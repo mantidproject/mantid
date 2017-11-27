@@ -130,7 +130,7 @@ def run_focus():
 
     inst_object = setup_inst_object(mode="PDF")
     return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
-                             do_absorb_corrections=False, sample_empty=sample_empty, suffix="-suf",
+                             do_absorb_corrections=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 
