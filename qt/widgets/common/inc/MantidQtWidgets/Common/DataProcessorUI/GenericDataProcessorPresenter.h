@@ -188,17 +188,9 @@ protected:
   void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
-  // Use the default column value if the given value is empty
-  QString useDefaultPreprocessValueIfEmpty(const QString &columnName,
-                            const QString &columnValueIn);
   // Preprocess the given column value if applicable
   QString preprocessColumnValue(const QString &columnName,
-                                const QString &columnValueIn,
-                                std::set<QString> &processedProps);
-  // Set user specified properties on the algorithm
-  void setUserSpecifiedProperties(Mantid::API::IAlgorithm_sptr alg,
-                                  RowData *data,
-                                  const std::set<QString> &processedProps);
+                                const QString &columnValueIn);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);

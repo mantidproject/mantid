@@ -400,16 +400,6 @@ void ReflRunsTabPresenter::notifyADSChanged(
   pushCommands();
 }
 
-/** Requests property names associated with pre-processing values.
-* @return :: Pre-processing property names.
-*/
-QString ReflRunsTabPresenter::getPreprocessingProperties() const {
-
-  auto properties =
-      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
-  return properties;
-}
-
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
   * @return :: Global pre-processing options

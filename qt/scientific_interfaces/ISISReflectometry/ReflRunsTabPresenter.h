@@ -68,7 +68,6 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
-  QString getPreprocessingProperties() const override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
   QString getPreprocessingOptionsAsString() const override;

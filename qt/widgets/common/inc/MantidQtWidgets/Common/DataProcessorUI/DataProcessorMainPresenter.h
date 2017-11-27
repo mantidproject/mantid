@@ -53,8 +53,6 @@ public:
 
   /// Return global options for pre-processing as a string
   virtual QString getPreprocessingOptionsAsString() const { return QString(); }
-  /// Return property names associated with pre-processing values
-  virtual QString getPreprocessingProperties() const { return QString(); }
   /// Return global options for reduction
   virtual QString getProcessingOptions() const { return QString(); }
   /// Return global options for post-processing

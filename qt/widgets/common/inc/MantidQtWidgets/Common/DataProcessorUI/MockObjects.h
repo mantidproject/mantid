@@ -105,7 +105,6 @@ public:
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
-  MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
   MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
