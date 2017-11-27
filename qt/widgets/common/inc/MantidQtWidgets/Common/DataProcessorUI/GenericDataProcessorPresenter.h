@@ -189,7 +189,7 @@ protected:
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Use the default column value if the given value is empty
-  QString useDefaultIfEmpty(const QString &columnName,
+  QString useDefaultPreprocessValueIfEmpty(const QString &columnName,
                             const QString &columnValueIn);
   // Preprocess the given column value if applicable
   QString preprocessColumnValue(const QString &columnName,

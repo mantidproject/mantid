@@ -876,7 +876,7 @@ void GenericDataProcessorPresenter::setPropertiesFromKeyValueString(
  *
  */
 QString
-GenericDataProcessorPresenter::useDefaultIfEmpty(const QString &columnName,
+GenericDataProcessorPresenter::useDefaultPreprocessValueIfEmpty(const QString &columnName,
                                                  const QString &columnValueIn) {
   auto columnValue = columnValueIn;
 
@@ -888,12 +888,17 @@ GenericDataProcessorPresenter::useDefaultIfEmpty(const QString &columnName,
   if (m_preprocessing.m_map.empty())
     return columnValue;
 
+  // These are the cached results from getPreprocessingOptionsAsString,
+  // e.g. Transmission Run(s):FirstTransmissionRun=val,SecondTransmissionRun=val
   std::map<QString, QString> globalOptions =
       convertStringToMap(m_preprocessing.m_options);
+
   if (globalOptions.count(columnName) && !globalOptions[columnName].isEmpty()) {
+    // Extract the values for this column as key-value pairs
     auto tmpOptionsMap =
         parseKeyValueString(globalOptions[columnName].toStdString());
 
+    // Append each value to the list, ignoring the keys
     QStringList valueList;
     for (auto &optionMapEntry : tmpOptionsMap) {
       valueList.append(QString::fromStdString(optionMapEntry.second));
@@ -1047,7 +1052,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     auto column = *columnIt;
     auto &propertyName = column.algorithmProperty();
 
-    auto columnValue = useDefaultIfEmpty(column.name(), *columnValueIt);
+    // Get the value from this column and preprocess it if necessary
+    auto columnValue = *columnValueIt;
+    columnValue = useDefaultPreprocessValueIfEmpty(column.name(), columnValue);
     columnValue =
         preprocessColumnValue(column.name(), columnValue, processedProps);
 
