@@ -2,7 +2,7 @@
 #define GRAVITYCORRECTION_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+//#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -13,6 +13,7 @@
 namespace Mantid {
 // forward declarations
 namespace API {
+//class AlgorithmHistory;
 class Progess;
 class SpectrumInfo;
 }
@@ -59,15 +60,10 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
-  /// Progress reporting
-  //boost::shared_ptr<API::Progress> m_progress;
+  /// Progress report & cancelling
   std::unique_ptr<API::Progress> m_progress{nullptr};
 
 private:
-  bool m_unMask;       // unmask spectra and bins
-  bool m_keepMask;     // keep/respect current mask
-  bool m_applyNewMask; // apply curent mask to new workspace (get and set masks
-                       // accordingly)
   std::string m_slit1Name;
   std::string m_slit2Name;
   Mantid::API::MatrixWorkspace_sptr m_ws;
@@ -76,24 +72,24 @@ private:
   Mantid::Geometry::PointingAlong m_upDirection;
   Mantid::Geometry::PointingAlong m_beamDirection;
   Mantid::Geometry::PointingAlong m_horizontalDirection;
+  std::map<double, size_t> m_finalAngles;
   /// Initialisation code
   void init() override;
-  /// Get indices for each spectrum of detectors
-  std::vector<int> getSpectraIndices(Mantid::API::SpectrumInfo &spectrumInfo);
   /// Parabola definition between source and sample
   std::pair<double, double> parabola(const double k);
   /// Retrieve the coordinate of an instrument component
   double coordinate(const std::string componentName,
                     Mantid::Geometry::PointingAlong direction) const;
-  /// Setup equation in 2D for line detector in xy plane
-  std::pair<double, double>
-  detector2DEquation(Mantid::API::SpectrumInfo &spectrumInfo) const;
   /// Generalise instrument setup (origin, handedness, coordinate system)
   void virtualInstrument(Mantid::API::SpectrumInfo &spectrumInfo);
   /// Compute final angle
   double finalAngle(const double k);
   /// Ensure slits to exist and be correctly ordered
   void slitCheck();
+  /// The corrected spectrum number for the initialSpectrumNumber
+  size_t spectrumNumber(const double angle, Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+  /// Tells if the corresponding spectrum will be considered for execution
+  bool spectrumCheck(Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
   /// Execution code
   void exec() override;
 };

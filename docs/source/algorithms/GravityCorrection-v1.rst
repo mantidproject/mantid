@@ -15,15 +15,18 @@ An initial computation of the final angle :math:`\theta_f` due to gravitation is
 For the path from the sample to the detector, gravitation plays a role which can be cancelled.
 Other properties of the :literal:`InputWorkspace` will be present in the :literal:`OutputWorkspace`.
 Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS here: Gutfreund et. al. Towards generalized data reduction on a time-of-flight neutron reflectometer.
-Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`,  an information will be logged.
+Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`, an information will be logged.
+Finally, a workspace of corrected gravity contains a :literal:`SampleLog` entry called :literal:`GravityCorrected`.
 
 Requirements
 ------------
 
-The x-axis of the :literal:`InputWorkspace` must be in time-of-flight.
-Furthermore, those initial time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
-In general, the instrument must consist of a source, sample, detector and a collimeter with its slits or two other known locations of the neutron flight path between source and sample position.
-The detector should be a point or a straight line in the :math:`x-y` plane.
+.. role:: red
+
+- The x-axis of the :literal:`InputWorkspace` must be in :red:`time-of-flight`.
+- Those time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
+- The instrument must consist of a :red:`source`, :red:`sample`, :red:`detector` and a collimeter with its :red:`slits` or two other known locations of the neutron flight path between source and sample position.
+- The instrument must be defined in :red:`units metre`.
 
 Corrected time-of-flight axis
 -----------------------------
@@ -147,6 +150,7 @@ Output:
 .. testcode:: ILL Figaro: workspace with instrument where the z axis is parallel and in direction to the beam.
 
         # Load an ILL Figaro File into a Workspace2D
+        #if (!ws.getRun()->hasProperty("GravityCorrected"))
         ws = LoadILLReflectometry('ILL/Figaro/xxxx.nxs')
 
         # Perform correction due to gravitation effects

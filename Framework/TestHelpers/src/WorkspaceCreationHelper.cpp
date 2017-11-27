@@ -678,7 +678,7 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0).setDetectorID(1);
+  workspace->getSpectrum(0).setDetectorID(1); // monitor
   workspace->getSpectrum(1).setDetectorID(2);
   workspace->getSpectrum(2).setDetectorID(3);
   workspace->getSpectrum(3).setDetectorID(4);
