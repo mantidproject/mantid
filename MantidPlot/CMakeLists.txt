@@ -690,6 +690,9 @@ find_package ( QScintillaQt4 REQUIRED )
 add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
+if ( MSVC )
+  add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
+endif ()
 
 ###########################################################################
 # Application icon files
