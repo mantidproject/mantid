@@ -14,7 +14,7 @@ GET_POINTER_SPECIALIZATION(CSGObject)
 void export_Object() {
   register_ptr_to_python<boost::shared_ptr<CSGObject>>();
 
-  class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>("Object",
+  class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>("CSGObject",
                                                                        no_init)
       .def("getBoundingBox", (const BoundingBox &(CSGObject::*)() const) &
                                  CSGObject::getBoundingBox,

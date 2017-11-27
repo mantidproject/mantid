@@ -25,7 +25,7 @@ set ( EXPORT_FILES
   src/Exports/OrientedLattice.cpp
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
-  src/Exports/Object.cpp
+  src/Exports/CSGObject.cpp
   src/Exports/PeakShape.cpp
   src/Exports/Group.cpp
   src/Exports/PointGroup.cpp
