@@ -320,11 +320,11 @@ EnggDiffFittingModel::createCalibrationParamsTable(
 }
 
 void EnggDiffFittingModel::convertFromDistribution(
-    Mantid::API::MatrixWorkspace_sptr inputWS) {
+    const std::string &inputWSName) {
   auto convertFromDistAlg = Mantid::API::AlgorithmManager::Instance().create(
       "ConvertFromDistribution");
   convertFromDistAlg->initialize();
-  convertFromDistAlg->setProperty("Workspace", inputWS);
+  convertFromDistAlg->setProperty("Workspace", inputWSName);
   convertFromDistAlg->execute();
 }
 
@@ -342,7 +342,7 @@ void EnggDiffFittingModel::alignDetectors(
   const auto calibrationParamsTable = createCalibrationParamsTable(inputWS);
 
   if (inputWS->isDistribution()) {
-    convertFromDistribution(inputWS);
+    convertFromDistribution(inputWS->getName());
   }
 
   auto alignDetAlg =
