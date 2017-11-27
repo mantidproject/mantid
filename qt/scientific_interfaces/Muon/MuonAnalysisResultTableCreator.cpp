@@ -553,14 +553,13 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       valuesPerWorkspace.sort();
       const auto &min = valuesPerWorkspace.front().toStdString();
       const auto &max = valuesPerWorkspace.back().toStdString();
-	  if (min == max)
-	  {
-                 row << min;
-          }else{
-          std::ostringstream oss;
-          oss << min<<"-"<<max;
-          row<<oss.str();
-          }
+      if (min == max) {
+        row << min;
+      } else {
+        std::ostringstream oss;
+        oss << min << "-" << max;
+        row << oss.str();
+      }
       columnIndex++;
     }
 
