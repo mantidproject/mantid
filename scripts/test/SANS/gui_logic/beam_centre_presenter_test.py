@@ -62,7 +62,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
     def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self, beam_centre_model_mock):
-        self.parent_presenter._file_information = mock.MagicMock(return_value = None)
+        self.parent_presenter._file_information = None#mock.MagicMock(return_value = None)
         self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.presenter.set_view(self.view)
 
