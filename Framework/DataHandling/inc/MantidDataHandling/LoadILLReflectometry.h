@@ -62,7 +62,7 @@ private:
   double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
-  double fitReflectometryPeak();
+  double reflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);

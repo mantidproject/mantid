@@ -280,14 +280,14 @@ void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
-
+  declareProperty("BeamPosition", EMPTY_DBL(), "Beam position in workspace indices (disables peak finding).");
   declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputBeamPosition", std::string(), Direction::Output,
                       PropertyMode::Optional),
                   "Name of the fitted beam position output workspace");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      "BeamPosition", std::string(), Direction::Input,
+                      "DirectBeamPosition", std::string(), Direction::Input,
                       PropertyMode::Optional),
                   "A workspace defining the beam position; used to calculate "
                   "the Bragg angle");
@@ -679,12 +679,15 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
 }
 
 /**
-  * Gaussian fit to determine peak position.
+  * Gaussian fit to determine peak position if no user position given.
   *
   * @return :: detector position of the peak: Gaussian fit and position
   * of the maximum (serves as start value for the optimization)
   */
-double LoadILLReflectometry::fitReflectometryPeak() {
+double LoadILLReflectometry::reflectometryPeak() {
+  if (!isDefault("BeamPosition")) {
+    return getProperty("BeamPosition");
+  }
   size_t startIndex;
   size_t endIndex;
   std::tie(startIndex, endIndex) =
@@ -751,8 +754,8 @@ double LoadILLReflectometry::fitReflectometryPeak() {
  *  @return a pair where first is detector angle and second the Bragg angle.
  */
 std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
-  ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
-  const double peakCentre = fitReflectometryPeak();
+  ITableWorkspace_const_sptr posTable = getProperty("DirectBeamPosition");
+  const double peakCentre = reflectometryPeak();
   g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle << '\n';
   const double deflection = collimationAngle();
   if (!isDefault("OutputBeamPosition")) {
