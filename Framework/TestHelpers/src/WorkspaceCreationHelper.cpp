@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
