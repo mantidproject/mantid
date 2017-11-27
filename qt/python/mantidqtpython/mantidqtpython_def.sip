@@ -1,9 +1,7 @@
 /***************************************************************************/
 /**
  This file is a SIP file for binding C++ methods of the
- MantidQt widgets (SliceViewer in particular)
- to Python.
-
+ MantidQt widgets to Python.
 */
 /***************************************************************************/
 
