@@ -51,8 +51,7 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return self.calibration_results.getName(),\
-               "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
+        return calibration_validator(self.calibration_results)
 
     def cleanup(self):
         try:
@@ -77,7 +76,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return self.focus_results.getName(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+        return focus_validation(self.focus_results)
 
     def cleanup(self):
         try:
@@ -130,6 +129,30 @@ def run_focus():
     return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
+
+
+def calibration_validator(results):
+    # Get the name of the grouped workspace list
+    reference_file_name = "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
+
+
+def focus_validation(results):
+    reference_file_name = "ISIS_Powder-GEM83605_FocusSempty.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
+
+
+def _compare_ws(reference_file_name, results):
+    ref_ws = mantid.Load(Filename=reference_file_name)
+
+    is_valid = True if len(results) > 0 else False
+
+    for ws, ref in zip(results, ref_ws):
+        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
+            is_valid = False
+            print (ws.getName() + " was not equal to: " + ref.getName())
+
+    return is_valid
 
 
 def setup_mantid_paths():
