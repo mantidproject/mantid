@@ -81,6 +81,7 @@ private:
   double offsetAngle(const double peakCentre, const double detectorCentre,
                      const double detectorDistance) const;
   double sampleDetectorDistance() const;
+  double sampleHorzontalOffset() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 

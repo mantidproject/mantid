@@ -19,6 +19,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_roots.h>
+
 namespace {
 /// Component coordinates for Figaro, in meter.
 namespace Figaro {
@@ -176,6 +179,62 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane,
   }();
   return Mantid::Kernel::Quat(angle, axis);
 }
+
+struct EquationParams {
+  double tangentOfUserAngle;
+  double originDetectorDistance;
+  double originSampleDistance;
+};
+
+double detectorAngleEquation(double detectorAngle, void *params) {
+  EquationParams *ps = static_cast<EquationParams *>(params);
+  const double a = inRad(detectorAngle);
+  return ps->originDetectorDistance * (ps->tangentOfUserAngle * std::cos(a) - std::sin(a)) + ps->originSampleDistance * ps->tangentOfUserAngle;
+}
+
+double detectorAngleDerivative(double detectorAngle, void *params) {
+  EquationParams *ps = static_cast<EquationParams *>(params);
+  const double a = inRad(detectorAngle);
+  return -ps->originDetectorDistance * (ps->tangentOfUserAngle * std::sin(a) + std::cos(a));
+}
+
+void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f, double *df) {
+  EquationParams *ps = static_cast<EquationParams *>(params);
+  const double a = inRad(detectorAngle);
+  const double cosa = std::cos(a);
+  const double sina = std::sin(a);
+  *f = ps->originDetectorDistance * (ps->tangentOfUserAngle * cosa - sina) + ps->originSampleDistance * ps->tangentOfUserAngle;
+  *df = -ps->originDetectorDistance * (ps->tangentOfUserAngle * sina + cosa);
+}
+
+double detectorAngleFromUserAngle(const double userAngle, const double originDetectorDistance, const double originSampleDistance) {
+  using Solver_uptr = std::unique_ptr<gsl_root_fdfsolver, void (*) (gsl_root_fdfsolver*)>;
+  Solver_uptr solver{gsl_root_fdfsolver_alloc(gsl_root_fdfsolver_steffenson), gsl_root_fdfsolver_free};
+  EquationParams p{std::tan(inRad(userAngle)), originDetectorDistance, originSampleDistance};
+  gsl_function_fdf dF;
+  dF.f = detectorAngleEquation;
+  dF.df = detectorAngleDerivative;
+  dF.fdf = detectorAngleEqAndDerivative;
+  dF.params = &p;
+  double previous = userAngle;
+  gsl_root_fdfsolver_set(solver.get(), &dF, previous);
+  int iter{0};
+  while (iter < 1000) {
+    auto status = gsl_root_fdfsolver_iterate(solver.get());
+    if (status != GSL_SUCCESS) {
+      throw std::runtime_error("Failed to solve the actual detector angle from BraggAngle");
+    }
+    const auto current = gsl_root_fdfsolver_root(solver.get());
+    status = gsl_root_test_delta(previous, current, 0., 1e-6);
+    if (status == GSL_SUCCESS) {
+      return current;
+    }
+    previous = current;
+    ++iter;
+  }
+  throw std::logic_error("Too many iterations while solving actual detector angle form BraggAngle.");
+}
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -273,6 +332,7 @@ void LoadILLReflectometry::exec() {
   firstEntry.close();
   // Move components as if the sample was at the origin (it usually is).
   placeSource();
+  m_sampleZOffset = sampleHorzontalOffset();
   placeDetector();
   // When other components are in-place
   placeSample();
@@ -710,8 +770,16 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     if (posTable) {
       g_log.notice() << "Ignoring BeamPosition, using BraggAngle instead.";
     }
-    const double userDetectorAngle = 2 * userAngle - offset;
-    return std::make_pair(userDetectorAngle, userAngle);
+    if (m_sampleZOffset != 0) {
+      // Sample is not in the origin; the detector angle (in spherical
+      // coordinates) need to be solved.
+      const double realDetectorAngle = detectorAngleFromUserAngle(userAngle, m_detectorDistance, std::abs(m_sampleZOffset));
+      const double userDetectorAngle = 2 * realDetectorAngle - offset;
+      return std::make_pair(userDetectorAngle, userAngle);
+    } else {
+      const double userDetectorAngle = 2 * userAngle - offset;
+      return std::make_pair(userDetectorAngle, userAngle);
+    }
   }
   if (!posTable) {
     if (deflection != 0) {
@@ -771,7 +839,6 @@ void LoadILLReflectometry::placeSample() {
     // Accept the sample position defined in the IDF.
     return;
   }
-  m_sampleZOffset = inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
   const V3D newPos{0.0, 0.0, m_sampleZOffset};
   m_loader.moveComponent(m_localWorkspace, "sample_position", newPos);
 }
@@ -837,6 +904,13 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double beamX = detectorX - pixelOffset * std::sin(inRad(detAngle));
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
   return std::hypot(beamX, beamY);
+}
+
+double LoadILLReflectometry::sampleHorzontalOffset() const {
+  if (m_instrumentName != "Figaro") {
+    return 0.;
+  }
+  return inMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
 }
 
 /** Return the source to sample distance for the current instrument.
