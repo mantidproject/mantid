@@ -62,7 +62,7 @@ private:
   double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
-  std::pair<double, double> fitReflectometryPeak();
+  double fitReflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
@@ -71,12 +71,11 @@ private:
                                      const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
-  double computeBraggAngle();
+  double peakOffsetAngle();
+  std::pair<double, double> detectorAndBraggAngles();
   void placeDetector();
   void placeSource();
 
-  double detectorAngle(const double peakPosition,
-                       const double detectorDistance) const;
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
@@ -96,7 +95,6 @@ private:
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
-  double m_detectorDistanceDirectBeam{0.0}; ///< Sample detector distance
   double m_detectorDistanceValue{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};

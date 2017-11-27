@@ -21,11 +21,10 @@
 
 namespace {
 /// A struct for information needed for detector angle calibration.
-struct DirectBeamMeasurement {
+struct PeakInfo {
   double detectorAngle;
   double detectorDistance;
-  double fittedPeakCentre;
-  double positionOfMaximum;
+  double peakCentre;
 };
 
 /** Convert degrees to radians.
@@ -51,21 +50,18 @@ constexpr double inMeter(const double x) { return x * 1e-3; }
  * @return a TableWorkspace containing the beam position info
  */
 Mantid::API::ITableWorkspace_sptr
-createBeamPositionTable(const DirectBeamMeasurement &info) {
+createPeakPositionTable(const PeakInfo &info) {
   auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
   table->addColumn("double", "DetectorAngle");
   table->addColumn("double", "DetectorDistance");
-  table->addColumn("double", "FittedPeakCentre");
-  table->addColumn("double", "PositionOfMaximum");
+  table->addColumn("double", "PeakCentre");
   table->appendRow();
   auto col = table->getColumn("DetectorAngle");
   col->cell<double>(0) = info.detectorAngle;
   col = table->getColumn("DetectorDistance");
   col->cell<double>(0) = info.detectorDistance;
-  col = table->getColumn("FittedPeakCentre");
-  col->cell<double>(0) = info.fittedPeakCentre;
-  col = table->getColumn("PositionOfMaximum");
-  col->cell<double>(0) = info.positionOfMaximum;
+  col = table->getColumn("PeakCentre");
+  col->cell<double>(0) = info.peakCentre;
   return table;
 }
 
@@ -98,21 +94,31 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
  *  @param table a beam position TableWorkspace
  *  @return a DirectBeamMeasurement object corresonding to the table parameter.
  */
-DirectBeamMeasurement
-parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
+PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
     throw std::runtime_error("BeamPosition table should have a single row.");
   }
-  DirectBeamMeasurement m;
+  PeakInfo p;
   auto col = table.getColumn("DetectorAngle");
-  m.detectorAngle = col->cell<double>(0);
+  p.detectorAngle = col->cell<double>(0);
   col = table.getColumn("DetectorDistance");
-  m.detectorDistance = col->cell<double>(0);
-  col = table.getColumn("FittedPeakCentre");
-  m.fittedPeakCentre = col->cell<double>(0);
-  col = table.getColumn("PositionOfMaximum");
-  m.positionOfMaximum = col->cell<double>(0);
-  return m;
+  p.detectorDistance = col->cell<double>(0);
+  col = table.getColumn("PeakCentre");
+  p.peakCentre = col->cell<double>(0);
+  return p;
+}
+
+/** Calculate the offset angle between detector center and peak.
+ *  @param peakCentre peak centre in pixels.
+ *  @param detectorCentre detector centre in pixels.
+ *  @param pixelWidth pixel width in meters.
+ *  @param detectorDistance detector-sample distance in meters.
+ *  @return the offset angle.
+ */
+double offsetAngle(const double peakCentre, const double detectorCentre,
+                   const double pixelWidth, const double detectorDistance) {
+  const double offsetWidth = (detectorCentre - peakCentre) * pixelWidth;
+  return inDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
 /** Fill the X values of the first histogram of ws with values 0, 1, 2,...
@@ -246,16 +252,6 @@ void LoadILLReflectometry::init() {
  */
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
-  if (!getPointerToProperty("BeamPosition")->isDefault() &&
-      !getPointerToProperty("BraggAngle")->isDefault()) {
-    result["BraggAngle"] = "User defined Bragg angle cannot be given "
-                           "simultaneously to BeamPosition.";
-  }
-  if (!getPointerToProperty("BraggAngle")->isDefault() &&
-      !getPointerToProperty("OutputBeamPosition")->isDefault()) {
-    result["OutputBeamPosition"] = "Beam position will not be calculated as "
-                                   "user defined Bragg angle was given.";
-  }
   return result;
 }
 
@@ -510,17 +506,17 @@ std::vector<double> LoadILLReflectometry::getXValues() {
   try {
     if (m_acqMode) {
       std::string chopper{"Chopper"};
-      double chop1Speed{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
+      double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
       if (m_instrumentName == "D17") {
         chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
+        chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
         chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
         chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
-      }
-      // use phase of first chopper
-      double chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
-      if (m_instrumentName == "Figaro" && chop1Phase > 360.0) {
+      } else if (m_instrumentName == "Figaro") {
+        chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
-        chop1Phase = 0.0;
+        if (chop1Phase > 360.0)
+          chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
       const double openOffset =
@@ -547,14 +543,16 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         g_log.error() << "First chopper velocity " << chop1Speed
                       << ". Check you NeXus file.\n";
       }
-      const double t_TOF2 =
-          m_tofDelay -
-          1.e+6 * 60.0 * (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
-              (2.0 * 360 * chop1Speed);
+      const double chopWindow = 45.0;
+      const double t_TOF2 = m_tofDelay -
+                            1.e+6 * 60.0 * (POFF - chopWindow + chop2Phase -
+                                            chop1Phase + openOffset) /
+                                (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
+      xVals.emplace_back(t_TOF2 - 0.5 * m_channelWidth);
       for (int channelIndex = 0;
-           channelIndex <= static_cast<int>(m_numberOfChannels);
+           channelIndex < static_cast<int>(m_numberOfChannels);
            ++channelIndex) {
         const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth;
         xVals.push_back(t_TOF1 + t_TOF2);
@@ -633,7 +631,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   * @return :: detector position of the peak: Gaussian fit and position
   * of the maximum (serves as start value for the optimization)
   */
-std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
+double LoadILLReflectometry::fitReflectometryPeak() {
   size_t startIndex;
   size_t endIndex;
   std::tie(startIndex, endIndex) =
@@ -688,55 +686,55 @@ std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
   fitGaussian->setProperty("InputWorkspace", integralWS);
   bool success = fitGaussian->execute();
   if (!success)
-    g_log.warning("Fit not successful, using initial values.\n");
+    g_log.warning("Fit not successful, using position of max value.\n");
   else
     g_log.debug() << "Sigma: " << initialGaussian->fwhm() << '\n';
-  const double centreByFit = success ? initialGaussian->centre() : centreByMax;
-  g_log.debug() << "Estimated peak position: " << centreByFit << '\n';
-  return std::pair<double, double>{centreByFit, centreByMax};
+  const double centre = success ? initialGaussian->centre() : centreByMax;
+  g_log.debug() << "Estimated peak position: " << centre << '\n';
+  return centre;
 }
 
-/// Compute Bragg angle
-double LoadILLReflectometry::computeBraggAngle() {
-  const double userAngle = getProperty("BraggAngle");
-  if (userAngle != EMPTY_DBL()) {
-    return userAngle;
-  }
-  // the reflected beam
-  double reflectedCentre;
-  double reflectedMaxPosition;
-  std::tie(reflectedCentre, reflectedMaxPosition) = fitReflectometryPeak();
-  if (!getPointerToProperty("OutputBeamPosition")->isDefault()) {
-    DirectBeamMeasurement m;
-    m.detectorAngle = doubleFromRun(m_detectorAngleName);
-    m.detectorDistance = sampleDetectorDistance();
-    m.fittedPeakCentre = reflectedCentre;
-    m.positionOfMaximum = reflectedMaxPosition;
-    setProperty("OutputBeamPosition", createBeamPositionTable(m));
-  }
-  double angleBragg;
+/** Compute the detector and the Bragg angles.
+ *  @return a pair where first is detector angle and second the Bragg angle.
+ */
+std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
-  if (!posTable) {
-    angleBragg = doubleFromRun(m_detectorAngleName);
-  } else {
-    const double detAngle = doubleFromRun(m_detectorAngleName);
-    g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName
-                  << ": " << detAngle << '\n';
-    const auto directBeamMeasurement = parseBeamPositionTable(*posTable);
-    const double dbOffset =
-        (m_pixelCentre - directBeamMeasurement.fittedPeakCentre) * m_pixelWidth;
-    const double dbOffsetAngle =
-        inDeg(std::atan2(dbOffset, directBeamMeasurement.detectorDistance));
-    const double refOffset = (m_pixelCentre - reflectedCentre) * m_pixelWidth;
-    const double refOffsetAngle =
-        inDeg(std::atan2(refOffset, m_detectorDistanceValue));
-    const double virtualDetAngle = detAngle -
-                                   directBeamMeasurement.detectorAngle -
-                                   2 * dbOffsetAngle + refOffsetAngle;
-    angleBragg = virtualDetAngle;
+  const double peakCentre = fitReflectometryPeak();
+  const double nominalDetectorAngle = doubleFromRun(m_detectorAngleName);
+  g_log.debug() << "Using detector angle (degrees) " << m_detectorAngleName
+                << ": " << nominalDetectorAngle << '\n';
+  if (!isDefault("OutputBeamPosition")) {
+    PeakInfo p;
+    p.detectorAngle = nominalDetectorAngle;
+    p.detectorDistance = sampleDetectorDistance();
+    p.peakCentre = peakCentre;
+    setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
-  g_log.debug() << "Bragg angle " << angleBragg << " degrees.\n";
-  return angleBragg;
+  const double userAngle = getProperty("BraggAngle");
+  const double offset = offsetAngle(peakCentre, m_pixelCentre, m_pixelWidth,
+                                    m_detectorDistanceValue);
+  m_log.debug() << "Beam offset angle: " << offset << '\n';
+  if (userAngle != EMPTY_DBL()) {
+    if (posTable) {
+      g_log.notice() << "Ignoring BeamPosition, using BraggAngle instead.";
+    }
+    const double userDetectorAngle = 2 * userAngle - offset;
+    return std::make_pair(userDetectorAngle, userAngle);
+  }
+  if (!posTable) {
+    const double bragg = (nominalDetectorAngle + offset) / 2;
+    return std::make_pair(nominalDetectorAngle, bragg);
+  }
+  const auto dbPeak = parseBeamPositionTable(*posTable);
+  const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
+                                      m_pixelWidth, dbPeak.detectorDistance);
+  m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
+  const double detectorAngle =
+      nominalDetectorAngle - dbPeak.detectorAngle - dbOffset;
+  m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
+                << '\n';
+  const double bragg = (detectorAngle + offset) / 2;
+  return std::make_pair(detectorAngle, bragg);
 }
 
 /// Update detector position according to data file
@@ -749,12 +747,14 @@ void LoadILLReflectometry::placeDetector() {
     dist += doubleFromRun(m_detectorDistance + ".offset_value");
   g_log.debug() << "Sample-detector distance: " << m_detectorDistanceValue
                 << "m.\n";
-  const double theta = computeBraggAngle();
+  double detectorAngle;
+  double braggAngle;
+  std::tie(detectorAngle, braggAngle) = detectorAndBraggAngles();
   // incident angle for using the algorithm ConvertToReflectometryQ
   // TODO Doesn't seem to work with ConvertToReflectometryQ. Maybe they
   //      expect a time series?
   // TODO They are moving to 2theta in ISIS reflectometry algorithms.
-  m_localWorkspace->mutableRun().addProperty("stheta", inRad(theta) / 2);
+  m_localWorkspace->mutableRun().addProperty("stheta", inRad(braggAngle));
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
     if (m_instrumentName == "D17")
@@ -765,10 +765,10 @@ void LoadILLReflectometry::placeDetector() {
       return RotationPlane::horizontal;
   }();
   const auto newpos =
-      detectorPosition(rotPlane, m_detectorDistanceValue, theta);
+      detectorPosition(rotPlane, m_detectorDistanceValue, detectorAngle);
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
-  const auto rotation = detectorFaceRotation(rotPlane, theta);
+  const auto rotation = detectorFaceRotation(rotPlane, detectorAngle);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
