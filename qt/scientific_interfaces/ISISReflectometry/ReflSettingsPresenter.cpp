@@ -80,6 +80,12 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     auto endOv = m_view->getEndOverlap();
     if (!endOv.empty())
       options.push_back("EndOverlap=" + endOv);
+
+    // Add momentum transfer step as 'Params'
+    auto qTransStep = m_view->getMomentumTransferStep();
+    if (!qTransStep.empty()) {
+      options.push_back("Params=" + qTransStep);
+    }
   }
 
   if (m_view->instrumentSettingsEnabled()) {
