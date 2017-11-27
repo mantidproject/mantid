@@ -11,6 +11,7 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+- :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` has been amended to write the metadata (e.g. temperature) value in the header, in the form of the Fullprof readable keyword.
 
 - Some new functionality for POLARIS in the ISIS Powder scripts. Adjusted some default parameters and output unsplined vanadium workspace by default
 - ISIS_Powder scripts for PEARL now support creation of grouping .cal files from ceria run(s)

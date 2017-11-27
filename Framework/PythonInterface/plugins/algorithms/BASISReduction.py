@@ -4,11 +4,12 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as sapi
-from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory,\
-    FileProperty, FileAction
-from mantid.kernel import IntArrayProperty, StringListValidator,\
-    FloatArrayProperty, EnabledWhenProperty,\
-    FloatArrayLengthValidator, Direction, PropertyCriterion
+from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
+                        FileAction, AnalysisDataService)
+from mantid.kernel import (IntArrayProperty, StringListValidator,
+                           FloatArrayProperty, EnabledWhenProperty,
+                           FloatArrayLengthValidator, Direction,
+                           PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
 
@@ -359,9 +360,10 @@ class BASISReduction(PythonAlgorithm):
                 if self._normalizationType == "by Q slice":
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
             if self.getProperty("ExcludeTimeSegment").value:
-                sapi.DeleteWorkspace('splitted_unfiltered')
                 sapi.DeleteWorkspace('splitter')
-                sapi.DeleteWorkspace('TOFCorrectWS')
+                [sapi.DeleteWorkspace(name) for name in
+                 ('splitted_unfiltered', 'TOFCorrectWS') if
+                 AnalysisDataService.doesExist(name)]
 
     def _getRuns(self, rlist, doIndiv=True):
         """
