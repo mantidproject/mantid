@@ -19,10 +19,33 @@
 from __future__ import absolute_import
 
 # stdlib modules
+import importlib
 import os
 
 # 3rd-party modules
+from qtpy import QT_VERSION
 from qtpy.uic import loadUi
+
+LIB_SUFFIX = 'qt' + QT_VERSION[0]
+
+
+def import_qtlib(modulename, package):
+    """Import a module built against a specified major version of Qt.
+    The provided name is suffixed with the string 'qtX' where
+    X is the major version of Qt that the library was built against.
+    The version is determined by inspecting the loaded Python Qt
+    bindings. If none can be found then Qt5 is assumed.
+
+    It is assumed that the module is a build product and therefore may not be in a fixed
+    location relative to the python source files. First a relative import from the calling
+    package is requested follwed by a simple search for the binary by name on sys.path
+    :param modulename: The name of the dynamic module to find
+    :package The calling package trying to import the module using dotted syntax
+    """
+    try:
+        return importlib.import_module('.' + modulename + LIB_SUFFIX, package)
+    except ImportError:
+        return importlib.import_module(modulename + LIB_SUFFIX)
 
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):
