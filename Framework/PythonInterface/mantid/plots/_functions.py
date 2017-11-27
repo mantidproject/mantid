@@ -70,6 +70,7 @@ def _getDistribution(workspace, kwargs):
 
 
 def getAxesLabels(workspace):
+    '''Return a tuple of ``(YUnit, <other units>)``'''
     axes = [workspace.YUnit()]
     for index in range(workspace.axes()):
         axis = workspace.getAxis(index)
