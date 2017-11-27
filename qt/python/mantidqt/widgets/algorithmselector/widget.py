@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem
-from PyQt4.QtCore import QModelIndex, pyqtSignal, Qt
+from PyQt4.QtCore import QModelIndex, pyqtSignal
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 from mantidqt.utility import block_signals
 import re
