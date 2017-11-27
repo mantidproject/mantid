@@ -16,4 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
-from ._core import MessageDisplay as MessageDisplay  # noqa
+from mantidqt.utils.qt import import_qtlib
+
+
+MessageDisplay = import_qtlib('_widgetscore', 'mantidqt.widgets', 'MessageDisplay')
