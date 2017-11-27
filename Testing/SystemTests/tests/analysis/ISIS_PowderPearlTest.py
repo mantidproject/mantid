@@ -42,6 +42,7 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     existing_config = config['datasearch.directories']
     focus_mode = None
+    tolerance = None
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -55,10 +56,9 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        return (_compare_ws(reference_file_name="ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
-                            results="PEARL98472_tt70-Results-D-Grp") and
-                _compare_ws(reference_file_name="ISIS_Powder-PEARL00098472_splined.nxs",
-                            results="Van_spline_data_tt70"))
+        self.tolerance = 1e-6
+        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),\
+               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
 
     def cleanup(self):
         try:
@@ -111,7 +111,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        return self.focus_results.getName(), "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
         try:
@@ -135,7 +135,7 @@ class CreateCalTest(stresstesting.MantidStressTest):
         self.calibration_results = run_create_cal()
 
     def valid(self):
-        return ceria_validator(self.calibration_results)
+        return self.calibration_results.getName(), "ISIS_Powder-PEARL00098494_grouped.nxs"
 
     def cleanup(self):
         try:
@@ -186,28 +186,6 @@ def run_focus():
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
                              perform_attenuation=True, attenuation_file_path=attenuation_path)
-
-
-def focus_validation(results):
-    reference_file_name = "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def ceria_validator(results):
-    reference_file_name = "ISIS_Powder-PEARL00098494_grouped.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-
-    is_valid = len(results) > 0
-
-    if not (mantid.CompareWorkspaces(Workspace1=results, Workspace2=ref_ws)):
-        is_valid = False
-        print(results.getName() + " was not equal to: " + ref_ws.getName())
-
-    return is_valid
 
 
 def setup_mantid_paths():
