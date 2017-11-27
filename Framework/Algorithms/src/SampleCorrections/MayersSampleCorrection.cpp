@@ -8,6 +8,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 
@@ -102,7 +103,7 @@ void MayersSampleCorrection::exec() {
   // something better for the time being
   const double big(100.); // seems to be a sweet spot...
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-  sampleShape.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  sampleShape.getBoundingBox();
   V3D boxWidth(maxX - minX, maxY - minY, maxZ - minZ);
   const double radius(0.5 * boxWidth[frame->pointingHorizontal()]),
       height(boxWidth[frame->pointingUp()]);

@@ -69,9 +69,9 @@ public:
   /// Set the name of the sample
   void setName(const std::string &name);
   /// Return the sample shape
-  const Geometry::CSGObject &getShape() const;
+  const Geometry::IObject &getShape() const;
   /// Update the shape of the object
-  void setShape(const Geometry::CSGObject &shape);
+  void setShape(const Geometry::IObject_sptr &shape);
 
   /** @name Material properties.*/
   //@{
@@ -138,7 +138,7 @@ private:
   /// The sample name
   std::string m_name;
   /// The sample shape object
-  Geometry::CSGObject m_shape;
+  Geometry::IObject_sptr m_shape;
   /// An owned pointer to the SampleEnvironment object
   boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.

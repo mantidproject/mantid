@@ -74,6 +74,8 @@ public:
   CSGObject &operator=(const CSGObject &);
   /// Destructor
   virtual ~CSGObject();
+  /// Clone
+  IObject* clone() const override { return new CSGObject(*this); }
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
@@ -167,7 +169,7 @@ public:
                                     const size_t) const;
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                     const BoundingBox &activeRegion,
-                                    const size_t) const;
+                                    const size_t) const override;
 
   // Rendering member functions
   void draw() const override;
@@ -187,7 +189,7 @@ public:
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const override;
   /// Getter for the shape xml
-  std::string getShapeXML() const;
+  std::string getShapeXML() const override;
 
 private:
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,

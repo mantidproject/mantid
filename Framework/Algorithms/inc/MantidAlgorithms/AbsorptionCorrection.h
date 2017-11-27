@@ -115,7 +115,7 @@ protected:
   virtual void initialiseCachedDistances() = 0;
 
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
-  const Geometry::CSGObject *m_sampleObject; ///< Local cache of sample object.
+  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
   Kernel::V3D m_beamDirection;               ///< The direction of the beam.
   std::vector<double> m_L1s,                 ///< Cached L1 distances
       m_elementVolumes;                      ///< Cached element volumes

@@ -16,7 +16,8 @@ namespace Mantid {
 
 namespace API {
 using namespace Mantid::Kernel;
-using Geometry::CSGObject;
+using Geometry::IObject;
+using Geometry::IObject_sptr;
 using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
@@ -101,18 +102,18 @@ void Sample::setName(const std::string &name) { m_name = name; }
  * its own coordinate system with its centre at [0,0,0]
  * @return A reference to the object describing the shape
  */
-const CSGObject &Sample::getShape() const { return m_shape; }
+const IObject &Sample::getShape() const { return *m_shape; }
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
  * @param shape :: The object describing the shape
  */
-void Sample::setShape(const CSGObject &shape) { m_shape = shape; }
+void Sample::setShape(const IObject_sptr &shape) { m_shape = shape; }
 
 /** Return the material.
  * @return A reference to the material the sample is composed of
  */
-const Material Sample::getMaterial() const { return m_shape.material(); }
+const Material Sample::getMaterial() const { return m_shape->material(); }
 
 /**
  * Return a reference to the sample environment that this sample is attached to
@@ -291,9 +292,9 @@ void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   file->putAttr("version", 1);
-  file->putAttr("shape_xml", m_shape.getShapeXML());
+  file->putAttr("shape_xml", m_shape->getShapeXML());
 
-  m_shape.material().saveNexus(file, "material");
+  m_shape->material().saveNexus(file, "material");
   // Write out the other (indexes 1+) samples
   file->writeData("num_other_samples", int(m_samples.size()));
   for (size_t i = 0; i < m_samples.size(); i++)
@@ -351,12 +352,12 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     shape_xml = Strings::strip(shape_xml);
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
-      m_shape = *shapeMaker.createShape(shape_xml,
+      m_shape = shapeMaker.createShape(shape_xml,
                                         false /*Don't wrap with <type> tag*/);
     }
     Kernel::Material material;
     material.loadNexus(file, "material");
-    m_shape.setMaterial(material);
+    m_shape->setMaterial(material);
 
     // Load other samples
     int num_other_samples;

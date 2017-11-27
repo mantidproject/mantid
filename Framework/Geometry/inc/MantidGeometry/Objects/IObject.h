@@ -12,6 +12,7 @@ namespace Mantid {
 // Forward declarations
 //----------------------------------------------------------------------
 namespace Kernel {
+class PseudoRandomNumberGenerator;
 class Material;
 class V3D;
 }
@@ -58,6 +59,7 @@ public:
   virtual bool hasValidShape() const = 0;
   virtual int setObject(const int ON, const std::string &Ln) = 0;
   virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
+  virtual IObject* clone() const = 0;
 
   virtual int getName() const = 0;
   virtual void setName(const int nx) = 0;
@@ -72,9 +74,16 @@ public:
   virtual const BoundingBox &getBoundingBox() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
+  virtual Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+    const BoundingBox &activeRegion,
+    const size_t) const = 0;
+
   virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() = 0;
+
+  /// Getter for the shape xml
+  virtual std::string getShapeXML() const = 0;
 
   // Rendering
   virtual void draw() const = 0;
