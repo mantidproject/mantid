@@ -13,7 +13,7 @@ Description
 Calculates detector asymmetries and phases from a reference dataset. The algorithm fits each of
 the spectra in the input workspace to:
 
-.. math:: f_i(t) = A_i \cos\left(\omega t + \phi_i\right)
+.. math:: f_i(t) = A_i \cos\left(\omega t - \phi_i\right)
 
 where :math:`\omega` is shared across spectra and :math:`A_i` and :math:`\phi_i` are
 detector-dependent.
@@ -64,10 +64,10 @@ Output:
 
 .. testoutput:: CalMuonDetectorPhasesExample
 
-  Detector 1 has phase 5.332568 and amplitude 0.133112
-  Detector 2 has phase 5.111274 and amplitude 0.134679
-  Detector 3 has phase 4.926346 and amplitude 0.149430
-  Detector 4 has phase 4.798584 and amplitude 0.152869
+  Detector 1 has phase 0.950498 and amplitude 0.133113
+  Detector 2 has phase 1.171793 and amplitude 0.134679
+  Detector 3 has phase 1.356717 and amplitude 0.149431
+  Detector 4 has phase 1.484481 and amplitude 0.152870
 
 .. categories::
 

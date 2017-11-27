@@ -59,6 +59,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_processing_finished(self):
             pass
 
+        @abstractmethod
+        def on_manage_directories(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -184,6 +188,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
@@ -469,12 +475,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
                   self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
+
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
@@ -619,6 +631,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
+
+    @property
+    def show_transmission(self):
+        return self.show_transmission_view.isChecked()
+
+    @show_transmission.setter
+    def show_transmission(self, value):
+        self.show_transmission_view.setChecked(value)
 
     # ==================================================================================================================
     # ==================================================================================================================

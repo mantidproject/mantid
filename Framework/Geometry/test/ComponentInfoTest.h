@@ -168,7 +168,7 @@ public:
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
 
-  void test_copy_construction() {
+  void test_partial_copy() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -184,14 +184,15 @@ public:
                     makeComponentIDMap(componentIds), shapes);
 
     // Make the copy
-    ComponentInfo b = a;
+    auto b = a.cloneWithoutDetectorInfo();
 
     // Compare sizes
-    TS_ASSERT_EQUALS(b.size(), a.size());
+    TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
-    TS_ASSERT_EQUALS(&b.shape(0), &a.shape(0));
+    TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
     // IDs are the same
-    TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT(!b->hasDetectorInfo());
   }
 
   void test_has_shape() {
@@ -453,6 +454,61 @@ public:
     TS_ASSERT(componentInfo->isStructuredBank(bank2Index));
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
+  }
+
+  void test_scanning_non_bank_throws() {
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    const auto &componentInfo = std::get<0>(wrappers);
+    componentInfo->setScanInterval({0, 1});
+    std::pair<size_t, size_t> temporalSourceIndex(
+        componentInfo->source(), 0); // Source index with time component
+    TSM_ASSERT_THROWS(
+        "Source is NOT allowed to time-scan",
+        componentInfo->setPosition(temporalSourceIndex, V3D(0, 0, 0)),
+        std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source position set as time-constant allowed",
+        componentInfo->setPosition(componentInfo->source(), V3D(0, 0, 0)));
+    TSM_ASSERT_THROWS("Source is NOT allowed to time-scan",
+                      componentInfo->setRotation(temporalSourceIndex, Quat()),
+                      std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source rotation set as time-constant allowed",
+        componentInfo->setRotation(componentInfo->source(), Quat()));
+  }
+
+  void test_merge_sync_scan() {
+
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+
+    auto wrappers1 = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &infoScan1 = std::get<0>(wrappers1);
+
+    auto wrappers2 = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &infoScan2 = std::get<0>(wrappers2);
+
+    infoScan1->setScanInterval({0, 1});
+    infoScan2->setScanInterval({1, 2});
+    infoScan1->setPosition(0 /*detector index*/, V3D(0, 0, 0));
+
+    infoScan1->merge(*infoScan2);
+
+    TS_ASSERT_EQUALS(infoScan1->scanSize(),
+                     infoScan1->size() + infoScan2->size());
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 0}),
+                     V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
+                     detectorPos);
   }
 };
 

@@ -4,11 +4,12 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as sapi
-from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory,\
-    FileProperty, FileAction
-from mantid.kernel import IntArrayProperty, StringListValidator,\
-    FloatArrayProperty, EnabledWhenProperty,\
-    FloatArrayLengthValidator, Direction, PropertyCriterion
+from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
+                        FileAction, AnalysisDataService)
+from mantid.kernel import (IntArrayProperty, StringListValidator,
+                           FloatArrayProperty, EnabledWhenProperty,
+                           FloatArrayLengthValidator, Direction,
+                           PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
 
@@ -104,12 +105,17 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False,
                              "Stop monitor normalization")
+        self.declareProperty('ExcludeTimeSegment', '',
+                             'Exclude a contigous time segment; '+
+                             'Examples: "71546:0-60" filter run 71546 from '+
+                             'start to 60 seconds, "71546:300-600", '+
+                             '"71546:120-end" from 120s to the end of the run')
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
-        self.declareProperty("NormalizeToFirst", False, "Normalize spectra \
-        to intensity of spectrum with lowest Q?")
+        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '+
+                             'to intensity of spectrum with lowest Q?')
 
         # Properties affected by the reflection selected
         titleReflection = "Reflection Selector"
@@ -353,6 +359,11 @@ class BASISReduction(PythonAlgorithm):
                 sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
                 if self._normalizationType == "by Q slice":
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
+            if self.getProperty("ExcludeTimeSegment").value:
+                sapi.DeleteWorkspace('splitter')
+                [sapi.DeleteWorkspace(name) for name in
+                 ('splitted_unfiltered', 'TOFCorrectWS') if
+                 AnalysisDataService.doesExist(name)]
 
     def _getRuns(self, rlist, doIndiv=True):
         """
@@ -411,12 +422,16 @@ class BASISReduction(PythonAlgorithm):
                 kwargs = {"BankName": "bank2"}  # 311 analyzers only in bank2
             else:
                 kwargs = {}
+
             sapi.LoadEventNexus(Filename=run_file,
                                 OutputWorkspace=ws_name, **kwargs)
+            if str(run)+':' in self.getProperty("ExcludeTimeSegment").value:
+                self._filterEvents(str(run), ws_name)
 
             if not self._noMonNorm:
                 sapi.LoadNexusMonitors(Filename=run_file,
                                        OutputWorkspace=mon_ws_name)
+
             if sam_ws != ws_name:
                 sapi.Plus(LHSWorkspace=sam_ws,
                           RHSWorkspace=ws_name,
@@ -560,6 +575,53 @@ class BASISReduction(PythonAlgorithm):
                    Factor=1./maximumYvalue,
                    Operation="Multiply")
 
+    def generateSplitterWorkspace(self, fragment):
+        r"""Create a table workspace with time intervals to keep
+
+        Parameters
+        ----------
+        fragment: str
+            a-b  start and end of time fragment to filter out
+        """
+        inf = 86400  # a run a full day long
+        a, b = fragment.split('-')
+        b = inf if 'end' in b else float(b)
+        a = float(a)
+        splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace='splitter')
+        splitter.addColumn('double', 'start')
+        splitter.addColumn('double', 'stop')
+        splitter.addColumn('str', 'target') #, 'str')
+        if a == 0.0:
+            splitter.addRow([b, inf, '0'])
+        elif b == inf:
+            splitter.addRow([0, a, '0'])
+        else:
+            splitter.addRow([0, a, '0'])
+            splitter.addRow([b, inf, '0'])
+
+    def _filterEvents(self, run, ws_name):
+        r"""Filter out ExcludeTimeSegment if applicable
+
+        Parameters
+        ----------
+        run: str
+            run number
+        ws_name : str
+            name of the workspace to filter
+        """
+        for run_fragment in self.getProperty("ExcludeTimeSegment").value.split(';'):
+            if run+':' in run_fragment:
+                self.generateSplitterWorkspace(run_fragment.split(':')[1])
+                sapi.FilterEvents(InputWorkspace=ws_name,
+                                  SplitterWorkspace='splitter',
+                                  OutputWorkspaceBaseName='splitted',
+                                  GroupWorkspaces=True,
+                                  OutputWorkspaceIndexedFrom1=True,
+                                  RelativeTime=True)
+                sapi.UnGroupWorkspace('splitted')
+                sapi.RenameWorkspace(InputWorkspace='splitted_0',
+                                     OutputWorkspace=ws_name)
+                break
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)

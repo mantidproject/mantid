@@ -743,6 +743,20 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
                                                const int &version) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
+  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
+  return alg;
+}
+
+/** Setup algorithm as child algorithm.
+ *
+ * Used internally by createChildAlgorithm. Arguments are as documented there.
+ * Can also be used manually for algorithms created otherwise. This allows
+ * running algorithms that are not declared into the factory as child
+ * algorithms. */
+void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
+                                      const double startProgress,
+                                      const double endProgress,
+                                      const bool enableLogging) {
   // set as a child
   alg->setChild(true);
   alg->setLogging(enableLogging);
@@ -751,8 +765,8 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   try {
     alg->initialize();
   } catch (std::runtime_error &) {
-    throw std::runtime_error("Unable to initialise Child Algorithm '" + name +
-                             "'");
+    throw std::runtime_error("Unable to initialise Child Algorithm '" +
+                             alg->name() + "'");
   }
 
   // If output workspaces are nameless, give them a temporary name to satisfy
@@ -783,8 +797,6 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
     m_ChildAlgorithms.push_back(weakPtr);
   }
-
-  return alg;
 }
 
 //=============================================================================================

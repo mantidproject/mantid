@@ -55,6 +55,7 @@ Changes
    Diffraction <diffraction>
    LowQ <lowq>
    Muon Analysis <muon>
+   Reflectometry <reflectometry>
    Spectroscopy <spectroscopy>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>

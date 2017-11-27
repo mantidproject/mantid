@@ -28,13 +28,16 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if :literal:`BraggAngle` and :literal:`BeamPosition` are not given.
+* The detector angle in the sample logs. This is the default behavior if neither :literal:`BraggAngle` nor :literal:`BeamPosition` is given.
 
-* User-specified angle given by the :literal:`BraggAngle` input property. This option will always take precedence over other options.
+* The detector angle calibrated by the direct beam measurement. This behavior is triggered when :literal:`BeamPosition` is given.
 
-* A calibrated detector angle. The calibration is done using a direct beam measurement. This option is triggered when the :literal:`BeamPosition` property is specified.
+* An angle based on a user-specified angle given by the :literal:`BraggAngle` input property. This overrides all other angles.
 
-For the direct beam calibration, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
+Direct beam calibration
+#######################
+
+Calibration using a direct beam measurement is triggered when the :literal:`BeamPosition` property is specified. In this mode, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
 
 .. code-block:: python
 
@@ -43,22 +46,32 @@ For the direct beam calibration, a direct beam file should be loaded separately 
    LoadILLReflectometry('sample2.nxs', OutputWorkspace='sample2_ws', BeamPosition='beam_position_ws')
    # ...
 
-Direct beam calibration
-#######################
+The detector is rotated around angle :math:`\alpha`, given by
 
-The detector position calibration requires peak position fitting for both the direct and reflected beam data. Basically, the data is integrated using :ref:`algm-Integration`, transposed using :ref:`algm-Transpose` and a :ref:`func-Gaussian` is fitted by :ref:`algm-Fit`. The fitted peak position gives the angle between the centre of the detector and the direct or reflected beam:
+.. math::
+   \alpha = \alpha_{R} - \alpha_{D} - \Delta_{D}
+
+where :math:`\alpha` is the nominal detector angle, :math:`\alpha` the detector angle of the direct beam reference and :math:`\Delta_{D}` the beam position offset (see below) of the reference.
+
+User angle
+##########
+
+The :literal:`BraggAngle` option rotates the detector by an angle :math:`\alpha` such that the angle between the direct beam axis and the reflected peak centre is twice :literal:`BraggAngle`
+
+.. math::
+   \alpha = 2 \theta_{user} - \Delta_{R}
+
+where :math:`\theta_{user}` is :literal:`BraggAngle` and :math:`\Delta_{R}` the beam position offset angle (see below).
+
+Beam position offset
+####################
+
+To calculate the angle between the detector centre and the beam, the reflectometry data is integrated using :ref:`algm-Integration`, transposed using :ref:`algm-Transpose` and finally fitted by a :ref:`func-Gaussian` using :ref:`algm-Fit`. The offset angle :math:`\Delta` can then be calculated by
 
 .. math::
    \Delta = \tan^{-1} \frac{(i_{centre} - i_{fit}) d_{pix}}{l_{2}},
 
 where :math:`i_{centre}` is the workspace index of the detector centre (127.5 for D17 and Figaro), :math:`i_{fit}` the fitted peak position, :math:`d_{pix}` the physical pixel width and :math:`l_{2}` the sample to detector centre distance.
-
-The calibrated detector angle is then given by
-
-.. math::
-   \alpha = \alpha_{R} - \alpha_{D} - 2 \Delta_{D} + \Delta_{R},
-
-where :math:`\alpha` denotes the detector angles while the subscript :math:`R` refers to the reflected beam and :math:`D` to the direct beam.
 
 Source position
 ---------------
@@ -175,25 +188,27 @@ Output:
 .. testcode:: LoadBraggAngle
 
    import numpy
-
+   
    # Load ILL d17 data file (TOF mode) into a workspace 2D using a user-defined angle of 30 degrees:
    ws2 = Load('ILL/D17/317370.nxs', BraggAngle = 5.5)
-
+   
    # The original detector angle can be found in the sample logs:
    angleOrig = ws2.getRun().getProperty("dan.value").value
-
-   # The Sample Log entry stheta will be the user defined angle of 30 degrees:
-   angleBragg = ws2.getRun().getProperty("stheta").value * 180. / numpy.pi
-
-   print("The detector of workspace {} was rotated to {:.1f} degrees.".format(ws2.name(), 2. * angleBragg))
-   print("The nominal angle in the NeXus file was {:.2} degrees.".format(angleOrig))
+   
+   # The reflected beam center is around pixel 202.
+   detId = 202
+   det = ws2.getInstrument().getDetector(detId)
+   angleDet = ws2.detectorTwoTheta(det) / numpy.pi * 180
+   
+   print("The nominal angle in the NeXus file was {:.2} degrees.".format(angleOrig)) 
+   print("Pixel at detector ID {} was rotated to {:.1f} degrees.".format(detId, angleDet))
 
 Output:
 
 .. testoutput:: LoadBraggAngle
 
-   The detector of workspace ws2 was rotated to 5.5 degrees.
    The nominal angle in the NeXus file was 3.2 degrees.
+   Pixel at detector ID 202 was rotated to 11.0 degrees.
 
 .. testcleanup:: LoadBraggAngle
 
@@ -208,7 +223,7 @@ Output:
    directBeamWS = Load('ILL/D17/317369.nxs', OutputBeamPosition='beamPositionWS')
 
    beamPosWS = mtd['beamPositionWS']
-   peakCentre = beamPosWS.cell('FittedPeakCentre', 0)
+   peakCentre = beamPosWS.cell('PeakCentre', 0)
    print('Fitted direct beam maximum (in workspace indices): {:.5}'.format(peakCentre))
 
    reflectedBeamWS = Load('ILL/D17/317370.nxs', BeamPosition=beamPosWS)
@@ -228,8 +243,8 @@ Output:
 .. testoutput:: LoadDirectBeam
 
    Fitted direct beam maximum (in workspace indices): 202.18
-   Uncalibrated detector angle: 1.591 degrees.
-   Detector angle after calibration using direct beam: 1.627 degrees.
+   Uncalibrated detector angle: 0.7722 degrees.
+   Detector angle after calibration using direct beam: 0.8023 degrees.
 
 .. testcleanup:: LoadDirectBeam
 

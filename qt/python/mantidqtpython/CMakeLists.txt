@@ -24,6 +24,7 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
 
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h
@@ -95,7 +96,7 @@ mtd_add_sip_module (
     Qt4::QtOpenGL
     Qwt5
     ${PYTHON_LIBRARIES}
-  FOLDER MantidQt4
+  FOLDER Qt4
 )
 
 if ( MSVC )
