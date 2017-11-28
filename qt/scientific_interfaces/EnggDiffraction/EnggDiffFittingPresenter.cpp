@@ -295,26 +295,18 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   // returns empty if no directory is found
   const std::string parsedUserInput = pocoUserPathInput.toString();
 
-  // split directory if 'ENGINX_' found by '_.'
-  std::vector<std::string> splitBaseName;
-  if (parsedUserInput.find(m_view->getCurrentInstrument() + "_") !=
-      std::string::npos) {
-    boost::split(splitBaseName, parsedUserInput, boost::is_any_of("_."));
-  }
-
   try {
     // if input file is a directory and successfully splitBaseName
     // or when default bank is set or changed, the text-field is updated with
     // selected bank directory which would trigger this function again
-    if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
-      foundFullFilePaths =
-          processFullPathInput(pocoUserPathInput, splitBaseName);
+    if (pocoUserPathInput.isFile()) {
+      foundFullFilePaths = processFullPathInput(pocoUserPathInput);
       // if given a multi-run
     } else if (userPathInput.find("-") != std::string::npos) {
       foundFullFilePaths = processMultiRun(userPathInput);
       // try to process using single run
     } else {
-      foundFullFilePaths = processSingleRun(userPathInput, splitBaseName);
+      foundFullFilePaths = processSingleRun(userPathInput);
     }
   } catch (std::invalid_argument &ia) {
     // If something went wrong stop and print error only
@@ -344,13 +336,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   * to update drop down for available banks and various widgets on the GUI
   *
   * @param filePath The user entered file path as a Poco Path
-  * @param splitBaseName The base file name split by the `_` delimiter
   *
   * @return The full file path as a vector of strings to make this
   * consistent with the other file processing methods
   */
 std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
-    const Poco::Path &filePath, const std::vector<std::string> &splitBaseName) {
+    const Poco::Path &filePath) {
 
   std::vector<std::string> foundRunNumbers;
   std::vector<std::string> foundFullFilePaths;
@@ -495,8 +486,7 @@ EnggDiffFittingPresenter::processMultiRun(const std::string &userInput) {
 }
 
 std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
-    const std::string &userInputBasename,
-    const std::vector<std::string> &splitBaseName) {
+    const std::string &userInputBasename) {
 
   const auto focusDir = m_view->focusingDir();
 

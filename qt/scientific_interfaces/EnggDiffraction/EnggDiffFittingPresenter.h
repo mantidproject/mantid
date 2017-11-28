@@ -141,12 +141,10 @@ private:
   std::vector<std::string> processMultiRun(const std::string &userInput);
 
   std::vector<std::string>
-  processSingleRun(const std::string &userInputBasename,
-                   const std::vector<std::string> &splitBaseName);
+  processSingleRun(const std::string &userInputBasename);
 
   std::vector<std::string>
-  processFullPathInput(const Poco::Path &pocoFilePath,
-                       const std::vector<std::string> &splitBaseName);
+  processFullPathInput(const Poco::Path &pocoFilePath);
 
   static int g_fitting_runno_counter;
 
