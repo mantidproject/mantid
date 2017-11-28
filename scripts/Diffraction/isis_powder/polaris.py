@@ -28,7 +28,8 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
-                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                           sample_details=self._sample_details)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
