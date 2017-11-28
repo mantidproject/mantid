@@ -32,6 +32,20 @@ set CM_GENERATOR=Visual Studio 14 2015 Win64
 set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Pre-processing steps on the workspace itself
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: If the third party repo exists ensure it is in a clean state
+:: as updating errors on previous builds can leave it in a state that
+:: cmake is unable to cope with
+if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
+  cd %WORKSPACE%\external\src\ThirdParty
+  git reset --hard HEAD
+  git clean -fdx
+  cd %WORKSPACE%
+)
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
 :: It defaults to a MantidExternalData directory within the USERPROFILE
