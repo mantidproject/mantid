@@ -40,9 +40,9 @@ DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
 
 
-def _make_run_selector(run_selector_view, parent_view):
+def _make_run_selector(run_selector_view, on_selection_change, parent_view):
     return RunSelectorPresenter('Runs To Sum',
-                                RunSelection(),
+                                RunSelection(on_selection_change),
                                 RunFinder(),
                                 run_selector_view,
                                 parent_view)

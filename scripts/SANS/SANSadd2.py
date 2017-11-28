@@ -18,8 +18,17 @@ ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
 ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, # noqa: C901
-             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts=None):
+def add_runs(runs, # noqa: C901
+             inst='sans2d',
+             defType='.nxs',
+             rawTypes=('.raw', '.s*', 'add','.RAW'),
+             lowMem=False,
+             binning='Monitors',
+             saveAsEvent=False,
+             isOverlay=False,
+             time_shifts=None,
+             outFile=None,
+             outFile_monitors=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -120,8 +129,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
         lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
-        outFile = lastFile+'-add.'+'nxs'
-        outFile_monitors = lastFile+'-add_monitors.'+'nxs'
+        outFile = lastFile+'-add.'+'nxs' if outFile is None else outFile
+        outFile_monitors = lastFile+'-add_monitors.'+'nxs' if outFile_monitors is None else outFile_monitors
         logger.notice('writing file:   '+outFile)
 
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:

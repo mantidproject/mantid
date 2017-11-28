@@ -5,7 +5,12 @@ from sans.gui_logic.models.run_file import RunFile
 class RunSelectorPresenter(object):
     file_extensions = ['.nxs']
 
-    def __init__(self, title, run_selection, run_finder, view, parent_view):
+    def __init__(self,
+                 title,
+                 run_selection,
+                 run_finder,
+                 view,
+                 parent_view):
         self._run_selection = run_selection
         self._run_finder = run_finder
         self.view = view

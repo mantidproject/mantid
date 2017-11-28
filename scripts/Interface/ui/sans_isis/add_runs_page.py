@@ -5,6 +5,7 @@ import ui_add_runs_page
 
 class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     sum = pyqtSignal()
+    outFileChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super(AddRunsPage, self).__init__(parent)
@@ -13,12 +14,25 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
 
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
+        self.fileNameEdit.editingFinished.connect(self.outFileChanged)
 
     def run_selector_view(self):
         return self.run_selector
 
+    def out_file_name(self):
+        return self.fileNameEdit.text().encode('utf-8')
+
+    def set_out_file_name(self, out_file_name):
+        self.fileNameEdit.setText(out_file_name)
+
     def summation_settings_view(self):
         return self.summation_settings
+
+    def enable_sum(self):
+        self.sumButton.setEnabled(True)
+
+    def disable_sum(self):
+        self.sumButton.setEnabled(False)
 
     def setupUi(self, other):
         ui_add_runs_page.Ui_AddRunsPage.setupUi(self, other)
