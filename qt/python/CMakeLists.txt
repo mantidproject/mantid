@@ -26,6 +26,9 @@ if ( ENABLE_WORKBENCH )
   # Now add any compiled sip targets
   add_subdirectory ( mantidqt/widgets )
 
+  # Setup dependency chain
+  add_dependencies ( mantidqt mantidqt_widgetscoreqt5 )
+
   ##########################################################################
   # Testing
   ##########################################################################

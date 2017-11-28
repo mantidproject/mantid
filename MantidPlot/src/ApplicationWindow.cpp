@@ -366,7 +366,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   using MantidQt::MantidWidgets::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog =
-      new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+      new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow,
           SLOT(show()));

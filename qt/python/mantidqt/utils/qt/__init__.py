@@ -24,7 +24,7 @@ import os
 
 # 3rd-party modules
 from qtpy import QT_VERSION
-from qtpy.uic import loadUi
+from qtpy.uic import loadUi, loadUiType
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -55,7 +55,9 @@ def import_qtlib(modulename, package, attr=None):
 
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):
-    """Load a ui file assuming it is relative to a given callers filepath
+    """Load a ui file assuming it is relative to a given callers filepath. If
+    an existing instance is given then the this instance is set as the baseclass
+    and the new Ui instance is returned otherwise the loaded Ui class is returned
 
     :param caller_filename: An absolute path to a file whose basename when
     joined with ui_relfilename gives the full path to the .ui file. Generally
@@ -64,7 +66,12 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     basename of caller_filename gives the absolute path to the .ui file.
     :param baseinstance: An instance of a widget to pass to uic.loadUi
     that becomes the base class rather than a new widget being created.
-    :return: A new instance of the form class
+    :return: A new instance of the form class if baseinstance is given, otherwise
+    return the form class
     """
     filepath = os.path.join(os.path.dirname(caller_filename), ui_relfilename)
-    return loadUi(filepath, baseinstance=baseinstance)
+    if baseinstance:
+        return loadUi(filepath, baseinstance=baseinstance)
+    else:
+        return loadUiType(filepath)
+

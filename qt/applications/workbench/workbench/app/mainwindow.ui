@@ -41,7 +41,7 @@
    <attribute name="dockWidgetArea">
     <number>4</number>
    </attribute>
-   <widget class="MessageDisplay" name="display"/>
+   <widget class="MessageDisplay" name="messagedisplay"/>
   </widget>
   <action name="actionQuit">
    <property name="text">

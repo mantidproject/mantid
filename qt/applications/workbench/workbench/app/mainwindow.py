@@ -20,6 +20,8 @@ Defines the QMainWindow of the application and the main() entry point.
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
+import atexit
+import importlib
 import sys
 
 # -----------------------------------------------------------------------------
@@ -32,16 +34,20 @@ STDERR = sys.stderr
 # Requirements
 # -----------------------------------------------------------------------------
 from workbench import requirements  # noqa
+
 requirements.check_qt()
 
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QByteArray, QCoreApplication, QPoint, QSize, Qt)  # noqa
-from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow)  # noqa
+from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
+                         QPoint, QSize, Qt)  # noqa
+from qtpy.QtGui import (QColor, QPixmap)  # noqa
+from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
+                            QSplashScreen)  # noqa
 from mantidqt.utils.qt import load_ui, plugins  # noqa
 
-# Pre-application startup
+# Pre-application setup
 plugins.setup_library_paths()
 if hasattr(Qt, 'AA_EnableHighDpiScaling'):
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -68,27 +74,53 @@ def qapplication():
 MAIN_APP = qapplication()
 
 # -----------------------------------------------------------------------------
+# Splash screen
+# -----------------------------------------------------------------------------
+# Importing resources loads the data in
+from workbench.app.resources import qCleanupResources  # noqa
+atexit.register(qCleanupResources)
+
+SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen.png'),
+                       Qt.WindowStaysOnTopHint)
+SPLASH.show()
+SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft |
+                   Qt.AlignAbsolute, QColor(Qt.black))
+# The event loop has not started - force event processing
+QApplication.processEvents(QEventLoop.AllEvents)
+
+
+# -----------------------------------------------------------------------------
 # Utilities
 # -----------------------------------------------------------------------------
 from mantidqt.py3compat import qbytearray_to_str  # noqa
 from workbench.config.main import CONF  # noqa
-
+from workbench.external.mantid import prepare_mantid_env
 
 # -----------------------------------------------------------------------------
 # MainWindow
 # -----------------------------------------------------------------------------
-class MainWindow(QMainWindow):
 
+class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self._ui = load_ui(__file__, 'mainwindow.ui', baseinstance=self)
+        self.splash = SPLASH
+        self.maximized_flag = None
         MAIN_APP.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
-        # Instance attributes
-        self.maximized_flag = None
+        # Loading the Ui file and creating the widgets can take some time so it is done
+        # here in stages allow another call to splash screen update and hence
+        # QApplication::processEvents as the event loop is not running yet.
+        self.set_splash('Loading main ui')
+        ui_cls, _ = load_ui(__file__, 'mainwindow.ui')
+        self.set_splash()
+        self._ui = ui_cls()
+        self._ui.setupUi(self)
 
     def setup(self):
         self.setup_layout()
+
+        # Logging window
+        self._ui.messagedisplay.attachLoggingChannel()
 
     def setup_layout(self):
         settings = self.load_window_settings('window/')
@@ -97,6 +129,14 @@ class MainWindow(QMainWindow):
             # First execution:
             self.setWindowState(Qt.WindowMaximized)
         self.set_window_settings(*settings)
+
+    def set_splash(self, msg=None):
+        if not self.splash:
+            return
+        if msg:
+            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+                                    QColor(Qt.black))
+        QApplication.processEvents(QEventLoop.AllEvents)
 
     def load_window_settings(self, prefix, section='main'):
         """Load window layout settings from userconfig-based configuration
@@ -123,7 +163,7 @@ class MainWindow(QMainWindow):
         is_maximized = get_func(section, prefix + 'is_maximized')
         is_fullscreen = get_func(section, prefix + 'is_fullscreen')
         return hexstate, window_size, pos, is_maximized, \
-            is_fullscreen
+               is_fullscreen
 
     def get_window_settings(self):
         """Return current window settings
@@ -199,6 +239,7 @@ def initialize():
     # the application this way
     def fake_sys_exit(arg=[]):
         pass
+
     sys.exit = fake_sys_exit
 
     return app
@@ -210,7 +251,15 @@ def start_workbench(app):
     """
     main_window = MainWindow()
     main_window.setup()
+
+    preloaded_packages = ('mantid', 'matplotlib')
+    for name in preloaded_packages:
+        main_window.set_splash('Preloading ' + name)
+        importlib.import_module('mantid')
+
     main_window.show()
+    if main_window.splash:
+        main_window.splash.hide()
     # lift-off!
     app.exec_()
 
@@ -219,12 +268,13 @@ def start_workbench(app):
 
 def main():
     """Main entry point for the application"""
+    # Prepare for mantid import
+    prepare_mantid_env()
 
-    # parse command arguments early
+    # TODO: parse command arguments
 
     # general initialization
     app = initialize()
-
     main_window = None
     try:
         main_window = start_workbench(app)

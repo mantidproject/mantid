@@ -31,7 +31,7 @@ class UserConfig(object):
     """
 
     # The raw QSettings instance
-    settings = None
+    qsettings = None
     defaults = None
 
     def __init__(self, organization, application, defaults=None):
@@ -43,16 +43,16 @@ class UserConfig(object):
         form of nested dict instances
         """
         # Loads the saved settings if found
-        self.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                                  organization, application)
+        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope,
+                                   organization, application)
         self.defaults = defaults
 
     def all_keys(self):
-        return self.settings.allKeys()
+        return self.qsettings.allKeys()
 
     @property
     def filename(self):
-        return self.settings.fileName()
+        return self.qsettings.fileName()
 
     def get(self, section, option):
         """
@@ -64,7 +64,7 @@ class UserConfig(object):
         :param option: A string option name
         :return: The value of the option
         """
-        value = self.settings.value(self._settings_path(section, option))
+        value = self.qsettings.value(self._settings_path(section, option))
         if not value:
             value = self._get_default_or_raise(section, option)
 
@@ -77,7 +77,7 @@ class UserConfig(object):
         :param option: A string option name
         :param value: The value of the setting
         """
-        self.settings.setValue(self._settings_path(section, option), value)
+        self.qsettings.setValue(self._settings_path(section, option), value)
 
     # -------------------------------------------------------------------------
     # "Private" methods
