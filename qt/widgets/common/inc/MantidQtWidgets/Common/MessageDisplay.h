@@ -46,14 +46,10 @@ public:
   void writeSettings(QSettings *storage) override;
 
 public:
-  /// Controls whether the display is allowed to set the log levels
-  enum LogLevelControl { EnableLogLevelControl = 0, DisableLogLevelControl };
-
   /// Default constructor with optional parent
   MessageDisplay(QWidget *parent = nullptr);
-  /// Constructor specifying if whether control over the global log level is
-  /// allowed
-  MessageDisplay(LogLevelControl logLevelControl, QWidget *parent = nullptr);
+  MessageDisplay(const MessageDisplay&) = delete;
+  MessageDisplay& operator=(const MessageDisplay&) = delete;
   /// Destructor
   ~MessageDisplay() override;
 
@@ -102,10 +98,9 @@ private slots:
   /// Provide a custom context menu
   void showContextMenu(const QPoint &event);
   /// Set the global logging level
-  void setGlobalLogLevel(int priority);
+  void setLogLevel(int priority);
 
 private:
-  Q_DISABLE_COPY(MessageDisplay)
   /// Setup the actions
   void initActions();
   /// Initialize the text formats
@@ -115,8 +110,6 @@ private:
   /// Return format for given log level
   QTextCharFormat format(const Message::Priority priority) const;
 
-  /// Are we allowed to affect the log level
-  LogLevelControl m_logLevelControl;
   /// A reference to the log channel
   QtSignalChannel *m_logChannel;
   /// A reference to the log channel

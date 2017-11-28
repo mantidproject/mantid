@@ -74,7 +74,7 @@ function ( mtd_add_sip_module )
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
-  add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} )
+  add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${PARSED_SIP_SRCS} )
   target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
   target_link_libraries ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS} )

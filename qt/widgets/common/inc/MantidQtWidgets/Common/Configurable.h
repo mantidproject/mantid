@@ -39,6 +39,7 @@ namespace MantidWidgets {
  */
 class EXPORT_OPT_MANTIDQT_COMMON Configurable {
 public:
+  virtual ~Configurable() = default;
   virtual void readSettings(const QSettings &) = 0;
   virtual void writeSettings(QSettings *) = 0;
 };

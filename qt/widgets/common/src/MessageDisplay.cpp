@@ -25,6 +25,8 @@ namespace {
 int ATTACH_COUNT = 0;
 }
 
+using Mantid::Kernel::ConfigService;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -39,7 +41,7 @@ namespace MantidWidgets {
  * at the group containing the values
  */
 void MessageDisplay::readSettings(const QSettings &storage) {
-  Mantid::Kernel::ConfigService::Instance().setFilterChannelLogLevel(
+  ConfigService::Instance().setFilterChannelLogLevel(
       m_filterChannelName,
       storage.value("MessageDisplayPriority", Message::Priority::PRIO_NOTICE)
           .toInt(),
@@ -59,21 +61,10 @@ void MessageDisplay::writeSettings(QSettings *storage) {
 }
 
 /**
- * Constructs a widget that does not allow control over the global log level
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
-    : MessageDisplay(DisableLogLevelControl, parent) {}
-
-/**
- * @param logLevelControl Controls whether this display shows the right-click
- * option to change
- * the global log level
- * @param parent An optional parent widget
- */
-MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
-    : QWidget(parent), m_logLevelControl(logLevelControl),
-      m_logChannel(new QtSignalChannel),
+    : QWidget(parent), m_logChannel(new QtSignalChannel),
       m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
@@ -99,11 +90,12 @@ MessageDisplay::~MessageDisplay() {
 }
 
 /**
- * Attaches the Mantid logging framework
- * (Note the ConfigService must have already been started)
+ * Attaches the Mantid logging framework. Starts the ConfigService if
+ * required
  */
 void MessageDisplay::attachLoggingChannel() {
-  // Setup logging
+  // Setup logging. ConfigService needs to be started
+  auto &configSvc = ConfigService::Instance();
   auto &rootLogger = Poco::Logger::root();
   auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
@@ -114,11 +106,10 @@ void MessageDisplay::attachLoggingChannel() {
   }
   m_filterChannel->addChannel(m_logChannel);
   m_filterChannelName = "MessageDisplayChannel" + std::to_string(ATTACH_COUNT);
-  auto &configService = Mantid::Kernel::ConfigService::Instance();
-  configService.registerLoggingFilterChannel(m_filterChannelName,
-                                             m_filterChannel);
+  configSvc.registerLoggingFilterChannel(m_filterChannelName, m_filterChannel);
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
+
   ++ATTACH_COUNT;
 }
 
@@ -262,34 +253,31 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   if (!m_textDisplay->document()->isEmpty())
     menu->addAction("Clear", m_textDisplay, SLOT(clear()));
 
-  if (m_logLevelControl == MessageDisplay::EnableLogLevelControl) {
-    menu->addSeparator();
-    QMenu *logLevelMenu = menu->addMenu("&Log Level");
-    logLevelMenu->addAction(m_error);
-    logLevelMenu->addAction(m_warning);
-    logLevelMenu->addAction(m_notice);
-    logLevelMenu->addAction(m_information);
-    logLevelMenu->addAction(m_debug);
+  menu->addSeparator();
+  QMenu *logLevelMenu = menu->addMenu("&Log Level");
+  logLevelMenu->addAction(m_error);
+  logLevelMenu->addAction(m_warning);
+  logLevelMenu->addAction(m_notice);
+  logLevelMenu->addAction(m_information);
+  logLevelMenu->addAction(m_debug);
 
-    // check the right level
-    int level = m_filterChannel->getPriority();
-    // get the root logger logging level
-    int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < level) {
-      level = rootLevel;
-    }
-
-    if (level == Poco::Message::PRIO_ERROR)
-      m_error->setChecked(true);
-    if (level == Poco::Message::PRIO_WARNING)
-      m_warning->setChecked(true);
-    if (level == Poco::Message::PRIO_NOTICE)
-      m_notice->setChecked(true);
-    if (level == Poco::Message::PRIO_INFORMATION)
-      m_information->setChecked(true);
-    if (level >= Poco::Message::PRIO_DEBUG)
-      m_debug->setChecked(true);
+  // check the right level
+  int level = m_filterChannel->getPriority();
+  // get the root logger logging level
+  int rootLevel = Poco::Logger::root().getLevel();
+  if (rootLevel < level) {
+    level = rootLevel;
   }
+  if (level == Poco::Message::PRIO_ERROR)
+    m_error->setChecked(true);
+  if (level == Poco::Message::PRIO_WARNING)
+    m_warning->setChecked(true);
+  if (level == Poco::Message::PRIO_NOTICE)
+    m_notice->setChecked(true);
+  if (level == Poco::Message::PRIO_INFORMATION)
+    m_information->setChecked(true);
+  if (level >= Poco::Message::PRIO_DEBUG)
+    m_debug->setChecked(true);
 
   menu->exec(this->mapToGlobal(mousePos));
   delete menu;
@@ -299,16 +287,14 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * @param priority An integer that must match the Poco::Message priority
  * enumeration
  */
-void MessageDisplay::setGlobalLogLevel(int priority) {
-  Mantid::Kernel::ConfigService::Instance().setFilterChannelLogLevel(
-      m_filterChannelName, priority);
+void MessageDisplay::setLogLevel(int priority) {
+  ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
+                                                     priority);
 }
 
 //-----------------------------------------------------------------------------
 // Private non-slot member functions
 //-----------------------------------------------------------------------------
-/*
- */
 void MessageDisplay::initActions() {
   m_error->setCheckable(true);
   m_warning->setCheckable(true);
@@ -334,8 +320,7 @@ void MessageDisplay::initActions() {
   connect(m_information, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
   connect(m_debug, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
 
-  connect(m_logLevelMapping, SIGNAL(mapped(int)), this,
-          SLOT(setGlobalLogLevel(int)));
+  connect(m_logLevelMapping, SIGNAL(mapped(int)), this, SLOT(setLogLevel(int)));
 }
 
 /**
