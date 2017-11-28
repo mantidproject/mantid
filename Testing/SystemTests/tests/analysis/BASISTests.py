@@ -7,7 +7,6 @@ from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces, ElasticWi
 
 class PreppingMixin(object):
     r"""Common code for tests classes
-    
     """
     def prepset(self, subdir):
         self.config = {p: config[p] for p in ('default.facility',
@@ -75,7 +74,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
 
 
 class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
-    r"""ELWIN tab of the Indirect Inelastic Interface 
+    r"""ELWIN tab of the Indirect Inelastic Interface
     """
     def __init__(self):
         super(ElwinTest, self).__init__()
