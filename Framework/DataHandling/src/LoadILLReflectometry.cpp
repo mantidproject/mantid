@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadILLReflectometry.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -716,36 +717,52 @@ double LoadILLReflectometry::reflectometryPeak() {
   const double centreByMax = static_cast<double>(maxIndex);
   g_log.debug() << "Peak maximum position: " << centreByMax << '\n';
   // determine sigma
+  const auto &ys = integralWS->y(0);
   auto lessThanHalfMax = [height](const double x) { return x < 0.5 * height; };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
   auto revMinFwhmIt =
-      std::find_if(revMaxValueIt, integralWS->y(0).crend(), lessThanHalfMax);
+      std::find_if(revMaxValueIt, ys.crend(), lessThanHalfMax);
   auto maxFwhmIt =
-      std::find_if(maxValueIt, integralWS->y(0).cend(), lessThanHalfMax);
+      std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
+  if (revMinFwhmIt == ys.crend() || maxFwhmIt ==ys.cend()) {
+    g_log.warning() << "Couldn't determine fwhm, using position of max value.\n";
+    return centreByMax;
+  }
   const double fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
-  g_log.debug() << "Initial fwhm (fixed window at half maximum): " << fwhm
+  g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';
   // generate Gaussian
-  auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto initialGaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
-  initialGaussian->setHeight(height);
-  initialGaussian->setCentre(centreByMax);
-  initialGaussian->setFwhm(fwhm);
+  auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
+  auto sum = boost::dynamic_pointer_cast<API::CompositeFunction>(func);
+  func = API::FunctionFactory::Instance().createFunction("Gaussian");
+  auto gaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
+  gaussian->setHeight(height);
+  gaussian->setCentre(centreByMax);
+  gaussian->setFwhm(fwhm);
+  sum->addFunction(gaussian);
+  func = API::FunctionFactory::Instance().createFunction("LinearBackground");
+  func->setParameter("A0", 0.);
+  func->setParameter("A1", 0.);
+  sum->addFunction(func);
   // call Fit child algorithm
-  API::IAlgorithm_sptr fitGaussian = createChildAlgorithm("Fit");
-  fitGaussian->initialize();
-  fitGaussian->setProperty(
-      "Function", boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
-  fitGaussian->setProperty("InputWorkspace", integralWS);
-  bool success = fitGaussian->execute();
-  if (!success)
+  API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  fit->initialize();
+  fit->setProperty(
+      "Function", boost::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("InputWorkspace", integralWS);
+  fit->setProperty("StartX", centreByMax - 3 * fwhm);
+  fit->setProperty("EndX", centreByMax + 3 * fwhm);
+  fit->execute();
+  const std::string fitStatus = fit->getProperty("OutputStatus");
+  if (fitStatus != "success") {
     g_log.warning("Fit not successful, using position of max value.\n");
-  else
-    g_log.debug() << "Sigma: " << initialGaussian->fwhm() << '\n';
-  const double centre = success ? initialGaussian->centre() : centreByMax;
+    return centreByMax;
+  }
+  const auto centre = gaussian->centre();
+  g_log.debug() << "Sigma: " << gaussian->fwhm() << '\n';
   g_log.debug() << "Estimated peak position: " << centre << '\n';
   return centre;
 }
