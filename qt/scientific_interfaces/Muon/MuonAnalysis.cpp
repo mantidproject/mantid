@@ -74,6 +74,36 @@ using Mantid::API::Grouping;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysis");
+
+void yvalues(const QString &wsName, QMap<QString, QString> &params) {
+	Workspace_sptr ws_ptr =
+		AnalysisDataService::Instance().retrieve(wsName.toStdString());
+	MatrixWorkspace_sptr matrix_workspace =
+		boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+	const auto &xData = matrix_workspace->x(0);
+
+	std::vector<double> yPlusEData, yMinusEData;
+	for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
+		const auto &yData = matrix_workspace->y(0)[index];
+	    const auto &eData = matrix_workspace->e(0)[index];
+		yPlusEData.push_back( yData + eData);
+		yMinusEData.push_back(yData - eData);
+	}
+
+	const auto xMin = *min_element(xData.begin(), xData.end());
+	const auto xMax = *max_element(xData.begin(), xData.end());
+	// make our own y limits for plot (not all of the data)
+	if (xMin < params["XAxisMin"].toDouble() || xMax > params["XAxisMin"].toDouble()) {
+		params["YAxisAuto"] = "False";
+		auto xN = std::distance(xData.begin(),std::upper_bound(xData.begin(), xData.end(), params["XAxisMax"].toDouble()));
+		auto x0 = std::distance(xData.begin(),std::lower_bound(xData.begin(), xData.end(), params["XAxisMin"].toDouble()));
+	    params["YAxisMax"] = QString::number(*max_element(yPlusEData.begin()+x0, yPlusEData.begin()+xN));
+		params["YAxisMin"] = QString::number(*min_element(yMinusEData.begin()+x0, yMinusEData.begin()+xN));
+	}
+	else {
+		params["YAxisAuto"] = "True";
+	}
+}
 }
 
 // Static constants
@@ -1743,14 +1773,15 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Format the graph scale, title, legends and colours
   // Data (most recently added curve) should be black
-  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max,x_min,x_max):";
   s << "  layer = graph.activeLayer()";
   s << "  num_curves = layer.numCurves()";
   s << "  layer.setCurveTitle(num_curves, ws_name)";
   s << "  layer.setTitle(mtd[ws_name].getTitle())";
   s << "  for i in range(0, num_curves):";
   s << "    color = i + 1 if i != num_curves - 1 else 0";
-  s << "    layer.setCurveLineColor(i, color)";
+  s << "    layer.setCurveLineColor(i, color)"; 
+
   s << "  if log_scale:";
   s << "    layer.logYlinX()";
   s << "  else:";
@@ -1761,7 +1792,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "    try:";
   s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
   s << "    except ValueError:";
-  s << "      layer.setAutoScale()";
+  s << "      layer.setAutoScale()";  
+  s << "  layer.setScale(2,float(x_min),float(x_max))";
+
   s << "";
 
   // Plot the data!
@@ -1776,8 +1809,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  if layer.numCurves()>1:";
   s << "     layer.removeCurve(0)";
 
-  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
-
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%','%XMIN%','%XMAX%')";
+    
   QString pyS;
 
   // Add line separators
@@ -1800,6 +1833,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  pyS.replace("%XMIN%", params["XAxisMin"]);
+  pyS.replace("%XMAX%", params["XAxisMax"]);
+
   if (policy == MuonAnalysisOptionTab::PreviousWindow) {
     pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
   } else {
@@ -1820,6 +1856,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+
+  params["XAxisMin"] = QString::number(m_uiForm.timeAxisStartAtInput->text().toDouble());
+  params["XAxisMax"] = QString::number(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
@@ -1843,6 +1882,9 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
         params["YAxisMax"] =
             QString::number(*max_element(yData.begin(), yData.end()));
     }
+  }
+  else {
+	  yvalues(wsName, params);
   }
 
   return params;
@@ -2965,8 +3007,6 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
-    groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
     bool addToTable = getIfTFAsymmStore();
