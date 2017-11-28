@@ -596,7 +596,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   }
 
   if (!obj_str.str().empty()) {
-    boost::shared_ptr<CSGObject> s = ShapeFactory().createShape(obj_str.str());
+    boost::shared_ptr<IObject> s = ShapeFactory().createShape(obj_str.str());
     setOutline(s);
     return s;
   }

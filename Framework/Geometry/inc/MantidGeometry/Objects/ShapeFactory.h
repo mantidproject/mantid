@@ -26,6 +26,7 @@ namespace Mantid {
 
 namespace Geometry {
 class Surface;
+class IObject;
 class CSGObject;
 
 struct CuboidCorners {
@@ -83,13 +84,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
-  template <typename ObjectType = CSGObject>
+  template <typename ObjectType = IObject>
   boost::shared_ptr<ObjectType> createShape(Poco::XML::Element *pElem);
-  template <typename ObjectType = CSGObject>
+  template <typename ObjectType = IObject>
   boost::shared_ptr<ObjectType> createShape(std::string shapeXML,
                                             bool addTypeTag = true);
 
-  boost::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf,
+  boost::shared_ptr<IObject> createHexahedralShape(double xlb, double xlf,
                                                      double xrf, double xrb,
                                                      double ylb, double ylf,
                                                      double yrf, double yrb);

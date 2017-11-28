@@ -1385,7 +1385,7 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
 
 @returns the newly created hexahedral shape object
 */
-boost::shared_ptr<CSGObject>
+boost::shared_ptr<IObject>
 ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
                                     double xrb, double ylb, double ylf,
                                     double yrf, double yrb) {

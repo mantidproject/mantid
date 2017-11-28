@@ -63,7 +63,7 @@ bool Container::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
  * @param args A hash of tag values to use in place of the default
  * @return A pointer to a object modeling the sample shape
  */
-Object_sptr
+IObject_sptr
 Container::createSampleShape(const Container::ShapeArgs &args) const {
   using namespace Poco::XML;
   if (!hasSampleShape()) {

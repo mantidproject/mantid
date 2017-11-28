@@ -420,7 +420,7 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   ylb -= ypos;
 
   ShapeFactory factory;
-  boost::shared_ptr<Mantid::Geometry::CSGObject> shape =
+  boost::shared_ptr<Mantid::Geometry::IObject> shape =
       factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector

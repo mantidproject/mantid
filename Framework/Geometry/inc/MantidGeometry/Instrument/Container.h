@@ -43,7 +43,7 @@ public:
   Container(std::string xml);
 
   bool hasSampleShape() const;
-  Object_sptr createSampleShape(const ShapeArgs &args) const;
+  IObject_sptr createSampleShape(const ShapeArgs &args) const;
 
   void setSampleShape(const std::string &sampleShapeXML);
 
