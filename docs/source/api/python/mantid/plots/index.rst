@@ -96,12 +96,6 @@ Similarly, showing the actual values with :func:`~mantid.plots.pcolormesh`
    :align: center
    :figwidth: image
 
-.. toctree::
-   :glob:
-   :maxdepth: 1
-
-   *
-
 Available Functions
 ===================
 
