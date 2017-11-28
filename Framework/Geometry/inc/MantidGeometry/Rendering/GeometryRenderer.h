@@ -132,4 +132,4 @@ void GeometryRenderer::render(Args &&... args) const & {
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_GEOMETRYRENDERER_H_ */
+#endif /* MANTID_GEOMETRY_RENDERER_H_ */

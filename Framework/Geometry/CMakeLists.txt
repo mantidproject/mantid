@@ -265,7 +265,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/GeometryHandler.h
     	inc/MantidGeometry/Rendering/RenderingHelpers.h
     	inc/MantidGeometry/Rendering/ShapeInfo.h
-        inc/MantidGeometry/Rendering/GeometryRenderer.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
