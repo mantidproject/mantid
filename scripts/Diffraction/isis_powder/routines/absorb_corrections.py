@@ -85,19 +85,8 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
 
 
 def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_obj):
-    geometry_json = {'Shape': 'Cylinder',
-                     'Height': sample_details_obj.height(), 'Radius': sample_details_obj.radius(),
-                     'Center': sample_details_obj.center()}
-    material = sample_details_obj.material_object
-    # See SetSampleMaterial for documentation on this dictionary
-    material_json = {'ChemicalFormula': material.chemical_formula}
-    if material.number_density:
-        material_json["SampleNumberDensity"] = material.number_density
-    if material.absorption_cross_section:
-        material_json["AttenuationXSection"] = material.absorption_cross_section
-    if material.scattering_cross_section:
-        material_json["ScatteringXSection"] = material.scattering_cross_section
-
+    geometry_json = common.generate_sample_geometry(sample_details_obj)
+    material_json = common.generate_sample_material(sample_details_obj)
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
 
