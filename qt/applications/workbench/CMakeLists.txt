@@ -1,6 +1,19 @@
-# Creates egg link to binary output directory
+# Create egg link to binary output directory
 add_python_package ( workbench EXECUTABLE )
-add_dependencies ( workbench mantidqt )
+
+# Configure resources data in place for ease of development. The output
+# file is added to the toplevel gitignore
+set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
+set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py )
+add_custom_command ( OUTPUT ${_output_res_py}
+  COMMAND ${PYQT5_RCC} -o ${_output_res_py} ${_qrc_file}
+  COMMENT "Generating workbench resources"
+  DEPENDS ${_qrc_file}
+)
+add_custom_target ( workbench_resources ALL DEPENDS ${_output_res_py} )
+
+# Dependency chain
+add_dependencies ( workbench workbench_resources mantidqt )
 
 # ctest targets
 set ( TEST_FILES
