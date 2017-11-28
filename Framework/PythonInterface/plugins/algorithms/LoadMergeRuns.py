@@ -12,6 +12,7 @@ class LoadMergeRuns(PythonAlgorithm):
     _loader = None
     _version = None
     _loader_options = None
+    _prefix = ''
 
     def name(self):
         return "LoadMergeRuns"
@@ -82,6 +83,8 @@ class LoadMergeRuns(PythonAlgorithm):
         self._loader_options = self.getProperty('LoaderOptions').value
         merge_options = self.getProperty('MergeRunsOptions').value
         output = self.getPropertyValue('OutputWorkspace')
+        if output.startswith('__'):
+            self._prefix = '__'
 
         # get the first run
         to_group = []
@@ -100,20 +103,22 @@ class LoadMergeRuns(PythonAlgorithm):
         for runs_to_sum in runs:
             if not isinstance(runs_to_sum, list):
                 run = runs_to_sum
-                runnumber = os.path.basename(run).split('.')[0]
+                runnumber = self._prefix + os.path.basename(run).split('.')[0]
                 self._load(run, runnumber)
                 to_group.append(runnumber)
             else:
-                runnumbers = ''
+                runnumbers = self._prefix
                 first = ''
                 for i, run in enumerate(runs_to_sum):
                     runnumber = os.path.basename(run).split('.')[0]
-                    runnumbers = runnumbers + '_' + runnumber
+                    runnumbers += '_' + runnumber
+                    runnumber = self._prefix + runnumber
                     self._load(run, runnumber)
                     if i == 0:
                         first = runnumber
                     else:
-                        MergeRuns(InputWorkspaces=[first, runnumber], OutputWorkspace=first, **merge_options)
+                        MergeRuns(InputWorkspaces=[first, runnumber],
+                                  OutputWorkspace=first, **merge_options)
                         DeleteWorkspace(Workspace=runnumber)
                 runnumbers = runnumbers[1:]
                 RenameWorkspace(InputWorkspace=first, OutputWorkspace=runnumbers)
