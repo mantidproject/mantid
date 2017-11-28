@@ -60,6 +60,7 @@ void LoadMcStas::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
+ *
  */
 void LoadMcStas::exec() {
 
@@ -208,37 +209,46 @@ void LoadMcStas::readEventData(
   // Finished reading Instrument. Then open new data folder again
   nxFile.openGroup("data", "NXdetector");
 
-  // create and prepare an event workspace ready to receive the mcstas events
-  progInitial.report("Set up EventWorkspace");
-  EventWorkspace_sptr eventWS(new EventWorkspace());
-  // initialize, where create up front number of eventlists = number of
-  // detectors
-  eventWS->initialize(instrument->getNumberDetectors(), 1, 1);
-  // Set the units
-  eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  eventWS->setYUnit("Counts");
-  // set the instrument
-  eventWS->setInstrument(instrument);
-  // assign detector ID to eventlists
-
-  std::vector<detid_t> detIDs = instrument->getDetectorIDs();
-
-  for (size_t i = 0; i < instrument->getNumberDetectors(); i++) {
-    eventWS->getSpectrum(i).addDetectorID(detIDs[i]);
-    // spectrum number are treated as equal to detector IDs for McStas data
-    eventWS->getSpectrum(i).setSpectrumNo(detIDs[i]);
-  }
-  // the one is here for the moment for backward compatibility
-  eventWS->rebuildSpectraMapping(true);
-
+  // Number of eventEntries processed, to allow unique naming
+  // of the event workspaces
+  int numEventEntriesProcessed(0);
   bool isAnyNeutrons = false;
-  // to store shortest and longest recorded TOF
-  double shortestTOF(0.0);
-  double longestTOF(0.0);
-
-  const size_t numEventEntries = eventEntries.size();
-  Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
   for (const auto &eventEntry : eventEntries) {
+      ++numEventEntriesProcessed;
+    // create and prepare an event workspace ready to receive the mcstas events
+    progInitial.report("Set up EventWorkspace");
+    EventWorkspace_sptr eventWS(new EventWorkspace());
+    // initialize, where create up front number of eventlists = number of
+    // detectors
+    eventWS->initialize(instrument->getNumberDetectors(), 1, 1);
+
+    // Set the units
+    eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    eventWS->setYUnit("Counts");
+    // set the instrument
+    eventWS->setInstrument(instrument);
+    // assign detector ID to eventlists
+
+
+    std::vector<detid_t> detIDs = instrument->getDetectorIDs();
+
+    for (size_t i = 0; i < instrument->getNumberDetectors(); i++) {
+      eventWS->getSpectrum(i).addDetectorID(detIDs[i]);
+      // spectrum number are treated as equal to detector IDs for McStas data
+      eventWS->getSpectrum(i).setSpectrumNo(detIDs[i]);
+    }
+    // the one is here for the moment for backward compatibility
+    eventWS->rebuildSpectraMapping(true);
+
+
+    // to store shortest and longest recorded TOF
+    double shortestTOF(0.0);
+    double longestTOF(0.0);
+
+    const size_t numEventEntries = eventEntries.size();
+    Progress progEntries(this, progressFractionInitial, 1.0,
+                         numEventEntries * 2);
+
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
 
@@ -270,10 +280,12 @@ void LoadMcStas::readEventData(
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
+
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return;
     }
+
     if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
@@ -354,33 +366,50 @@ void LoadMcStas::readEventData(
         }
       }
     } // end reading over number of blocks of an event dataset
-
+    eventWS->setTitle(dataName);
     // nxFile.getData(data);
     nxFile.closeData();
     nxFile.closeGroup();
 
+    // Create a default TOF-vector for histogramming, for now just 2 bins
+    // 2 bins is the standard. However for McStas simulation data it may make
+    // sense to
+    // increase this number for better initial visual effect
+    auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
+    eventWS->setAllX(axis);
+
+    // ensure that specified name is given to workspace (eventWS) when added to
+    // outputGroup
+    std::string nameOfGroupWS = getProperty("OutputWorkspace");
+    // Ensure the workspace names are unique, otherwise the workspaces
+    // Overwrite each other in workspaceDataService
+      std::string nameUserSee;
+      if (numEventEntries == 1){
+          nameUserSee = "EventData_" + nameOfGroupWS;
+      }
+      else{
+          nameUserSee = std::string("EventData_") + nameOfGroupWS + "_" +
+                        std::to_string(numEventEntriesProcessed);
+      }
+
+    std::string extraProperty =
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, nameUserSee, Direction::Output));
+    setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
+    m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
+    // unique
+
+    outputGroup->addWorkspace(eventWS);
+
+
+
+      // Set EventWSAll equal to eventWS if first, else add
   } // end reading over number of event datasets
-
-  // Create a default TOF-vector for histogramming, for now just 2 bins
-  // 2 bins is the standard. However for McStas simulation data it may make
-  // sense to
-  // increase this number for better initial visual effect
-  auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
-  eventWS->setAllX(axis);
-
-  // ensure that specified name is given to workspace (eventWS) when added to
-  // outputGroup
-  std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
-  std::string extraProperty =
-      "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-      extraProperty, nameUserSee, Direction::Output));
-  setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
-  m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                              // unique
-
-  outputGroup->addWorkspace(eventWS);
+  // Create workspace Event_$WORKSPACEGROUP to contain sum of all event
+  // workspaces
+  // If only one EventData, then only Event_$WORKSPACEGROUP is added to the
+  // wkspGroup
 }
 
 /**
@@ -389,6 +418,7 @@ void LoadMcStas::readEventData(
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
  */
+
 void LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {

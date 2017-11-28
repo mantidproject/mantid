@@ -1,4 +1,3 @@
-
 #ifndef LOADMCSTASTEST_H_
 #define LOADMCSTASTEST_H_
 
@@ -65,45 +64,55 @@ public:
     //  test workspace created by LoadMcStas
     WorkspaceGroup_sptr output =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
-    TS_ASSERT_EQUALS(output->getNumberOfEntries(), 5); // 5 NXdata groups
+    TS_ASSERT_EQUALS(output->getNumberOfEntries(), 6); // 6 NXdata groups
     //
     //
+    // Test both detector outputs
     MatrixWorkspace_sptr outputItem1 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "EventData" + postfix);
+            "EventData" + postfix + "_1");
     TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 8192);
-    double sum = 0.0;
+    double sum1 = 0.0;
     for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
-      sum += outputItem1->y(i)[0];
-    sum *= 1.0e22;
-    TS_ASSERT_DELTA(sum, 107163.7851, 0.0001);
-    //
+      sum1 += outputItem1->y(i)[0];
+    sum1 *= 1.0e22;
+    TS_ASSERT_DELTA(sum1, 636716.8615, 0.001);
     //
     MatrixWorkspace_sptr outputItem2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" +
-                                                                    postfix);
-    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputItem2->getNPoints(), 1000);
-    //
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "EventData" + postfix + "_2");
+    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 8192);
+    double sum2 = 0.0;
+    for (size_t i = 0; i < outputItem2->getNumberHistograms(); i++)
+      sum2 += outputItem2->y(i)[0];
+    sum2 *= 1.0e22;
+    TS_ASSERT_DELTA(sum2, 22.4557, 0.0001);
     //
     MatrixWorkspace_sptr outputItem3 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" +
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" +
                                                                     postfix);
-    TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 128);
+    TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputItem3->getNPoints(), 1000);
     //
     //
     MatrixWorkspace_sptr outputItem4 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "psd2_av.dat" + postfix);
-    TS_ASSERT_EQUALS(outputItem4->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputItem4->getNPoints(), 100);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" +
+                                                                    postfix);
+    TS_ASSERT_EQUALS(outputItem4->getNumberHistograms(), 128);
     //
     //
     MatrixWorkspace_sptr outputItem5 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2.dat" +
-                                                                    postfix);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "psd2_av.dat" + postfix);
     TS_ASSERT_EQUALS(outputItem5->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outputItem5->getNPoints(), 100);
+    //
+    //
+    MatrixWorkspace_sptr outputItem6 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2.dat" +
+                                                                    postfix);
+    TS_ASSERT_EQUALS(outputItem6->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputItem6->getNPoints(), 100);
   } // testExec()
 
 private:
