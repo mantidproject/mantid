@@ -61,8 +61,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         @abstractmethod
         def on_multi_period_selection(self):
-          pass
-        
+            pass
+
         @abstractmethod
         def on_manage_directories(self):
             pass

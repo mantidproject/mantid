@@ -54,7 +54,7 @@ class RunTabPresenter(object):
 
         def on_multi_period_selection(self):
             self._presenter.on_multi_period_selection()
-            
+
         def on_manage_directories(self):
             self._presenter.on_manage_directories()
 
