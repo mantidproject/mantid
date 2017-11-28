@@ -1,6 +1,7 @@
 import numpy as np
 
 from CrystalField import CrystalField, Function
+from .fitting import islistlike
 
 
 def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
@@ -66,6 +67,7 @@ class CrystalFieldMultiSite(object):
         self.Symmetries = Symmetries
         self._plot_window = {}
         self.chi2 = None
+        self._resolutionModel = None
 
         parameter_dict = kwargs.pop('parameters', None)
         attribute_dict = kwargs.pop('attributes', None)
@@ -90,12 +92,12 @@ class CrystalFieldMultiSite(object):
     def _setMandatoryArguments(self, kwargs):
         if 'Temperatures' in kwargs:
             self.Temperatures = kwargs.pop('Temperatures')
-            if 'FWHMs' in kwargs:
-                self.FWHMs = kwargs.pop('FWHMs')
+            if 'FWHM' in kwargs:
+                self.FWHM = kwargs.pop('FWHM')
             elif 'ResolutionModel' in kwargs:
                 self.ResolutionModel = kwargs.pop('ResolutionModel')
             else:
-                raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
+                raise RuntimeError("If temperatures are set, must also set FWHM or ResolutionModel")
         return kwargs
 
     def _setRemainingArguments(self, kwargs):
@@ -371,7 +373,7 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add_from_multisite(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     def __getitem__(self, item):
@@ -399,7 +401,7 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     def __radd__(self, other):
@@ -416,7 +418,7 @@ class CrystalFieldMultiSite(object):
         params = get_parameters_for_add(other, 0)
         params.update(get_parameters_for_add_from_multisite(self, 1))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
-                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+                                       FWHM=self.FWHM, parameters=params, abundances=abundances)
         return new_cf
 
     @property
@@ -478,19 +480,47 @@ class CrystalFieldMultiSite(object):
         self.function.setAttributeValue('Temperatures', value)
 
     @property
-    def FWHMs(self):
+    def FWHM(self):
         fwhm = self.function.getAttributeValue('FWHMs')
         nDatasets = len(self.Temperatures)
         if len(fwhm) != nDatasets:
             return list(fwhm) * nDatasets
         return list(fwhm)
 
-    @FWHMs.setter
-    def FWHMs(self, value):
-        if len(value) == 1:
-            value = value[0]
+    @FWHM.setter
+    def FWHM(self, value):
+        if islistlike(value):
+            if len(value) != len(self.Temperatures):
+                value = [value[0]] * len(self.Temperatures)
+        else:
             value = [value] * len(self.Temperatures)
         self.function.setAttributeValue('FWHMs', value)
+        self._resolutionModel = None
+
+    @property
+    def ResolutionModel(self):
+        return self._resolutionModel
+
+    @ResolutionModel.setter
+    def ResolutionModel(self, value):
+        from .function import ResolutionModel
+        if isinstance(value, ResolutionModel):
+            self._resolutionModel = value
+        else:
+            self._resolutionModel = ResolutionModel(value)
+        nSpec = len(self.Temperatures)
+        if nSpec > 1:
+            if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != nSpec:
+                raise RuntimeError('Resolution model is expected to have %s functions, found %s' %
+                                   (nSpec, self._resolutionModel.NumberOfSpectra))
+            for i in range(nSpec):
+                model = self._resolutionModel.model[i]
+                self.function.setAttributeValue('sp%i.FWHMX' % i, model[0])
+                self.function.setAttributeValue('sp%i.FWHMY' % i, model[1])
+        else:
+            model = self._resolutionModel.model
+            self.function.setAttributeValue('FWHMX', model[0])
+            self.function.setAttributeValue('FWHMY', model[1])
 
     @property
     def FWHMVariation(self):

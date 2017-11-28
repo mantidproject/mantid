@@ -300,6 +300,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
     if (i < nFunctions - iFirst) {
       auto fun = spectrum.getFunction(i + iFirst);
       auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
+      peak.setFwhm(defaultFWHM);
       updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood,
                  fixAllPeaks);
     } else {

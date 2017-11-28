@@ -426,6 +426,19 @@ class CrystalField(object):
                 raise ValueError('FWHM is expected to be a single floating point value')
             self.crystalFieldFunction.setAttributeValue('FWHM', float(value))
         self._dirty_spectra = True
+        # If both FWHM and ResolutionModel is set, may cause runtime errors
+        self._resolutionModel = None
+        if self._isMultiSpectrum: 
+            for i in range(self.NumberOfSpectra):
+                if self.crystalFieldFunction.getAttributeValue('FWHMX%s' % i):
+                    self.crystalFieldFunction.setAttributeValue('FWHMX%s' % i, [])
+                if self.crystalFieldFunction.getAttributeValue('FWHMY%s' % i):
+                    self.crystalFieldFunction.setAttributeValue('FWHMY%s' % i, [])
+        else:
+            if self.crystalFieldFunction.getAttributeValue('FWHMX'):
+                self.crystalFieldFunction.setAttributeValue('FWHMX', [])
+            if self.crystalFieldFunction.getAttributeValue('FWHMY'):
+                self.crystalFieldFunction.setAttributeValue('FWHMY', [])
 
     @property
     def FWHMVariation(self):
@@ -466,6 +479,11 @@ class CrystalField(object):
             model = self._resolutionModel.model
             self.crystalFieldFunction.setAttributeValue('FWHMX', model[0])
             self.crystalFieldFunction.setAttributeValue('FWHMY', model[1])
+        # If FWHM is set, it overrides resolution model, so unset it
+        if self._isMultiSpectrum and any(self.crystalFieldFunction.getAttributeValue('FWHMs')):
+            self.crystalFieldFunction.setAttributeValue('FWHMs', [0.] * self.NumberOfSpectra)
+        elif not self._isMultiSpectrum and self.crystalFieldFunction.getAttributeValue('FWHM'):
+            self.crystalFieldFunction.setAttributeValue('FWHM', 0.)
 
     @property
     def FixAllPeaks(self):
@@ -898,12 +916,17 @@ class CrystalField(object):
             symmetries = [self.Symmetry, other.Symmetry]
             params = {}
             temperatures = [self._getTemperature(x) for x in range(self.NumberOfSpectra)]
-            fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
             for bparam in CrystalField.field_parameter_names:
                 params['ion0.' + bparam] = self[bparam]
                 params['ion1.' + bparam] = other[bparam]
-            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
-                                         FWHMs = fwhms, parameters=params, abundances=[1.0, 1.0])
+            if self._resolutionModel is None:
+               fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
+               return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                            FWHM = fwhms, parameters=params, abundances=[1.0, 1.0])
+            else:
+               return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                            ResolutionModel=self._resolutionModel, parameters=params, 
+                                            abundances=[1.0, 1.0])
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1079,13 +1102,18 @@ class CrystalFieldSite(object):
         ions = [self.crystalField.Ion, other.Ion]
         symmetries = [self.crystalField.Symmetry, other.Symmetry]
         temperatures = [self.crystalField._getTemperature(x) for x in range(self.crystalField.NumberOfSpectra)]
-        FWHMs = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
         params = {}
         for bparam in CrystalField.field_parameter_names:
             params['ion0.' + bparam] = self.crystalField[bparam]
             params['ion1.' + bparam] = other[bparam]
-        return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHMs = FWHMs,
-                                     abundances=abundances, parameters=params)
+        if self.crystalField.ResolutionModel is None:
+            FWHM = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHM = FWHM,
+                                         abundances=abundances, parameters=params)
+        else:
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, 
+                                         ResolutionModel=self.crystalField.ResolutionModel, 
+                                         abundances=abundances, parameters=params)
 
 
 #pylint: disable=too-few-public-methods
@@ -1094,12 +1122,15 @@ class CrystalFieldFit(object):
     Object that controls fitting.
     """
 
-    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None, **kwargs):
+    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None,
+                 ResolutionModel=None, **kwargs):
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
         if FWHM is not None:
             self.model.FWHM = FWHM
+        if ResolutionModel is not None:
+            self.model.ResolutionModel = ResolutionModel
         self._input_workspace = InputWorkspace
         self._output_workspace_base_name = 'fit'
         self._fit_properties = kwargs

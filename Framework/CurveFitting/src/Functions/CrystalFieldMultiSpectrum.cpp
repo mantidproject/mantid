@@ -15,6 +15,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+#include <boost/regex.hpp>
 #include <iostream>
 
 namespace Mantid {
@@ -28,6 +29,10 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldMultiSpectrum)
 
 namespace {
+
+// Regex for the FWHMX# type strings (single-site mode)
+const boost::regex FWHMX_ATTR_REGEX("FWHMX([0-9]+)");
+const boost::regex FWHMY_ATTR_REGEX("FWHMY([0-9]+)");
 
 /// Define the source function for CrystalFieldMultiSpectrum.
 /// Its function() method is not needed.
@@ -123,6 +128,7 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
 /// Perform custom actions on setting certain attributes.
 void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
                                              const Attribute &attr) {
+  boost::smatch match;
   if (name == "Temperatures") {
     // Define (declare) the parameters for intensity scaling.
     const auto nSpec = attr.asVector().size();
@@ -135,8 +141,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
       declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
     }
-  }
-  if (name == "PhysicalProperties") {
+  } else if (name == "PhysicalProperties") {
     const auto physpropId = attr.asVector();
     const auto nSpec = physpropId.size();
     auto &source = dynamic_cast<Peaks &>(*m_source);
@@ -162,6 +167,12 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         m_nOwnParams = m_source->nParams();
       }
     }
+  } else if (boost::regex_match(name, match, FWHMX_ATTR_REGEX)) {
+    auto iSpec = std::stoul(match[1]);
+    m_fwhmX[iSpec].clear();
+  } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
+    auto iSpec = std::stoul(match[1]);
+    m_fwhmY[iSpec].clear();
   }
   FunctionGenerator::setAttribute(name, attr);
 }
