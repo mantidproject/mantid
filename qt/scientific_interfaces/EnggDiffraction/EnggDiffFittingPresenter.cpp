@@ -340,8 +340,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   * @return The full file path as a vector of strings to make this
   * consistent with the other file processing methods
   */
-std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
-    const Poco::Path &filePath) {
+std::vector<std::string>
+EnggDiffFittingPresenter::processFullPathInput(const Poco::Path &filePath) {
 
   std::vector<std::string> foundRunNumbers;
   std::vector<std::string> foundFullFilePaths;

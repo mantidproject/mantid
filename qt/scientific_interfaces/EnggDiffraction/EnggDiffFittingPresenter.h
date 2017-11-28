@@ -143,8 +143,7 @@ private:
   std::vector<std::string>
   processSingleRun(const std::string &userInputBasename);
 
-  std::vector<std::string>
-  processFullPathInput(const Poco::Path &pocoFilePath);
+  std::vector<std::string> processFullPathInput(const Poco::Path &pocoFilePath);
 
   static int g_fitting_runno_counter;
 
