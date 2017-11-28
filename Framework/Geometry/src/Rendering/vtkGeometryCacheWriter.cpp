@@ -85,9 +85,9 @@ void vtkGeometryCacheWriter::addObject(Object *obj) {
   // get the name of the Object
   int name = obj->getName();
   // get number of point
-  int noPts = handle->NumberOfPoints();
+  auto noPts = handle->numberOfPoints();
   // get number of triangles
-  int noTris = handle->NumberOfTriangles();
+  auto noTris = handle->numberOfTriangles();
   // Add Piece
   AutoPtr<Element> pPiece = mDoc->createElement("Piece");
   // Add attribute name
@@ -110,9 +110,9 @@ void vtkGeometryCacheWriter::addObject(Object *obj) {
   pPtsDataArray->setAttribute("format", "ascii");
   buf.str("");
   // get the triangles info
-  double *points = handle->getTriangleVertices();
+  const auto &points = handle->getTriangleVertices().get();
   int i;
-  for (i = 0; i < noPts * 3; i++) {
+  for (i = 0; i < points.size(); i++) {
     buf << points[i] << " ";
   }
   AutoPtr<Text> pPointText = mDoc->createTextNode(buf.str());
@@ -127,8 +127,8 @@ void vtkGeometryCacheWriter::addObject(Object *obj) {
   pTrisDataArray->setAttribute("format", "ascii");
 
   buf.str("");
-  int *faces = handle->getTriangleFaces();
-  for (i = 0; i < noTris * 3; i++) {
+  const auto &faces = handle->getTriangleFaces().get();
+  for (i = 0; i < faces.size(); i++) {
     buf << faces[i] << " ";
   }
   AutoPtr<Text> pTrisDataText = mDoc->createTextNode(buf.str());

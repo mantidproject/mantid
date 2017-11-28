@@ -8,9 +8,11 @@ namespace Mantid {
 
 namespace Geometry {
 class GeometryHandler;
-class OCGeometryGenerator;
 class IObjComponent;
 class Object;
+namespace detail {
+class GeometryTriangulator;
+}
 /**
    \class OCGeometryHandler
    \brief Place holder for OpenCascade library geometry triangulation and
@@ -50,12 +52,13 @@ class Object;
 class MANTID_GEOMETRY_DLL OCGeometryHandler : public GeometryHandler {
 private:
   static Kernel::Logger &PLog;  ///< The official logger
-  OCGeometryGenerator *
-      Triangulator; ///< Geometry generator to triangulate Object
+  std::unique_ptr<detail::GeometryTriangulator>
+      m_triangulator; ///< Geometry generator to triangulate Object
 public:
   OCGeometryHandler(IObjComponent *comp);           ///< Constructor
   OCGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   OCGeometryHandler(Object *obj);                   ///< Constructor
+  OCGeometryHandler(const OCGeometryHandler &handler);
   boost::shared_ptr<GeometryHandler>
   clone() const override;        ///< Virtual copy constructor
   ~OCGeometryHandler() override; ///< Destructor
@@ -67,14 +70,14 @@ public:
   void Initialize() override;
   /// Returns true if the shape can be triangulated
   bool canTriangulate() override { return true; }
-  /// get the number of Triangles
-  int NumberOfTriangles() override;
+  /// get the number of triangles
+  size_t numberOfTriangles() override;
   /// get the number of points or vertices
-  int NumberOfPoints() override;
+  size_t numberOfPoints() override;
   /// Extract the vertices of the triangles
-  double *getTriangleVertices() override;
+  boost::optional<const std::vector<double> &> getTriangleVertices() override;
   /// Extract the Faces of the triangles
-  int *getTriangleFaces() override;
+  boost::optional<const std::vector<int> &> getTriangleFaces() override;
 };
 
 } // NAMESPACE Geometry

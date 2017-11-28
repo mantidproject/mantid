@@ -15,6 +15,10 @@ class CacheGeometryGenerator;
 class IObjComponent;
 class Object;
 
+namespace detail {
+class GeometryTriangulator;
+}
+
 /**
    \class CacheGeometryHandler
    \brief Place holder for geometry triangulation and rendering with caching
@@ -49,13 +53,14 @@ class Object;
 */
 class MANTID_GEOMETRY_DLL CacheGeometryHandler : public GeometryHandler {
 private:
-  CacheGeometryGenerator *
-      Triangulator; ///< Geometry generator to triangulate Object
+  std::unique_ptr<detail::GeometryTriangulator>
+      m_triangulator; ///< Triangulates geometry
 
 public:
   CacheGeometryHandler(IObjComponent *comp);           ///< Constructor
   CacheGeometryHandler(boost::shared_ptr<Object> obj); ///< Constructor
   CacheGeometryHandler(Object *obj);                   ///< Constructor
+  CacheGeometryHandler(const CacheGeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const override;
   ~CacheGeometryHandler() override; ///< Destructor
   GeometryHandler *createInstance(IObjComponent *comp) override;
@@ -66,13 +71,15 @@ public:
   void Render() override;
   void Initialize() override;
   bool canTriangulate() override { return true; }
-  int NumberOfTriangles() override;
-  int NumberOfPoints() override;
-  double *getTriangleVertices() override;
-  int *getTriangleFaces() override;
+  /// get the number of triangles
+  size_t numberOfTriangles() override;
+  /// get the number of points or vertices
+  size_t numberOfPoints() override;
+  boost::optional<const std::vector<double> &> getTriangleVertices() override;
+  boost::optional<const std::vector<int> &> getTriangleFaces() override;
   /// Sets the geometry cache using the triangulation information provided
-  void setGeometryCache(int noPts, int noFaces, double *pts,
-                        int *faces) override;
+  void setGeometryCache(size_t nPts, size_t nFaces, std::vector<double> &&pts,
+                        std::vector<int> &&faces) override;
 };
 
 } // NAMESPACE Geometry

@@ -9,6 +9,7 @@
 #include "BoundingBox.h"
 #include <map>
 #include <memory>
+#include <boost/optional.hpp>
 
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -246,11 +247,11 @@ private:
   /// a pointer to a class for writing to the geometry cache
   boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
   void updateGeometryHandler();
+  size_t numberOfTriangles() const;
+  size_t numberOfVertices() const;
   /// for solid angle from triangulation
-  int NumberOfTriangles() const;
-  int NumberOfPoints() const;
-  int *getTriangleFaces() const;
-  double *getTriangleVertices() const;
+  boost::optional<const std::vector<int> &>getTriangleFaces() const;
+  boost::optional<const std::vector<double> &>getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
   /// Optional string identifier

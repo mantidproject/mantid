@@ -71,31 +71,6 @@ public:
       override; ///< Prepare/Initialize Object/ObjComponent to be rendered
                 /// Returns true if the shape can be triangulated
   bool canTriangulate() override { return false; }
-  /// get the number of triangles
-  int NumberOfTriangles() override { return 0; }
-  /// get the number of points or vertices
-  int NumberOfPoints() override { return 0; }
-  /// Extract the vertices of the triangles
-  double *getTriangleVertices() override { return nullptr; }
-  /// Extract the Faces of the triangles
-  int *getTriangleFaces() override { return nullptr; }
-  /// Sets the geometry cache using the triangulation information provided
-  void setGeometryCache(int noPts, int noFaces, double *pts,
-                        int *faces) override {
-    (void)noPts;
-    (void)noFaces;
-    (void)pts;
-    (void)faces; // Avoid compiler warning
-  };
-  /// return the actual type and points of one of the "standard" objects,
-  /// cuboid/cone/cyl/sphere
-  void GetObjectGeom(int &mytype, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) override {
-    (void)mytype;
-    (void)vectors;
-    (void)myradius;
-    (void)myheight; // Avoid compiler warning
-  };
 };
 
 } // NAMESPACE Geometry

@@ -809,7 +809,7 @@ int Object::calcValidType(const Kernel::V3D &Pt,
 * shape.
 */
 double Object::solidAngle(const Kernel::V3D &observer) const {
-  if (this->NumberOfTriangles() > 30000)
+  if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
   return triangleSolidAngle(observer);
 }
@@ -1011,7 +1011,7 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
   GluGeometryHandler::GeometryType gluType =
       static_cast<GluGeometryHandler::GeometryType>(type);
@@ -1036,8 +1036,8 @@ double Object::triangleSolidAngle(const V3D &observer) const {
     {
       return rayTraceSolidAngle(observer);
     } else { // Compute a generic shape that has been triangulated
-      double *vertices = this->getTriangleVertices();
-      int *faces = this->getTriangleFaces();
+      const auto &vertices = this->getTriangleVertices().get();
+      const auto &faces = this->getTriangleFaces().get();
       double sangle(0.0), sneg(0.0);
       for (int i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1088,7 +1088,7 @@ double Object::triangleSolidAngle(const V3D &observer,
     }
   }
 
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   //
   // If triangulation is not available fall back to ray tracing method, unless
   // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
@@ -1120,8 +1120,8 @@ double Object::triangleSolidAngle(const V3D &observer,
     //
     return rayTraceSolidAngle(observer); // so is this
   }
-  double *vertices = this->getTriangleVertices();
-  int *faces = this->getTriangleFaces();
+  const auto &vertices = this->getTriangleVertices().get();
+  const auto &faces = this->getTriangleFaces().get();
   double sangle(0.0), sneg(0.0);
   for (int i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1713,10 +1713,10 @@ void Object::calcBoundingBoxByRule() {
  */
 void Object::calcBoundingBoxByVertices() {
   // Grab vertex information
-  auto vertCount = this->NumberOfPoints();
-  auto vertArray = this->getTriangleVertices();
+  auto vertCount = this->numberOfVertices();
+  const auto &vertArray = this->getTriangleVertices().get();
 
-  if (vertCount && vertArray) {
+  if (vertCount > 0) {
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -2133,40 +2133,33 @@ void Object::updateGeometryHandler() {
 
 // Initialize Draw Object
 
-/**
-* get number of triangles
-* @return the number of triangles
-*/
-int Object::NumberOfTriangles() const {
+size_t Object::numberOfTriangles() const
+{
   if (handle == nullptr)
     return 0;
-  return handle->NumberOfTriangles();
+  return handle->numberOfTriangles();
 }
-
-/**
-* get number of points
-*/
-int Object::NumberOfPoints() const {
+size_t Object::numberOfVertices() const
+{
   if (handle == nullptr)
     return 0;
-  return handle->NumberOfPoints();
+  return handle->numberOfPoints();
 }
-
 /**
 * get vertices
 */
-double *Object::getTriangleVertices() const {
+boost::optional<const std::vector<double> &>Object::getTriangleVertices() const {
   if (handle == nullptr)
-    return nullptr;
+    return boost::none;
   return handle->getTriangleVertices();
 }
 
 /**
 * get faces
 */
-int *Object::getTriangleFaces() const {
+boost::optional<const std::vector<int> &> Object::getTriangleFaces() const {
   if (handle == nullptr)
-    return nullptr;
+    return boost::none;
   return handle->getTriangleFaces();
 }
 

@@ -5,8 +5,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidGeometry/Rendering/GeometryRenderer.h"
+#include "MantidGeometry/Rendering/Renderer.h"
 #include <vector>
+#include <boost/optional.hpp>
 
 namespace Mantid {
 
@@ -50,7 +51,7 @@ private:
   static Kernel::Logger &PLog; ///< The official logger
 
 protected:
-  GeometryRenderer m_renderer;
+  detail::Renderer m_renderer;
   IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
   Object *Obj;            ///< Object that uses this geometry handler
   bool boolTriangulated;  ///< state of the geometry triangulation
@@ -60,6 +61,7 @@ public:
   GeometryHandler(IObjComponent *comp);           ///< Constructor
   GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
   GeometryHandler(Object *obj);                   ///<Constructor
+  GeometryHandler(const GeometryHandler &) = default;
   virtual boost::shared_ptr<GeometryHandler>
   clone() const = 0; ///< Virtual copy constructor
   virtual ~GeometryHandler();
@@ -83,18 +85,23 @@ public:
   /// Returns true if the shape can be triangulated
   virtual bool canTriangulate() { return false; }
   /// get the number of triangles
-  virtual int NumberOfTriangles() { return 0; }
+  virtual size_t numberOfTriangles() { return 0; }
   /// get the number of points or vertices
-  virtual int NumberOfPoints() { return 0; }
+  virtual size_t numberOfPoints() { return 0; }
   /// Extract the vertices of the triangles
-  virtual double *getTriangleVertices() { return nullptr; }
+  virtual boost::optional<const std::vector<double> &> getTriangleVertices() {
+    return boost::none;
+  }
   /// Extract the Faces of the triangles
-  virtual int *getTriangleFaces() { return nullptr; }
+  virtual boost::optional<const std::vector<int> &> getTriangleFaces() {
+    return boost::none;
+  }
   /// Sets the geometry cache using the triangulation information provided
-  virtual void setGeometryCache(int noPts, int noFaces, double *pts,
-                                int *faces) {
-    UNUSED_ARG(noPts);
-    UNUSED_ARG(noFaces);
+  virtual void setGeometryCache(size_t nPts, size_t nFaces,
+                                std::vector<double> &&pts,
+                                std::vector<int> &&faces) {
+    UNUSED_ARG(nPts);
+    UNUSED_ARG(nFaces);
     UNUSED_ARG(pts);
     UNUSED_ARG(faces);
   };
