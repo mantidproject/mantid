@@ -290,7 +290,7 @@ public:
             dbBeamPosWSName);
     MatrixWorkspace_sptr refOutput;
     prop.clear();
-    prop.emplace_back("BeamPosition", dbBeamPosWSName);
+    prop.emplace_back("DirectBeamPosition", dbBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
     const auto dbDetAngle =
         dbOutput->run().getPropertyValueAsType<double>("dan.value");
@@ -325,7 +325,7 @@ public:
     const std::string refBeamPosWSName{
         "LoadILLReflectometryTest_RefBeamPositionWS"};
     prop.clear();
-    prop.emplace_back("BeamPosition", dbBeamPosWSName);
+    prop.emplace_back("DirectBeamPosition", dbBeamPosWSName);
     prop.emplace_back("BraggAngle", std::to_string(userAngle));
     prop.emplace_back("OutputBeamPosition", refBeamPosWSName);
     getWorkspaceFor(refOutput, m_d17File, m_outWSName, prop);
