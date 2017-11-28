@@ -140,9 +140,7 @@ void VesuvioCalculateMS::exec() {
       Kernel::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*totalsc, *multsc))
-  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+  for (size_t i = 0; i < nhist; ++i) {
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
     multsc->setSharedX(i, m_inputWS->sharedX(i));
@@ -163,9 +161,7 @@ void VesuvioCalculateMS::exec() {
     // stored
     calculateMS(static_cast<size_t>(i), totalsc->getSpectrum(i),
                 multsc->getSpectrum(i), randgen.get());
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("TotalScatteringWS", totalsc);
   setProperty("MultipleScatteringWS", multsc);
@@ -225,7 +221,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
@@ -354,9 +350,15 @@ void VesuvioCalculateMS::simulate(
     CurveFitting::MSVesuvioHelper::Simulation &simulCounts,
     CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const {
 
-  for (size_t i = 0; i < m_nevents; ++i) {
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < static_cast<int64_t>(m_nevents); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+
     calculateCounts(detpar, respar, simulCounts, randgen);
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**
