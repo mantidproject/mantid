@@ -108,7 +108,7 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
  */
 PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
-    throw std::runtime_error("BeamPosition table should have a single row.");
+    throw std::runtime_error("DirectBeamPosition table should have a single row.");
   }
   PeakInfo p;
   auto col = table.getColumn("DetectorAngle");
@@ -281,7 +281,7 @@ void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
-  declareProperty("BeamPosition", EMPTY_DBL(), "Beam position in workspace indices (disables peak finding).");
+  declareProperty("BeamCentre", EMPTY_DBL(), "Beam position in workspace indices (disables peak finding).");
   declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputBeamPosition", std::string(), Direction::Output,
                       PropertyMode::Optional),
@@ -686,8 +686,8 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   * of the maximum (serves as start value for the optimization)
   */
 double LoadILLReflectometry::reflectometryPeak() {
-  if (!isDefault("BeamPosition")) {
-    return getProperty("BeamPosition");
+  if (!isDefault("BeamCentre")) {
+    return getProperty("BeamCentre");
   }
   size_t startIndex;
   size_t endIndex;
@@ -788,7 +788,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
     if (posTable) {
-      g_log.notice() << "Ignoring BeamPosition, using BraggAngle instead.";
+      g_log.notice() << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
     if (m_sampleZOffset != 0) {
       // Sample is not in the origin; the detector angle (in spherical
