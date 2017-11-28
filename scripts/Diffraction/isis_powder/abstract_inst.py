@@ -49,7 +49,7 @@ class AbstractInst(object):
         return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections)
 
-    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections, sample_details=None):
+    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -58,7 +58,7 @@ class AbstractInst(object):
         """
         self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
-                           instrument=self, absorb=do_absorb_corrections, sample_details=sample_details)
+                           instrument=self, absorb=do_absorb_corrections)
 
     # Mandatory overrides
 

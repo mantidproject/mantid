@@ -31,9 +31,6 @@ def create_van(instrument, run_details, absorb):
     if absorb:
         corrected_van_ws = instrument._apply_absorb_corrections(run_details=run_details,
                                                                 ws_to_correct=corrected_van_ws)
-    else:
-        # Assume that create_van only uses Vanadium runs
-        mantid.SetSampleMaterial(InputWorkspace=corrected_van_ws, ChemicalFormula='V')
 
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                        CalibrationFile=run_details.offset_file_path)
