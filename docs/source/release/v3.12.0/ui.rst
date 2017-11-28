@@ -23,6 +23,7 @@ SliceViewer and Vates Simple Interface
 - Users can now sort by the I/sigma and energy columns in the SliceViewer when viewing a peaks workspace.
 - Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
 - Fixed a bug where overwriting peaks workspaces with overlaid in the slice viewer with peak backgrounds shown cause Mantid to crash.
+- Fixed an issue preventing sorting of the VSI peaks table.
 
 .. figure:: ../../images/VatesMultiSliceView.png
    :class: screenshot
