@@ -55,6 +55,8 @@ public:
     UNUSED_ARG(workspaceList);
   }
 
+  /// Return global options for pre-processing
+  virtual OptionsMap getPreprocessingOptions() const { return OptionsMap(); }
   /// Return global options for pre-processing as a string
   virtual QString getPreprocessingOptionsAsString() const { return QString(); }
   /// Return global options for reduction

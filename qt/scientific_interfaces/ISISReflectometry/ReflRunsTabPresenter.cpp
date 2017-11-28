@@ -423,12 +423,29 @@ ReflRunsTabPresenter::convertMapToString(const OptionsMap &optionsMap) const {
   * the main presenter.
   * @return :: Global pre-processing options
   */
+OptionsMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+
+  return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+}
+
+/** Requests global pre-processing options as a string. Options are supplied by
+  * the main presenter.
+  * @return :: Global pre-processing options as a string
+  */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
   auto optionsStr = convertMapToString(
       m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
 
   return optionsStr;
+}
+
+/** Requests global processing options. Options are supplied by the main
+* presenter
+* @return :: Global processing options
+*/
+OptionsMap ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
 /** Requests global processing options. Options are supplied by the main
@@ -440,17 +457,10 @@ QString ReflRunsTabPresenter::getProcessingOptionsAsString() const {
       m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
-/** Requests global processing options. Options are supplied by the main
+/** Requests global post-processing options as a string. Options are supplied by
+* the main
 * presenter
-* @return :: Global processing options
-*/
-OptionsMap ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
-}
-
-/** Requests global post-processing options. Options are supplied by the main
-* presenter
-* @return :: Global post-processing options
+* @return :: Global post-processing options as a string
 */
 QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 

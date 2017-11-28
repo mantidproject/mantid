@@ -38,39 +38,15 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-
-/** Convert a  semi-colon-separated string of comma-separated values
- *  into a map
- * @param options : the string to convert
- * @param optionsMap : the map to update (defaults to a new map)
- * @return : the (new/updated) options map of key to value-list pairs
- */
-std::map<QString, QString> convertStringToMap(
-    const QString &options,
-    std::map<QString, QString> optionsMap = std::map<QString, QString>()) {
-  if (options.isEmpty() || options.isNull())
-    return optionsMap;
-
-  auto optionsVec = options.split(";");
-
-  for (auto const &option : optionsVec) {
-    auto opt = option.split(",");
-    auto const key = opt[0];
-    opt.removeFirst();
-    optionsMap[key] = opt.join(",");
-  }
-
-  return optionsMap;
-}
+using OptionsMap = std::map<QString, QString>;
 
 /** Convert a key=value command-separated string into a map
  * @param options : the string to convert
  * @param optionsMap : the map to update (defaults to a new map)
  * @return : the (new/updated) options map of key to value pairs
  */
-std::map<QString, QString> convertKVPStringToMap(
-    const QString &options,
-    std::map<QString, QString> optionsMap = std::map<QString, QString>()) {
+OptionsMap convertStringToMap(const QString &options,
+                              OptionsMap optionsMap = OptionsMap()) {
   if (options.isEmpty() || options.isNull())
     return optionsMap;
   
@@ -139,7 +115,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                            : PostprocessingStep(QString(),
                                                 std::move(postprocessor),
                                                 std::move(postprocessMap))),
-      m_preprocessing(QString(), std::move(preprocessMap)),
+      m_preprocessing(OptionsMap(), std::move(preprocessMap)),
       m_whitelist(std::move(whitelist)), m_processor(std::move(processor)),
       m_progressReporter(nullptr), m_promptUser(true), m_tableDirty(false),
       m_pauseReduction(false), m_reductionPaused(true),
@@ -306,8 +282,7 @@ void GenericDataProcessorPresenter::acceptViews(
 }
 
 bool GenericDataProcessorPresenter::areOptionsUpdated() {
-  auto newPreprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString();
+  auto newPreprocessingOptions = m_mainPresenter->getPreprocessingOptions();
   auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
   auto newPostprocessingOptions =
       m_mainPresenter->getPostprocessingOptionsAsString();
@@ -575,8 +550,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   if (!filename.isEmpty()) {
     // Global pre-processing options as a map where keys are column
     // name and values are pre-processing options as a string
-    const auto preprocessingOptionsMap =
-        convertStringToMap(m_preprocessing.m_options);
+    const auto preprocessingOptionsMap = m_preprocessing.m_options;
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
@@ -872,10 +846,10 @@ QString GenericDataProcessorPresenter::preprocessColumnValue(
   auto preprocessor = m_preprocessing.m_map.at(columnName);
 
   // Get any defaults specified on the options
-  std::map<QString, QString> globalOptions =
-      convertStringToMap(m_preprocessing.m_options);
   auto const globalOptionsForColumn =
-      globalOptions.count(columnName) > 0 ? globalOptions.at(columnName) : "";
+      m_preprocessing.m_options.count(columnName) > 0
+          ? m_preprocessing.m_options.at(columnName)
+          : "";
 
   auto optionsMap = parseKeyValueString(globalOptionsForColumn.toStdString());
   auto runWS = prepareRunWorkspace(columnValue, preprocessor, optionsMap);
@@ -940,8 +914,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
   const auto hiddenOptions = data->back();
   auto options = m_processingOptions;
-  convertKVPStringToMap(userOptions, options);
-  convertKVPStringToMap(hiddenOptions, options);
+  convertStringToMap(userOptions, options);
+  convertStringToMap(hiddenOptions, options);
 
   // Now set user-specified options from the columns (overrides any values
   // already set in the options map)

@@ -69,11 +69,11 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const QString &options) : m_options(options) {}
-  PreprocessingAttributes(const QString &options,
+  PreprocessingAttributes(const OptionsMap &options) : m_options(options) {}
+  PreprocessingAttributes(const OptionsMap &options,
                           std::map<QString, PreprocessingAlgorithm> map)
       : m_options(options), m_map(map) {}
-  QString m_options;
+  OptionsMap m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
   bool hasPreprocessing(const QString &columnName) const {
@@ -173,7 +173,7 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(QString const &options) {
+  void setPreprocessingOptions(OptionsMap const &options) {
     m_preprocessing.m_options = options;
   }
 
