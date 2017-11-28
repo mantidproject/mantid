@@ -14,6 +14,8 @@ Reflectometry
 
 Small Angle Scattering
 ----------------------
+- BeamCentreFinder has been implemented to work with the new backend in the python script window.
+- Added functionality to specify q values between which merged data is used and outside of which pure HAB and LAB are used.
 - Have added the functionality to show diagnostic transmission workspaces to new GUI.
 - Have added functionality to continually plot latest results to new GUI.
 - Fixed a bug where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.

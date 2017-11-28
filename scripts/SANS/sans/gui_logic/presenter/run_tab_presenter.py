@@ -65,6 +65,9 @@ class RunTabPresenter(object):
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
 
+        def on_manage_directories(self):
+            self._presenter.on_manage_directories()
+
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
         self._facility = facility
@@ -249,7 +252,7 @@ class RunTabPresenter(object):
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   "has been loaded")
+                                   " has been loaded")
             property_manager_service = PropertyManagerService()
             property_manager_service.add_states_to_pmds(states)
 
@@ -264,12 +267,16 @@ class RunTabPresenter(object):
             if mantidplot:
                 if self._view.plot_results and not mantidplot.graph(self.output_graph):
                     mantidplot.newGraph(self.output_graph)
-        except:
+                    
+        except Exception as e:
             self._view.halt_process_flag()
-            raise
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_manage_directories(self):
+        self._view.show_directory_manager()
 
     def on_mask_file_add(self):
         """
@@ -479,6 +486,7 @@ class RunTabPresenter(object):
         self._set_on_view("reduction_mode")
         self._set_on_view("event_slices")
         self._set_on_view("event_binning")
+        self._set_on_view("merge_mask")
 
         self._set_on_view("wavelength_step_type")
         self._set_on_view("wavelength_min")
@@ -653,6 +661,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("merge_shift_fit", state_model)
         self._set_on_state_model("merge_q_range_start", state_model)
         self._set_on_state_model("merge_q_range_stop", state_model)
+        self._set_on_state_model("merge_mask", state_model)
+        self._set_on_state_model("merge_max", state_model)
+        self._set_on_state_model("merge_min", state_model)
 
         # Settings tab
         self._set_on_state_model("reduction_dimensionality", state_model)
@@ -883,11 +894,10 @@ class RunTabPresenter(object):
         try:
             state = director.create_state(row)
             states.update({row: state})
-        except ValueError as e:
-            error_msg = "There was a bad entry for row {}. Ensure that the path to your files has been added to the " \
-                        "Mantid search directories! See here for more details: {}"
-            self.sans_logger.error(error_msg.format(row, str(e)))
-            raise RuntimeError(error_msg.format(row, str(e)))
+        except (ValueError, RuntimeError) as e:
+            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                               "been added to the Mantid search directories! See here for more "
+                               "details: {}".format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """
