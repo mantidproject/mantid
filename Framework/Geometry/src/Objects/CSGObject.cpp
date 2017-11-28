@@ -810,7 +810,7 @@ int CSGObject::calcValidType(const Kernel::V3D &Pt,
 * shape.
 */
 double CSGObject::solidAngle(const Kernel::V3D &observer) const {
-  if (this->NumberOfTriangles() > 30000)
+  if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
   return triangleSolidAngle(observer);
 }
@@ -1013,7 +1013,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
   GluGeometryHandler::GeometryType gluType =
       static_cast<GluGeometryHandler::GeometryType>(type);
@@ -1038,8 +1038,8 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
     {
       return rayTraceSolidAngle(observer);
     } else { // Compute a generic shape that has been triangulated
-      double *vertices = this->getTriangleVertices();
-      int *faces = this->getTriangleFaces();
+      const auto &vertices = this->getTriangleVertices().get();
+      const auto &faces = this->getTriangleFaces().get();
       double sangle(0.0), sneg(0.0);
       for (int i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1090,7 +1090,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     }
   }
 
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   //
   // If triangulation is not available fall back to ray tracing method, unless
   // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
@@ -1122,8 +1122,8 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     return rayTraceSolidAngle(observer); // so is this
   }
-  double *vertices = this->getTriangleVertices();
-  int *faces = this->getTriangleFaces();
+  const auto &vertices = this->getTriangleVertices().get();
+  const auto &faces = this->getTriangleFaces().get();
   double sangle(0.0), sneg(0.0);
   for (int i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
@@ -1717,10 +1717,10 @@ void CSGObject::calcBoundingBoxByRule() {
  */
 void CSGObject::calcBoundingBoxByVertices() {
   // Grab vertex information
-  auto vertCount = this->NumberOfPoints();
-  auto vertArray = this->getTriangleVertices();
+  auto vertCount = this->numberOfVertices();
+  const auto &vertArray = this->getTriangleVertices().get();
 
-  if (vertCount && vertArray) {
+  if (vertCount > 0) {
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -2155,22 +2155,21 @@ int CSGObject::NumberOfPoints() const {
     return 0;
   return m_handler->NumberOfPoints();
 }
-
 /**
 * get vertices
 */
-double *CSGObject::getTriangleVertices() const {
-  if (m_handler == nullptr)
-    return nullptr;
+boost::optional<const std::vector<double> &>CSGObject::getTriangleVertices() const {
+  if (handle == nullptr)
+    return boost::none;
   return m_handler->getTriangleVertices();
 }
 
 /**
 * get faces
 */
-int *CSGObject::getTriangleFaces() const {
-  if (m_handler == nullptr)
-    return nullptr;
+boost::optional<const std::vector<int> &> CSGObject::getTriangleFaces() const {
+  if (handle == nullptr)
+    return boost::none;
   return m_handler->getTriangleFaces();
 }
 
