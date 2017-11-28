@@ -284,8 +284,6 @@ class SANSStitch(DataProcessorAlgorithm):
         return cR, cF, nR, nF
 
     def PyExec(self):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         enum_map = self._make_mode_map()
         mode = enum_map[self.getProperty('Mode').value]
         merge_mask = self.getProperty('MergeMask').value

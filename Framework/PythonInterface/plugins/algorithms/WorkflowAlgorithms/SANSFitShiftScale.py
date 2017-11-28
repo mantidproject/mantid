@@ -67,8 +67,6 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
     def PyExec(self):
         enum_map = self._make_mode_map()
         mode = enum_map[self.getProperty('Mode').value]
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         hab = self.getProperty('HABWorkspace').value
         lab = self.getProperty('LABWorkspace').value
         shift_factor = self.getProperty('ShiftFactor').value
