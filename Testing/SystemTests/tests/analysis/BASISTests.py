@@ -9,15 +9,15 @@ class PreppingMixin(object):
     r"""Common code for tests classes
     
     """
-    def setUp(self):
+    def prepset(self, subdir):
         self.config = {p: config[p] for p in ('default.facility',
                                               'default.instrument',
                                               'datasearch.directories')}
         config['default.facility'] = 'SNS'
         config['default.instrument'] = 'BASIS'
-        config.appendDataSearchSubDir('BASIS/'+self._subdir)
+        config.appendDataSearchSubDir('BASIS/'+subdir)
 
-    def tearDown(self):
+    def preptear(self):
         config.update(self.config)
 
 
@@ -30,8 +30,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
     def __init__(self):
         super(CrystalDiffractionTest, self).__init__()
         self.config = None
-        self._subdir = 'BASISDiffraction'
-        self.setUp()
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -63,7 +62,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
                              Nbins=300,
                              OutputWorkspace='peaky')
         finally:
-            self.tearDown()
+            self.preptear()
 
     def validate(self):
         """
@@ -81,8 +80,7 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
     def __init__(self):
         super(ElwinTest, self).__init__()
         self.config = None
-        self._subdir = 'ELWIN'
-        self.setUp()
+        self.prepset('ELWIN')
 
     def requiredFiles(self):
         return ['BSS_63652_event.nxs',
@@ -110,7 +108,7 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
                                   OutputELF='ELF',
                                   OutputELT='ELT')
         finally:
-            self.tearDown()
+            self.preptear()
 
     def validate(self):
         """
