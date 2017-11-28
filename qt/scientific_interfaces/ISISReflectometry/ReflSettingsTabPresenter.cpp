@@ -50,7 +50,7 @@ std::string ReflSettingsTabPresenter::getTransmissionRuns(int group) const {
 * @param group :: The group from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
+OptionsMap ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getTransmissionOptions();
 }
@@ -60,7 +60,7 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 * @param group :: The group from which to get the options
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions(int group) const {
+OptionsMap ReflSettingsTabPresenter::getReductionOptions(int group) const {
 
   return m_settingsPresenters.at(group)->getReductionOptions();
 }

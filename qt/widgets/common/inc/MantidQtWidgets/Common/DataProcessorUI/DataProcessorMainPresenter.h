@@ -5,10 +5,14 @@
 
 #include <QSet>
 #include <QString>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
+
+using OptionsMap = std::map<QString, QString>;
+
 /** @class DataProcessorMainPresenter
 
 DataProcessorMainPresenter is an interface that defines the functions that
@@ -54,9 +58,11 @@ public:
   /// Return global options for pre-processing as a string
   virtual QString getPreprocessingOptionsAsString() const { return QString(); }
   /// Return global options for reduction
-  virtual QString getProcessingOptions() const { return QString(); }
-  /// Return global options for post-processing
-  virtual QString getPostprocessingOptions() const { return QString(); }
+  virtual OptionsMap getProcessingOptions() const { return OptionsMap(); }
+  /// Return global options for reduction as a string
+  virtual QString getProcessingOptionsAsString() const { return QString(); }
+  /// Return global options for post-processing as a string
+  virtual QString getPostprocessingOptionsAsString() const { return QString(); }
   /// Return time-slicing values
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type

@@ -143,7 +143,7 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(mockMainPresenter, getReductionOptions(group)).Times(1);
-    presenter.getProcessingOptions();
+    presenter.getProcessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -165,7 +165,7 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(mockMainPresenter, getStitchOptions(group)).Times(1);
-    presenter.getPostprocessingOptions();
+    presenter.getPostprocessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));

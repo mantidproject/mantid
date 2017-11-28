@@ -68,13 +68,12 @@ QString DLLExport getReducedWorkspaceName(const RowData &data,
                                           const WhiteList &whitelist,
                                           const QString &prefix = "");
 
-boost::tuple<QString, QString> DLLExport
-reduceRowString(const RowData &data, const QString &instrument,
-                const WhiteList &whitelist,
-                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-                const ProcessingAlgorithm &processor,
-                const std::map<QString, QString> &preprocessOoptionsMap,
-                const QString &processingOptions);
+boost::tuple<QString, QString> DLLExport reduceRowString(
+    const RowData &data, const QString &instrument, const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const ProcessingAlgorithm &processor,
+    const std::map<QString, QString> &preprocessOoptionsMap,
+    const std::map<QString, QString> &processingOptions);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
@@ -100,7 +99,7 @@ public:
                    ProcessingAlgorithm processor,
                    PostprocessingStep postprocessingStep,
                    std::map<QString, QString> preprocessingInstructionsMap,
-                   QString processingInstructions);
+                   std::map<QString, QString> processingInstructions);
   virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
@@ -124,7 +123,7 @@ private:
   // hinting line edits
   std::map<QString, QString> m_preprocessingOptionsMap;
   // Options to reduction algorithm specified in the view via hinting line edit
-  QString m_processingOptions;
+  std::map<QString, QString> m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line
   // edit
 };

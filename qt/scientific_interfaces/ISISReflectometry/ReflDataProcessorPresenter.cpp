@@ -76,7 +76,8 @@ void ReflDataProcessorPresenter::process() {
   this->setPreprocessingOptions(
       m_mainPresenter->getPreprocessingOptionsAsString());
   m_processingOptions = m_mainPresenter->getProcessingOptions();
-  this->setPostprocessingOptions(m_mainPresenter->getPostprocessingOptions());
+  this->setPostprocessingOptions(
+      m_mainPresenter->getPostprocessingOptionsAsString());
 
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType();

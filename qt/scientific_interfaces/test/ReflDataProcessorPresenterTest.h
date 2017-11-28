@@ -172,10 +172,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -259,10 +259,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(8)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -357,10 +357,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -444,10 +444,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
@@ -531,10 +531,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(1)
         .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -595,10 +595,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())

@@ -1060,10 +1060,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString("Params = \"0.1\"")));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -1137,8 +1137,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString()).Times(0);
     EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
     EXPECT_CALL(mockMainPresenter, resume()).Times(0);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
@@ -1203,10 +1203,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -1300,10 +1300,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -1391,10 +1391,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -1475,10 +1475,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillRepeatedly(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -1650,10 +1650,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -3255,10 +3255,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
@@ -3448,10 +3448,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
         .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString("")));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return("Params='-0.10'"));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);

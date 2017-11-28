@@ -25,8 +25,8 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     A DataProcessorMainPresenter. The base class provides default implementations
     but we should re-implement the following methods:
     - getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
-    - getProcessingOptions() -- to supply global processing options
-    - getPostprocessingOptions() -- to supply global post-processing options
+    - getProcessingOptionsAsString() -- to supply global processing options
+    - getPostprocessingOptionsAsString() -- to supply global post-processing options
     - notifyADSChanged() -- to act when the ADS changed, typically we want to update
       table actions with the list of table workspaces that can be loaded into the interface
 
@@ -76,7 +76,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     # ------------------------------------------------------------------------------------------------------------------
     # Inherited methods
     # ------------------------------------------------------------------------------------------------------------------
-    def getProcessingOptions(self):
+    def getProcessingOptionsAsString(self):
         """
         Gets the processing options from the run tab presenter
         """
@@ -88,7 +88,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
     def getPreprocessingOptionsAsString(self):
         return ""
 
-    def getPostprocessingOptions(self):
+    def getPostprocessingOptionsAsString(self):
         return ""
 
     def notifyADSChanged(self, workspace_list):

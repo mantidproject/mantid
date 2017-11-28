@@ -49,7 +49,7 @@ GenerateNotebook::GenerateNotebook(
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
     std::map<QString, QString> preprocessingOptionsMap,
-    QString processingOptions)
+    std::map<QString, QString> processingOptions)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
       m_whitelist(std::move(whitelist)),
       m_preprocessMap(std::move(preprocessMap)),
@@ -399,7 +399,7 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
                 const std::map<QString, QString> &preprocessingOptionsMap,
-                const QString &processingOptions) {
+                const std::map<QString, QString> &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -462,7 +462,7 @@ reduceRowString(const RowData &data, const QString &instrument,
     }
   }
 
-  auto options = parseKeyValueString(processingOptions.toStdString());
+  auto options = processingOptions;
 
   const auto &hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
@@ -475,7 +475,8 @@ reduceRowString(const RowData &data, const QString &instrument,
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
-  optionsMap.insert(options.begin(), options.end());
+  for (auto &kvp : options)
+    optionsMap[kvp.first.toStdString()] = kvp.second.toStdString();
   addProperties(algProperties, optionsMap);
 
   /* Now construct the names of the reduced workspaces*/

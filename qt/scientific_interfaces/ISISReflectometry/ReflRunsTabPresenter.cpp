@@ -400,33 +400,59 @@ void ReflRunsTabPresenter::notifyADSChanged(
   pushCommands();
 }
 
+/** Convert an options map to a comma-separated list of key=value pairs
+ */
+QString
+ReflRunsTabPresenter::convertMapToString(const OptionsMap &optionsMap) const {
+  QString result;
+  bool first = true;
+
+  for (auto &kvp : optionsMap) {
+    if (!first)
+      result += ",";
+    else
+      first = false;
+
+    result += kvp.first + "=" + kvp.second;
+  }
+
+  return result;
+}
+
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
   * @return :: Global pre-processing options
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  auto optionsStr= QString::fromStdString(m_mainPresenter->getTransmissionOptions(
-                        m_view->getSelectedGroup()));
+  auto optionsStr = convertMapToString(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
 
   return optionsStr;
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
+* @return :: Global processing options as a string
+*/
+QString ReflRunsTabPresenter::getProcessingOptionsAsString() const {
+  return convertMapToString(
+      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
+}
+
+/** Requests global processing options. Options are supplied by the main
+* presenter
 * @return :: Global processing options
 */
-QString ReflRunsTabPresenter::getProcessingOptions() const {
-
-  return QString::fromStdString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
+OptionsMap ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
 /** Requests global post-processing options. Options are supplied by the main
 * presenter
 * @return :: Global post-processing options
 */
-QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 
   return QString::fromStdString(
       m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));

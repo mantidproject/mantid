@@ -71,8 +71,9 @@ public:
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
   QString getPreprocessingOptionsAsString() const override;
-  QString getProcessingOptions() const override;
-  QString getPostprocessingOptions() const override;
+  OptionsMap getProcessingOptions() const override;
+  QString getProcessingOptionsAsString() const override;
+  QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
   /// Handle data reduction paused/resumed
@@ -118,6 +119,8 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  /// Convert an options map to a string
+  QString convertMapToString(const OptionsMap &optionsMap) const;
 };
 }
 }

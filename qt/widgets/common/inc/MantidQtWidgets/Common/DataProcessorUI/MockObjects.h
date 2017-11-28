@@ -108,8 +108,8 @@ public:
 
   // Global options
   MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getProcessingOptions, QString());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
+  MOCK_CONST_METHOD0(getProcessingOptionsAsString, QString());
+  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 
   // Event handling

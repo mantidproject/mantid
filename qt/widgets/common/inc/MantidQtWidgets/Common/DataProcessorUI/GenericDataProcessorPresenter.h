@@ -22,6 +22,7 @@
 #include <boost/optional.hpp>
 
 #include <QSet>
+#include <map>
 #include <queue>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,6 +40,7 @@ class GenericDataProcessorPresenterThread;
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;
 using GroupQueue = std::queue<std::pair<int, RowQueue>>;
+using OptionsMap = std::map<QString, QString>;
 
 /** @class GenericDataProcessorPresenter
 
@@ -184,7 +186,7 @@ protected:
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
-  QString m_processingOptions;
+  OptionsMap m_processingOptions;
   void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);

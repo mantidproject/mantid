@@ -1595,8 +1595,8 @@ public:
 DataProcessorMainPresenter();
 
 virtual QString getPreprocessingOptionsAsString() const;
-virtual QString getProcessingOptions() const;
-virtual QString getPostprocessingOptions() const;
+virtual QString getProcessingOptionsAsString() const;
+virtual QString getPostprocessingOptionsAsString() const;
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };

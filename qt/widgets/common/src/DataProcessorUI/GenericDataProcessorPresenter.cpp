@@ -309,7 +309,8 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   auto newPreprocessingOptions =
       m_mainPresenter->getPreprocessingOptionsAsString();
   auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
-  auto newPostprocessingOptions = m_mainPresenter->getPostprocessingOptions();
+  auto newPostprocessingOptions =
+      m_mainPresenter->getPostprocessingOptionsAsString();
 
   auto settingsChanged =
       m_preprocessing.m_options != newPreprocessingOptions ||
@@ -938,7 +939,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // precedence if given multiple times.
   const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
   const auto hiddenOptions = data->back();
-  auto options = convertKVPStringToMap(m_processingOptions);
+  auto options = m_processingOptions;
   convertKVPStringToMap(userOptions, options);
   convertKVPStringToMap(hiddenOptions, options);
 
