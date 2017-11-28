@@ -14,7 +14,7 @@
 //-----------------------------------------
 namespace Mantid {
 namespace Geometry {
-class CSGObject;
+class IObject;
 }
 }
 
@@ -60,7 +60,7 @@ public:
   ~MantidGLWidget() override;
 
   /// Set the Mantid geometry object
-  void setDisplayObject(boost::shared_ptr<Mantid::Geometry::CSGObject> object);
+  void setDisplayObject(boost::shared_ptr<Mantid::Geometry::IObject> object);
 
 protected:
   /// Initialize the renderer
@@ -88,7 +88,7 @@ private:
   /// Handle a MouseMoveEvent
   void mouseMoveEvent(QMouseEvent *event) override;
   /// A Mantid geometry object
-  boost::shared_ptr<Mantid::Geometry::CSGObject> m_display_object;
+  boost::shared_ptr<Mantid::Geometry::IObject> m_display_object;
   /// The current X, Y and Z rotations
   GLdouble m_x_rot, m_y_rot, m_z_rot;
   /// The scaling factor to use

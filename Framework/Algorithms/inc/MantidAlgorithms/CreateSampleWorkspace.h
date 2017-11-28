@@ -70,11 +70,11 @@ private:
       API::Progress &progress, int numBanks, int numMonitors, int pixels,
       double pixelSpacing, const double bankDistanceFromSample,
       const double sourceSampleDistance);
-  Geometry::Object_sptr createCappedCylinder(double radius, double height,
+  Geometry::IObject_sptr createCappedCylinder(double radius, double height,
                                              const Kernel::V3D &baseCentre,
                                              const Kernel::V3D &axis,
                                              const std::string &id);
-  Geometry::Object_sptr createSphere(double radius, const Kernel::V3D &centre,
+  Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre,
                                      const std::string &id);
   std::vector<double> evalFunction(const std::string &functionString,
                                    const std::vector<double> &xVal,

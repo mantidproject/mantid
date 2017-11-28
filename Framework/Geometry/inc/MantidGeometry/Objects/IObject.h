@@ -56,6 +56,7 @@ class MANTID_GEOMETRY_DLL IObject {
 public:
   virtual bool isValid(const Kernel::V3D &) const = 0;
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
+  virtual int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
   virtual int setObject(const int ON, const std::string &Ln) = 0;
   virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
@@ -72,8 +73,11 @@ public:
                             const Kernel::V3D &scaleFactor) const = 0;
   /// Return cached value of axis-aligned bounding box
   virtual const BoundingBox &getBoundingBox() const = 0;
+  virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
+  virtual Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const = 0;
   virtual Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     const BoundingBox &activeRegion,
     const size_t) const = 0;
@@ -96,6 +100,8 @@ public:
 
   virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual const Kernel::Material material() const = 0;
+  virtual void setID(const std::string &id) = 0;
+  virtual const std::string &id() const = 0;
 };
 
 /// Typdef for a shared pointer

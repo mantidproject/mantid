@@ -151,7 +151,7 @@ private:
 
     ObjComponent *aperture = new ObjComponent("aperture");
     aperture->setPos(V3D(0.0, 0.0, -10.01));
-    Object_sptr shape =
+    auto shape =
         ComponentCreationHelper::createCuboid(0.047, 0.047, 0.001);
     aperture->setShape(shape);
     instrument->add(aperture);

@@ -131,7 +131,7 @@ private:
     // Pixel shape
     const double pixelRadius(0.01);
     const double pixelHeight(0.003);
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
         pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
         V3D(0.0, 1.0, 0.0), "pixelShape");
     for (int i = 0; i < nTubes; ++i) {

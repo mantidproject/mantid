@@ -79,8 +79,8 @@ public:
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) { m_id = id; }
-  inline const std::string &id() const { return m_id; }
+  void setID(const std::string &id) override { m_id = id; }
+  const std::string &id() const override { return m_id; }
 
   void setName(const int nx) override { ObjNum = nx; } ///< Set Name
   int getName() const override { return ObjNum; }      ///< Get Name
@@ -113,7 +113,7 @@ public:
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const override;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
@@ -146,7 +146,7 @@ public:
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
   /// Calculates the volume of this object.
-  double volume() const;
+  double volume() const override;
 
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)

@@ -153,7 +153,7 @@ modelHistogram(const API::MatrixWorkspace &modelWS,
 /** Creates a rectangular cuboid shape.
  *  @return A cube shape.
  */
-Geometry::Object_sptr makeCubeShape() {
+Geometry::IObject_sptr makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
   AutoPtr<Document> shapeDescription = new Document;

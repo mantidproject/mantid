@@ -682,7 +682,7 @@ private:
     // Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
 
     const double pixelRadius(0.05);
-    Geometry::Object_sptr pixelShape =
+    auto pixelShape =
         ComponentCreationHelper::createCappedCylinder(
             pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 

@@ -20,7 +20,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
   const double pixelRadius(0.05);
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   const double detZPos(5.0);

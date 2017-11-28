@@ -59,7 +59,7 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-Object_sptr createCappedCylinder(double radius, double height,
+IObject_sptr createCappedCylinder(double radius, double height,
                                  const V3D &baseCentre, const V3D &axis,
                                  const std::string &id) {
   return ShapeFactory().createShape(
@@ -84,7 +84,7 @@ std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
 /**
  * Create a sphere object
  */
-Object_sptr createSphere(double radius, const V3D &centre,
+IObject_sptr createSphere(double radius, const V3D &centre,
                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
@@ -92,7 +92,7 @@ Object_sptr createSphere(double radius, const V3D &centre,
 
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
-Object_sptr createCuboid(double x_side_length, double y_side_length,
+IObject_sptr createCuboid(double x_side_length, double y_side_length,
                          double z_side_length) {
   double szX = x_side_length;
   double szY = (y_side_length == -1.0 ? szX : y_side_length);
@@ -111,7 +111,7 @@ Object_sptr createCuboid(double x_side_length, double y_side_length,
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   ShapeFactory shapeCreator;
-  Object_sptr cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
   return cuboidShape;
 }
 
@@ -123,7 +123,7 @@ boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   boost::shared_ptr<CompAssembly> bank =
       boost::make_shared<CompAssembly>("BankName");
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   // Four object components
   for (size_t i = 1; i < 5; ++i) {
@@ -139,7 +139,7 @@ boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
  * Create an object component that has a defined shape
  */
 ObjComponent *createSingleObjectComponent() {
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   return new ObjComponent("pixel", pixelShape);
 }
@@ -148,7 +148,7 @@ ObjComponent *createSingleObjectComponent() {
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-Object_sptr createHollowShell(double innerRadius, double outerRadius,
+IObject_sptr createHollowShell(double innerRadius, double outerRadius,
                               const V3D &centre) {
   std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" +
                          sphereXML(outerRadius, centre, "outer") + "\n" +
@@ -167,7 +167,7 @@ createDetectorGroupWith5CylindricalDetectors() {
   const int ndets = 5;
   std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
   // One object
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
@@ -190,7 +190,7 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
 
   std::vector<boost::shared_ptr<const IDetector>> groupMembers(nDet);
   // One object
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
   for (unsigned int i = 0; i < nDet; ++i) {
     std::ostringstream os;
@@ -210,7 +210,7 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
   // One object
   double R0 = 0.5;
   double h = 1.5;
-  Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(
+  auto detShape = ComponentCreationHelper::createCappedCylinder(
       R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   int NY = int(ceil(2 * R_max / h) + 1);
@@ -266,7 +266,7 @@ Instrument_sptr createTestInstrumentCylindrical(
   auto testInst = boost::make_shared<Instrument>("basic");
 
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -307,7 +307,7 @@ Instrument_sptr createTestInstrumentCylindrical(
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  auto sampleSphere =
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
@@ -369,7 +369,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
 
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
   // Just increment pixel ID's
@@ -399,7 +399,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  auto sampleSphere =
       createSphere(cylRadius, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
@@ -419,7 +419,7 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -479,7 +479,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  auto sampleSphere =
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
@@ -510,7 +510,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -549,7 +549,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  auto sampleSphere =
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());

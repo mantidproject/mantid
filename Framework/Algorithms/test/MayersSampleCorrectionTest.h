@@ -136,7 +136,7 @@ private:
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
     const double numberDensity(0.07261);
     cylinder->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
-    testWS->mutableSample().setShape(*cylinder);
+    testWS->mutableSample().setShape(cylinder);
 
     // Move the detector to a known position
     const double twoTheta = 0.10821;

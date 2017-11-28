@@ -71,7 +71,7 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
@@ -83,12 +83,12 @@ std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre,
 /**
  * Create a sphere object
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createSphere(double radius,
              const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
-Mantid::Geometry::Object_sptr createCuboid(double x_side_length,
+Mantid::Geometry::IObject_sptr createCuboid(double x_side_length,
                                            double y_side_length = -1.0,
                                            double z_side_length = -1.0);
 /**
@@ -104,7 +104,7 @@ Mantid::Geometry::ObjComponent *createSingleObjectComponent();
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createHollowShell(double innerRadius, double outerRadius,
                   const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 /**

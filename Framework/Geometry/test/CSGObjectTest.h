@@ -80,17 +80,18 @@ public:
   }
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
-    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
-    original->setID("sp-1");
+    auto original_ptr = ComponentCreationHelper::createSphere(1.0);
+    auto &original = dynamic_cast<CSGObject&>(*original_ptr);
+    original.setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
-    original->GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, radius, height);
     TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original->getGeometryHandler()));
+        original.getGeometryHandler()));
 
-    CSGObject copy(*original);
+    CSGObject copy(original);
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
@@ -99,25 +100,26 @@ public:
     TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
-    TS_ASSERT_EQUALS(copy.getName(), original->getName());
+    TS_ASSERT_EQUALS(copy.getName(), original.getName());
     // Check the string representation is the same
-    TS_ASSERT_EQUALS(copy.str(), original->str());
-    TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original->getSurfaceIndex());
+    TS_ASSERT_EQUALS(copy.str(), original.str());
+    TS_ASSERT_EQUALS(copy.getSurfaceIndex(), original.getSurfaceIndex());
   }
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
-    Object_sptr original = ComponentCreationHelper::createSphere(1.0);
-    original->setID("sp-1");
+    auto original_ptr = ComponentCreationHelper::createSphere(1.0);
+    auto &original = dynamic_cast<CSGObject&>(*original_ptr);
+    original.setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
-    original->GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, radius, height);
     TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original->getGeometryHandler()));
+        original.getGeometryHandler()));
 
     CSGObject lhs;   // initialize
-    lhs = *original; // assign
+    lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
@@ -206,7 +208,7 @@ public:
   }
 
   void testIsOnSideSphere() {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 4.0, 0)), false);
@@ -227,7 +229,7 @@ public:
   }
 
   void testIsValidSphere() {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 4.0, 0)), true);
@@ -248,7 +250,7 @@ public:
   }
 
   void testCalcValidTypeSphere() {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)),
@@ -271,19 +273,8 @@ public:
   }
 
   void testGetBoundingBoxForSphere() {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     const double tolerance(1e-10);
-
-    double xmax, ymax, zmax, xmin, ymin, zmin;
-    xmax = ymax = zmax = 20;
-    xmin = ymin = zmin = -20;
-    geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
-    TS_ASSERT_DELTA(xmax, 4.1, tolerance);
-    TS_ASSERT_DELTA(ymax, 4.1, tolerance);
-    TS_ASSERT_DELTA(zmax, 4.1, tolerance);
-    TS_ASSERT_DELTA(xmin, -4.1, tolerance);
-    TS_ASSERT_DELTA(ymin, -4.1, tolerance);
-    TS_ASSERT_DELTA(zmin, -4.1, tolerance);
 
     const BoundingBox &bbox = geom_obj->getBoundingBox();
 
@@ -347,7 +338,7 @@ public:
 
   void testInterceptSurfaceSphereY() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -359,7 +350,7 @@ public:
 
   void testInterceptSurfaceSphereX() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -415,7 +406,7 @@ public:
     TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
   }
 
-  void checkTrackIntercept(Object_sptr obj, Track &track,
+  void checkTrackIntercept(IObject_sptr obj, Track &track,
                            const std::vector<Link> &expectedResults) {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
@@ -580,7 +571,8 @@ public:
   }
 
   void testComplementWithTwoPrimitives() {
-    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    auto shell_ptr = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    auto shell = dynamic_cast<CSGObject*>(shell_ptr.get());
 
     TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
 
@@ -686,7 +678,7 @@ public:
                          -M_SQRT2 - 0.5 * M_SQRT1_2,
                          -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
-    Object_sptr S = ComponentCreationHelper::createSphere(4.1);
+    auto S = ComponentCreationHelper::createSphere(4.1);
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0.0, 0.0, 0));
   }
@@ -762,7 +754,8 @@ public:
   Test solid angle calculation for a sphere
   */
   {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj_ptr = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = dynamic_cast<CSGObject*>(geom_obj_ptr.get());
     double satol = 2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -1120,7 +1113,8 @@ public:
   Test solid angle calculation for a sphere from triangulation
   */
   {
-    Object_sptr geom_obj = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj_ptr = ComponentCreationHelper::createSphere(4.1);
+    auto geom_obj = dynamic_cast<CSGObject*>(geom_obj_ptr.get());
     double satol = 1e-3; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -1548,8 +1542,8 @@ public:
 private:
   const size_t npoints = 20000;
   Mantid::Kernel::MersenneTwister rng;
-  Object_sptr solid;
-  Object_sptr shell;
+  IObject_sptr solid;
+  IObject_sptr shell;
 };
 
 #endif // MANTID_TESTOBJECT__

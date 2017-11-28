@@ -62,8 +62,7 @@ private:
   void parseAndAddContainers(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
   Container_const_sptr parseContainer(Poco::XML::Element *element) const;
-  template <typename ObjectType>
-  boost::shared_ptr<ObjectType>
+  boost::shared_ptr<IObject>
   parseComponent(Poco::XML::Element *element) const;
 
   // Members

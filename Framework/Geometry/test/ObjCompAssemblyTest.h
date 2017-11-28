@@ -342,7 +342,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    boost::shared_ptr<CSGObject> s =
+    auto s =
         Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
@@ -379,7 +379,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</segmented-cylinder>";
-    boost::shared_ptr<CSGObject> s =
+    auto s =
         Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");

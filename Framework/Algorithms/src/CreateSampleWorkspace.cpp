@@ -504,7 +504,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
   // One object
-  Object_sptr pixelShape = createCappedCylinder(
+  auto pixelShape = createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
@@ -537,7 +537,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
   int monitorsStart = (numBanks + 1) * pixels * pixels;
 
-  Object_sptr monitorShape =
+  auto monitorShape =
       createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0),
                            V3D(0., 1.0, 0.), "monitor-shape");
 
@@ -577,7 +577,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   testInst->add(chopper);
 
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  auto sampleSphere =
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
@@ -592,7 +592,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 /**
  * Create a capped cylinder object
  */
-Object_sptr CreateSampleWorkspace::createCappedCylinder(double radius,
+IObject_sptr CreateSampleWorkspace::createCappedCylinder(double radius,
                                                         double height,
                                                         const V3D &baseCentre,
                                                         const V3D &axis,
@@ -616,7 +616,7 @@ Object_sptr CreateSampleWorkspace::createCappedCylinder(double radius,
 /**
  * Create a sphere object
  */
-Object_sptr CreateSampleWorkspace::createSphere(double radius,
+IObject_sptr CreateSampleWorkspace::createSphere(double radius,
                                                 const V3D &centre,
                                                 const std::string &id) {
   ShapeFactory shapeMaker;

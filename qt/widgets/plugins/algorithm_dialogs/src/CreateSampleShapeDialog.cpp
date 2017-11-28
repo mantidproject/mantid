@@ -200,7 +200,7 @@ void CreateSampleShapeDialog::update3DView() {
   //     (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
 
   Mantid::Geometry::ShapeFactory sFactory;
-  boost::shared_ptr<Mantid::Geometry::CSGObject> shape_sptr =
+  auto shape_sptr =
       sFactory.createShape(shapexml);
   // std::cerr << "\n--------- XML String -----------\n" << shapexml <<
   // "\n---------------------\n";

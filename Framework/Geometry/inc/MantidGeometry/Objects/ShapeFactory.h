@@ -84,10 +84,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
-  template <typename ObjectType = IObject>
-  boost::shared_ptr<ObjectType> createShape(Poco::XML::Element *pElem);
-  template <typename ObjectType = IObject>
-  boost::shared_ptr<ObjectType> createShape(std::string shapeXML,
+  boost::shared_ptr<IObject> createShape(Poco::XML::Element *pElem);
+  boost::shared_ptr<IObject> createShape(std::string shapeXML,
                                             bool addTypeTag = true);
 
   boost::shared_ptr<IObject> createHexahedralShape(double xlb, double xlf,

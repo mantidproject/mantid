@@ -54,8 +54,7 @@ Logger g_log("ShapeFactory");
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape
  *if XML tags contain no geo. info.)
  */
-template <typename ObjectType>
-boost::shared_ptr<ObjectType> ShapeFactory::createShape(std::string shapeXML,
+boost::shared_ptr<IObject> ShapeFactory::createShape(std::string shapeXML,
                                                         bool addTypeTag) {
   // wrap in a type tag
   if (addTypeTag)
@@ -70,13 +69,13 @@ boost::shared_ptr<ObjectType> ShapeFactory::createShape(std::string shapeXML,
     g_log.warning("Unable to parse XML string " + shapeXML +
                   " . Empty geometry Object is returned.");
 
-    return boost::make_shared<ObjectType>();
+    return boost::make_shared<CSGObject>();
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
 
   // convert into a Geometry object
-  return createShape<ObjectType>(pRootElem);
+  return createShape(pRootElem);
 }
 
 /** Creates a geometric object from a DOM-element-node pointing to an element
@@ -87,15 +86,14 @@ boost::shared_ptr<ObjectType> ShapeFactory::createShape(std::string shapeXML,
  * object. The name of this element is unimportant.
  * @return A shared pointer to a geometric shape
  */
-template <typename ObjectType>
-boost::shared_ptr<ObjectType>
+boost::shared_ptr<IObject>
 ShapeFactory::createShape(Poco::XML::Element *pElem) {
   // Write the definition to a string to store in the final object
   std::stringstream xmlstream;
   DOMWriter writer;
   writer.writeNode(xmlstream, pElem);
   std::string shapeXML = xmlstream.str();
-  auto retVal = boost::make_shared<ObjectType>(shapeXML);
+  auto retVal = boost::make_shared<CSGObject>(shapeXML);
 
   // if no <algebra> element then use default algebra
   bool defaultAlgebra(false);
@@ -1478,19 +1476,6 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     geomHandler->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }
 }
-
-///@cond
-// Template instantations
-template MANTID_GEOMETRY_DLL boost::shared_ptr<CSGObject>
-ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
-ShapeFactory::createShape(std::string shapeXML, bool addTypeTag);
-
-template MANTID_GEOMETRY_DLL boost::shared_ptr<CSGObject>
-ShapeFactory::createShape(Poco::XML::Element *pElem);
-template MANTID_GEOMETRY_DLL boost::shared_ptr<Container>
-ShapeFactory::createShape(Poco::XML::Element *pElem);
-///@endcond
 
 } // namespace Geometry
 } // namespace Mantid
