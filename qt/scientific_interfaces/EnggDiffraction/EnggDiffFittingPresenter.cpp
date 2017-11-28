@@ -292,9 +292,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   std::vector<std::string> foundFullFilePaths;
 
-  // returns empty if no directory is found
-  const std::string parsedUserInput = pocoUserPathInput.toString();
-
   try {
     // if input file is a directory and successfully splitBaseName
     // or when default bank is set or changed, the text-field is updated with
