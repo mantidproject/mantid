@@ -62,7 +62,7 @@ public:
     EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(1);
     EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
     EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
-    presenter.getTransmissionRuns(0, false);
+    presenter.getTransmissionRuns(0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
@@ -70,7 +70,7 @@ public:
     EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
     EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(1);
     EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
-    presenter.getTransmissionRuns(1, false);
+    presenter.getTransmissionRuns(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
@@ -78,7 +78,7 @@ public:
     EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
     EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
     EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(1);
-    presenter.getTransmissionRuns(2, false);
+    presenter.getTransmissionRuns(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));

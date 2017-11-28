@@ -206,7 +206,7 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int, bool));
+  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));

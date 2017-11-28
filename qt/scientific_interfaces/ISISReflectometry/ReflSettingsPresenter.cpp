@@ -88,16 +88,9 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     }
 
     // Add transmission runs
-    auto transRuns = this->getTransmissionRuns(true);
+    auto transRuns = this->getTransmissionRuns();
     if (!transRuns.empty())
-      options.push_back("FirstTransmissionRun" + transRuns);
-//    if (!transRuns.empty()) {
-//      std::vector<std::string> splitRuns;
-//      boost::split(splitRuns, transRuns, boost::is_any_of(","));
-//      options.push_back(splitRuns[0]);
-//      if (splitRuns.size() > 1)
-//        options.push_back(splitRuns[1]);
-//    }
+      options.push_back("FirstTransmissionRun=" + transRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -223,16 +216,9 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("EndOverlap=" + endOv);
 
     // Add transmission runs
-    auto transRuns = this->getTransmissionRuns(true);
+    auto transRuns = this->getTransmissionRuns();
     if (!transRuns.empty())
-      options.push_back("FirstTransmissionRun" + transRuns);
-//    if (!transRuns.empty()) {
-//      std::vector<std::string> splitRuns;
-//      boost::split(splitRuns, transRuns, boost::is_any_of(","));
-//      options.push_back(splitRuns[0]);
-//      if (splitRuns.size() > 1)
-//        options.push_back(splitRuns[1]);
-//    }
+      options.push_back("FirstTransmissionRun=" + transRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -293,14 +279,11 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
   return boost::algorithm::join(options, ",");
 }
 
-/** Receives specified transmission runs from the view and loads them into the
-*ADS. Returns a string with transmission runs so that they are considered in the
-*reduction
+/** Gets the user-specified transmission runs from the view
 *
-* @param loadRuns :: If true, will try to load transmission runs as well
-* @return :: transmission run(s) as a string that will be used for the reduction
+* @return :: the transmission runs string
 */
-std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
+std::string ReflSettingsPresenter::getTransmissionRuns() const {
   auto transmissionRunsString = m_view->getTransmissionRuns();
   if (transmissionRunsString.empty())
     return "";
@@ -308,44 +291,13 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
   std::vector<std::string> transmissionRuns;
   boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
 
-  if (loadRuns)
-    loadTransmissionRuns(transmissionRuns);
-
-  switch (transmissionRuns.size()) {
-  case 1:
-    return firstTransmissionRunLabelled(transmissionRuns);
-  case 2:
-    return firstTransmissionRunLabelled(transmissionRuns) + "," +
-           secondTransmissionRunLabelled(transmissionRuns);
-  default:
+  if (transmissionRuns.size() < 1 || transmissionRuns.size() > 2) {
     throw std::invalid_argument("Only one transmission run or two "
                                 "transmission runs separated by ',' "
                                 "are allowed.");
   }
-}
 
-std::string ReflSettingsPresenter::firstTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "FirstTransmissionRun=" + runNumbers[0];
-}
-
-std::string ReflSettingsPresenter::secondTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "SecondTransmissionRun=" + runNumbers[1];
-}
-
-void ReflSettingsPresenter::loadTransmissionRuns(
-    std::vector<std::string> const &transmissionRuns) const {
-  for (const auto &run : transmissionRuns) {
-    if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
-      // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("LoadISISNexus");
-      alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-      alg->execute();
-    }
-  }
+  return transmissionRunsString;
 }
 
 /** Returns global options for 'Stitch1DMany'

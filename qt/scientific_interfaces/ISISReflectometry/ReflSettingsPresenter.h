@@ -50,20 +50,13 @@ public:
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRuns(bool loadRuns) const override;
+  std::string getTransmissionRuns() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
   std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  // Loads the runs with the names/run numbers specified by the vector.
-  void
-  loadTransmissionRuns(std::vector<std::string> const &transmissionRuns) const;
-  std::string
-  firstTransmissionRunLabelled(std::vector<std::string> const &runNumber) const;
-  std::string secondTransmissionRunLabelled(
-      std::vector<std::string> const &runNumber) const;
 
 private:
   void createStitchHints();

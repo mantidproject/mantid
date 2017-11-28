@@ -406,8 +406,7 @@ void ReflRunsTabPresenter::notifyADSChanged(
   */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  auto optionsStr = QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionOptions(
+  auto optionsStr= QString::fromStdString(m_mainPresenter->getTransmissionOptions(
                         m_view->getSelectedGroup()));
 
   return optionsStr;
