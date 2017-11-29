@@ -117,7 +117,7 @@ void JumpFit::run() {
   m_fitAlg = createFitAlgorithm(createPopulatedFunction(
       functionName.toStdString(), m_properties[functionName]));
   m_baseName = m_fitAlg->getPropertyValue("OutputWorkspace");
-  runFitAlgorithm(m_fitAlg, SLOT(fitAlgDone(bool)));
+  runFitAlgorithm(m_fitAlg);
 }
 
 /**
@@ -125,7 +125,7 @@ void JumpFit::run() {
  *
  * @param error True if the algorithm failed, false otherwise
  */
-void JumpFit::fitAlgDone(bool error) {
+void JumpFit::algorithmComplete(bool error) {
   // Ignore errors
   if (error)
     return;

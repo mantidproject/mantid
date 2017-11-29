@@ -46,8 +46,7 @@ private slots:
   void singleFit();
   void plotGuess();
   void fitContextMenu(const QPoint &);
-  void singleFitComplete(bool error);
-  void algorithmComplete(bool error);
+  void algorithmComplete(bool error) override;
   void plotWorkspace();
   void saveResult();
 

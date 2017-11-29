@@ -31,7 +31,7 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void saveClicked();
   void plotClicked();
-  void algorithmComplete(bool error);
+  void algorithmComplete(bool error) override;
   void modelSelection(int selected);
   void updatePlot() override;
   void plotGuess();

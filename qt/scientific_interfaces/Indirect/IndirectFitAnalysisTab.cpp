@@ -137,7 +137,8 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
         maximumSpectrum());
 
     if (m_appendResults)
-      combineParameterValues(parameterValues, m_parameterValues);
+      m_parameterValues =
+          combineParameterValues(parameterValues, m_parameterValues);
     else
       m_parameterValues = parameterValues;
   }
@@ -159,13 +160,12 @@ QHash<QString, QHash<size_t, double>>
 IndirectFitAnalysisTab::combineParameterValues(
     const QHash<QString, QHash<size_t, double>> &parameterValues1,
     const QHash<QString, QHash<size_t, double>> &parameterValues2) {
-  QHash<QString, QHash<size_t, double>> combinedValues;
+  auto combinedValues = parameterValues1;
 
   for (const auto &parameterName : parameterValues1.keys()) {
-    const auto &values1 = parameterValues1[parameterName];
-    combinedValues[parameterName] = values1;
 
     if (parameterValues2.contains(parameterName)) {
+      const auto &values1 = parameterValues1[parameterName];
       const auto &values2 = parameterValues2[parameterName];
 
       for (const auto &index : values2.keys()) {
@@ -345,6 +345,13 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
 }
 
 /*
+ * Clears all slots connected to the batch runners signals.
+ */
+void IndirectFitAnalysisTab::clearBatchRunnerSlots() {
+  m_batchAlgoRunner->disconnect();
+}
+
+/*
  * Saves the result workspace with the specified name, in the default
  * save directory.
  *
@@ -388,7 +395,7 @@ void IndirectFitAnalysisTab::plotResult(const std::string &resultName,
     if (plotType.compare("None") != 0) {
       if (plotType.compare("All") == 0) {
         const auto specEnd = (int)resultWs->getNumberHistograms();
-        for (int i = 0; i < specEnd; i++)
+        for (int i = 0; i < specEnd; ++i)
           IndirectTab::plotSpectrum(resultWsQName, i);
       } else {
         QHash<QString, size_t> labels =
@@ -444,21 +451,18 @@ void IndirectFitAnalysisTab::updatePlot(
 }
 
 /*
- * Runs the specified fit algorithm and calls the specified fit
- * complete method, once the algorithm has completed.
+ * Runs the specified fit algorithm and calls the algorithmComplete
+ * method of this fit analysis tab once completed.
  *
  * @param fitAlgorithm      The fit algorithm to run.
- * @param fitCompleteMethod The method to call after the algorithm
- *                          has run.
  */
 void IndirectFitAnalysisTab::runFitAlgorithm(
-    Mantid::API::IAlgorithm_sptr fitAlgorithm, const char *fitCompleteMethod) {
-  m_fitCompleteMethod = fitCompleteMethod;
+    Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          fitCompleteMethod);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), m_batchAlgoRunner,
-          SLOT(&API::BatchAlgorithmRunner::disconnect));
+          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(clearBatchRunnerSlots()));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -535,7 +539,7 @@ QVector<QString> IndirectFitAnalysisTab::addPrefixToParameters(
     const QVector<QString> &parameters, const QString &functionName) const {
   QVector<QString> parametersWithPrefix(parameters.size());
 
-  for (int i = 0; i < parameters.size(); i++)
+  for (int i = 0; i < parameters.size(); ++i)
     parametersWithPrefix[i] = addPrefixToParameter(parameters[i], functionName);
   return parametersWithPrefix;
 }
@@ -680,7 +684,7 @@ QVector<QVector<QString>> IndirectFitAnalysisTab::getFunctionParameters(
     const QVector<QString> &functionNames) const {
   QVector<QVector<QString>> parameters(functionNames.size());
 
-  for (int i = 0; i < functionNames.size(); i++)
+  for (int i = 0; i < functionNames.size(); ++i)
     parameters[i] = getFunctionParameters(functionNames[i]);
   return parameters;
 }

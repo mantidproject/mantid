@@ -34,7 +34,7 @@ private slots:
   /// Find all spectra with width data in the workspace
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
-  void fitAlgDone(bool error);
+  void algorithmComplete(bool error) override;
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
   /// Generates the plot guess data

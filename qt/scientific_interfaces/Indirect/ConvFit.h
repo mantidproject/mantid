@@ -22,6 +22,7 @@ private:
   void loadSettings(const QSettings &settings) override;
 
 private slots:
+  void algorithmComplete(bool error) override;
   void typeSelection(int index);
   void bgTypeSelection(int index);
   void newDataLoaded(const QString &wsName);
@@ -76,7 +77,6 @@ private:
   Mantid::API::IAlgorithm_sptr sequentialFit(const std::string &specMin,
                                              const std::string &specMax,
                                              QString &outputWSName);
-  void algorithmComplete(bool error);
   Mantid::API::IFunction_sptr
   getFunction(const QString &functionName) const override;
 

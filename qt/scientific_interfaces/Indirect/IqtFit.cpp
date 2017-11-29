@@ -169,7 +169,7 @@ void IqtFit::run() {
   setFitFunctions(indexToFitFunctions(selectedSpectrum()));
   auto iqtFitAlg =
       iqtFitAlgorithm(inputWs, minimumSpectrum(), maximumSpectrum());
-  runFitAlgorithm(iqtFitAlg, SLOT(algorithmComplete(bool)));
+  runFitAlgorithm(iqtFitAlg);
 }
 
 Mantid::API::IAlgorithm_sptr
@@ -620,15 +620,7 @@ void IqtFit::singleFit() {
   setFitFunctions(indexToFitFunctions(selectedSpectrum()));
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
   m_singleFitAlg = iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
-  runFitAlgorithm(m_singleFitAlg, SLOT(singleFitComplete(bool)));
-}
-
-void IqtFit::singleFitComplete(bool error) {
-  algorithmComplete(error);
-
-  // Can start updating the guess curve again
-  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(plotGuess()));
+  runFitAlgorithm(m_singleFitAlg);
 }
 
 void IqtFit::disablePlotGuess() {

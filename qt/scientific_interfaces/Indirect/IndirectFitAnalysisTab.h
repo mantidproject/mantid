@@ -86,16 +86,18 @@ protected:
              MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
              MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) override;
 
-  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                       const char *fitCompleteMethod);
-
-  void clearBatchRunnerSlots();
+  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   QtTreePropertyBrowser *m_propertyTree;
+
 protected slots:
+  virtual void algorithmComplete(bool error) = 0;
+
   void updateProperties(int specNo);
 
   void newInputDataLoaded(const QString &wsName);
+
+  void clearBatchRunnerSlots();
 
 private:
   /// Overidden by child class.
@@ -148,8 +150,6 @@ private:
   QHash<QString, QString> m_propertyToParameter;
   QMap<QString, double> m_defaultPropertyValues;
   bool m_appendResults;
-
-  std::string m_fitCompleteMethod;
 };
 
 } // namespace IDA

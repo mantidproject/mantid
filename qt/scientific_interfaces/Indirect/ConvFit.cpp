@@ -289,9 +289,7 @@ void ConvFit::run() {
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
   setFitFunctions(indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
-
-  auto cfs = sequentialFit(specMin, specMax, m_baseName);
-  runFitAlgorithm(cfs, SLOT(algorithmComplete(bool)));
+  runFitAlgorithm(sequentialFit(specMin, specMax, m_baseName));
 }
 
 IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
@@ -1111,7 +1109,7 @@ void ConvFit::singleFit() {
   setFitFunctions(indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
 
   auto cfs = sequentialFit(specNoStr, specNoStr, m_baseName);
-  runFitAlgorithm(cfs, SLOT(algorithmComplete(bool)));
+  runFitAlgorithm(cfs);
 }
 
 /**
@@ -1344,11 +1342,7 @@ QString ConvFit::addPrefixToParameter(const QString &parameter,
  * Populates the default parameter map with the initial default values
  */
 void ConvFit::createDefaultParamsMap() {
-  // If the parameters from a One Lorentzian fit are present
-  if (hasDefaultPropertyValue("PeakCentre")) {
-    removeDefaultPropertyValue("PeakCentre");
-    removeDefaultPropertyValue("FWHM");
-  }
+  setDefaultPropertyValue("PeakCentre", 0.0);
   // Reset all parameters to default of 1
   setDefaultPropertyValue("Amplitude", 1.0);
   setDefaultPropertyValue("beta", 1.0);

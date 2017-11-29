@@ -110,7 +110,7 @@ void MSDFit::run() {
 
   auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
-  runFitAlgorithm(msdAlg, SLOT(algorithmComplete(bool)));
+  runFitAlgorithm(msdAlg);
 }
 
 void MSDFit::singleFit() {
@@ -129,7 +129,7 @@ void MSDFit::singleFit() {
 
   auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
-  runFitAlgorithm(msdAlg, SLOT(algorithmComplete(bool)));
+  runFitAlgorithm(msdAlg);
 }
 
 /*
