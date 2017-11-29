@@ -27,6 +27,7 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
+- :ref:`LoadMergeRuns <algm-LoadMergeRuns>` is a new algorithm that can load and merge multiple runs.
 
 Core Functionality
 ------------------
