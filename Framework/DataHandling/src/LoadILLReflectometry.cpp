@@ -28,8 +28,8 @@ namespace {
 namespace Figaro {
 // TODO: Consider moving these to the IPF.
 constexpr double detectorRestY{0.509};
-constexpr double DH1Z{1.135}; //Motor DH1 horizontal position
-constexpr double DH2Z{2.077}; //Motor DH2 horizontal position
+constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
+constexpr double DH2Z{2.077}; // Motor DH2 horizontal position
 }
 
 /// A struct for information needed for detector angle calibration.
@@ -108,7 +108,8 @@ fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
  */
 PeakInfo parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
   if (table.rowCount() != 1) {
-    throw std::runtime_error("DirectBeamPosition table should have a single row.");
+    throw std::runtime_error(
+        "DirectBeamPosition table should have a single row.");
   }
   PeakInfo p;
   auto col = table.getColumn("DetectorAngle");
@@ -183,9 +184,9 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane,
 
 /// A parameter bundle for the detector angle solver.
 struct EquationParams {
-  double tangentOfUserAngle; ///< tan(BraggAngle)
+  double tangentOfUserAngle;     ///< tan(BraggAngle)
   double originDetectorDistance; ///< distance in meters.
-  double originSampleDistance; ///< sample horizontal shift in meters.
+  double originSampleDistance;   ///< sample horizontal shift in meters.
 };
 
 /** The equation whose root gives the detector angle (at origin) for a
@@ -196,7 +197,10 @@ struct EquationParams {
  */
 double detectorAngleEquation(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
-  return ps->originDetectorDistance * (ps->tangentOfUserAngle * std::cos(detectorAngle) - std::sin(detectorAngle)) + ps->originSampleDistance * ps->tangentOfUserAngle;
+  return ps->originDetectorDistance *
+             (ps->tangentOfUserAngle * std::cos(detectorAngle) -
+              std::sin(detectorAngle)) +
+         ps->originSampleDistance * ps->tangentOfUserAngle;
 }
 
 /** The derivative of detectorAngleEquation. Useful for root finding
@@ -207,7 +211,9 @@ double detectorAngleEquation(double detectorAngle, void *params) {
  */
 double detectorAngleDerivative(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
-  return -ps->originDetectorDistance * (ps->tangentOfUserAngle * std::sin(detectorAngle) + std::cos(detectorAngle));
+  return -ps->originDetectorDistance *
+         (ps->tangentOfUserAngle * std::sin(detectorAngle) +
+          std::cos(detectorAngle));
 }
 
 /** Combined angle equation and its derivative. Useful for root finding
@@ -217,12 +223,14 @@ double detectorAngleDerivative(double detectorAngle, void *params) {
  *  @param f an output variable for the equation's result.
  *  @param df an output variable for the derivative's result.
  */
-void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f, double *df) {
+void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f,
+                                  double *df) {
   EquationParams *ps = static_cast<EquationParams *>(params);
   const double cosa = std::cos(detectorAngle);
   const double sina = std::sin(detectorAngle);
-  *f = ps->originDetectorDistance * (ps->tangentOfUserAngle * cosa - sina) + ps->originSampleDistance * ps->tangentOfUserAngle;
-  *df = -ps->originDetectorDistance * (ps->tangentOfUserAngle * sina + cosa);
+  *f = ps->originDetectorDistance *(ps->tangentOfUserAngle * cosa - sina) +
+       ps->originSampleDistance * ps->tangentOfUserAngle;
+  *df = -ps->originDetectorDistance *(ps->tangentOfUserAngle * sina + cosa);
 }
 
 /** Calculate the detector angle with respect to origin from a
@@ -232,10 +240,15 @@ void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f,
  *  @param originSampleDistance a distance in meters.
  *  @return an angle around origin corresponding to userAngle.
  */
-double detectorAngleFromUserAngle(const double userAngle, const double originDetectorDistance, const double originSampleDistance) {
-  using Solver_uptr = std::unique_ptr<gsl_root_fdfsolver, void (*) (gsl_root_fdfsolver*)>;
-  Solver_uptr solver{gsl_root_fdfsolver_alloc(gsl_root_fdfsolver_steffenson), gsl_root_fdfsolver_free};
-  EquationParams p{std::tan(inRad(userAngle)), originDetectorDistance, originSampleDistance};
+double detectorAngleFromUserAngle(const double userAngle,
+                                  const double originDetectorDistance,
+                                  const double originSampleDistance) {
+  using Solver_uptr =
+      std::unique_ptr<gsl_root_fdfsolver, void (*)(gsl_root_fdfsolver *)>;
+  Solver_uptr solver{gsl_root_fdfsolver_alloc(gsl_root_fdfsolver_steffenson),
+                     gsl_root_fdfsolver_free};
+  EquationParams p{std::tan(inRad(userAngle)), originDetectorDistance,
+                   originSampleDistance};
   gsl_function_fdf dF;
   dF.f = detectorAngleEquation;
   dF.df = detectorAngleDerivative;
@@ -247,7 +260,8 @@ double detectorAngleFromUserAngle(const double userAngle, const double originDet
   while (iter < 100) {
     auto status = gsl_root_fdfsolver_iterate(solver.get());
     if (status != GSL_SUCCESS) {
-      throw std::runtime_error("Failed to solve the actual detector angle from BraggAngle");
+      throw std::runtime_error(
+          "Failed to solve the actual detector angle from BraggAngle");
     }
     const auto current = gsl_root_fdfsolver_root(solver.get());
     status = gsl_root_test_delta(previous, current, 0., 1e-8);
@@ -257,7 +271,8 @@ double detectorAngleFromUserAngle(const double userAngle, const double originDet
     previous = current;
     ++iter;
   }
-  throw std::logic_error("Too many iterations while solving actual detector angle form BraggAngle.");
+  throw std::logic_error("Too many iterations while solving actual detector "
+                         "angle form BraggAngle.");
 }
 
 } // anonymous namespace
@@ -305,7 +320,9 @@ void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
-  declareProperty("BeamCentre", EMPTY_DBL(), "Beam position in workspace indices (disables peak finding).");
+  declareProperty(
+      "BeamCentre", EMPTY_DBL(),
+      "Beam position in workspace indices (disables peak finding).");
   declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputBeamPosition", std::string(), Direction::Output,
                       PropertyMode::Optional),
@@ -745,13 +762,12 @@ double LoadILLReflectometry::reflectometryPeak() {
   auto lessThanHalfMax = [height](const double x) { return x < 0.5 * height; };
   using IterType = HistogramData::HistogramY::const_iterator;
   std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
-  auto revMinFwhmIt =
-      std::find_if(revMaxValueIt, ys.crend(), lessThanHalfMax);
-  auto maxFwhmIt =
-      std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
+  auto revMinFwhmIt = std::find_if(revMaxValueIt, ys.crend(), lessThanHalfMax);
+  auto maxFwhmIt = std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
   std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
-  if (revMinFwhmIt == ys.crend() || maxFwhmIt ==ys.cend()) {
-    g_log.warning() << "Couldn't determine fwhm, using position of max value.\n";
+  if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
+    g_log.warning()
+        << "Couldn't determine fwhm, using position of max value.\n";
     return centreByMax;
   }
   const double fwhm =
@@ -759,7 +775,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';
   // generate Gaussian
-  auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
+  auto func =
+      API::FunctionFactory::Instance().createFunction("CompositeFunction");
   auto sum = boost::dynamic_pointer_cast<API::CompositeFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
   auto gaussian = boost::dynamic_pointer_cast<API::IPeakFunction>(func);
@@ -774,8 +791,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   // call Fit child algorithm
   API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
   fit->initialize();
-  fit->setProperty(
-      "Function", boost::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("Function",
+                   boost::dynamic_pointer_cast<API::IFunction>(sum));
   fit->setProperty("InputWorkspace", integralWS);
   fit->setProperty("StartX", centreByMax - 3 * fwhm);
   fit->setProperty("EndX", centreByMax + 3 * fwhm);
@@ -798,7 +815,8 @@ double LoadILLReflectometry::reflectometryPeak() {
 double LoadILLReflectometry::detectorRotation() {
   ITableWorkspace_const_sptr posTable = getProperty("DirectBeamPosition");
   const double peakCentre = reflectometryPeak();
-  g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle << '\n';
+  g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle
+                << '\n';
   const double deflection = collimationAngle();
   if (!isDefault("OutputBeamPosition")) {
     PeakInfo p;
@@ -808,18 +826,21 @@ double LoadILLReflectometry::detectorRotation() {
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
   const double userAngle = getProperty("BraggAngle");
-  const double offset = offsetAngle(peakCentre, m_pixelCentre,
-                                    m_detectorDistance);
+  const double offset =
+      offsetAngle(peakCentre, m_pixelCentre, m_detectorDistance);
   m_log.debug() << "Beam offset angle: " << offset << '\n';
   if (userAngle != EMPTY_DBL()) {
     if (posTable) {
-      g_log.notice() << "Ignoring DirectBeamPosition, using BraggAngle instead.";
+      g_log.notice()
+          << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
     if (m_sampleZOffset != 0) {
       // Sample is not in the origin; the detector angle (in spherical
       // coordinates) need to be solved.
-      const auto originPixelDistance = m_detectorDistance / std::cos(inRad(std::abs(offset)));
-      const auto realDetectorAngle = detectorAngleFromUserAngle(2 * userAngle, originPixelDistance, std::abs(m_sampleZOffset));
+      const auto originPixelDistance =
+          m_detectorDistance / std::cos(inRad(std::abs(offset)));
+      const auto realDetectorAngle = detectorAngleFromUserAngle(
+          2 * userAngle, originPixelDistance, std::abs(m_sampleZOffset));
       return realDetectorAngle - offset;
     } else {
       return 2 * userAngle - offset;
@@ -827,13 +848,14 @@ double LoadILLReflectometry::detectorRotation() {
   }
   if (!posTable) {
     if (deflection != 0) {
-      g_log.debug() << "Using incident deflection angle (degrees): " << deflection << '\n';
+      g_log.debug() << "Using incident deflection angle (degrees): "
+                    << deflection << '\n';
     }
     return m_detectorAngle + deflection;
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
-  const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
-                                      dbPeak.detectorDistance);
+  const double dbOffset =
+      offsetAngle(dbPeak.peakCentre, m_pixelCentre, dbPeak.detectorDistance);
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
@@ -847,8 +869,7 @@ void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   m_detectorDistance = originDetectorDistance();
   m_detectorAngle = detectorAngle();
-  g_log.debug() << "Sample-detector distance: " << m_detectorDistance
-                << "m.\n";
+  g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
@@ -887,16 +908,14 @@ void LoadILLReflectometry::placeSource() {
 }
 
 /// Return the incident neutron deflection angle.
-double LoadILLReflectometry::collimationAngle() const
-{
+double LoadILLReflectometry::collimationAngle() const {
   if (m_instrumentName != "Figaro") {
     return 0;
   }
   return doubleFromRun("CollAngle.actual_coll_angle");
 }
 
-double LoadILLReflectometry::detectorAngle() const
-{
+double LoadILLReflectometry::detectorAngle() const {
   if (m_instrumentName != "Figaro") {
     return doubleFromRun(m_detectorAngleName);
   }
@@ -913,7 +932,8 @@ double LoadILLReflectometry::detectorAngle() const
  *  @param detectorDistance detector-sample distance in meters.
  *  @return the offset angle.
  */
-double LoadILLReflectometry::offsetAngle(const double peakCentre, const double detectorCentre,
+double LoadILLReflectometry::offsetAngle(const double peakCentre,
+                                         const double detectorCentre,
                                          const double detectorDistance) const {
   // Sign depends on the definition of detector angle and which way
   // spectrum numbers increase.
@@ -929,12 +949,16 @@ double LoadILLReflectometry::originDetectorDistance() const {
   if (m_instrumentName != "Figaro") {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
-  const double detectorRestZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double detectorRestZ =
+      inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
-  const double detectorY = std::sin(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + DH1Y - Figaro::detectorRestY;
-  const double detectorZ = std::cos(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + Figaro::DH1Z;
+  const double detectorY =
+      std::sin(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + DH1Y -
+      Figaro::detectorRestY;
+  const double detectorZ =
+      std::cos(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + Figaro::DH1Z;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
   const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));

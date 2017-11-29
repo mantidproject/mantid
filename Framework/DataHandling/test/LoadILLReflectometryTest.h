@@ -170,15 +170,14 @@ public:
     const auto channelCount = static_cast<size_t>(
         run.getPropertyValueAsType<double>("PSD.time_of_flight_1"));
     const auto tofDelay =
-        run.getPropertyValueAsType<double>("PSD.time_of_flight_2") + run.getPropertyValueAsType<double>("Theta.edelay_delay");
+        run.getPropertyValueAsType<double>("PSD.time_of_flight_2") +
+        run.getPropertyValueAsType<double>("Theta.edelay_delay");
     // Using choppers 1 and 4.
-    const auto chopper1Speed = run.getPropertyValueAsType<double>(
-        "CH1.rotation_speed");
+    const auto chopper1Speed =
+        run.getPropertyValueAsType<double>("CH1.rotation_speed");
     const double chopper1Phase{0.}; // The value in NeXus is trash.
-    const auto chopper2Phase = run.getPropertyValueAsType<double>(
-        "CH4.phase");
-    const auto pOffset =
-        run.getPropertyValueAsType<double>("CollAngle.poff");
+    const auto chopper2Phase = run.getPropertyValueAsType<double>("CH4.phase");
+    const auto pOffset = run.getPropertyValueAsType<double>("CollAngle.poff");
     const auto openOffset =
         run.getPropertyValueAsType<double>("CollAngle.openOffset");
     const auto tof0 =
@@ -226,8 +225,12 @@ public:
     getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
     const auto &run = output->run();
     const auto chopperCentre =
-        run.getPropertyValueAsType<double>("ChopperSetting.chopperpair_sample_distance") * 1e-3;
-    const auto sampleZOffset = run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") * 1e-3;
+        run.getPropertyValueAsType<double>(
+            "ChopperSetting.chopperpair_sample_distance") *
+        1e-3;
+    const auto sampleZOffset =
+        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        1e-3;
     const auto sourceSample = chopperCentre + sampleZOffset;
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
@@ -272,21 +275,25 @@ public:
     getWorkspaceFor(output, m_figaroFile, m_outWSName, emptyProperties());
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &run = output->run();
-    const auto detectorRestZ = run.getPropertyValueAsType<double>("DTR.value") * 1e-3;
+    const auto detectorRestZ =
+        run.getPropertyValueAsType<double>("DTR.value") * 1e-3;
     const auto DH1Y = run.getPropertyValueAsType<double>("DH1.value") * 1e-3;
     const double DH1Z{1.135};
     const auto DH2Y = run.getPropertyValueAsType<double>("DH2.value") * 1e-3;
     const double DH2Z{2.077};
     const auto detAngle = std::atan2(DH2Y - DH1Y, DH2Z - DH1Z);
     const double detectorRestY{0.509};
-    const auto detectorY = std::sin(detAngle) * (detectorRestZ - DH1Z) + DH1Y - detectorRestY;
+    const auto detectorY =
+        std::sin(detAngle) * (detectorRestZ - DH1Z) + DH1Y - detectorRestY;
     const auto detectorZ = std::cos(detAngle) * (detectorRestZ - DH1Z) + DH1Z;
     const auto pixWidth = run.getPropertyValueAsType<double>("PSD.mppy") * 1e-3;
     const auto pixelOffset = detectorRestY - 0.5 * pixWidth;
     const auto beamY = detectorY + pixelOffset * std::cos(detAngle);
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
     const auto detDist = std::hypot(beamY, beamZ);
-    const auto collimationAngle = run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle")  / 180. * M_PI;
+    const auto collimationAngle =
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
+        180. * M_PI;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {
         continue;
@@ -294,7 +301,8 @@ public:
       const auto p = spectrumInfo.position(i);
       TS_ASSERT_EQUALS(p.X(), 0)
       const auto pixOffset = (static_cast<double>(i) - 127.5) * pixWidth;
-      const auto pixAngle = detAngle + collimationAngle + std::atan2(pixOffset, detDist);
+      const auto pixAngle =
+          detAngle + collimationAngle + std::atan2(pixOffset, detDist);
       const auto pixDist = std::hypot(pixOffset, detDist);
       const auto idealY = pixDist * std::sin(pixAngle);
       const auto idealZ = pixDist * std::cos(pixAngle);
@@ -339,7 +347,8 @@ public:
     getWorkspaceFor(output, m_figaroFile, m_outWSName, prop);
     const double detectorAngle = 2 * angle;
     const auto &spectrumInfo = output->spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(detector) * 180. / M_PI, detectorAngle, 1e-6)
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(detector) * 180. / M_PI,
+                    detectorAngle, 1e-6)
   }
 
   void testPropertiesD17() {
