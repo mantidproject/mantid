@@ -75,7 +75,7 @@ namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysis");
 
-void yvalues(const QString &wsName, QMap<QString, QString> &params) {
+void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
 	Workspace_sptr ws_ptr =
 		AnalysisDataService::Instance().retrieve(wsName.toStdString());
 	MatrixWorkspace_sptr matrix_workspace =
@@ -94,13 +94,14 @@ void yvalues(const QString &wsName, QMap<QString, QString> &params) {
 	const auto xMax = *max_element(xData.begin(), xData.end());
 	// make our own y limits for plot (not all of the data)
 	if (xMin < params["XAxisMin"].toDouble() || xMax > params["XAxisMin"].toDouble()) {
-		params["YAxisAuto"] = "False";
 		auto xN = std::distance(xData.begin(),std::upper_bound(xData.begin(), xData.end(), params["XAxisMax"].toDouble()));
 		auto x0 = std::distance(xData.begin(),std::lower_bound(xData.begin(), xData.end(), params["XAxisMin"].toDouble()));
-	    params["YAxisMax"] = QString::number(*max_element(yPlusEData.begin()+x0, yPlusEData.begin()+xN));
-		params["YAxisMin"] = QString::number(*min_element(yMinusEData.begin()+x0, yMinusEData.begin()+xN));
+	    params["YAxisMax"]  = QString::number(*max_element(yPlusEData.begin() +x0, yPlusEData.begin() +xN));
+		params["YAxisMin"]  = QString::number(*min_element(yMinusEData.begin()+x0, yMinusEData.begin()+xN));		
+		params["YAxisAuto"] = "False";
 	}
 	else {
+        // make sure auto scale is on
 		params["YAxisAuto"] = "True";
 	}
 }
@@ -1884,7 +1885,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
     }
   }
   else {
-	  yvalues(wsName, params);
+	  zoomYAxis(wsName, params);
   }
 
   return params;
