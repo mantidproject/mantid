@@ -49,11 +49,13 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  // Construct the trial set of elements from the object's bounding box
-  const double big(10.0); // Seems like bounding box code searches inwards, 10m
-                          // should be enough!
-  double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-  integrationVolume->getBoundingBox();
+  auto bbox = integrationVolume->getBoundingBox();
+  double minX = bbox.xMin();
+  double maxX = bbox.xMax();
+  double minY = bbox.yMin();
+  double maxY = bbox.yMax();
+  double minZ = bbox.zMin();
+  double maxZ = bbox.zMax();
   assert(maxX > minX);
   assert(maxY > minY);
   assert(maxZ > minZ);

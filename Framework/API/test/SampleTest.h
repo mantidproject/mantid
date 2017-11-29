@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -41,8 +42,8 @@ public:
   void test_Setting_Default_Shape_Is_Accepted() {
     Sample sample;
     IObject_sptr object;
-    TS_ASSERT_EQUALS(object->hasValidShape(), false);
     TS_ASSERT_THROWS_NOTHING(sample.setShape(object));
+    TS_ASSERT_EQUALS(sample.getShape().hasValidShape(), false);
   }
 
   void test_That_Requests_For_An_Undefined_Environment_Throw() {
@@ -259,7 +260,7 @@ public:
     Material vanBlock("vanBlock",
                       Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    IObject_sptr shape;
+    IObject_sptr shape = Mantid::Geometry::ShapeFactory().createShape("");
     shape->setMaterial(vanBlock);
     sample.setShape(shape);
 

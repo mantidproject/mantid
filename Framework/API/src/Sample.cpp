@@ -26,7 +26,7 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(), m_environment(), m_lattice(nullptr),
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(), m_lattice(nullptr),
       m_crystalStructure(), m_samples(), m_geom_id(0), m_thick(0.0),
       m_height(0.0), m_width(0.0) {}
 
@@ -108,7 +108,13 @@ const IObject &Sample::getShape() const { return *m_shape; }
  * its own coordinate system
  * @param shape :: The object describing the shape
  */
-void Sample::setShape(const IObject_sptr &shape) { m_shape = shape; }
+void Sample::setShape(const IObject_sptr &shape) {
+  if (shape) {
+    m_shape = shape;
+  } else {
+    m_shape = ShapeFactory().createShape("");
+  }
+}
 
 /** Return the material.
  * @return A reference to the material the sample is composed of

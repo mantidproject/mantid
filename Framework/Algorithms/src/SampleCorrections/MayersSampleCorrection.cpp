@@ -103,7 +103,7 @@ void MayersSampleCorrection::exec() {
   // something better for the time being
   const double big(100.); // seems to be a sweet spot...
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-  sampleShape.getBoundingBox();
+  sampleShape.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
   V3D boxWidth(maxX - minX, maxY - minY, maxZ - minZ);
   const double radius(0.5 * boxWidth[frame->pointingHorizontal()]),
       height(boxWidth[frame->pointingUp()]);
