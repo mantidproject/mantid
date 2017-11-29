@@ -175,6 +175,8 @@ void VesuvioCalculateMS::cacheInputs() {
   m_nruns = static_cast<size_t>(nruns);
   int nevents = getProperty("NumEventsPerRun");
   m_nevents = static_cast<size_t>(nevents);
+  int seed = getProperty("Seed");
+  m_seed = static_cast<size_t>(seed);
 
   // -- Geometry --
   const auto instrument = m_inputWS->getInstrument();
@@ -322,7 +324,7 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
 
     auto randgen =
         make_unique<CurveFitting::MSVesuvioHelper::RandomNumberGenerator>(
-            getProperty("Seed"));
+            m_seed);
     simulate(detpar, respar,
              accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()),
              randgen.get());
