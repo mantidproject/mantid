@@ -14,76 +14,26 @@ class PreppingMixin(object):
                                               'datasearch.directories')}
         config['default.facility'] = 'SNS'
         config['default.instrument'] = 'BASIS'
-        config.appendDataSearchSubDir('BASIS/'+subdir)
+        config.appendDataSearchSubDir('BASIS/{}/'.format(subdir))
 
     def preptear(self):
-        config.update(self.config)
+        for (key, value) in self.config.items():
+            config[key] = value  # config object does not have update method like python dict
 
-
-class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
-    """
-    Run a reduction for a scan of runs probing different orientations
-    of a crystal.
-    """
-
-    def __init__(self):
-        super(CrystalDiffractionTest, self).__init__()
-        self.config = None
-        self.prepset('BASISDiffraction')
-
-    def requiredFiles(self):
-        return ['BASIS_Mask_default_diff.xml',
-                'BSS_74799_event.nxs',
-                'BSS_74800_event.nxs',
-                'BSS_64642_event.nxs',
-                'BSS_75527_event.nxs',
-                'BASISOrientedSample.nxs']
-
-    def runTest(self):
-        """
-        Override parent method, does the work of running the test
-        """
-        try:
-            BASISDiffraction(SingleCrystalDiffraction=True,
-                             RunNumbers='74799-74800',
-                             MaskFile='BASIS_Mask_default_diff.xml',
-                             VanadiumRuns='64642',
-                             BackgroundRun='75527',
-                             PsiAngleLog='SE50Rot',
-                             PsiOffset=-27.0,
-                             LatticeSizes=[10.71, 10.71, 10.71],
-                             LatticeAngles=[90.0, 90.0, 90.0],
-                             VectorU=[1, 1, 0],
-                             VectorV=[0, 0, 1],
-                             Uproj=[1, 1, 0],
-                             Vproj=[0, 0, 1],
-                             Wproj=[1, -1, 0],
-                             Nbins=300,
-                             OutputWorkspace='peaky')
-        finally:
-            self.preptear()
-
-    def validate(self):
-        """
-        Inform of workspace output after runTest(), and associated file to
-        compare to.
-        :return: strings for workspace and file name
-        """
-        self.tolerance = 0.1
-        return 'peaky', 'BASISOrientedSample.nxs'
 
 
 class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface
     """
+
     def __init__(self):
         super(ElwinTest, self).__init__()
         self.config = None
         self.prepset('ELWIN')
 
     def requiredFiles(self):
-        return ['BSS_63652_event.nxs',
-                'BSS_63700_event.nxs',
+        return ['BASIS_63652_sqw.nxs',
+                'BASIS_63700_sqw.nxs',
                 'BASIS_elwin_eq2.nxs']
 
     def runTest(self):
@@ -92,7 +42,7 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         # Load files and create workspace group
         try:
-            names = ('BSS_63652_event', 'BSS_63700_event')
+            names = ('BASIS_63652_sqw', 'BASIS_63700_sqw')
             [Load(Filename=name + '.nxs', OutputWorkspace=name) for name in names]
             GroupWorkspaces(InputWorkspaces=names, OutputWorkspace='elwin_input')
             ElasticWindowMultiple(InputWorkspaces='elwin_input',
@@ -117,3 +67,54 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         self.tolerance = 0.1
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
+
+class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
+    r"""Reduction for a scan of runs probing different orientations of a crystal.
+    """
+
+    def __init__(self):
+        super(CrystalDiffractionTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs',
+                'BSS_74800_event.nxs',
+                'BSS_64642_event.nxs',
+                'BSS_75527_event.nxs',
+                'BASISOrientedSample.nxs']
+
+    def runTest(self):
+        """
+        Override parent method, does the work of running the test
+        """
+        try:
+            BASISDiffraction(SingleCrystalDiffraction=True,
+                             RunNumbers='74799-74800',
+                             MaskFile='BASIS_Mask_default_diff.xml',
+                             VanadiumRuns='64642',
+                             BackgroundRuns='75527',
+                             PsiAngleLog='SE50Rot',
+                             PsiOffset=-27.0,
+                             LatticeSizes=[10.71, 10.71, 10.71],
+                             LatticeAngles=[90.0, 90.0, 90.0],
+                             VectorU=[1, 1, 0],
+                             VectorV=[0, 0, 1],
+                             Uproj=[1, 1, 0],
+                             Vproj=[0, 0, 1],
+                             Wproj=[1, -1, 0],
+                             Nbins=300,
+                             OutputWorkspace='peaky')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        """
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        return 'peaky', 'BASISOrientedSample.nxs'
+
