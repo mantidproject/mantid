@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectFitAnalysisTab.h"
 #include "ui_JumpFit.h"
 
 #include "MantidAPI/IFunction.h"
@@ -9,7 +9,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport JumpFit : public IndirectDataAnalysisTab {
+class DLLExport JumpFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
@@ -30,7 +30,7 @@ private slots:
   /// Slot for when the range on the range selector changes
   void qRangeChanged(double min, double max);
   /// Slot to update the guides when the range properties change
-  void updateProperties(QtProperty *prop, double val);
+  void updateRS(QtProperty *prop, double val);
   /// Find all spectra with width data in the workspace
   void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
   /// Handles plotting results of algorithm on miniplot
@@ -49,17 +49,9 @@ protected:
   createFitAlgorithm(Mantid::API::IFunction_sptr func);
 
 private:
-  /// Gets a list of parameter names for a given fit function
-  QStringList getFunctionParameters(const QString &functionName);
-
-  /// Creates the function for fitting
-  Mantid::API::IFunction_sptr createFunction(const QString &functionName);
-
-  /// Clears the mini plot of data excluding sample
-  void clearPlot();
-
-  /// Deletes Plot Guess Workspace after use
-  void deletePlotGuessWorkspaces(const bool &removePlotGuess);
+  void disablePlotGuess() override;
+  void enablePlotGuess() override;
+  void updatePlot() override;
 
   // The UI form
   Ui::JumpFit m_uiForm;
@@ -69,6 +61,7 @@ private:
 
   QtTreePropertyBrowser *m_jfTree;
 
+  std::string m_baseName;
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 };
 } // namespace IDA
