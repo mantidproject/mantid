@@ -32,7 +32,7 @@ A reflectivity measurement is made by shining a collimated beam (low angular div
 
 Further to this, there are two geometric modes of operation. By far the most common is specular reflectivity. In this case the angle of incidence is equal to the angle of reflection or :math:`\theta_i = \theta_f`. This is called the specular condition. It provides the SLD profile/information that is directly normal or perpendicular to the surface of the sample. Secondly there is off-specular reflectivity where the angle of incidence is not equal to the angle of reflection or :math:`\theta_i \ne \theta_f` . This provides structural information in the plane of the sample.
 
-As a quick aside it is worth mentioning that there is an added complication in describing scattering geometries in that different techniques, sources and institutions use different notations for the same things. For instance the specular condition can also be referred to as the :math:`\frac{\theta}{2\theta}` (where :math:`2\theta` is the scattering/detector angle and :math:`\theta` the sample angle) or :math:`\frac{\omega}{\theta}` (where :math:`\theta` is not the scattering/detector angle and :math:`\omega` the sample angle) conditions. At ISIS reflectometers for historic reasons the detector angle is refered to as :math:`\theta` and the sample angle as :math:`\Phi`. 
+As a quick aside it is worth mentioning that there is an added complication in describing scattering geometries in that different techniques, sources and institutions use different notations for the same things. For instance the specular condition can also be referred to as the :math:`\frac{\theta}{2\theta}` (where :math:`2\theta` is the scattering/detector angle and :math:`\theta` the sample angle) or :math:`\frac{\omega}{\theta}` (where :math:`\theta` is not the scattering/detector angle and :math:`\omega` the sample angle) conditions. At ISIS reflectometers for historic reasons the detector angle is refered to as :math:`\theta` and the sample angle as :math:`\Phi`.
 
 For more information, see the `ISIS website <https://www.isis.stfc.ac.uk/Pages/Reflectometry.aspx>`__.
 
@@ -48,27 +48,27 @@ The main components in the instrument are shown below:
 The basic reflectometry instrument setup as used on the Inter, Crisp and Surf beamlines. The black line is the incident beam and the red line the reflected beam. The dotted black line is the horizon of the sample which is at an angle :math:`\theta_i` with respect to the incident beam. There are several caveats; the diagram depicts what happens with the 1D linear detectors’ on Inter, Crisp and Surf. In the case of the 0D point detectors on these beamlines the detector changes angle such that the beam is always perpendicular incident on the 0D detector surface. On Polref and Offspec, the detector plane rotates with the detector angle such that the beam is always perpendicular incident on the detector plane whether it is a 0D, 1D or 2D detector. This needs to be taken account of in the IDF depending on the beamline and detector in use.
 
 * *Source*: The source of neutrons
-  
+
 * *Sample*: The planar material under analysis
-  
+
 * *Slits*: These are used to collimate the beam. These have two primary effects:
-  
+
   - They set the angular divergence/resolution :math:`\alpha` of the beamline via the collimation equation :math:`\alpha = \frac{S_1+S_2}{L}`, where :math:`S_1,S_2` are the widths of the slit gaps and :math:`L` is the distance between Slit 1 and Slit 2. The resolution is often defined as :math:`\frac{\delta Q}{Q}`, where :math:`Q` is the momentum transfer. Please see the :ref:`algm-NRCalculateSlitResolution` algorithm for more details.
-    
+
   - They set the illuminated area on the sample. There are two regimes, under and over illumination and ideally you want to be under illuminating but that is not always possible as in the case of small samples.
-    
+
 * *Monitors*: These are low efficiency detectors used to normalize the detector signal and mainly provide scaling.
-  
+
 * *Detectors*: These are high efficiency detectors. Scattered neutrons are recorded by a detector or banks of detectors located at different *scattering angles*, :math:`2\theta_{det}`. Note that the terminology here differs from that in neutron diffraction, where :math:`\theta` is referred to as the scattering angle rather than :math:`2\theta`. We define three types of general geometry of detector:
-  
+
   - *0D* or *point detectors*, where a simple tube is used to integrate intensity, the detector itself has no position sensitivity, just the angle it is positioned at.
-    
+
   - *1D* also referred to as *linear*, *area* or *multidetector*’s, where a stack of tubes/pixels is used to integrate intensity with either vertical or horizontal position sensitivity equal to the pixel size.
-    
+
   - *2D*, which can also be referred to as an *area* detector. Similar to the 1D but with both vertical and horizontal position sensitivity. Note pixels may not be uniform in horizontal/vertical size.
-    
+
 * :math:`\theta_i`: the *incident angle*, that is, the angle between the incident beam and the sample, commonly called the sample angle or at ISIS reflectometers the :math:`\Phi` axis.
-  
+
 * :math:`\theta_f`: the *final angle*, that is, the angle between the reflected beam and the sample. At ISIS reflectometers this is referred to as :math:`\theta`. In specular reflection, :math:`\theta_i = \theta_f` and in off-specular analysis :math:`\theta_i \neq \theta_f`.
 
 In addition, some instruments also use:
@@ -196,7 +196,7 @@ The main reduction algorithm is :ref:`algm-ReflectometryReductionOneAuto`. This 
 
 :ref:`algm-SpecularReflectionPositionCorrect` can be used to correct detector positions if they are not at the correct position when loaded. It can shift them vertically or rotate then around the sample position. This algorithm is called as a child by :ref:`algm-ReflectometryReductionOneAuto`.
 
-Related to :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` we also have :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto`, which convert transmission run(s) to wavelength and stitches transmission runs together when two are provided.
+Related to :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` we also have :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto`, which converts transmission run(s) to wavelength and stitches transmission runs together when two are provided.
 
 :ref:`algm-Stitch1DMany` does the work to stitch multiple runs together, which is quite a complicated operation.
 
