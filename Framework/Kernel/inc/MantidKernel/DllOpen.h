@@ -39,42 +39,42 @@ namespace Kernel {
  */
 class MANTID_KERNEL_DLL DllOpen {
 public:
+  // Unconstructible
+  DllOpen() = delete;
+  // Not copyable
+  DllOpen(const DllOpen &) = delete;
+  ~DllOpen() = delete;
+
+public:
   /// Static method for opening the shared library
-  static void *OpenDll(const std::string &);
+  static void *openDll(const std::string &);
 
   /// Static method for opening the shared library
-  static void *OpenDll(const std::string &, const std::string &);
+  static void *openDll(const std::string &, const std::string &);
 
   /// Static method for retrieving a function pointer
-  static void *GetFunction(void *, const std::string &);
+  static void *getFunction(void *, const std::string &);
 
   /// Static method for closing the shared library
-  static void CloseDll(void *);
+  static void closeDll(void *);
 
   /// Static method for converting a filename to a libName (without lib___.so or
   /// ___.dll)
-  static const std::string ConvertToLibName(const std::string &);
+  static const std::string convertToLibName(std::string);
 
   /// Adds a directiry to the dll search path.
   static void addSearchDirectory(const std::string &);
 
 private:
-  /// Constructor private as not needed
-  DllOpen() = default;
-  /// Copy operator private as not needed
-  DllOpen(const DllOpen &) = default;
-  /// Destructor private as not needed
-  ~DllOpen() = default;
-
   // private functions specific to implementation
   /// Implementation specifc static method for opening a shared library
-  static void *OpenDllImpl(const std::string &);
+  static void *openDllImpl(const std::string &);
 
   /// Implementation specifc static method for retrieving a function pointer
-  static void *GetFunctionImpl(void *, const std::string &);
+  static void *getFunctionImpl(void *, const std::string &);
 
   /// Implementation specifc static method for closing a shared library
-  static void CloseDllImpl(void *);
+  static void closeDllImpl(void *);
 
   /// Implementation specifc static method for adding a directiry to the dll
   /// search path.
