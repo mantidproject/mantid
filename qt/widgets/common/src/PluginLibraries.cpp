@@ -45,8 +45,8 @@ int loadPluginsFromCfgPath(std::string key) {
  * @return The number of libraries successfully loaded
  */
 int loadPluginsFromPath(std::string path) {
-  // We must *NOT* load plugins compiled against a different version of Qt
-  // so we set exclude flags by Qt version.
+// We must *NOT* load plugins compiled against a different version of Qt
+// so we set exclude flags by Qt version.
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
   static std::vector<std::string> excludes{"Qt5"};
 #else
