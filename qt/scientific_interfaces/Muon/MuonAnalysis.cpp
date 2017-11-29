@@ -82,20 +82,19 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
-
   const auto xMin = *min_element(xData.begin(), xData.end());
   const auto xMax = *max_element(xData.begin(), xData.end());
   // make our own y limits for plot (not all of the data)
   if (xMin < params["XAxisMin"].toDouble() ||
-      xMax > params["XAxisMin"].toDouble()) {  
-	  
-  std::vector<double> yPlusEData, yMinusEData;
-  for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
-    const auto &yData = matrix_workspace->y(0)[index];
-    const auto &eData = matrix_workspace->e(0)[index];
-    yPlusEData.push_back(yData + eData);
-    yMinusEData.push_back(yData - eData);
-  }
+      xMax > params["XAxisMin"].toDouble()) {
+
+    std::vector<double> yPlusEData, yMinusEData;
+    for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
+      const auto &yData = matrix_workspace->y(0)[index];
+      const auto &eData = matrix_workspace->e(0)[index];
+      yPlusEData.push_back(yData + eData);
+      yMinusEData.push_back(yData - eData);
+    }
 
     auto xN = std::distance(xData.begin(),
                             std::upper_bound(xData.begin(), xData.end(),
