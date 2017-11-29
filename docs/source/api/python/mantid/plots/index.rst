@@ -126,6 +126,9 @@ Types of functions
 * :func:`~mantid.plots.tricontour` - Draw contours at specified levels on an unstructured triangular grid
 * :func:`~mantid.plots.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
 
+matplotlib demonstrates the difference between uniform and nonuniform
+grids well in `this example
+<https://matplotlib.org/gallery/images_contours_and_fields/tricontour_vs_griddata.html#sphx-glr-gallery-images-contours-and-fields-tricontour-vs-griddata-py>`_
 
 Available Functions
 ===================
