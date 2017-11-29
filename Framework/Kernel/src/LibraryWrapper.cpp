@@ -4,15 +4,12 @@
 namespace Mantid {
 namespace Kernel {
 
-/// Constructor
-LibraryWrapper::LibraryWrapper() : module(nullptr) {}
-
 /// Destructor
 LibraryWrapper::~LibraryWrapper() {
   // Close lib
-  if (module) {
-    DllOpen::CloseDll(module);
-    module = nullptr;
+  if (m_module) {
+    DllOpen::closeDll(m_module);
+    m_module = nullptr;
   }
 }
 
@@ -21,12 +18,12 @@ LibraryWrapper::~LibraryWrapper() {
  * lib/so/dll).
  *  @return True if DLL is opened or already open.
  */
-bool LibraryWrapper::OpenLibrary(const std::string &libName) {
-  if (!module) {
+bool LibraryWrapper::openLibrary(const std::string &libName) {
+  if (!m_module) {
     // Load dynamically loaded library
-    module = DllOpen::OpenDll(libName);
+    m_module = DllOpen::openDll(libName);
 
-    if (!module) {
+    if (!m_module) {
       return false;
     }
   }
@@ -40,12 +37,12 @@ bool LibraryWrapper::OpenLibrary(const std::string &libName) {
  *  @param filePath :: The filepath to the directory where the library is.
  *  @return True if DLL is opened or already open
  */
-bool LibraryWrapper::OpenLibrary(const std::string &libName,
+bool LibraryWrapper::openLibrary(const std::string &libName,
                                  const std::string &filePath) {
-  if (!module) {
+  if (!m_module) {
     // Load dynamically loaded library
-    module = DllOpen::OpenDll(libName, filePath);
-    if (!module) {
+    m_module = DllOpen::openDll(libName, filePath);
+    if (!m_module) {
       return false;
     }
   }

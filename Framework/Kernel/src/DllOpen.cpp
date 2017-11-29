@@ -32,9 +32,9 @@ Logger g_log("DllOpen");
  * @param libName :: Name of the library.
  * @return Pointer to library (of type void).
  **/
-void *DllOpen::OpenDll(const std::string &libName) {
+void *DllOpen::openDll(const std::string &libName) {
   std::string str = LIB_PREFIX + libName + LIB_POSTFIX;
-  return OpenDllImpl(str);
+  return openDllImpl(str);
 }
 
 /* Opens the shared library after appending the required formatting,
@@ -44,11 +44,11 @@ void *DllOpen::OpenDll(const std::string &libName) {
  * @param filePath :: The location on the library.
  * @return Pointer to library (of type void).
  **/
-void *DllOpen::OpenDll(const std::string &libName,
+void *DllOpen::openDll(const std::string &libName,
                        const std::string &filePath) {
   std::string str =
       filePath + PATH_SEPERATOR + LIB_PREFIX + libName + LIB_POSTFIX;
-  return OpenDllImpl(str);
+  return openDllImpl(str);
 }
 
 /* Retrieves a function from the opened library.
@@ -57,15 +57,15 @@ void *DllOpen::OpenDll(const std::string &libName,
  * @param funcName :: The name of the function to retrieve.
  * @return Pointer to the function (of type void).
  **/
-void *DllOpen::GetFunction(void *libName, const std::string &funcName) {
-  return GetFunctionImpl(libName, funcName);
+void *DllOpen::getFunction(void *libName, const std::string &funcName) {
+  return getFunctionImpl(libName, funcName);
 }
 
 /* Closes an open library.
  * Calls the correct implementation based on the current O/S.
  * @param libName :: Name of the library.
  **/
-void DllOpen::CloseDll(void *libName) { CloseDllImpl(libName); }
+void DllOpen::closeDll(void *libName) { closeDllImpl(libName); }
 
 /** Converts a file name (without directory) to a undecorated library name.
  * e.g. MyLibrary.dll or libMyLibary.so would become MyLibrary.
@@ -73,28 +73,26 @@ void DllOpen::CloseDll(void *libName) { CloseDllImpl(libName); }
  * @return The converted libName, or empty string if the conversion was not
  *possible.
  **/
-const std::string DllOpen::ConvertToLibName(const std::string &fileName) {
-  // take a copy of the input string
-  std::string retVal = fileName;
-
-  if ((retVal.compare(0, LIB_PREFIX.size(), LIB_PREFIX) == 0) &&
-      (retVal.find(PATH_SEPERATOR) == std::string::npos)) {
+const std::string DllOpen::convertToLibName(std::string fileName) {
+  if ((fileName.compare(0, LIB_PREFIX.size(), LIB_PREFIX) == 0) &&
+      (fileName.find(PATH_SEPERATOR) == std::string::npos)) {
     // found
-    retVal =
-        retVal.substr(LIB_PREFIX.size(), retVal.size() - LIB_PREFIX.size());
+    fileName =
+        fileName.substr(LIB_PREFIX.size(), fileName.size() - LIB_PREFIX.size());
   } else {
     // prefix not found
     return "";
   }
-  std::string::size_type pos = retVal.rfind(LIB_POSTFIX);
-  if (pos != std::string::npos && pos == (retVal.size() - LIB_POSTFIX.size())) {
+  std::string::size_type pos = fileName.rfind(LIB_POSTFIX);
+  if (pos != std::string::npos &&
+      pos == (fileName.size() - LIB_POSTFIX.size())) {
     // found
-    retVal = retVal.substr(0, retVal.size() - LIB_POSTFIX.size());
+    fileName = fileName.substr(0, fileName.size() - LIB_POSTFIX.size());
   } else {
     // postfix not found
     return "";
   }
-  return retVal;
+  return fileName;
 }
 
 /* Adds a directory to the dll cearch path
@@ -155,7 +153,7 @@ void *DllOpen::GetFunctionImpl(void *libName, const std::string &funcName) {
  **/
 void DllOpen::CloseDllImpl(void *libName) { FreeLibrary((HINSTANCE)libName); }
 
-/* Adds a directory to the dll cearch path
+/* Adds a directory to the dll search path
  **/
 void DllOpen::addSearchDirectoryImpl(const std::string &dir) {
   SetDllDirectory(dir.c_str());
@@ -177,7 +175,7 @@ const std::string DllOpen::PATH_SEPERATOR = "/";
  * @param filePath :: Filepath of the library.
  * @return Pointer to library (of type void).
  **/
-void *DllOpen::OpenDllImpl(const std::string &filePath) {
+void *DllOpen::openDllImpl(const std::string &filePath) {
   void *handle = dlopen(filePath.c_str(), RTLD_NOW | RTLD_GLOBAL);
   if (!handle) {
     g_log.error("Could not open library " + filePath + ": " + dlerror());
@@ -191,21 +189,22 @@ void *DllOpen::OpenDllImpl(const std::string &filePath) {
  * @param funcName :: The name of the function to retrieve.
  * @return Pointer to the function (of type void).
  **/
-void *DllOpen::GetFunctionImpl(void *libName, const std::string &funcName) {
+void *DllOpen::getFunctionImpl(void *libName, const std::string &funcName) {
   return dlsym(libName, funcName.c_str());
 }
 
 /* Closes an open .so file.
  * @param libName :: Name of the library.
  **/
-void DllOpen::CloseDllImpl(void *libName) {
+void DllOpen::closeDllImpl(void *libName) {
   UNUSED_ARG(libName);
   // Commented out for now due to a potential bug in glibc
   // dlclose(libName);
 }
 
-/* Adds a directory to the dll cearch path
- **/
+/* Adds a directory to the dll search path
+ * @param dir Unused argument
+ */
 void DllOpen::addSearchDirectoryImpl(const std::string &dir) {
   UNUSED_ARG(dir);
 }
