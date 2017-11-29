@@ -267,7 +267,7 @@ class RunTabPresenter(object):
             if mantidplot:
                 if self._view.plot_results and not mantidplot.graph(self.output_graph):
                     mantidplot.newGraph(self.output_graph)
-                    
+
         except Exception as e:
             self._view.halt_process_flag()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
