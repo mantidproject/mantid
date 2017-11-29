@@ -46,46 +46,16 @@ public:
   ~DllOpen() = delete;
 
 public:
-  /// Static method for opening the shared library
-  static void *openDll(const std::string &);
+  /// Check if the filename conforms to the expected style for this platform
+  static bool isValidFilename(const std::string &filename);
 
   /// Static method for opening the shared library
-  static void *openDll(const std::string &, const std::string &);
-
-  /// Static method for retrieving a function pointer
-  static void *getFunction(void *, const std::string &);
+  static void *openDll(const std::string &filepath);
 
   /// Static method for closing the shared library
-  static void closeDll(void *);
-
-  /// Static method for converting a filename to a libName (without lib___.so or
-  /// ___.dll)
-  static const std::string convertToLibName(std::string);
-
-  /// Adds a directiry to the dll search path.
-  static void addSearchDirectory(const std::string &);
+  static void closeDll(void *handle);
 
 private:
-  // private functions specific to implementation
-  /// Implementation specifc static method for opening a shared library
-  static void *openDllImpl(const std::string &);
-
-  /// Implementation specifc static method for retrieving a function pointer
-  static void *getFunctionImpl(void *, const std::string &);
-
-  /// Implementation specifc static method for closing a shared library
-  static void closeDllImpl(void *);
-
-  /// Implementation specifc static method for adding a directiry to the dll
-  /// search path.
-  static void addSearchDirectoryImpl(const std::string &);
-
-  /// lib prefix
-  static const std::string LIB_PREFIX;
-  /// lib postfix
-  static const std::string LIB_POSTFIX;
-  /// path seperator
-  static const std::string PATH_SEPERATOR;
 };
 
 } // namespace Kernel

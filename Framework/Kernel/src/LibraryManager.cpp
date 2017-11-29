@@ -65,17 +65,15 @@ int LibraryManagerImpl::openLibraries(
     const std::vector<std::string> &excludes) {
   int libCount(0);
   if (libPath.exists() && libPath.isDirectory()) {
-    DllOpen::addSearchDirectory(libPath.path());
     // Iterate over the available files
     Poco::DirectoryIterator end_itr;
     for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr) {
       const Poco::File &item = *itr;
       if (item.isFile()) {
-        if (skipLibrary(itr.path().getFileName(), excludes))
+        if (shouldBeLoaded(itr.path().getFileName(), excludes))
+          libCount += openLibrary(itr.path(), itr.path().getFileName());
+        else
           continue;
-        if (loadLibrary(itr.path())) {
-          ++libCount;
-        }
       } else if (loadingBehaviour == LoadLibraries::Recursive) {
         // it must be a directory
         libCount += openLibraries(item, LoadLibraries::Recursive, excludes);
@@ -89,57 +87,70 @@ int LibraryManagerImpl::openLibraries(
 }
 
 /**
+ * Check if the library should be loaded
+ * @param filename The filename of the library, i.e no directory
+ * @param excludes If not empty then each string is considered as a substring
+ * to search within each library to be opened. If the substring is found then
+ * the library is not opened.
+ * @return True if loading should be attempted
+ */
+bool LibraryManagerImpl::shouldBeLoaded(
+    const std::string &filename,
+    const std::vector<std::string> &excludes) const {
+  return !isLoaded(filename) && DllOpen::isValidFilename(filename) &&
+         !isExcluded(filename, excludes);
+}
+
+/**
+ * Check if the library been loaded already?
+ * @param filename The filename of the library, i.e no directory
+ * @return True if the library has been seen before
+ */
+bool LibraryManagerImpl::isLoaded(const std::string &filename) const {
+  return m_openedLibs.find(filename) != m_openedLibs.cend();
+}
+
+/**
  * Returns true if the name contains one of the strings given in the
  * exclude list. Each string from the variable is
  * searched for with the filename so an exact match is not necessary. This
  * avoids having to specify prefixes and suffixes for different platforms,
  * i.e. 'plugins.exclude = MantidKernel' will exclude libMantidKernel.so
- * @param filename A string giving the filename/file path
+ * @param filename The filename of the library (no directory)
  * @param excludes A list of substrings to exclude library from loading
  * @return True if the library should be skipped
  */
-bool LibraryManagerImpl::skipLibrary(const std::string &filename,
-                                     const std::vector<std::string> &excludes) {
-  bool skipme(false);
+bool LibraryManagerImpl::isExcluded(
+    const std::string &filename,
+    const std::vector<std::string> &excludes) const {
   for (const auto &exclude : excludes) {
     if (filename.find(exclude) != std::string::npos) {
-      skipme = true;
-      break;
+      return true;
     }
   }
-  return skipme;
+  return false;
 }
 
 /**
 * Load a library
 * @param filepath :: A Poco::File The full path to a library as a string
+* @param cacheKey :: An identifier for the cache if loading is successful
+* @return 1 if the file loaded successfully, 0 otherwise
 */
-bool LibraryManagerImpl::loadLibrary(Poco::Path filepath) {
-  // Get the name of the library.
-  std::string libName = DllOpen::convertToLibName(filepath.getFileName());
-  if (libName.empty())
-    return false;
-  // Check that a library with this name has not already been loaded
-  if (m_openedLibs.find(boost::algorithm::to_lower_copy(libName)) ==
-      m_openedLibs.end()) {
-    filepath.makeParent();
-    // Try to open the library. The wrapper will unload the library when it
-    // is deleted
-    LibraryWrapper dlwrap;
-    if (dlwrap.openLibrary(libName, filepath.toString())) {
-      // Successfully opened, so add to map
-      if (g_log.is(Poco::Message::PRIO_DEBUG)) {
-        g_log.debug("Opened library: " + libName + ".\n");
-      }
-      m_openedLibs.emplace(libName, std::move(dlwrap));
-      return true;
-    } else {
-      return false;
+int LibraryManagerImpl::openLibrary(const Poco::File &filepath,
+                                    const std::string &cacheKey) {
+  // Try to open the library. The wrapper will unload the library when it
+  // is deleted
+  LibraryWrapper dlwrap;
+  if (dlwrap.openLibrary(filepath.path())) {
+    // Successfully opened, so add to map
+    if (g_log.is(Poco::Message::PRIO_DEBUG)) {
+      g_log.debug("Opened library: " + filepath.path() + ".\n");
     }
-  } else {
-    g_log.debug() << libName << " already opened, skipping load\n";
-  }
-  return false;
+    m_openedLibs.emplace(cacheKey, std::move(dlwrap));
+    return 1;
+  } else
+    return 0;
 }
 
 } // namespace Kernel

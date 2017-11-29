@@ -344,6 +344,7 @@ set ( TEST_FILES
 	DirectoryValidatorTest.h
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
+	DllOpenTest.h
 	DynamicFactoryTest.h
 	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h

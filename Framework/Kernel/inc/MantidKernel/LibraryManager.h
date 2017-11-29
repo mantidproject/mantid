@@ -65,11 +65,17 @@ private:
   /// Private so Poco::File doesn't leak to the public interface
   int openLibraries(const Poco::File &, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
+  /// Check if the library should be loaded
+  bool shouldBeLoaded(const std::string &filename,
+                      const std::vector<std::string> &excludes) const;
+  /// Check if the library has already been loaded
+  bool isLoaded(const std::string &filename) const;
+  /// Returns true if the library has been requested to be excluded
+  bool isExcluded(const std::string &filename,
+                  const std::vector<std::string> &excludes) const;
   /// Load a given library
-  bool loadLibrary(Poco::Path filepath);
-  /// Returns true if the library is to be loaded
-  bool skipLibrary(const std::string &filename,
-                   const std::vector<std::string> &excludes);
+  int openLibrary(const Poco::File &filepath, const std::string &cacheKey);
+
   /// Storage for the LibraryWrappers.
   std::unordered_map<std::string, LibraryWrapper> m_openedLibs;
 };

@@ -41,14 +41,15 @@ public:
   // Move-only class. The internal module pointer
   // is not safe to copy around.
   LibraryWrapper() = default;
+  // No copy
   LibraryWrapper(const LibraryWrapper &) = delete;
-  LibraryWrapper& operator=(const LibraryWrapper &) = delete;
-  LibraryWrapper(LibraryWrapper &&) = default;
-  LibraryWrapper& operator=(LibraryWrapper &&) = default;
+  LibraryWrapper &operator=(const LibraryWrapper &) = delete;
+
+  LibraryWrapper(LibraryWrapper &&src);
+  LibraryWrapper &operator=(LibraryWrapper &&rhs);
   ~LibraryWrapper();
 
-  bool openLibrary(const std::string &);
-  bool openLibrary(const std::string &, const std::string &);
+  bool openLibrary(const std::string &filepath);
 
 private:
   /** An untyped pointer to the loaded library.
