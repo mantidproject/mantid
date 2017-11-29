@@ -180,7 +180,6 @@ private slots:
   void saveClicked();
   void plotSeparateWindow();
   void showToolTipHelp();
-  void setBankDir(int idx);
   void listViewFittingRun();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
 

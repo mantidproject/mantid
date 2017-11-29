@@ -246,19 +246,6 @@ void EnggDiffFittingViewQtWidget::saveClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
 }
 
-void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
-
-  const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
-  // idx must correspond to an element and the vector cant be empty
-  if (size_t(idx) < runNoDirSize && runNoDirSize > 0) {
-
-    std::string bankDir = m_fitting_runno_dir_vec[idx];
-    Poco::Path fpath(bankDir);
-
-    setFocusedFileNames(bankDir);
-  }
-}
-
 void EnggDiffFittingViewQtWidget::listViewFittingRun() {
 
   if (m_fittingMutliRunMode) {
