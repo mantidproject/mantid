@@ -74,7 +74,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         return fake_selection
 
 
-class AddRunsPagePresenterInitializationTest(AddRunsPagePresenterTestCase):
+class InitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
         self.set_up_fake_child_views()
         self.set_up_mock_child_presenters_with_default_summation_settings()
@@ -119,10 +119,10 @@ class AddRunsPagePresenterInitializationTest(AddRunsPagePresenterTestCase):
         self.assertEqual(self.view, call_args[1])
 
 
-class AddRunsPagePresenterSelectionMockingTestCase(AddRunsPagePresenterTestCase):
+class SelectionMockingTestCase(AddRunsPagePresenterTestCase):
     # Creates a factory function which stores the run summation
     # change callback allowing us to notify the presenter when
-    # the view is updated.
+    # the view should be synchronised with the model.
     def _capture_on_change_callback(self, presenter):
         def run_selector_presenter_factory(view, callback, parent_view):
             self._on_model_updated = callback
@@ -134,7 +134,7 @@ class AddRunsPagePresenterSelectionMockingTestCase(AddRunsPagePresenterTestCase)
         self._on_model_updated(new_selection)
 
 
-class AddRunsPagePresenterSummationTest(AddRunsPagePresenterSelectionMockingTestCase):
+class SummationConfigurationTest(SelectionMockingTestCase):
     def setUp(self):
         self.set_up_mock_child_presenters()
         self.view = self._make_mock_view()
@@ -148,7 +148,6 @@ class AddRunsPagePresenterSummationTest(AddRunsPagePresenterSelectionMockingTest
                                     summation_settings,
                                     self.view,
                                     None)
-
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
@@ -172,7 +171,7 @@ class AddRunsPagePresenterSummationTest(AddRunsPagePresenterSelectionMockingTest
                                          '3')
 
 
-class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSelectionMockingTestCase):
+class BaseFileNameTest(SelectionMockingTestCase):
     def setUp(self):
         self.set_up_mock_child_presenters_with_default_summation_settings()
         self.view = self._make_mock_view()
@@ -258,7 +257,7 @@ class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSelectionMockingT
         self.view.set_out_file_name.assert_called_with('5')
 
 
-class AddRunsPagePresenterSumButtonTest(AddRunsPagePresenterSelectionMockingTestCase):
+class SumButtonTest(SelectionMockingTestCase):
     def setUp(self):
         self.set_up_mock_child_presenters_with_default_summation_settings()
         self.run_summation = self._make_mock_run_summation()
