@@ -181,22 +181,42 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane,
   return Mantid::Kernel::Quat(angle, axis);
 }
 
+/// A parameter bundle for the detector angle solver.
 struct EquationParams {
-  double tangentOfUserAngle;
-  double originDetectorDistance;
-  double originSampleDistance;
+  double tangentOfUserAngle; ///< tan(BraggAngle)
+  double originDetectorDistance; ///< distance in meters.
+  double originSampleDistance; ///< sample horizontal shift in meters.
 };
 
+/** The equation whose root gives the detector angle (at origin) for a
+ *  given angle at the sample position.
+ *  @param detectorAngle the argument in radians.
+ *  @param params a pointer to an EquationParams struct.
+ *  @return the value of the equation evaluated at detectorAngle.
+ */
 double detectorAngleEquation(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
   return ps->originDetectorDistance * (ps->tangentOfUserAngle * std::cos(detectorAngle) - std::sin(detectorAngle)) + ps->originSampleDistance * ps->tangentOfUserAngle;
 }
 
+/** The derivative of detectorAngleEquation. Useful for root finding
+ *  algorithms.
+ *  @param detectorAngle the argument in radians.
+ *  @param params a pointer to an EquationParams struct.
+ *  @return the derivative evaluated at detectorAngle.
+ */
 double detectorAngleDerivative(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
   return -ps->originDetectorDistance * (ps->tangentOfUserAngle * std::sin(detectorAngle) + std::cos(detectorAngle));
 }
 
+/** Combined angle equation and its derivative. Useful for root finding
+ *  algorithms.
+ *  @param detectorAngle the argument in radians.
+ *  @param params a pointer to an EquationParams struct.
+ *  @param f an output variable for the equation's result.
+ *  @param df an output variable for the derivative's result.
+ */
 void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f, double *df) {
   EquationParams *ps = static_cast<EquationParams *>(params);
   const double cosa = std::cos(detectorAngle);
@@ -205,6 +225,13 @@ void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f,
   *df = -ps->originDetectorDistance * (ps->tangentOfUserAngle * sina + cosa);
 }
 
+/** Calculate the detector angle with respect to origin from a
+ *  given userAngle when the sample is not in the origin.
+ *  @param userAngle a requested angle, in degrees.
+ *  @param originDetectorDistance a distance in meters.
+ *  @param originSampleDistance a distance in meters.
+ *  @return an angle around origin corresponding to userAngle.
+ */
 double detectorAngleFromUserAngle(const double userAngle, const double originDetectorDistance, const double originSampleDistance) {
   using Solver_uptr = std::unique_ptr<gsl_root_fdfsolver, void (*) (gsl_root_fdfsolver*)>;
   Solver_uptr solver{gsl_root_fdfsolver_alloc(gsl_root_fdfsolver_steffenson), gsl_root_fdfsolver_free};
@@ -658,7 +685,7 @@ void LoadILLReflectometry::loadData(
     }
   } else
     g_log.debug("Vector of x values is empty");
-} // LoadILLIndirect::loadData
+}
 
 /**
  * Use the LoadHelper utility to load most of the nexus entries into workspace
@@ -859,6 +886,7 @@ void LoadILLReflectometry::placeSource() {
   m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 
+/// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const
 {
   if (m_instrumentName != "Figaro") {
@@ -913,6 +941,7 @@ double LoadILLReflectometry::originDetectorDistance() const {
   return std::hypot(beamY, beamZ);
 }
 
+/// Return the horizontal offset along the z axis.
 double LoadILLReflectometry::sampleHorzontalOffset() const {
   if (m_instrumentName != "Figaro") {
     return 0.;
