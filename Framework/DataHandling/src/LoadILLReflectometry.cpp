@@ -28,8 +28,8 @@ namespace {
 namespace Figaro {
 // TODO: Consider moving these to the IPF.
 constexpr double detectorRestY{0.509};
-constexpr double DH1X{1.135}; //Motor DH1 horzontal position
-constexpr double DH2X{2.077}; //Motor DH2 horzontal position
+constexpr double DH1Z{1.135}; //Motor DH1 horizontal position
+constexpr double DH2Z{2.077}; //Motor DH2 horizontal position
 }
 
 /// A struct for information needed for detector angle calibration.
@@ -822,13 +822,13 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  m_detectorDistance = sampleDetectorDistance();
+  m_detectorDistance = originDetectorDistance();
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance
                 << "m.\n";
-  double detectorAngle;
+  double detectorRotationAngle;
   double braggAngle;
-  std::tie(detectorAngle, braggAngle) = detectorAndBraggAngles();
+  std::tie(detectorRotationAngle, braggAngle) = detectorAndBraggAngles();
   // incident angle for using the algorithm ConvertToReflectometryQ
   // TODO Doesn't seem to work with ConvertToReflectometryQ. Maybe they
   //      expect a time series?
@@ -844,10 +844,10 @@ void LoadILLReflectometry::placeDetector() {
       return RotationPlane::horizontal;
   }();
   const auto newpos =
-      detectorPosition(rotPlane, m_detectorDistance, detectorAngle);
+      detectorPosition(rotPlane, m_detectorDistance, detectorRotationAngle);
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
-  const auto rotation = detectorFaceRotation(rotPlane, detectorAngle);
+  const auto rotation = detectorFaceRotation(rotPlane, detectorRotationAngle);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
@@ -886,7 +886,7 @@ double LoadILLReflectometry::detectorAngle() const
   // Take the bent beam into account.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double DH2Y = inMeter(doubleFromRun("DH2.value"));
-  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2X - Figaro::DH1X));
+  return inDeg(std::atan2(DH2Y - DH1Y, Figaro::DH2Z - Figaro::DH1Z));
 }
 
 /** Calculate the offset angle between detector center and peak.
@@ -905,23 +905,23 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
   return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
-/** Return the sample to detector distance for the current instrument.
- *  @return the sample to detector distance in meters
+/** Return the origin to detector distance for the current instrument.
+ *  @return the distance in meters
  */
-double LoadILLReflectometry::sampleDetectorDistance() const {
+double LoadILLReflectometry::originDetectorDistance() const {
   if (m_instrumentName != "Figaro") {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
-  const double detectorRestX = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double detectorRestZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
-  const double detectorX = std::cos(inRad(detAngle)) * (detectorRestX - Figaro::DH1X) + Figaro::DH1X;
-  const double detectorY = std::sin(inRad(detAngle)) * (detectorRestX - Figaro::DH1X) + DH1Y - Figaro::detectorRestY;
+  const double detectorY = std::sin(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + DH1Y - Figaro::detectorRestY;
+  const double detectorZ = std::cos(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + Figaro::DH1Z;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
-  const double beamX = detectorX - pixelOffset * std::sin(inRad(detAngle));
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
-  return std::hypot(beamX, beamY);
+  const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
+  return std::hypot(beamY, beamZ);
 }
 
 double LoadILLReflectometry::sampleHorzontalOffset() const {
