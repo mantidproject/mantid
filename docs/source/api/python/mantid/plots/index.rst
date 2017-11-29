@@ -19,9 +19,10 @@ not all are used in all places.
 
 .. code-block:: python
 
-   from mantid.simpleapi import mtd, LoadEventNexus, Rebin, ConvertUnits, SofQW
+   from mantid.simpleapi import mtd, Load, LoadEventNexus, Rebin, ConvertUnits, SofQW, Transpose
    from mantid import plots
    import matplotlib.pyplot as plt
+   from matplotlib.colors import LogNorm
 
 First, load some diffraction data and see what the automatic axes will
 be using :func:`~mantid.plots.getAxesLabels`.
@@ -72,9 +73,10 @@ values.
    ConvertUnits(InputWorkspace='CNCS_7860_event', OutputWorkspace='CNCS_7860_event', Target='DeltaE', EMode='Direct', EFixed=3)
    Rebin(InputWorkspace='CNCS_7860_event', OutputWorkspace='CNCS_7860_event', Params='-3,0.05,3')
    SofQW(InputWorkspace='CNCS_7860_event', OutputWorkspace='CNCS_7860_sqw', QAxisBinning='0,0.05,3', EMode='Direct', EFixed=3)
+   Transpose(InputWorkspace='CNCS_7860_sqw',  OutputWorkspace='CNCS_7860_sqw')
 
    fig, ax = plt.subplots()
-   c = plots.contourf(ax, mtd['CNCS_7860_sqw'])
+   c = plots.contourf(ax, mtd['CNCS_7860_sqw'], norm=LogNorm())
    ax.set_xlabel('awesome label')
    fig.colorbar(c)
    fig.show()
@@ -88,7 +90,7 @@ Similarly, showing the actual values with :func:`~mantid.plots.pcolormesh`
 .. code-block:: python
 
    fig, ax = plt.subplots()
-   c = plots.pcolormesh(ax, mtd['CNCS_7860_sqw'])
+   c = plots.pcolormesh(ax, mtd['CNCS_7860_sqw'], norm=LogNorm())
    fig.colorbar(c)
    fig.show()
 
@@ -96,9 +98,39 @@ Similarly, showing the actual values with :func:`~mantid.plots.pcolormesh`
    :align: center
    :figwidth: image
 
+Types of functions
+==================
+
+**Informational**
+
+* :func:`~mantid.plots.getAxesLabels`
+
+**1D Plotting**
+
+* :func:`~mantid.plots.plot` - Plot lines and/or markers
+* :func:`~mantid.plots.errorbar` - Plot valuse with errorbars
+* :func:`~mantid.plots.scatter` - Make a scatter plot
+
+**2D Plotting - uniform grid**
+
+* :func:`~mantid.plots.contour` - Draw contours at specified levels
+* :func:`~mantid.plots.contourf` - Draw contours at calculated levels
+* :func:`~mantid.plots.pcolor` - Draw a pseudocolor plot of a 2-D array
+* :func:`~mantid.plots.pcolorfast` - Draw a pseudocolor plot of a 2-D array
+* :func:`~mantid.plots.pcolormesh` - Draw a quadrilateral mesh
+
+**2D Plotting - nonuniform grid**
+
+* :func:`~mantid.plots.tripcolor` - Draw a pseudocolor plot of an unstructured triangular grid
+* :func:`~mantid.plots.triplot` - Draw a unstructured triangular grid as lines and/or markers
+* :func:`~mantid.plots.tricontour` - Draw contours at specified levels on an unstructured triangular grid
+* :func:`~mantid.plots.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
+
+
 Available Functions
 ===================
 
 .. automodule:: mantid.plots
    :members: getAxesLabels, plot, errorbar, scatter, contour,
-             contourf, pcolor, pcolorfast, pcolormesh
+             contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
+             triplot, tricontour, tricontourf

@@ -293,3 +293,83 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     _setLabels2D(axes, workspace)
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
+
+def tripcolor(axes, workspace, *args, **kwargs):
+    '''
+    To be used with non-uniform grids. Currently this only works with workspaces
+    that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+
+    See :meth:`matplotlib.axes.Axes.tripcolor` for more information.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+
+def triplot(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`mantid.plots.pcolor`, but works
+    for non-uniform grids. Currently this only works with workspaces
+    that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+
+    See :meth:`matplotlib.axes.Axes.triplot` for more information.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.triplot(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+
+def tricontour(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`mantid.plots.contour`, but works
+    for non-uniform grids. Currently this only works with workspaces
+    that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+
+    See :meth:`matplotlib.axes.Axes.tricontour` for more information.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.tricontour(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+
+
+def tricontourf(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`mantid.plots.contourf`, but works
+    for non-uniform grids. Currently this only works with workspaces
+    that have a constant number of bins between spectra.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the workspace is a histogram.
+
+    See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
+    '''
+    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (x,y,z) = _getContour(workspace, distribution)
+    _setLabels2D(axes, workspace)
+
+    return axes.tricontourf(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
