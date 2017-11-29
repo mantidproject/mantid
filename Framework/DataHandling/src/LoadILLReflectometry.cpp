@@ -189,21 +189,18 @@ struct EquationParams {
 
 double detectorAngleEquation(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
-  const double a = inRad(detectorAngle);
-  return ps->originDetectorDistance * (ps->tangentOfUserAngle * std::cos(a) - std::sin(a)) + ps->originSampleDistance * ps->tangentOfUserAngle;
+  return ps->originDetectorDistance * (ps->tangentOfUserAngle * std::cos(detectorAngle) - std::sin(detectorAngle)) + ps->originSampleDistance * ps->tangentOfUserAngle;
 }
 
 double detectorAngleDerivative(double detectorAngle, void *params) {
   EquationParams *ps = static_cast<EquationParams *>(params);
-  const double a = inRad(detectorAngle);
-  return -ps->originDetectorDistance * (ps->tangentOfUserAngle * std::sin(a) + std::cos(a));
+  return -ps->originDetectorDistance * (ps->tangentOfUserAngle * std::sin(detectorAngle) + std::cos(detectorAngle));
 }
 
 void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f, double *df) {
   EquationParams *ps = static_cast<EquationParams *>(params);
-  const double a = inRad(detectorAngle);
-  const double cosa = std::cos(a);
-  const double sina = std::sin(a);
+  const double cosa = std::cos(detectorAngle);
+  const double sina = std::sin(detectorAngle);
   *f = ps->originDetectorDistance * (ps->tangentOfUserAngle * cosa - sina) + ps->originSampleDistance * ps->tangentOfUserAngle;
   *df = -ps->originDetectorDistance * (ps->tangentOfUserAngle * sina + cosa);
 }
@@ -217,18 +214,18 @@ double detectorAngleFromUserAngle(const double userAngle, const double originDet
   dF.df = detectorAngleDerivative;
   dF.fdf = detectorAngleEqAndDerivative;
   dF.params = &p;
-  double previous = userAngle;
+  double previous = inRad(userAngle);
   gsl_root_fdfsolver_set(solver.get(), &dF, previous);
   int iter{0};
-  while (iter < 1000) {
+  while (iter < 100) {
     auto status = gsl_root_fdfsolver_iterate(solver.get());
     if (status != GSL_SUCCESS) {
       throw std::runtime_error("Failed to solve the actual detector angle from BraggAngle");
     }
     const auto current = gsl_root_fdfsolver_root(solver.get());
-    status = gsl_root_test_delta(previous, current, 0., 1e-6);
+    status = gsl_root_test_delta(previous, current, 0., 1e-8);
     if (status == GSL_SUCCESS) {
-      return current;
+      return inDeg(current);
     }
     previous = current;
     ++iter;
@@ -793,8 +790,9 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
     if (m_sampleZOffset != 0) {
       // Sample is not in the origin; the detector angle (in spherical
       // coordinates) need to be solved.
-      const double realDetectorAngle = detectorAngleFromUserAngle(userAngle, m_detectorDistance, std::abs(m_sampleZOffset));
-      const double userDetectorAngle = 2 * realDetectorAngle - offset;
+      const auto originPixelDistance = m_detectorDistance / std::cos(inRad(std::abs(offset)));
+      const auto realDetectorAngle = detectorAngleFromUserAngle(2 * userAngle, originPixelDistance, std::abs(m_sampleZOffset));
+      const auto userDetectorAngle = realDetectorAngle - offset;
       return std::make_pair(userDetectorAngle, userAngle);
     } else {
       const double userDetectorAngle = 2 * userAngle - offset;
