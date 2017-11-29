@@ -22,7 +22,6 @@ class PreppingMixin(object):
             config[key] = value  # config object does not have update method like python dict
 
 
-
 class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface
     """
@@ -120,4 +119,3 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         self.tolerance = 0.1
         return 'peaky', 'BASISOrientedSample.nxs'
-
