@@ -158,9 +158,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -308,14 +307,17 @@ void IndirectDataAnalysisTab::updatePlot(
 void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
-  try {
-    const QPair<double, double> curveRange =
-        previewPlot->getCurveRange("Sample");
-    auto rangeSelector = previewPlot->getRangeSelector(rangeName);
-    setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                         m_properties[endRangePropName], curveRange);
-  } catch (std::exception &exc) {
-    showMessageBox(exc.what());
+
+  if (inputWorkspace()) {
+    try {
+      const QPair<double, double> curveRange =
+          previewPlot->getCurveRange("Sample");
+      auto rangeSelector = previewPlot->getRangeSelector(rangeName);
+      setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
+                           m_properties[endRangePropName], curveRange);
+    } catch (std::exception &exc) {
+      showMessageBox(exc.what());
+    }
   }
 }
 
