@@ -5,18 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include <string>
-#include <map>
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#endif
+#include <unordered_map>
 
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/LibraryWrapper.h"
+#include "MantidKernel/SingletonHolder.h"
+
+namespace Poco {
+class File;
+class Path;
+}
 
 namespace Mantid {
 namespace Kernel {
-class LibraryWrapper;
-
 /**
 Class for opening shared libraries.
 
@@ -46,8 +47,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL LibraryManagerImpl {
 public:
-  // opens all suitable libraries on a given path
-  int OpenAllLibraries(const std::string &, bool isRecursive = false);
+  enum LoadLibraries { Recursive, NonRecursive };
+  int openLibraries(const std::string &, LoadLibraries loadingBehaviour,
+                    const std::vector<std::string> &excludes);
   LibraryManagerImpl(const LibraryManagerImpl &) = delete;
   LibraryManagerImpl &operator=(const LibraryManagerImpl &) = delete;
 
@@ -56,17 +58,20 @@ private:
 
   /// Private Constructor
   LibraryManagerImpl();
-
   /// Private Destructor
-  virtual ~LibraryManagerImpl() = default;
+  ~LibraryManagerImpl() = default;
 
+  /// Load libraries from the given Poco::File path
+  /// Private so Poco::File doesn't leak to the public interface
+  int openLibraries(const Poco::File &, LoadLibraries loadingBehaviour,
+                    const std::vector<std::string> &excludes);
   /// Load a given library
-  bool loadLibrary(const std::string &filepath);
+  bool loadLibrary(Poco::Path filepath);
   /// Returns true if the library is to be loaded
-  bool skip(const std::string &filename);
+  bool skipLibrary(const std::string &filename,
+                   const std::vector<std::string> &excludes);
   /// Storage for the LibraryWrappers.
-  std::map<const std::string, boost::shared_ptr<Mantid::Kernel::LibraryWrapper>>
-      OpenLibs;
+  std::unordered_map<std::string, LibraryWrapper> m_openedLibs;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
