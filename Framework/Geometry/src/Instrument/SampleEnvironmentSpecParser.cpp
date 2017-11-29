@@ -15,6 +15,7 @@
 #include "Poco/SAX/SAXException.h"
 
 #include <boost/make_shared.hpp>
+#include <sstream>
 
 using namespace Poco::XML;
 
