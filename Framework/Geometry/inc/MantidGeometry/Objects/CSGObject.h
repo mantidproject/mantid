@@ -152,7 +152,7 @@ public:
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) const;
+                      double &ymin, double &zmin) const override;
 
   /// Return cached value of axis-aligned bounding box
   const BoundingBox &getBoundingBox() const override;
@@ -167,7 +167,7 @@ public:
 
   /// Select a random point within the object
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const;
+                                    const size_t) const override;
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                     const BoundingBox &activeRegion,
                                     const size_t) const override;
