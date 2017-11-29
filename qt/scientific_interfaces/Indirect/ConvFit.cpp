@@ -289,13 +289,9 @@ void ConvFit::run() {
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
   setFitFunctions(indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
-  auto cfs = sequentialFit(specMin, specMax, m_baseName);
 
-  // Add to batch alg runner and execute
-  m_batchAlgoRunner->addAlgorithm(cfs);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(sequentialFitComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  auto cfs = sequentialFit(specMin, specMax, m_baseName);
+  runFitAlgorithm(cfs, SLOT(algorithmComplete(bool)));
 }
 
 IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
@@ -350,12 +346,6 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   return cfs;
 }
 
-void ConvFit::sequentialFitComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(sequentialFitComplete(bool)));
-  algorithmComplete(error, m_baseName);
-}
-
 /**
  * Handles saving the workspace when save is clicked
  */
@@ -375,16 +365,14 @@ void ConvFit::plotClicked() {
  * Handles completion of the ConvolutionFitSequential algorithm.
  *
  * @param error True if the algorithm was stopped due to error, false otherwise
- * @param outputWSName The name of the output workspace created from running the
- *                     algorithm.
  */
-void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
+void ConvFit::algorithmComplete(bool error) {
 
   if (error) {
     return;
   }
 
-  std::string outputPrefix = outputWSName.toStdString();
+  std::string outputPrefix = m_baseName.toStdString();
 
   const auto resultName = outputPrefix + "_Result";
   MatrixWorkspace_sptr resultWs =
@@ -1112,9 +1100,7 @@ void ConvFit::singleFit() {
   if (!validate()) {
     return;
   }
-  // disconnect signal for single fit
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(singleFit(bool)));
+
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
   int specNo = m_uiForm.spPlotSpectrum->value();
@@ -1123,25 +1109,9 @@ void ConvFit::singleFit() {
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
   setFitFunctions(indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
+
   auto cfs = sequentialFit(specNoStr, specNoStr, m_baseName);
-
-  // Connection to singleFitComplete SLOT (post algorithm completion)
-  m_batchAlgoRunner->addAlgorithm(cfs);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(singleFitComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-/**
- * Handle completion of the fit algorithm for single fit.
- *
- * @param error :: If the fit algorithm failed
- */
-void ConvFit::singleFitComplete(bool error) {
-  // Disconnect signal for single fit complete
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(singleFitComplete(bool)));
-  algorithmComplete(error, m_baseName);
+  runFitAlgorithm(cfs, SLOT(algorithmComplete(bool)));
 }
 
 /**

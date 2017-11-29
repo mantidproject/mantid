@@ -23,8 +23,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(parent), m_ties() {
+IqtFit::IqtFit(QWidget *parent) : IndirectFitAnalysisTab(parent), m_ties() {
   m_uiForm.setupUi(parent);
   m_iqtFTree = m_propertyTree;
 }
@@ -88,8 +87,7 @@ void IqtFit::setup() {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
 
-  m_properties["LinearBackground"] =
-      m_grpManager->addProperty("Background");
+  m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
   m_properties["BGA0"] = m_dblManager->addProperty("A0");
   m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
   m_properties["LinearBackground"]->addSubProperty(m_properties["BGA0"]);
@@ -169,13 +167,9 @@ void IqtFit::run() {
   setMaximumSpectrum(m_uiForm.spSpectraMax->value());
 
   setFitFunctions(indexToFitFunctions(selectedSpectrum()));
-  IAlgorithm_sptr iqtFitAlg =
+  auto iqtFitAlg =
       iqtFitAlgorithm(inputWs, minimumSpectrum(), maximumSpectrum());
-
-  m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(iqtFitAlg, SLOT(algorithmComplete(bool)));
 }
 
 Mantid::API::IAlgorithm_sptr
@@ -257,8 +251,6 @@ void IqtFit::saveResult() {
  * @param outputWsName The name of the output workspace
  */
 void IqtFit::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
 
   if (error) {
     QString msg =
@@ -438,7 +430,7 @@ void IqtFit::updatePlot() {
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
-                                      m_uiForm.ppPlotBottom);
+                                     m_uiForm.ppPlotBottom);
 
   IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
   plotGuess();
@@ -628,18 +620,10 @@ void IqtFit::singleFit() {
   setFitFunctions(indexToFitFunctions(selectedSpectrum()));
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
   m_singleFitAlg = iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(singleFitComplete(bool)));
-
-  m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(m_singleFitAlg, SLOT(singleFitComplete(bool)));
 }
 
 void IqtFit::singleFitComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(singleFitComplete(bool)));
-
   algorithmComplete(error);
 
   // Can start updating the guess curve again

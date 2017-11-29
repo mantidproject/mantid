@@ -40,8 +40,6 @@ private slots:
   void hwhmUpdateRS(double);
   void fitContextMenu(const QPoint &);
   void showTieCheckbox(QString);
-  void sequentialFitComplete(bool error);
-  void singleFitComplete(bool error);
   void fitFunctionSelected(int fitTypeIndex);
   void saveClicked();
   void plotClicked();
@@ -78,7 +76,7 @@ private:
   Mantid::API::IAlgorithm_sptr sequentialFit(const std::string &specMin,
                                              const std::string &specMax,
                                              QString &outputWSName);
-  void algorithmComplete(bool error, const QString &outputWSName);
+  void algorithmComplete(bool error);
   Mantid::API::IFunction_sptr
   getFunction(const QString &functionName) const override;
 

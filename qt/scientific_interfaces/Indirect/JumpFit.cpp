@@ -117,12 +117,7 @@ void JumpFit::run() {
   m_fitAlg = createFitAlgorithm(createPopulatedFunction(
       functionName.toStdString(), m_properties[functionName]));
   m_baseName = m_fitAlg->getPropertyValue("OutputWorkspace");
-
-  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
-  // Connect algorithm runner to completion handler function
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(fitAlgDone(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(m_fitAlg, SLOT(fitAlgDone(bool)));
 }
 
 /**
@@ -131,8 +126,6 @@ void JumpFit::run() {
  * @param error True if the algorithm failed, false otherwise
  */
 void JumpFit::fitAlgDone(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(fitAlgDone(bool)));
   // Ignore errors
   if (error)
     return;

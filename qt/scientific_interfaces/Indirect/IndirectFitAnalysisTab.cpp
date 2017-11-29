@@ -159,12 +159,13 @@ QHash<QString, QHash<size_t, double>>
 IndirectFitAnalysisTab::combineParameterValues(
     const QHash<QString, QHash<size_t, double>> &parameterValues1,
     const QHash<QString, QHash<size_t, double>> &parameterValues2) {
-  auto combinedValues = parameterValues1;
+  QHash<QString, QHash<size_t, double>> combinedValues;
 
   for (const auto &parameterName : parameterValues1.keys()) {
+    const auto &values1 = parameterValues1[parameterName];
+    combinedValues[parameterName] = values1;
 
     if (parameterValues2.contains(parameterName)) {
-      const auto &values1 = combinedValues[parameterName];
       const auto &values2 = parameterValues2[parameterName];
 
       for (const auto &index : values2.keys()) {
@@ -440,6 +441,25 @@ void IndirectFitAnalysisTab::updatePlot(
                                         diffPreviewPlot);
   else
     IndirectDataAnalysisTab::updatePlot("", fitPreviewPlot, diffPreviewPlot);
+}
+
+/*
+ * Runs the specified fit algorithm and calls the specified fit
+ * complete method, once the algorithm has completed.
+ *
+ * @param fitAlgorithm      The fit algorithm to run.
+ * @param fitCompleteMethod The method to call after the algorithm
+ *                          has run.
+ */
+void IndirectFitAnalysisTab::runFitAlgorithm(
+    Mantid::API::IAlgorithm_sptr fitAlgorithm, const char *fitCompleteMethod) {
+  m_fitCompleteMethod = fitCompleteMethod;
+  m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          fitCompleteMethod);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), m_batchAlgoRunner,
+          SLOT(&API::BatchAlgorithmRunner::disconnect));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /*

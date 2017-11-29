@@ -108,13 +108,9 @@ void MSDFit::run() {
       std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
       model.toStdString() + "_msd";
 
-  IAlgorithm_sptr msdAlg =
+  auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
-  m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(msdAlg, SLOT(algorithmComplete(bool)));
 }
 
 void MSDFit::singleFit() {
@@ -131,13 +127,9 @@ void MSDFit::singleFit() {
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(fitSpec) + "_" + model.toStdString() + "_msd";
 
-  IAlgorithm_sptr msdAlg =
+  auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
-  m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(msdAlg, SLOT(algorithmComplete(bool)));
 }
 
 /*
@@ -203,8 +195,6 @@ void MSDFit::loadSettings(const QSettings &settings) {
  * @param error If the algorithm chain failed
  */
 void MSDFit::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
   if (error)
     return;
 
