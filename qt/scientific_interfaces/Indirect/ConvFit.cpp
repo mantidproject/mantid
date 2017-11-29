@@ -1326,7 +1326,7 @@ QString ConvFit::addPrefixToParameter(const QString &parameter,
   QString tempPrefix = m_usedTemperature ? "f1." : "f0.";
 
   if (functionName == "Delta Function")
-    return "f1.f1." + tempPrefix + parameter;
+    return "f1.f1." + QString::number(functionNumber) + "." + parameter;
   else
     return "f1.f1.f" + QString::number(functionNumber) + "." + tempPrefix +
            parameter;
