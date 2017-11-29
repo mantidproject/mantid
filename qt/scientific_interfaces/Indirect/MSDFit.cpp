@@ -39,9 +39,9 @@ void MSDFit::setup() {
   m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
   m_msdTree->addProperty(m_properties["FitRange"]);
 
-  m_properties["Gaussian"] = createFunctionProperty("MsdGauss");
-  m_properties["Peters"] = createFunctionProperty("MsdPeters");
-  m_properties["Yi"] = createFunctionProperty("MsdYi");
+  m_properties["Gaussian"] = createFunctionProperty("Gaussian");
+  m_properties["Peters"] = createFunctionProperty("Peters");
+  m_properties["Yi"] = createFunctionProperty("Yi");
 
   auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
   m_dblManager->setValue(m_properties["StartX"],
