@@ -49,11 +49,12 @@ public:
   virtual ~IEnggDiffFittingView() = default;
 
   /**
-   * returns directory of the file name to preform fitting on
+   * Get value of the input files text box
    *
-   * @return directory as std::string
+   * @return (hopefully) comma-separated list of focused files to load for 
+   * fitting
    */
-  virtual std::string getFittingRunNo() const = 0;
+  virtual std::string getFocusedFileNames() const = 0;
 
   /**
    * A list of dSpacing values to be translated into TOF
@@ -168,11 +169,11 @@ public:
   virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
-   * sets the fitting run number according to path
+   * Set value of the text box for input filenames
    *
-   * @param path of the selected focused run file
+   * @param Comma-separated list of files to add
    */
-  virtual void setFittingRunNo(const std::string &path) = 0;
+  virtual void setFocusedFileNames(const std::string &path) = 0;
 
   /**
    * gets the global vector in view containing focused file directory

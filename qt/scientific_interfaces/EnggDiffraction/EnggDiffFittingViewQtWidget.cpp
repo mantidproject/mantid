@@ -259,7 +259,7 @@ void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
 
-    setFittingRunNo(bankDir);
+    setFocusedFileNames(bankDir);
   }
 }
 
@@ -271,7 +271,7 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     auto item = listView->item(currentRow);
     QString itemText = item->text();
 
-    setFittingRunNo(itemText.toStdString());
+    setFocusedFileNames(itemText.toStdString());
     FittingRunNo();
   }
 }
@@ -474,15 +474,15 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   }
 
   // MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(paths[0]);
-  setFittingRunNo(paths.join(",").toStdString());
+  setFocusedFileNames(paths.join(",").toStdString());
   // getBanks();
 }
 
-void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
-  m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(path));
+void EnggDiffFittingViewQtWidget::setFocusedFileNames(const std::string &paths) {
+  m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(paths));
 }
 
-std::string EnggDiffFittingViewQtWidget::getFittingRunNo() const {
+std::string EnggDiffFittingViewQtWidget::getFocusedFileNames() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
 }
 

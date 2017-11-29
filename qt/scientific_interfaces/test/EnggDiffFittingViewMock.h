@@ -40,7 +40,7 @@ public:
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual std::string fittingRunNo() const;
-  MOCK_CONST_METHOD0(getFittingRunNo, std::string());
+  MOCK_CONST_METHOD0(getFocusedFileNames, std::string());
 
   // virtual std::string getExpectedPeaksInput() const;
   MOCK_CONST_METHOD0(getExpectedPeaksInput, std::string());
@@ -118,7 +118,7 @@ public:
   MOCK_METHOD1(setFittingRunNumVec, void(std::vector<std::string> assignVec));
 
   // sets the fitting run number according to path
-  MOCK_METHOD1(setFittingRunNo, void(const std::string &path));
+  MOCK_METHOD1(setFocusedFileNames, void(const std::string &path));
 
   // To determine whether the current loop is multi-run or single to avoid
   // regenerating the list - view widget when not required

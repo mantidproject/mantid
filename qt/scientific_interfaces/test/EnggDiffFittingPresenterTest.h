@@ -105,7 +105,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getFocusedFileNames()).Times(1).WillOnce(Return(""));
 
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -225,7 +225,7 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(1)
         .WillRepeatedly(Return(std::string(g_focusedBankFile)));
 
@@ -247,7 +247,7 @@ public:
 
     // inputs from user - invalid run given this can't be numerical
     // only as that has the chance of matching a file so use a prefix
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(1)
         .WillOnce(Return(std::string("ENGINX1")));
 
@@ -266,7 +266,7 @@ public:
     testing::StrictMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(1)
         .WillOnce(Return(std::string("")));
 
@@ -289,7 +289,7 @@ public:
     std::vector<std::string> splittedFileVec;
 
     // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(1)
         .WillOnce(Return(g_focusedFittingRunNo));
 
@@ -325,7 +325,7 @@ public:
     std::vector<std::string> splittedFileVec;
 
     // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(2)
         .WillRepeatedly(Return("241391"));
 
@@ -370,7 +370,7 @@ public:
     splittedFileVec.emplace_back("1");
 
     // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
+    EXPECT_CALL(mockView, getFocusedFileNames())
         .Times(1)
         .WillOnce(Return(g_focusedBankFile));
 
@@ -402,7 +402,7 @@ public:
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
@@ -698,7 +698,7 @@ public:
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
     EXPECT_CALL(mockView, focusingDir()).Times(0);
 

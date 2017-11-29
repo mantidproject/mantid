@@ -274,7 +274,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
 void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   // receive the run number from the text-field
-  const std::string userPathInput = m_view->getFittingRunNo();
+  const std::string userPathInput = m_view->getFocusedFileNames();
 
   if (m_previousInput == userPathInput || userPathInput.empty()) {
     // Short circuit the checks and skip any warnings
@@ -334,7 +334,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   } else if (!pocoUserPathInput.isFile()) {
     // foundFiles is not empty and this is a directory
     const std::string firstDir = foundFullFilePaths[0];
-    m_view->setFittingRunNo(firstDir);
+    m_view->setFocusedFileNames(firstDir);
   }
 }
 
@@ -753,7 +753,7 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 void EnggDiffFittingPresenter::processStart() {}
 
 void EnggDiffFittingPresenter::processLoad() {
-  const std::string filenames = m_view->getFittingRunNo();
+  const std::string filenames = m_view->getFocusedFileNames();
   if (filenames.empty()) {
     m_view->userWarning("No file selected", "Please enter filename(s) to load");
     return;

@@ -89,9 +89,9 @@ public:
 
   std::vector<std::string> logMsgs() const override { return m_logMsgs; }
 
-  void setFittingRunNo(const std::string &path) override;
+  void setFocusedFileNames(const std::string &paths) override;
 
-  std::string getFittingRunNo() const override;
+  std::string getFocusedFileNames() const override;
 
   void enableFitAllButton(bool enable) const override;
 
