@@ -187,6 +187,16 @@ public:
     TS_ASSERT_EQUALS(fittedPeaksWS->getNumberHistograms(), 4);
   }
 
+  void test_getNumFocusedWorkspaces() {
+    auto model = EnggDiffFittingModelAddWSExposed();
+
+    addSampleWorkspaceToModel(123, 1, model);
+    addSampleWorkspaceToModel(456, 2, model);
+    addSampleWorkspaceToModel(789, 1, model);
+
+    TS_ASSERT_EQUALS(model.getNumFocusedWorkspaces(), 3);
+  }
+
 private:
   const static std::string FOCUSED_WS_FILENAME;
   const static int FOCUSED_WS_RUN_NUMBER;

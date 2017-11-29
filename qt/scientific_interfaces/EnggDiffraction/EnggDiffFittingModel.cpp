@@ -196,6 +196,15 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
   addToRunMap(runNumber, bank, m_alignedWorkspaceMap, alignedFocusedWS);
 }
 
+size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
+  size_t numWorkspaces = 0;
+  
+  for (const auto &bank : m_focusedWorkspaceMap) {
+    numWorkspaces += bank.size();
+  }
+  return numWorkspaces;
+}
+
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
                                           const size_t bank) const {

@@ -55,6 +55,8 @@ public:
 
   MOCK_METHOD2(createFittedPeaksWS,
                void(const int runNumber, const size_t bank));
+
+  MOCK_CONST_METHOD0(getNumFocusedWorkspaces, size_t());
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
