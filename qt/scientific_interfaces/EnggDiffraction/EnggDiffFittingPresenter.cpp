@@ -292,11 +292,21 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   std::vector<std::string> foundFullFilePaths;
 
+  // returns empty if no directory is found
+  const std::string parsedUserInput = pocoUserPathInput.toString();
+
+  // split directory if 'ENGINX_' found by '_.'
+  std::vector<std::string> splitBaseName;
+  if (parsedUserInput.find(m_view->getCurrentInstrument() + "_") !=
+      std::string::npos) {
+    boost::split(splitBaseName, parsedUserInput, boost::is_any_of("_."));
+  }
+
   try {
     // if input file is a directory and successfully splitBaseName
     // or when default bank is set or changed, the text-field is updated with
     // selected bank directory which would trigger this function again
-    if (pocoUserPathInput.isFile()) {
+    if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
       foundFullFilePaths = processFullPathInput(pocoUserPathInput);
       // if given a multi-run
     } else if (userPathInput.find("-") != std::string::npos) {
