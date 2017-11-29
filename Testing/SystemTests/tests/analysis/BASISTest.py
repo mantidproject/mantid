@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import stresstesting
 from mantid import config
-from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces, ElasticWindowMultiple)
+from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces,
+                              ElasticWindowMultiple)
 
 
 class PreppingMixin(object):
@@ -66,7 +67,9 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         :return: strings for workspace and file name
         """
         self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
+
 
 class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a crystal.
