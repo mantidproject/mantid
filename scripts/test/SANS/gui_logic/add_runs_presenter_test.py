@@ -11,6 +11,7 @@ from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from fake_signal import FakeSignal
+from assert_called import assert_called
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -30,6 +31,10 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
             self._make_mock_summation_settings_presenter()
         self.run_selector_presenter = \
             self._make_mock_run_selector_presenter()
+
+    def set_up_fake_child_views(self):
+        self.fake_run_selector_view = 'Fake Run Selector View'
+        self.fake_summation_settings_view = 'Fake Summation Settings View'
 
     def set_up_mock_child_presenters_with_default_summation_settings(self):
         self.set_up_mock_child_presenters()
@@ -51,26 +56,31 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
+    def _make_mock_run_selection(self):
+        mock_runs = mock.create_autospec(RunSelection, spec_set=True)
+        mock_runs.__iter__.return_value = []
+        return mock_runs
+
     def _make_mock_run_summation(self):
         return mock.create_autospec(RunSummation, spec_set=True)
-
-    def _make_mock_run_selection(self):
-        return mock.create_autospec(RunSelection, spec_set=True)
 
     def _make_run_file(self, path):
         return RunFile(path)
 
+    def _make_fake_runs(self, run_paths):
+        fake_selection = self._make_mock_run_selection()
+        fake_selection.__iter__.return_value = \
+            [RunFile(path) for path in run_paths]
+        return fake_selection
+
 
 class AddRunsPagePresenterInitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
-        self.set_up_fake_views()
+        self.set_up_fake_child_views()
         self.set_up_mock_child_presenters_with_default_summation_settings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
 
-    def set_up_fake_views(self):
-        self.fake_run_selector_view = 'Fake Run Selector View'
-        self.fake_summation_settings_view = 'Fake Summation Settings View'
 
     def _make_presenter_with_child_presenters(self,
                                               run_selection,
@@ -109,7 +119,7 @@ class AddRunsPagePresenterInitializationTest(AddRunsPagePresenterTestCase):
         self.assertEqual(self.view, call_args[1])
 
 
-class AddRunsPagePresenterSummationConfigTestCase(AddRunsPagePresenterTestCase):
+class AddRunsPagePresenterSelectionMockingTestCase(AddRunsPagePresenterTestCase):
     # Creates a factory function which stores the run summation
     # change callback allowing us to notify the presenter when
     # the view is updated.
@@ -124,7 +134,7 @@ class AddRunsPagePresenterSummationConfigTestCase(AddRunsPagePresenterTestCase):
         self._on_model_updated(new_selection)
 
 
-class AddRunsPagePresenterModelConfigTest(AddRunsPagePresenterSummationConfigTestCase):
+class AddRunsPagePresenterSummationTest(AddRunsPagePresenterSelectionMockingTestCase):
     def setUp(self):
         self.set_up_mock_child_presenters()
         self.view = self._make_mock_view()
@@ -139,11 +149,6 @@ class AddRunsPagePresenterModelConfigTest(AddRunsPagePresenterSummationConfigTes
                                     self.view,
                                     None)
 
-    def _make_fake_runs(self, run_paths):
-        fake_selection = self._make_mock_run_selection()
-        fake_selection.__iter__.return_value = \
-            [RunFile(path) for path in run_paths]
-        return fake_selection
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
@@ -167,7 +172,7 @@ class AddRunsPagePresenterModelConfigTest(AddRunsPagePresenterSummationConfigTes
                                          '3')
 
 
-class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSummationConfigTestCase):
+class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSelectionMockingTestCase):
     def setUp(self):
         self.set_up_mock_child_presenters_with_default_summation_settings()
         self.view = self._make_mock_view()
@@ -252,14 +257,34 @@ class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSummationConfigTe
         self._update_selection_model(self._make_fake_runs(['5', '4']))
         self.view.set_out_file_name.assert_called_with('5')
 
-class AddRunsPagePresenterSumButtonTest(AddRunsPagePresenterTestCase):
+
+class AddRunsPagePresenterSumButtonTest(AddRunsPagePresenterSelectionMockingTestCase):
     def setUp(self):
-        pass
+        self.set_up_mock_child_presenters_with_default_summation_settings()
+        self.run_summation = self._make_mock_run_summation()
+        self.view = self._make_mock_view()
+        self.presenter = self._make_presenter()
+
+    def _make_presenter(self):
+        return AddRunsPagePresenter(
+            self._make_mock_run_summation(),
+            self._capture_on_change_callback(self.run_selector_presenter),
+            self._just_use_summation_settings_presenter(),
+            self.view,
+            None)
 
     def test_enables_sum_button_when_row_added(self):
-        pass
+        fake_run_selection = self._make_fake_runs(['5'])
+        fake_run_selection.has_any_runs.return_value = True
+        self._update_selection_model(fake_run_selection)
+        assert_called(self.view.enable_sum)
 
-    def test_disables_sum_button_when_row_removed(self):
-        pass
+    def test_disables_sum_button_when_no_rows(self):
+        fake_run_selection = self._make_fake_runs(['5'])
+        fake_run_selection.has_any_runs.return_value = True
+        self._update_selection_model(fake_run_selection)
+        fake_run_selection.has_any_runs.return_value = False
+        self._update_selection_model(fake_run_selection)
+        assert_called(self.view.disable_sum)
 
 if __name__ == '__main__': unittest.main()
