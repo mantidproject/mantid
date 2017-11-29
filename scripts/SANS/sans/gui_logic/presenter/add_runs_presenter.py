@@ -36,7 +36,6 @@ class AddRunsPagePresenter(object):
         return max(names) if names else ''
 
     def _sum_base_file_name(self, run_selection):
-        print("Using from " + str(self))
         if self._use_generated_file_name:
             return self._generated_output_file_name
         else:
@@ -50,7 +49,6 @@ class AddRunsPagePresenter(object):
             self._view.disable_sum()
 
     def update_output_filename(self, run_selection):
-        print("Set for " + str(self))
         self._generated_output_file_name = self._make_base_file_name_from_selection(run_selection)
         if self._use_generated_file_name:
             self._view.set_out_file_name(self._generated_output_file_name)
@@ -62,7 +60,6 @@ class AddRunsPagePresenter(object):
         self._use_generated_file_name = False
 
     def _handle_sum(self):
-        print("handle_sum")
         run_selection = self._run_selector_presenter.run_selection()
         self._sum_runs(run_selection,
                        self._default_instrument(),
