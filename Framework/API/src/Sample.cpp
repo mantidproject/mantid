@@ -26,9 +26,9 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(), m_lattice(nullptr),
-      m_crystalStructure(), m_samples(), m_geom_id(0), m_thick(0.0),
-      m_height(0.0), m_width(0.0) {}
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(),
+      m_lattice(nullptr), m_crystalStructure(), m_samples(), m_geom_id(0),
+      m_thick(0.0), m_height(0.0), m_width(0.0) {}
 
 /**
  * Copy constructor

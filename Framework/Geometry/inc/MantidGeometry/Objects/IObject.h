@@ -76,8 +76,9 @@ public:
   virtual const BoundingBox &getBoundingBox() const = 0;
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
-  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) const = 0;
+  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax,
+                              double &xmin, double &ymin,
+                              double &zmin) const = 0;
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
