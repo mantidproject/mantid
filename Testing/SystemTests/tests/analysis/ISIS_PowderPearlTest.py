@@ -110,7 +110,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        self.tolerance = 0.1  # Required for difference in spline data between operating systems
+        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
@@ -135,6 +135,7 @@ class CreateCalTest(stresstesting.MantidStressTest):
         self.calibration_results = run_create_cal()
 
     def validate(self):
+        self.tolerance = 1e-5
         return "PRL98494_tt88_grouped", "ISIS_Powder-PEARL98494_grouped.nxs"
 
     def cleanup(self):
