@@ -2,7 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4.QtCore import QThread
 
-import sys,traceback
+import sys
+import traceback
+
 
 class ThreadModel(QThread):
 
@@ -24,7 +26,7 @@ class ThreadModel(QThread):
         except:
             exc_type,exc_value,exc_traceback =sys.exc_info()
             # remove the stack trace
-            exc_traceback=None
+            exc_traceback=None #noqa
         return
 
     def cancel(self):
