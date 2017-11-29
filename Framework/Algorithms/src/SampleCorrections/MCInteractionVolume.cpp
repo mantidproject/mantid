@@ -40,8 +40,8 @@ double attenuation(double rho, double sigma, double length) {
 MCInteractionVolume::MCInteractionVolume(
     const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
     const size_t maxScatterAttempts)
-    : m_sample(sample.getShape().clone()), m_env(nullptr), m_activeRegion(activeRegion),
-      m_maxScatterAttempts(maxScatterAttempts) {
+    : m_sample(sample.getShape().clone()), m_env(nullptr),
+      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts) {
   if (!m_sample->hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
@@ -93,7 +93,7 @@ double MCInteractionVolume::calculateAbsorption(
         m_env->generatePoint(rng, m_activeRegion, m_maxScatterAttempts);
   } else {
     scatterPos = m_sample->generatePointInObject(rng, m_activeRegion,
-                                                m_maxScatterAttempts);
+                                                 m_maxScatterAttempts);
   }
   auto toStart = startPos - scatterPos;
   toStart.normalize();

@@ -71,11 +71,11 @@ private:
       double pixelSpacing, const double bankDistanceFromSample,
       const double sourceSampleDistance);
   Geometry::IObject_sptr createCappedCylinder(double radius, double height,
-                                             const Kernel::V3D &baseCentre,
-                                             const Kernel::V3D &axis,
-                                             const std::string &id);
+                                              const Kernel::V3D &baseCentre,
+                                              const Kernel::V3D &axis,
+                                              const std::string &id);
   Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre,
-                                     const std::string &id);
+                                      const std::string &id);
   std::vector<double> evalFunction(const std::string &functionString,
                                    const std::vector<double> &xVal,
                                    double noiseScale);

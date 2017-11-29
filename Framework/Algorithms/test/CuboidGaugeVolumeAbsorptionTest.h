@@ -96,8 +96,7 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Define a sample shape
-    auto sampleShape =
-        ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
     testWS->mutableSample().setShape(sampleShape);
 
     TS_ASSERT_THROWS_NOTHING(

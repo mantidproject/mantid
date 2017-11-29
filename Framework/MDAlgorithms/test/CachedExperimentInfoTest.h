@@ -216,8 +216,7 @@ private:
     ObjComponent *samplePos = new ObjComponent("samplePos");
     instrument->add(samplePos);
     instrument->markAsSamplePos(samplePos);
-    auto sampleShape =
-        ComponentCreationHelper::createCuboid(0.1, 0.2, 0.3);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.1, 0.2, 0.3);
     m_expt->mutableSample().setShape(sampleShape);
 
     if (addChopper == WithChopper) {
@@ -230,8 +229,7 @@ private:
     if (addAperture == WithAperture) {
       ObjComponent *aperture = new ObjComponent("aperture");
       aperture->setPos(m_aperturePos);
-      auto shape =
-          ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
+      auto shape = ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
       aperture->setShape(shape);
       instrument->add(aperture);
     }

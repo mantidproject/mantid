@@ -596,8 +596,7 @@ public:
     xmlShape += "</c5one>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    auto shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -612,8 +611,7 @@ public:
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    auto shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
@@ -628,8 +626,7 @@ public:
     xmlShape += "</cone>";
     xmlShape += "<algebra val=\"shape\" /> ";
 
-    auto shape_sptr =
-        getObject(xmlShape); // should return empty object
+    auto shape_sptr = getObject(xmlShape); // should return empty object
 
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }

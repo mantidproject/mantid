@@ -62,8 +62,7 @@ private:
   void parseAndAddContainers(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
   Container_const_sptr parseContainer(Poco::XML::Element *element) const;
-  boost::shared_ptr<IObject>
-  parseComponent(Poco::XML::Element *element) const;
+  boost::shared_ptr<IObject> parseComponent(Poco::XML::Element *element) const;
 
   // Members
   MaterialsIndex m_materials;

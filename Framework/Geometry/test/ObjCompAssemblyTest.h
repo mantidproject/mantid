@@ -342,8 +342,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
-    auto s =
-        Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+    auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
     Component *det1 = new ObjComponent("Det1Name", s);
@@ -379,8 +378,7 @@ public:
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</segmented-cylinder>";
-    auto s =
-        Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+    auto s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
 
     ObjCompAssembly bank("BankName");
     Component *det1 = new ObjComponent("Det1Name", s);

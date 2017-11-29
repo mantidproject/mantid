@@ -86,12 +86,12 @@ class MANTID_GEOMETRY_DLL ShapeFactory {
 public:
   boost::shared_ptr<IObject> createShape(Poco::XML::Element *pElem);
   boost::shared_ptr<IObject> createShape(std::string shapeXML,
-                                            bool addTypeTag = true);
+                                         bool addTypeTag = true);
 
   boost::shared_ptr<IObject> createHexahedralShape(double xlb, double xlf,
-                                                     double xrf, double xrb,
-                                                     double ylb, double ylf,
-                                                     double yrf, double yrb);
+                                                   double xrf, double xrb,
+                                                   double ylb, double ylf,
+                                                   double yrf, double yrb);
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,

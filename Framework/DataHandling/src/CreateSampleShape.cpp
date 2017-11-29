@@ -51,9 +51,10 @@ void CreateSampleShape::exec() {
   } else {
     std::ostringstream msg;
     msg << "Object has invalid shape.";
-    if (auto csgShape = dynamic_cast<Geometry::CSGObject*>(shape.get())) {
+    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
       msg << " TopRule = " << csgShape->topRule()
-          << ", number of surfaces = " << csgShape->getSurfacePtr().size() << "\n";
+          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+          << "\n";
     }
     throw std::runtime_error(msg.str());
   }

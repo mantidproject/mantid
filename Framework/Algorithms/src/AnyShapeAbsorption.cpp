@@ -43,7 +43,8 @@ std::string AnyShapeAbsorption::sampleXML() {
 void AnyShapeAbsorption::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
-  auto integrationVolume = boost::shared_ptr<const IObject>(m_sampleObject->clone());
+  auto integrationVolume =
+      boost::shared_ptr<const IObject>(m_sampleObject->clone());
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = constructGaugeVolume();
   }
@@ -120,7 +121,8 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
                    YSliceThickness * ZSliceThickness;
 }
 
-boost::shared_ptr<const Geometry::IObject> AnyShapeAbsorption::constructGaugeVolume() {
+boost::shared_ptr<const Geometry::IObject>
+AnyShapeAbsorption::constructGaugeVolume() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 

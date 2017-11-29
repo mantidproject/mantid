@@ -60,8 +60,8 @@ std::string cappedCylinderXML(double radius, double height,
  * Create a capped cylinder object
  */
 IObject_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+                                  const V3D &baseCentre, const V3D &axis,
+                                  const std::string &id) {
   return ShapeFactory().createShape(
       cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
@@ -85,7 +85,7 @@ std::string sphereXML(double radius, const V3D &centre, const std::string &id) {
  * Create a sphere object
  */
 IObject_sptr createSphere(double radius, const V3D &centre,
-                         const std::string &id) {
+                          const std::string &id) {
   ShapeFactory shapeMaker;
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
@@ -93,7 +93,7 @@ IObject_sptr createSphere(double radius, const V3D &centre,
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
 IObject_sptr createCuboid(double x_side_length, double y_side_length,
-                         double z_side_length) {
+                          double z_side_length) {
   double szX = x_side_length;
   double szY = (y_side_length == -1.0 ? szX : y_side_length);
   double szZ = (z_side_length == -1.0 ? szX : z_side_length);
@@ -149,7 +149,7 @@ ObjComponent *createSingleObjectComponent() {
  * r2
  */
 IObject_sptr createHollowShell(double innerRadius, double outerRadius,
-                              const V3D &centre) {
+                               const V3D &centre) {
   std::string wholeXML = sphereXML(innerRadius, centre, "inner") + "\n" +
                          sphereXML(outerRadius, centre, "outer") + "\n" +
                          "<algebra val=\"(outer (# inner))\" />";
@@ -307,8 +307,7 @@ Instrument_sptr createTestInstrumentCylindrical(
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  auto sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  auto sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
   testInst->setPos(samplePos);
@@ -479,8 +478,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  auto sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  auto sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
@@ -549,8 +547,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   testInst->markAsSource(source);
 
   // Define a sample as a simple sphere
-  auto sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  auto sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);

@@ -33,8 +33,7 @@ void DefineGaugeVolume::exec() {
   // Get the XML definition
   const std::string shapeXML = getProperty("ShapeXML");
   // Try creating the shape to make sure the input's valid
-  auto shape_sptr =
-      Geometry::ShapeFactory().createShape(shapeXML);
+  auto shape_sptr = Geometry::ShapeFactory().createShape(shapeXML);
   if (!shape_sptr->hasValidShape()) {
     g_log.error("Invalid shape definition provided. Gauge Volume NOT added to "
                 "workspace.");

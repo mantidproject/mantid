@@ -81,7 +81,7 @@ public:
 
   void testCopyConstructorGivesObjectWithSameAttributes() {
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
-    auto &original = dynamic_cast<CSGObject&>(*original_ptr);
+    auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
@@ -108,7 +108,7 @@ public:
 
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
-    auto &original = dynamic_cast<CSGObject&>(*original_ptr);
+    auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
@@ -118,7 +118,7 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original.getGeometryHandler()));
 
-    CSGObject lhs;   // initialize
+    CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
     objType = -1;
@@ -572,7 +572,7 @@ public:
 
   void testComplementWithTwoPrimitives() {
     auto shell_ptr = ComponentCreationHelper::createHollowShell(0.5, 1.0);
-    auto shell = dynamic_cast<CSGObject*>(shell_ptr.get());
+    auto shell = dynamic_cast<CSGObject *>(shell_ptr.get());
 
     TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
 
@@ -755,7 +755,7 @@ public:
   */
   {
     auto geom_obj_ptr = ComponentCreationHelper::createSphere(4.1);
-    auto geom_obj = dynamic_cast<CSGObject*>(geom_obj_ptr.get());
+    auto geom_obj = dynamic_cast<CSGObject *>(geom_obj_ptr.get());
     double satol = 2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
@@ -1114,7 +1114,7 @@ public:
   */
   {
     auto geom_obj_ptr = ComponentCreationHelper::createSphere(4.1);
-    auto geom_obj = dynamic_cast<CSGObject*>(geom_obj_ptr.get());
+    auto geom_obj = dynamic_cast<CSGObject *>(geom_obj_ptr.get());
     double satol = 1e-3; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z

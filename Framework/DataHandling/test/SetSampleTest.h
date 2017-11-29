@@ -121,7 +121,8 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // New shape
-    auto &sphere = dynamic_cast<const Mantid::Geometry::CSGObject&>(inputWS->sample().getShape());
+    auto &sphere = dynamic_cast<const Mantid::Geometry::CSGObject &>(
+        inputWS->sample().getShape());
     TS_ASSERT_DELTA(0.02, getSphereRadius(sphere), 1e-08);
     // Old material
     const auto &material = inputWS->sample().getMaterial();
@@ -193,7 +194,10 @@ public:
     // New shape
     // radius was 0.1 in <samplegeometry> set in constructor now 0.4
     // from createOverrideGeometryProps
-    TS_ASSERT_DELTA(0.4, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject&>(sampleShape)), 1e-08);
+    TS_ASSERT_DELTA(
+        0.4, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                 sampleShape)),
+        1e-08);
   }
 
   void test_Setting_Geometry_As_FlatPlate() {

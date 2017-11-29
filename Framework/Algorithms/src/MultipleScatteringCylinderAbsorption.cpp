@@ -140,7 +140,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, coeff3, 0.0, coeff3,
                         coeff1);
-    auto shape = boost::shared_ptr<IObject>(in_WS->sample().getShape().clone()); 
+    auto shape = boost::shared_ptr<IObject>(in_WS->sample().getShape().clone());
     shape->setMaterial(Material("SetInMultipleScattering", neutron, coeff2));
     in_WS->mutableSample().setShape(shape);
   }

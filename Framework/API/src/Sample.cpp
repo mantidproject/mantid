@@ -353,7 +353,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
       m_shape = shapeMaker.createShape(shape_xml,
-                                        false /*Don't wrap with <type> tag*/);
+                                       false /*Don't wrap with <type> tag*/);
     }
     Kernel::Material material;
     material.loadNexus(file, "material");

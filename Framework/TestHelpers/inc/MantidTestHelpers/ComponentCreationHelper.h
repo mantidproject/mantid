@@ -89,8 +89,8 @@ createSphere(double radius,
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
 Mantid::Geometry::IObject_sptr createCuboid(double x_side_length,
-                                           double y_side_length = -1.0,
-                                           double z_side_length = -1.0);
+                                            double y_side_length = -1.0,
+                                            double z_side_length = -1.0);
 /**
 * Create a component assembly at the origin made up of 4 cylindrical detectors
 */

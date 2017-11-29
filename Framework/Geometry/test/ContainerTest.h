@@ -51,7 +51,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         sampleShape = can->createSampleShape(Container::ShapeArgs()));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject&>(*sampleShape)), 1e-10);
+    TS_ASSERT_DELTA(
+        1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                 *sampleShape)),
+        1e-10);
   }
 
   void test_CreateSampleShape_Args_Override_Defaults() {
@@ -64,7 +67,10 @@ public:
     Container::ShapeArgs args = {{"radius", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(0.5, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject&>(*sampleShape)), 1e-10);
+    TS_ASSERT_DELTA(
+        0.5, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                 *sampleShape)),
+        1e-10);
   }
 
   void test_CreateSampleShape_Args_Not_Matching_Do_Nothing() {
@@ -77,7 +83,10 @@ public:
     Container::ShapeArgs args = {{"height", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject&>(*sampleShape)), 1e-10);
+    TS_ASSERT_DELTA(
+        1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                 *sampleShape)),
+        1e-10);
   }
 
   // ---------------------------------------------------------------------------

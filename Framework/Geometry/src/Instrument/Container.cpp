@@ -47,20 +47,20 @@ void updateTreeValues(Poco::XML::Element *root,
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
-Container::Container() : m_shape(boost::make_shared<CSGObject>()) {
-}
+Container::Container() : m_shape(boost::make_shared<CSGObject>()) {}
 
-Container::Container(IObject_sptr shape) : m_shape(shape) {
-}
+Container::Container(IObject_sptr shape) : m_shape(shape) {}
 
-Container::Container(const Container& container) : 
-  m_shape(IObject_sptr(container.m_shape->clone())), m_sampleShapeXML(container.m_sampleShapeXML) {}
+Container::Container(const Container &container)
+    : m_shape(IObject_sptr(container.m_shape->clone())),
+      m_sampleShapeXML(container.m_sampleShapeXML) {}
 
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml) : m_shape(boost::make_shared<CSGObject>(xml)) {}
+Container::Container(std::string xml)
+    : m_shape(boost::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a defintion of the sample shape

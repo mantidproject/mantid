@@ -43,7 +43,8 @@ public:
     auto canShape = ComponentCreationHelper::cappedCylinderXML(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
     SampleEnvironment *kit = new SampleEnvironment(
-        envName, boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
+        envName,
+        boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);

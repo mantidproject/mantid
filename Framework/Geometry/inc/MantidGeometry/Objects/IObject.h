@@ -56,11 +56,12 @@ class MANTID_GEOMETRY_DLL IObject {
 public:
   virtual bool isValid(const Kernel::V3D &) const = 0;
   virtual bool isOnSide(const Kernel::V3D &) const = 0;
-  virtual int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const = 0;
+  virtual int calcValidType(const Kernel::V3D &Pt,
+                            const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
   virtual int setObject(const int ON, const std::string &Ln) = 0;
   virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
-  virtual IObject* clone() const = 0;
+  virtual IObject *clone() const = 0;
 
   virtual int getName() const = 0;
   virtual void setName(const int nx) = 0;
@@ -76,11 +77,13 @@ public:
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
-  virtual Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const = 0;
-  virtual Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-    const BoundingBox &activeRegion,
-    const size_t) const = 0;
+  virtual Kernel::V3D
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t) const = 0;
+  virtual Kernel::V3D
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t) const = 0;
 
   virtual void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;

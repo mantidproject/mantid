@@ -50,7 +50,7 @@ void MantidGLWidget::setDisplayObject(
   m_z_rot = 0.0;
 
   auto boundingBox = m_display_object->getBoundingBox();
-  double bbox[6] = {boundingBox.xMax(),  boundingBox.yMax(),  boundingBox.zMax(),
+  double bbox[6] = {boundingBox.xMax(), boundingBox.yMax(), boundingBox.zMax(),
                     boundingBox.xMin(), boundingBox.yMin(), boundingBox.zMin()};
 
   // Calculate the widths and save for resize events
