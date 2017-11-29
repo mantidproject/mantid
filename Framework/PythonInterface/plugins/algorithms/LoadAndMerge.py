@@ -7,7 +7,7 @@ from mantid.api import AlgorithmFactory, AlgorithmManager, MultipleFileProperty,
 from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, mtd
 
 
-class LoadMergeRuns(PythonAlgorithm):
+class LoadAndMerge(PythonAlgorithm):
 
     _loader = None
     _version = None
@@ -108,7 +108,7 @@ class LoadMergeRuns(PythonAlgorithm):
                 to_group.append(runnumber)
             else:
                 runnumbers = self._prefix
-                first = ''
+                first = ''s
                 for i, run in enumerate(runs_to_sum):
                     runnumber = os.path.basename(run).split('.')[0]
                     runnumbers += '_' + runnumber
@@ -131,4 +131,4 @@ class LoadMergeRuns(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[output])
 
-AlgorithmFactory.subscribe(LoadMergeRuns)
+AlgorithmFactory.subscribe(LoadAndMerge)

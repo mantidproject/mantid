@@ -2,10 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import LoadMergeRuns, config, mtd
+from mantid.simpleapi import LoadAndMerge, config, mtd
 
 
-class LoadMergeRunsTest(unittest.TestCase):
+class LoadAndMergeTest(unittest.TestCase):
 
     def setUp(self):
         config.setFacility('ILL')
@@ -13,21 +13,21 @@ class LoadMergeRunsTest(unittest.TestCase):
         config.appendDataSearchSubDir('ILL/D20/')
 
     def test_single_run_load(self):
-        out1 = LoadMergeRuns(Filename='170257')
+        out1 = LoadAndMerge(Filename='170257')
         self.assertTrue(out1)
         self.assertEquals(out1.getName(), 'out1')
         self.assertTrue(isinstance(out1, MatrixWorkspace))
         mtd.clear()
 
     def test_many_runs_summed(self):
-        out2 = LoadMergeRuns(Filename='170257+170258',LoaderName='LoadILLIndirect')
+        out2 = LoadAndMerge(Filename='170257+170258',LoaderName='LoadILLIndirect')
         self.assertTrue(out2)
         self.assertEquals(out2.getName(), 'out2')
         self.assertTrue(isinstance(out2, MatrixWorkspace))
         mtd.clear()
 
     def test_many_runs_listed(self):
-        out3 = LoadMergeRuns(Filename='170257,170258',LoaderName='LoadILLIndirect')
+        out3 = LoadAndMerge(Filename='170257,170258',LoaderName='LoadILLIndirect')
         self.assertTrue(out3)
         self.assertEquals(out3.getName(), 'out3')
         self.assertTrue(isinstance(out3, WorkspaceGroup))
@@ -39,7 +39,7 @@ class LoadMergeRunsTest(unittest.TestCase):
         mtd.clear()
 
     def test_many_runs_mixed(self):
-        out4 = LoadMergeRuns(Filename='170257+170258,170300+170302',LoaderName='LoadILLIndirect')
+        out4 = LoadAndMerge(Filename='170257+170258,170300+170302',LoaderName='LoadILLIndirect')
         self.assertTrue(out4)
         self.assertEquals(out4.getName(), 'out4')
         self.assertTrue(isinstance(out4, WorkspaceGroup))
@@ -51,19 +51,19 @@ class LoadMergeRunsTest(unittest.TestCase):
         mtd.clear()
 
     def test_merge_options(self):
-        self.assertRaises(RuntimeError,LoadMergeRuns,Filename='170300+170301',
+        self.assertRaises(RuntimeError,LoadAndMerge,Filename='170300+170301',
                           OutputWorkspace='out5',LoaderName='LoadILLIndirect',
                           MergeRunsOptions=dict({'FailBehaviour':'Stop'}))
 
     def test_specific_loader(self):
-        out5 = LoadMergeRuns(Filename='170257',LoaderName='LoadILLIndirect',)
+        out5 = LoadAndMerge(Filename='170257',LoaderName='LoadILLIndirect',)
         self.assertTrue(out5)
         self.assertEquals(out5.getName(), 'out5')
         self.assertTrue(isinstance(out5, MatrixWorkspace))
         mtd.clear()
 
     def test_loader_option(self):
-        out6 = LoadMergeRuns(Filename='967101',LoaderName='LoadILLDiffraction',
+        out6 = LoadAndMerge(Filename='967101',LoaderName='LoadILLDiffraction',
                              LoaderVersion=1,LoaderOptions=dict({'DataType':'Raw'}))
         self.assertTrue(out6)
         self.assertEquals(out6.getName(), 'out6')
@@ -71,7 +71,7 @@ class LoadMergeRunsTest(unittest.TestCase):
         mtd.clear()
 
     def test_output_hidden(self):
-        LoadMergeRuns(Filename='170257+170258,170300+170302',LoaderName='LoadILLIndirect',
+        LoadAndMerge(Filename='170257+170258,170300+170302',LoaderName='LoadILLIndirect',
                       OutputWorkspace='__out')
         self.assertTrue(mtd['__out'])
         self.assertTrue(isinstance(mtd['__out'], WorkspaceGroup))
@@ -83,7 +83,7 @@ class LoadMergeRunsTest(unittest.TestCase):
         mtd.clear()
 
     def test_non_ill_load(self):
-        out7 = LoadMergeRuns(Filename='IRS26173,26174.RAW')
+        out7 = LoadAndMerge(Filename='IRS26173,26174.RAW')
         self.assertTrue(out7)
         self.assertTrue(isinstance(out7, WorkspaceGroup))
         self.assertEquals(out7.getNumberOfEntries(), 2)

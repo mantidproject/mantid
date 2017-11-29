@@ -27,26 +27,26 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-.. testsetup:: LoadMergeRuns
+.. testsetup:: LoadAndMerge
 
   config.setFacility('ILL')
   config.appendDataSearchSubDir('ILL/IN16B/')
 
-.. testcode:: LoadMergeRuns
+.. testcode:: LoadAndMerge
 
-  out = LoadMergeRuns(Filename='170257+170258,170300+170302')
+  out = LoadAndMerge(Filename='170257+170258,170300+170302')
   print('out is a WorkspaceGroup, containing {0} workspaces'.format(out.getNumberOfEntries()))
   print('the first item is the merged output of the runs 170257 and 170258 with the name {0}'.format(out.getItem(0).getName()))
   print('the second item is the merged output of the runs 170300 and 170302 with the name {0}'.format(out.getItem(1).getName()))
 
-.. testcleanup:: LoadMergeRuns
+.. testcleanup:: LoadAndMerge
 
   mtd.clear()
 
 Output
 ######
 
-.. testoutput:: LoadMergeRuns
+.. testoutput:: LoadAndMerge
 
   out is a WorkspaceGroup, containing 2 workspaces
   the first item is the merged output of the runs 170257 and 170258 with the name 170257_170258

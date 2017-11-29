@@ -28,7 +28,7 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
-- :ref:`LoadMergeRuns <algm-LoadMergeRuns>` is a new algorithm that can load and merge multiple runs.
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` is a new algorithm that can load and merge multiple runs.
 - :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
