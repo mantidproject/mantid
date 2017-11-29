@@ -154,13 +154,10 @@ void VesuvioCalculateMS::exec() {
       continue;
     }
 
-    auto randgen =
-        make_unique<CurveFitting::MSVesuvioHelper::RandomNumberGenerator>(
-            getProperty("Seed"));
     // the output spectrum objects have references to where the data will be
     // stored
     calculateMS(static_cast<size_t>(i), totalsc->getSpectrum(i),
-                multsc->getSpectrum(i), randgen.get());
+                multsc->getSpectrum(i));
   }
 
   setProperty("TotalScatteringWS", totalsc);
@@ -221,7 +218,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
@@ -304,9 +301,9 @@ void VesuvioCalculateMS::cacheInputs() {
  * multiple scattering contribution
  * @param randgen A random number generator
  */
-void VesuvioCalculateMS::calculateMS(
-    const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc,
-    CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const {
+void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
+                                     API::ISpectrum &totalsc,
+                                     API::ISpectrum &multsc) {
   // Detector information
   DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
@@ -316,17 +313,26 @@ void VesuvioCalculateMS::calculateMS(
 
   // Final counts averaged over all simulations
   CurveFitting::MSVesuvioHelper::SimulationAggregator accumulator(m_nruns);
-  for (size_t i = 0; i < m_nruns; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(m_inputWS))
+  for (int64_t i = 0; i < m_nruns; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
                        ", run=" + std::to_string(i));
 
+    auto randgen =
+        make_unique<CurveFitting::MSVesuvioHelper::RandomNumberGenerator>(
+            getProperty("Seed"));
     simulate(detpar, respar,
              accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()),
-             randgen);
+             randgen.get());
 
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
                        ", run=" + std::to_string(i));
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Average over all runs and assign to output workspaces
   CurveFitting::MSVesuvioHelper::SimulationWithErrors avgCounts =
@@ -350,15 +356,9 @@ void VesuvioCalculateMS::simulate(
     CurveFitting::MSVesuvioHelper::Simulation &simulCounts,
     CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const {
 
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = 0; i < static_cast<int64_t>(m_nevents); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-
+  for (size_t i = 0; i < static_cast<int64_t>(m_nevents); ++i) {
     calculateCounts(detpar, respar, simulCounts, randgen);
-
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**

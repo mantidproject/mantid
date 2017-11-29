@@ -100,9 +100,8 @@ private:
   void exec() override;
 
   void cacheInputs();
-  void calculateMS(
-      const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc,
-      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
+                   API::ISpectrum &multsc);
   void
   simulate(const DetectorParams &detpar,
            const Functions::ResolutionParams &respar,
