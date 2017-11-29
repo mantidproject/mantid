@@ -1,4 +1,3 @@
-
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/LibraryManager.h"
@@ -9,8 +8,6 @@
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
-#include <unordered_set>
 
 namespace Mantid {
 namespace Kernel {
@@ -20,73 +17,89 @@ Logger g_log("LibraryManager");
 }
 
 /// Constructor
-LibraryManagerImpl::LibraryManagerImpl() {
+LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
   g_log.debug() << "LibraryManager created.\n";
 }
 
-/** Opens all suitable DLLs on a given path.
-*  @param filePath :: The filepath to the directory where the libraries are.
-*  @param isRecursive :: Whether to search subdirectories.
-*  @return The number of libraries opened.
-*/
-int LibraryManagerImpl::OpenAllLibraries(const std::string &filePath,
-                                         bool isRecursive) {
+/**
+ * Opens suitable DLLs on a given path.
+ *  @param filePath The filepath to the directory where the libraries are.
+ *  @param loadingBehaviour Control how libraries are searched for
+ *  @param excludes If not empty then each string is considered as a substring
+ * to search within each library to be opened. If the substring is found then
+ * the library is not opened.
+ *  @return The number of libraries opened.
+ */
+int LibraryManagerImpl::openLibraries(
+    const std::string &filePath, LoadLibraries loadingBehaviour,
+    const std::vector<std::string> &excludes) {
   g_log.debug() << "Opening all libraries in " << filePath << "\n";
-  int libCount = 0;
-  // validate inputs
-  Poco::File libPath;
   try {
-    libPath = Poco::File(filePath);
+    return openLibraries(Poco::File(filePath), loadingBehaviour, excludes);
+  } catch (std::exception &exc) {
+    g_log.debug() << "Error occurred while opening libraries: " << exc.what()
+                  << "\n";
+    return 0;
   } catch (...) {
-    return libCount;
+    g_log.error() << "An unknown error occurred while opening libraries.";
+    return 0;
   }
-  if (libPath.exists() && libPath.isDirectory()) {
-    DllOpen::addSearchDirectory(filePath);
-    // Iteratate over the available files
-    Poco::DirectoryIterator end_itr;
-    for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr) {
-      const Poco::Path &item = itr.path();
-      if (item.isDirectory()) {
-        if (isRecursive) {
-          libCount += OpenAllLibraries(item.toString());
-        }
-      } else {
-        if (skip(item.toString()))
-          continue;
-        if (loadLibrary(item.toString())) {
-          ++libCount;
-        }
-      }
-    }
-  } else {
-    g_log.error("In OpenAllLibraries: " + filePath + " must be a directory.");
-  }
-
-  return libCount;
 }
 
 //-------------------------------------------------------------------------
 // Private members
 //-------------------------------------------------------------------------
 /**
+ * Opens suitable DLLs on a given path.
+ *  @param filePath A Poco::File object pointing to a directory where the
+ * libraries are.
+ *  @param loadingBehaviour Control how libraries are searched for
+ *  @param excludes If not empty then each string is considered as a substring
+ * to search within each library to be opened. If the substring is found then
+ * the library is not opened.
+ *  @return The number of libraries opened.
+ */
+int LibraryManagerImpl::openLibraries(
+    const Poco::File &libPath,
+    LibraryManagerImpl::LoadLibraries loadingBehaviour,
+    const std::vector<std::string> &excludes) {
+  int libCount(0);
+  if (libPath.exists() && libPath.isDirectory()) {
+    DllOpen::addSearchDirectory(libPath.path());
+    // Iterate over the available files
+    Poco::DirectoryIterator end_itr;
+    for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr) {
+      const Poco::File &item = *itr;
+      if (item.isFile()) {
+        if (skipLibrary(itr.path().getFileName(), excludes))
+          continue;
+        if (loadLibrary(itr.path())) {
+          ++libCount;
+        }
+      } else if (loadingBehaviour == LoadLibraries::Recursive) {
+        // it must be a directory
+        libCount += openLibraries(item, LoadLibraries::Recursive, excludes);
+      }
+    }
+  } else {
+    g_log.error("In OpenAllLibraries: " + libPath.path() +
+                " must be a directory.");
+  }
+  return libCount;
+}
+
+/**
  * Returns true if the name contains one of the strings given in the
- * 'plugins.exclude' variable. Each string from the variable is
+ * exclude list. Each string from the variable is
  * searched for with the filename so an exact match is not necessary. This
  * avoids having to specify prefixes and suffixes for different platforms,
  * i.e. 'plugins.exclude = MantidKernel' will exclude libMantidKernel.so
- * @param filename :: A string giving the filename/file path
+ * @param filename A string giving the filename/file path
+ * @param excludes A list of substrings to exclude library from loading
  * @return True if the library should be skipped
  */
-bool LibraryManagerImpl::skip(const std::string &filename) {
-  static std::unordered_set<std::string> excludes;
-  static bool initialized(false);
-  if (!initialized) {
-    std::string excludeStr =
-        ConfigService::Instance().getString("plugins.exclude");
-    boost::split(excludes, excludeStr, boost::is_any_of(":;"),
-                 boost::token_compress_on);
-    initialized = true;
-  }
+bool LibraryManagerImpl::skipLibrary(const std::string &filename,
+                                     const std::vector<std::string> &excludes) {
   bool skipme(false);
   for (const auto &exclude : excludes) {
     if (filename.find(exclude) != std::string::npos) {
@@ -99,31 +112,26 @@ bool LibraryManagerImpl::skip(const std::string &filename) {
 
 /**
 * Load a library
-* @param filepath :: The full path to a library as a string
+* @param filepath :: A Poco::File The full path to a library as a string
 */
-bool LibraryManagerImpl::loadLibrary(const std::string &filepath) {
+bool LibraryManagerImpl::loadLibrary(Poco::Path filepath) {
   // Get the name of the library.
-  std::string libName =
-      DllOpen::ConvertToLibName(Poco::Path(filepath).getFileName());
+  std::string libName = DllOpen::convertToLibName(filepath.getFileName());
   if (libName.empty())
     return false;
-  // The wrapper will unload the library when it is deleted
-  auto dlwrap = boost::make_shared<LibraryWrapper>();
-  std::string libNameLower = boost::algorithm::to_lower_copy(libName);
-
-  // Check that a libray with this name has not already been loaded
-  if (OpenLibs.find(libNameLower) == OpenLibs.end()) {
-    Poco::Path directory(filepath);
-    directory.makeParent();
-    if (g_log.is(Poco::Message::PRIO_DEBUG)) {
-      g_log.debug() << "Trying to open library: " << libName << " from "
-                    << directory.toString() << " ...";
-    }
-    // Try to open the library
-    if (dlwrap->OpenLibrary(libName, directory.toString())) {
+  // Check that a library with this name has not already been loaded
+  if (m_openedLibs.find(boost::algorithm::to_lower_copy(libName)) ==
+      m_openedLibs.end()) {
+    filepath.makeParent();
+    // Try to open the library. The wrapper will unload the library when it
+    // is deleted
+    LibraryWrapper dlwrap;
+    if (dlwrap.openLibrary(libName, filepath.toString())) {
       // Successfully opened, so add to map
-      g_log.debug("Opened library: " + libName + ".\n");
-      OpenLibs.emplace(libName, dlwrap);
+      if (g_log.is(Poco::Message::PRIO_DEBUG)) {
+        g_log.debug("Opened library: " + libName + ".\n");
+      }
+      m_openedLibs.emplace(libName, std::move(dlwrap));
       return true;
     } else {
       return false;
