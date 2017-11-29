@@ -41,7 +41,6 @@ private:
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
                      detCounts(output));
-    TS_ASSERT(output->run().hasProperty("stheta"))
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {
@@ -313,9 +312,6 @@ public:
     const auto dan = output->run().getPropertyValueAsType<double>("dan.value");
     TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(128) * 180 / M_PI, dan)
     TS_ASSERT_LESS_THAN_EQUALS(dan, spectrumInfo.twoTheta(127) * 180 / M_PI)
-    const auto san = output->run().getPropertyValueAsType<double>("san.value");
-    const auto stheta = output->run().getPropertyValueAsType<double>("stheta");
-    TS_ASSERT_DELTA(stheta * 180 / M_PI, san, 0.03)
   }
 
   void testUserAngleD17() {
@@ -331,8 +327,6 @@ public:
                                detectorAngle)
     TS_ASSERT_LESS_THAN_EQUALS(detectorAngle,
                                spectrumInfo.twoTheta(127) * 180 / M_PI)
-    const auto stheta = output->run().getPropertyValueAsType<double>("stheta");
-    TS_ASSERT_EQUALS(stheta * 180 / M_PI, angle)
   }
 
   void testUserAngleFigaro() {

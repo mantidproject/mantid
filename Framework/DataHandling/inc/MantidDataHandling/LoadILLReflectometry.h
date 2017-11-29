@@ -72,7 +72,7 @@ private:
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
-  std::pair<double, double> detectorAndBraggAngles();
+  double detectorRotation();
   void placeDetector();
   void placeSample();
   void placeSource();

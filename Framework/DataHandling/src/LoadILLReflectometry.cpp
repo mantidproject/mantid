@@ -764,10 +764,11 @@ double LoadILLReflectometry::reflectometryPeak() {
   return centre;
 }
 
-/** Compute the detector and the Bragg angles.
- *  @return a pair where first is detector angle and second the Bragg angle.
+/** Compute the detector rotation angle around origin and optionally set the
+ *  OutputBeamPosition property.
+ *  @return a rotation angle
  */
-std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
+double LoadILLReflectometry::detectorRotation() {
   ITableWorkspace_const_sptr posTable = getProperty("DirectBeamPosition");
   const double peakCentre = reflectometryPeak();
   g_log.debug() << "Using detector angle (degrees): " << m_detectorAngle << '\n';
@@ -792,20 +793,16 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
       // coordinates) need to be solved.
       const auto originPixelDistance = m_detectorDistance / std::cos(inRad(std::abs(offset)));
       const auto realDetectorAngle = detectorAngleFromUserAngle(2 * userAngle, originPixelDistance, std::abs(m_sampleZOffset));
-      const auto userDetectorAngle = realDetectorAngle - offset;
-      return std::make_pair(userDetectorAngle, userAngle);
+      return realDetectorAngle - offset;
     } else {
-      const double userDetectorAngle = 2 * userAngle - offset;
-      return std::make_pair(userDetectorAngle, userAngle);
+      return 2 * userAngle - offset;
     }
   }
   if (!posTable) {
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): " << deflection << '\n';
     }
-    const double detectorAngle = m_detectorAngle + deflection;
-    const double bragg = (detectorAngle + offset) / 2;
-    return std::make_pair(detectorAngle, bragg);
+    return m_detectorAngle + deflection;
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre,
@@ -815,8 +812,7 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
   m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
                 << '\n';
-  const double bragg = (detectorAngle + offset) / 2;
-  return std::make_pair(detectorAngle, bragg);
+  return detectorAngle;
 }
 
 /// Update detector position according to data file
@@ -826,14 +822,7 @@ void LoadILLReflectometry::placeDetector() {
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance
                 << "m.\n";
-  double detectorRotationAngle;
-  double braggAngle;
-  std::tie(detectorRotationAngle, braggAngle) = detectorAndBraggAngles();
-  // incident angle for using the algorithm ConvertToReflectometryQ
-  // TODO Doesn't seem to work with ConvertToReflectometryQ. Maybe they
-  //      expect a time series?
-  // TODO They are moving to 2theta in ISIS reflectometry algorithms.
-  m_localWorkspace->mutableRun().addProperty("stheta", inRad(braggAngle));
+  const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
     if (m_instrumentName == "D17")
