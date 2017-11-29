@@ -69,7 +69,7 @@ void OCGeometryHandler::Render() {
       Triangulate();
     m_renderer.render(m_triangulator->getOCSurface());
   } else if (ObjComp != nullptr) {
-    m_renderer.render(ObjComp);
+    m_renderer.render(*ObjComp);
   }
 }
 

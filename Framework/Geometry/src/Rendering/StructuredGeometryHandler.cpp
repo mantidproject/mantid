@@ -54,7 +54,7 @@ void StructuredGeometryHandler::Triangulate() {
 
 //----------------------------------------------------------------------------------------------
 ///< Draw pixels according to StructuredDetector vertices
-void StructuredGeometryHandler::Render() { m_renderer.render(m_Det); }
+void StructuredGeometryHandler::Render() { m_renderer.render(*m_Det); }
 
 //----------------------------------------------------------------------------------------------
 ///< Prepare/Initialize Object/ObjComponent to be rendered
