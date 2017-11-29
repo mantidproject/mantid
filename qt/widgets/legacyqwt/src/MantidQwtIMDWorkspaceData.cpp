@@ -1,3 +1,5 @@
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -6,9 +8,9 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include <QStringBuilder>
 
+using MantidQt::API::toQStringInternal;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::NullCoordTransform;
@@ -365,7 +367,7 @@ QString MantidQwtIMDWorkspaceData::getXAxisLabel() const {
     IMDDimension_const_sptr dim =
         m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
     xLabel = QString::fromStdString(dim->getName()) + " (" +
-             QString::fromStdWString(dim->getUnits().utf8()) + ")";
+             toQStringInternal(dim->getUnits().utf8()) + ")";
   } else {
     // Distance
     // Distance, or not set.

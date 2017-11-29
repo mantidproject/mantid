@@ -30,7 +30,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
                                        CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
                                        CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
                                        OPTIONS_SEPARATOR, OPTIONS_INDEX,
-                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
+                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX, USER_FILE_INDEX)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
@@ -58,6 +58,9 @@ class RunTabPresenter(object):
 
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
+
+        def on_manage_directories(self):
+            self._presenter.on_manage_directories()
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
@@ -159,7 +162,6 @@ class RunTabPresenter(object):
 
             if not user_file_path:
                 return
-
             # 2. Get the full file path
             user_file_path = FileFinder.getFullPath(user_file_path)
             if not os.path.exists(user_file_path):
@@ -205,7 +207,6 @@ class RunTabPresenter(object):
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
-
             # 3. Clear the table
             self._view.clear_table()
 
@@ -244,7 +245,7 @@ class RunTabPresenter(object):
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   "has been loaded")
+                                   " has been loaded")
             property_manager_service = PropertyManagerService()
             property_manager_service.add_states_to_pmds(states)
 
@@ -254,12 +255,15 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
-        except:
+        except Exception as e:
             self._view.halt_process_flag()
-            raise
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_manage_directories(self):
+        self._view.show_directory_manager()
 
     def on_mask_file_add(self):
         """
@@ -460,6 +464,7 @@ class RunTabPresenter(object):
         self._set_on_view("reduction_mode")
         self._set_on_view("event_slices")
         self._set_on_view("event_binning")
+        self._set_on_view("merge_mask")
 
         self._set_on_view("wavelength_step_type")
         self._set_on_view("wavelength_min")
@@ -484,6 +489,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
+        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -633,6 +639,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("merge_shift_fit", state_model)
         self._set_on_state_model("merge_q_range_start", state_model)
         self._set_on_state_model("merge_q_range_stop", state_model)
+        self._set_on_state_model("merge_mask", state_model)
+        self._set_on_state_model("merge_max", state_model)
+        self._set_on_state_model("merge_min", state_model)
 
         # Settings tab
         self._set_on_state_model("reduction_dimensionality", state_model)
@@ -663,6 +672,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
+        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 
@@ -795,6 +805,7 @@ class RunTabPresenter(object):
             can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
             can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
             output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
+            user_file = self._view.get_cell(row=row, column=USER_FILE_INDEX, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -815,6 +826,7 @@ class RunTabPresenter(object):
                                                 can_direct=can_direct,
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
+                                                user_file = user_file,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -839,17 +851,31 @@ class RunTabPresenter(object):
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
-                try:
-                    state = gui_state_director.create_state(row)
-                    states.update({row: state})
-                except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                           "been added to the Mantid search directories! See here for more "
-                                           "details: {}".format(row, str(e)))
-                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                                       "been added to the Mantid search directories! See here for more "
-                                       "details: {}".format(row, str(e)))
+                row_user_file = table_model.get_row_user_file(row)
+                if row_user_file:
+                    user_file_path = FileFinder.getFullPath(row_user_file)
+                    if not os.path.exists(user_file_path):
+                        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                                           " has been specified.".format(user_file_path))
+
+                    user_file_reader = UserFileReader(user_file_path)
+                    user_file_items = user_file_reader.read_user_file()
+
+                    row_state_model = StateGuiModel(user_file_items)
+                    row_gui_state_director = GuiStateDirector(table_model, row_state_model, self._facility)
+                    self._create_row_state(row_gui_state_director, states, row)
+                else:
+                    self._create_row_state(gui_state_director, states, row)
         return states
+
+    def _create_row_state(self, director, states, row):
+        try:
+            state = director.create_state(row)
+            states.update({row: state})
+        except (ValueError, RuntimeError) as e:
+            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                               "been added to the Mantid search directories! See here for more "
+                               "details: {}".format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """

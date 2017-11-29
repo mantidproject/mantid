@@ -1,9 +1,6 @@
 #ifndef MANTID_API_REFAXIS_H_
 #define MANTID_API_REFAXIS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/NumericAxis.h"
 
 namespace Mantid {
@@ -41,13 +38,12 @@ namespace API {
 */
 class MANTID_API_DLL RefAxis : public NumericAxis {
 public:
-  RefAxis(const std::size_t &length,
-          const MatrixWorkspace *const parentWorkspace);
+  RefAxis(const MatrixWorkspace *const parentWorkspace);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
               const MatrixWorkspace *const parentWorkspace) override;
-  std::size_t length() const override { return m_size; }
+  std::size_t length() const override;
   /// Get a value at the specified index
   double operator()(const std::size_t &index,
                     const std::size_t &verticalIndex) const override;
@@ -72,8 +68,6 @@ private:
 
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace *const m_parentWS;
-  /// Length of the axis
-  std::size_t m_size;
 };
 
 } // namespace API

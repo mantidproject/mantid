@@ -67,8 +67,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISSANS
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt4
 )
-
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesISISSANSQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()

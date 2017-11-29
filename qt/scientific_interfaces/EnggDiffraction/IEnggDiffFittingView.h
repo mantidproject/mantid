@@ -192,6 +192,11 @@ public:
   virtual int getFittingListWidgetCurrentRow() const = 0;
 
   /**
+  * @return The text on the current selected row of the list widget
+  */
+  virtual std::string getFittingListWidgetCurrentValue() const = 0;
+
+  /**
    * Sets the current row of the fitting list widget
    *
    * @param idx number to set as for the list widget

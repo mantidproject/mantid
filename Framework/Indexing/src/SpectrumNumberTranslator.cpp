@@ -63,6 +63,31 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   // called.
 }
 
+SpectrumNumberTranslator::SpectrumNumberTranslator(
+    const std::vector<SpectrumNumber> &spectrumNumbers,
+    const SpectrumNumberTranslator &parent)
+    : m_isPartitioned(parent.m_isPartitioned), m_partition(parent.m_partition),
+      m_globalSpectrumNumbers(spectrumNumbers) {
+  size_t currentIndex = 0;
+  for (size_t i = 0; i < m_globalSpectrumNumbers.size(); ++i) {
+    auto partition = parent.m_spectrumNumberToPartition.at(spectrumNumbers[i]);
+    auto number = m_globalSpectrumNumbers[i];
+    m_spectrumNumberToPartition.emplace(number, partition);
+    if (partition == m_partition) {
+      m_spectrumNumberToIndex.emplace_back(number, currentIndex);
+      m_globalToLocal.emplace_back(GlobalSpectrumIndex(i), currentIndex);
+      if (m_isPartitioned)
+        m_spectrumNumbers.emplace_back(number);
+      ++currentIndex;
+    }
+  }
+}
+
+SpectrumNumberTranslator::SpectrumNumberTranslator(
+    const std::vector<GlobalSpectrumIndex> &globalIndices,
+    const SpectrumNumberTranslator &parent)
+    : SpectrumNumberTranslator(parent.spectrumNumbers(globalIndices), parent) {}
+
 SpectrumIndexSet
 SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
                                        SpectrumNumber max) const {
@@ -142,6 +167,15 @@ void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
             [](const std::pair<SpectrumNumber, size_t> &a,
                const std::pair<SpectrumNumber, size_t> &b)
                 -> bool { return std::get<0>(a) < std::get<0>(b); });
+}
+
+std::vector<SpectrumNumber> SpectrumNumberTranslator::spectrumNumbers(
+    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+  std::vector<SpectrumNumber> spectrumNumbers;
+  for (const auto index : globalIndices)
+    spectrumNumbers.push_back(
+        m_globalSpectrumNumbers[static_cast<size_t>(index)]);
+  return spectrumNumbers;
 }
 
 } // namespace Indexing

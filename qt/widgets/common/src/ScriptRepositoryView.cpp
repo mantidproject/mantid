@@ -452,7 +452,11 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
   if (painter->device() == nullptr)
     return;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QStyleOptionViewItemV4 modifiedOption(option);
+#else
+  QStyleOptionViewItem modifiedOption(option);
+#endif
 
   QPoint p = modifiedOption.rect.center();
   QSize curr = modifiedOption.rect.size();
