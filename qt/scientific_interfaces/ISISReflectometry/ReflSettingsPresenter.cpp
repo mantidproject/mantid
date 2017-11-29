@@ -81,12 +81,6 @@ OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
     if (!endOv.empty())
       options["EndOverlap"] = QString::fromStdString(endOv);
 
-    // Add momentum transfer step as 'Params'
-    auto qTransStep = m_view->getMomentumTransferStep();
-    if (!qTransStep.empty()) {
-      options["Params"] = QString::fromStdString(qTransStep);
-    }
-
     // Add transmission runs
     auto transRuns = this->getTransmissionRuns();
     if (!transRuns.empty())
