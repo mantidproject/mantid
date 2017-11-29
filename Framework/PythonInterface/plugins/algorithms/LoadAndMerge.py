@@ -108,7 +108,7 @@ class LoadAndMerge(PythonAlgorithm):
                 to_group.append(runnumber)
             else:
                 runnumbers = self._prefix
-                first = ''s
+                first = ''
                 for i, run in enumerate(runs_to_sum):
                     runnumber = os.path.basename(run).split('.')[0]
                     runnumbers += '_' + runnumber
