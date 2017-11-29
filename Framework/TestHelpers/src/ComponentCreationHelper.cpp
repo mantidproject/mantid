@@ -664,12 +664,12 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   // If mirror is set to true they will go from 0 -> -90 deg
   Instrument_sptr testInst(new Instrument("PSDTubeInst"));
 
-  int xDirection(-1);
+  int xDirection(1);
   if (mirrorTubes)
-    xDirection = 1;
+    xDirection = -1;
 
   testInst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
-      Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Left,
+      Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Right,
       "0,0,0"));
 
   // Pixel shape
@@ -683,7 +683,11 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     std::ostringstream lexer;
     lexer << "tube-" << i;
     const auto theta = (M_PI / 2.0) * double(i) / (double(nTubes) - 1);
-    const auto x = xDirection * radius * sin(theta);
+    auto x = xDirection * radius * sin(theta);
+    // A small correction to make testing easier where the instrument is
+    // mirrored
+    if (i == 0 && xDirection < 0)
+      x = -1e-32;
     const auto z = radius * cos(theta);
     CompAssembly *tube = new CompAssembly(lexer.str());
     tube->setPos(V3D(x, 0.0, z));
@@ -699,16 +703,10 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
       testInst->markAsDetector(pixel);
     }
     testInst->add(tube);
-    addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
-    addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
   }
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
-  auto pmap = boost::make_shared<ParameterMap>();
-  pmap->setInstrument(testInst.get());
-  if (mirrorTubes)
-    pmap->addBool(testInst->getBaseComponent(), "mirror_detector_angles", true);
-  auto testInstParameterised = boost::make_shared<Instrument>(testInst, pmap);
-
-  return testInstParameterised;
+  return testInst;
 }
 }

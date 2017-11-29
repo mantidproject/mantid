@@ -38,7 +38,8 @@ public:
   const size_t N_PIXELS_PER_TUBE = 10;
 
   MatrixWorkspace_sptr createTestWS(size_t nTubes, size_t nPixelsPerTube,
-                                    bool mirror = true) {
+                                    bool mirror = true,
+                                    bool mirrorOutput = false) {
     const size_t nSpectra = nTubes * nPixelsPerTube;
     const size_t nBins = 1;
 
@@ -55,7 +56,7 @@ public:
 
     testWS->getInstrument()->getParameterMap()->addBool(
         testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
-        true);
+        mirrorOutput);
     return testWS;
   }
 
@@ -176,6 +177,34 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
+  void test_normal_operation_with_component_specified_and_mirrored_output() {
+    auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE, true, true);
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outWS"));
+
+    // Check x-axis goes from 0 -> 90 with 180 bins
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 5)
+    for (size_t i = 0; i < N_TUBES; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), 22.5 * double(i), 1e-6)
+
+    verifyHeightAxis(outWS);
+    verifySpectraHaveSameCounts(outWS, 2.0);
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
   void test_normal_operation_explicit_height_axis() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
@@ -279,7 +308,7 @@ public:
   }
 
   void test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan() {
-    std::vector<double> rotations = {0, -22.5, -45};
+    std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
     SumOverlappingTubes alg;
@@ -305,7 +334,7 @@ public:
 
   void
   test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan() {
-    std::vector<double> rotations = {0, -28.125, -45};
+    std::vector<double> rotations = {0, 28.125, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
     SumOverlappingTubes alg;
@@ -350,7 +379,7 @@ public:
 
   void
   test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_large_tolerance() {
-    std::vector<double> rotations = {0, -22.5, -45};
+    std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
     SumOverlappingTubes alg;
@@ -377,7 +406,7 @@ public:
 
   void
   test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_normalisation() {
-    std::vector<double> rotations = {0, -28.125, -45};
+    std::vector<double> rotations = {0, 28.125, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
     SumOverlappingTubes alg;
@@ -403,7 +432,7 @@ public:
 
   void
   test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_with_normalisation() {
-    std::vector<double> rotations = {0, -22.5, -45};
+    std::vector<double> rotations = {0, 22.5, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
     SumOverlappingTubes alg;
@@ -460,14 +489,13 @@ public:
 
   MatrixWorkspace_sptr do_straight_option(bool oneDimensional = false,
                                           bool explicitHeightAxis = false) {
-    auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE, false);
+    auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("CropNegativeScatteringAngles", true);
     if (explicitHeightAxis)
       alg.setProperty("HeightAxis", "0.0, 0.0135");
     else
@@ -486,7 +514,7 @@ public:
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), N_TUBES)
     for (size_t i = 0; i < N_TUBES; ++i)
-      TS_ASSERT_DELTA(xAxis->getValue(i), 0.0 + 22.5 * double(i), 1e-6)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -90.0 + 22.5 * double(i), 1e-6)
 
     return outWS;
   }
