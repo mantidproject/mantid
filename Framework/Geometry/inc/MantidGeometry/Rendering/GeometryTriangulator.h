@@ -63,9 +63,10 @@ public:
   const std::vector<int> &getTriangleFaces();
 #ifdef ENABLE_OPENCASCADE
 private:
-  TopoDS_Shape *m_objSurface; ///< Storage for the output surface
-                              /// Analyze the object
-                              /// OpenCascade analysis of object surface
+  std::unique_ptr<TopoDS_Shape>
+      m_objSurface; ///< Storage for the output surface
+                    /// Analyze the object
+                    /// OpenCascade analysis of object surface
   void OCAnalyzeObject();
   size_t numPoints() const;
   size_t numFaces() const;
@@ -74,7 +75,7 @@ private:
 
 public:
   /// Return OpenCascade surface.
-  TopoDS_Shape *getOCSurface();
+  const TopoDS_Shape &getOCSurface();
 #endif
 };
 } // namespace detail

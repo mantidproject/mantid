@@ -1013,21 +1013,21 @@ double Object::triangleSolidAngle(const V3D &observer) const {
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
+  detail::ShapeInfo::GeometryShape gluType =
+      static_cast<detail::ShapeInfo::GeometryShape>(type);
 
   switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID:
+  case detail::ShapeInfo::GeometryShape::CUBOID:
     return CuboidSolidAngle(observer, geometry_vectors);
     break;
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return SphereSolidAngle(observer, geometry_vectors, radius);
     break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
     break;
-  case GluGeometryHandler::GeometryType::CONE:
+  case detail::ShapeInfo::GeometryShape::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
     break;
@@ -1099,16 +1099,16 @@ double Object::triangleSolidAngle(const V3D &observer,
     int type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    GluGeometryHandler::GeometryType gluType =
-        static_cast<GluGeometryHandler::GeometryType>(type);
+    detail::ShapeInfo::GeometryShape gluType =
+        static_cast<detail::ShapeInfo::GeometryShape>(type);
 
     switch (gluType) {
-    case GluGeometryHandler::GeometryType::CUBOID:
+    case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
       break;
-    case GluGeometryHandler::GeometryType::SPHERE:
+    case detail::ShapeInfo::GeometryShape::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
       break;
     default:
@@ -1492,10 +1492,10 @@ double Object::volume() const {
   double radius;
   std::vector<Kernel::V3D> vectors;
   this->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
+  detail::ShapeInfo::GeometryShape gluType =
+      static_cast<detail::ShapeInfo::GeometryShape>(type);
   switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
     // point.
@@ -1525,9 +1525,9 @@ double Object::volume() const {
     volume += brt.scalar_prod(brb.cross_prod(blb));
     return volume / 6;
   }
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return M_PI * radius * radius * height;
   default:
     // Fall back to Monte Carlo method.
@@ -1764,12 +1764,12 @@ void Object::calcBoundingBoxByGeometry() {
 
   // Will only work for shapes handled by GluGeometryHandler
   handle->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
+  detail::ShapeInfo::GeometryShape gluType =
+      static_cast<detail::ShapeInfo::GeometryShape>(type);
 
   // Type of shape is given as a simple integer
   switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1802,7 +1802,7 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+  case detail::ShapeInfo::GeometryShape::HEXAHEDRON: {
     // These will be replaced by more realistic values in the loop below
     minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
     maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
@@ -1817,8 +1817,8 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
-  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::SEGMENTED_CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1841,7 +1841,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case GluGeometryHandler::GeometryType::CONE: {
+  case detail::ShapeInfo::GeometryShape::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base

@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -45,27 +46,13 @@ class Object;
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_GEOMETRY_DLL GluGeometryHandler : public GeometryHandler {
-public:
-  /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
-  enum class GeometryType {
-    NOSHAPE = 0,
-    CUBOID,            ///< CUBOID
-    HEXAHEDRON,        ///< HEXAHEDRON
-    SPHERE,            ///< SPHERE
-    CYLINDER,          ///< CYLINDER
-    CONE,              ///< CONE
-    SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis).
-    /// Sizes of segments are important.
-  };
-
 private:
   static Kernel::Logger &PLog;                   ///< The official logger
   /// Object/ObjComponent
   std::vector<Kernel::V3D> m_points;
   double radius; ///<Radius for the sphere, cone and cylinder
   double height; ///<height for cone and cylinder;
-  GeometryType
-      type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
+  detail::ShapeInfo m_shapeInfo;
 public:
   GluGeometryHandler(const GluGeometryHandler &other);
   GluGeometryHandler(IObjComponent *comp);           ///< Constructor
@@ -77,22 +64,7 @@ public:
   GeometryHandler *createInstance(boost::shared_ptr<Object> obj) override;
   GeometryHandler *createInstance(Object *) override;
   /// sets the geometry handler for a cuboid
-  void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
-                 const Kernel::V3D &);
-  /// sets the geometry handler for a hexahedron
-  void setHexahedron(const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &,
-                     const Kernel::V3D &, const Kernel::V3D &);
-  /// sets the geometry handler for a cone
-  void setSphere(const Kernel::V3D &, double);
-  /// sets the geometry handler for a cylinder
-  void setCylinder(const Kernel::V3D &, const Kernel::V3D &, double, double);
-  /// sets the geometry handler for a cone
-  void setCone(const Kernel::V3D &, const Kernel::V3D &, double, double);
-  /// sets the geometry handler for a segmented cylinder
-  void setSegmentedCylinder(const Kernel::V3D &, const Kernel::V3D &, double,
-                            double);
+  void setShapeInfo(detail::ShapeInfo &&shapeInfo);
   void Triangulate() override;
   void Render() override;
   void Initialize() override;

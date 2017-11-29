@@ -9,22 +9,20 @@
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
+using namespace detail;
 
 GluGeometryHandler::GluGeometryHandler(IObjComponent *comp)
-    : GeometryHandler(comp), radius(0.0), height(0.0),
-      type(GeometryType::NOSHAPE) {}
+    : GeometryHandler(comp), radius(0.0), height(0.0){}
 
 GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
-    : GeometryHandler(std::move(obj)), radius(0.0), height(0.0),
-      type(GeometryType::NOSHAPE) {}
+    : GeometryHandler(std::move(obj)), radius(0.0), height(0.0) {}
 
 GluGeometryHandler::GluGeometryHandler(Object *obj)
-    : GeometryHandler(obj), radius(0.0), height(0.0),
-      type(GeometryType::NOSHAPE) {}
+    : GeometryHandler(obj), radius(0.0), height(0.0) {}
 
 GluGeometryHandler::GluGeometryHandler(const GluGeometryHandler &other)
     : GeometryHandler(other), m_points(other.m_points), radius(other.radius),
-      height(other.height), type(other.type) {
+      height(other.height), m_shapeInfo(other.m_shapeInfo) {
 }
 
 boost::shared_ptr<GeometryHandler> GluGeometryHandler::clone() const {
@@ -54,100 +52,24 @@ void GluGeometryHandler::Triangulate() {
 
 void GluGeometryHandler::Render() {
   if (Obj != nullptr) {
-    switch (type) {
-    case GeometryType::CUBOID:
-      m_renderer.renderCuboid(m_points[0], m_points[1], m_points[2],
-                              m_points[3]);
-      break;
-    case GeometryType::HEXAHEDRON:
-      m_renderer.renderHexahedron(
-          std::vector<V3D>{m_points[0], m_points[1], m_points[2], m_points[3],
-                           m_points[4], m_points[5], m_points[6], m_points[7]});
-      break;
-    case GeometryType::SPHERE:
-      m_renderer.renderSphere(m_points[0], radius);
-      break;
-    case GeometryType::CYLINDER:
-      m_renderer.renderCylinder(m_points[0], m_points[1], radius, height);
-      break;
-    case GeometryType::CONE:
-      m_renderer.renderCone(m_points[0], m_points[1], radius, height);
-      break;
-    case GeometryType::SEGMENTED_CYLINDER:
-      m_renderer.renderCylinder(m_points[0], m_points[1], radius, height, true);
-      break;
-    case GeometryType::NOSHAPE:
-      break;
-    }
+    m_renderer.renderShape(m_shapeInfo);
   } else if (ObjComp != nullptr) {
-    m_renderer.render(ObjComp);
+    m_renderer.render(*ObjComp);
   }
 }
 
 void GluGeometryHandler::GetObjectGeom(int &mytype,
                                        std::vector<Kernel::V3D> &vectors,
                                        double &myradius, double &myheight) {
-  mytype = 0;
-  if (Obj != nullptr) {
-    mytype = static_cast<int>(type);
-    vectors = m_points;
-    switch (type) {
-    case GeometryType::CUBOID:
-      break;
-    case GeometryType::HEXAHEDRON:
-      break;
-    case GeometryType::SPHERE:
-      myradius = radius;
-      break;
-    default:
-      myradius = radius;
-      myheight = height;
-      break;
-    }
-  }
+  m_shapeInfo.getObjectGeometry(mytype, vectors, myradius, myheight);
 }
 
 void GluGeometryHandler::Initialize() { Render(); }
 
-void GluGeometryHandler::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
-                                   const V3D &p4) {
-  type = GeometryType::CUBOID;
-  m_points.assign({p1, p2, p3, p4});
+void GluGeometryHandler::setShapeInfo(detail::ShapeInfo &&shapeInfo)
+{
+  m_shapeInfo = std::move(shapeInfo);
 }
 
-void GluGeometryHandler::setHexahedron(const V3D &p1, const V3D &p2,
-                                       const V3D &p3, const V3D &p4,
-                                       const V3D &p5, const V3D &p6,
-                                       const V3D &p7, const V3D &p8) {
-  type = GeometryType::HEXAHEDRON;
-  m_points.assign({p1, p2, p3, p4, p5, p6, p7, p8});
-}
-
-void GluGeometryHandler::setSphere(const V3D &c, double r) {
-  type = GeometryType::SPHERE;
-  m_points.assign({c});
-  radius = r;
-}
-void GluGeometryHandler::setCylinder(const V3D &c, const V3D &a, double r,
-                                     double h) {
-  type = GeometryType::CYLINDER;
-  m_points.assign({c, a});
-  radius = r;
-  height = h;
-}
-void GluGeometryHandler::setCone(const V3D &c, const V3D &a, double r,
-                                 double h) {
-  type = GeometryType::CONE;
-  m_points.assign({c, a});
-  radius = r;
-  height = h;
-}
-void GluGeometryHandler::setSegmentedCylinder(const V3D &c, const V3D &a,
-                                              double r, double h) {
-  type = GeometryType::SEGMENTED_CYLINDER;
-  m_points.assign({c, a});
-  radius = r;
-  height = h;
-}
 }
 }

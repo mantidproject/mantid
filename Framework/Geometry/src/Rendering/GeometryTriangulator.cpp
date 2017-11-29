@@ -76,9 +76,9 @@ void GeometryTriangulator::triangulate() {
 
 #ifdef ENABLE_OPENCASCADE
 /// Return OpenCascade surface.
-TopoDS_Shape *GeometryTriangulator::getOCSurface() {
+const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
   checkTriangulated();
-  return m_objSurface;
+  return *m_objSurface;
 }
 #endif
 
@@ -119,13 +119,13 @@ void GeometryTriangulator::OCAnalyzeObject() {
     // Get the top rule tree in Obj
     const Rule *top = m_obj->topRule();
     if (top == nullptr) {
-      m_objSurface = new TopoDS_Shape();
+      m_objSurface.reset(new TopoDS_Shape());
       return;
     }
     // Traverse through Rule
     TopoDS_Shape Result = const_cast<Rule *>(top)->analyze();
     try {
-      m_objSurface = new TopoDS_Shape(Result);
+      m_objSurface.reset(new TopoDS_Shape(Result));
       BRepMesh_IncrementalMesh(Result, 0.001);
     } catch (StdFail_NotDone &) {
       g_log.error("Cannot build the geometry. Check the geometry definition");

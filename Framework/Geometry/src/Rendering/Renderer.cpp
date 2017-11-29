@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -51,157 +52,76 @@ using Kernel::Quat;
 using Kernel::V3D;
 
 namespace detail {
-void Renderer::renderIObjComponent(IObjComponent *objComp,
+void Renderer::renderIObjComponent(const IObjComponent &objComp,
                                    RenderMode mode) const {
   render(mode, objComp);
 }
 
 void Renderer::renderTriangulated(detail::GeometryTriangulator &triangulator,
                                   RenderMode mode) const {
+#ifdef ENABLE_OPENCASCADE
+  auto surface = triangulator.getOCSurface();
+  if (!surface.IsNull())
+    render(mode, surface);
+  else
+    render(mode, triangulator);
+#else
   render(mode, triangulator);
+#endif
 }
 
-void Renderer::renderOpenCascade(TopoDS_Shape *objSurf, RenderMode mode) const {
-  render(mode, objSurf);
+void Renderer::renderShape(const ShapeInfo &shapeInfo) const {
+  switch (shapeInfo.shape()) {
+  case ShapeInfo::GeometryShape::CUBOID:
+    doRenderCuboid(shapeInfo);
+    break;
+  case ShapeInfo::GeometryShape::SPHERE:
+    doRenderSphere(shapeInfo);
+    break;
+  case ShapeInfo::GeometryShape::HEXAHEDRON:
+    doRenderHexahedron(shapeInfo);
+    break;
+  case ShapeInfo::GeometryShape::CONE:
+    doRenderCone(shapeInfo);
+    break;
+  case ShapeInfo::GeometryShape::CYLINDER:
+  case ShapeInfo::GeometryShape::SEGMENTED_CYLINDER:
+    doRenderCylinder(shapeInfo);
+    break;
+  }
 }
 
-void Renderer::renderSphere(const Kernel::V3D &center, double radius,
-                            RenderMode mode) const {
-  render(mode, center, radius);
-}
-
-void Renderer::renderCuboid(const Kernel::V3D &Point1,
-                            const Kernel::V3D &Point2,
-                            const Kernel::V3D &Point3,
-                            const Kernel::V3D &Point4, RenderMode mode) const {
-  render(mode, Point1, Point2, Point3, Point4);
-}
-
-void Renderer::renderHexahedron(const std::vector<Kernel::V3D> &points,
-                                RenderMode mode) const {
-  render(mode, points);
-}
-
-void Renderer::renderCone(const Kernel::V3D &center, const Kernel::V3D &axis,
-                          double radius, double height, RenderMode mode) const {
-  render(mode, center, axis, radius, height);
-}
-
-void Renderer::renderCylinder(const Kernel::V3D &center,
-                              const Kernel::V3D &axis, double radius,
-                              double height, bool segmented,
-                              RenderMode mode) const {
-  render(mode, center, axis, radius, height, segmented);
-}
-
-void Renderer::renderBitmap(const RectangularDetector *rectDet,
+void Renderer::renderBitmap(const RectangularDetector &rectDet,
                             RenderMode mode) const {
   render(mode, rectDet);
 }
 
-void Renderer::renderStructured(const StructuredDetector *structDet,
+void Renderer::renderStructured(const StructuredDetector &structDet,
                                 RenderMode mode) const {
   render(mode, structDet);
 }
 
-// Render IObjectComponent
-void Renderer::doRender(IObjComponent *ObjComp) const {
-  glPushMatrix();
-  V3D pos = ObjComp->getPos();
-  Quat rot = ObjComp->getRotation();
-  double rotGL[16];
-  rot.GLMatrix(&rotGL[0]);
-  glTranslated(pos[0], pos[1], pos[2]);
-  glMultMatrixd(rotGL);
-  V3D scaleFactor = ObjComp->getScaleFactor();
-  glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
-  ObjComp->drawObject();
-  glPopMatrix();
-}
-
-// Render triangulated surface
-void Renderer::doRender(detail::GeometryTriangulator &triangulator) const {
-  const auto &faces = triangulator.getTriangleFaces();
-  const auto &points = triangulator.getTriangleVertices();
-  glBegin(GL_TRIANGLES);
-  V3D normal;
-  for (int i = 0; i < triangulator.numTriangleFaces(); i++) {
-    int index1 = faces[i * 3] * 3;
-    int index2 = faces[i * 3 + 1] * 3;
-    int index3 = faces[i * 3 + 2] * 3;
-    // Calculate normal and normalize
-    V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
-    V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);
-    V3D v3(points[index3], points[index3 + 1], points[index3 + 2]);
-    normal = (v1 - v2).cross_prod(v2 - v3);
-    normal.normalize();
-    glNormal3d(normal[0], normal[1], normal[2]);
-    glVertex3dv(&points[index1]);
-    glVertex3dv(&points[index2]);
-    glVertex3dv(&points[index3]);
-  }
-  glEnd();
-}
-
-// Render OpenCascade Shape
-void Renderer::doRender(TopoDS_Shape *ObjSurf) const {
-  glBegin(GL_TRIANGLES);
-  if ((ObjSurf != nullptr) && !ObjSurf->IsNull()) {
-    TopExp_Explorer Ex;
-    for (Ex.Init(*ObjSurf, TopAbs_FACE); Ex.More(); Ex.Next()) {
-      TopoDS_Face F = TopoDS::Face(Ex.Current());
-      TopLoc_Location L;
-      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
-      tab = facing->Nodes();
-      Poly_Array1OfTriangle tri(1, facing->NbTriangles());
-      tri = facing->Triangles();
-      for (Standard_Integer i = 1; i <= (facing->NbTriangles()); i++) {
-        Poly_Triangle trian = tri.Value(i);
-        Standard_Integer index1, index2, index3;
-        trian.Get(index1, index2, index3);
-        gp_Pnt point1 = tab.Value(index1);
-        gp_Pnt point2 = tab.Value(index2);
-        gp_Pnt point3 = tab.Value(index3);
-        gp_XYZ pt1 = tab.Value(index1).XYZ();
-        gp_XYZ pt2 = tab.Value(index2).XYZ();
-        gp_XYZ pt3 = tab.Value(index3).XYZ();
-
-        gp_XYZ v1 = pt2 - pt1;
-        gp_XYZ v2 = pt3 - pt2;
-
-        gp_XYZ normal = v1 ^ v2;
-        normal.Normalize();
-        glNormal3d(normal.X(), normal.Y(), normal.Z());
-        glVertex3d(point1.X(), point1.Y(), point1.Z());
-        glVertex3d(point2.X(), point2.Y(), point2.Z());
-        glVertex3d(point3.X(), point3.Y(), point3.Z());
-      }
-    }
-  }
-  glEnd();
-}
-
-// Render Sphere
-void Renderer::doRender(const Kernel::V3D &center, double radius) const {
+void Renderer::doRenderSphere(const ShapeInfo &shapeInfo) const
+{
   // create glu sphere
   GLUquadricObj *qobj = gluNewQuadric();
   gluQuadricDrawStyle(qobj, GLU_FILL);
   gluQuadricNormals(qobj, GL_SMOOTH);
   glPushMatrix();
+  auto center = shapeInfo.points()[0];
   glTranslated(center[0], center[1], center[2]);
-  gluSphere(qobj, radius, Sphere::g_nslices, Sphere::g_nstacks);
+  gluSphere(qobj, shapeInfo.radius(), Sphere::g_nslices, Sphere::g_nstacks);
   glPopMatrix();
   gluDeleteQuadric(qobj);
 }
 
-// Render Cuboid
-void Renderer::doRender(const V3D &Point1, const V3D &Point2, const V3D &Point3,
-                        const V3D &Point4) const {
-  V3D vec0 = Point1;
-  V3D vec1 = Point2 - Point1;
-  V3D vec2 = Point3 - Point1;
-  V3D vec3 = Point4 - Point1;
+void Renderer::doRenderCuboid(const ShapeInfo &shapeInfo) const
+{
+  const auto &points = shapeInfo.points();
+  V3D vec0 = points[0];
+  V3D vec1 = points[1] - points[0];
+  V3D vec2 = points[2] - points[0];
+  V3D vec3 = points[3] - points[0];
   V3D vertex[8];
   vertex[0] = vec0;
   vertex[1] = vec0 + vec3;
@@ -213,19 +133,19 @@ void Renderer::doRender(const V3D &Point1, const V3D &Point2, const V3D &Point3,
   vertex[7] = vec0 + vec1 + vec2;
 
   int faceindex[6][4] = {
-      {0, 1, 2, 3}, // top
-      {0, 3, 7, 4}, // left
-      {3, 2, 6, 7}, // back
-      {2, 1, 5, 6}, // right
-      {0, 4, 5, 1}, // front
-      {4, 7, 6, 5}, // bottom
+    { 0, 1, 2, 3 }, // top
+    { 0, 3, 7, 4 }, // left
+    { 3, 2, 6, 7 }, // back
+    { 2, 1, 5, 6 }, // right
+    { 0, 4, 5, 1 }, // front
+    { 4, 7, 6, 5 }, // bottom
   };
   V3D normal;
   // first face
   glBegin(GL_QUADS);
   for (auto &row : faceindex) {
     normal = (vertex[row[0]] - vertex[row[1]])
-                 .cross_prod((vertex[row[0]] - vertex[row[2]]));
+      .cross_prod((vertex[row[0]] - vertex[row[2]]));
     normal.normalize();
     glNormal3d(normal[0], normal[1], normal[2]);
     for (const int ij : row) {
@@ -251,9 +171,10 @@ void Renderer::doRender(const V3D &Point1, const V3D &Point2, const V3D &Point3,
   glEnd();
 }
 
-// Render Hexahedron
-void Renderer::doRender(const std::vector<Kernel::V3D> &points) const {
+void Renderer::doRenderHexahedron(const ShapeInfo &shapeInfo) const
+{
   glBegin(GL_QUADS);
+  const auto &points = shapeInfo.points();
   // bottom
   glVertex3d(points[0].X(), points[0].Y(), points[0].Z());
   glVertex3d(points[1].X(), points[1].Y(), points[1].Z());
@@ -288,40 +209,46 @@ void Renderer::doRender(const std::vector<Kernel::V3D> &points) const {
   glEnd();
 }
 
-// Render Cone
-void Renderer::doRender(const Kernel::V3D &center, const Kernel::V3D &axis,
-                        double radius, double height) const {
+void Renderer::doRenderCone(const ShapeInfo &shapeInfo) const {
   glPushMatrix();
   GLUquadricObj *qobj = gluNewQuadric();
   gluQuadricDrawStyle(qobj, GLU_FILL);
   gluQuadricNormals(qobj, GL_SMOOTH);
+  auto center = shapeInfo.points()[0];
   glTranslated(center[0], center[1], center[2]);
   GLdouble mat[16];
   V3D unit(0, 0, 1);
+  auto axis = shapeInfo.points()[1];
   Quat rot(unit, axis);
   rot.GLMatrix(&mat[0]);
   glMultMatrixd(mat);
+  auto radius = shapeInfo.radius();
+  auto height = shapeInfo.height();
   gluCylinder(qobj, 0, radius, height, Geometry::Cone::g_nslices,
-              Geometry::Cone::g_nstacks);
+    Geometry::Cone::g_nstacks);
   glTranslated(0.0, 0.0, height);
   gluDisk(qobj, 0, radius, Geometry::Cone::g_nslices, 1);
   glPopMatrix();
 }
 
-// Render Cylinder
-void Renderer::doRender(const Kernel::V3D &center, const Kernel::V3D &axis,
-                        double radius, double height, bool segmented) const {
+void Renderer::doRenderCylinder(const ShapeInfo &shapeInfo) const {
   GLUquadricObj *qobj = gluNewQuadric();
   gluQuadricDrawStyle(qobj, GLU_FILL);
   gluQuadricNormals(qobj, GL_SMOOTH);
   gluQuadricTexture(qobj, true);
   glPushMatrix();
+  auto center = shapeInfo.points()[0];
   glTranslated(center[0], center[1], center[2]);
   GLdouble mat[16];
   V3D unit(0, 0, 1);
+  auto axis = shapeInfo.points()[1];
   Quat rot(unit, axis);
   rot.GLMatrix(&mat[0]);
   glMultMatrixd(mat);
+  auto radius = shapeInfo.radius();
+  auto height = shapeInfo.height();
+  bool segmented =
+      shapeInfo.shape() == ShapeInfo::GeometryShape::SEGMENTED_CYLINDER;
   gluCylinder(qobj, radius, radius, height, Cylinder::g_nslices,
               segmented ? 1 : Cylinder::g_nstacks);
   gluQuadricTexture(qobj, false);
@@ -331,8 +258,88 @@ void Renderer::doRender(const Kernel::V3D &center, const Kernel::V3D &axis,
   glPopMatrix();
 }
 
+// Render IObjectComponent
+void Renderer::doRender(const IObjComponent &ObjComp) const {
+  glPushMatrix();
+  V3D pos = ObjComp.getPos();
+  Quat rot = ObjComp.getRotation();
+  double rotGL[16];
+  rot.GLMatrix(&rotGL[0]);
+  glTranslated(pos[0], pos[1], pos[2]);
+  glMultMatrixd(rotGL);
+  V3D scaleFactor = ObjComp.getScaleFactor();
+  glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
+  ObjComp.drawObject();
+  glPopMatrix();
+}
+
+// Render triangulated surface
+void Renderer::doRender(detail::GeometryTriangulator &triangulator) const {
+  const auto &faces = triangulator.getTriangleFaces();
+  const auto &points = triangulator.getTriangleVertices();
+  glBegin(GL_TRIANGLES);
+  V3D normal;
+  for (int i = 0; i < triangulator.numTriangleFaces(); i++) {
+    int index1 = faces[i * 3] * 3;
+    int index2 = faces[i * 3 + 1] * 3;
+    int index3 = faces[i * 3 + 2] * 3;
+    // Calculate normal and normalize
+    V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
+    V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);
+    V3D v3(points[index3], points[index3 + 1], points[index3 + 2]);
+    normal = (v1 - v2).cross_prod(v2 - v3);
+    normal.normalize();
+    glNormal3d(normal[0], normal[1], normal[2]);
+    glVertex3dv(&points[index1]);
+    glVertex3dv(&points[index2]);
+    glVertex3dv(&points[index3]);
+  }
+  glEnd();
+}
+
+#ifdef ENABLE_OPENCASCADE
+// Render OpenCascade Shape
+void Renderer::doRender(const TopoDS_Shape &ObjSurf) const {
+  glBegin(GL_TRIANGLES);
+  if (ObjSurf.IsNull()) {
+    TopExp_Explorer Ex;
+    for (Ex.Init(ObjSurf, TopAbs_FACE); Ex.More(); Ex.Next()) {
+      TopoDS_Face F = TopoDS::Face(Ex.Current());
+      TopLoc_Location L;
+      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
+      TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
+      tab = facing->Nodes();
+      Poly_Array1OfTriangle tri(1, facing->NbTriangles());
+      tri = facing->Triangles();
+      for (Standard_Integer i = 1; i <= (facing->NbTriangles()); i++) {
+        Poly_Triangle trian = tri.Value(i);
+        Standard_Integer index1, index2, index3;
+        trian.Get(index1, index2, index3);
+        gp_Pnt point1 = tab.Value(index1);
+        gp_Pnt point2 = tab.Value(index2);
+        gp_Pnt point3 = tab.Value(index3);
+        gp_XYZ pt1 = tab.Value(index1).XYZ();
+        gp_XYZ pt2 = tab.Value(index2).XYZ();
+        gp_XYZ pt3 = tab.Value(index3).XYZ();
+
+        gp_XYZ v1 = pt2 - pt1;
+        gp_XYZ v2 = pt3 - pt2;
+
+        gp_XYZ normal = v1 ^ v2;
+        normal.Normalize();
+        glNormal3d(normal.X(), normal.Y(), normal.Z());
+        glVertex3d(point1.X(), point1.Y(), point1.Z());
+        glVertex3d(point2.X(), point2.Y(), point2.Z());
+        glVertex3d(point3.X(), point3.Y(), point3.Z());
+      }
+    }
+  }
+  glEnd();
+}
+#endif
+
 // Render Bitmap for RectangularDetector
-void Renderer::doRender(const RectangularDetector *rectDet) const {
+void Renderer::doRender(const RectangularDetector &rectDet) const {
   // Because texture colours are combined with the geometry colour
   // make sure the current colour is white
   glColor3f(1.0f, 1.0f, 1.0f);
@@ -345,39 +352,39 @@ void Renderer::doRender(const RectangularDetector *rectDet) const {
   glEnable(GL_TEXTURE_2D); // enable texture mapping
 
   int texx, texy;
-  rectDet->getTextureSize(texx, texy);
-  double tex_frac_x = (1.0 * rectDet->xpixels()) / (texx);
-  double tex_frac_y = (1.0 * rectDet->ypixels()) / (texy);
+  rectDet.getTextureSize(texx, texy);
+  double tex_frac_x = (1.0 * rectDet.xpixels()) / (texx);
+  double tex_frac_y = (1.0 * rectDet.ypixels()) / (texy);
 
   glBegin(GL_QUADS);
 
   glTexCoord2f(0.0, 0.0);
   V3D pos;
-  pos = rectDet->getRelativePosAtXY(0, 0);
-  pos += V3D(rectDet->xstep() * (-0.5), rectDet->ystep() * (-0.5),
+  pos = rectDet.getRelativePosAtXY(0, 0);
+  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (-0.5),
              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
              static_cast<GLfloat>(pos.Z()));
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x), 0.0);
-  pos = rectDet->getRelativePosAtXY(rectDet->xpixels() - 1, 0);
-  pos += V3D(rectDet->xstep() * (+0.5), rectDet->ystep() * (-0.5),
+  pos = rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, 0);
+  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (-0.5),
              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
              static_cast<GLfloat>(pos.Z()));
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
                static_cast<GLfloat>(tex_frac_y));
-  pos = rectDet->getRelativePosAtXY(rectDet->xpixels() - 1,
-                                    rectDet->ypixels() - 1);
-  pos += V3D(rectDet->xstep() * (+0.5), rectDet->ystep() * (+0.5),
+  pos = rectDet.getRelativePosAtXY(rectDet.xpixels() - 1,
+                                    rectDet.ypixels() - 1);
+  pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (+0.5),
              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
              static_cast<GLfloat>(pos.Z()));
 
   glTexCoord2f(0.0, static_cast<GLfloat>(tex_frac_y));
-  pos = rectDet->getRelativePosAtXY(0, rectDet->ypixels() - 1);
-  pos += V3D(rectDet->xstep() * (-0.5), rectDet->ystep() * (+0.5),
+  pos = rectDet.getRelativePosAtXY(0, rectDet.ypixels() - 1);
+  pos += V3D(rectDet.xstep() * (-0.5), rectDet.ystep() * (+0.5),
              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
              static_cast<GLfloat>(pos.Z()));
@@ -390,18 +397,18 @@ void Renderer::doRender(const RectangularDetector *rectDet) const {
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
 }
 
-void Renderer::doRender(const StructuredDetector *structDet) const {
-  auto xVerts = structDet->getXValues();
-  auto yVerts = structDet->getYValues();
-  auto r = structDet->getR();
-  auto g = structDet->getG();
-  auto b = structDet->getB();
+void Renderer::doRender(const StructuredDetector &structDet) const {
+  auto xVerts = structDet.getXValues();
+  auto yVerts = structDet.getYValues();
+  auto r = structDet.getR();
+  auto g = structDet.getG();
+  auto b = structDet.getB();
 
   if (xVerts.size() != yVerts.size())
     return;
 
-  auto w = structDet->xPixels() + 1;
-  auto h = structDet->yPixels() + 1;
+  auto w = structDet.xPixels() + 1;
+  auto h = structDet.yPixels() + 1;
 
   glBegin(GL_QUADS);
 

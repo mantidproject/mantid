@@ -112,6 +112,7 @@ set ( SRC_FILES
 	src/Rendering/CacheGeometryHandler.cpp
 	src/Rendering/GeometryHandler.cpp
     src/Rendering/Renderer.cpp
+    src/Rendering/ShapeInfo.cpp
 	src/Rendering/GluGeometryHandler.cpp
 	src/Rendering/StructuredGeometryHandler.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
@@ -272,6 +273,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/CacheGeometryHandler.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
     inc/MantidGeometry/Rendering/Renderer.h
+    inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/GluGeometryHandler.h
 	inc/MantidGeometry/Rendering/OCGeometryHandler.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h

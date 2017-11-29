@@ -11,6 +11,7 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
@@ -789,7 +790,10 @@ public:
     boost::shared_ptr<GluGeometryHandler> h =
         boost::shared_ptr<GluGeometryHandler>(
             new GluGeometryHandler(geom_obj.get()));
-    h->setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005,
+                          0.003);
+    h->setShapeInfo(std::move(shapeInfo));
     geom_obj->setGeometryHandler(h);
 
     double satol(1e-8); // tolerance for solid angle
@@ -1429,8 +1433,10 @@ private:
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
     auto handler = boost::make_shared<GluGeometryHandler>(retVal);
-    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                           hex.rft, hex.rbt);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
+                            hex.lft, hex.rft, hex.rbt);
+    handler->setShapeInfo(std::move(shapeInfo));
     retVal->setGeometryHandler(handler);
 
     retVal->setObject(68, ObjHex);

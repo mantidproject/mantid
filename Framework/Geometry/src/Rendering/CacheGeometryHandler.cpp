@@ -76,7 +76,7 @@ void CacheGeometryHandler::Render() {
       Triangulate();
     m_renderer.renderTriangulated(*m_triangulator);
   } else if (ObjComp != nullptr) {
-    m_renderer.render(ObjComp);
+    m_renderer.render(*ObjComp);
   }
 }
 
@@ -87,7 +87,7 @@ void CacheGeometryHandler::Initialize() {
       Triangulate();
     m_renderer.renderTriangulated(*m_triangulator);
   } else if (ObjComp != nullptr) {
-    m_renderer.render(ObjComp);
+    m_renderer.render(*ObjComp);
   }
 }
 
