@@ -668,6 +668,10 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   if (mirrorTubes)
     xDirection = 1;
 
+  testInst->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Left,
+      "0,0,0"));
+
   // Pixel shape
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
@@ -698,6 +702,13 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
     addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
   }
-  return testInst;
+
+  auto pmap = boost::make_shared<ParameterMap>();
+  pmap->setInstrument(testInst.get());
+  if (mirrorTubes)
+    pmap->addBool(testInst->getBaseComponent(), "mirror_detector_angles", true);
+  auto testInstParameterised = boost::make_shared<Instrument>(testInst, pmap);
+
+  return testInstParameterised;
 }
 }

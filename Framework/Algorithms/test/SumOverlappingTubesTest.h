@@ -85,10 +85,6 @@ public:
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
 
-    testWS->getInstrument()->getParameterMap()->addBool(
-        testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
-        true);
-
     return testWS;
   }
 
