@@ -43,7 +43,6 @@ public:
   /// handling by the presenter
   enum Notification {
     Start,        ///< Start and setup interface
-    FittingRunNo, ///< Creates widgets and handles multi/run numbers
     Load,         ///< Load the focused file to the canvas
     FitPeaks,     ///< Preforms single peak fits
     FitAllPeaks,  ///< Preforms multiple runs in sequence single peak fits

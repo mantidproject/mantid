@@ -234,10 +234,6 @@ void EnggDiffFittingViewQtWidget::fitAllClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
 }
 
-void EnggDiffFittingViewQtWidget::FittingRunNo() {
-  m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
-}
-
 void EnggDiffFittingViewQtWidget::addClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
 }
@@ -272,7 +268,6 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     QString itemText = item->text();
 
     setFocusedFileNames(itemText.toStdString());
-    FittingRunNo();
   }
 }
 

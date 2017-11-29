@@ -80,9 +80,6 @@ public:
 
   void plotFitPeaksCurves();
 
-  void setRunNoItems(const std::vector<std::string> &runNumVector,
-                     bool multiRun);
-
 protected:
   void processStart();
   void processLoad();
@@ -97,7 +94,6 @@ protected:
 protected slots:
 
   void fittingFinished();
-  void fittingRunNoChanged();
 
 private:
   bool isDigit(const std::string &text) const;
@@ -113,17 +109,6 @@ private:
   void validateFittingInputs(const std::string &focusedRunNo,
                              const std::string &expectedPeaks);
 
-  // TODO make this const when the global is removed
-  bool findFilePathFromBaseName(const std::string &directoryToSearch,
-                                const std::string &baseFileNamesToFind,
-                                std::vector<std::string> &foundFullFilePath);
-
-  std::vector<std::string>
-  splitFittingDirectory(const std::string &selectedfPath);
-
-  std::vector<std::string> enableMultiRun(const std::string &firstRun,
-                                          const std::string &lastRun);
-
   void browsePeaksToFit();
 
   void addPeakToList();
@@ -133,17 +118,6 @@ private:
   std::string readPeaksFile(std::string fileDir);
 
   void fittingWriteFile(const std::string &fileDir);
-
-  std::vector<std::string>
-  getAllBrowsedFilePaths(const std::string &inputFullPath,
-                         std::vector<std::string> &foundFullFilePaths);
-
-  std::vector<std::string> processMultiRun(const std::string &userInput);
-
-  std::vector<std::string>
-  processSingleRun(const std::string &userInputBasename);
-
-  std::vector<std::string> processFullPathInput(const Poco::Path &pocoFilePath);
 
   static int g_fitting_runno_counter;
 

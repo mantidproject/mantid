@@ -175,7 +175,6 @@ private slots:
   void loadClicked();
   void fitClicked();
   void fitAllClicked();
-  void FittingRunNo();
   void addClicked();
   void browseClicked();
   void saveClicked();
