@@ -107,11 +107,20 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   // Add columns for log values
   if (m_multiple) {
     addColumnToTable(table, "str", "Label", PLOT_TYPE_LABEL);
+  } else {
+    addColumnToTable(table, "str", "workspace_Name", PLOT_TYPE_LABEL);
   }
+  const auto valMap = m_logValues->value(m_logValues->keys()[0]);
   for (const auto &log : m_logs) {
-    // Despite type "str", this will still work for plotting if it contains a
-    // number (like "100")
-    addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+
+    auto val = valMap[log];
+    // multiple files use strings due to x-y format
+    if (val.canConvert<double>() && !log.endsWith(" (text)") && !m_multiple) {
+      addColumnToTable(table, "double", log.toStdString(), PLOT_TYPE_X);
+
+    } else {
+      addColumnToTable(table, "str", log.toStdString(), PLOT_TYPE_X);
+    }
   }
 
   // Cache the start time of the first run
@@ -462,6 +471,7 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 
   for (const auto &wsName : m_items) {
     Mantid::API::TableRow row = table->appendRow();
+    row << wsName.toStdString();
 
     // Get log values for this row
     const auto &logValues = m_logValues->value(wsName);
@@ -477,10 +487,17 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
+      } else if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
-      row << valueToWrite.toStdString();
+
+      if (val.canConvert<double>() && !log.endsWith(" (text)")) {
+        row << valueToWrite.toDouble();
+      } else {
+        row << valueToWrite.toStdString();
+      }
     }
 
     // Add param values (params same for all workspaces)
@@ -540,7 +557,7 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
         row << min;
       } else {
         std::ostringstream oss;
-        oss << min << '-' << max;
+        oss << min << "-" << max;
         row << oss.str();
       }
       columnIndex++;

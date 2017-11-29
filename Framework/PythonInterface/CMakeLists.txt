@@ -49,6 +49,13 @@ include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
 add_definitions ( -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION )
+if ( CMAKE_COMPILER_IS_GNUCXX AND Boost_MAJOR_VERSION EQUAL "1" AND
+     Boost_MINOR_VERSION GREATER "63" AND Boost_MINOR_VERSION LESS "66" )
+  # Several bugs in boost 1.64-1.65 prevent python modues from loading on gcc without
+  # this definition:   https://github.com/boostorg/python/issues/131
+  add_definitions ( -DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY )
+endif ()
+
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
 
 ####################################################################################
