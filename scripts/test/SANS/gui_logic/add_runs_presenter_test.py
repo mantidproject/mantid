@@ -51,7 +51,6 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
-
     def _make_mock_run_summation(self):
         return mock.create_autospec(RunSummation, spec_set=True)
 
@@ -111,6 +110,9 @@ class AddRunsPagePresenterInitializationTest(AddRunsPagePresenterTestCase):
 
 
 class AddRunsPagePresenterSummationConfigTestCase(AddRunsPagePresenterTestCase):
+    # Creates a factory function which stores the run summation
+    # change callback allowing us to notify the presenter when
+    # the view is updated.
     def _capture_on_change_callback(self, presenter):
         def run_selector_presenter_factory(view, callback, parent_view):
             self._on_model_updated = callback
@@ -185,15 +187,6 @@ class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSummationConfigTe
             [RunFile(path) for path in run_paths]
         return fake_selection
 
-    # Creates a factory function which stores the run summation
-    # change callback allowing us to notify the presenter when
-    # the view is updated.
-    def _capture_on_change_callback(self, presenter):
-        def run_selector_presenter_factory(view, callback, parent_view):
-            self._on_model_updated = callback
-            return presenter
-        return run_selector_presenter_factory
-
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
@@ -251,8 +244,13 @@ class AddRunsPagePresenterBaseFileNameTest(AddRunsPagePresenterSummationConfigTe
         self.assertEqual(user_out_file_name,
                          self._base_file_name_arg(run_summation))
 
-# TODO Remember to test setting the name to the view when it is generated!
-
+    def test_sets_name_in_view_after_selection_update(self):
+        run_summation = mock.Mock()
+        presenter = self._make_presenter(run_summation)
+        self._update_selection_model(self._make_fake_runs(['4', '6', '5']))
+        self.view.set_out_file_name.assert_called_with('6')
+        self._update_selection_model(self._make_fake_runs(['5', '4']))
+        self.view.set_out_file_name.assert_called_with('5')
 
 class AddRunsPagePresenterSumButtonTest(AddRunsPagePresenterTestCase):
     def setUp(self):
