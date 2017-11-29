@@ -125,16 +125,17 @@ void MaxEnt::init() {
                                              Direction::Input),
       "A maximum entropy constant. This algorithm was first developed for the "
       "ISIS muon group where the default 0.4 was found to give good "
-      "reconstructions."
-      "In general the user will need to experiment with this value. Chosen a "
-      "small value may lead to unphysical spiky reconstructions and a too "
-      "large "
+      "reconstructions. "
+      "In general the user will need to experiment with this value. Choosing a "
+      "small value may lead to unphysical spiky reconstructions and choosing "
+      "an increasingly large "
       "value the reconstruction will start to resamble that of a direct "
       "fourier "
-      "transform reconstruction. However, where data contain a strongly "
-      "determined zero "
-      "Fourier data point the reconstruction will be insensitive to the choice "
-      "of this property.");
+      "transform reconstruction. However, where the data contain a "
+      "zero Fourier data point with a small error the "
+      "reconstruction will be insensitive to the choice "
+      "of this property (and increasing so the more well determined "
+      "this data point is).");
 
   declareProperty(
       make_unique<PropertyWithValue<double>>(
@@ -422,6 +423,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 /** Bisection method to move delta one step closer towards the solution
 * @param coeffs :: [input] The current quadratic coefficients
 * @param ChiTargetOverN :: [input] The requested Chi target over N
+* (data points)
 * @param chiEps :: [input] Precision required for Chi target
 * @param alphaIter :: [input] Maximum number of iterations in the bisection
 * method (alpha chop)

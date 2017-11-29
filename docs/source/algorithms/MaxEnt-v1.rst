@@ -17,13 +17,17 @@ image from the many images which fit the data with the same value of the statist
 has minimum information (maximum entropy).
 More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` subject to the constraint:
 
-.. math:: \chi^2 = \frac{1}{N}\sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
+.. math:: \chi^2 = \frac{1}{N'}\sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq \chi^2_{target}
 
-where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, and :math:`d_m^c`
-the calculated or reconstructed data. The image is a set of numbers
+where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, :math:`d_m^c`
+the calculated or reconstructed data, :math:`\chi^2_{target}` is value of the input algorithm 
+property ChiTargetOverN and :math:`N'` the number of measured data point. The image is a set of numbers
 :math:`\{x_0, x_1, \dots, x_{N-1}\}` related to the measured data via a 1D Fourier transform:
 
 .. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
+
+where :math:`N` is the number of image points, which can be made different from :math:`N'` and
+is controlled by the input algorithm property ResolutionFactor, see examples further below.
 
 Note that even for real input data the reconstructed image can be complex, which means that both the real and
 imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
