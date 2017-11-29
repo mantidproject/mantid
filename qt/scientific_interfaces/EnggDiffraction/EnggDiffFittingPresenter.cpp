@@ -73,8 +73,6 @@ std::string stripExtraCommas(std::string &expectedPeaks) {
 }
 }
 
-int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
-
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
  * handle on the current calibration (produced and updated elsewhere).
@@ -260,8 +258,6 @@ void EnggDiffFittingPresenter::fittingFinished() {
     m_view->showStatus(
         "Single peak fitting process did not complete successfully");
   }
-  // Reset once whole process is completed
-  g_multi_run.clear();
   // enable the GUI
   m_view->enableCalibrateFocusFitUserActions(true);
 }

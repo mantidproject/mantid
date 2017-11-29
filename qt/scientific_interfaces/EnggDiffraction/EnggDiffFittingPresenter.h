@@ -119,14 +119,6 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  static int g_fitting_runno_counter;
-
-  // name of the workspace with the focused ws being used for fitting
-  static const std::string g_focusedFittingWSName;
-
-  // input run number - used for output file name
-  std::vector<std::string> g_multi_run;
-
   // Holds the previous user input so we can short circuit further checks
   std::string m_previousInput;
 
