@@ -14,7 +14,8 @@ New
 Improved
 ########
 
-- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process
+- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process.
+- BASISReduction option noMonitorNorm changed to MonitorNorm.
 
 Vesuvio
 -------
