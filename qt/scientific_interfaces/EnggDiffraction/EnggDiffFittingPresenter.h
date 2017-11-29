@@ -125,9 +125,6 @@ private:
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
 
-  // directories of all the run numbers when multi-run option
-  std::vector<std::string> g_multi_run_directories;
-
   QThread *m_workerThread;
 
   /// interface for the 'current' calibration

@@ -328,16 +328,23 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
   m_view->setPeakList(normalisedPeakCentres);
 
+  const auto workspaceLabels = m_model->getRunNumbersAndBankIDs();
+
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
-  for (const auto &dir : g_multi_run_directories) {
-    g_log.debug() << dir << '\n';
+  for (const auto &workspaceLabel: workspaceLabels) {
+    g_log.debug() << listWidgetLabelFromRunAndBankNumber(workspaceLabel.first,
+                                                         workspaceLabel.second)
+                  << '\n';
   }
 
-  if (!g_multi_run_directories.empty()) {
+  if (!workspaceLabels.empty()) {
 
-    for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
+    for (const auto &workspaceLabel: workspaceLabels) {
+      int runNumber;
+      size_t bank;
+      std::tie(runNumber, bank) = workspaceLabel;
       try {
-        validateFittingInputs(g_multi_run_directories[i],
+        validateFittingInputs(m_model->getWorkspaceFilename(runNumber, bank),
                               normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
