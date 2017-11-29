@@ -137,12 +137,6 @@ protected:
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
                        QPair<double, double> range);
 
-  /// Updates the properties in the m_dblManager
-  void updateProperties(const QString &functionName, const QString &prefix,
-                        const QStringList &paramNames,
-                        const QMap<QString, double> &paramValues,
-                        int startOffset, int endOffset);
-
   /// Extracts a map of column name to value in the specified spectra from the
   /// specified table workspace
   QMap<QString, double>
@@ -184,7 +178,7 @@ protected:
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
   QHash<QString, size_t>
-  extractAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
+  extractAxisLabels(Mantid::API::MatrixWorkspace_const_sptr workspace,
                     const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
