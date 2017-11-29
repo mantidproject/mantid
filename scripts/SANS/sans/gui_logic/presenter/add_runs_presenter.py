@@ -43,12 +43,9 @@ class AddRunsPagePresenter(object):
 
     def _refresh_view(self, run_selection):
         self.update_output_filename(run_selection)
-        print(run_selection)
         if run_selection.has_any_runs():
-            print("Enable Sum")
             self._view.enable_sum()
         else:
-            print("Disable Sum")
             self._view.disable_sum()
 
     def update_output_filename(self, run_selection):
