@@ -26,18 +26,18 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         mock_view.outFileChanged = FakeSignal()
         return mock_view
 
-    def set_up_mock_child_presenters(self):
+    def setUpMockChildPresenters(self):
         self.summation_settings_presenter = \
             self._make_mock_summation_settings_presenter()
         self.run_selector_presenter = \
             self._make_mock_run_selector_presenter()
 
-    def set_up_fake_child_views(self):
+    def setUpFakeChildViews(self):
         self.fake_run_selector_view = 'Fake Run Selector View'
         self.fake_summation_settings_view = 'Fake Summation Settings View'
 
-    def set_up_mock_child_presenters_with_default_summation_settings(self):
-        self.set_up_mock_child_presenters()
+    def setUpMockChildPresentersWithDefaultSummationSettings(self):
+        self.setUpMockChildPresenters()
         self.summation_settings_presenter.settings.return_value = \
             SummationSettings(BinningType.SaveAsEventData)
 
@@ -76,8 +76,8 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 
 class InitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
-        self.set_up_fake_child_views()
-        self.set_up_mock_child_presenters_with_default_summation_settings()
+        self.setUpFakeChildViews()
+        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
 
@@ -136,7 +136,7 @@ class SelectionMockingTestCase(AddRunsPagePresenterTestCase):
 
 class SummationConfigurationTest(SelectionMockingTestCase):
     def setUp(self):
-        self.set_up_mock_child_presenters()
+        self.setUpMockChildPresenters()
         self.view = self._make_mock_view()
 
     def _make_presenter(self,
@@ -173,7 +173,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
 
 class BaseFileNameTest(SelectionMockingTestCase):
     def setUp(self):
-        self.set_up_mock_child_presenters_with_default_summation_settings()
+        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
 
     def _make_presenter(self,
@@ -259,7 +259,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
 class SumButtonTest(SelectionMockingTestCase):
     def setUp(self):
-        self.set_up_mock_child_presenters_with_default_summation_settings()
+        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
         self.presenter = self._make_presenter()
