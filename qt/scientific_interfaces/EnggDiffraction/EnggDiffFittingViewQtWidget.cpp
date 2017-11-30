@@ -436,9 +436,7 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
     return;
   }
 
-  // MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(paths[0]);
   setFocusedFileNames(paths.join(",").toStdString());
-  // getBanks();
 }
 
 void EnggDiffFittingViewQtWidget::setFocusedFileNames(
@@ -472,7 +470,6 @@ EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
     return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
   }
   return boost::none;
-  ;
 }
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
