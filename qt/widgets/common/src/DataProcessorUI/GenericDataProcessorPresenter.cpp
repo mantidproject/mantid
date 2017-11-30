@@ -40,16 +40,15 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 using OptionsMap = std::map<QString, QString>;
 
-/** Convert a key=value command-separated string into a map
+/** Convert a key=value command-separated string into a map and add
+ * the results into the given optionsMap.
  * @param options : the string to convert
- * @param optionsMap : the map to update (defaults to a new map)
- * @return : the (new/updated) options map of key to value pairs
+ * @param optionsMap : the map to update
  */
-OptionsMap convertStringToMap(const QString &options,
-                              OptionsMap optionsMap = OptionsMap()) {
-  if (options.isEmpty() || options.isNull())
-    return optionsMap;
-  
+void addStringOptionsToMap(const QString &options, OptionsMap &optionsMap) {
+  if (options.isEmpty())
+    return;
+
   auto optionsVec = options.split(",");
 
   for (auto const &option : optionsVec) {
@@ -57,8 +56,6 @@ OptionsMap convertStringToMap(const QString &options,
     auto const key = opt[0];
     optionsMap[key] = opt[1];
   }
-
-  return optionsMap;
 }
 
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
@@ -932,8 +929,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
   const auto hiddenOptions = data->back();
   auto options = m_processingOptions;
-  convertStringToMap(userOptions, options);
-  convertStringToMap(hiddenOptions, options);
+  addStringOptionsToMap(userOptions, options);
+  addStringOptionsToMap(hiddenOptions, options);
 
   // Now set user-specified options from the columns (overrides any values
   // already set in the options map)
