@@ -320,8 +320,8 @@ void JumpFit::updateProperties(QtProperty *prop, double val) {
   if (prop == m_properties["StartX"] || prop == m_properties["EndX"]) {
     auto bounds = qMakePair(m_dblManager->value(m_properties["StartX"]),
                             m_dblManager->value(m_properties["EndX"]));
-    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
-                     bounds);
+    setRangeSelector(qRangeSelector, m_properties["StartX"],
+                     m_properties["EndX"], bounds);
   }
 }
 
@@ -417,7 +417,7 @@ IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample =
-    m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
+      m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
   const auto startX = m_dblManager->value(m_properties["StartX"]);
   const auto endX = m_dblManager->value(m_properties["EndX"]);
   const auto baseName = getWorkspaceBasename(QString::fromStdString(sample));
