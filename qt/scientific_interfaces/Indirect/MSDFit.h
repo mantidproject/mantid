@@ -21,7 +21,7 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void singleFit();
   void newDataLoaded(const QString wsName);
   void specMinChanged(int value);

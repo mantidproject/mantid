@@ -521,7 +521,7 @@ QString IndirectFitAnalysisTab::addPrefixToParameter(const QString &parameter,
  * @param parameters     A vector containing the vector of parameters for each
  *                       function.
  * @param functionNames  A vector containing the names of the functions used
- * in the fit.
+ *                       in the fit.
  * @return               A vector containing a vector of parameters with the
  *                       appropriate prefixes prepended for each function.
  */

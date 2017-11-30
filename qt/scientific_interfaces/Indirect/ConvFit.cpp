@@ -848,8 +848,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1332,7 +1332,7 @@ QString ConvFit::addPrefixToParameter(const QString &parameter,
 }
 
 QString ConvFit::addPrefixToParameter(const QString &parameter,
-                                      const QString &functionName) const {
+                                      const QString &) const {
   QString tempPrefix = m_usedTemperature ? "f1." : "f0.";
   return "f1.f1." + tempPrefix + parameter;
 }

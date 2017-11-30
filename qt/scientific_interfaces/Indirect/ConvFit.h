@@ -21,7 +21,7 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void algorithmComplete(bool error) override;
   void typeSelection(int index);
   void bgTypeSelection(int index);

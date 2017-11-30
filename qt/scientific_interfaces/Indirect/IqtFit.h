@@ -31,7 +31,7 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   void typeSelection(int index);
   void newDataLoaded(const QString wsName);
   void updatePlot() override;

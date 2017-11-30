@@ -99,13 +99,14 @@ protected slots:
 
   void clearBatchRunnerSlots();
 
+  virtual void updatePlot() = 0;
+
 private:
   /// Overidden by child class.
   void setup() override = 0;
   void run() override = 0;
   bool validate() override = 0;
   void loadSettings(const QSettings &settings) override = 0;
-  virtual void updatePlot() = 0;
   virtual void disablePlotGuess() = 0;
   virtual void enablePlotGuess() = 0;
 

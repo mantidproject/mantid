@@ -22,7 +22,7 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
-private slots:
+protected slots:
   /// Handle when the sample input is ready
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle plotting a different spectrum of the workspace
