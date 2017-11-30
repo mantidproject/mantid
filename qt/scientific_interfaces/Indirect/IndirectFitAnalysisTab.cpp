@@ -451,6 +451,7 @@ void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
  * Updates the preview plots in this fit analysis tab, given the name
  * of the output workspace from a fit.
  *
+ * @param workspaceName   The name of the workspace to plot.
  * @param fitPreviewPlot  The preview plot widget in which to plot the fit.
  * @param diffPreviewPlot The preview plot widget in which to plot the
  *                        difference between the fit and sample data.
