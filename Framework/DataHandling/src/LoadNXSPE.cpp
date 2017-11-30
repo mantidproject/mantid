@@ -342,7 +342,8 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-Geometry::IObject_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+Geometry::IObject_sptr LoadNXSPE::createCuboid(double dx, double dy,
+                                               double dz) {
 
   dx = 0.5 * std::fabs(dx);
   dy = 0.5 * std::fabs(dy);

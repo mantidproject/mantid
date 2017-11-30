@@ -564,8 +564,8 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   }
 
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "moderator", IObject_sptr(new CSGObject), testInst.get());
   source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
   testInst->add(source);
   testInst->markAsSource(source);

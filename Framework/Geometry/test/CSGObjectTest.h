@@ -321,7 +321,8 @@ public:
     // A sphere
     std::string ObjSphere = "-41";
 
-    boost::shared_ptr<CSGObject> geom_obj = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> geom_obj =
+        boost::shared_ptr<CSGObject>(new CSGObject);
     geom_obj->setObject(41, ObjSphere);
     geom_obj->populate(SphSurMap);
 
@@ -1162,7 +1163,8 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal =
+        boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1197,7 +1199,8 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal =
+        boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1297,7 +1300,8 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal =
+        boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1338,7 +1342,8 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal =
+        boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
@@ -1418,7 +1423,8 @@ private:
 
     std::string ObjHex = "-1 2 3 -4 -5 6";
 
-    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal =
+        boost::shared_ptr<CSGObject>(new CSGObject);
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.

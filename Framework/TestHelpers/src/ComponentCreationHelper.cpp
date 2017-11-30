@@ -300,8 +300,8 @@ Instrument_sptr createTestInstrumentCylindrical(
   }
 
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "moderator", IObject_sptr(new CSGObject), testInst.get());
   source->setPos(sourcePos);
   testInst->add(source);
   testInst->markAsSource(source);
@@ -391,8 +391,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   bank->setPos(V3D(0., 0., 0.));
 
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "moderator", IObject_sptr(new CSGObject), testInst.get());
   source->setPos(V3D(0.0, 0.0, -L2_min));
   testInst->add(source);
   testInst->markAsSource(source);
@@ -540,8 +540,8 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   }
 
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
+  ObjComponent *source = new ObjComponent(
+      "moderator", IObject_sptr(new CSGObject), testInst.get());
   source->setPos(V3D(0.0, 0.0, -10.));
   testInst->add(source);
   testInst->markAsSource(source);
