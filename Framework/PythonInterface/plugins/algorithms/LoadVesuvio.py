@@ -19,6 +19,7 @@ SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
 LOAD_MON = "LoadMonitors"
+LOAD_LOG_FILES = "LoadLogFiles"
 WKSP_PROP_LOAD_MON= "OutputMonitorWorkspace"
 
 FILENAME_RE = re.compile(r'^([0-9]+)(\.[a-zA-z]+)?$')
@@ -136,6 +137,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.declareProperty(LOAD_MON, False,
                              doc="If true then the monitor data is loaded and will be output by the "
                                  "algorithm into a separate workspace.")
+
+        self.declareProperty(LOAD_LOG_FILES, False,
+                             doc="If true, then the log files for the specified runs will be loaded.")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
