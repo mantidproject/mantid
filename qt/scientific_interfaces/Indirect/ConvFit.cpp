@@ -1343,6 +1343,7 @@ QString ConvFit::addPrefixToParameter(const QString &parameter,
  */
 void ConvFit::createDefaultParamsMap() {
   setDefaultPropertyValue("PeakCentre", 0.0);
+  setDefaultPropertyValue("Centre", 0.0);
   // Reset all parameters to default of 1
   setDefaultPropertyValue("Amplitude", 1.0);
   setDefaultPropertyValue("beta", 1.0);
