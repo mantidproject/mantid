@@ -86,6 +86,30 @@ bool workspaceExists(QString const &workspaceName) {
 void removeWorkspace(QString const &workspaceName) {
   AnalysisDataService::Instance().remove(workspaceName.toStdString());
 }
+
+/** Parses individual runs from the preprocessing input string
+@param inputStr : the input string. Multiple runs may be separated by '+' or ','
+@return : a list of strings for individual properties
+ */
+QStringList parsePreprocessingInput(const QString &inputStr) {
+
+  auto properties = inputStr.split(QRegExp("[+,]"));
+
+  if (properties.isEmpty())
+    throw std::runtime_error("No runs given");
+
+  // Remove leading/trailing whitespace from each run
+  std::transform(properties.begin(), properties.end(), properties.begin(),
+                 [](QString in) -> QString { return in.trimmed(); });
+
+  // Check if we have any empty strings
+  if (properties.contains(""))
+    throw std::runtime_error("Some of the runs are empty. This may be due to "
+                             "trailing separators or other invalid characters "
+                             "in the input.");
+
+  return properties;
+}
 }
 
 namespace MantidQt {
@@ -594,13 +618,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
-  auto runs = runStr.split(QRegExp("[+,]"));
-  if (runs.isEmpty())
-    throw std::runtime_error("No runs given");
-
-  // Remove leading/trailing whitespace from each run
-  std::transform(runs.begin(), runs.end(), runs.begin(),
-                 [](QString in) -> QString { return in.trimmed(); });
+  auto runs = parsePreprocessingInput(runStr);
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
