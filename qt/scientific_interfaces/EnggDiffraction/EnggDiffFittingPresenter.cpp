@@ -1,9 +1,9 @@
 #include "EnggDiffFittingPresenter.h"
+#include "EnggDiffFittingPresWorker.h"
+#include "IEnggDiffFittingModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
-#include "IEnggDiffFittingModel.h"
-#include "EnggDiffFittingPresWorker.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -268,7 +268,7 @@ void EnggDiffFittingPresenter::processSelectRun() {
     int runNumber;
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
-    
+
     const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
     plotFocusedFile(false, ws);
   }
@@ -335,7 +335,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   const auto workspaceLabels = m_model->getRunNumbersAndBankIDs();
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
-  for (const auto &workspaceLabel: workspaceLabels) {
+  for (const auto &workspaceLabel : workspaceLabels) {
     g_log.debug() << listWidgetLabelFromRunAndBankNumber(workspaceLabel.first,
                                                          workspaceLabel.second)
                   << '\n';
@@ -343,7 +343,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   if (!workspaceLabels.empty()) {
 
-    for (const auto &workspaceLabel: workspaceLabels) {
+    for (const auto &workspaceLabel : workspaceLabels) {
       const int runNumber = workspaceLabel.first;
       const size_t bank = workspaceLabel.second;
       try {
@@ -360,7 +360,6 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
                    << "single peak fits. This may take some seconds...\n";
     m_view->showStatus("Fitting multi-run single peaks...");
 
-    
     // disable GUI to avoid any double threads
     m_view->enableCalibrateFocusFitUserActions(false);
     m_view->enableFitAllButton(false);
@@ -413,7 +412,8 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
 
-  startAsyncFittingWorker({std::make_pair(runNumber, bank)}, normalisedPeakCentres);
+  startAsyncFittingWorker({std::make_pair(runNumber, bank)},
+                          normalisedPeakCentres);
 }
 
 void EnggDiffFittingPresenter::validateFittingInputs(

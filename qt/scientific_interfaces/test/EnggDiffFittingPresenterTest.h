@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 
+#include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
@@ -33,9 +33,9 @@ public:
 
 private:
   // not async at all
-  void startAsyncFittingWorker(const std::vector<std::pair<int, size_t>> 
-                                   &runNumberBankPairs,
-                               const std::string &ExpectedPeaks) override {
+  void startAsyncFittingWorker(
+      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
+      const std::string &ExpectedPeaks) override {
     assert(runNumberBankPairs.size() == 1);
     const auto runNumber = runNumberBankPairs[0].first;
     const auto bank = runNumberBankPairs[0].second;
@@ -135,9 +135,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -161,9 +161,9 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -190,12 +190,10 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return("123_1"));
+        .WillOnce(Return(boost::optional<std::string>(
+            boost::optional<std::string>("123_1"))));
     EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
         .Times(1)
         .WillOnce(Return(""));
@@ -226,16 +224,24 @@ public:
   // Fit All Peaks test begin here
   void test_fit_all_runno_valid_single_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
 
-    EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
+    EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
+
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+        .Times(1)
+        .WillOnce(Return(
+            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
-    EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(1);
+    EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(0);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -251,7 +257,6 @@ public:
   // This would test the fitting tab with invalid expected peaks but should only
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
-    return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
@@ -268,7 +273,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
-    pres.notify(IEnggDiffFittingPresenter::FitPeaks);
+    pres.notify(IEnggDiffFittingPresenter::FitAllPeaks);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
