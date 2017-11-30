@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_SURFACETRIANGULATOR_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 class TopoDS_Shape;
@@ -63,7 +64,7 @@ public:
   const std::vector<int> &getTriangleFaces();
 #ifdef ENABLE_OPENCASCADE
 private:
-  std::unique_ptr<TopoDS_Shape>
+  boost::shared_ptr<TopoDS_Shape>
       m_objSurface; ///< Storage for the output surface
                     /// Analyze the object
                     /// OpenCascade analysis of object surface
@@ -75,7 +76,7 @@ private:
 
 public:
   /// Return OpenCascade surface.
-  const TopoDS_Shape &getOCSurface();
+  boost::shared_ptr<TopoDS_Shape> getOCSurface();
 #endif
 };
 } // namespace detail

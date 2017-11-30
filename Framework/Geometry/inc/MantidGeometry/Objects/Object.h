@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -22,7 +23,6 @@ class V3D;
 }
 
 namespace Geometry {
-class CacheGeometryHandler;
 class CompGrp;
 class GeometryHandler;
 class Rule;
@@ -178,7 +178,7 @@ public:
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
                      double &myradius, double &myheight) const;
   /// Getter for the shape xml
   std::string getShapeXML() const;
@@ -239,8 +239,7 @@ private:
   int ObjNum;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
-  friend class CacheGeometryHandler;
-  friend class GeometryRenderer;
+  friend class GeometryHandler;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
   /// a pointer to a class for reading from the geometry cache

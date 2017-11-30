@@ -2,9 +2,8 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -60,7 +59,7 @@ Object::Object(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  handle = boost::make_shared<CacheGeometryHandler>(this);
+  handle = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -1006,17 +1005,14 @@ double Object::triangleSolidAngle(const V3D &observer) const {
 
   // If the object is a simple shape use the special methods
   double height(0.0), radius(0.0);
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID:
     return CuboidSolidAngle(observer, geometry_vectors);
     break;
@@ -1096,13 +1092,10 @@ double Object::triangleSolidAngle(const V3D &observer,
   //
   if (nTri == 0) {
     double height = 0.0, radius(0.0);
-    int type;
+    detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    detail::ShapeInfo::GeometryShape gluType =
-        static_cast<detail::ShapeInfo::GeometryShape>(type);
-
-    switch (gluType) {
+    switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
@@ -1487,14 +1480,12 @@ double Object::ConeSolidAngle(const V3D &observer,
  * @return The volume.
  */
 double Object::volume() const {
-  int type;
+  detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
   std::vector<Kernel::V3D> vectors;
   this->GetObjectGeom(type, vectors, radius, height);
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
@@ -1714,9 +1705,9 @@ void Object::calcBoundingBoxByRule() {
 void Object::calcBoundingBoxByVertices() {
   // Grab vertex information
   auto vertCount = this->numberOfVertices();
-  const auto &vertArray = this->getTriangleVertices().get();
 
   if (vertCount > 0) {
+    const auto &vertArray = this->getTriangleVertices().get();
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -1757,18 +1748,15 @@ void Object::calcBoundingBoxByGeometry() {
   double minX, maxX, minY, maxY, minZ, maxZ;
 
   // Shape geometry data
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
 
-  // Will only work for shapes handled by GluGeometryHandler
+  // Will only work for shapes with ShapeInfo
   handle->GetObjectGeom(type, vectors, radius, height);
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-
   // Type of shape is given as a simple integer
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
@@ -2068,7 +2056,7 @@ void Object::draw() const {
   if (handle == nullptr)
     return;
   // Render the Object
-  handle->Render();
+  handle->render();
 }
 
 /**
@@ -2080,7 +2068,7 @@ void Object::initDraw() const {
   if (handle == nullptr)
     return;
   // Render the Object
-  handle->Initialize();
+  handle->initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2166,9 +2154,9 @@ boost::optional<const std::vector<int> &> Object::getTriangleFaces() const {
 /**
 * get info on standard shapes
 */
-void Object::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
+void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
                            double &myradius, double &myheight) const {
-  type = 0;
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (handle == nullptr)
     return;
   handle->GetObjectGeom(type, vectors, myradius, myheight);

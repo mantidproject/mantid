@@ -379,7 +379,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
 
   // Get information about the shape and size of a detector
   std::string type;
-  int otype;
+  detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
   boost::shared_ptr<const Object> obj = group.front()->shape();
@@ -388,9 +388,9 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
         "Found ObjComponent without shape");
   }
   obj->GetObjectGeom(otype, vectors, radius, height);
-  if (otype == 1) {
+  if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
     type = "box";
-  } else if (otype == 4) {
+  } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
     type = "cylinder";
   } else {
     throw std::runtime_error(

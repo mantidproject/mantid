@@ -312,7 +312,7 @@ void ObjComponent::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -333,7 +333,7 @@ void ObjComponent::initDraw() const {
   // Render the ObjComponent and then render the object
   if (shape() != nullptr)
     shape()->initDraw();
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 /**

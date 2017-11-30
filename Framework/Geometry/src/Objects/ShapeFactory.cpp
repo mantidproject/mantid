@@ -5,7 +5,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -1409,7 +1409,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
   shape->setObject(21, algebra);
   shape->populate(prim);
 
-  auto handler = boost::make_shared<GluGeometryHandler>(shape);
+  auto handler = boost::make_shared<GeometryHandler>(shape);
   detail::ShapeInfo shapeInfo;
   shape->setGeometryHandler(handler);
 
@@ -1427,7 +1427,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<Object> Obj) {
 
-  auto geomHandler = boost::make_shared<GluGeometryHandler>(Obj);
+  auto geomHandler = boost::make_shared<GeometryHandler>(Obj);
   detail::ShapeInfo shapeInfo;
   Obj->setGeometryHandler(geomHandler);
 
