@@ -119,7 +119,6 @@ private:
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::CompAssembly;
     using Mantid::Geometry::Detector;
-    using Mantid::Geometry::Object_sptr;
     using Mantid::Kernel::V3D;
 
     // Need a tube based instrument.

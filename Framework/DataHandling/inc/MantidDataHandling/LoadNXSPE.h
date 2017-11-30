@@ -69,7 +69,7 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Function to return a cuboid shape, with widths dx,dy,dz
-  Geometry::Object_sptr createCuboid(double dx, double dy, double dz);
+  Geometry::IObject_sptr createCuboid(double dx, double dy, double dz);
 };
 
 } // namespace DataHandling

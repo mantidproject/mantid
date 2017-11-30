@@ -565,14 +565,14 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
   // Define a source component
   ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new CSGObject), testInst.get());
+      new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
   source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
   testInst->add(source);
   testInst->markAsSource(source);
 
   // Add chopper
   ObjComponent *chopper = new ObjComponent(
-      "chopper-position", Object_sptr(new CSGObject), testInst.get());
+      "chopper-position", IObject_sptr(new CSGObject), testInst.get());
   chopper->setPos(V3D(0.0, 0.0, -0.25 * sourceSampleDistance));
   testInst->add(chopper);
 

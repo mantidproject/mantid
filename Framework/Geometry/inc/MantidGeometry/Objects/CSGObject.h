@@ -273,11 +273,6 @@ protected:
   /// including complementary object ?)
 };
 
-/// Typdef for a shared pointer
-typedef boost::shared_ptr<CSGObject> Object_sptr;
-/// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const CSGObject> Object_const_sptr;
-
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
 

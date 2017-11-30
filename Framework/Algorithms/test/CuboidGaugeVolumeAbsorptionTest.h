@@ -12,7 +12,6 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::Geometry::Object_sptr;
 
 class CuboidGaugeVolumeAbsorptionTest : public CxxTest::TestSuite {
 public:

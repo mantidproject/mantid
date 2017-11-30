@@ -131,7 +131,7 @@ public:
   }
 
   void testCreateUnitCube() {
-    Object_sptr geom_obj = createUnitCube();
+    boost::shared_ptr<CSGObject> geom_obj = createUnitCube();
 
     TS_ASSERT_EQUALS(geom_obj->str(), "68 1 -2 3 -4 5 -6");
 
@@ -140,7 +140,7 @@ public:
   }
 
   void testIsOnSideCappedCylinder() {
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 0, 0)), false); // origin
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0, 2.9, 0)), false);
@@ -174,7 +174,7 @@ public:
   }
 
   void testIsValidCappedCylinder() {
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 0, 0)), true); // origin
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0, 2.9, 0)), true);
@@ -287,7 +287,7 @@ public:
   }
 
   void testCalcValidTypeCappedCylinder() {
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     // entry on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
@@ -321,7 +321,7 @@ public:
     // A sphere
     std::string ObjSphere = "-41";
 
-    Object_sptr geom_obj = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> geom_obj = boost::shared_ptr<CSGObject>(new CSGObject);
     geom_obj->setObject(41, ObjSphere);
     geom_obj->populate(SphSurMap);
 
@@ -361,7 +361,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderY() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
@@ -371,7 +371,7 @@ public:
 
   void testInterceptSurfaceCappedCylinderX() {
     std::vector<Link> expectedResults;
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
@@ -383,7 +383,7 @@ public:
   void testInterceptSurfaceCappedCylinderMiss() {
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -618,7 +618,7 @@ public:
   Test find point in cube
   */
   {
-    Object_sptr geom_obj = createUnitCube();
+    boost::shared_ptr<CSGObject> geom_obj = createUnitCube();
     // initial guess in object
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
@@ -626,17 +626,17 @@ public:
     // initial guess not in object, but on x-axis
     std::vector<std::string> planes{"px 10",  "px 11",   "py -0.5",
                                     "py 0.5", "pz -0.5", "pz 0.5"};
-    Object_sptr B = createCuboid(planes);
+    boost::shared_ptr<CSGObject> B = createCuboid(planes);
     TS_ASSERT_EQUALS(B->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(10, 0, 0));
     // on y axis
     planes = {"px -0.5", "px 0.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
-    Object_sptr C = createCuboid(planes);
+    boost::shared_ptr<CSGObject> C = createCuboid(planes);
     TS_ASSERT_EQUALS(C->getPointInObject(pt), 1);
     TS_ASSERT_EQUALS(pt, V3D(0, -21, 0));
     // not on principle axis, now works using getBoundingBox
     planes = {"px 0.5", "px 1.5", "py -22", "py -21", "pz -0.5", "pz 0.5"};
-    Object_sptr D = createCuboid(planes);
+    boost::shared_ptr<CSGObject> D = createCuboid(planes);
     TS_ASSERT_EQUALS(D->getPointInObject(pt), 1);
     TS_ASSERT_DELTA(pt.X(), 1.0, 1e-6);
     TS_ASSERT_DELTA(pt.Y(), -21.5, 1e-6);
@@ -655,7 +655,7 @@ public:
               "p 0 .70710678118 .70710678118 -0.1",
               "p 0 -.70710678118 .70710678118 -0.5",
               "p 0 -.70710678118 .70710678118 0.5"};
-    Object_sptr E = createCuboid(planes);
+    boost::shared_ptr<CSGObject> E = createCuboid(planes);
     TS_ASSERT_EQUALS(E->getPointInObject(pt), 1);
     TS_ASSERT_DELTA(pt.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(pt.Y(), -0.1414213562373, 1e-6);
@@ -670,7 +670,7 @@ public:
               "p 0  .70710678118 .70710678118 -1",
               "p 0 -.70710678118 .70710678118 -0.5",
               "p 0 -.70710678118 .70710678118 0.5"};
-    Object_sptr F = createCuboid(planes);
+    boost::shared_ptr<CSGObject> F = createCuboid(planes);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
@@ -777,7 +777,7 @@ public:
   Test solid angle calculation for a capped cylinder
   */
   {
-    Object_sptr geom_obj = createSmallCappedCylinder();
+    boost::shared_ptr<CSGObject> geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
     boost::shared_ptr<GluGeometryHandler> h =
         boost::shared_ptr<GluGeometryHandler>(
@@ -824,7 +824,7 @@ public:
   - test for using Open Cascade surface triangulation for all solid angles.
   */
   {
-    Object_sptr geom_obj = createUnitCube();
+    boost::shared_ptr<CSGObject> geom_obj = createUnitCube();
     double satol = 1e-3; // tolerance for solid angle
 
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
@@ -847,7 +847,7 @@ public:
 
   /** Add a scale factor */
   void testSolidAngleCubeTriangles_WithScaleFactor() {
-    Object_sptr geom_obj = createUnitCube();
+    boost::shared_ptr<CSGObject> geom_obj = createUnitCube();
     double satol = 1e-3; // tolerance for solid angle
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     double expected = M_PI * 2.0 / 3.0;
@@ -954,7 +954,7 @@ public:
   Test bounding box for a object capped cylinder
   */
   {
-    Object_sptr geom_obj = createCappedCylinder();
+    IObject_sptr geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = ymax = zmax = 100;
     xmin = ymin = zmin = -100;
@@ -968,7 +968,7 @@ public:
   }
 
   void testGetBoundingBoxForCuboid() {
-    Object_sptr cuboid = createUnitCube();
+    boost::shared_ptr<CSGObject> cuboid = createUnitCube();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = ymax = zmax = 100;
     xmin = ymin = zmin = -100;
@@ -997,7 +997,7 @@ public:
     hex.rft = V3D(0.5, 0.5, 2);
     hex.rbt = V3D(0, 0.5, 2);
 
-    Object_sptr hexahedron = createHexahedron(hex);
+    boost::shared_ptr<CSGObject> hexahedron = createHexahedron(hex);
 
     auto bb = hexahedron->getBoundingBox();
 
@@ -1014,7 +1014,7 @@ public:
   Test use of defineBoundingBox
   */
   {
-    Object_sptr geom_obj = createCappedCylinder();
+    boost::shared_ptr<CSGObject> geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = 1.2;
     ymax = 3.0;
@@ -1047,7 +1047,7 @@ public:
   Test triangle solid angle calc
   */
   {
-    Object_sptr geom_obj = createCappedCylinder();
+    boost::shared_ptr<CSGObject> geom_obj = createCappedCylinder();
     double xmax, ymax, zmax, xmin, ymin, zmin;
     xmax = 20;
     ymax = 20.0;
@@ -1140,7 +1140,7 @@ private:
 
   STYPE SMap; ///< Surface Map
 
-  Object_sptr createCappedCylinder() {
+  boost::shared_ptr<CSGObject> createCappedCylinder() {
     std::string C31 = "cx 3.0"; // cylinder x-axis radius 3
     std::string C32 = "px 1.2";
     std::string C33 = "px -3.2";
@@ -1162,7 +1162,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1174,7 +1174,7 @@ private:
   // This creates a cylinder to test the solid angle that is more realistic in
   // size
   // for a detector cylinder
-  Object_sptr createSmallCappedCylinder() {
+  boost::shared_ptr<CSGObject> createSmallCappedCylinder() {
     std::string C31 =
         "cx 0.005"; // cylinder x-axis radius 0.005 and height 0.003
     std::string C32 = "px -0.997";
@@ -1197,7 +1197,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    Object_sptr retVal = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
@@ -1263,7 +1263,7 @@ private:
     return;
   }
 
-  Object_sptr createUnitCube() {
+  boost::shared_ptr<CSGObject> createUnitCube() {
     std::string C1 = "px -0.5"; // cube +/-0.5
     std::string C2 = "px 0.5";
     std::string C3 = "py -0.5";
@@ -1297,14 +1297,14 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
     return retVal;
   }
 
-  Object_sptr createCuboid(std::vector<std::string> &planes) {
+  boost::shared_ptr<CSGObject> createCuboid(std::vector<std::string> &planes) {
     std::string C1 = planes[0];
     std::string C2 = planes[1];
     std::string C3 = planes[2];
@@ -1338,14 +1338,14 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    Object_sptr retVal = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
     return retVal;
   }
 
-  Object_sptr createHexahedron(Hexahedron &hex) {
+  boost::shared_ptr<CSGObject> createHexahedron(Hexahedron &hex) {
     // Create surfaces
     std::map<int, boost::shared_ptr<Surface>> HexSurMap;
     HexSurMap[1] = boost::make_shared<Plane>();
@@ -1418,7 +1418,7 @@ private:
 
     std::string ObjHex = "-1 2 3 -4 -5 6";
 
-    Object_sptr retVal = Object_sptr(new CSGObject);
+    boost::shared_ptr<CSGObject> retVal = boost::shared_ptr<CSGObject>(new CSGObject);
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
