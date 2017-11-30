@@ -391,7 +391,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
-    	ShapeInfoTest.h
+    ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
