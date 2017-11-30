@@ -55,8 +55,8 @@ public:
 
   void addAllFittedPeaksToADS() const override;
 
-  bool hasFittedPeaksForRun(const int runNumber, const size_t bank) const 
-    override;
+  bool hasFittedPeaksForRun(const int runNumber,
+                            const size_t bank) const override;
 
 protected:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
@@ -114,7 +114,8 @@ private:
   void setDataToClonedWS(const std::string &wsToCopyName,
                          const std::string &targetWSName);
 
-  void appendSpectra(const std::string &ws1Name, const std::string &ws2Name) const;
+  void appendSpectra(const std::string &ws1Name,
+                     const std::string &ws2Name) const;
 
   std::tuple<double, double, double>
   getDifcDifaTzero(Mantid::API::MatrixWorkspace_const_sptr ws);

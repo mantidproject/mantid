@@ -62,8 +62,8 @@ public:
 
   MOCK_CONST_METHOD0(addAllFittedPeaksToADS, void());
 
-  MOCK_CONST_METHOD2(hasFittedPeaksForRun, bool(const int runNumber,
-						const size_t bank));
+  MOCK_CONST_METHOD2(hasFittedPeaksForRun,
+                     bool(const int runNumber, const size_t bank));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

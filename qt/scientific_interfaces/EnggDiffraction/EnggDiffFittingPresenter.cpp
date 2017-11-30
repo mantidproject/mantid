@@ -88,8 +88,8 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_model(std::move(model)), m_viewHasClosed(false), m_multiRunMode(false)
-    {}
+      m_model(std::move(model)), m_viewHasClosed(false), m_multiRunMode(false) {
+}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -278,8 +278,7 @@ void EnggDiffFittingPresenter::processSelectRun() {
 
     if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
       plotFitPeaksCurves();
-    }
-    else {
+    } else {
       const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
       plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
     }
@@ -349,9 +348,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &workspaceLabel : workspaceLabels) {
-    g_log.debug() << listWidgetLabelFromRunAndBankNumber(workspaceLabel.first,
-                                                         workspaceLabel.second)
-                  << '\n';
+    g_log.debug() << listWidgetLabelFromRunAndBankNumber(
+                         workspaceLabel.first, workspaceLabel.second) << '\n';
   }
 
   if (!workspaceLabels.empty()) {

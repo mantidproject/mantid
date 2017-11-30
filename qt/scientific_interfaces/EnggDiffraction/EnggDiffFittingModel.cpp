@@ -197,7 +197,7 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
 
 size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
   size_t numWorkspaces = 0;
-  
+
   for (const auto &bank : m_focusedWorkspaceMap) {
     numWorkspaces += bank.size();
   }
@@ -206,7 +206,7 @@ size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
 
 bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
                                                 const size_t bank) const {
-  return m_fittedPeaksMap[bank - 1].find(runNumber) != 
+  return m_fittedPeaksMap[bank - 1].find(runNumber) !=
          m_fittedPeaksMap[bank - 1].end();
 }
 
@@ -416,13 +416,14 @@ std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
   return runNumbers;
 }
 
-void EnggDiffFittingModel::mergeTables(const API::ITableWorkspace_sptr tableToCopy,
-                                       API::ITableWorkspace_sptr targetTable) const {
+void EnggDiffFittingModel::mergeTables(
+    const API::ITableWorkspace_sptr tableToCopy,
+    API::ITableWorkspace_sptr targetTable) const {
   for (size_t i = 0; i < tableToCopy->rowCount(); ++i) {
     API::TableRow rowToCopy = tableToCopy->getRow(i);
     API::TableRow newRow = targetTable->appendRow();
 
-    for (size_t j = 0; j < tableToCopy->columnCount(); ++j){
+    for (size_t j = 0; j < tableToCopy->columnCount(); ++j) {
       double valueToCopy;
       rowToCopy >> valueToCopy;
       newRow << valueToCopy;
@@ -443,7 +444,7 @@ void EnggDiffFittingModel::addAllFitResultsToADS() const {
     const auto singleWSFitResults = getFitResults(runNumber, bank);
 
     if (runNumberBankPair == *runNumberBankPairs.begin()) {
-      //First element - copy column headings over
+      // First element - copy column headings over
       const auto columnHeaders = singleWSFitResults->getColumnNames();
       for (const auto &header : columnHeaders) {
         fitParamsTable->addColumn("double", header);
@@ -459,7 +460,8 @@ void EnggDiffFittingModel::addAllFittedPeaksToADS() const {
     return;
   }
   const auto firstWSLabel = runNumberBankPairs[0];
-  auto fittedPeaksWS = getFittedPeaksWS(firstWSLabel.first, firstWSLabel.second);
+  auto fittedPeaksWS =
+      getFittedPeaksWS(firstWSLabel.first, firstWSLabel.second);
   cloneWorkspace(fittedPeaksWS, FITTED_PEAKS_WS_NAME);
 
   for (size_t i = 1; i < runNumberBankPairs.size(); ++i) {
@@ -607,7 +609,7 @@ const std::string EnggDiffFittingModel::FOCUSED_WS_NAME =
     "engggui_fitting_focused_ws";
 const std::string EnggDiffFittingModel::FIT_RESULTS_TABLE_NAME =
     "engggui_fitting_fitpeaks_params";
-const std::string EnggDiffFittingModel::FITTED_PEAKS_WS_NAME = 
+const std::string EnggDiffFittingModel::FITTED_PEAKS_WS_NAME =
     "engggui_fitting_single_peaks";
 
 const double EnggDiffFittingModel::DEFAULT_DIFA = 0.0;

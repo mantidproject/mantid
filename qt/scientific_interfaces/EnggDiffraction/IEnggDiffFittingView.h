@@ -52,7 +52,7 @@ public:
   /**
    * Get value of the input files text box
    *
-   * @return (hopefully) comma-separated list of focused files to load for 
+   * @return (hopefully) comma-separated list of focused files to load for
    * fitting
    */
   virtual std::string getFocusedFileNames() const = 0;
@@ -155,7 +155,8 @@ public:
   /**
   * @return The text on the current selected row of the list widget
   */
-  virtual boost::optional<std::string> getFittingListWidgetCurrentValue() const = 0;
+  virtual boost::optional<std::string>
+  getFittingListWidgetCurrentValue() const = 0;
 
   /**
   * @return Whether the list widget currently has an item selected

@@ -261,7 +261,7 @@ public:
     auto mockModel = Mantid::Kernel::make_unique<
         testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
-    
+
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
     // inputs from user
@@ -271,9 +271,9 @@ public:
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
-         .Times(1)
-         .WillOnce(Return(std::vector<std::pair<int, size_t>>(
-                          {std::make_pair(123, 1)})));
+        .Times(1)
+        .WillOnce(Return(
+            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);

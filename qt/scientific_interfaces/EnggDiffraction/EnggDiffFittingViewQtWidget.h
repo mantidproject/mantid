@@ -101,7 +101,8 @@ public:
 
   int getFittingListWidgetCurrentRow() const override;
 
-  boost::optional<std::string> getFittingListWidgetCurrentValue() const override;
+  boost::optional<std::string>
+  getFittingListWidgetCurrentValue() const override;
 
   bool listWidgetHasSelectedRow() const override;
 

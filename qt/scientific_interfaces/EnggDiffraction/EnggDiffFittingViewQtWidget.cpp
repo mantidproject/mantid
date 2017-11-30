@@ -441,7 +441,8 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   // getBanks();
 }
 
-void EnggDiffFittingViewQtWidget::setFocusedFileNames(const std::string &paths) {
+void EnggDiffFittingViewQtWidget::setFocusedFileNames(
+    const std::string &paths) {
   m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(paths));
 }
 
@@ -470,7 +471,8 @@ EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
   if (listWidgetHasSelectedRow()) {
     return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
   }
-  return boost::none;;
+  return boost::none;
+  ;
 }
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {

@@ -48,7 +48,8 @@ inline void EnggDiffFittingModelAddWSExposed::addFitParams(
 }
 
 inline void EnggDiffFittingModelAddWSExposed::mergeTablesExposed(
-  API::ITableWorkspace_sptr tableToCopy, API::ITableWorkspace_sptr targetTable){
+    API::ITableWorkspace_sptr tableToCopy,
+    API::ITableWorkspace_sptr targetTable) {
   mergeTables(tableToCopy, targetTable);
 }
 
@@ -107,10 +108,10 @@ API::ITableWorkspace_sptr createFitParamsTable() {
   return table;
 }
 
-template<size_t numColumns, size_t numRows>
+template <size_t numColumns, size_t numRows>
 API::ITableWorkspace_sptr createDummyTable(
-  const std::array<std::string, numColumns> &columnHeadings,
-  const std::array<std::array<double, numColumns>, numRows> tableContents) {
+    const std::array<std::string, numColumns> &columnHeadings,
+    const std::array<std::array<double, numColumns>, numRows> tableContents) {
   auto table = API::WorkspaceFactory::Instance().createTable();
   for (const auto &header : columnHeadings) {
     table->addColumn("double", header);
@@ -228,16 +229,16 @@ public:
     const size_t numberOfColumns = 3;
     const size_t numberOfRows = 2;
 
-    const std::array<std::string, numberOfColumns> columnHeadings = 
-          {{"X", "Y", "Z"}};
+    const std::array<std::string, numberOfColumns> columnHeadings = {
+        {"X", "Y", "Z"}};
 
     const std::array<std::array<double, numberOfColumns>, numberOfRows>
-      targetTableValues = { {{1, 2, 3}, {4, 5, 6}} };
+        targetTableValues = {{{1, 2, 3}, {4, 5, 6}}};
 
     auto targetTable = createDummyTable(columnHeadings, targetTableValues);
 
     const std::array<std::array<double, numberOfColumns>, numberOfRows>
-      copyTableValues = { {{7, 8, 9}, {10, 11, 12}} };
+        copyTableValues = {{{7, 8, 9}, {10, 11, 12}}};
 
     auto copyTable = createDummyTable(columnHeadings, copyTableValues);
 
