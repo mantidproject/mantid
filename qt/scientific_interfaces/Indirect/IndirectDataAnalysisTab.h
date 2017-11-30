@@ -109,7 +109,7 @@ protected:
                  Mantid::API::IFunction_sptr function);
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_sptr func);
+  createGuessWorkspace(Mantid::API::IFunction_sptr func, size_t wsIndex);
 
   std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
                                     const std::vector<double> &dataX);
@@ -171,6 +171,8 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
+  int m_guessSpectrum;
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;

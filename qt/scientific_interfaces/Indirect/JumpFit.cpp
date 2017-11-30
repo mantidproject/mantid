@@ -184,8 +184,8 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     QPair<double, double> range = m_uiForm.ppPlotTop->getCurveRange("Sample");
 
     auto bounds = getResolutionRangeFromWs(sample, res) ? res : range;
-    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
-                     bounds);
+    setRangeSelector(qRangeSelector, m_properties["StartX"],
+                     m_properties["EndX"], bounds);
     setPlotPropertyRange(qRangeSelector, m_properties["StartX"],
                          m_properties["EndX"], range);
   } else {
@@ -285,8 +285,8 @@ void JumpFit::updateRS(QtProperty *prop, double val) {
   if (prop == m_properties["StartX"] || prop == m_properties["EndX"]) {
     auto bounds = qMakePair(m_dblManager->value(m_properties["StartX"]),
                             m_dblManager->value(m_properties["EndX"]));
-    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
-                     bounds);
+    setRangeSelector(qRangeSelector, m_properties["StartX"],
+                     m_properties["EndX"], bounds);
   }
 }
 
