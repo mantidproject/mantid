@@ -184,8 +184,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         Matrix<double> temp_UB(3, 3, false);
         fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
         UB = temp_UB;
-      }
-      catch (...) {
+      } catch (...) {
         // failed to fit using these peaks, so add some more and try again
       }
     }
@@ -202,8 +201,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         Matrix<double> temp_UB = UB;
         fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
         UB = temp_UB;
-      }
-      catch (...) {
+      } catch (...) {
         // failed to improve UB using these peaks, so just return the current UB
       }
     }
@@ -396,8 +394,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     try {
       fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...) {
+    } catch (...) {
       // failed to improve with these peaks, so continue with more peaks
       // if possible
     }
@@ -410,8 +407,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     try {
       fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    }
-    catch (...) {
+    } catch (...) {
       // failed to improve with all peaks, so return the UB we had
     }
   }
@@ -545,8 +541,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         UB = temp_UB;
         GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind,
                         indexed_qs, fit_error);
-      }
-      catch (std::exception &) {
+      } catch (std::exception &) {
         // failed to improve with all peaks, so just keep the UB we had
       }
     }
@@ -1351,8 +1346,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
 
         count++;
       }
-    }
-    catch (...) {
+    } catch (...) {
       // don't continue to refine if the direction fails to optimize properly
     }
   }
@@ -1537,7 +1531,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
   // the possible range of d-values
   // implies a bound on the minimum
   // angle between a,b, c vectors.
-  double min_deg = (RAD_TO_DEG) * atan(2.0 * std::min(0.2, min_d / max_d));
+  double min_deg = (RAD_TO_DEG)*atan(2.0 * std::min(0.2, min_d / max_d));
 
   double epsilon = 5; //  tolerance on right angle (degrees)
   V3D b_dir;

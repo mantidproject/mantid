@@ -55,7 +55,8 @@ public:
                         const std::vector<Kernel::V3D> &q_vectors,
                         OrientedLattice &lattice, double required_tolerance,
                         int base_index, size_t num_initial,
-                        double degrees_per_step, bool fixAll = false, int iterations = 1);
+                        double degrees_per_step, bool fixAll = false,
+                        int iterations = 1);
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the range of possible real space unit cell edge lengths.

@@ -18,17 +18,17 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  auto moreThan2Int = boost::make_shared<BoundedValidator<int> >();
+  auto moreThan2Int = boost::make_shared<BoundedValidator<int>>();
   moreThan2Int->setLower(2);
 
-  auto reasonable_angle = boost::make_shared<BoundedValidator<double> >();
+  auto reasonable_angle = boost::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
 
