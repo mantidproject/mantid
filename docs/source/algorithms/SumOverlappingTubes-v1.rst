@@ -39,6 +39,11 @@ In this case the x-axis is the true scattering angle of a pixel, so the Debye-Sc
 
 This is effectively the 2DStraight option, with a single bin in the y-axis. For this case only the HeightAxis option can be given as a minimum and maximum.
 
+Instrument Parameters
++++++++++++++++++++++
+
+If the instrument parameter ``mirror_detector_angles`` is set to true, then output scattering angles are effectively multiplied by :math:`-1`. This is used for D2B where the instrument is mirrored compared with other Powder Diffraction instruments at the ILL.
+
 Usage
 -----
 **Example - an example of running SumOverlappingTubes in the 2D case.**
@@ -66,7 +71,7 @@ Output:
 .. testcode:: SumOverlappingTubes1DHeightRange
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1DStraight', HeightAxis='-0.05,0.05')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1DStraight', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05')
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
     print('Counts: ' + str(ws.dataY(0)[2068:2078]))
     print('Errors: ' + str(ws.dataE(0)[2068:2078]))
@@ -76,10 +81,10 @@ Output:
 .. testoutput:: SumOverlappingTubes1DHeightRange
 
     X Size: 2975, Y Size: 1
-    Counts: [ 256.63180166  264.75558897  407.32906379  471.60849006  598.71314465
-      578.03255556  526.23999651  379.75622636  290.18856048  229.93467443]
-    Errors: [ 25.83186524  25.22927258  31.82736554  33.20004921  40.4255695
-      39.17008256  36.47802831  30.87108129  27.30165394  23.10683043]
+    Counts: [ 127.08681254  131.10979889  201.71370827  233.54556754  296.48915172
+      286.24790285  260.59967375  188.05934431  143.70447835  113.86610964]
+    Errors: [ 12.79221591  12.49380558  15.76125177  16.4410194   20.01917432
+      19.39744376  18.06430971  15.28768958  13.52007099  11.44274953]
 
 .. categories::
 

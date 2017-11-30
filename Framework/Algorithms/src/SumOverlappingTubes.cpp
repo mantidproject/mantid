@@ -54,10 +54,10 @@ void SumOverlappingTubes::init() {
       "also be a single number, which is the angle step size. In this case, "
       "the boundary of binning will be determined by minimum and maximum "
       "scattering angle present in the workspaces.");
-  declareProperty(make_unique<PropertyWithValue<bool>>(
-                      "CropNegativeScatteringAngles", false, Direction::Input),
-                  "If true the negative scattering angles are ignored. "
-                  "Otherwise they are included as normal.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
+                                           false, Direction::Input),
+      "If true the negative scattering angles are cropped (ignored).");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ComponentForHeightAxis", "tube_1", Direction::Input),
                   "The name of the component to use for the height axis, that "
