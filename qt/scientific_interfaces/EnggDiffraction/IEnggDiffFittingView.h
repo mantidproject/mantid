@@ -173,7 +173,7 @@ public:
   /**
    * Set value of the text box for input filenames
    *
-   * @param Comma-separated list of files to add
+   * @param path Comma-separated list of files to add
    */
   virtual void setFocusedFileNames(const std::string &path) = 0;
 
