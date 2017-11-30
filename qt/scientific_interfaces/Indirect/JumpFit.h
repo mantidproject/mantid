@@ -46,8 +46,7 @@ private slots:
 protected:
   /// Creates the algorithm to use in fitting.
   Mantid::API::IAlgorithm_sptr
-  createFitAlgorithm(Mantid::API::IFunction_sptr func,
-                     QString const &outputWSName);
+  createFitAlgorithm(Mantid::API::IFunction_sptr func);
 
 private:
   /// Gets a list of parameter names for a given fit function
@@ -67,7 +66,7 @@ private:
 
   QtTreePropertyBrowser *m_jfTree;
 
-  Mantid::API::IAlgorithm_sptr m_fitAlg;
+  std::string m_baseName;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

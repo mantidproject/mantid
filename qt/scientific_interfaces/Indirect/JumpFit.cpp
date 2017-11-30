@@ -117,13 +117,10 @@ void JumpFit::run() {
   // Fit function to use
   const QString functionName = m_uiForm.cbFunction->currentText();
   const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
-  const QString outputName =
-      getWorkspaceBasename(QString::fromStdString(sample)) + "_" +
-      functionName + "_fit";
   // Setup fit algorithm
-  m_fitAlg = createFitAlgorithm(createFunction(functionName), outputName);
+  auto fitAlg = createFitAlgorithm(createFunction(functionName));
 
-  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
+  m_batchAlgoRunner->addAlgorithm(fitAlg);
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgDone(bool)));
@@ -143,14 +140,13 @@ void JumpFit::fitAlgDone(bool error) {
     return;
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
-  std::string outName = m_fitAlg->getPropertyValue("Output");
 
   // Get output workspace name
-  std::string outWsName = outName + "_Workspace";
+  std::string outWsName = m_baseName + "_Workspace";
   IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
   // Update parameters in UI
-  std::string paramTableName = outName + "_Parameters";
+  std::string paramTableName = m_baseName + "_Parameters";
 
   ITableWorkspace_sptr paramTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -417,14 +413,15 @@ void JumpFit::plotGuess() {
   }
 }
 
-IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func,
-                                            QString const &outputWSName) {
+IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample =
-      m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
+    m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
+  const auto baseName = getWorkspaceBasename(QString::fromStdString(sample));
+  m_baseName = baseName.toStdString() + "_" + func->name() + "_fit";
 
   auto fitAlg = AlgorithmManager::Instance().create("Fit");
   fitAlg->initialize();
@@ -435,7 +432,7 @@ IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func,
   fitAlg->setProperty("StartX", startX);
   fitAlg->setProperty("EndX", endX);
   fitAlg->setProperty("CreateOutput", true);
-  fitAlg->setProperty("Output", outputWSName);
+  fitAlg->setProperty("Output", m_baseName);
   return fitAlg;
 }
 
@@ -465,7 +462,7 @@ IFunction_sptr JumpFit::createFunction(const QString &functionName) {
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  std::string outWsName = m_baseName + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, true);
   plotSpectrum(QString::fromStdString(outWsName), 0, 2);
 }
@@ -474,7 +471,7 @@ void JumpFit::plotClicked() {
  * Handles saving of workspace
  */
 void JumpFit::saveClicked() {
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  std::string outWsName = m_baseName + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
   m_batchAlgoRunner->executeBatchAsync();
