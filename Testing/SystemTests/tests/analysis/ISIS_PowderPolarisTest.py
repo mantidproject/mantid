@@ -94,14 +94,34 @@ class FocusTest(stresstesting.MantidStressTest):
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
 
+
 class TotalScatteringTest(stresstesting.MantidStressTest):
 
-    def runTest(self):
+    pdf_output = None
 
+    def runTest(self):
+        focused_ws = mantid.Load(Filename="ISIS_Powder-POLARIS98533_FocusSempty.nxs")  # Reference from focus output
+        self.pdf_output = run_total_scattering(focused_ws, False)
 
     def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~4 Angstrom will be checked.
+        # expected_peak_values = [bin_index, y_value] (each list item is a bank (1-5))
+        expected_peak_values = [[7,  0.149],
+                                [11, 0.285],
+                                [23, 0.504],
+                                [37, 0.382],
+                                [52, 0.700]]
+        for index, ws in enumerate(self.pdf_output):
+            self.assertAlmostEqual(ws.dataY(0)[expected_peak_values[index][0]], expected_peak_values[index][1],
+                                   places=3)
 
-    def cleanup(self):
+
+def run_total_scattering(focused_ws, merge_banks):
+    pdf_inst_obj = setup_inst_object(mode="pdf")
+    return pdf_inst_obj.create_total_scattering_pdf(focused_workspace=focused_ws,
+                                                    merge_banks=merge_banks)
+
 
 def _gen_required_files():
     required_run_numbers = ["98531", "98532",  # create_van : PDF mode
