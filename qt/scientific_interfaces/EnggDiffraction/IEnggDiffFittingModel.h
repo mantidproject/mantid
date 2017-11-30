@@ -54,6 +54,9 @@ public:
 
   virtual void addAllFittedPeaksToADS() const = 0;
 
+  virtual bool hasFittedPeaksForRun(const int runNumber, const size_t bank) 
+    const = 0;
+
 };
 
 } // namespace MantidQt

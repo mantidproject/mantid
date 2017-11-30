@@ -55,6 +55,9 @@ public:
 
   void addAllFittedPeaksToADS() const override;
 
+  bool hasFittedPeaksForRun(const int runNumber, const size_t bank) const 
+    override;
+
 protected:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            const Mantid::API::MatrixWorkspace_sptr ws,

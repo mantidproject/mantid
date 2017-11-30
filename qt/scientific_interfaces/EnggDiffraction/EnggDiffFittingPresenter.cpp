@@ -276,8 +276,13 @@ void EnggDiffFittingPresenter::processSelectRun() {
     size_t bank;
     std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
 
-    const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-    plotFocusedFile(false, ws);
+    if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
+      plotFitPeaksCurves();
+    }
+    else {
+      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+      plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
+    }
   }
 }
 

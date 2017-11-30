@@ -204,6 +204,12 @@ size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
   return numWorkspaces;
 }
 
+bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
+                                                const size_t bank) const {
+  return m_fittedPeaksMap[bank - 1].find(runNumber) != 
+         m_fittedPeaksMap[bank - 1].end();
+}
+
 Mantid::API::MatrixWorkspace_sptr
 EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
                                           const size_t bank) const {
