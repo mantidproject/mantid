@@ -87,19 +87,17 @@ void IqtFit::setup() {
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
 
-  m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
-  m_properties["BGA0"] = m_dblManager->addProperty("A0");
-  m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
-  m_properties["LinearBackground"]->addSubProperty(m_properties["BGA0"]);
-  m_iqtFTree->addProperty(m_properties["LinearBackground"]);
+  m_properties["Background"] = createFunctionProperty("Background");
+  m_properties["Background"]->removeSubProperty(m_properties["Background.A1"]);
+  m_iqtFTree->addProperty(m_properties["Background"]);
 
   m_properties["Exponential1"] = createFunctionProperty("Exponential1");
   m_properties["Exponential2"] = createFunctionProperty("Exponential2");
 
   m_properties["StretchedExp"] = createFunctionProperty("StretchedExp");
 
-  m_dblManager->setMinimum(m_properties["BGA0"], 0);
-  m_dblManager->setMaximum(m_properties["BGA0"], 1);
+  m_dblManager->setMinimum(m_properties["Background.A0"], 0);
+  m_dblManager->setMaximum(m_properties["Background.A0"], 1);
 
   m_dblManager->setMinimum(m_properties["Exponential1.Intensity"], 0);
   m_dblManager->setMaximum(m_properties["Exponential1.Intensity"], 1);
@@ -112,6 +110,7 @@ void IqtFit::setup() {
 
   typeSelection(m_uiForm.cbFitType->currentIndex());
 
+  m_uiForm.ckPlotGuess->setChecked(false);
   enablePlotGuess();
 
   // Signal/slot ui connections
@@ -260,11 +259,7 @@ void IqtFit::algorithmComplete(bool error) {
     return;
   }
 
-  QHash<QString, QString> backgroundMap;
-  backgroundMap["BGA0"] = "f0.A0";
-  IndirectFitAnalysisTab::fitAlgorithmComplete(m_baseName + "_Parameters",
-                                               backgroundMap);
-
+  IndirectFitAnalysisTab::fitAlgorithmComplete(m_baseName + "_Parameters");
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.cbPlotType->setEnabled(true);
@@ -347,31 +342,20 @@ void IqtFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setMinimum(0);
   m_uiForm.spSpectraMax->setValue(maxWsIndex);
 
-  m_dblManager->setValue(m_properties["BGA0"], 1.0);
-
-  setDefaultParameters("Exponential1");
-  setDefaultParameters("Exponential2");
-  setDefaultParameters("StretchedExp");
+  setDefaultParameters();
 }
 
 CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   CompositeFunction_sptr result(new CompositeFunction);
-  QString fname;
   const int fitType = m_uiForm.cbFitType->currentIndex();
-
-  IFunction_sptr func = getFunction("LinearBackground");
-  func->setParameter("A0", m_dblManager->value(m_properties["BGA0"]));
-  result->addFunction(func);
-  result->tie("f0.A1", "0");
-  if (tie) {
-    result->tie("f0.A0", m_properties["BGA0"]->valueText().toStdString());
-  }
-
   const auto functionNames = indexToFitFunctions(fitType);
-  for (const auto &functionName : functionNames) {
+
+  for (int i = 0; i < functionNames.size(); ++i) {
+    const auto &functionName = functionNames[i];
     IFunction_sptr func1 = getFunction(functionName);
-    populateFunction(func1, m_properties[functionName], tie);
     result->addFunction(func1);
+    const std::string prefix = "f" + std::to_string(i) + ".";
+    populateFunction(func1, result, m_properties[functionName], tie, prefix);
   }
 
   // Return CompositeFunction object to caller.
@@ -436,10 +420,10 @@ void IqtFit::updatePlot() {
   plotGuess();
 }
 
-void IqtFit::setDefaultParameters(const QString &name) {
-  double background = m_dblManager->value(m_properties["BGA0"]);
+void IqtFit::setDefaultParameters() {
+  double background = m_dblManager->value(m_properties["Background.A0"]);
   // intensity is always 1-background
-  setDefaultPropertyValue(name + ".Intensity", 1.0 - background);
+  setDefaultPropertyValue("Height", 1.0 - background);
 
   auto inputWs = inputWorkspace();
   double tau = 0;
@@ -453,8 +437,9 @@ void IqtFit::setDefaultParameters(const QString &name) {
     }
   }
 
-  setDefaultPropertyValue(name + ".Tau", tau);
-  setDefaultPropertyValue(name + ".Beta", 1.0);
+  setDefaultPropertyValue("Lifetime", tau);
+  setDefaultPropertyValue("Stretching", 1.0);
+  setDefaultPropertyValue("A0", 0.0);
 }
 
 /**
@@ -488,10 +473,10 @@ void IqtFit::xMaxSelected(double val) {
 }
 
 void IqtFit::backgroundSelected(double val) {
-  m_dblManager->setValue(m_properties["BGA0"], val);
-  m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
-  m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
-  m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
+  m_dblManager->setValue(m_properties["Background.A0"], val);
+  m_dblManager->setValue(m_properties["Exponential1.Height"], 1.0 - val);
+  m_dblManager->setValue(m_properties["Exponential2.Height"], 1.0 - val);
+  m_dblManager->setValue(m_properties["StretchedExp.Height"], 1.0 - val);
 }
 
 void IqtFit::propertyChanged(QtProperty *prop, double val) {
@@ -505,18 +490,18 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
     fitRangeSelector->setMinimum(val);
   } else if (prop == m_properties["EndX"]) {
     fitRangeSelector->setMaximum(val);
-  } else if (autoUpdate && prop == m_properties["BGA0"]) {
+  } else if (autoUpdate && prop == m_properties["Background.A0"]) {
     backgroundRangeSelector->setMinimum(val);
-    m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
-    m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
-    m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
-  } else if (autoUpdate && (prop == m_properties["Exponential1.Intensity"] ||
-                            prop == m_properties["Exponential2.Intensity"] ||
-                            prop == m_properties["StretchedExp.Intensity"])) {
+    m_dblManager->setValue(m_properties["Exponential1.Height"], 1.0 - val);
+    m_dblManager->setValue(m_properties["Exponential2.Height"], 1.0 - val);
+    m_dblManager->setValue(m_properties["StretchedExp.Height"], 1.0 - val);
+  } else if (autoUpdate && (prop == m_properties["Exponential1.Height"] ||
+                            prop == m_properties["Exponential2.Height"] ||
+                            prop == m_properties["StretchedExp.Height"])) {
     backgroundRangeSelector->setMinimum(1.0 - val);
-    m_dblManager->setValue(m_properties["Exponential1.Intensity"], val);
-    m_dblManager->setValue(m_properties["Exponential2.Intensity"], val);
-    m_dblManager->setValue(m_properties["StretchedExp.Intensity"], val);
+    m_dblManager->setValue(m_properties["Exponential1.Height"], val);
+    m_dblManager->setValue(m_properties["Exponential2.Height"], val);
+    m_dblManager->setValue(m_properties["StretchedExp.Height"], val);
   }
 }
 
@@ -660,13 +645,13 @@ void IqtFit::plotGuess() {
  */
 QVector<QString> IqtFit::indexToFitFunctions(const int &fitTypeIndex) const {
   if (fitTypeIndex == 0)
-    return {"Exponential1"};
+    return {"Background", "Exponential1"};
   else if (fitTypeIndex == 1)
-    return {"Exponential1", "Exponential2"};
+    return {"Background", "Exponential1", "Exponential2"};
   else if (fitTypeIndex == 2)
-    return {"StretchedExp"};
+    return {"Background", "StretchedExp"};
   else if (fitTypeIndex == 3)
-    return {"Exponential1", "StretchedExp"};
+    return {"Background", "Exponential1", "StretchedExp"};
   else
     return {};
 }
@@ -691,6 +676,8 @@ IFunction_sptr IqtFit::getFunction(const QString &functionName) const {
     return IndirectFitAnalysisTab::getFunction("ExpDecay");
   else if (functionName == "StretchedExp")
     return IndirectFitAnalysisTab::getFunction("StretchExp");
+  else if (functionName == "Background")
+    return IndirectFitAnalysisTab::getFunction("LinearBackground");
   else
     return IndirectFitAnalysisTab::getFunction(functionName);
 }
