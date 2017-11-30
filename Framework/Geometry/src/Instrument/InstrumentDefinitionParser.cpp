@@ -853,8 +853,8 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
 */
 Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
     const Poco::XML::Element *pLocElem) {
-  if ((pLocElem->tagName()).compare("location") &&
-      (pLocElem->tagName()).compare("locations")) {
+  if (((pLocElem->tagName()) != "location") &&
+      ((pLocElem->tagName()) != "locations")) {
     const std::string &tagname = pLocElem->tagName();
     g_log.error("Argument to function getParentComponent must be a pointer to "
                 "an XML element with tag name location or locations.");
@@ -872,7 +872,7 @@ Poco::XML::Element *InstrumentDefinitionParser::getParentComponent(
   Element *pCompElem;
   if (pCompNode->nodeType() == 1) {
     pCompElem = static_cast<Element *>(pCompNode);
-    if ((pCompElem->tagName()).compare("component")) {
+    if ((pCompElem->tagName()) != "component") {
       g_log.error("Argument to function getParentComponent must be a XML "
                   "element sitting inside a component element.");
       throw std::logic_error("Argument to function getParentComponent must be "
@@ -1128,7 +1128,7 @@ void InstrumentDefinitionParser::appendAssembly(
   if (pCompElem->hasAttribute("idlist")) {
     std::string idlist = pCompElem->getAttribute("idlist");
 
-    if (idlist.compare(idList.idname)) {
+    if (idlist != idList.idname) {
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
@@ -1642,7 +1642,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   if (pCompElem->hasAttribute("idlist")) {
     std::string idlist = pCompElem->getAttribute("idlist");
 
-    if (idlist.compare(idList.idname)) {
+    if (idlist != idList.idname) {
       Element *pFound =
           pCompElem->ownerDocument()->getElementById(idlist, "idname");
 
@@ -1730,7 +1730,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
                                                 IdList &idList) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  if ((pE->tagName()).compare("idlist")) {
+  if ((pE->tagName()) != "idlist") {
     g_log.error("Argument to function createIdList must be a pointer to an XML "
                 "element with tag name idlist.");
     throw std::logic_error("Argument to function createIdList must be a "
@@ -1995,7 +1995,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
                                            const Poco::XML::Element *pElem) {
   // Require that pElem points to an element with tag name 'location'
 
-  if ((pElem->tagName()).compare("location")) {
+  if ((pElem->tagName()) != "location") {
     g_log.error("Second argument to function setLocation must be a pointer to "
                 "an XML element with tag name location.");
     throw std::logic_error("Second argument to function setLocation must be a "
@@ -2609,7 +2609,7 @@ void InstrumentDefinitionParser::adjust(
     std::map<std::string, Poco::XML::Element *> &getTypeElement) {
   UNUSED_ARG(isTypeAssembly)
   // check if pElem is an element with tag name 'type'
-  if ((pElem->tagName()).compare("type"))
+  if (pElem->tagName() != "type")
     throw Exception::InstrumentDefinitionError("Argument to function adjust() "
                                                "must be a pointer to an XML "
                                                "element with tag name type.");

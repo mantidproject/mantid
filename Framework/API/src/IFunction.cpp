@@ -1117,7 +1117,7 @@ void IFunction::setMatrixWorkspace(
 
             // add tie if specified for this parameter in instrument definition
             // file
-            if (fitParam.getTie().compare("")) {
+            if (!fitParam.getTie().empty()) {
               std::ostringstream str;
               str << getParameter(i);
               tie(parameterName(i), str.str());
@@ -1125,11 +1125,11 @@ void IFunction::setMatrixWorkspace(
 
             // add constraint if specified for this parameter in instrument
             // definition file
-            if (fitParam.getConstraint().compare("")) {
+            if (!fitParam.getConstraint().empty()) {
               IConstraint *constraint =
                   ConstraintFactory::Instance().createInitialized(
                       this, fitParam.getConstraint());
-              if (fitParam.getConstraintPenaltyFactor().compare("")) {
+              if (!fitParam.getConstraintPenaltyFactor().empty()) {
                 try {
                   double penalty =
                       std::stod(fitParam.getConstraintPenaltyFactor());

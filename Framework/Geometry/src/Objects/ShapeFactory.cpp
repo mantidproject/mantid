@@ -147,51 +147,51 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
         // shapes are ignored
         // this way an empty object is returned to the user.
         try {
-          if (!primitiveName.compare("sphere")) {
+          if (primitiveName == "sphere") {
             lastElement = pE;
             idMatching[idFromUser] = parseSphere(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("infinite-plane")) {
+          } else if (primitiveName == "infinite-plane") {
             idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("infinite-cylinder")) {
+          } else if (primitiveName == "infinite-cylinder") {
             idMatching[idFromUser] =
                 parseInfiniteCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("cylinder")) {
+          } else if (primitiveName == "cylinder") {
             lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("segmented-cylinder")) {
+          } else if (primitiveName == "segmented-cylinder") {
             lastElement = pE;
             idMatching[idFromUser] =
                 parseSegmentedCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("hollow-cylinder")) {
+          } else if (primitiveName == "hollow-cylinder") {
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("cuboid")) {
+          } else if (primitiveName == "cuboid") {
             lastElement = pE;
             idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("infinite-cone")) {
+          } else if (primitiveName == "infinite-cone") {
             idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("cone")) {
+          } else if (primitiveName == "cone") {
             lastElement = pE;
             idMatching[idFromUser] = parseCone(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("hexahedron")) {
+          } else if (primitiveName == "hexahedron") {
             lastElement = pE;
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("tapered-guide")) {
+          } else if (primitiveName == "tapered-guide") {
             idMatching[idFromUser] = parseTaperedGuide(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("torus")) {
+          } else if (primitiveName == "torus") {
             idMatching[idFromUser] = parseTorus(pE, primitives, l_id);
             numPrimitives++;
-          } else if (!primitiveName.compare("slice-of-cylinder-ring")) {
+          } else if (primitiveName == "slice-of-cylinder-ring") {
             idMatching[idFromUser] =
                 parseSliceOfCylinderRing(pE, primitives, l_id);
             numPrimitives++;
