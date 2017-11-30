@@ -115,6 +115,7 @@ private:
                                        const int &functionNumber) const;
   virtual QString addPrefixToParameter(const QString &parameter,
                                        const QString &functionName) const;
+
   QVector<QVector<QString>>
   addPrefixToParameters(const QVector<QVector<QString>> &parameters,
                         const QVector<QString> &functionNames) const;
