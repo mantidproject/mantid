@@ -18,17 +18,17 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
-  auto moreThan2Int = boost::make_shared<BoundedValidator<int>>();
+  auto moreThan2Int = boost::make_shared<BoundedValidator<int> >();
   moreThan2Int->setLower(2);
 
-  auto reasonable_angle = boost::make_shared<BoundedValidator<double>>();
+  auto reasonable_angle = boost::make_shared<BoundedValidator<double> >();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
 
@@ -48,6 +48,7 @@ void FindUBUsingLatticeParameters::init() {
                         "Indexing Tolerance (0.15)");
   this->declareProperty("FixParameters", false,
                         "Do not optimise the UB after finding the orientation");
+  this->declareProperty("Iterations", 1, "Iterations to refine UB (1)");
 }
 
 /** Execute the algorithm.
@@ -62,6 +63,7 @@ void FindUBUsingLatticeParameters::exec() {
   int num_initial = this->getProperty("NumInitial");
   double tolerance = this->getProperty("Tolerance");
   auto fixAll = this->getProperty("FixParameters");
+  auto iterations = this->getProperty("Iterations");
 
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1.5;
@@ -83,7 +85,7 @@ void FindUBUsingLatticeParameters::exec() {
   OrientedLattice lattice(a, b, c, alpha, beta, gamma);
   double error =
       IndexingUtils::Find_UB(UB, q_vectors, lattice, tolerance, base_index,
-                             num_initial, degrees_per_step, fixAll);
+                             num_initial, degrees_per_step, fixAll, iterations);
 
   g_log.notice() << "Error = " << error << '\n';
   g_log.notice() << "UB = " << UB << '\n';

@@ -26,11 +26,11 @@ const std::string FindUBUsingFFT::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   // use negative values, force user to input all parameters
@@ -40,6 +40,7 @@ void FindUBUsingFFT::init() {
                         "Upper Bound on Lattice Parameters a, b, c");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
+  this->declareProperty("Iterations", 4, "Iterations to refine UB (4)");
 }
 
 /** Execute the algorithm.
@@ -48,6 +49,7 @@ void FindUBUsingFFT::exec() {
   double min_d = this->getProperty("MinD");
   double max_d = this->getProperty("MaxD");
   double tolerance = this->getProperty("Tolerance");
+  int iterations = this->getProperty("Iterations");
 
   double degrees_per_step = 1.5;
 
@@ -63,7 +65,7 @@ void FindUBUsingFFT::exec() {
 
   Matrix<double> UB(3, 3, false);
   double error = IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance,
-                                        degrees_per_step);
+                                        degrees_per_step, iterations);
 
   g_log.notice() << "Error = " << error << '\n';
   g_log.notice() << "UB = " << UB << '\n';

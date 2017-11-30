@@ -51,7 +51,8 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
   initially typically has no benefit and increases execution time.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the
+  @param  q_vectors           std::vector of V3D objects that
+  contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
   @param  lattice             The orientated lattice with the lattice
@@ -90,7 +91,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               OrientedLattice &lattice,
                               double required_tolerance, int base_index,
                               size_t num_initial, double degrees_per_step,
-                              bool fixAll) {
+                              bool fixAll, int iterations) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -176,15 +177,17 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 
     for (size_t i = some_qs.size(); i < num_initial; i++)
       some_qs.push_back(sorted_qs[i]);
-
-    try {
-      GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
-                      fit_error);
-      Matrix<double> temp_UB(3, 3, false);
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
-      UB = temp_UB;
-    } catch (...) {
-      // failed to fit using these peaks, so add some more and try again
+    for (int counter = 0; counter < iterations; counter++) {
+      try {
+        GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
+                        fit_error);
+        Matrix<double> temp_UB(3, 3, false);
+        fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+        UB = temp_UB;
+      }
+      catch (...) {
+        // failed to fit using these peaks, so add some more and try again
+      }
     }
   }
 
@@ -192,14 +195,17 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   if (!fixAll &&
       q_vectors.size() >= 3) // try one last refinement using all peaks
   {
-    try {
-      GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
-                      fit_error);
-      Matrix<double> temp_UB = UB;
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
-      UB = temp_UB;
-    } catch (...) {
-      // failed to improve UB using these peaks, so just return the current UB
+    for (int counter = 0; counter < iterations; counter++) {
+      try {
+        GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind,
+                        indexed_qs, fit_error);
+        Matrix<double> temp_UB = UB;
+        fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
+        UB = temp_UB;
+      }
+      catch (...) {
+        // failed to improve UB using these peaks, so just return the current UB
+      }
     }
   }
   // Regardless of how we got the UB, find the
@@ -238,7 +244,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   as a peak, or by other methods.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the
+  @param  q_vectors           std::vector of V3D objects that
+  contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 3 q_vectors.
   @param  min_d               Lower bound on shortest unit cell edge length.
@@ -389,7 +396,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     try {
       fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    } catch (...) {
+    }
+    catch (...) {
       // failed to improve with these peaks, so continue with more peaks
       // if possible
     }
@@ -402,7 +410,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     try {
       fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
       UB = temp_UB;
-    } catch (...) {
+    }
+    catch (...) {
       // failed to improve with all peaks, so return the UB we had
     }
   }
@@ -431,7 +440,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   to work reliably.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that contains the
+  @param  q_vectors           std::vector of V3D objects that
+  contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 4 q_vectors and it
                               really should have at least 10 or more peaks
@@ -464,7 +474,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               double min_d, double max_d,
                               double required_tolerance,
-                              double degrees_per_step) {
+                              double degrees_per_step, int iterations) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -529,13 +539,14 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                     fit_error);
 
-    for (int counter = 0; counter < 4; counter++) {
+    for (int counter = 0; counter < iterations; counter++) {
       try {
         fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
         UB = temp_UB;
         GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind,
                         indexed_qs, fit_error);
-      } catch (std::exception &) {
+      }
+      catch (std::exception &) {
         // failed to improve with all peaks, so just keep the UB we had
       }
     }
@@ -556,9 +567,11 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   used to optimize the UB matrix once an initial indexing has been found.
 
   @param  UB           3x3 matrix that will be set to the UB matrix
-  @param  hkl_vectors  std::vector of V3D objects that contains the
+  @param  hkl_vectors  std::vector of V3D objects that contains
+  the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains the list of
+  @param  q_vectors    std::vector of V3D objects that contains
+  the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
   @param  sigabc      error in the crystal lattice parameter values if length
@@ -648,9 +661,11 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
   used to optimize the UB matrix once an initial indexing has been found.
 
   @param  UB           3x3 matrix that will be set to the UB matrix
-  @param  hkl_vectors  std::vector of V3D objects that contains the
+  @param  hkl_vectors  std::vector of V3D objects that contains
+  the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains the list of
+  @param  q_vectors    std::vector of V3D objects that contains
+  the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
   NOTE: The number of hkl_vectors and q_vectors must be the same, and must
@@ -772,13 +787,15 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
         Optimize_UB method optimizes the mapping from three (h,k,l) to
         (qx,qy,qz) (3 indices to Q).
 
-  @param  best_vec     V3D vector that will be set to a vector whose
+  @param  best_vec     V3D vector that will be set to a vector
+  whose
                        direction most nearly corresponds to the plane
                        normal direction and whose magnitude is d.  The
                        corresponding plane spacing in reciprocal space
                        is 1/d.
   @param  index_values std::vector of ints that contains the list of indices
-  @param  q_vectors    std::vector of V3D objects that contains the list of
+  @param  q_vectors    std::vector of V3D objects that contains
+  the list of
                        q_vectors that are indexed in one direction by the
                        corresponding index values.
   NOTE: The number of index_values and q_vectors must be the same, and must
@@ -1334,7 +1351,8 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
 
         count++;
       }
-    } catch (...) {
+    }
+    catch (...) {
       // don't continue to refine if the direction fails to optimize properly
     }
   }
@@ -1343,7 +1361,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
   for (auto &temp_dir : temp_dirs) {
     current_dir = temp_dir;
     double length = current_dir.norm();
-    if (length >= min_d && length <= max_d)
+    if (length >= 0.8 * min_d && length <= 1.2 * max_d)
       temp_dirs_2.push_back(current_dir);
   }
   // only keep directions that index at
@@ -1508,9 +1526,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
 bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
                                             const std::vector<V3D> &directions,
                                             size_t a_index, double min_d,
-                                            double max_d)
-
-{
+                                            double max_d) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -1521,7 +1537,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
   // the possible range of d-values
   // implies a bound on the minimum
   // angle between a,b, c vectors.
-  double min_deg = (RAD_TO_DEG)*atan(2.0 * min_d / max_d);
+  double min_deg = (RAD_TO_DEG) * atan(2.0 * std::min(0.2, min_d / max_d));
 
   double epsilon = 5; //  tolerance on right angle (degrees)
   V3D b_dir;
@@ -1678,9 +1694,11 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     and "b", with lengths a and b, and the cell angles.  The calculation is
     explained in the Mantid document UBMatriximplementationnotes.pdf, pg 3,
     Andre Savici.
-    @param  a_dir   V3D object with length "a" in the direction of the rotated
+    @param  a_dir   V3D object with length "a" in the direction
+   of the rotated
                     cell edge "a"
-    @param  b_dir   V3D object with length "b" in the direction of the rotated
+    @param  b_dir   V3D object with length "b" in the direction
+   of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
     @param  cosAlpha   cos angle between edges b and c in radians.
@@ -1688,7 +1706,8 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @param  cosGamma   cos angle between edges a and b in radians.
     @param  sinGamma   sin angle between edges a and b in radians.
 
-    @return A new V3D object with length "c", in the direction of the third
+    @return A new V3D object with length "c", in the direction
+   of the third
             rotated unit cell edge, "c".
  */
 V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double c,
@@ -1819,7 +1838,8 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
   the PeaksWorkspace records the Miller indices as sets of three doubles,
   there is no guarantee that the Miller indices will be integers.
 
-  @param hkl_list   Vector of V3D objects whose components will be rounded.
+  @param hkl_list   Vector of V3D objects whose components will
+  be rounded.
 
  */
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
@@ -1848,7 +1868,8 @@ inline bool withinTol(const double value, const double tolerance) {
   Check whether or not the components of the specified vector are within
   the specified tolerance of integer values, other than (0,0,0).
 
-  @param hkl        A V3D object containing what may be valid Miller indices
+  @param hkl        A V3D object containing what may be valid
+  Miller indices
                     for a peak.
   @param tolerance  The maximum acceptable deviation from integer values for
                     the Miller indices.
@@ -1972,7 +1993,8 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   @param UB           A 3x3 matrix of doubles holding the UB matrix.
                       The UB matrix must not be singular.
-  @param q_vectors    std::vector of V3D objects that contains the list of
+  @param q_vectors    std::vector of V3D objects that contains
+  the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance between each component
@@ -2014,8 +2036,10 @@ int IndexingUtils::NumberIndexed(const DblMatrix &UB,
   The dot product must be within the specified tolerance of an integer,
   in order to count as indexed.
 
-  @param direction    A V3D specifying a possible edge vector in real space.
-  @param q_vectors    std::vector of V3D objects that contains the list of
+  @param direction    A V3D specifying a possible edge vector in
+  real space.
+  @param q_vectors    std::vector of V3D objects that contains
+  the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance to an integer from the dot
@@ -2094,7 +2118,8 @@ int IndexingUtils::NumberIndexed_3D(const V3D &a_dir, const V3D &b_dir,
   counted as indexed, since (0,0,0) is not a valid index of any peak.
 
   @param UB             A 3x3 matrix of doubles holding the UB matrix
-  @param q_vectors      std::vector of V3D objects that contains the list of
+  @param q_vectors      std::vector of V3D objects that contains
+  the list of
                         q_vectors that are to be indexed.
   @param tolerance      The maximum allowed distance between each component
                         of UB^(-1)*Q and the nearest integer value, required to
@@ -2161,7 +2186,8 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
                              normal vector for a family of parallel planes
                              in reciprocal space.  The length of this vector
                              must be the reciprocal of the plane spacing.
-  @param q_vectors           List of V3D peaks in reciprocal space
+  @param q_vectors           List of V3D peaks in reciprocal
+  space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -2229,7 +2255,8 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
                              vector for the second family of parallel planes.
   @param direction_3         Direction vector in the direction of the normal
                              vector for the third family of parallel planes.
-  @param q_vectors           List of V3D peaks in reciprocal space
+  @param q_vectors           List of V3D peaks in reciprocal
+  space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -2300,7 +2327,8 @@ int IndexingUtils::GetIndexedPeaks_3D(
 
   @param UB                  The UB matrix that determines the indexing of
                              the peaks.
-  @param q_vectors           List of V3D peaks in reciprocal space
+  @param q_vectors           List of V3D peaks in reciprocal
+  space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
