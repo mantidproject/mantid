@@ -6,6 +6,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/lexical_cast.hpp>
 #include <string>
@@ -32,14 +33,14 @@ void JumpFit::setup() {
   m_uiForm.treeSpace->addWidget(m_jfTree);
 
   // Fitting range
-  m_properties["QMin"] = m_dblManager->addProperty("QMin");
-  m_properties["QMax"] = m_dblManager->addProperty("QMax");
+  m_properties["StartX"] = m_dblManager->addProperty("QMin");
+  m_properties["EndX"] = m_dblManager->addProperty("QMax");
 
-  m_dblManager->setDecimals(m_properties["QMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["QMax"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
-  m_jfTree->addProperty(m_properties["QMin"]);
-  m_jfTree->addProperty(m_properties["QMax"]);
+  m_jfTree->addProperty(m_properties["StartX"]);
+  m_jfTree->addProperty(m_properties["EndX"]);
 
   m_properties["ChudleyElliot"] = createFunctionProperty("ChudleyElliot");
   m_properties["HallRoss"] = createFunctionProperty("HallRoss");
@@ -114,10 +115,9 @@ void JumpFit::run() {
   const QString functionName = m_uiForm.cbFunction->currentText();
   setFitFunctions({functionName});
   // Setup fit algorithm
-  m_fitAlg = createFitAlgorithm(createPopulatedFunction(
+  auto fitAlg = createFitAlgorithm(createPopulatedFunction(
       functionName.toStdString(), m_properties[functionName]));
-  m_baseName = m_fitAlg->getPropertyValue("OutputWorkspace");
-  runFitAlgorithm(m_fitAlg);
+  runFitAlgorithm(fitAlg);
 }
 
 /**
@@ -132,9 +132,13 @@ void JumpFit::algorithmComplete(bool error) {
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 
-  // Get output workspace name
-  const auto paramWsName = m_fitAlg->getPropertyValue("Output") + "_Parameters";
-  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName + "_Parameters");
+  // Process the parameters table
+  const auto paramWsName = m_baseName + "_Parameters";
+  const auto resultWsName = m_baseName + "_Result";
+  deleteWorkspaceAlgorithm(paramWsName)->execute();
+  renameWorkspaceAlgorithm(m_baseName, paramWsName)->execute();
+  processParametersAlgorithm(paramWsName, resultWsName)->execute();
+  IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName);
 }
 
 /**
@@ -173,20 +177,17 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
     setSelectedSpectrum(m_spectraList[currentWidth]);
+    setMinimumSpectrum(m_spectraList[currentWidth]);
+    setMaximumSpectrum(m_spectraList[currentWidth]);
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlotTop->getCurveRange("Sample");
 
-    // Use the values from the instrument parameter file if we can
-    if (getResolutionRangeFromWs(sample, res))
-      setRangeSelector(qRangeSelector, m_properties["QMin"],
-                       m_properties["QMax"], res);
-    else
-      setRangeSelector(qRangeSelector, m_properties["QMin"],
-                       m_properties["QMax"], range);
-
-    setPlotPropertyRange(qRangeSelector, m_properties["QMin"],
-                         m_properties["QMax"], range);
+    auto bounds = getResolutionRangeFromWs(sample, res) ? res : range;
+    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
+                     bounds);
+    setPlotPropertyRange(qRangeSelector, m_properties["StartX"],
+                         m_properties["EndX"], range);
   } else {
     m_uiForm.cbWidth->setEnabled(false);
     emit showMessageBox("Workspace doesn't appear to contain any width data");
@@ -266,8 +267,8 @@ void JumpFit::handleWidthChange(const QString &text) {
  * @param max :: The new value of the upper guide
  */
 void JumpFit::qRangeChanged(double min, double max) {
-  m_dblManager->setValue(m_properties["QMin"], min);
-  m_dblManager->setValue(m_properties["QMax"], max);
+  m_dblManager->setValue(m_properties["StartX"], min);
+  m_dblManager->setValue(m_properties["EndX"], max);
 }
 
 /**
@@ -281,10 +282,10 @@ void JumpFit::updateRS(QtProperty *prop, double val) {
 
   auto qRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("JumpFitQ");
 
-  if (prop == m_properties["QMin"] || prop == m_properties["QMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["QMin"]),
-                            m_dblManager->value(m_properties["QMax"]));
-    setRangeSelector(qRangeSelector, m_properties["QMin"], m_properties["QMax"],
+  if (prop == m_properties["StartX"] || prop == m_properties["EndX"]) {
+    auto bounds = qMakePair(m_dblManager->value(m_properties["StartX"]),
+                            m_dblManager->value(m_properties["EndX"]));
+    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
                      bounds);
   }
 }
@@ -350,29 +351,67 @@ void JumpFit::plotGuess() {
 IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
-  const auto sample =
-      m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
-  const auto startX = m_dblManager->value(m_properties["QMin"]);
-  const auto endX = m_dblManager->value(m_properties["QMax"]);
+  const auto sample = inputWorkspace()->getName();
+  const auto startX = m_dblManager->value(m_properties["StartX"]);
+  const auto endX = m_dblManager->value(m_properties["EndX"]);
+  const auto baseName = getWorkspaceBasename(QString::fromStdString(sample));
+  m_baseName = baseName.toStdString() + "_" + func->name() + "_fit";
 
-  auto fitAlg = AlgorithmManager::Instance().create("Fit");
+  auto fitAlg = AlgorithmManager::Instance().create("PlotPeakByLogValue");
   fitAlg->initialize();
   fitAlg->setProperty("Function", func->asString());
-  fitAlg->setProperty("InputWorkspace", sample);
-  fitAlg->setProperty("WorkspaceIndex", width);
-  fitAlg->setProperty("IgnoreInvalidData", true);
+  fitAlg->setProperty("Input", sample + ",i" + std::to_string(width));
   fitAlg->setProperty("StartX", startX);
   fitAlg->setProperty("EndX", endX);
   fitAlg->setProperty("CreateOutput", true);
-  fitAlg->setProperty("Output", "__PlotGuessData");
+  fitAlg->setProperty("OutputWorkspace", m_baseName);
   return fitAlg;
+}
+
+/*
+ * Creates an algorithm for processing an output parameters workspace.
+ *
+ * @param parameterWSName The name of the parameters workspace.
+ * @return                A processing algorithm.
+ */
+IAlgorithm_sptr
+JumpFit::processParametersAlgorithm(const std::string &parameterWSName,
+                                    const std::string &resultWSName) {
+  const auto functionName = m_uiForm.cbFunction->currentText();
+  const auto parameters = getFunctionParameters(functionName);
+  const auto parameterNames = QStringList(parameters.toList()).join(",");
+
+  auto processAlg =
+      AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
+  processAlg->setProperty("InputWorkspace", parameterWSName);
+  processAlg->setProperty("ColumnX", "axis-1");
+  processAlg->setProperty("XAxisUnit", "MomentumTransfer");
+  processAlg->setProperty("ParameterNames", parameterNames.toStdString());
+  processAlg->setProperty("OutputWorkspace", resultWSName);
+  return processAlg;
+}
+
+IAlgorithm_sptr
+JumpFit::deleteWorkspaceAlgorithm(const std::string &workspaceName) {
+  auto deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->setProperty("Workspace", workspaceName);
+  return deleteAlg;
+}
+
+IAlgorithm_sptr
+JumpFit::renameWorkspaceAlgorithm(const std::string &workspaceToRename,
+                                  const std::string &newName) {
+  auto renameAlg = AlgorithmManager::Instance().create("RenameWorkspace");
+  renameAlg->setProperty("InputWorkspace", workspaceToRename);
+  renameAlg->setProperty("OutputWorkspace", newName);
+  return renameAlg;
 }
 
 /**
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  std::string outWsName = m_baseName + "_Workspace";
   IndirectFitAnalysisTab::plotResult(outWsName, "All");
 }
 
@@ -380,7 +419,7 @@ void JumpFit::plotClicked() {
  * Handles saving of workspace
  */
 void JumpFit::saveClicked() {
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  std::string outWsName = m_baseName + "_Workspace";
   IndirectFitAnalysisTab::saveResult(outWsName);
 }
 

@@ -40,6 +40,7 @@ private slots:
   /// Generates the plot guess data
   void plotGuess();
   /// Handles plotting and saving
+  void updatePlot() override;
   void saveClicked();
   void plotClicked();
 
@@ -48,10 +49,20 @@ protected:
   Mantid::API::IAlgorithm_sptr
   createFitAlgorithm(Mantid::API::IFunction_sptr func);
 
+  Mantid::API::IAlgorithm_sptr
+  processParametersAlgorithm(const std::string &parameterWSName,
+                             const std::string &resultWSName);
+
+  Mantid::API::IAlgorithm_sptr
+  deleteWorkspaceAlgorithm(const std::string &workspaceName);
+
+  Mantid::API::IAlgorithm_sptr
+  renameWorkspaceAlgorithm(const std::string &workspaceToRename,
+                           const std::string &newName);
+
 private:
   void disablePlotGuess() override;
   void enablePlotGuess() override;
-  void updatePlot() override;
 
   // The UI form
   Ui::JumpFit m_uiForm;
@@ -62,7 +73,6 @@ private:
   QtTreePropertyBrowser *m_jfTree;
 
   std::string m_baseName;
-  Mantid::API::IAlgorithm_sptr m_fitAlg;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
