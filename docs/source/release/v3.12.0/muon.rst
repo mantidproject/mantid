@@ -18,4 +18,8 @@ Interface
 - The data plot style in the settings tab of Muon Analysis, only alters the plot range. It no longer crops the data.  
 - Results table in Muon Analysis now sets relevant columns to numeric. 
 
+Algorithms
+----------
+-:ref:`MuonProcess <algm-MuonProcess>` now has a flag to determine if to crop the input workspace (default is true). In the Muon Analysis interface this flag has been set to false.
+
 :ref:`Release 3.12.0 <v3.12.0>`
