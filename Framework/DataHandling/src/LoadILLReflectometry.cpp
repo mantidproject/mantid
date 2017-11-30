@@ -928,7 +928,6 @@ double LoadILLReflectometry::detectorAngle() const {
 /** Calculate the offset angle between detector center and peak.
  *  @param peakCentre peak centre in pixels.
  *  @param detectorCentre detector centre in pixels.
- *  @param pixelWidth pixel width in meters.
  *  @param detectorDistance detector-sample distance in meters.
  *  @return the offset angle.
  */
