@@ -51,8 +51,7 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
   initially typically has no benefit and increases execution time.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that
-  contains the
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
   @param  lattice             The orientated lattice with the lattice
@@ -242,8 +241,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   as a peak, or by other methods.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that
-  contains the
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 3 q_vectors.
   @param  min_d               Lower bound on shortest unit cell edge length.
@@ -436,8 +434,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   to work reliably.
 
   @param  UB                  3x3 matrix that will be set to the UB matrix
-  @param  q_vectors           std::vector of V3D objects that
-  contains the
+  @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 4 q_vectors and it
                               really should have at least 10 or more peaks
@@ -562,11 +559,9 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   used to optimize the UB matrix once an initial indexing has been found.
 
   @param  UB           3x3 matrix that will be set to the UB matrix
-  @param  hkl_vectors  std::vector of V3D objects that contains
-  the
+  @param  hkl_vectors  std::vector of V3D objects that contains the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains
-  the list of
+  @param  q_vectors    std::vector of V3D objects that contains the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
   @param  sigabc      error in the crystal lattice parameter values if length
@@ -656,11 +651,9 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
   used to optimize the UB matrix once an initial indexing has been found.
 
   @param  UB           3x3 matrix that will be set to the UB matrix
-  @param  hkl_vectors  std::vector of V3D objects that contains
-  the
+  @param  hkl_vectors  std::vector of V3D objects that contains the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains
-  the list of
+  @param  q_vectors    std::vector of V3D objects that contains the list of
                        q_vectors that are indexed by the corresponding hkl
                        vectors.
   NOTE: The number of hkl_vectors and q_vectors must be the same, and must
@@ -789,8 +782,7 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
                        corresponding plane spacing in reciprocal space
                        is 1/d.
   @param  index_values std::vector of ints that contains the list of indices
-  @param  q_vectors    std::vector of V3D objects that contains
-  the list of
+  @param  q_vectors    std::vector of V3D objects that contains the list of
                        q_vectors that are indexed in one direction by the
                        corresponding index values.
   NOTE: The number of index_values and q_vectors must be the same, and must
@@ -1987,8 +1979,7 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   @param UB           A 3x3 matrix of doubles holding the UB matrix.
                       The UB matrix must not be singular.
-  @param q_vectors    std::vector of V3D objects that contains
-  the list of
+  @param q_vectors    std::vector of V3D objects that contains the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance between each component
@@ -2030,10 +2021,8 @@ int IndexingUtils::NumberIndexed(const DblMatrix &UB,
   The dot product must be within the specified tolerance of an integer,
   in order to count as indexed.
 
-  @param direction    A V3D specifying a possible edge vector in
-  real space.
-  @param q_vectors    std::vector of V3D objects that contains
-  the list of
+  @param direction    A V3D specifying a possible edge vector in real space.
+  @param q_vectors    std::vector of V3D objects that contains the list of
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance to an integer from the dot
@@ -2112,8 +2101,7 @@ int IndexingUtils::NumberIndexed_3D(const V3D &a_dir, const V3D &b_dir,
   counted as indexed, since (0,0,0) is not a valid index of any peak.
 
   @param UB             A 3x3 matrix of doubles holding the UB matrix
-  @param q_vectors      std::vector of V3D objects that contains
-  the list of
+  @param q_vectors      std::vector of V3D objects that contains the list of
                         q_vectors that are to be indexed.
   @param tolerance      The maximum allowed distance between each component
                         of UB^(-1)*Q and the nearest integer value, required to
@@ -2180,8 +2168,7 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
                              normal vector for a family of parallel planes
                              in reciprocal space.  The length of this vector
                              must be the reciprocal of the plane spacing.
-  @param q_vectors           List of V3D peaks in reciprocal
-  space
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -2249,8 +2236,7 @@ int IndexingUtils::GetIndexedPeaks_1D(const V3D &direction,
                              vector for the second family of parallel planes.
   @param direction_3         Direction vector in the direction of the normal
                              vector for the third family of parallel planes.
-  @param q_vectors           List of V3D peaks in reciprocal
-  space
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -2321,8 +2307,7 @@ int IndexingUtils::GetIndexedPeaks_3D(
 
   @param UB                  The UB matrix that determines the indexing of
                              the peaks.
-  @param q_vectors           List of V3D peaks in reciprocal
-  space
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
