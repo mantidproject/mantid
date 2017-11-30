@@ -120,8 +120,6 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  bool m_multiRunMode;
-
   // Holds the previous user input so we can short circuit further checks
   std::string m_previousInput;
 
@@ -147,6 +145,9 @@ private:
 
   /// Handle the user selecting a different run to plot
   void processSelectRun();
+
+  /// Whether the user is doing fitting on multiple runs
+  bool m_multiRunMode;
 };
 
 } // namespace CustomInterfaces
