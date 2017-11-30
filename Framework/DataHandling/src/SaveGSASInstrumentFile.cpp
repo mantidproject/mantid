@@ -517,7 +517,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     TableRow tmprow = ws->getRow(irow);
     string parname;
     tmprow >> parname;
-    if (parname == "BANK") {
+    if (parname != "BANK") {
       for (size_t icol = 0; icol < numbanks; ++icol) {
         double tmpdbl;
         tmprow >> tmpdbl;

@@ -271,7 +271,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
     throw runtime_error(errmsg.str());
   }
   for (size_t i = 0; i < sourcecolnames.size(); ++i) {
-    if (sourcecolnames[i] == targetcolnames[i]) {
+    if (sourcecolnames[i] != targetcolnames[i]) {
       stringstream errss;
       errss << "Source and target have incompatible column name at column " << i
             << ". "
