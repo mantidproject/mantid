@@ -42,6 +42,14 @@ class Polaris(AbstractInst):
                                              output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
+    def create_total_scattering_pdf(self, **kwargs):
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        # Validate that required files exist
+        # generate pdf
+        pdf_output = self._generate_ts_pdf(focused_ws=self._inst_settings.focused_ws,
+                                           merge_banks=self._inst_settings.merge_banks)
+        return pdf_output
+
     def set_sample_details(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         kwarg_name = "sample"

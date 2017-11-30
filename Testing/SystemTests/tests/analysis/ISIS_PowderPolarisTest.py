@@ -94,6 +94,14 @@ class FocusTest(stresstesting.MantidStressTest):
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
 
+class TotalScatteringTest(stresstesting.MantidStressTest):
+
+    def runTest(self):
+
+
+    def validate(self):
+
+    def cleanup(self):
 
 def _gen_required_files():
     required_run_numbers = ["98531", "98532",  # create_van : PDF mode
