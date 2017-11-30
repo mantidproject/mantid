@@ -16,7 +16,7 @@ By doing this, the metadata (SampleLogs) are also merged governed by the rules s
 as explained in :ref:`MergeRuns <algm-MergeRuns>`.
 This rules can be overridden by the **MergeRunsOptions** input.
 Specific loader can be given by the **LoaderName** and **LoaderVersion**.
-If left as defaults, the algorithm will automatically find out the corresponding specific loader, deducting from the first run in the list.
+If left as defaults, the algorithm will automatically find out the corresponding specific loader, deducing from the first run in the list.
 It will set the name and the version of the suitable loader found as output properties in **LoaderName** and **LoaderVersion**.
 The input runs must be loadable by the same specific loader, the files can not be mixed.
 If the **Output** is hidden, i.e. the name starts with **__**, all the workspaces (intermediate and final) produced by this algorithm will also be hidden,
