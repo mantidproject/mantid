@@ -3018,8 +3018,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-    groupAlg->setProperty("xmin",m_dataSelector->getStartTime());
-    groupAlg->setProperty("xmax",m_dataSelector->getEndTime());
+    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
+    groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
     bool addToTable = getIfTFAsymmStore();
     m_fitDataPresenter->storeNormalization(wsName, addToTable);

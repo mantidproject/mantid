@@ -99,7 +99,7 @@ public:
     }
   }
 
- void test_Cropping() {
+  void test_Cropping() {
     ScopedWorkspace output;
 
     std::vector<int> group1, group2;
@@ -129,8 +129,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace",true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin",3.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -142,14 +142,13 @@ public:
     if (ws) {
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
 
-      TS_ASSERT_DELTA(ws->readX(0)[0],    3.0100, 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1000],19.0100 , 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1752],31.0420, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[0], 3.0100, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1000], 19.0100, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1752], 31.0420, 0.001);
     }
   }
 
-
- void test_noCropping() {
+  void test_noCropping() {
     ScopedWorkspace output;
 
     std::vector<int> group1, group2;
@@ -179,8 +178,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace",false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin",3.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 

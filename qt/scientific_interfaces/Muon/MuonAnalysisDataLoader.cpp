@@ -379,11 +379,11 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   alg->setProperty("Mode", "Analyse");
   alg->setProperty("TimeZero", options.timeZero);             // user input
   alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file
-  alg->setProperty("CropWorkspace",false);
-  alg->setProperty("Xmin",options.timeLimits.first);
+  alg->setProperty("CropWorkspace", false);
+  alg->setProperty("Xmin", options.timeLimits.first);
   double Xmax = options.timeLimits.second;
-  if(Xmax!=Mantid::EMPTY_DBL()){
-     alg->setProperty("Xmax",Xmax);
+  if (Xmax != Mantid::EMPTY_DBL()) {
+    alg->setProperty("Xmax", Xmax);
   }
   if (!options.rebinArgs.empty()) {
     alg->setProperty("RebinParams", options.rebinArgs);
