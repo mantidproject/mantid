@@ -249,9 +249,9 @@ public:
     for (size_t rowIndex = 0; rowIndex < numberOfRows * 2; ++rowIndex) {
       std::cout << "ROW " << rowIndex << "\n";
       API::TableRow row = targetTable->getRow(rowIndex);
-      double expectedX = rowIndex * 3 + 1.0;
-      double expectedY = rowIndex * 3 + 2.0;
-      double expectedZ = rowIndex * 3 + 3.0;
+      double expectedX = static_cast<double>(rowIndex) * 3 + 1;
+      double expectedY = static_cast<double>(rowIndex) * 3 + 2;
+      double expectedZ = static_cast<double>(rowIndex) * 3 + 3;
 
       double x, y, z;
       TS_ASSERT_THROWS_NOTHING(row >> x >> y >> z);
