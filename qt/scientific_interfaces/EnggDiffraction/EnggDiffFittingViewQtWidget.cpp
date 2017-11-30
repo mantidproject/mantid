@@ -1,7 +1,9 @@
 #include "EnggDiffFittingViewQtWidget.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "EnggDiffFittingModel.h"
 #include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
@@ -54,7 +56,9 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
+  m_presenter.reset(new EnggDiffFittingPresenter(
+      this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+      mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
@@ -514,6 +518,10 @@ int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
 std::string
 EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
   return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
+}
+
+bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
+  return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
