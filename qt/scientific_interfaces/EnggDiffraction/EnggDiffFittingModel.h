@@ -51,6 +51,10 @@ public:
 
   size_t getNumFocusedWorkspaces() const override;
 
+  void addAllFitResultsToADS() const override;
+
+  void addAllFittedPeaksToADS() const override;
+
 protected:
   void addFocusedWorkspace(const int runNumber, const size_t bank,
                            const Mantid::API::MatrixWorkspace_sptr ws,
@@ -59,6 +63,9 @@ protected:
   void addFitResults(const int runNumber, const size_t bank,
                      const Mantid::API::ITableWorkspace_sptr ws);
 
+  void mergeTables(const Mantid::API::ITableWorkspace_sptr tableToCopy,
+                   Mantid::API::ITableWorkspace_sptr targetTable) const;
+
 private:
   static const size_t MAX_BANKS = 2;
   static const double DEFAULT_DIFC;
@@ -66,6 +73,7 @@ private:
   static const double DEFAULT_TZERO;
   static const std::string FOCUSED_WS_NAME;
   static const std::string FIT_RESULTS_TABLE_NAME;
+  static const std::string FITTED_PEAKS_WS_NAME;
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedWorkspaceMap;
   RunMap<MAX_BANKS, std::string> m_wsFilenameMap;
@@ -98,12 +106,12 @@ private:
                                const std::string &outputWSName);
 
   void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                      const std::string &outputWSName);
+                      const std::string &outputWSName) const;
 
   void setDataToClonedWS(const std::string &wsToCopyName,
                          const std::string &targetWSName);
 
-  void appendSpectra(const std::string &ws1Name, const std::string &ws2Name);
+  void appendSpectra(const std::string &ws1Name, const std::string &ws2Name) const;
 
   std::tuple<double, double, double>
   getDifcDifaTzero(Mantid::API::MatrixWorkspace_const_sptr ws);
@@ -121,8 +129,8 @@ private:
 
   void loadWorkspace(const std::string &filename, const std::string &wsName);
 
-  void renameWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
-                       const std::string &newName);
+  void renameWorkspace(Mantid::API::Workspace_sptr inputWS,
+                       const std::string &newName) const;
 
   void groupWorkspaces(const std::vector<std::string> &workspaceNames,
                        const std::string &outputWSName);

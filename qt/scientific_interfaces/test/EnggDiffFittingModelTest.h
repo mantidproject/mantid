@@ -30,6 +30,9 @@ public:
 
   void addFitParams(const int runNumber, const size_t bank,
                     Mantid::API::ITableWorkspace_sptr ws);
+
+  void mergeTablesExposed(API::ITableWorkspace_sptr tableToCopy,
+                          API::ITableWorkspace_sptr targetTable);
 };
 
 inline void EnggDiffFittingModelAddWSExposed::addWorkspace(
@@ -42,6 +45,11 @@ inline void EnggDiffFittingModelAddWSExposed::addFitParams(
     const int runNumber, const size_t bank,
     Mantid::API::ITableWorkspace_sptr ws) {
   addFitResults(runNumber, bank, ws);
+}
+
+inline void EnggDiffFittingModelAddWSExposed::mergeTablesExposed(
+  API::ITableWorkspace_sptr tableToCopy, API::ITableWorkspace_sptr targetTable){
+  mergeTables(tableToCopy, targetTable);
 }
 
 void addSampleWorkspaceToModel(const int runNumber, const int bank,
@@ -94,6 +102,23 @@ API::ITableWorkspace_sptr createFitParamsTable() {
     API::TableRow tableRow = table->appendRow();
     for (const auto entry : row) {
       tableRow << entry;
+    }
+  }
+  return table;
+}
+
+template<size_t numColumns, size_t numRows>
+API::ITableWorkspace_sptr createDummyTable(
+  const std::array<std::string, numColumns> &columnHeadings,
+  const std::array<std::array<double, numColumns>, numRows> tableContents) {
+  auto table = API::WorkspaceFactory::Instance().createTable();
+  for (const auto &header : columnHeadings) {
+    table->addColumn("double", header);
+  }
+  for (const auto &row : tableContents) {
+    API::TableRow newRow = table->appendRow();
+    for (const auto value : row) {
+      newRow << value;
     }
   }
   return table;
@@ -195,6 +220,45 @@ public:
     addSampleWorkspaceToModel(789, 1, model);
 
     TS_ASSERT_EQUALS(model.getNumFocusedWorkspaces(), 3);
+  }
+
+  void test_mergeTables() {
+    auto model = EnggDiffFittingModelAddWSExposed();
+
+    const size_t numberOfColumns = 3;
+    const size_t numberOfRows = 2;
+
+    const std::array<std::string, numberOfColumns> columnHeadings = 
+          {{"X", "Y", "Z"}};
+
+    const std::array<std::array<double, numberOfColumns>, numberOfRows>
+      targetTableValues = { {{1, 2, 3}, {4, 5, 6}} };
+
+    auto targetTable = createDummyTable(columnHeadings, targetTableValues);
+
+    const std::array<std::array<double, numberOfColumns>, numberOfRows>
+      copyTableValues = { {{7, 8, 9}, {10, 11, 12}} };
+
+    auto copyTable = createDummyTable(columnHeadings, copyTableValues);
+
+    TS_ASSERT_THROWS_NOTHING(model.mergeTablesExposed(copyTable, targetTable));
+
+    TS_ASSERT_EQUALS(targetTable->columnCount(), numberOfColumns);
+    TS_ASSERT_EQUALS(targetTable->rowCount(), numberOfRows * 2);
+
+    for (size_t rowIndex = 0; rowIndex < numberOfRows * 2; ++rowIndex) {
+      std::cout << "ROW " << rowIndex << "\n";
+      API::TableRow row = targetTable->getRow(rowIndex);
+      double expectedX = rowIndex * 3 + 1.0;
+      double expectedY = rowIndex * 3 + 2.0;
+      double expectedZ = rowIndex * 3 + 3.0;
+
+      double x, y, z;
+      TS_ASSERT_THROWS_NOTHING(row >> x >> y >> z);
+      TS_ASSERT_EQUALS(x, expectedX);
+      TS_ASSERT_EQUALS(y, expectedY);
+      TS_ASSERT_EQUALS(z, expectedZ);
+    }
   }
 
 private:

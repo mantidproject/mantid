@@ -49,6 +49,11 @@ public:
   virtual void createFittedPeaksWS(const int runNumber, const size_t bank) = 0;
 
   virtual size_t getNumFocusedWorkspaces() const = 0;
+
+  virtual void addAllFitResultsToADS() const = 0;
+
+  virtual void addAllFittedPeaksToADS() const = 0;
+
 };
 
 } // namespace MantidQt

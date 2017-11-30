@@ -88,7 +88,8 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_model(std::move(model)), m_viewHasClosed(false) {}
+      m_model(std::move(model)), m_viewHasClosed(false), m_multiRunMode(false)
+    {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -225,6 +226,11 @@ void EnggDiffFittingPresenter::fittingFinished() {
       m_view->setFittingListWidgetCurrentRow(0);
     }
 
+    if (m_multiRunMode) {
+      m_model->addAllFitResultsToADS();
+      m_model->addAllFittedPeaksToADS();
+    }
+
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
@@ -260,6 +266,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
   // enable the GUI
   m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
   m_view->enableCalibrateFocusFitUserActions(true);
+  m_multiRunMode = false;
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
@@ -327,6 +334,7 @@ void EnggDiffFittingPresenter::processLogMsg() {
 }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
+  m_multiRunMode = true;
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -365,7 +373,6 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     m_view->enableFitAllButton(false);
 
     startAsyncFittingWorker(workspaceLabels, normalisedPeakCentres);
-
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
                         "No runs were loaded for fitting");

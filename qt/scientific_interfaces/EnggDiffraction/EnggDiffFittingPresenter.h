@@ -120,6 +120,8 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
+  bool m_multiRunMode;
+
   // Holds the previous user input so we can short circuit further checks
   std::string m_previousInput;
 

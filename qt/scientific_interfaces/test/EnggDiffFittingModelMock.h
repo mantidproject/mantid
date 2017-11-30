@@ -57,6 +57,12 @@ public:
                void(const int runNumber, const size_t bank));
 
   MOCK_CONST_METHOD0(getNumFocusedWorkspaces, size_t());
+
+  MOCK_CONST_METHOD0(getAllFitResults, Mantid::API::ITableWorkspace_sptr());
+
+  MOCK_CONST_METHOD2(mergeTables,
+                     void(Mantid::API::ITableWorkspace_sptr tableToCopy,
+                          Mantid::API::ITableWorkspace_sptr targetTable));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
