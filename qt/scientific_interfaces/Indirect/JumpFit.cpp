@@ -33,14 +33,14 @@ void JumpFit::setup() {
   m_uiForm.treeSpace->addWidget(m_jfTree);
 
   // Fitting range
-  m_properties["QMin"] = m_dblManager->addProperty("QMin");
-  m_properties["QMax"] = m_dblManager->addProperty("QMax");
+  m_properties["StartX"] = m_dblManager->addProperty("QMin");
+  m_properties["EndX"] = m_dblManager->addProperty("QMax");
 
-  m_dblManager->setDecimals(m_properties["QMin"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties["QMax"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
-  m_jfTree->addProperty(m_properties["QMin"]);
-  m_jfTree->addProperty(m_properties["QMax"]);
+  m_jfTree->addProperty(m_properties["StartX"]);
+  m_jfTree->addProperty(m_properties["EndX"]);
 
   // Fitting function
   m_properties["FitFunction"] = m_grpManager->addProperty("Fitting Parameters");
@@ -215,14 +215,14 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
     // Use the values from the instrument parameter file if we can
     if (getResolutionRangeFromWs(sample, res))
-      setRangeSelector(qRangeSelector, m_properties["QMin"],
-                       m_properties["QMax"], res);
+      setRangeSelector(qRangeSelector, m_properties["StartX"],
+                       m_properties["EndX"], res);
     else
-      setRangeSelector(qRangeSelector, m_properties["QMin"],
-                       m_properties["QMax"], range);
+      setRangeSelector(qRangeSelector, m_properties["StartX"],
+                       m_properties["EndX"], range);
 
-    setPlotPropertyRange(qRangeSelector, m_properties["QMin"],
-                         m_properties["QMax"], range);
+    setPlotPropertyRange(qRangeSelector, m_properties["StartX"],
+                         m_properties["EndX"], range);
   } else {
     m_uiForm.cbWidth->setEnabled(false);
     emit showMessageBox("Workspace doesn't appear to contain any width data");
@@ -302,8 +302,8 @@ void JumpFit::handleWidthChange(const QString &text) {
  * @param max :: The new value of the upper guide
  */
 void JumpFit::qRangeChanged(double min, double max) {
-  m_dblManager->setValue(m_properties["QMin"], min);
-  m_dblManager->setValue(m_properties["QMax"], max);
+  m_dblManager->setValue(m_properties["StartX"], min);
+  m_dblManager->setValue(m_properties["EndX"], max);
 }
 
 /**
@@ -317,10 +317,10 @@ void JumpFit::updateProperties(QtProperty *prop, double val) {
 
   auto qRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("JumpFitQ");
 
-  if (prop == m_properties["QMin"] || prop == m_properties["QMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["QMin"]),
-                            m_dblManager->value(m_properties["QMax"]));
-    setRangeSelector(qRangeSelector, m_properties["QMin"], m_properties["QMax"],
+  if (prop == m_properties["StartX"] || prop == m_properties["EndX"]) {
+    auto bounds = qMakePair(m_dblManager->value(m_properties["StartX"]),
+                            m_dblManager->value(m_properties["EndX"]));
+    setRangeSelector(qRangeSelector, m_properties["StartX"], m_properties["EndX"],
                      bounds);
   }
 }
@@ -418,8 +418,8 @@ IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
   int width = m_spectraList[widthText];
   const auto sample =
     m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
-  const auto startX = m_dblManager->value(m_properties["QMin"]);
-  const auto endX = m_dblManager->value(m_properties["QMax"]);
+  const auto startX = m_dblManager->value(m_properties["StartX"]);
+  const auto endX = m_dblManager->value(m_properties["EndX"]);
   const auto baseName = getWorkspaceBasename(QString::fromStdString(sample));
   m_baseName = baseName.toStdString() + "_" + func->name() + "_fit";
 
