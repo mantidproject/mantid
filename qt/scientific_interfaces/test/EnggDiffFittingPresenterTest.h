@@ -258,13 +258,22 @@ public:
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
+    
+    EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
     // inputs from user
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
+
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+         .Times(1)
+         .WillOnce(Return(std::vector<std::pair<int, size_t>>(
+                          {std::make_pair(123, 1)})));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
