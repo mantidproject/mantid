@@ -9,10 +9,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, LoadILLTOF, MergeRuns, Minus,
+                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
                               NormaliseToMonitor, Scale, LoadAndMerge)
 import numpy
-import os.path
 
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
