@@ -5,7 +5,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 #include <list>
 

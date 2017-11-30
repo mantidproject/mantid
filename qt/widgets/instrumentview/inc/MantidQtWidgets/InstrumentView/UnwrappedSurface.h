@@ -4,7 +4,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 #include <boost/shared_ptr.hpp>

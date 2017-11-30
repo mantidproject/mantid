@@ -25,7 +25,6 @@ class IDetector;
 class IObjComponent;
 class Instrument;
 class IObject;
-class CSGObject;
 class ParameterMap;
 class RectangularDetector;
 

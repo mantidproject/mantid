@@ -26,7 +26,7 @@ class ICompAssembly;
 class IComponent;
 class Instrument;
 class ObjComponent;
-class CSGObject;
+class IObject;
 class ShapeFactory;
 
 /** Creates an instrument data from a XML instrument description file

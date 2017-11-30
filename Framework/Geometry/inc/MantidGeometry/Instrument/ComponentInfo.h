@@ -15,7 +15,6 @@ class V3D;
 }
 
 namespace Geometry {
-// class BoundingBox;
 class IComponent;
 class IObject;
 }
