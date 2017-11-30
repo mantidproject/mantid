@@ -16,10 +16,9 @@ class RectangularDetector;
 class StructuredDetector;
 class IObjComponent;
 
-  namespace detail
-  {
-    class GeometryTriangulator;
-  }
+namespace detail {
+class GeometryTriangulator;
+}
 
 /** Renderer : Handles rendering details of geometry within mantid.
 
@@ -70,10 +69,11 @@ public:
   void renderShape(const ShapeInfo &shapeInfo) const;
   /// Renders a Bitmap (used for rendering RectangularDetector)
   void renderBitmap(const RectangularDetector &rectDet,
-    RenderMode mode = RenderMode::Basic) const;
+                    RenderMode mode = RenderMode::Basic) const;
   /// Renders structured geometry (used for rendering StructuredDetector)
   void renderStructured(const StructuredDetector &structDet,
-    RenderMode mode = RenderMode::Basic) const;
+                        RenderMode mode = RenderMode::Basic) const;
+
 private:
   mutable RenderMode m_renderMode;
   /// Renders a sphere

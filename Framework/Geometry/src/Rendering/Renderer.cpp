@@ -61,8 +61,8 @@ void Renderer::renderTriangulated(detail::GeometryTriangulator &triangulator,
                                   RenderMode mode) const {
 #ifdef ENABLE_OPENCASCADE
   auto surface = triangulator.getOCSurface();
-  if (!surface.IsNull())
-    render(mode, surface);
+  if (surface && !surface->IsNull())
+    render(mode, *surface);
   else
     render(mode, triangulator);
 #else
@@ -101,8 +101,7 @@ void Renderer::renderStructured(const StructuredDetector &structDet,
   render(mode, structDet);
 }
 
-void Renderer::doRenderSphere(const ShapeInfo &shapeInfo) const
-{
+void Renderer::doRenderSphere(const ShapeInfo &shapeInfo) const {
   // create glu sphere
   GLUquadricObj *qobj = gluNewQuadric();
   gluQuadricDrawStyle(qobj, GLU_FILL);
@@ -115,8 +114,7 @@ void Renderer::doRenderSphere(const ShapeInfo &shapeInfo) const
   gluDeleteQuadric(qobj);
 }
 
-void Renderer::doRenderCuboid(const ShapeInfo &shapeInfo) const
-{
+void Renderer::doRenderCuboid(const ShapeInfo &shapeInfo) const {
   const auto &points = shapeInfo.points();
   V3D vec0 = points[0];
   V3D vec1 = points[1] - points[0];
@@ -133,19 +131,19 @@ void Renderer::doRenderCuboid(const ShapeInfo &shapeInfo) const
   vertex[7] = vec0 + vec1 + vec2;
 
   int faceindex[6][4] = {
-    { 0, 1, 2, 3 }, // top
-    { 0, 3, 7, 4 }, // left
-    { 3, 2, 6, 7 }, // back
-    { 2, 1, 5, 6 }, // right
-    { 0, 4, 5, 1 }, // front
-    { 4, 7, 6, 5 }, // bottom
+      {0, 1, 2, 3}, // top
+      {0, 3, 7, 4}, // left
+      {3, 2, 6, 7}, // back
+      {2, 1, 5, 6}, // right
+      {0, 4, 5, 1}, // front
+      {4, 7, 6, 5}, // bottom
   };
   V3D normal;
   // first face
   glBegin(GL_QUADS);
   for (auto &row : faceindex) {
     normal = (vertex[row[0]] - vertex[row[1]])
-      .cross_prod((vertex[row[0]] - vertex[row[2]]));
+                 .cross_prod((vertex[row[0]] - vertex[row[2]]));
     normal.normalize();
     glNormal3d(normal[0], normal[1], normal[2]);
     for (const int ij : row) {
@@ -171,8 +169,7 @@ void Renderer::doRenderCuboid(const ShapeInfo &shapeInfo) const
   glEnd();
 }
 
-void Renderer::doRenderHexahedron(const ShapeInfo &shapeInfo) const
-{
+void Renderer::doRenderHexahedron(const ShapeInfo &shapeInfo) const {
   glBegin(GL_QUADS);
   const auto &points = shapeInfo.points();
   // bottom
@@ -225,7 +222,7 @@ void Renderer::doRenderCone(const ShapeInfo &shapeInfo) const {
   auto radius = shapeInfo.radius();
   auto height = shapeInfo.height();
   gluCylinder(qobj, 0, radius, height, Geometry::Cone::g_nslices,
-    Geometry::Cone::g_nstacks);
+              Geometry::Cone::g_nstacks);
   glTranslated(0.0, 0.0, height);
   gluDisk(qobj, 0, radius, Geometry::Cone::g_nslices, 1);
   glPopMatrix();
@@ -375,8 +372,8 @@ void Renderer::doRender(const RectangularDetector &rectDet) const {
 
   glTexCoord2f(static_cast<GLfloat>(tex_frac_x),
                static_cast<GLfloat>(tex_frac_y));
-  pos = rectDet.getRelativePosAtXY(rectDet.xpixels() - 1,
-                                    rectDet.ypixels() - 1);
+  pos =
+      rectDet.getRelativePosAtXY(rectDet.xpixels() - 1, rectDet.ypixels() - 1);
   pos += V3D(rectDet.xstep() * (+0.5), rectDet.ystep() * (+0.5),
              0.0); // Adjust to account for the size of a pixel
   glVertex3f(static_cast<GLfloat>(pos.X()), static_cast<GLfloat>(pos.Y()),
@@ -391,18 +388,19 @@ void Renderer::doRender(const RectangularDetector &rectDet) const {
 
   glEnd();
   if (glGetError() > 0)
-    std::cout << "OpenGL error in BitmapGeometryHandler::render \n";
+    std::cout
+        << "OpenGL error in Renderer::doRender(const RectangularDetector &) \n";
 
   glDisable(
       GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
 }
 
 void Renderer::doRender(const StructuredDetector &structDet) const {
-  auto xVerts = structDet.getXValues();
-  auto yVerts = structDet.getYValues();
-  auto r = structDet.getR();
-  auto g = structDet.getG();
-  auto b = structDet.getB();
+  const auto &xVerts = structDet.getXValues();
+  const auto &yVerts = structDet.getYValues();
+  const auto &r = structDet.getR();
+  const auto &g = structDet.getG();
+  const auto &b = structDet.getB();
 
   if (xVerts.size() != yVerts.size())
     return;
@@ -438,10 +436,8 @@ void Renderer::doRender(const StructuredDetector &structDet) const {
   glEnd();
 
   if (glGetError() > 0)
-    std::cout << "OpenGL error in StructuredGeometryHandler::render \n";
-
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
+    std::cout
+        << "OpenGL error in Renderer::doRender(const StructuredDetector &) \n";
 }
 } // namespace detail
 } // namespace Geometry

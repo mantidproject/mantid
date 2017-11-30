@@ -2,9 +2,8 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -60,7 +59,7 @@ CSGObject::CSGObject(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  m_handler = boost::make_shared<CacheGeometryHandler>(this);
+  handle = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -1008,17 +1007,14 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
 
   // If the object is a simple shape use the special methods
   double height(0.0), radius(0.0);
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
   auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID:
     return CuboidSolidAngle(observer, geometry_vectors);
     break;
@@ -1098,13 +1094,10 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
   //
   if (nTri == 0) {
     double height = 0.0, radius(0.0);
-    int type;
+    detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    detail::ShapeInfo::GeometryShape gluType =
-        static_cast<detail::ShapeInfo::GeometryShape>(type);
-
-    switch (gluType) {
+    switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
@@ -1491,14 +1484,12 @@ double CSGObject::ConeSolidAngle(const V3D &observer,
  * @return The volume.
  */
 double CSGObject::volume() const {
-  int type;
+  detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
   std::vector<Kernel::V3D> vectors;
   this->GetObjectGeom(type, vectors, radius, height);
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
@@ -1718,9 +1709,9 @@ void CSGObject::calcBoundingBoxByRule() {
 void CSGObject::calcBoundingBoxByVertices() {
   // Grab vertex information
   auto vertCount = this->numberOfVertices();
-  const auto &vertArray = this->getTriangleVertices().get();
 
   if (vertCount > 0) {
+    const auto &vertArray = this->getTriangleVertices().get();
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -1761,18 +1752,15 @@ void CSGObject::calcBoundingBoxByGeometry() {
   double minX, maxX, minY, maxY, minZ, maxZ;
 
   // Shape geometry data
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
 
-  // Will only work for shapes handled by GluGeometryHandler
+  // Will only work for shapes with ShapeInfo
   m_handler->GetObjectGeom(type, vectors, radius, height);
-  detail::ShapeInfo::GeometryShape gluType =
-      static_cast<detail::ShapeInfo::GeometryShape>(type);
-
   // Type of shape is given as a simple integer
-  switch (gluType) {
+  switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
@@ -2072,7 +2060,7 @@ void CSGObject::draw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Render();
+  handle->render();
 }
 
 /**
@@ -2084,7 +2072,7 @@ void CSGObject::initDraw() const {
   if (m_handler == nullptr)
     return;
   // Render the Object
-  m_handler->Initialize();
+  handle->initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2176,9 +2164,9 @@ boost::optional<const std::vector<int> &> CSGObject::getTriangleFaces() const {
 /**
 * get info on standard shapes
 */
-void CSGObject::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                              double &myradius, double &myheight) const {
-  type = 0;
+void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
+                           double &myradius, double &myheight) const {
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
   m_handler->GetObjectGeom(type, vectors, myradius, myheight);

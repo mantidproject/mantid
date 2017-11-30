@@ -64,8 +64,9 @@ public:
   double height() const;
   GeometryShape shape() const;
 
-  void getObjectGeometry(int &myshape, std::vector<Kernel::V3D> &points,
-                         double &myradius, double &myheight) const;
+  void getObjectGeometry(GeometryShape &myshape,
+                         std::vector<Kernel::V3D> &points, double &myradius,
+                         double &myheight) const;
   /// sets the geometry handler for a cuboid
   void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
                  const Kernel::V3D &);
@@ -74,15 +75,19 @@ public:
                      const Kernel::V3D &, const Kernel::V3D &,
                      const Kernel::V3D &, const Kernel::V3D &,
                      const Kernel::V3D &, const Kernel::V3D &);
-  /// sets the geometry handler for a cone
-  void setSphere(const Kernel::V3D &, double);
+  /// sets the geometry handler for a sphere
+  void setSphere(const Kernel::V3D &center, double radius);
   /// sets the geometry handler for a cylinder
-  void setCylinder(const Kernel::V3D &, const Kernel::V3D &, double, double);
+  void setCylinder(const Kernel::V3D &center, const Kernel::V3D &axis,
+                   double radius, double height);
   /// sets the geometry handler for a cone
-  void setCone(const Kernel::V3D &, const Kernel::V3D &, double, double);
+  void setCone(const Kernel::V3D &center, const Kernel::V3D &axis,
+               double radius, double height);
   /// sets the geometry handler for a segmented cylinder
-  void setSegmentedCylinder(const Kernel::V3D &, const Kernel::V3D &, double,
-                            double);
+  void setSegmentedCylinder(const Kernel::V3D &center, const Kernel::V3D &axis,
+                            double radius, double height);
+
+  bool operator==(const ShapeInfo &other);
 };
 } // namespace detail
 } // namespace Geometry

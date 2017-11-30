@@ -76,9 +76,9 @@ void GeometryTriangulator::triangulate() {
 
 #ifdef ENABLE_OPENCASCADE
 /// Return OpenCascade surface.
-const TopoDS_Shape &GeometryTriangulator::getOCSurface() {
+boost::shared_ptr<TopoDS_Shape> GeometryTriangulator::getOCSurface() {
   checkTriangulated();
-  return *m_objSurface;
+  return m_objSurface;
 }
 #endif
 
