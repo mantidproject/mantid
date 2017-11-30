@@ -288,20 +288,10 @@ OptionsMap ReflSettingsPresenter::getReductionOptions() const {
 * @return :: the transmission runs string
 */
 std::string ReflSettingsPresenter::getTransmissionRuns() const {
-  auto transmissionRunsString = m_view->getTransmissionRuns();
-  if (transmissionRunsString.empty())
-    return "";
+  if (m_view->experimentSettingsEnabled())
+    return m_view->getTransmissionRuns();
 
-  std::vector<std::string> transmissionRuns;
-  boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
-
-  if (transmissionRuns.size() < 1 || transmissionRuns.size() > 2) {
-    throw std::invalid_argument("Only one transmission run or two "
-                                "transmission runs separated by ',' "
-                                "are allowed.");
-  }
-
-  return transmissionRunsString;
+  return std::string();
 }
 
 /** Returns global options for 'Stitch1DMany'
