@@ -775,8 +775,7 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
         Optimize_UB method optimizes the mapping from three (h,k,l) to
         (qx,qy,qz) (3 indices to Q).
 
-  @param  best_vec     V3D vector that will be set to a vector
-  whose
+  @param  best_vec     V3D vector that will be set to a vector whose
                        direction most nearly corresponds to the plane
                        normal direction and whose magnitude is d.  The
                        corresponding plane spacing in reciprocal space
@@ -1680,11 +1679,9 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     and "b", with lengths a and b, and the cell angles.  The calculation is
     explained in the Mantid document UBMatriximplementationnotes.pdf, pg 3,
     Andre Savici.
-    @param  a_dir   V3D object with length "a" in the direction
-   of the rotated
+    @param  a_dir   V3D object with length "a" in the direction of the rotated
                     cell edge "a"
-    @param  b_dir   V3D object with length "b" in the direction
-   of the rotated
+    @param  b_dir   V3D object with length "b" in the direction of the rotated
                     cell edge "b"
     @param  c       The length of the third cell edge, c.
     @param  cosAlpha   cos angle between edges b and c in radians.
@@ -1692,8 +1689,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     @param  cosGamma   cos angle between edges a and b in radians.
     @param  sinGamma   sin angle between edges a and b in radians.
 
-    @return A new V3D object with length "c", in the direction
-   of the third
+    @return A new V3D object with length "c", in the direction of the third
             rotated unit cell edge, "c".
  */
 V3D IndexingUtils::makeCDir(const V3D &a_dir, const V3D &b_dir, const double c,
@@ -1824,8 +1820,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
   the PeaksWorkspace records the Miller indices as sets of three doubles,
   there is no guarantee that the Miller indices will be integers.
 
-  @param hkl_list   Vector of V3D objects whose components will
-  be rounded.
+  @param hkl_list   Vector of V3D objects whose components will be rounded.
 
  */
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
@@ -1854,8 +1849,7 @@ inline bool withinTol(const double value, const double tolerance) {
   Check whether or not the components of the specified vector are within
   the specified tolerance of integer values, other than (0,0,0).
 
-  @param hkl        A V3D object containing what may be valid
-  Miller indices
+  @param hkl        A V3D object containing what may be valid Miller indices
                     for a peak.
   @param tolerance  The maximum acceptable deviation from integer values for
                     the Miller indices.
