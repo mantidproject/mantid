@@ -14,9 +14,6 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
-if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  ON_RHEL6=true
-fi
 if [[ ${NODE_LABELS} == *rhel7* ]]; then
   ON_RHEL7=true
 fi
@@ -170,16 +167,6 @@ if [ -z "$MANTID_DATA_STORE" ]; then
 fi
 
 ###############################################################################
-# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
-###############################################################################
-DIST_FLAGS="-DSTATIC_LIBSTDCXX=OFF"
-if [[ "${ON_RHEL6}" == true ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs34 devtoolset-2"
-else
-  SCL_ON_RHEL6="eval"
-fi
-
-###############################################################################
 # Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
 PY2_BUILD=false
@@ -254,7 +241,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ..
 
 ###############################################################################
 # Coverity build should exit early
@@ -277,8 +264,9 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} --build . -- -j$BUILD_THREADS"
-$SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target AllTests -- -j$BUILD_THREADS"
+
+${CMAKE_EXE} --build . -- -j$BUILD_THREADS
+${CMAKE_EXE} --build . --target AllTests -- -j$BUILD_THREADS
 
 ###############################################################################
 # static analysis builds stop here
@@ -294,7 +282,8 @@ fi
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-$SCL_ON_RHEL6 "$CTEST_EXE -j$BUILD_THREADS --schedule-random --output-on-failure"
+
+$CTEST_EXE -j$BUILD_THREADS --schedule-random --output-on-failure
 
 ###############################################################################
 # Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
@@ -306,8 +295,8 @@ if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
     rm -rf $BUILD_DIR/docs/doctrees/*
   fi
   # Build HTML to verify that no referencing errors have crept in.
-  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-html"
-  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-test"
+  ${CMAKE_EXE} --build . --target docs-html
+  ${CMAKE_EXE} --build . --target docs-test
 fi
 
 ###############################################################################
@@ -320,18 +309,18 @@ if [[ ${BUILDPKG} == true ]]; then
   if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-qthelp"
-  $SCL_ON_RHEL6 "${CPACK_EXE}"
+  ${CMAKE_EXE} --build . --target docs-qthelp
+  ${CPACK_EXE}
 
   # Source tarball on clean build (arbitrarily choose rhel7)
   # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-html"
+    ${CMAKE_EXE} --build . --target docs-html
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
-    $SCL_ON_RHEL6 "${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
+    ${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX=
   fi
 fi
 
