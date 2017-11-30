@@ -76,11 +76,12 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(tof_ws, merge_banks=False):
-    q_ws = mantid.ConvertUnits(InputWorkspace=tof_ws, Target="MomentumTransfer")
+def generate_ts_pdf(focused_ws, merge_banks=False):
+    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer")
     if merge_banks:
         raise RuntimeError("Merging banks is currently not supported")
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=q_ws, InputSofQType="S(Q)", PDFType="G(r)")
+    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
+                                            Filter=True)
     return pdf_output
 
 
