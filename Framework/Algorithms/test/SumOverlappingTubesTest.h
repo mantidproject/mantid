@@ -333,6 +333,55 @@ public:
   }
 
   void
+  test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_crop_negative() {
+    std::vector<double> rotations = {0, 22.5, 45};
+    auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("CropNegativeScatteringAngles", true);
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    alg.setProperty("Normalise", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outWS"));
+
+    // Check x-axis goes from 0 -> 45 degrees
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 3)
+    for (size_t i = 0; i < 3; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), 0.0 + 22.5 * double(i), 1e-6)
+
+    verifyHeightAxis(outWS);
+
+    size_t bin = 0;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(6.0), 1e-6)
+    }
+
+    bin = 1;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0), 1e-6)
+    }
+
+    bin = 2;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0), 1e-6)
+    }
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void
   test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan() {
     std::vector<double> rotations = {0, 28.125, 45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
