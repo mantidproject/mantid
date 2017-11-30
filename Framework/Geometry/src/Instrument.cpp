@@ -1397,7 +1397,7 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
-  auto compInfo = Kernel::make_unique<ComponentInfo>(componentInfo);
+  auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());

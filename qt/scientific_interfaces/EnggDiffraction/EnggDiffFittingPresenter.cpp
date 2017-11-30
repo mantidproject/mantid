@@ -1,13 +1,8 @@
 #include "EnggDiffFittingPresenter.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "IEnggDiffFittingModel.h"
 #include "EnggDiffFittingPresWorker.h"
 
 #include <boost/algorithm/string.hpp>
@@ -27,13 +22,24 @@ namespace CustomInterfaces {
 
 namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
+
+std::pair<int, size_t>
+runAndBankNumberFromListWidgetLabel(const std::string &listLabel) {
+  const size_t underscorePosition = listLabel.find_first_of("_");
+  const auto runNumber = listLabel.substr(0, underscorePosition);
+  const auto bank = listLabel.substr(underscorePosition + 1);
+
+  return std::pair<int, size_t>(std::atoi(runNumber.c_str()),
+                                std::atoi(bank.c_str()));
+}
+
+std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
+                                                const size_t bank) {
+  return std::to_string(runNumber) + "_" + std::to_string(bank);
+}
 }
 
 const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
-
-// MOVE THIS TO THE MODEL
-const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
-    "engggui_fitting_focused_ws";
 
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
@@ -42,16 +48,17 @@ int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
  * handle on the current calibration (produced and updated elsewhere).
  *
  * @param view the view that is attached to this presenter
+ * @param model the model that is attached to this presenter
  * @param mainCalib provides the current calibration parameters/status
  * @param mainParam provides current params and functions
  */
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
-    IEnggDiffFittingView *view,
+    IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
       m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_viewHasClosed(false) {}
+      m_model(std::move(model)), m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -145,13 +152,12 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
-    const std::vector<std::string> &focusedRunNo,
-    const std::string &expectedPeaks) {
+    const int runNumber, const size_t bank, const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffFittingWorker *worker =
-      new EnggDiffFittingWorker(this, focusedRunNo, expectedPeaks);
+      new EnggDiffFittingWorker(this, runNumber, bank, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -191,6 +197,12 @@ void EnggDiffFittingPresenter::fittingFinished() {
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
+      const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+      int runNumber;
+      size_t bank;
+      std::tie(runNumber, bank) =
+          runAndBankNumberFromListWidgetLabel(listLabel);
+
       plotFitPeaksCurves();
 
     } catch (std::runtime_error &re) {
@@ -353,12 +365,12 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
-  const auto workspaceID = m_view->getFittingListWidgetCurrentValue();
-  std::vector<std::string> tokens;
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  int runNumber;
+  size_t bank;
+  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
 
-  boost::split(tokens, workspaceID, boost::is_any_of("_"));
-  const auto ws =
-      m_model.getWorkspace(std::stoi(tokens[0]), std::stoi(tokens[1]));
+  const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
   plotFocusedFile(false, ws);
 }
 
@@ -720,36 +732,15 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
 void EnggDiffFittingPresenter::processStart() {}
 
-size_t EnggDiffFittingPresenter::findBankID(
-    Mantid::API::MatrixWorkspace_sptr ws) const {
-  // MOVE THIS TO THE MODEL
-  size_t bankID = 1;
-
-  auto name = ws->getName();
-  std::vector<std::string> chunks;
-  boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      bankID = boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain focused " +
-          m_view->getCurrentInstrument() + " workspace?");
-    }
-  }
-  return bankID;
-}
-
 void EnggDiffFittingPresenter::processLoad() {
   const std::string filenames = m_view->getFittingRunNo();
+  if (filenames.empty()) {
+    m_view->userWarning("No file selected", "Please enter filename(s) to load");
+    return;
+  }
 
   try {
-    m_model.loadWorkspaces(filenames);
+    m_model->loadWorkspaces(filenames);
   } catch (Poco::PathSyntaxException &ex) {
     warnFileNotFound(ex);
     return;
@@ -761,19 +752,19 @@ void EnggDiffFittingPresenter::processLoad() {
     return;
   }
 
-  const auto runNoBankPairs = m_model.getRunNumbersAndBanksIDs();
-  std::vector<std::string> workspaceIDs;
-  std::transform(
-      runNoBankPairs.begin(), runNoBankPairs.end(),
-      std::back_inserter(workspaceIDs), [](const std::pair<int, size_t> &pair) {
-        return std::to_string(pair.first) + "_" + std::to_string(pair.second);
-      });
+  const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
+  std::vector<std::string> listWidgetLabels;
+  std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+                 std::back_inserter(listWidgetLabels),
+                 [](const std::pair<int, size_t> &pair) {
+                   return listWidgetLabelFromRunAndBankNumber(pair.first,
+                                                              pair.second);
+                 });
   m_view->enableFittingListWidget(true);
   m_view->clearFittingListWidget();
-  std::for_each(workspaceIDs.begin(), workspaceIDs.end(),
-                [&](const std::string &workspaceID) {
-                  m_view->addRunNoItem(workspaceID);
-                });
+  std::for_each(
+      listWidgetLabels.begin(), listWidgetLabels.end(),
+      [&](const std::string &listLabel) { m_view->addRunNoItem(listLabel); });
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -827,7 +818,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     m_view->enableFitAllButton(false);
     // startAsyncFittingWorker
     // doFitting()
-    startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+    // WORK OUT WHAT TO DO HERE
+    // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
@@ -837,7 +829,16 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {
-  const std::string focusedRunNo = m_view->getFittingRunNo();
+  if (!m_view->listWidgetHasSelectedRow()) {
+    m_view->userWarning("No run selected",
+                        "Please select a run to fit from the list");
+    return;
+  }
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  int runNumber;
+  size_t bank;
+  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+  const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
   std::string fittingPeaks = m_view->fittingPeaksData();
 
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
@@ -845,7 +846,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
 
   try {
-    inputChecksBeforeFitting(focusedRunNo, fitPeaksData);
+    inputChecksBeforeFitting(filename, fitPeaksData);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
@@ -857,34 +858,28 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
-                    "single peak fits into workspace '" +
-                        outWSName + "'. This "
-                                    "may take some seconds... \n";
+                 << "single peak fits into workspace '" << outWSName
+                 << "'. This may take some seconds... \n";
 
   m_view->showStatus("Fitting single peaks...");
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
-  // startAsyncFittingWorker
-  // doFitting()
-  std::vector<std::string> focusRunNoVec;
-  focusRunNoVec.push_back(focusedRunNo);
 
-  startAsyncFittingWorker(focusRunNoVec, fitPeaksData);
+  startAsyncFittingWorker(runNumber, bank, fitPeaksData);
 }
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
-    const std::string &focusedRunNo, const std::string &expectedPeaks) {
-  if (focusedRunNo.empty()) {
+    const std::string &focusedRunFilename, const std::string &expectedPeaks) {
+  if (focusedRunFilename.empty()) {
     throw std::invalid_argument(
-        "Focused Run "
-        "cannot be empty and must be a valid directory");
+        "Focused run filename cannot be empty and must be a valid file");
   }
 
-  Poco::File file(focusedRunNo);
+  Poco::File file(focusedRunFilename);
   if (!file.exists()) {
     throw std::invalid_argument("The focused workspace file for single peak "
                                 "fitting could not be found: " +
-                                focusedRunNo);
+                                focusedRunFilename);
   }
 
   if (expectedPeaks.empty()) {
@@ -942,9 +937,9 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
     }
 
     size_t strLength = expectedPeaks.length() - 1;
-    if (expectedPeaks.at(size_t(0)) == ',') {
-      expectedPeaks.erase(size_t(0), 1);
-      strLength -= size_t(1);
+    if (expectedPeaks.at(0) == ',') {
+      expectedPeaks.erase(0, 1);
+      strLength -= 1;
     }
 
     if (expectedPeaks.at(strLength) == ',') {
@@ -957,283 +952,32 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
   return expectedPeaks;
 }
 
-void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
-  const auto bankID = findBankID(wks);
-
-  const std::string units = "none";
-  auto &run = wks->mutableRun();
-
-  std::vector<GSASCalibrationParms> calibParms = currentCalibration();
-  if (calibParms.empty()) {
-    run.addProperty<int>("bankid", 1, units, true);
-    run.addProperty<double>("difc", 18400.0, units, true);
-    run.addProperty<double>("difa", 0.0, units, true);
-    run.addProperty<double>("tzero", 4.0, units, true);
-  } else {
-    GSASCalibrationParms parms(0, 0.0, 0.0, 0.0);
-    for (const auto &p : calibParms) {
-      if (p.bankid == bankID) {
-        parms = p;
-        break;
-      }
-    }
-    if (0 == parms.difc)
-      parms = calibParms.front();
-
-    run.addProperty<int>("bankid", static_cast<int>(parms.bankid), units, true);
-    run.addProperty<double>("difc", parms.difc, units, true);
-    run.addProperty<double>("difa", parms.difa, units, true);
-    run.addProperty<double>("tzero", parms.tzero, units, true);
-  }
-}
-
-void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
+void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
                                          const std::string &expectedPeaks) {
-  g_log.notice() << "EnggDiffraction GUI: starting new fitting with file "
-                 << focusedRunNo << ". This may take a few seconds... \n";
+  g_log.notice() << "EnggDiffraction GUI: starting new fitting with run "
+                 << runNumber << " and bank " << bank
+                 << ". This may take a few seconds... \n";
 
-  MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
 
-  // if the last directory in vector matches the input directory within this
-  // function then clear the vector
-  if (!g_multi_run_directories.empty()) {
-    auto lastDir = g_multi_run_directories.back() == focusedRunNo;
-    if (lastDir) {
-      m_view->enableFitAllButton(false);
-      g_fitting_runno_counter = 0;
-    }
-  }
-
   // load the focused workspace file to perform single peak fits
-  runLoadAlg(focusedRunNo, focusedWS);
+
   // apply calibration to the focused workspace
-  setDifcTzero(focusedWS);
+  m_model->setDifcTzero(runNumber, bank, currentCalibration());
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
-  auto enggFitPeaks =
-      Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
-  const std::string focusedFitPeaksTableName =
-      "engggui_fitting_fitpeaks_params";
+  m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
 
-  // delete existing table workspace to avoid confusion
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  if (ADS.doesExist(focusedFitPeaksTableName)) {
-    ADS.remove(focusedFitPeaksTableName);
-  }
+  const auto outFilename = m_view->getCurrentInstrument() +
+                           std::to_string(runNumber) +
+                           "_Single_Peak_Fitting.csv";
+  auto saveDirectory = outFilesUserDir("SinglePeakFitting");
+  saveDirectory.append(outFilename);
+  m_model->saveDiffFittingAscii(runNumber, bank, saveDirectory.toString());
 
-  try {
-    enggFitPeaks->initialize();
-    enggFitPeaks->setProperty("InputWorkspace", focusedWS);
-    if (!expectedPeaks.empty()) {
-      enggFitPeaks->setProperty("expectedPeaks", expectedPeaks);
-    }
-    enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
-    enggFitPeaks->execute();
-
-  } catch (std::exception) {
-    throw std::runtime_error(
-        "Could not run the algorithm EnggFitPeaks successfully.");
-  }
-
-  auto fPath = focusedRunNo;
-  runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
-  runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
-}
-
-void EnggDiffFittingPresenter::runLoadAlg(
-    const std::string &focusedFile,
-    Mantid::API::MatrixWorkspace_sptr &focusedWS) {
-  // load the focused workspace file to perform single peak fits
-  try {
-    auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", focusedFile);
-    load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-    load->execute();
-
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading focused data. "
-           "Could not run the algorithm Load successfully for the Fit "
-           "peaks (file name: " +
-               focusedFile + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    return;
-  }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
-    runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
-                               std::string &filePath) {
-
-  // split to get run number and bank
-  auto fileSplit = splitFittingDirectory(filePath);
-  // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
-  if (fileSplit.size() == 1) {
-    // The user probably has input just `ENGINX012345.nxs`
-    throw std::invalid_argument(
-        "Could not save fitting ASCII as"
-        " file name does not contain any '_' characters"
-        " - expected file name is "
-        "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs \n");
-  }
-
-  auto runNumber = fileSplit[1];
-
-  // if a normal focused file assign bank number otherwise 'customised'
-  std::string bank = "customised";
-  if (fileSplit.size() == 5)
-    bank = fileSplit[4];
-
-  // generate file name
-  std::string fileName;
-  if (g_multi_run.size() > 1) {
-    fileName = m_view->getCurrentInstrument() + "_" + g_multi_run.front() +
-               "-" + g_multi_run.back() + "_Single_Peak_Fitting.csv";
-  } else {
-    fileName = m_view->getCurrentInstrument() + "_" + runNumber +
-               "_Single_Peak_Fitting.csv";
-  }
-
-  // separate folder for Single Peak Fitting output;
-  auto dir = outFilesUserDir("SinglePeakFitting");
-  dir.append(fileName);
-
-  // save the results
-  // run the algorithm SaveDiffFittingAscii with output of EnggFitPeaks
-  auto saveDiffFit =
-      Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
-
-  saveDiffFit->initialize();
-  saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
-  saveDiffFit->setProperty("Filename", dir.toString());
-  saveDiffFit->setProperty("RunNumber", runNumber);
-  saveDiffFit->setProperty("Bank", bank);
-  saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
-  saveDiffFit->execute();
-}
-
-void EnggDiffFittingPresenter::runFittingAlgs(
-    std::string focusedFitPeaksTableName, std::string focusedWSName) {
-  // retrieve the table with parameters
-  auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  if (!ADS.doesExist(focusedFitPeaksTableName)) {
-    // convert units so valid dSpacing peaks can still be added to gui
-    if (ADS.doesExist(g_focusedFittingWSName)) {
-      convertUnits(g_focusedFittingWSName);
-    }
-
-    throw std::invalid_argument(
-        focusedFitPeaksTableName +
-        " workspace could not be found. "
-        "Please check the log messages for more details.");
-  }
-
-  auto table = ADS.retrieveWS<ITableWorkspace>(focusedFitPeaksTableName);
-  size_t rowCount = table->rowCount();
-  const std::string single_peak_out_WS = "engggui_fitting_single_peaks";
-  std::string currentPeakOutWS;
-
-  std::string Bk2BkExpFunctionStr;
-  std::string startX = "";
-  std::string endX = "";
-  for (size_t i = 0; i < rowCount; i++) {
-    // get the functionStrFactory to generate the string for function
-    // property, returns the string with i row from table workspace
-    // table is just passed so it works?
-    Bk2BkExpFunctionStr =
-        functionStrFactory(table, focusedFitPeaksTableName, i, startX, endX);
-
-    g_log.debug() << "startX: " + startX + " . endX: " + endX << '\n';
-
-    currentPeakOutWS = "__engggui_fitting_single_peaks" + std::to_string(i);
-
-    // run EvaluateFunction algorithm with focused workspace to produce
-    // the correct fit function
-    // focusedWSName is not going to change as its always going to be from
-    // single workspace
-    runEvaluateFunctionAlg(Bk2BkExpFunctionStr, focusedWSName, currentPeakOutWS,
-                           startX, endX);
-
-    // crop workspace so only the correct workspace index is plotted
-    runCropWorkspaceAlg(currentPeakOutWS);
-
-    // apply the same binning as a focused workspace
-    runRebinToWorkspaceAlg(currentPeakOutWS);
-
-    // if the first peak
-    if (i == size_t(0)) {
-
-      // create a workspace clone of bank focus file
-      // this will import all information of the previous file
-      runCloneWorkspaceAlg(focusedWSName, single_peak_out_WS);
-
-      setDataToClonedWS(currentPeakOutWS, single_peak_out_WS);
-      ADS.remove(currentPeakOutWS);
-    } else {
-      const std::string currentPeakClonedWS =
-          "__engggui_fitting_cloned_peaks" + std::to_string(i);
-
-      runCloneWorkspaceAlg(focusedWSName, currentPeakClonedWS);
-
-      setDataToClonedWS(currentPeakOutWS, currentPeakClonedWS);
-
-      // append all peaks in to single workspace & remove
-      runAppendSpectraAlg(single_peak_out_WS, currentPeakClonedWS);
-      ADS.remove(currentPeakOutWS);
-      ADS.remove(currentPeakClonedWS);
-    }
-  }
-
-  convertUnits(g_focusedFittingWSName);
-
-  // convert units for both workspaces to dSpacing from ToF
-  if (rowCount > size_t(0)) {
-    auto swks = ADS.retrieveWS<MatrixWorkspace>(single_peak_out_WS);
-    setDifcTzero(swks);
-    convertUnits(single_peak_out_WS);
-  } else {
-    g_log.error() << "The engggui_fitting_fitpeaks_params table produced is"
-                     "empty. Please try again!\n";
-  }
-
+  m_model->createFittedPeaksWS(runNumber, bank);
   m_fittingFinishedOK = true;
-}
-
-std::string EnggDiffFittingPresenter::functionStrFactory(
-    Mantid::API::ITableWorkspace_sptr &paramTableWS, std::string tableName,
-    size_t row, std::string &startX, std::string &endX) {
-  const double windowLeft = 9;
-  const double windowRight = 12;
-
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  paramTableWS = ADS.retrieveWS<ITableWorkspace>(tableName);
-
-  double A0 = paramTableWS->cell<double>(row, size_t(1));
-  double A1 = paramTableWS->cell<double>(row, size_t(3));
-  double I = paramTableWS->cell<double>(row, size_t(13));
-  double A = paramTableWS->cell<double>(row, size_t(7));
-  double B = paramTableWS->cell<double>(row, size_t(9));
-  double X0 = paramTableWS->cell<double>(row, size_t(5));
-  double S = paramTableWS->cell<double>(row, size_t(11));
-
-  startX = boost::lexical_cast<std::string>(X0 - (windowLeft * S));
-  endX = boost::lexical_cast<std::string>(X0 + (windowRight * S));
-
-  std::string functionStr =
-      "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
-      ",A1=" + boost::lexical_cast<std::string>(A1) +
-      ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
-      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
-      boost::lexical_cast<std::string>(B) + ",X0=" +
-      boost::lexical_cast<std::string>(X0) + ",S=" +
-      boost::lexical_cast<std::string>(S);
-
-  return functionStr;
 }
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
@@ -1349,246 +1093,6 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
     auto expPeaks = m_view->fittingPeaksData();
     outfile << expPeaks;
   }
-}
-
-void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
-    const std::string &bk2BkExpFunction, const std::string &InputName,
-    const std::string &OutputName, const std::string &startX,
-    const std::string &endX) {
-
-  auto evalFunc =
-      Mantid::API::AlgorithmManager::Instance().create("EvaluateFunction");
-  g_log.notice() << "EvaluateFunction algorithm has started\n";
-  try {
-    evalFunc->initialize();
-    evalFunc->setProperty("Function", bk2BkExpFunction);
-    evalFunc->setProperty("InputWorkspace", InputName);
-    evalFunc->setProperty("OutputWorkspace", OutputName);
-    evalFunc->setProperty("StartX", startX);
-    evalFunc->setProperty("EndX", endX);
-    evalFunc->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm EvaluateFunction, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
-  auto cropWS =
-      Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  try {
-    cropWS->initialize();
-    cropWS->setProperty("InputWorkspace", workspaceName);
-    cropWS->setProperty("OutputWorkspace", workspaceName);
-    cropWS->setProperty("StartWorkspaceIndex", 1);
-    cropWS->setProperty("EndWorkspaceIndex", 1);
-    cropWS->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm CropWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
-                                                   std::string workspace2Name) {
-  auto appendSpec =
-      Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-  try {
-    appendSpec->initialize();
-    appendSpec->setProperty("InputWorkspace1", workspace1Name);
-    appendSpec->setProperty("InputWorkspace2", workspace2Name);
-    appendSpec->setProperty("OutputWorkspace", workspace1Name);
-    appendSpec->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm AppendWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
-    std::string workspaceName) {
-  auto RebinToWs =
-      Mantid::API::AlgorithmManager::Instance().create("RebinToWorkspace");
-  try {
-    RebinToWs->initialize();
-    RebinToWs->setProperty("WorkspaceToRebin", workspaceName);
-    RebinToWs->setProperty("WorkspaceToMatch", g_focusedFittingWSName);
-    RebinToWs->setProperty("OutputWorkspace", workspaceName);
-    RebinToWs->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm RebinToWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-/**
- * Converts from time-of-flight to d-spacing
- *
- * @param workspaceName name of the workspace to convert (in place)
- */
-void EnggDiffFittingPresenter::convertUnits(std::string workspaceName) {
-  // Here using the GSAS (DIFC, TZERO) parameters seems preferred
-  if (g_useAlignDetectors) {
-    runAlignDetectorsAlg(workspaceName);
-  } else {
-    runConvertUnitsAlg(workspaceName);
-  }
-}
-
-void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
-                                            double &difc, double &difa,
-                                            double &tzero) const {
-
-  try {
-    const auto run = wks->run();
-    // long, step by step way:
-    // auto propC = run.getLogData("difc");
-    // auto doubleC =
-    //     dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(propC);
-    // if (!doubleC)
-    //   throw Mantid::Kernel::Exception::NotFoundError(
-    //       "Required difc property not found in workspace.", "difc");
-    difc = run.getPropertyValueAsType<double>("difc");
-    difa = run.getPropertyValueAsType<double>("difa");
-    tzero = run.getPropertyValueAsType<double>("tzero");
-
-  } catch (std::runtime_error &rexc) {
-    // fallback to something reasonable / approximate values so
-    // the fitting tab can work minimally
-    difa = tzero = 0.0;
-    difc = 18400;
-    g_log.warning()
-        << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
-        << wks->getName() << ". Using default, which is not adjusted for this "
-                             "workspace/run: DIFA: " << difa
-        << ", DIFC: " << difc << ", TZERO: " << tzero
-        << ". Error details: " << rexc.what() << '\n';
-  }
-}
-
-/**
- * Converts units from time-of-flight to d-spacing, using
- * AlignDetectors.  This is the GSAS-style alternative to using the
- * algorithm ConvertUnits.  Needs to make sure that the workspace is
- * not of distribution type (and use the algorithm
- * ConvertFromDistribution if it is). This is a requirement of
- * AlignDetectors.
- *
- * @param workspaceName name of the workspace to convert
- */
-void EnggDiffFittingPresenter::runAlignDetectorsAlg(std::string workspaceName) {
-  const std::string targetUnit = "dSpacing";
-  const std::string algName = "AlignDetectors";
-
-  const auto &ADS = Mantid::API::AnalysisDataService::Instance();
-  auto inputWS = ADS.retrieveWS<MatrixWorkspace>(workspaceName);
-  if (!inputWS)
-    return;
-
-  double difc, difa, tzero;
-  getDifcTzero(inputWS, difc, difa, tzero);
-
-  // create a table with the GSAS calibration parameters
-  ITableWorkspace_sptr difcTable;
-  try {
-    difcTable = Mantid::API::WorkspaceFactory::Instance().createTable();
-    if (!difcTable) {
-      return;
-    }
-    difcTable->addColumn("int", "detid");
-    difcTable->addColumn("double", "difc");
-    difcTable->addColumn("double", "difa");
-    difcTable->addColumn("double", "tzero");
-    TableRow row = difcTable->appendRow();
-    auto &spec = inputWS->getSpectrum(0);
-    Mantid::detid_t detID = *(spec.getDetectorIDs().cbegin());
-
-    row << detID << difc << difa << tzero;
-  } catch (std::runtime_error &rexc) {
-    g_log.error() << "Failed to prepare calibration table input to convert "
-                     "units with the algorithm " << algName
-                  << ". Error details: " << rexc.what() << '\n';
-    return;
-  }
-
-  // AlignDetectors doesn't take distribution workspaces (it enforces
-  // RawCountValidator)
-  if (inputWS->isDistribution()) {
-    try {
-      auto alg = Mantid::API::AlgorithmManager::Instance().create(
-          "ConvertFromDistribution");
-      alg->initialize();
-      alg->setProperty("Workspace", workspaceName);
-      alg->execute();
-    } catch (std::runtime_error &rexc) {
-      g_log.error() << "Could not run ConvertFromDistribution. Error: "
-                    << rexc.what() << '\n';
-      return;
-    }
-  }
-
-  try {
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(algName);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", workspaceName);
-    alg->setProperty("OutputWorkspace", workspaceName);
-    alg->setProperty("CalibrationWorkspace", difcTable);
-    alg->execute();
-  } catch (std::runtime_error &rexc) {
-    g_log.error() << "Could not run the algorithm " << algName
-                  << " to convert workspace to " << targetUnit
-                  << ", Error details: " + static_cast<std::string>(rexc.what())
-                  << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runConvertUnitsAlg(std::string workspaceName) {
-  const std::string targetUnit = "dSpacing";
-  auto ConvertUnits =
-      Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
-  try {
-    ConvertUnits->initialize();
-    ConvertUnits->setProperty("InputWorkspace", workspaceName);
-    ConvertUnits->setProperty("OutputWorkspace", workspaceName);
-    ConvertUnits->setProperty("Target", targetUnit);
-    ConvertUnits->setPropertyValue("EMode", "Elastic");
-    ConvertUnits->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm ConvertUnits to convert "
-                     "workspace to " << targetUnit
-                  << ", Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::runCloneWorkspaceAlg(
-    std::string inputWorkspace, const std::string &outputWorkspace) {
-
-  auto cloneWorkspace =
-      Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
-  try {
-    cloneWorkspace->initialize();
-    cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
-    cloneWorkspace->setProperty("OutputWorkspace", outputWorkspace);
-    cloneWorkspace->execute();
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Could not run the algorithm CreateWorkspace, "
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
-  }
-}
-
-void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
-                                                 const std::string &cloned_WS) {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
-  auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
-  currentClonedWS->mutableY(0) = currentPeakWS->y(0);
-  currentClonedWS->mutableE(0) = currentPeakWS->e(0);
 }
 
 void EnggDiffFittingPresenter::setBankItems(
@@ -1759,11 +1263,9 @@ void EnggDiffFittingPresenter::plotFocusedFile(
 
   } catch (std::runtime_error &re) {
     g_log.error()
-        << "Unable to plot focused " + g_focusedFittingWSName +
-               "workspace on the canvas. "
-               "Error description: " +
-               re.what() +
-               " Please check also the previous log messages for details.";
+        << "Unable to plot focused workspace on the canvas. "
+        << "Error description: " << re.what()
+        << " Please check also the previous log messages for details.";
 
     m_view->showStatus("Error while plotting the peaks fitted");
     throw;
@@ -1771,30 +1273,23 @@ void EnggDiffFittingPresenter::plotFocusedFile(
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  std::string singlePeaksWs = "engggui_fitting_single_peaks";
-
-  if (!ADS.doesExist(singlePeaksWs) && !ADS.doesExist(g_focusedFittingWSName)) {
-    g_log.error() << "Fitting results could not be plotted as there is no " +
-                         singlePeaksWs + " or " + g_focusedFittingWSName +
-                         " workspace found.\n";
-    m_view->showStatus("Error while fitting peaks");
-    return;
-  }
-
   try {
 
     // detaches previous plots from canvas
     m_view->resetCanvas();
 
+    const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+    int runNumber;
+    size_t bank;
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+    const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
+
     // plots focused workspace
-    throw new std::runtime_error("Plotting fit not yet implemented");
-    // TODO: sort out what to do here
-    // plotFocusedFile(m_fittingFinishedOK);
+    plotFocusedFile(m_fittingFinishedOK, ws);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
-      auto singlePeaksWS = ADS.retrieveWS<MatrixWorkspace>(singlePeaksWs);
+      auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true);
       m_view->showStatus("Peaks fitted successfully");

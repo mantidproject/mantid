@@ -24,6 +24,7 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
 
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
   ${SLICEVIEWER_INC}/MantidQtWidgets/SliceViewer/LineViewer.h
