@@ -33,8 +33,12 @@ public:
 
 private:
   // not async at all
-  void startAsyncFittingWorker(const int runNumber, const size_t bank,
+  void startAsyncFittingWorker(const std::vector<std::pair<int, size_t>> 
+                                   &runNumberBankPairs,
                                const std::string &ExpectedPeaks) override {
+    assert(runNumberBankPairs.size() == 1);
+    const auto runNumber = runNumberBankPairs[0].first;
+    const auto bank = runNumberBankPairs[0].second;
     doFitting(runNumber, bank, ExpectedPeaks);
     fittingFinished();
   }

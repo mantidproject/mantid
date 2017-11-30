@@ -178,12 +178,13 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
-    const int runNumber, const size_t bank, const std::string &expectedPeaks) {
+    const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
+    const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffFittingWorker *worker =
-      new EnggDiffFittingWorker(this, runNumber, bank, expectedPeaks);
+      new EnggDiffFittingWorker(this, runNumberBankPairs, expectedPeaks);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(fitting()));
@@ -220,15 +221,13 @@ void EnggDiffFittingPresenter::fittingFinished() {
 
     m_view->showStatus("Single peak fitting process finished. Ready");
 
+    if (!m_view->listWidgetHasSelectedRow()) {
+      m_view->setFittingListWidgetCurrentRow(0);
+    }
+
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
-      const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-      int runNumber;
-      size_t bank;
-      std::tie(runNumber, bank) =
-          runAndBankNumberFromListWidgetLabel(listLabel);
-
       plotFitPeaksCurves();
 
     } catch (std::runtime_error &re) {
@@ -259,17 +258,20 @@ void EnggDiffFittingPresenter::fittingFinished() {
         "Single peak fitting process did not complete successfully");
   }
   // enable the GUI
+  m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
   m_view->enableCalibrateFocusFitUserActions(true);
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
   const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-  int runNumber;
-  size_t bank;
-  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
-
-  const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-  plotFocusedFile(false, ws);
+  if (listLabel) {
+    int runNumber;
+    size_t bank;
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
+    
+    const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+    plotFocusedFile(false, ws);
+  }
 }
 
 void EnggDiffFittingPresenter::processStart() {}
@@ -307,6 +309,8 @@ void EnggDiffFittingPresenter::processLoad() {
   std::for_each(
       listWidgetLabels.begin(), listWidgetLabels.end(),
       [&](const std::string &listLabel) { m_view->addRunNoItem(listLabel); });
+
+  m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -340,9 +344,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   if (!workspaceLabels.empty()) {
 
     for (const auto &workspaceLabel: workspaceLabels) {
-      int runNumber;
-      size_t bank;
-      std::tie(runNumber, bank) = workspaceLabel;
+      const int runNumber = workspaceLabel.first;
+      const size_t bank = workspaceLabel.second;
       try {
         validateFittingInputs(m_model->getWorkspaceFilename(runNumber, bank),
                               normalisedPeakCentres);
@@ -353,39 +356,35 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
       }
     }
 
-    const std::string outWSName = "engggui_fitting_fit_peak_ws";
     g_log.notice() << "EnggDiffraction GUI: starting new multi-run "
-                      "single peak fits into workspace '" +
-                          outWSName + "'. This "
-                                      "may take some seconds... \n";
-
+                   << "single peak fits. This may take some seconds...\n";
     m_view->showStatus("Fitting multi-run single peaks...");
 
+    
     // disable GUI to avoid any double threads
     m_view->enableCalibrateFocusFitUserActions(false);
     m_view->enableFitAllButton(false);
 
-    // doFitting()
-    // WORK OUT WHAT TO DO HERE
-    // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+    startAsyncFittingWorker(workspaceLabels, normalisedPeakCentres);
 
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
-                        "Invalid files have been selected for Fit All process");
-    m_view->enableFitAllButton(false);
+                        "No runs were loaded for fitting");
   }
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {
-  if (!m_view->listWidgetHasSelectedRow()) {
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+
+  if (!listLabel) {
     m_view->userWarning("No run selected",
                         "Please select a run to fit from the list");
     return;
   }
-  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+
   int runNumber;
   size_t bank;
-  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+  std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
   std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
   const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
@@ -414,7 +413,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
 
-  startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
+  startAsyncFittingWorker({std::make_pair(runNumber, bank)}, normalisedPeakCentres);
 }
 
 void EnggDiffFittingPresenter::validateFittingInputs(
@@ -640,9 +639,14 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     m_view->resetCanvas();
 
     const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+    if (!listLabel) {
+      m_view->userWarning("Invalid run number or bank",
+                          "Tried to plot a focused file which does not exist");
+      return;
+    }
     int runNumber;
     size_t bank;
-    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
     const auto ws = m_model->getAlignedWorkspace(runNumber, bank);
 
     // plots focused workspace

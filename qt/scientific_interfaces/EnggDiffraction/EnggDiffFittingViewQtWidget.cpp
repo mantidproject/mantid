@@ -93,13 +93,6 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
           SLOT(loadClicked()));
 
-  connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
-
-  connect(this, SIGNAL(setBank()), this, SLOT(listViewFittingRun()));
-
-  connect(m_ui.listWidget_fitting_run_num, SIGNAL(itemSelectionChanged()), this,
-          SLOT(listViewFittingRun()));
-
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
 
@@ -244,18 +237,6 @@ void EnggDiffFittingViewQtWidget::browseClicked() {
 
 void EnggDiffFittingViewQtWidget::saveClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
-}
-
-void EnggDiffFittingViewQtWidget::listViewFittingRun() {
-
-  if (m_fittingMutliRunMode) {
-    auto listView = m_ui.listWidget_fitting_run_num;
-    auto currentRow = listView->currentRow();
-    auto item = listView->item(currentRow);
-    QString itemText = item->text();
-
-    setFocusedFileNames(itemText.toStdString());
-  }
 }
 
 void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
@@ -484,9 +465,12 @@ int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
   return m_ui.listWidget_fitting_run_num->currentRow();
 }
 
-std::string
+boost::optional<std::string>
 EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
-  return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
+  if (listWidgetHasSelectedRow()) {
+    return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
+  }
+  return boost::none;;
 }
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {

@@ -101,7 +101,8 @@ private:
   void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const int runNumber, const size_t bank,
+  virtual void startAsyncFittingWorker(const std::vector<std::pair<int, size_t>>
+                                          &runNumberBankPairs,
                                        const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;

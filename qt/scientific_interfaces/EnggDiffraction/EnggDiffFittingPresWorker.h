@@ -41,16 +41,21 @@ class EnggDiffFittingWorker : public QObject {
 
 public:
   // for fitting (single peak fits)
-  EnggDiffFittingWorker(EnggDiffFittingPresenter *pres, const int runNumber,
-                        const size_t bank, const std::string &ExpectedPeaks)
-      : m_pres(pres), m_runNumber(runNumber), m_bank(bank),
-        m_expectedPeaks(ExpectedPeaks) {}
+  EnggDiffFittingWorker(EnggDiffFittingPresenter *pres, 
+                        const std::vector<std::pair<int, size_t>> runNumberBankPairs,
+                        const std::string &expectedPeaks)
+    : m_pres(pres), m_runNumberBankPairs(runNumberBankPairs),
+    m_expectedPeaks(expectedPeaks) {}
 
 private slots:
 
   void fitting() {
     try {
-      m_pres->doFitting(m_runNumber, m_bank, m_expectedPeaks);
+      for (const auto &runNumberBankPair : m_runNumberBankPairs) {
+        const int runNumber = runNumberBankPair.first;
+        const size_t bank = runNumberBankPair.second;
+        m_pres->doFitting(runNumber, bank, m_expectedPeaks);
+      }
     } catch (std::exception &ex) {
       Mantid::Kernel::Logger log("EngineeringDiffractionFitting");
       log.error(ex.what());
@@ -65,8 +70,7 @@ private:
   EnggDiffFittingPresenter *m_pres;
 
   /// sample run to process
-  const int m_runNumber;
-  const size_t m_bank;
+  const std::vector<std::pair<int, size_t>> m_runNumberBankPairs;
   // parameters for fitting, list of peaks
   const std::string m_expectedPeaks;
 };

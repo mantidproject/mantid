@@ -101,7 +101,7 @@ public:
 
   int getFittingListWidgetCurrentRow() const override;
 
-  std::string getFittingListWidgetCurrentValue() const override;
+  boost::optional<std::string> getFittingListWidgetCurrentValue() const override;
 
   bool listWidgetHasSelectedRow() const override;
 
@@ -180,7 +180,6 @@ private slots:
   void saveClicked();
   void plotSeparateWindow();
   void showToolTipHelp();
-  void listViewFittingRun();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
 
 private:

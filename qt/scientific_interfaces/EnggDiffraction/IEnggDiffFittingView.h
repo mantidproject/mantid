@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 class QwtData;
 
@@ -154,7 +155,7 @@ public:
   /**
   * @return The text on the current selected row of the list widget
   */
-  virtual std::string getFittingListWidgetCurrentValue() const = 0;
+  virtual boost::optional<std::string> getFittingListWidgetCurrentValue() const = 0;
 
   /**
   * @return Whether the list widget currently has an item selected
