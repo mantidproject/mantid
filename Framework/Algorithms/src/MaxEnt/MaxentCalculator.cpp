@@ -302,31 +302,27 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 * Calculates chi-square
 */
 void MaxentCalculator::calculateChisq() {
-
   if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
     throw std::runtime_error("Cannot calculate chi-square");
   }
-
-  // Calculate
-  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
   m_chisq = calculateChiSquared(m_dataCalc);
 }
 
+/// Calculate
+/// ChiSq = 1 / N sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
 double
 MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
   size_t npoints = m_data.size();
   auto dpoints = static_cast<double>(npoints);
 
-  // Calculate
-  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
   double chisq = 0;
   for (size_t i = 0; i < npoints; i++) {
     if (m_errors[i] != 0.0) {
       double term = (m_data[i] - data[i]) / m_errors[i];
-      chisq += term * term / dpoints;
+      chisq += term * term;
     }
   }
-  return chisq;
+  return chisq / dpoints;
 }
 
 } // namespace Algorithms
