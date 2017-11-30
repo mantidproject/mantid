@@ -77,6 +77,7 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
                               orientations used during the initial scan.
   @param  fixAll              Fix the lattice parameters and do not optimise
                               the UB matrix.
+  @param  iterations          Number of refinements of UB
 
   @return  This will return the sum of the squares of the residual errors.
 
@@ -451,6 +452,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               from integer values for a peak to be indexed.
   @param  degrees_per_step    The number of degrees between different
                               orientations used during the initial scan.
+  @param  iterations          Number of refinements of UB
 
   @return  This will return the sum of the squares of the residual errors.
 
