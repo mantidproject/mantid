@@ -9,7 +9,7 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 
