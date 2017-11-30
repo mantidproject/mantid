@@ -43,7 +43,7 @@ public:
   // for fitting (single peak fits)
   EnggDiffFittingWorker(
       EnggDiffFittingPresenter *pres,
-      const std::vector<std::pair<int, size_t>> runNumberBankPairs,
+      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
       const std::string &expectedPeaks)
       : m_pres(pres), m_runNumberBankPairs(runNumberBankPairs),
         m_expectedPeaks(expectedPeaks) {}
