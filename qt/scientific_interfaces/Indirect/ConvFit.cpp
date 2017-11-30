@@ -90,21 +90,14 @@ void ConvFit::setup() {
   initFABADAOptions();
 
   // Background type
-  m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
-  m_properties["BGA0"] = m_dblManager->addProperty("A0");
-  m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
-  m_properties["BGA1"] = m_dblManager->addProperty("A1");
-  m_dblManager->setDecimals(m_properties["BGA1"], NUM_DECIMALS);
-  m_properties["LinearBackground"]->addSubProperty(m_properties["BGA0"]);
-  m_properties["LinearBackground"]->addSubProperty(m_properties["BGA1"]);
-  m_cfTree->addProperty(m_properties["LinearBackground"]);
+  m_properties["Background"] = createFunctionProperty("Background");
+  m_cfTree->addProperty(m_properties["Background"]);
 
   // Delta Function
-  m_properties["Delta Function"] = m_grpManager->addProperty("Delta Function");
+  m_properties["Delta Function"] =
+      createFunctionProperty("Delta Function", false);
   m_properties["UseDeltaFunc"] = m_blnManager->addProperty("Use");
   m_properties["Delta Function"]->addSubProperty(m_properties["UseDeltaFunc"]);
-  m_properties["Delta Function"] =
-      createFunctionProperty(m_properties["Delta Function"], false);
   m_cfTree->addProperty(m_properties["Delta Function"]);
 
   // Fit functions
@@ -413,8 +406,8 @@ void ConvFit::algorithmComplete(bool error) {
 
   const std::string paramWsName = outputPrefix + "_Parameters";
   QHash<QString, QString> backgroundMap;
-  backgroundMap["BGA0"] = "f0.A0";
-  backgroundMap["BGA1"] = "f0.A1";
+  backgroundMap["Background.A0"] = "f0.A0";
+  backgroundMap["Background.A1"] = "f0.A1";
   IndirectFitAnalysisTab::fitAlgorithmComplete(paramWsName, backgroundMap);
 
   m_uiForm.pbSave->setEnabled(true);
@@ -653,19 +646,24 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres,
   // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   const int bgType = m_uiForm.cbBackground->currentIndex();
 
-  if (bgType == 0 || !m_properties["BGA0"]->subProperties().isEmpty()) {
-    comp->tie("f0.A0", m_properties["BGA0"]->valueText().toStdString());
+  if (bgType == 0 ||
+      !m_properties["Background.A0"]->subProperties().isEmpty()) {
+    comp->tie("f0.A0",
+              m_properties["Background.A1"]->valueText().toStdString());
   } else {
-    func->setParameter("A0", m_properties["BGA0"]->valueText().toDouble());
+    func->setParameter("A0",
+                       m_properties["Background.A0"]->valueText().toDouble());
   }
 
   if (bgType != 2) {
     comp->tie("f0.A1", "0.0");
   } else {
-    if (!m_properties["BGA1"]->subProperties().isEmpty()) {
-      comp->tie("f0.A1", m_properties["BGA1"]->valueText().toStdString());
+    if (!m_properties["Background.A1"]->subProperties().isEmpty()) {
+      comp->tie("f0.A1",
+                m_properties["Background.A1"]->valueText().toStdString());
     } else {
-      func->setParameter("A1", m_properties["BGA1"]->valueText().toDouble());
+      func->setParameter("A1",
+                         m_properties["Background.A1"]->valueText().toDouble());
     }
   }
 
@@ -998,9 +996,10 @@ void ConvFit::typeSelection(int index) {
  */
 void ConvFit::bgTypeSelection(int index) {
   if (index == 2) {
-    m_properties["LinearBackground"]->addSubProperty(m_properties["BGA1"]);
+    m_properties["Background"]->addSubProperty(m_properties["Background.A0"]);
   } else {
-    m_properties["LinearBackground"]->removeSubProperty(m_properties["BGA1"]);
+    m_properties["Background"]->removeSubProperty(
+        m_properties["Background.A1"]);
   }
 }
 
@@ -1156,7 +1155,7 @@ void ConvFit::hwhmChanged(double val) {
 }
 
 void ConvFit::backgLevel(double val) {
-  m_dblManager->setValue(m_properties["BGA0"], val);
+  m_dblManager->setValue(m_properties["Background.A0"], val);
 }
 
 void ConvFit::updateRS(QtProperty *prop, double val) {
@@ -1168,7 +1167,7 @@ void ConvFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMinimum(val);
   } else if (prop == m_properties["EndX"]) {
     fitRangeSelector->setMaximum(val);
-  } else if (prop == m_properties["BGA0"]) {
+  } else if (prop == m_properties["Background.A0"]) {
     backRangeSelector->setMinimum(val);
   } else if (prop == m_properties["InstrumentResolution"]) {
     hwhmUpdateRS(val);
@@ -1363,6 +1362,8 @@ IFunction_sptr ConvFit::getFunction(const QString &functionName) const {
     return IndirectFitAnalysisTab::getFunction("Lorentzian");
   else if (functionName == "Delta Function")
     return IndirectFitAnalysisTab::getFunction("DeltaFunction");
+  else if (functionName == "Background")
+    return IndirectFitAnalysisTab::getFunction("LinearBackground");
   else
     return IndirectFitAnalysisTab::getFunction(functionName);
 }
