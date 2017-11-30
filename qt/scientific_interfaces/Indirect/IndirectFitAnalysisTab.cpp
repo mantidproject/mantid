@@ -187,7 +187,6 @@ IndirectFitAnalysisTab::combineParameterValues(
  *                will be extracted for.
  */
 void IndirectFitAnalysisTab::updateProperties(int specNo) {
-  // Disable guess plotting while updating properties
   disablePlotGuess();
 
   size_t index = boost::numeric_cast<size_t>(specNo);
@@ -196,10 +195,16 @@ void IndirectFitAnalysisTab::updateProperties(int specNo) {
   for (const auto &propertyName : m_properties.keys())
     updateProperty(propertyName, index);
 
-  // Re-enable guess plotting
   enablePlotGuess();
 }
 
+/*
+ * Updates the value of the property, with the specified name, in the
+ * property table of this fit analysis tab.
+ *
+ * @param propertyName  The name of the property to update.
+ * @param index         The spectrum number selected in this tab.
+ */
 void IndirectFitAnalysisTab::updateProperty(const QString &propertyName,
                                             const size_t &index) {
   // Check whether values for this property were found in the
@@ -223,6 +228,9 @@ void IndirectFitAnalysisTab::updateProperty(const QString &propertyName,
                            m_defaultPropertyValues[functionAndParameter[1]]);
 }
 
+/*
+ * Clears the property tree of all functions.
+ */
 void IndirectFitAnalysisTab::clearFunctionProperties() {
   for (const auto &propertyFunction : m_propertyFunctions)
     m_propertyTree->removeProperty(m_properties[propertyFunction]);
@@ -439,6 +447,14 @@ void IndirectFitAnalysisTab::fillPlotTypeComboBox(QComboBox *comboBox) {
   comboBox->addItems(parameters.toList());
 }
 
+/*
+ * Updates the preview plots in this fit analysis tab, given the name
+ * of the output workspace from a fit.
+ *
+ * @param fitPreviewPlot  The preview plot widget in which to plot the fit.
+ * @param diffPreviewPlot The preview plot widget in which to plot the
+ *                        difference between the fit and sample data.
+ */
 void IndirectFitAnalysisTab::updatePlot(
     const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
