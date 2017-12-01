@@ -87,6 +87,7 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
+  size_t indexOf(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::V3D position(const std::pair<size_t, size_t> index) const;
@@ -111,6 +112,7 @@ public:
   size_t sample() const;
   double l1() const;
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
+  std::string name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
   size_t root();

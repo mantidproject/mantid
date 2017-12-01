@@ -104,11 +104,12 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
+  auto names = boost::make_shared<std::vector<std::string>>(1);
   auto isStructuredBank = boost::make_shared<std::vector<bool>>(1, false);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isStructuredBank, -1,
-      -1);
+      parentIndices, positions, rotations, scaleFactors, isStructuredBank,
+      names, -1, -1);
 }
 }
 
@@ -146,10 +147,12 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto names = boost::make_shared<std::vector<std::string>>(2);
     auto isRectBank = boost::make_shared<std::vector<bool>>(2);
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, scaleFactors, isRectBank, -1, -1);
+        parentIndices, positions, rotations, scaleFactors, isRectBank, names,
+        -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
