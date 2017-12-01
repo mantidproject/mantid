@@ -142,11 +142,11 @@ void JumpFit::fitAlgDone(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 
   // Get output workspace name
-  std::string outWsName = m_baseName + "_Workspace";
+  const auto outWsName = m_baseName + "_Workspace";
   IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
   // Update parameters in UI
-  std::string paramTableName = m_baseName + "_Parameters";
+  const auto paramTableName = m_baseName + "_Parameters";
 
   ITableWorkspace_sptr paramTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -244,7 +244,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
     if (!axis)
       return;
 
-    std::string title = axis->label(i);
+    const auto title = axis->label(i);
 
     // check if the axis labels indicate this spectrum is width data
     size_t qLinesWidthIndex = title.find(".Width");
@@ -283,7 +283,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param text :: The name spectrum index to plot
  */
 void JumpFit::handleWidthChange(const QString &text) {
-  QString sampleName = (m_uiForm.dsSample->getCurrentDataName() + "_HWHM");
+  const auto sampleName = (m_uiForm.dsSample->getCurrentDataName() + "_HWHM");
 
   if (!sampleName.isEmpty() && m_spectraList.size() > 0) {
     if (validate()) {
@@ -383,7 +383,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
  */
 void JumpFit::clearPlot() {
   m_uiForm.ppPlotTop->clear();
-  const std::string sampleName =
+  const auto sampleName =
       (m_uiForm.dsSample->getCurrentDataName().toStdString());
   if (sampleName.compare("") != 0) {
     MatrixWorkspace_sptr sample =
@@ -392,7 +392,7 @@ void JumpFit::clearPlot() {
     if (sample && m_spectraList.size() > 0) {
       m_uiForm.cbWidth->setEnabled(true);
 
-      std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+      const auto currentWidth = m_uiForm.cbWidth->currentText().toStdString();
 
       m_uiForm.ppPlotTop->clear();
       m_uiForm.ppPlotTop->addSpectrum("Sample", sample,
@@ -404,7 +404,7 @@ void JumpFit::clearPlot() {
 void JumpFit::plotGuess() {
   // Do nothing if there is not a sample
   if (m_uiForm.dsSample->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
-    const QString functionName = m_uiForm.cbFunction->currentText();
+    const auto functionName = m_uiForm.cbFunction->currentText();
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
                                        createFunction(functionName));
   } else {
@@ -414,7 +414,7 @@ void JumpFit::plotGuess() {
 }
 
 IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
-  std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
+  const auto widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample =
       m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
@@ -440,17 +440,17 @@ IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
  * Creates a function string to be used in fitting
  */
 IFunction_sptr JumpFit::createFunction(const QString &functionName) {
-  QString functionString = "name=" + functionName;
+  auto functionString = "name=" + functionName;
 
   // Build function string
   QStringList parameters = getFunctionParameters(functionName);
   for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-    QString parameterName = *it;
+    auto parameterName = *it;
 
     // Get the value form double manager
-    QString name = "parameter_" + *it;
+    auto name = "parameter_" + *it;
     double value = m_dblManager->value(m_properties[name]);
-    QString parameterValue = QString::number(value);
+    auto parameterValue = QString::number(value);
 
     functionString += "," + parameterName + "=" + parameterValue;
   }
@@ -462,7 +462,7 @@ IFunction_sptr JumpFit::createFunction(const QString &functionName) {
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-  std::string outWsName = m_baseName + "_Workspace";
+  const auto outWsName = m_baseName + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, true);
   plotSpectrum(QString::fromStdString(outWsName), 0, 2);
 }
@@ -471,7 +471,7 @@ void JumpFit::plotClicked() {
  * Handles saving of workspace
  */
 void JumpFit::saveClicked() {
-  std::string outWsName = m_baseName + "_Workspace";
+  const auto outWsName = m_baseName + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
   m_batchAlgoRunner->executeBatchAsync();
