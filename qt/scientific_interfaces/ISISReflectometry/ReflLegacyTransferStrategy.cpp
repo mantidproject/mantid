@@ -1,10 +1,10 @@
 #include "ReflLegacyTransferStrategy.h"
-#include "Trim.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ProgressBase.h"
 #include "ReflTableSchema.h"
 #include <algorithm>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -59,7 +59,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
     if (descriptionToGroup[cleanDescription].empty()) {
-      trim(groupName);
+      boost::trim(groupName);
       descriptionToGroup[cleanDescription] = groupName;
     }
 

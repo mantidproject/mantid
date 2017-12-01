@@ -24,7 +24,6 @@ set ( SRC_FILES
     ReflSettingsTabPresenter.cpp
     ReflTableSchema.cpp
     TransferResults.cpp
-    Trim.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -73,7 +72,6 @@ set ( INC_FILES
     ReflTableSchema.h
     ReflTransferStrategy.h
     TransferResults.h
-    Trim.h
 )
 
 set ( MOC_FILES
