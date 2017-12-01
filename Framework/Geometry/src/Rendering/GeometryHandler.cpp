@@ -25,21 +25,21 @@ GeometryHandler::GeometryHandler(RectangularDetector *comp)
 GeometryHandler::GeometryHandler(StructuredDetector *comp)
     : m_structDet(comp), m_renderer(new detail::Renderer()) {}
 
-GeometryHandler::GeometryHandler(const GeometryHandler &renderer)
+GeometryHandler::GeometryHandler(const GeometryHandler &handler)
     : m_renderer(new detail::Renderer()) {
-  if (renderer.m_obj) {
-    m_obj = renderer.m_obj;
-    if (renderer.m_triangulator)
+  if (handler.m_obj) {
+    m_obj = handler.m_obj;
+    if (handler.m_triangulator)
       m_triangulator.reset(new detail::GeometryTriangulator(m_obj));
   }
-  if (renderer.m_objComp)
-    m_objComp = renderer.m_objComp;
-  if (renderer.m_shapeInfo)
-    m_shapeInfo = renderer.m_shapeInfo;
-  if (renderer.m_structDet)
-    m_structDet = renderer.m_structDet;
-  if (renderer.m_rectDet)
-    m_rectDet = renderer.m_rectDet;
+  if (handler.m_objComp)
+    m_objComp = handler.m_objComp;
+  if (handler.m_shapeInfo)
+    m_shapeInfo = handler.m_shapeInfo;
+  if (handler.m_structDet)
+    m_structDet = handler.m_structDet;
+  if (handler.m_rectDet)
+    m_rectDet = handler.m_rectDet;
 }
 
 boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {

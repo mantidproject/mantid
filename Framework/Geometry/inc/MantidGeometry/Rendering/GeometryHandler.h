@@ -2,10 +2,10 @@
 #define GEOMETRYHANDLER_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Rendering/Renderer.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -16,6 +16,7 @@ class ObjComponent;
 class Object;
 namespace detail {
 class Renderer;
+class GeometryTriangulator;
 }
 
 /**
@@ -51,9 +52,9 @@ private:
   static Kernel::Logger &PLog; ///< The official logger
 
 protected:
-  std::unique_ptr<detail::Renderer> m_renderer = nullptr;
-  std::shared_ptr<detail::ShapeInfo> m_shapeInfo = nullptr;
-  std::unique_ptr<detail::GeometryTriangulator> m_triangulator = nullptr;
+  std::unique_ptr<detail::Renderer> m_renderer;
+  std::shared_ptr<detail::ShapeInfo> m_shapeInfo;
+  std::unique_ptr<detail::GeometryTriangulator> m_triangulator;
   RectangularDetector *m_rectDet = nullptr;
   StructuredDetector *m_structDet = nullptr;
   IObjComponent *m_objComp =
@@ -65,7 +66,7 @@ public:
   GeometryHandler(Object *obj);                   ///< Constructor
   GeometryHandler(RectangularDetector *comp);
   GeometryHandler(StructuredDetector *comp);
-  GeometryHandler(const GeometryHandler &renderer);
+  GeometryHandler(const GeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
   void render();     ///< Render Object or ObjComponent
