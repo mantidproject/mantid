@@ -60,7 +60,6 @@ public:
                             const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
   virtual int setObject(const int ON, const std::string &Ln) = 0;
-  virtual int populate(const std::map<int, boost::shared_ptr<Surface>> &) = 0;
   virtual IObject *clone() const = 0;
 
   virtual int getName() const = 0;

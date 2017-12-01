@@ -96,7 +96,7 @@ public:
                           std::string &Ln); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &) override;
+  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
   int removeSurface(const int SurfN);

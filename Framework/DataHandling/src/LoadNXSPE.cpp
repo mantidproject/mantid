@@ -275,7 +275,7 @@ void LoadNXSPE::exec() {
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  Geometry::IObject_const_sptr cuboid(
+  boost::shared_ptr<const Geometry::CSGObject> cuboid(
       createCuboid(0.1, 0.1, 0.1)); // FIXME: memory hog on rendering. Also,
                                     // make each detector separate size
   for (std::size_t i = 0; i < numSpectra; ++i) {
@@ -342,7 +342,7 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-Geometry::IObject_sptr LoadNXSPE::createCuboid(double dx, double dy,
+boost::shared_ptr<Geometry::CSGObject>  LoadNXSPE::createCuboid(double dx, double dy,
                                                double dz) {
 
   dx = 0.5 * std::fabs(dx);
@@ -404,7 +404,7 @@ Geometry::IObject_sptr LoadNXSPE::createCuboid(double dx, double dy,
 
   // A sphere
   std::string ObjSphere = "-41";
-  Geometry::IObject_sptr retVal = boost::make_shared<Geometry::CSGObject>();
+  boost::shared_ptr<Geometry::CSGObject> retVal = boost::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 

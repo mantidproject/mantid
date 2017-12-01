@@ -65,9 +65,6 @@ public:
   int setObject(const int ON, const std::string &Ln) override {
     return m_shape->setObject(ON, Ln);
   }
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &m) override {
-    return m_shape->populate(m);
-  }
   IObject *clone() const override { return new Container(*this); }
 
   int getName() const override { return m_shape->getName(); }
