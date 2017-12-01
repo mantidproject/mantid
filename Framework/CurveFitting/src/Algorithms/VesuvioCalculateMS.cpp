@@ -326,8 +326,7 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
     auto randgen =
         make_unique<CurveFitting::MSVesuvioHelper::RandomNumberGenerator>(
             m_seed);
-    simulate(detpar, respar,
-             accumulator.newSimulation(m_nscatters, nspectra),
+    simulate(detpar, respar, accumulator.newSimulation(m_nscatters, nspectra),
              randgen.get());
 
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
