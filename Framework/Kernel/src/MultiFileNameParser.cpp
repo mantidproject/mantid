@@ -334,6 +334,7 @@ Parser::parseStep(const std::string &multiFileName) {
 
   // Set the string to parse.
   m_multiFileName = multiFileName;
+  boost::algorithm::trim(m_multiFileName);
 
   // Split the string to be parsed into sections, and do some validation.
   split();
