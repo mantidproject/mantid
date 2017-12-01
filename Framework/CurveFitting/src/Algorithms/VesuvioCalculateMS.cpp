@@ -306,6 +306,7 @@ void VesuvioCalculateMS::cacheInputs() {
 void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
                                      API::ISpectrum &totalsc,
                                      API::ISpectrum &multsc) {
+  const auto nspectra = m_inputWS->blocksize();
   // Detector information
   DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_inputWS, wsIndex);
@@ -315,7 +316,7 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
 
   // Final counts averaged over all simulations
   CurveFitting::MSVesuvioHelper::SimulationAggregator accumulator(m_nruns);
-  PARALLEL_FOR_IF(Kernel::threadSafe(m_inputWS))
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < m_nruns; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -326,7 +327,7 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
         make_unique<CurveFitting::MSVesuvioHelper::RandomNumberGenerator>(
             m_seed);
     simulate(detpar, respar,
-             accumulator.newSimulation(m_nscatters, m_inputWS->blocksize()),
+             accumulator.newSimulation(m_nscatters, nspectra),
              randgen.get());
 
     m_progress->report("MS calculation: idx=" + std::to_string(wsIndex) +
