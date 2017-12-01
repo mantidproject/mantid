@@ -46,8 +46,7 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
 
-
-  virtual void acceptTabPresenter(IReflSettingsTabPresenter* tabPresenter) = 0;
+  virtual void acceptTabPresenter(IReflSettingsTabPresenter *tabPresenter) = 0;
 
   enum Flag { ExpDefaultsFlag, InstDefaultsFlag, SettingsChangedFlag };
 

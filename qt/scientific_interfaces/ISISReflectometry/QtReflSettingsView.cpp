@@ -40,24 +40,22 @@ void QtReflSettingsView::initLayout() {
   connectChangeListeners();
 }
 
-void QtReflSettingsView::connectSettingsChange(QLineEdit* edit) {
-  connect(edit, SIGNAL(textChanged(QString const&)), this,
+void QtReflSettingsView::connectSettingsChange(QLineEdit *edit) {
+  connect(edit, SIGNAL(textChanged(QString const &)), this,
           SLOT(notifySettingsChanged()));
 }
 
-void QtReflSettingsView::connectSettingsChange(QComboBox* edit) {
+void QtReflSettingsView::connectSettingsChange(QComboBox *edit) {
   connect(edit, SIGNAL(currentIndexChanged(int)), this,
           SLOT(notifySettingsChanged()));
 }
 
-void QtReflSettingsView::connectSettingsChange(QCheckBox* edit) {
-  connect(edit, SIGNAL(stateChanged(int)), this,
-          SLOT(notifySettingsChanged()));
+void QtReflSettingsView::connectSettingsChange(QCheckBox *edit) {
+  connect(edit, SIGNAL(stateChanged(int)), this, SLOT(notifySettingsChanged()));
 }
 
-void QtReflSettingsView::connectSettingsChange(QGroupBox* edit) {
-  connect(edit, SIGNAL(toggled(bool)), this,
-          SLOT(notifySettingsChanged()));
+void QtReflSettingsView::connectSettingsChange(QGroupBox *edit) {
+  connect(edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
 }
 
 void QtReflSettingsView::connectChangeListeners() {

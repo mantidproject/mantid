@@ -120,8 +120,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
     std::map<QString, QString> postprocessMap, QString loader)
-    : WorkspaceObserver(), /*m_optionsUpdated(false),*/ m_view(nullptr),
-      m_progressView(nullptr), m_mainPresenter(), m_loader(std::move(loader)),
+    : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
+      m_mainPresenter(), m_loader(std::move(loader)),
       m_postprocessing(postprocessor.name().isEmpty()
                            ? boost::optional<PostprocessingStep>()
                            : PostprocessingStep(QString(),
@@ -332,7 +332,7 @@ void GenericDataProcessorPresenter::process() {
 
   // Set the global settings. If any have been changed, set all groups and rows
   // as unprocessed
-  auto settingsHaveChanged = false; //areOptionsUpdated();
+  auto settingsHaveChanged = false;
 
   // Clear the group queue
   m_group_queue = GroupQueue();

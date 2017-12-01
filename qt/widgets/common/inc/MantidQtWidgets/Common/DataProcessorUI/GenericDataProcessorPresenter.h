@@ -206,7 +206,7 @@ protected:
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData);
-  bool rowOutputExists(RowItem const& row) const;
+  bool rowOutputExists(RowItem const &row) const;
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);

@@ -82,6 +82,7 @@ public:
   bool checkIfProcessing() const override;
 
   void settingsChanged(int group) override;
+
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
