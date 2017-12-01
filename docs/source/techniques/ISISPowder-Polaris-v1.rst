@@ -161,7 +161,32 @@ Example
 
   polaris_example.set_sample(sample=sample_obj)
 
+.. _create_total_scattering_pdf_polaris-isis-powder-ref:
+
+
+create_total_scattering_pdf
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning:: Total scattering support is not yet fully implemented.
+             Any results obtaining from using the below routine in its current
+             state should not be considered accurate or complete.
+
+The *create_total_scattering_pdf* method allows a user to create a Pair Distribution Function (PDF)
+from focused POLARIS data, with a view performing further total scattering analysis.
+
+With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
+the focused_workspace.
+
+
+Example
+=======
+
+..  code-block:: python
+
+  polaris_example.set_sample(focused_workspace=focused_ws,
+                             merge_banks=False)
+
 .. _calibration_mapping_polaris-isis-powder-ref:
+
 
 Calibration Mapping File
 -------------------------
