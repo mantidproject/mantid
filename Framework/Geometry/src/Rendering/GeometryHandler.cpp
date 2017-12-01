@@ -43,8 +43,9 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler)
 }
 
 boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
-  return boost::make_shared<GeometryHandler>(GeometryHandler(*this));
+  return boost::make_shared<GeometryHandler>(*this);
 }
+
 GeometryHandler::~GeometryHandler() {}
 
 void GeometryHandler::render() const {
