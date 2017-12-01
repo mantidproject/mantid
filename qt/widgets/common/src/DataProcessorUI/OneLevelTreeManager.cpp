@@ -60,6 +60,8 @@ OneLevelTreeManager::OneLevelTreeManager(DataProcessorPresenter *presenter,
 */
 OneLevelTreeManager::~OneLevelTreeManager() {}
 
+bool OneLevelTreeManager::isMultiLevel() const {return false;} 
+
 /**
 * Publishes a list of available commands
 * @return : The list of available commands

@@ -69,6 +69,7 @@ TwoLevelTreeManager::TwoLevelTreeManager(DataProcessorPresenter *presenter,
 */
 TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
+bool TwoLevelTreeManager::isMultiLevel() const {return true;}
 /**
 * Publishes a list of available commands
 * @return : The list of available commands

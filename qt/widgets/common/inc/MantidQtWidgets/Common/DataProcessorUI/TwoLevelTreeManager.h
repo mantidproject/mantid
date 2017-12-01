@@ -108,6 +108,8 @@ public:
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
+  bool isMultiLevel() const override;
+
 private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;

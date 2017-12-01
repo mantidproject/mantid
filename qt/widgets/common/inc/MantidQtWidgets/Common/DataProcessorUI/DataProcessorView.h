@@ -115,6 +115,8 @@ public:
 
   //
   virtual void skipProcessing() = 0;
+  virtual void enableGrouping() = 0;
+  virtual void disableGrouping() = 0;
 };
 }
 }

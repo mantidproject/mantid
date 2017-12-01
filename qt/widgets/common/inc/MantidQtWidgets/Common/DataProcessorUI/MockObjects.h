@@ -69,6 +69,10 @@ public:
   MOCK_METHOD1(setForcedReProcessing, void(bool));
   MOCK_METHOD0(skipProcessing, void());
 
+  // Grouping options
+  MOCK_METHOD0(enableGrouping, void());
+  MOCK_METHOD0(disableGrouping, void());
+
   // Accessor
   MOCK_CONST_METHOD0(getCurrentInstrument, QString());
 

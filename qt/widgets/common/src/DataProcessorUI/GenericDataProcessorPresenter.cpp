@@ -252,6 +252,11 @@ void GenericDataProcessorPresenter::acceptViews(
   // Add actions to toolbar
   addCommands();
 
+  if (m_manager->isMultiLevel())
+    m_view->enableGrouping();
+  else
+    m_view->disableGrouping();
+
   // Initialise options
   // Load saved values from disk
   initOptions();

@@ -129,8 +129,6 @@ void QDataProcessorWidget::createTable() {
   ui.viewTable->setHeader(header);
 
   ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;} QTreeView::item {border: 0.5px solid lightGray;}"); 
-  //ui.viewTable->setIndentation(0);
-  //ui.viewTable->setRootIsDecorated(0);
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
@@ -697,6 +695,9 @@ QString QDataProcessorWidget::getCurrentInstrument() const {
 }
 
 void QDataProcessorWidget::skipProcessing() { m_presenter->skipProcessing(); }
+
+void QDataProcessorWidget::enableGrouping(){ui.viewTable->setRootIsDecorated(true);}
+void QDataProcessorWidget::disableGrouping(){ui.viewTable->setRootIsDecorated(false);}
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

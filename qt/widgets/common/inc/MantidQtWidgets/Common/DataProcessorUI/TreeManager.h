@@ -52,7 +52,7 @@ public:
   virtual ~TreeManager(){};
 
   /// Actions/commands
-
+  virtual bool isMultiLevel() const = 0;
   /// Publish actions/commands
   virtual std::vector<std::unique_ptr<Command>> publishCommands() = 0;
   /// Append a row
