@@ -35,14 +35,9 @@ set_target_properties ( VatesAlgorithms PROPERTIES OUTPUT_NAME MantidVatesAlgori
 
 target_link_libraries( VatesAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 ${MANTID_SUBPROJECT_LIBS}
-VatesAPI
 vtkCommonCore
 vtkCommonDataModel
-vtkIOLegacy
-vtkFiltersExtraction
-vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
-vtkPVVTKExtensionsDefault
 ${POCO_LIBRARIES}
 )
 
@@ -62,6 +57,7 @@ set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper
 cxxtest_add_test( VatesAlgorithmsTest ${TEST_FILES} )
 target_link_libraries( VatesAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${MANTID_SUBPROJECT_LIBS}
+  VatesAPI
   VatesAlgorithms
   DataHandling
   Kernel
