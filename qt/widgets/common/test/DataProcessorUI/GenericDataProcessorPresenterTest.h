@@ -422,6 +422,39 @@ public:
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
     // Expect that the layout containing pre-processing, processing and
     // post-processing options is created
+    EXPECT_CALL(mockDataProcessorView, enableGrouping()).Times(Exactly(1));
+    std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
+                                   "Post-process"};
+    std::vector<QString> algorithms = {
+        "Plus", "CreateTransmissionWorkspaceAuto",
+        "ReflectometryReductionOneAuto", "Stitch1DMany"};
+
+    // Expect that the autocompletion hints are populated
+    EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, 7))
+        .Times(Exactly(1));
+    // Now accept the views
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
+  void testNonPostProcessPresenterAcceptsViews() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+
+    auto presenter = makeNonPostProcessPresenter();
+
+    // When the presenter accepts the views, expect the following:
+    // Expect that the list of actions is published
+    EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(Exactly(1));
+    // Expect that the list of settings is populated
+    EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
+    // Expect that the list of tables is populated
+    EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(Exactly(1));
+    // Expect that the layout containing pre-processing, processing and
+    // post-processing options is created
+    EXPECT_CALL(mockDataProcessorView, enableGrouping()).Times(Exactly(0));
     std::vector<QString> stages = {"Pre-process", "Pre-process", "Process",
                                    "Post-process"};
     std::vector<QString> algorithms = {
@@ -1693,6 +1726,12 @@ public:
     return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
+  }
+
+  std::unique_ptr<GenericDataProcessorPresenter> makeNonPostProcessPresenter() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+        createReflectometryProcessor());
   }
 
   void testBadWorkspaceType() {

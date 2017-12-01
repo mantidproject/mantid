@@ -50,7 +50,7 @@ public:
                       const WhiteList &whitelist);
   /// Destructor
   ~OneLevelTreeManager() override;
-   
+
   bool isMultiLevel() const override;
   /// Publish commands
   std::vector<std::unique_ptr<Command>> publishCommands() override;
