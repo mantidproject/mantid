@@ -132,7 +132,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
     for (int i = 0; i < points.size(); i++) {
       buf >> points[i];
     }
-  } 
+  }
   // Read from binary otherwise
 }
 

@@ -2125,28 +2125,21 @@ void CSGObject::updateGeometryHandler() {
 
 // Initialize Draw Object
 
-/**
-* get number of triangles
-* @return the number of triangles
-*/
-int CSGObject::NumberOfTriangles() const {
-  if (m_handler == nullptr)
+size_t CSGObject::numberOfTriangles() const {
+  if (handle == nullptr)
     return 0;
   return m_handler->NumberOfTriangles();
 }
-
-/**
-* get number of points
-*/
-int CSGObject::NumberOfPoints() const {
-  if (m_handler == nullptr)
+size_t CSGObject::numberOfVertices() const {
+  if (handle == nullptr)
     return 0;
   return m_handler->NumberOfPoints();
 }
 /**
 * get vertices
 */
-boost::optional<const std::vector<double> &>CSGObject::getTriangleVertices() const {
+boost::optional<const std::vector<double> &>
+CSGObject::getTriangleVertices() const {
   if (handle == nullptr)
     return boost::none;
   return m_handler->getTriangleVertices();
@@ -2164,8 +2157,9 @@ boost::optional<const std::vector<int> &> CSGObject::getTriangleFaces() const {
 /**
 * get info on standard shapes
 */
-void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
-                           double &myradius, double &myheight) const {
+void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                           std::vector<Kernel::V3D> &vectors, double &myradius,
+                           double &myheight) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;

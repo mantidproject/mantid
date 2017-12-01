@@ -188,8 +188,9 @@ public:
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(
       boost::shared_ptr<vtkGeometryCacheReader>) override;
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const;
   /// Getter for the shape xml
   std::string getShapeXML() const override;
 
@@ -260,8 +261,8 @@ private:
   size_t numberOfTriangles() const;
   size_t numberOfVertices() const;
   /// for solid angle from triangulation
-  boost::optional<const std::vector<int> &>getTriangleFaces() const;
-  boost::optional<const std::vector<double> &>getTriangleVertices() const;
+  boost::optional<const std::vector<int> &> getTriangleFaces() const;
+  boost::optional<const std::vector<double> &> getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
   /// Optional string identifier
