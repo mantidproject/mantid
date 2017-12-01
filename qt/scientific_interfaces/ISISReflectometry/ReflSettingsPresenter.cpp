@@ -17,6 +17,7 @@ using namespace Mantid::Geometry;
 
 /** Constructor
 * @param view :: The view we are handling
+* @param group :: The number of the group this settings presenter's settings correspond to.
 */
 ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
     : m_view(view), m_group(group) {
