@@ -35,27 +35,5 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
   this->handle = h;
 }
 
-/**
- * Copy constructor
- * @param origin :: The object to initialize this with
- */
-IObjComponent::IObjComponent(const IObjComponent &origin) {
-  // Handler contains a pointer to 'this' therefore needs regenerating
-  // with new object
-  handle = new GeometryHandler(this);
-}
-
-/**
- * Assignment operator
- * @param rhs The rvalue to copy into this object
- * @returns A reference to this object
- */
-IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
-  if (&rhs != this) {
-    handle = new GeometryHandler(this);
-  }
-  return *this;
-}
-
 } // namespace Geometry
 } // namespace Mantid

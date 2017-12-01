@@ -103,11 +103,6 @@ public:
   GeometryHandler *Handle() const { return handle; }
 
 protected:
-  /// Protected copy constructor
-  IObjComponent(const IObjComponent &);
-  /// Assignment operator
-  IObjComponent &operator=(const IObjComponent &);
-
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
 

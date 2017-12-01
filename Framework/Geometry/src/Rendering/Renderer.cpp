@@ -27,7 +27,7 @@
 
 GCC_DIAG_OFF(conversion)
 // clang-format off
-GCC_DIAG_OFF(cast - qual)
+GCC_DIAG_OFF(cast-qual)
 // clang-format on
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
@@ -40,7 +40,7 @@ GCC_DIAG_OFF(cast - qual)
 #include <Poly_Triangulation.hxx>
 GCC_DIAG_ON(conversion)
 // clang-format off
-GCC_DIAG_ON(cast - qual)
+GCC_DIAG_ON(cast-qual)
 // clang-format on
 
 #ifdef __INTEL_COMPILER

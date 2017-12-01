@@ -111,7 +111,7 @@ void vtkGeometryCacheWriter::addObject(Object *obj) {
   buf.str("");
   // get the triangles info
   const auto &points = handle->getTriangleVertices().get();
-  int i;
+  size_t i;
   for (i = 0; i < points.size(); i++) {
     buf << points[i] << " ";
   }

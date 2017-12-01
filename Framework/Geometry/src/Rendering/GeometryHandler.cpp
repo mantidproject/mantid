@@ -8,22 +8,22 @@
 namespace Mantid {
 namespace Geometry {
 GeometryHandler::GeometryHandler(IObjComponent *comp)
-    : m_objComp(comp), m_renderer(new detail::Renderer()) {}
+    : m_renderer(new detail::Renderer()), m_objComp(comp) {}
 
 GeometryHandler::GeometryHandler(boost::shared_ptr<Object> obj)
-    : m_obj(obj.get()),
+    : m_renderer(new detail::Renderer()),
       m_triangulator(new detail::GeometryTriangulator(obj.get())),
-      m_renderer(new detail::Renderer()) {}
+      m_obj(obj.get()) {}
 
 GeometryHandler::GeometryHandler(Object *obj)
-    : m_obj(obj), m_triangulator(new detail::GeometryTriangulator(obj)),
-      m_renderer(new detail::Renderer()) {}
+    : m_renderer(new detail::Renderer()),
+      m_triangulator(new detail::GeometryTriangulator(obj)), m_obj(obj) {}
 
 GeometryHandler::GeometryHandler(RectangularDetector *comp)
-    : m_rectDet(comp), m_renderer(new detail::Renderer()) {}
+    : m_renderer(new detail::Renderer()), m_rectDet(comp) {}
 
 GeometryHandler::GeometryHandler(StructuredDetector *comp)
-    : m_structDet(comp), m_renderer(new detail::Renderer()) {}
+    : m_renderer(new detail::Renderer()), m_structDet(comp) {}
 
 GeometryHandler::GeometryHandler(const GeometryHandler &handler)
     : m_renderer(new detail::Renderer()) {
@@ -47,7 +47,7 @@ boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
 }
 GeometryHandler::~GeometryHandler() {}
 
-void GeometryHandler::render() {
+void GeometryHandler::render() const {
   if (m_rectDet)
     m_renderer->renderBitmap(*m_rectDet);
   else if (m_structDet)
@@ -60,7 +60,7 @@ void GeometryHandler::render() {
     m_renderer->renderTriangulated(*m_triangulator);
 }
 
-void GeometryHandler::initialize() {
+void GeometryHandler::initialize() const {
   if (m_obj != nullptr)
     m_obj->updateGeometryHandler();
   render();
