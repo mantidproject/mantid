@@ -10,6 +10,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#ifdef ENABLE_OPENCASCADE
 // Squash a warning coming out of an OpenCascade header
 #ifdef __INTEL_COMPILER
 #pragma warning disable 191
@@ -44,6 +45,7 @@ GCC_DIAG_ON(cast - qual)
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191
+#endif
 #endif
 
 namespace Mantid {
