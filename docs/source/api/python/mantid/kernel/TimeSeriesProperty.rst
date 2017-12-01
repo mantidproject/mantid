@@ -73,3 +73,14 @@ Return the value of nth interval.
 
   * the log value just before the filter time if filter time is not ahead all log entries' time or
   * the value of first log entry
+
+Class Methods
+=============
+
+There are also variants of this class for integers, but the methods are the same.
+
+.. module:`mantid.kernel`
+
+.. autoclass:: mantid.kernel.FloatTimeSeriesProperty
+    :members:
+    :undoc-members:
