@@ -16,6 +16,8 @@ set ( TEST_PY_FILES
   summation_settings_presenter_test.py
   summation_settings_model_test.py
   add_runs_presenter_test.py
+  beam_centre_presenter_test.py
+  beam_centre_model_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

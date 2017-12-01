@@ -1,23 +1,22 @@
 """
-    This module defines a simple function-style API for running Mantid
-    algorithms. Each algorithm within Mantid is mapped to a Python
-    function of the same name with the parameters of the algorithm becoming
-    arguments to the function.
+This module defines a simple function-style API for running Mantid
+algorithms. Each algorithm within Mantid is mapped to a Python
+function of the same name with the parameters of the algorithm becoming
+arguments to the function.
 
-    For example:
+For example:
 
-    The Rebin algorithm is mapped to this Python function:
+The Rebin algorithm is mapped to this Python function:
 
-        Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
+   Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
 
-    It returns the output workspace and this workspace has the same name as
-    the variable it is assigned to, i.e.
+It returns the output workspace and this workspace has the same name as
+the variable it is assigned to, i.e.
 
-       rebinned = Rebin(input, Params = '0.1,0.05,10')
+   rebinned = Rebin(input, Params = '0.1,0.05,10')
 
-    would call Rebin with the given parameters and create a workspace called 'rebinned'
-    and assign it to the rebinned variable
-
+would call Rebin with the given parameters and create a workspace called 'rebinned'
+and assign it to the rebinned variable
 """
 from __future__ import (absolute_import, division,
                         print_function)

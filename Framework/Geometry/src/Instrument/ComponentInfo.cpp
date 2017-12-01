@@ -111,6 +111,10 @@ size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
 
+size_t ComponentInfo::indexOf(const std::string &name) const {
+  return m_componentInfo->indexOf(name);
+}
+
 bool ComponentInfo::isDetector(const size_t componentIndex) const {
   return m_componentInfo->isDetector(componentIndex);
 }
@@ -205,6 +209,10 @@ const Object &ComponentInfo::shape(const size_t componentIndex) const {
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
+}
+
+std::string ComponentInfo::name(const size_t componentIndex) const {
+  return m_componentInfo->name(componentIndex);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex,

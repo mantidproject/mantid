@@ -760,6 +760,46 @@ Note that the settings are logically grouped by significant stages in the reduct
 | **wavelength**    | This group contains information about the wavelength conversion.                               |
 +-------------------+---------------------------+--------------------------------------------------------------------+
 
+Beam centre tab
+---------------
+
+.. image::  ../images/sans_isis_v2_beam_centre_tab.png
+   :align: right
+   :width: 800px
+
+.. _Beam:
+
+The beam centre tab allows the position of the beam centre to be set either manually by the user or by running the beam centre
+finder.
+
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **Centre Position LAB**  | The centre position of the low angle bank. The first coordinate is horizontal           |
+|       |                          | and the second vertical. These boxes are populated by the user file and the values here |
+|       |                          | are used by the reduction.                                                              |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Centre Position HAB**  | The centre position of the high angle bank. The first coordinate is horizontal          |
+|       |                          | and the second vertical. These boxes are populated by the user file and the values here |
+|       |                          | are used by the reduction.                                                              | 
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Minimum radius limit** | The minimum radius of the region used to ascertain centre position.                     |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Maximum radius limit** | The maximum radius of the region used to ascertain centre position.                     |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
+|       |                          | search.                                                                                 |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
+|       |                          | conclude its search.                                                                    |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | left/right direction.                                                                   |   
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | up/down direction.                                                                      |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **9** | **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
+|       |                          | values upon completion.                                                                 |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------
