@@ -22,23 +22,14 @@ New
 
 Improved
 ########
+
 - A pre-loaded runs workspace can now be passed to the fit_tof VESUVIO routine, which will skip the loading subroutine given this input
-
-Bugfixes
-########
-
-Vesuvio
--------
-
-New
-###
-
-Improved
-########
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` can now accept a discontinuous range of sample runs - uses the same syntax as the Load algorithm.
 
 Bugfixes
 ########
+
+
 
 Data Analysis Interfaces
 ------------------------
