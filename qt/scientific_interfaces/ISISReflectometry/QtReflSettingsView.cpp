@@ -10,7 +10,8 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
 * @param parent :: [input] The parent of this widget
-* @param group :: The number of the group this settings view's settings correspond to.
+* @param group :: The number of the group this settings view's settings
+* correspond to.
 */
 QtReflSettingsView::QtReflSettingsView(int group, QWidget *parent) {
 
