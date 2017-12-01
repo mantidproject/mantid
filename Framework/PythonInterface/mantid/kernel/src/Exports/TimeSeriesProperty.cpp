@@ -33,33 +33,39 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
       #Prefix "TimeSeriesProperty",                                            \
       init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
-           "value",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,      \
-               return_value_policy<VectorToNumpy>()))                          \
+          "value",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
+              return_value_policy<VectorToNumpy>()))                           \
       .add_property("times",                                                   \
                     &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector)  \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const DateAndTime &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const std::string &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
       .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))             \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \
       .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))               \
-      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"))     \
+      .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),     \
+           "returns :class:`mantid.kernel.DateAndTime`")                       \
       .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))   \
-      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"))       \
+      .def("lastTime", &TimeSeriesProperty<TYPE>::lastTime, arg("self"),       \
+           "returns :class:`mantid.kernel.DateAndTime`")                       \
       .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue, arg("self"))     \
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue,                    \
            (arg("self"), arg("index")))                                        \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime,                      \
-           (arg("self"), arg("index")))                                        \
+           (arg("self"), arg("index")),                                        \
+           "returns :class:`mantid.kernel.DateAndTime`")                       \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics,          \
-           arg("self"))                                                        \
+           arg("self"),                                                        \
+           "returns :class:`mantid.kernel.TimeSeriesPropertyStatistics`")      \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue,    \
            arg("self"));
 }
