@@ -200,7 +200,7 @@ public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter*));
+  MOCK_METHOD1(acceptTabPresenter, void(IReflSettingsTabPresenter *));
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
   ~MockSettingsPresenter() override{};
@@ -212,7 +212,7 @@ public:
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
-  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter*));
+  MOCK_METHOD1(acceptMainPresenter, void(IReflMainWindowPresenter *));
   MOCK_METHOD1(settingsChanged, void(int));
   void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
