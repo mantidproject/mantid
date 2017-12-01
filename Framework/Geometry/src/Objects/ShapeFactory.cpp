@@ -1414,7 +1414,7 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
   shape->setGeometryHandler(handler);
 
   shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                         hex.rft, hex.rbt);
+                          hex.rft, hex.rbt);
   handler->setShapeInfo(std::move(shapeInfo));
 
   shape->defineBoundingBox(std::max(xrb, xrf), yrf, ZDEPTH, std::min(xlf, xlb),
@@ -1436,9 +1436,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     shapeInfo.setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
   } else if (pElem->tagName() == "hexahedron") {
     auto corners = parseHexahedron(pElem);
-    shapeInfo.setHexahedron(corners.lbb, corners.lfb, corners.rfb,
-                               corners.rbb, corners.lbt, corners.lft,
-                               corners.rft, corners.rbt);
+    shapeInfo.setHexahedron(corners.lbb, corners.lfb, corners.rfb, corners.rbb,
+                            corners.lbt, corners.lft, corners.rft, corners.rbt);
   } else if (pElem->tagName() == "sphere") {
     Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
     Element *pElemRadius = getShapeElement(pElem, "radius");
@@ -1454,8 +1453,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
     shapeInfo.setCylinder(parsePosition(pElemCentre), normVec,
-                             std::stod(pElemRadius->getAttribute("val")),
-                             std::stod(pElemHeight->getAttribute("val")));
+                          std::stod(pElemRadius->getAttribute("val")),
+                          std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "segmented-cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1463,10 +1462,9 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    shapeInfo.setSegmentedCylinder(
-        parsePosition(pElemCentre), normVec,
-        std::stod(pElemRadius->getAttribute("val")),
-        std::stod(pElemHeight->getAttribute("val")));
+    shapeInfo.setSegmentedCylinder(parsePosition(pElemCentre), normVec,
+                                   std::stod(pElemRadius->getAttribute("val")),
+                                   std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");

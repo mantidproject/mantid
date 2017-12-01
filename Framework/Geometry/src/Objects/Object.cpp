@@ -2121,14 +2121,12 @@ void Object::updateGeometryHandler() {
 
 // Initialize Draw Object
 
-size_t Object::numberOfTriangles() const
-{
+size_t Object::numberOfTriangles() const {
   if (handle == nullptr)
     return 0;
   return handle->numberOfTriangles();
 }
-size_t Object::numberOfVertices() const
-{
+size_t Object::numberOfVertices() const {
   if (handle == nullptr)
     return 0;
   return handle->numberOfPoints();
@@ -2136,7 +2134,8 @@ size_t Object::numberOfVertices() const
 /**
 * get vertices
 */
-boost::optional<const std::vector<double> &>Object::getTriangleVertices() const {
+boost::optional<const std::vector<double> &>
+Object::getTriangleVertices() const {
   if (handle == nullptr)
     return boost::none;
   return handle->getTriangleVertices();
@@ -2154,8 +2153,9 @@ boost::optional<const std::vector<int> &> Object::getTriangleFaces() const {
 /**
 * get info on standard shapes
 */
-void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors,
-                           double &myradius, double &myheight) const {
+void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                           std::vector<Kernel::V3D> &vectors, double &myradius,
+                           double &myheight) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (handle == nullptr)
     return;
