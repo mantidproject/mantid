@@ -342,8 +342,8 @@ void LoadNXSPE::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-boost::shared_ptr<Geometry::CSGObject>  LoadNXSPE::createCuboid(double dx, double dy,
-                                               double dz) {
+boost::shared_ptr<Geometry::CSGObject>
+LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   dx = 0.5 * std::fabs(dx);
   dy = 0.5 * std::fabs(dy);
@@ -404,7 +404,8 @@ boost::shared_ptr<Geometry::CSGObject>  LoadNXSPE::createCuboid(double dx, doubl
 
   // A sphere
   std::string ObjSphere = "-41";
-  boost::shared_ptr<Geometry::CSGObject> retVal = boost::make_shared<Geometry::CSGObject>();
+  boost::shared_ptr<Geometry::CSGObject> retVal =
+      boost::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 
