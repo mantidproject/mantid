@@ -144,7 +144,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(
   }
 
   updateProperties(selectedSpectrum());
-  updatePlot();
+  updatePreviewPlots();
 }
 
 /*
@@ -349,7 +349,7 @@ void IndirectFitAnalysisTab::newInputDataLoaded(const QString &wsName) {
   m_propertyToParameter.clear();
   m_fitFunctions.clear();
   updateProperties(selectedSpectrum());
-  updatePlot();
+  updatePreviewPlots();
 }
 
 /*
