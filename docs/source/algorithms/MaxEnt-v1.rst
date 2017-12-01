@@ -131,6 +131,9 @@ whose values will be set to zero once the true maximum entropy solution is found
 Usage
 -----
 
+Some of the usage examples use usage data files.
+
+.. include:: ../usagedata-note.txt
 
 **Example - Reconstruct Fourier coefficients**
 
