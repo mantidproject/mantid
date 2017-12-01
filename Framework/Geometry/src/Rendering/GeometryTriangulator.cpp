@@ -23,7 +23,7 @@
 
 GCC_DIAG_OFF(conversion)
 // clang-format off
-GCC_DIAG_OFF(cast - qual)
+GCC_DIAG_OFF(cast-qual)
 // clang-format on
 #include <gp_Trsf.hxx>
 #include <gp_Pnt.hxx>
@@ -39,7 +39,7 @@ GCC_DIAG_OFF(cast - qual)
 #include <Poly_Triangulation.hxx>
 GCC_DIAG_ON(conversion)
 // clang-format off
-GCC_DIAG_ON(cast - qual)
+GCC_DIAG_ON(cast-qual)
 // clang-format on
 
 #ifdef __INTEL_COMPILER
@@ -144,7 +144,7 @@ size_t GeometryTriangulator::numPoints() const {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
       Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      countVert += facing->NbNodes();
+      countVert += static_cast<size_t>(facing->NbNodes());
     }
   }
   return countVert;
@@ -158,7 +158,7 @@ size_t GeometryTriangulator::numFaces() const {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
       Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      countFace += facing->NbTriangles();
+      countFace += static_cast<size_t>(facing->NbTriangles());
     }
   }
   return countFace;

@@ -71,8 +71,9 @@ public:
   GeometryHandler(const GeometryHandler &handler);
   boost::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
-  void render();     ///< Render Object or ObjComponent
-  void initialize(); ///< Prepare/Initialize Object/ObjComponent to be rendered
+  void render() const;     ///< Render Object or ObjComponent
+  void
+  initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered
   bool canTriangulate() const { return !(m_triangulator == nullptr); }
   /// get the number of triangles
   size_t numberOfTriangles();
