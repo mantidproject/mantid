@@ -35,11 +35,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMainWindow>
 #include "DllOption.h"
 
-class HelpBrowser;
 class QHelpEngine;
 class QToolButton;
 class QUrl;
+#if defined(USE_QTWEBKIT)
 class QWebView;
+using QWebEngineView = QWebView;
+#else
+#include <QWebEnginePage>
+class QWebEngineView;
+
+/// Mimic the WebKit class to emit linkClicked signal from the page
+class DelegatingWebPage : public QWebEnginePage {
+  Q_OBJECT
+
+public:
+  DelegatingWebPage(QObject *parent = nullptr) : QWebEnginePage(parent) {}
+
+  bool acceptNavigationRequest(const QUrl &url,
+                               QWebEnginePage::NavigationType type,
+                               bool) override {
+    if (type == QWebEnginePage::NavigationTypeLinkClicked) {
+
+      emit linkClicked(url);
+    }
+    return true;
+  }
+
+signals:
+  void linkClicked(const QUrl &);
+};
+
+#endif
 
 /// pqHelpWindow provides a assistant-like window  for showing help provided by
 /// a QHelpEngine.
@@ -50,7 +77,6 @@ class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
 public:
   pqHelpWindow(QHelpEngine *engine, QWidget *parent = 0,
                Qt::WindowFlags flags = 0);
-  ~pqHelpWindow() override;
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
@@ -72,13 +98,13 @@ signals:
 
 protected slots:
   void search();
-  void linkHovered(const QString &link, const QString &title,
-                   const QString &textContent);
+  void linkHovered(const QString &link, const QString &title = "",
+                   const QString &textContent = "");
   void updateNavButtons();
 
 protected:
   QHelpEngine *m_helpEngine;
-  QWebView *m_browser;
+  QWebEngineView *m_browser;
   QToolButton *m_forward;
   QToolButton *m_backward;
 

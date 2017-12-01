@@ -1,6 +1,7 @@
 #
 # PYUNITTEST_ADD_TEST (public macro to add unit tests)
 #   Adds a set of python tests based upon the unittest module
+#
 #   Parameters:
 #       _test_src_dir_base :: A base directory when added to the relative test paths gives
 #                             an absolute path to that test. This directory is added to the
