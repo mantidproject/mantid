@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/GravityCorrection.h"
 
-//#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -10,28 +10,28 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/HistogramE.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Quat.h"
 
 #include <cmath>
-#include <forward_list>
 #include <iterator>
 #include <utility>
 
-using Mantid::API::AlgorithmHistories; // a std::set
+using Mantid::API::AlgorithmHistories;
 using Mantid::API::AlgorithmHistory_const_sptr;
 using Mantid::API::HistogramValidator;
 using Mantid::API::InstrumentValidator;
@@ -42,26 +42,26 @@ using Mantid::API::SpectrumInfo;
 using Mantid::API::WorkspaceHistory;
 using Mantid::API::WorkspaceProperty;
 using Mantid::API::WorkspaceUnitValidator;
+using Mantid::Geometry::ComponentInfo;
+using Mantid::Geometry::IDetector;
 using Mantid::Geometry::IComponent_const_sptr;
-using Mantid::Geometry::IComponent_sptr;
-using Mantid::Geometry::ParameterMap_sptr;
 using Mantid::Geometry::PointingAlong;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Exception::InstrumentDefinitionError;
 using Mantid::Kernel::Exception::NotFoundError;
 using Mantid::Kernel::make_unique;
+using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using Mantid::PhysicalConstants::g;
 
 using boost::make_shared;
 
 using std::find_if;
-using std::forward_list;
 using std::logic_error;
 using std::map;
 using std::pair;
@@ -95,6 +95,8 @@ void GravityCorrection::init() {
                         "Component name of the first slit.");
   this->declareProperty("SecondSlitName", "slit2",
                         "Component name of the second slit.");
+  this->declareProperty("RotationAngle", EMPTY_DBL(),
+                        "Rotation angle of the instrument in degrees.");
 }
 
 /**
@@ -106,7 +108,7 @@ map<string, string> GravityCorrection::validateInputs() {
   map<string, string> result;
   // InputWorkspace
   this->m_ws = this->getProperty("InputWorkspace");
-  if (!this->m_ws)
+  if (this->m_ws == nullptr)
     result["InputWorkspace"] = "InputWorkspace not defined.";
   const WorkspaceHistory history = this->m_ws->getHistory();
   const AlgorithmHistories &histories = history.getAlgorithmHistories();
@@ -119,18 +121,22 @@ map<string, string> GravityCorrection::validateInputs() {
                                "(check workspace history).";
   // Slits
   const string slit1Name = this->getProperty("FirstSlitName");
+  if (slit1Name.empty())
+    result["FirstSlitName"] = "Must provide a name for first slit.";
   const string slit2Name = this->getProperty("SecondSlitName");
+  if (slit2Name.empty())
+    result["SecondSlitName"] = "Must provide a name for second slit.";
   // Check slit component existance
   // get a pointer to the instrument of the input workspace
   this->m_originalInstrument = this->m_ws->getInstrument();
   IComponent_const_sptr slit1 =
       this->m_originalInstrument->getComponentByName(slit1Name);
-  if (!slit1)
+  if (slit1 == nullptr)
     result["FirstSlitName"] =
         "Instrument component with name " + slit1Name + " does not exist.";
   IComponent_const_sptr slit2 =
       this->m_originalInstrument->getComponentByName(slit2Name);
-  if (!slit2)
+  if (slit2 == nullptr)
     result["SecondSlitName"] =
         "Instrument component with name " + slit2Name + " does not exist.";
   return result;
@@ -145,7 +151,7 @@ map<string, string> GravityCorrection::validateInputs() {
 double GravityCorrection::coordinate(const std::string componentName,
                                      const PointingAlong axis) const {
   IComponent_const_sptr component =
-      m_originalInstrument->getComponentByName(componentName);
+      this->m_virtualInstrument->getComponentByName(componentName);
   double position{0.};
   switch (axis) {
   case Mantid::Geometry::X:
@@ -170,39 +176,39 @@ double GravityCorrection::coordinate(const std::string componentName,
  * @return true if slit position is between source and sample
  */
 void GravityCorrection::slitCheck() {
-  string sourceName = m_originalInstrument->getSource()->getName();
-  string sampleName = m_originalInstrument->getSample()->getName();
+  const string sourceName = this->m_virtualInstrument->getSource()->getName();
+  const string sampleName = this->m_virtualInstrument->getSample()->getName();
   const string slit1{this->getPropertyValue("FirstSlitName")};
   const string slit2{this->getPropertyValue("SecondSlitName")};
   // in beam directions
-  const double sourceD = coordinate(sourceName, m_beamDirection);
-  const double sampleD = coordinate(sampleName, m_beamDirection);
-  const double slit2D = coordinate(slit2, m_beamDirection);
-  const double slit1D = coordinate(slit1, m_beamDirection);
+  const double sourceD = coordinate(sourceName, this->m_beamDirection);
+  const double sampleD = coordinate(sampleName, this->m_beamDirection);
+  const double slit2D = coordinate(slit2, this->m_beamDirection);
+  const double slit1D = coordinate(slit1, this->m_beamDirection);
   // Slits must be located between source and sample
   if (sourceD < sampleD) {
     // slit 1 should be the next component after source in beam direction
     if (slit2D < slit1D) {
-      m_slit1Name = slit2;
-      m_slit2Name = slit1;
+      this->m_slit1Name = slit2;
+      this->m_slit2Name = slit1;
     }
     if ((slit1D < sourceD) && (slit1D > sampleD))
-      throw InstrumentDefinitionError("Slit " + m_slit1Name +
+      throw InstrumentDefinitionError("Slit " + this->m_slit1Name +
                                       " position is incorrect.");
   } else {
     // slit 1 should be the next component after source in beam direction
     if (slit2D > slit1D) {
-      m_slit1Name = slit2;
-      m_slit2Name = slit1;
+      this->m_slit1Name = slit2;
+      this->m_slit2Name = slit1;
     }
     if ((slit1D > sourceD) && (slit1D < sampleD))
-      throw InstrumentDefinitionError("Slit " + m_slit2Name +
-                                      " position is incorrect.");
+      throw InstrumentDefinitionError("Position of " + this->m_slit2Name +
+                                      " is incorrect.");
   }
-  if (m_slit1Name.empty())
-    m_slit1Name = slit1;
-  if (m_slit2Name.empty())
-    m_slit2Name = slit2;
+  if (this->m_slit1Name.empty())
+    this->m_slit1Name = slit1;
+  if (this->m_slit2Name.empty())
+    this->m_slit2Name = slit2;
 }
 
 /**
@@ -211,10 +217,10 @@ void GravityCorrection::slitCheck() {
  * direction of the parabola from source to sample via the slits
  */
 pair<double, double> GravityCorrection::parabola(const double k) {
-  const double beam1 = coordinate(m_slit1Name, m_beamDirection);
-  const double beam2 = coordinate(m_slit2Name, m_beamDirection);
-  const double up1 = coordinate(m_slit1Name, m_upDirection);
-  const double up2 = coordinate(m_slit2Name, m_upDirection);
+  const double beam1 = coordinate(this->m_slit1Name, this->m_beamDirection);
+  const double beam2 = coordinate(this->m_slit2Name, this->m_beamDirection);
+  const double up1 = coordinate(this->m_slit1Name, this->m_upDirection);
+  const double up2 = coordinate(this->m_slit2Name, this->m_upDirection);
   double beamShift = (k * (pow(beam1, 2) - pow(beam2, 2)) + (up1 - up2)) /
                      (2 * k * (beam1 - beam2));
   double upShift = up1 + k * (beam1 - beam2);
@@ -237,46 +243,86 @@ double GravityCorrection::finalAngle(const double k) {
  * @brief GravityCorrection::virtualInstrument defines a virtual instrument with
  * the sample at its origin x = y = z = 0 m. The original instrument and its
  * parameter map will be copied.
- * @param spectrumInfo ::
  */
-void GravityCorrection::virtualInstrument(SpectrumInfo &spectrumInfo) {
-  if (m_originalInstrument->isParametrized()) {
-    ParameterMap_sptr parMap = m_originalInstrument->getParameterMap();
-    m_virtualInstrument =
-        make_shared<Geometry::Instrument>(m_originalInstrument, parMap);
-    V3D samplePos = spectrumInfo.samplePosition();
-    if (samplePos.distance(V3D(0.0, 0.0, 0.0))) {
-      // move instrument to ensure sample at position x = y = z = 0 m,
-      samplePos *= -1.0;
-      // parameter map holds parameters of all modified
-      // IComponent_const_sptr's:
-      auto sample = m_originalInstrument->getSample();
-      parMap->addV3D(sample.get(), sample->getName(), V3D(0.0, 0.0, 0.0));
-      auto source = m_originalInstrument->getSource();
-      parMap->addV3D(source.get(), source->getName(),
-                     source->getPos() + samplePos);
-      auto slit1 = m_originalInstrument->getComponentByName(m_slit1Name);
-      parMap->addV3D(slit1.get(), slit1->getName(),
-                     slit1->getPos() + samplePos);
-      auto slit2 = m_originalInstrument->getComponentByName(m_slit2Name);
-      parMap->addV3D(slit2.get(), slit2->getName(),
-                     slit2->getPos() + samplePos);
-      for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-        const auto &det = spectrumInfo.detector(i);
-        const auto rdet = dynamic_cast<const Geometry::Detector *>(&det);
-        parMap->addV3D(rdet, rdet->getName(),
-                       spectrumInfo.position(i) + samplePos);
+void GravityCorrection::virtualInstrument() {
+  if (this->m_originalInstrument->isParametrized()) {
+
+    auto ws = this->m_ws->clone();
+
+    IComponent_const_sptr sampleC = this->m_originalInstrument->getSample();
+    const V3D samplePos = sampleC->getPos();
+    const V3D nullVec = V3D(0., 0., 0.);
+
+    double angle = this->getProperty("RotationAngle");
+
+    // translate and rotate relative to the parent component:
+    if (samplePos.distance(nullVec) || !isEmpty(angle)) {
+
+      auto &componentInfo = ws->mutableComponentInfo();
+      auto &spectrumInfo = ws->mutableSpectrumInfo();
+
+      const string sourceName =
+          this->m_originalInstrument->getSource()->getName();
+      const string sampleName =
+          this->m_originalInstrument->getSample()->getName();
+
+      vector<IComponent_const_sptr> comps = {
+          this->m_originalInstrument->getComponentByName(sourceName),
+          this->m_originalInstrument->getComponentByName(sampleName),
+          this->m_originalInstrument->getComponentByName(m_slit1Name),
+          this->m_originalInstrument->getComponentByName(m_slit2Name)};
+
+      if (samplePos.distance(V3D(0.0, 0.0, 0.0))) {
+        // move instrument to ensure sample at position x = y = z = 0 m,
+        for (vector<IComponent_const_sptr>::iterator compit = comps.begin();
+             compit != comps.end(); ++compit) {
+          const auto compID1 = (*compit)->getComponentID();
+          auto translatedPos = (*compit)->getPos() - samplePos;
+          componentInfo.setPosition(componentInfo.indexOf(compID1),
+                                    translatedPos);
+        }
+        for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+          const IDetector &det1 = spectrumInfo.detector(i);
+          auto newDetectorPos = det1.getPos() - samplePos;
+          const auto detID1 = det1.getComponentID();
+          componentInfo.setPosition(componentInfo.indexOf(detID1),
+                                    newDetectorPos);
+        }
       }
-      if (this->m_originalInstrument->getSample()->getPos() ==
-          V3D(0.0, 0.0, 0.0))
-        this->g_log.debug("Accidentially moved the original instrument.");
+      if (!isEmpty(angle)) {
+        const V3D &vector =
+            m_originalInstrument->getReferenceFrame()->vecPointingUp();
+        const Quat &rot = Quat(angle, vector);
+        for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
+          const auto compID2 = (*compit)->getComponentID();
+          auto rotation = (*compit)->getRotation() * rot;
+          componentInfo.setRotation(componentInfo.indexOf(compID2), rotation);
+        }
+        for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+          const IDetector &det2 = spectrumInfo.detector(i);
+          Quat newDetectorRot = det2.getRotation() * rot;
+          const auto detID2 = det2.getComponentID();
+          componentInfo.setRotation(componentInfo.indexOf(detID2),
+                                    newDetectorRot);
+        }
+      }
     }
+
+    this->m_virtualInstrument = ws->getInstrument();
+
+    // move to unit tests, if possible
+    if (this->m_virtualInstrument->getSample()->getPos() != nullVec)
+      this->g_log.debug("Could not move the virtual instrument.");
+    if (this->m_originalInstrument->getSample()->getPos() == nullVec)
+      this->g_log.debug("Modified original instrument.");
     if (this->m_virtualInstrument->isEmptyInstrument())
       this->g_log.debug("Cannot create a virtual instrument.");
   } else
     this->g_log.debug("Instrument of the InputWorkspace is not parametrised.");
-  if (this->m_virtualInstrument->getSample()->getPos() != V3D(0.0, 0.0, 0.0))
-    this->g_log.debug("Could not move the virtual instrument.");
+
+  if (!(m_virtualInstrument->isParametrized()))
+    this->g_log.error("Cannot copy parameter map correctly from original "
+                      "instrument. Virtual instrument is not parametrised.");
 }
 
 /**
@@ -290,7 +336,7 @@ bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
   if (spectrumInfo.isMonitor(i))
     this->g_log.debug("Is monitor spectrum, will be ignored.");
   if (!spectrumInfo.hasDetectors(i)) {
-    g_log.debug("No detector(s) found");
+    this->g_log.debug("No detector(s) found");
   }
   return (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i));
 }
@@ -298,8 +344,8 @@ bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
 /**
  * @brief GravityCorrection::spectrumNumber
  * @param angle :: a final angle for a specific detector
- * @param spectrumInfo ::
- * @param i ::
+ * @param spectrumInfo :: a reference to spectrum information
+ * @param i :: spectrum number
  * @return spectrum number closest to the given final angle
  */
 size_t GravityCorrection::spectrumNumber(const double angle,
@@ -307,14 +353,15 @@ size_t GravityCorrection::spectrumNumber(const double angle,
   if (!(this->spectrumCheck(spectrumInfo, i))) {
     size_t n = 0;
     if (m_finalAngles.empty())
-      g_log.error("Map of initial final angles and its corresponding spectrum "
-                  "number does not exist.");
+      this->g_log.error(
+          "Map of initial final angles and its corresponding spectrum "
+          "number does not exist.");
     double currentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
     // a starting, lower bound iterator for an effective search that should
     // exist
     auto start_i = this->m_finalAngles.find(currentAngle);
     if (start_i == m_finalAngles.end())
-      g_log.debug("Cannot find final angle for this spectrum.");
+      this->g_log.debug("Cannot find final angle for this spectrum.");
     // search first for the spectrum with closest smaller final angle
     while (start_i != m_finalAngles.end()) {
       ++start_i;
@@ -336,7 +383,7 @@ size_t GravityCorrection::spectrumNumber(const double angle,
     // up and n cannot be smaller than 0, only larger than
     // m_ws->getNumberHistograms()
     if (n > this->m_ws->getNumberHistograms())
-      g_log.information("Move counts out of spectrum range.");
+      this->g_log.information("Move counts out of spectrum range.");
     return n;
   } else
     return i;
@@ -345,46 +392,48 @@ size_t GravityCorrection::spectrumNumber(const double angle,
 void GravityCorrection::exec() {
   this->m_progress = make_unique<Progress>(this, 0.0, 1.0, 3); // or size() ?
 
+  this->m_progress->report("Create virtual instrument ...");
+  this->virtualInstrument();
+
   const auto refFrame = m_originalInstrument->getReferenceFrame();
   this->m_upDirection = refFrame->pointingUp();
   this->m_beamDirection = refFrame->pointingAlongBeam();
   this->m_horizontalDirection = refFrame->pointingHorizontal();
+
   this->m_progress->report("Check slits ...");
   this->slitCheck();
 
   auto spectrumInfo = this->m_ws->spectrumInfo();
 
-  this->m_progress->report("Create virtual instrument ...");
-  this->virtualInstrument(spectrumInfo);
-
-  double finalAngleValue;
-
   this->m_progress->report("Setup OutputWorkspace");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
   outWS = this->m_ws->clone();
+  MatrixWorkspace_sptr clonedWS = this->m_ws->clone();
   outWS->setTitle(this->m_ws->getTitle());
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (!(this->spectrumCheck(spectrumInfo, i)))
+      continue;
+
     // delete data (x, y, e)
     HistogramX &xVals = outWS->mutableX(i);
     for (HistogramX::iterator xit = xVals.begin(); xit < xVals.end(); ++xit)
       *xit = 0.;
-    HistogramY &Y = outWS->mutableY(i);
-    for (auto yit = Y.begin(); yit < Y.end(); ++yit)
+    HistogramY &yVals = outWS->mutableY(i);
+    for (auto yit = yVals.begin(); yit < yVals.end(); ++yit)
       *yit = 0.;
-    HistogramE &E = outWS->mutableE(i);
-    for (auto eit = E.begin(); eit < E.end(); ++eit)
+    HistogramE &eVals = outWS->mutableE(i);
+    for (auto eit = eVals.begin(); eit < eVals.end(); ++eit)
       *eit = 0.;
 
     // setup map of initial final angles (y axis, spectra)
     // this map is sorted internally by its finalAngleValue's
-    if (!(this->spectrumCheck(spectrumInfo, i)))
-      continue;
-    finalAngleValue = spectrumInfo.signedTwoTheta(i) / 2.;
+    double finalAngleValue = spectrumInfo.signedTwoTheta(i) / 2.;
     this->m_finalAngles[finalAngleValue] = i;
 
     // unmask bins of OutputWorkspace
     if (outWS->hasMaskedBins(i)) {
+      this->g_log.debug("Delete masked bins.");
       const MatrixWorkspace::MaskList &maskOut = outWS->maskedBins(i);
       MatrixWorkspace::MaskList::const_iterator maskit;
       for (maskit = maskOut.begin(); maskit != maskOut.end(); ++maskit)
@@ -402,15 +451,26 @@ void GravityCorrection::exec() {
     // take neutrons that hit the detector of spectrum i
     V3D pos = spectrumInfo.position(i);
     double l1 = spectrumInfo.l1();
-    // get a reference to X (tof values), Y and E of the input WS
-    HistogramX &tof = this->m_ws->mutableX(i);
+    if (!l1)
+      this->g_log.error("Zero l1 norm detected.");
+    // get a reference to X values, which will be modified
+    HistogramX &tof = clonedWS->mutableX(i);
     // correct tof angles, velocity, characteristic length
     size_t i_tofit{0};
     for (HistogramX::iterator tofit = tof.begin(); tofit < tof.end(); ++tofit) {
-      double v{l1 / (*tofit)};
+      // this velocity should take the real flight path into account
+      if (!*tofit) {
+        this->g_log.notice(
+            "Zero tof detected. Cannot divide by it, skip this bin.");
+        continue;
+      }
+
+      double v{l1 / (*tofit)}; // l1 is too simple here
       double k = g / (2. * pow(v, 2));
       double angle = this->finalAngle(k);
-      // no sorting of tof values needed
+      if (cos(angle) == 0.)
+        this->g_log.error("Cannot divide by zero for new tof values.");
+      // no sorting of tof values needed, varying bins may be due to v
       *tofit = pos.X() / (v * cos(angle));
 
       // get new spectrum number for new final angle
@@ -427,14 +487,15 @@ void GravityCorrection::exec() {
 
     if (this->m_ws->hasMaskedBins(i)) {
       // store mask of InputWorkspace
-      const HistogramX &tof2 = outWS->mutableX(i);
+      HistogramX &tof2 = outWS->mutableX(i);
       const MatrixWorkspace::MaskList &maskIn = this->m_ws->maskedBins(i);
       MatrixWorkspace::MaskList::const_iterator maskit;
       for (maskit = maskIn.begin(); maskit != maskIn.end(); ++maskit) {
         // determine offset for new bin index
-        auto t = find_if(tof2.begin(), tof2.end(), [&](const auto &ii) {
-          return ii > this->m_ws->x(i)[ii];
-        });
+        HistogramX::iterator t =
+            find_if(tof2.begin(), tof2.end(), [&](const auto &ii) {
+              return ii > this->m_ws->x(i)[maskit->first];
+            });
         if (t != tof2.end()) {
           // get left bin boundary (index) of t
           pair<size_t, double> ti = outWS->getXIndex(i, *t, true, 0);

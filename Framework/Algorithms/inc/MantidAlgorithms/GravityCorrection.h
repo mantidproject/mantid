@@ -81,7 +81,7 @@ private:
   double coordinate(const std::string componentName,
                     Mantid::Geometry::PointingAlong direction) const;
   /// Generalise instrument setup (origin, handedness, coordinate system)
-  void virtualInstrument(Mantid::API::SpectrumInfo &spectrumInfo);
+  void virtualInstrument();
   /// Compute final angle
   double finalAngle(const double k);
   /// Ensure slits to exist and be correctly ordered

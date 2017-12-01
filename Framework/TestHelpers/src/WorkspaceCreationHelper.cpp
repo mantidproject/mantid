@@ -661,27 +661,33 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * @param nSpectra :: number of spectra
 * @param nBins :: number of bins
 * @param deltaX :: TOF delta x-value
+* @param slit1Pos :: slit 1 position
+* @param slit2Pos :: slit 2 position
+* @param sourcePos :: source position
+* @param monitorPos :: monitor position
+* @param samplePos :: sample position
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     double startX, const double detSize, const int nSpectra, const int nBins,
-    const double deltaX) {
+    const double deltaX, V3D slit1Pos, V3D slit2Pos, V3D sourcePos,
+    V3D monitorPos, V3D samplePos, V3D detectorPos) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left,
       "0,0,0"));
 
-  addSource(instrument, V3D(0, 0, 0), "source");
-  addSample(instrument, V3D(15, 0, 0), "some-surface-holder");
-  addMonitor(instrument, V3D(14, 0, 0), 1, "Monitor");
+  addSource(instrument, sourcePos, "source");
+  addSample(instrument, samplePos, "some-surface-holder");
+  addMonitor(instrument, monitorPos, 1, "Monitor");
+  addComponent(instrument, slit1Pos, "slit1");
+  addComponent(instrument, slit2Pos, "slit2");
 
   // Place the central detector at 45 degrees (i.e. the distance
   // from the sample in Y is the same as the distance in X).
-  const double posX = 20;
-  const double posY = posX - 15;
-  addDetector(instrument, V3D(posX, posY - detSize, 0), 2,
+  addDetector(instrument, detectorPos - V3D(0., detSize, 0.), 2,
               "point-detector"); // offset below centre
-  addDetector(instrument, V3D(posX, posY, 0), 3, "point-detector"); // at centre
-  addDetector(instrument, V3D(posX, posY + detSize, 0), 4,
+  addDetector(instrument, detectorPos, 3, "point-detector"); // at centre
+  addDetector(instrument, detectorPos + V3D(0., detSize, 0.), 4,
               "point-detector"); // offset above centre
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
@@ -907,7 +913,7 @@ MatrixWorkspace_sptr createGroupedWorkspace2D(size_t numHist, int numBins,
 }
 
 // =====================================================================================
-// RootOfNumHist == square root of hystohram number;
+// RootOfNumHist == square root of hystogram number;
 MatrixWorkspace_sptr
 createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
                                           double binDelta) {

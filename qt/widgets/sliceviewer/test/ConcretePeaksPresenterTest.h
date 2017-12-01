@@ -363,8 +363,10 @@ public:
         peakTransformFactory);
 
     // Updating should cause all of the held views to be updated too.
-    PeakBoundingBox region(Left(-1), Right(1), Top(1), Bottom(-1),
-                           SlicePoint(slicePoint));
+    PeakBoundingBox region(
+        MantidQt::SliceViewer::Left(-1), MantidQt::SliceViewer::Right(1),
+        MantidQt::SliceViewer::Top(1), MantidQt::SliceViewer::Bottom(-1),
+        MantidQt::SliceViewer::SlicePoint(slicePoint));
     presenter.updateWithSlicePoint(region);
 
     TSM_ASSERT("MockView not used as expected.",
@@ -942,11 +944,11 @@ public:
     /*
      * Create a Cursor region.
     */
-    Top top(0.5);
-    Bottom bottom(-0.5);
-    Left left(0);
-    Right right(1);
-    SlicePoint slicePoint(0.0);
+    MantidQt::SliceViewer::Top top(0.5);
+    MantidQt::SliceViewer::Bottom bottom(-0.5);
+    MantidQt::SliceViewer::Left left(0);
+    MantidQt::SliceViewer::Right right(1);
+    MantidQt::SliceViewer::SlicePoint slicePoint(0.0);
     PeakBoundingBox cursorRegion(left, right, top, bottom,
                                  slicePoint); // psudo viewing frustrum.
 
