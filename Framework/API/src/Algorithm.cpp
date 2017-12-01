@@ -1428,7 +1428,7 @@ bool Algorithm::processGroups() {
       Property *prop =
           dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
       if (prop && prop->value().empty())
-          continue;
+        continue;
       // And add it to the output group
       outGroups[owp]->add(outputWSNames[owp]);
     }
