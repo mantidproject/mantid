@@ -170,7 +170,7 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       wrapWithQuotes(cpp);
       options.push_back("CPp=" + cpp);
     }
-    
+
     // Add polarisation corrections
     auto polCorr = m_view->getPolarisationCorrections();
     if (!polCorr.empty())
