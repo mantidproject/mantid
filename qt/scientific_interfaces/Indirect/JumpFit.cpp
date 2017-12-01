@@ -175,7 +175,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
-    std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+    const auto currentWidth = m_uiForm.cbWidth->currentText().toStdString();
     setSelectedSpectrum(m_spectraList[currentWidth]);
     setMinimumSpectrum(m_spectraList[currentWidth]);
     setMaximumSpectrum(m_spectraList[currentWidth]);
@@ -209,7 +209,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
     return;
 
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-    std::string title = axis->label(i);
+    const auto title = axis->label(i);
 
     // check if the axis labels indicate this spectrum is width data
     size_t qLinesWidthIndex = title.find(".Width");
@@ -248,7 +248,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param text :: The name spectrum index to plot
  */
 void JumpFit::handleWidthChange(const QString &text) {
-  QString sampleName = (m_uiForm.dsSample->getCurrentDataName() + "_HWHM");
+  const auto sampleName = (m_uiForm.dsSample->getCurrentDataName() + "_HWHM");
 
   if (!sampleName.isEmpty() && m_spectraList.size() > 0) {
     if (validate()) {
@@ -349,7 +349,7 @@ void JumpFit::plotGuess() {
 }
 
 IAlgorithm_sptr JumpFit::createFitAlgorithm(IFunction_sptr func) {
-  std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
+  const auto widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   const auto sample = inputWorkspace()->getName();
   const auto startX = m_dblManager->value(m_properties["StartX"]);
@@ -411,7 +411,7 @@ JumpFit::renameWorkspaceAlgorithm(const std::string &workspaceToRename,
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-  std::string outWsName = m_baseName + "_Workspace";
+  const auto outWsName = m_baseName + "_Workspace";
   IndirectFitAnalysisTab::plotResult(outWsName, "All");
 }
 
@@ -419,7 +419,7 @@ void JumpFit::plotClicked() {
  * Handles saving of workspace
  */
 void JumpFit::saveClicked() {
-  std::string outWsName = m_baseName + "_Workspace";
+  const auto outWsName = m_baseName + "_Workspace";
   IndirectFitAnalysisTab::saveResult(outWsName);
 }
 
