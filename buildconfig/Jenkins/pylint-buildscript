@@ -60,9 +60,9 @@ cd $BUILD_DIR
 ###############################################################################
 # Clean some artifacts
 ###############################################################################
-rm -rf $BUILD_DIR/bin
+rm -rf ${BUILD_DIR:?}/bin
 # legacy file
-rm -fr $BUILD_DIR/pylint.log
+rm -fr ${BUILD_DIR:?}/pylint.log
 
 
 ###############################################################################
@@ -74,9 +74,9 @@ BUILD_CONFIG="Release"
 # CMake configuration
 ###############################################################################
 # Generator
-if [ $(command -v ninja) ]; then
+if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
-elif [ $(command -v ninja-build) ]; then
+elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
@@ -86,12 +86,12 @@ fi
 # Need this because some strange control sequences when using default TERM=xterm
 export TERM="linux"
 PYLINT_FORMAT="parseable"
-${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} ..
+${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=${BUILD_THREADS:?} -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} ..
 
 ###############################################################################
 # Build step (we only need the framework)
 ###############################################################################
-$CMAKE_EXE --build . --target Framework -- -j$BUILD_THREADS
+$CMAKE_EXE --build . --target Framework -- -j${BUILD_THREADS:?}
 
 ###############################################################################
 # Run plint check

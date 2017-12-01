@@ -17,7 +17,6 @@ else
     CMAKE_EXE=cmake
 fi
 $CMAKE_EXE --version
-echo "SHA1=${sha1}"
 
 ###############################################################################
 # Set up the location for the local object store outside of the build and

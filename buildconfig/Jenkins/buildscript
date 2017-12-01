@@ -104,7 +104,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
@@ -138,7 +138,7 @@ if [[ $USE_CLANG ]]; then
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
   #only needed with incremental builds. Clean builds delete this directory in a later step.
   if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt`
+    COMPILERFILEPATH=$(grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt)
     if [[ $COMPILERFILEPATH != *clang++* ]]; then
       # Removing the build directory entirely guarantees clang is used.
       rm -rf $BUILD_DIR
@@ -173,7 +173,7 @@ PY2_BUILD=false
 PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
   PY3_BUILD=true
-  PYTHON3_EXECUTABLE=`which python3`
+  PYTHON3_EXECUTABLE=$(which python3)
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
   PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 else
@@ -218,9 +218,9 @@ fi
 ###############################################################################
 # Generator
 ###############################################################################
-if [ $(command -v ninja) ]; then
+if [ "$(command -v ninja)" ]; then
   CMAKE_GENERATOR="-G Ninja"
-elif [ $(command -v ninja-build) ]; then
+elif [ "$(command -v ninja-build)" ]; then
   CMAKE_GENERATOR="-G Ninja"
 fi
 if [ -e $BUILD_DIR/CMakeCache.txt ]; then
@@ -236,7 +236,7 @@ cd $BUILD_DIR
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
-rm -f *.dmg *.rpm *.deb *.tar.gz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz
 
 ###############################################################################
 # CMake configuration
@@ -247,7 +247,7 @@ ${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPAC
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS}
+  ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS:?}
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
@@ -264,9 +264,8 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-
-${CMAKE_EXE} --build . -- -j$BUILD_THREADS
-${CMAKE_EXE} --build . --target AllTests -- -j$BUILD_THREADS
+${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
+${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
 
 ###############################################################################
 # static analysis builds stop here
@@ -282,8 +281,7 @@ fi
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-
-$CTEST_EXE -j$BUILD_THREADS --schedule-random --output-on-failure
+$CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 
 ###############################################################################
 # Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
