@@ -64,6 +64,7 @@ public:
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
+  MOCK_METHOD0(settingsChanged, void());
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
@@ -145,6 +146,7 @@ public:
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(settingsChanged, void());
 
 private:
   // Calls we don't care about

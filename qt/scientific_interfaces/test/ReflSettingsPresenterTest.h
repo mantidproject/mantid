@@ -46,7 +46,7 @@ public:
 
   void testGetTransmissionOptions() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -109,7 +109,7 @@ public:
 
   void testGetReductionOptions() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -221,7 +221,7 @@ public:
 
   void testStitchOptions() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(1)
@@ -234,7 +234,7 @@ public:
 
   void testPolarisationOptionsEnabled() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
@@ -248,7 +248,7 @@ public:
 
   void testExperimentDefaults() {
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
@@ -272,7 +272,7 @@ public:
   void testInstrumentDefaults() {
     MockSettingsView mockView;
     MockMainWindowPresenter mainPresenter;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     // Set instrument to 'INTER'
     EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
@@ -293,7 +293,7 @@ public:
   void testExperimentSettingsDisabled() {
 
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(3)
@@ -330,7 +330,7 @@ public:
   void testInstrumentSettingsDisabled() {
 
     MockSettingsView mockView;
-    ReflSettingsPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView, 1);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
         .Times(3)
