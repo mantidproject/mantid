@@ -197,6 +197,11 @@ public:
   virtual std::string getFittingListWidgetCurrentValue() const = 0;
 
   /**
+  * @return Whether the list widget currently has an item selected
+  */
+  virtual bool listWidgetHasSelectedRow() const = 0;
+
+  /**
    * Sets the current row of the fitting list widget
    *
    * @param idx number to set as for the list widget

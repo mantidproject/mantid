@@ -96,6 +96,9 @@ public:
   // return idx of current selected row of list widget
   MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
 
+  // gets whether the list widget has a selected row
+  MOCK_CONST_METHOD0(listWidgetHasSelectedRow, bool());
+
   // sets the current row of the fitting list widget
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
 
