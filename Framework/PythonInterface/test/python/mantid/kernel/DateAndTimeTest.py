@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.kernel import DateAndTime
+from numpy import timedelta64, datetime64
 
 class DateAndTimeTest(unittest.TestCase):
 
@@ -17,6 +18,15 @@ class DateAndTimeTest(unittest.TestCase):
     def test_construction_with_total_nano_seconds(self):
         dt = DateAndTime(598471118000000000)
         self.assertEquals(self.iso_str_plus_space, str(dt))
+
+    def test_convert_to_np(self):
+        dt = DateAndTime(598471118000000000)
+        dt_np = timedelta64(dt.total_nanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
+
+        # convert both into ISO8601 strings up to the seconds
+        dt = str(dt)[:19]
+        dt_np = str(dt_np)[:19]
+        self.assertEquals(dt, dt_np)
 
 if __name__ == "__main__":
     unittest.main()

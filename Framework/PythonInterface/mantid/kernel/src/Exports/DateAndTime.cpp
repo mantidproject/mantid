@@ -13,6 +13,7 @@ using boost::python::arg;
  *  the special treatment that leads to the problem.
  */
 std::string ISO8601StringPlusSpace(DateAndTime &self) {
+  // TODO this should cmake check and turn off the behavior
   return self.toISO8601String() + " ";
 }
 
@@ -33,7 +34,7 @@ void export_DateAndTime() {
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"))
       .def("setToMinimum", &DateAndTime::setToMinimum, arg("self"))
       .def("__str__", &ISO8601StringPlusSpace, arg("self"))
-      .def("__long__", &DateAndTime::totalNanoseconds, arg("self"))
+      .def("__int__", &DateAndTime::totalNanoseconds, arg("self"))
       .def(self == self)
       .def(self != self)
       // cppcheck-suppress duplicateExpression
@@ -66,6 +67,5 @@ void export_time_duration() {
       .def(
           "total_nanoseconds", &time_duration::total_nanoseconds, arg("self"),
           "Get the total number of nanoseconds truncating any remaining digits")
-
       ;
 }
