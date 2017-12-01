@@ -1,4 +1,4 @@
-#include "ApplyPaalmanPings.h"
+#include "ApplyAbsorptionCorrections.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -10,12 +10,12 @@
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("ApplyPaalmanPings");
+Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 }
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
+ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
@@ -47,14 +47,14 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
   m_uiForm.spPreviewSpec->setMaximum(0);
 }
 
-void ApplyPaalmanPings::setup() {}
+void ApplyAbsorptionCorrections::setup() {}
 
 /**
 * Disables corrections when using S(Q, w) as input data.
 *
 * @param dataName Name of new data source
 */
-void ApplyPaalmanPings::newSample(const QString &dataName) {
+void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   // Remove old curves
   m_uiForm.ppPreview->removeSpectrum("Sample");
   m_uiForm.ppPreview->removeSpectrum("Corrected");
@@ -74,7 +74,7 @@ void ApplyPaalmanPings::newSample(const QString &dataName) {
   m_uiForm.spCanShift->setMaximum(m_ppSampleWS->getXMax());
 }
 
-void ApplyPaalmanPings::newContainer(const QString &dataName) {
+void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   // Remove old curves
   m_uiForm.ppPreview->removeSpectrum("Container");
   m_uiForm.ppPreview->removeSpectrum("Corrected");
@@ -94,7 +94,7 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
   plotInPreview("Container", m_ppContainerWS, Qt::red);
 }
 
-void ApplyPaalmanPings::updateContainer() {
+void ApplyAbsorptionCorrections::updateContainer() {
   const auto canName = m_uiForm.dsContainer->getCurrentDataName();
   const auto canValid = m_uiForm.dsContainer->isValid();
   const auto useCan = m_uiForm.ckUseCan->isChecked();
@@ -148,11 +148,11 @@ void ApplyPaalmanPings::updateContainer() {
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
 
-void ApplyPaalmanPings::run() {
+void ApplyAbsorptionCorrections::run() {
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
   IAlgorithm_sptr applyCorrAlg =
-      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
+      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrections");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
@@ -251,7 +251,7 @@ void ApplyPaalmanPings::run() {
           break;
         default:
           m_batchAlgoRunner->clearQueue();
-          g_log.error("ApplyPaalmanPings cannot run with corrections that do "
+          g_log.error("ApplyAbsorptionCorrections cannot run with corrections that do "
                       "not match sample binning.");
           return;
         }
@@ -331,7 +331,7 @@ void ApplyPaalmanPings::run() {
 * @param toInterpolate Pointer to the workspace to interpolate
 * @param toMatch Name of the workspace to match
 */
-void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
+void ApplyAbsorptionCorrections::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
                                              std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
   interpolationProps["WorkspaceToMatch"] = toMatch;
@@ -352,7 +352,7 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 *
 * @param error True if algorithm failed.
 */
-void ApplyPaalmanPings::absCorComplete(bool error) {
+void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
   if (error) {
@@ -386,7 +386,7 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
 *
 * @param error True if algorithm failed.
 */
-void ApplyPaalmanPings::postProcessComplete(bool error) {
+void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
 
@@ -421,7 +421,7 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
   }
 }
 
-bool ApplyPaalmanPings::validate() {
+bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
@@ -494,7 +494,7 @@ bool ApplyPaalmanPings::validate() {
   return uiv.isAllInputValid();
 }
 
-void ApplyPaalmanPings::loadSettings(const QSettings &settings) {
+void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCorrections->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
@@ -505,7 +505,7 @@ void ApplyPaalmanPings::loadSettings(const QSettings &settings) {
 *
 * Updates the file extension to search for
 */
-void ApplyPaalmanPings::handleGeometryChange(int index) {
+void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
   QString ext("");
   switch (index) {
   case 0:
@@ -530,7 +530,7 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
 *
 * @param wsIndex Spectrum index to plot
 */
-void ApplyPaalmanPings::plotPreview(int wsIndex) {
+void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
   m_uiForm.ppPreview->clear();
@@ -557,7 +557,7 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
 /**
  * Handles saving of the workspace
  */
-void ApplyPaalmanPings::saveClicked() {
+void ApplyAbsorptionCorrections::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
@@ -567,7 +567,7 @@ void ApplyPaalmanPings::saveClicked() {
 /**
  * Handles mantid plotting of workspace
  */
-void ApplyPaalmanPings::plotClicked() {
+void ApplyAbsorptionCorrections::plotClicked() {
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
@@ -584,7 +584,7 @@ void ApplyPaalmanPings::plotClicked() {
 /**
 * Plots the current spectrum displayed in the preview plot
 */
-void ApplyPaalmanPings::plotCurrentPreview() {
+void ApplyAbsorptionCorrections::plotCurrentPreview() {
   QStringList workspaces = QStringList();
 
   // Check whether a sample workspace has been specified
@@ -614,7 +614,7 @@ void ApplyPaalmanPings::plotCurrentPreview() {
  * @param ws          The workspace whose spectra to plot in the preview.
  * @param curveColor  The color of the curve to plot in the preview.
  */
-void ApplyPaalmanPings::plotInPreview(const QString &curveName,
+void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
                                       MatrixWorkspace_sptr &ws,
                                       const QColor &curveColor) {
 
