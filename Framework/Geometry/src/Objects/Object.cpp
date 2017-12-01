@@ -1035,7 +1035,7 @@ double Object::triangleSolidAngle(const V3D &observer) const {
       const auto &vertices = this->getTriangleVertices().get();
       const auto &faces = this->getTriangleFaces().get();
       double sangle(0.0), sneg(0.0);
-      for (int i = 0; i < nTri; i++) {
+      for (size_t i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
         V3D vp1 =
             V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
@@ -1116,7 +1116,7 @@ double Object::triangleSolidAngle(const V3D &observer,
   const auto &vertices = this->getTriangleVertices().get();
   const auto &faces = this->getTriangleFaces().get();
   double sangle(0.0), sneg(0.0);
-  for (int i = 0; i < nTri; i++) {
+  for (size_t i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
     // would be more efficient to pre-multiply the vertices (copy of) by these
     // factors beforehand
@@ -1715,7 +1715,7 @@ void Object::calcBoundingBoxByVertices() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all vertices and determine minima and maxima on each axis
-    for (int i = 0; i < vertCount; ++i) {
+    for (size_t i = 0; i < vertCount; ++i) {
       auto vx = vertArray[3 * i + 0];
       auto vy = vertArray[3 * i + 1];
       auto vz = vertArray[3 * i + 2];

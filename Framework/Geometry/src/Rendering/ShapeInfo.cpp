@@ -1,4 +1,5 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 using Kernel::V3D;

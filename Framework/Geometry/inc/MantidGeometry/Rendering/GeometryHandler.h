@@ -5,7 +5,9 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
+#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {

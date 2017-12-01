@@ -90,6 +90,8 @@ void Renderer::renderShape(const ShapeInfo &shapeInfo) const {
   case ShapeInfo::GeometryShape::SEGMENTED_CYLINDER:
     doRenderCylinder(shapeInfo);
     break;
+  default:
+    return;
   }
 }
 
@@ -278,7 +280,7 @@ void Renderer::doRender(detail::GeometryTriangulator &triangulator) const {
   const auto &points = triangulator.getTriangleVertices();
   glBegin(GL_TRIANGLES);
   V3D normal;
-  for (int i = 0; i < triangulator.numTriangleFaces(); i++) {
+  for (size_t i = 0; i < triangulator.numTriangleFaces(); i++) {
     int index1 = faces[i * 3] * 3;
     int index2 = faces[i * 3 + 1] * 3;
     int index3 = faces[i * 3 + 2] * 3;
