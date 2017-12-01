@@ -34,7 +34,7 @@ private:
 protected slots:
   void typeSelection(int index);
   void newDataLoaded(const QString wsName);
-  void updatePlot() override;
+  void updatePreviewPlots() override;
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void xMinSelected(double val);

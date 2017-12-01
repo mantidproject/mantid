@@ -33,7 +33,7 @@ protected slots:
   void plotClicked();
   void algorithmComplete(bool error) override;
   void modelSelection(int selected);
-  void updatePlot() override;
+  void updatePreviewPlots() override;
   void plotGuess();
 
 private:

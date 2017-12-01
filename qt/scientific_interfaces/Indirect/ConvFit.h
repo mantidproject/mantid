@@ -27,7 +27,7 @@ protected slots:
   void bgTypeSelection(int index);
   void newDataLoaded(const QString &wsName);
   void extendResolutionWorkspace();
-  void updatePlot() override;
+  void updatePreviewPlots() override;
   void plotGuess();
   void singleFit();
   void specMinChanged(int value);

@@ -160,13 +160,13 @@ void ConvFit::setup() {
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
 
   // Update plot preview when fit function changes
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -1006,7 +1006,7 @@ void ConvFit::bgTypeSelection(int index) {
 /**
  * Updates the plot in the GUI window
  */
-void ConvFit::updatePlot() {
+void ConvFit::updatePreviewPlots() {
   const auto inputWS = inputWorkspace();
 
   if (inputWS) {

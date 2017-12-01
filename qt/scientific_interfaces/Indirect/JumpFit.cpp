@@ -60,7 +60,7 @@ void JumpFit::setup() {
   connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(fitFunctionSelected(const QString &)));
   connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(updatePlot()));
+          this, SLOT(updatePreviewPlots()));
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRS(QtProperty *, double)));
@@ -327,7 +327,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
 /**
  * Updates the plot
  */
-void JumpFit::updatePlot() {
+void JumpFit::updatePreviewPlots() {
   const auto baseGroupName = m_baseName + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(baseGroupName, m_uiForm.ppPlotTop,
                                      m_uiForm.ppPlotBottom);

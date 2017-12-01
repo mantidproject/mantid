@@ -122,12 +122,12 @@ void IqtFit::setup() {
 
   // Update plot when fit type changes
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
 
@@ -410,7 +410,7 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
   m_plotOption = newOption.toStdString();
 }
 
-void IqtFit::updatePlot() {
+void IqtFit::updatePreviewPlots() {
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,

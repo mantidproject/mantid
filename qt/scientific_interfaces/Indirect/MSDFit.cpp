@@ -69,9 +69,9 @@ void MSDFit::setup() {
           SLOT(updateProperties(int)));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
   connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(plotGuess()));
@@ -205,7 +205,7 @@ void MSDFit::algorithmComplete(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void MSDFit::updatePlot() {
+void MSDFit::updatePreviewPlots() {
   const auto groupName = m_pythonExportWsName + "_Workspaces";
   IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
                                      m_uiForm.ppPlotBottom);

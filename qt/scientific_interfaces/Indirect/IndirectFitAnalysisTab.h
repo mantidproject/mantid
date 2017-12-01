@@ -99,7 +99,7 @@ protected slots:
 
   void clearBatchRunnerSlots();
 
-  virtual void updatePlot() = 0;
+  virtual void updatePreviewPlots() = 0;
 
 private:
   /// Overidden by child class.

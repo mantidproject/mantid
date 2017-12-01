@@ -40,7 +40,7 @@ protected slots:
   /// Generates the plot guess data
   void plotGuess();
   /// Handles plotting and saving
-  void updatePlot() override;
+  void updatePreviewPlots() override;
   void saveClicked();
   void plotClicked();
 
