@@ -61,12 +61,14 @@
          <stringlist>
           <string>_red</string>
           <string>_sqw</string>
+          <string>_elf</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
           <string>_red.nxs</string>
           <string>_sqw.nxs</string>
+          <string>_elf.nxs</string>
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
@@ -92,12 +94,14 @@
          <stringlist>
           <string>_red</string>
           <string>_sqw</string>
+          <string>_elf</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
           <string>_red.nxs</string>
           <string>_sqw.nxs</string>
+          <string>_elf.nxs</string>
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
@@ -199,7 +203,18 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true">
+        <property name="showLegend" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="canvasColour" stdset="0">
+         <color>
+          <red>255</red>
+          <green>255</green>
+          <blue>255</blue>
+         </color>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -326,7 +341,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/PreviewPlot.h</header>
+   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

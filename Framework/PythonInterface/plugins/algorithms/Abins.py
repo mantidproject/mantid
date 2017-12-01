@@ -276,7 +276,7 @@ class Abins(PythonAlgorithm):
         eps = AbinsModules.AbinsConstants.MASS_EPS
         # convert set to list to fix order
         for s in masses:
-            masses[s] = list(set(masses[s]))
+            masses[s] = sorted(list(set(masses[s])))
 
         for symbol in atoms_symbols:
 

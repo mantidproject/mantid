@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <qwt_plot.h>
 
@@ -340,14 +340,13 @@ void Iqt::plotInput(const QString &wsname) {
   try {
     workspace = Mantid::API::AnalysisDataService::Instance()
                     .retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
     return;
   }
 
-  m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
-
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
@@ -387,11 +386,6 @@ void Iqt::plotInput(const QString &wsname) {
       // set default value for width
       m_dblManager->setValue(m_properties["EWidth"], 0.005);
     }
-
-    // Set saved workspace
-    auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        wsname.toStdString());
-    setInputWorkspace(inputWs);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }

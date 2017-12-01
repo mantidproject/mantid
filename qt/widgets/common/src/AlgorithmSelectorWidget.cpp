@@ -4,6 +4,14 @@
 
 #include "boost/algorithm/string.hpp"
 
+#include <QApplication>
+#include <QCompleter>
+#include <QDrag>
+#include <QHBoxLayout>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QPushButton>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

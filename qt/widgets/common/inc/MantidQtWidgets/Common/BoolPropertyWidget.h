@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qcheckbox.h>
+#include <QCheckBox>
 
 namespace MantidQt {
 namespace API {
