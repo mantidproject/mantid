@@ -3,7 +3,7 @@
 //----------------------
 
 #include "AbsorptionCorrections.h"
-#include "ApplyPaalmanPings.h"
+#include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
 #include "IndirectCorrections.h"
@@ -39,7 +39,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
   m_tabs.emplace(CALC_CORR,
                  new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR)));
   m_tabs.emplace(APPLY_CORR,
-                 new ApplyPaalmanPings(m_uiForm.twTabs->widget(APPLY_CORR)));
+                 new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORR)));
   m_tabs.emplace(ABSORPTION_CORRECTIONS,
                  new AbsorptionCorrections(
                      m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
