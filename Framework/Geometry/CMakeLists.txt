@@ -109,8 +109,8 @@ set ( SRC_FILES
 	src/Objects/ShapeFactory.cpp
 	src/Objects/Track.cpp
 	src/Rendering/GeometryHandler.cpp
-    src/Rendering/Renderer.cpp
-    src/Rendering/ShapeInfo.cpp
+        src/Rendering/Renderer.cpp
+        src/Rendering/ShapeInfo.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Rendering/GeometryTriangulator.cpp
@@ -260,8 +260,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
-    inc/MantidGeometry/Rendering/Renderer.h
-    inc/MantidGeometry/Rendering/ShapeInfo.h
+    	inc/MantidGeometry/Rendering/Renderer.h
+    	inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
@@ -387,7 +387,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
-    ShapeInfoTest.h
+    	ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
