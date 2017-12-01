@@ -1,4 +1,6 @@
 #include "EnggDiffFittingPresenter.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
@@ -70,6 +72,16 @@ std::string stripExtraCommas(std::string &expectedPeaks) {
     }
   }
   return expectedPeaks;
+}
+
+std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
+  std::string label = unit->unitID();
+  if (label == "TOF") {
+    label += " (us)";
+  } else if (label == "dSpacing") {
+    label += " (A)";
+  }
+  return label;
 }
 }
 
@@ -1165,7 +1177,8 @@ void EnggDiffFittingPresenter::plotFocusedFile(
                                   " Is this a focused file?");
     }
 
-    m_view->setDataVector(focusedData, true, plotSinglePeaks);
+    m_view->setDataVector(focusedData, true, plotSinglePeaks, 
+                          generateXAxisLabel(focusedPeaksWS->getAxis(0)->unit()));
 
   } catch (std::runtime_error &re) {
     g_log.error()
@@ -1197,7 +1210,8 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
-      m_view->setDataVector(singlePeaksData, false, true);
+      m_view->setDataVector(singlePeaksData, false, true, 
+                            generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
 
     } else {

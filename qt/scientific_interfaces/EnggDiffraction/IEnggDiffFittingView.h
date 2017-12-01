@@ -5,6 +5,8 @@
 #include "IEnggDiffractionSettings.h"
 #include "IEnggDiffractionUserMsg.h"
 
+#include "MantidKernel/Unit.h"
+
 #include <string>
 #include <vector>
 
@@ -227,9 +229,11 @@ public:
    * @param data of the workspace to be passed as QwtData
    * @param focused to check whether focused workspace
    * @param plotSinglePeaks whether to plot single peak fitting ws
+   * @param xAxisLabel Label specifying the x axis units
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused, bool plotSinglePeaks) = 0;
+                             bool focused, bool plotSinglePeaks,
+                             const std::string &xAxisLabel) = 0;
 
   /**
    * resets the canvas to avoid multiple plotting
