@@ -118,6 +118,7 @@ void QDataProcessorWidget::createTable() {
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
+  header->setStyleSheet("QHeaderView {font-size:11pt;}"); 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
@@ -126,6 +127,10 @@ void QDataProcessorWidget::createTable() {
   header->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
   ui.viewTable->setHeader(header);
+
+  ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;} QTreeView::item {border: 0.5px solid lightGray;}"); 
+  //ui.viewTable->setIndentation(0);
+  //ui.viewTable->setRootIsDecorated(0);
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
