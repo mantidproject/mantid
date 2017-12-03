@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid import config
 from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces,
-                              ElasticWindowMultiple)
+                              ElasticWindowMultiple, MSDFit)
 
 
 class PreppingMixin(object):
@@ -40,8 +40,8 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         Override parent method, does the work of running the test
         """
-        # Load files and create workspace group
         try:
+            # Load files and create workspace group
             names = ('BASIS_63652_sqw', 'BASIS_63700_sqw')
             [Load(Filename=name + '.nxs', OutputWorkspace=name) for name in names]
             GroupWorkspaces(InputWorkspaces=names, OutputWorkspace='elwin_input')
@@ -68,6 +68,42 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
+
+
+class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
+    r"""MSD tab of the Indirect Inelastic Interface
+    """
+
+    def __init__(self):
+        super(GaussianMSDTest, self).__init__()
+        self.config = None
+        self.prepset('MSD')
+
+    def requiredFiles(self):
+        return ['BASIS_63652_63720_elwin_eq.nxs',
+                'BASIS_63652_63720_Gaussian_msd.nxs']
+
+    def runTest(self):
+        """
+        Override parent method, does the work of running the test
+        """
+        try:
+            Load(Filename='BASIS_63652_63720_elwin_eq.nxs',
+                 OutputWorkspace='elwin_eq')
+            MSDFit(InputWorkspace='elwin_eq', Model='Gauss', SpecMax=68,
+                   XStart=0.3, XEnd=1.3, OutputWorkspace='outMSD')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        """
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
 
 
 class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
