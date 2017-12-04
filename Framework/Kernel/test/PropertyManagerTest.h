@@ -11,7 +11,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/OptionalBool.h"
-#include "../inc/MantidKernel/EnabledWhenProperty.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
