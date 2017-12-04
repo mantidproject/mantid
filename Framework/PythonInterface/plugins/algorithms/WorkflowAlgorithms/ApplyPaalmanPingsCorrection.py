@@ -18,11 +18,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _scale_can = False
     _output_ws_name = None
     _corrections = None
-    _scaled_container = None
     _shift_can = False
     _shifted_container = None
     _can_shift_factor = 0.0
-    _scaled_container_wavelength = None
     _sample_ws_wavelength = None
     _rebin_container_ws = False
     _factors = []
@@ -70,7 +68,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Units should be wavelength
         sample_unit = self._sample_workspace.getAxis(0).getUnit().unitID()
-        sample_ws_wavelength = self._convert_units(self._sample_workspace, "Wavelength")
+        sample_ws_wavelength = self._convert_units_wavelength(self._sample_workspace)
 
         container_ws_wavelength = (self._process_container_workspace(self._container_workspace, prog_container)
                                    if self._use_can else None)
@@ -144,7 +142,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                            LogText=sam_base)
 
         # Convert Units back to original
-        output_workspace = self._convert_units(output_workspace, sample_unit)
+        efixed = self._get_e_fixed(output_workspace)
+        emode = output_workspace.getEMode()
+        output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
         self.setProperty('OutputWorkspace', output_workspace)
         prog_wrkflow.report('Algorithm Complete')
 
@@ -232,7 +232,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                             OutputWorkspace="__shifted",
                             Operation="Add", StoreInADS=False)
 
-    def _convert_units(self, workspace, target):
+    def _convert_units_wavelength(self, workspace):
         unit = workspace.getAxis(0).getUnit().unitID()
 
         if unit != 'Wavelength':
@@ -243,17 +243,20 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                     efixed = 0.0
                 else:
                     emode = 'Indirect'
-                    from IndirectCommon import getEfixed
-                    efixed = getEfixed(workspace)
-
-                # Do conversion
-                # Use temporary workspace so we don't modify data
-                return s_api.ConvertUnits(InputWorkspace=workspace,
-                                          OutputWorkspace="__units_converted",
-                                          Target=target, EMode=emode,
-                                          EFixed=efixed, StoreInADS=False)
+                    efixed = self._get_e_fixed(workspace)
+                return self._convert_units(workspace, "Wavelength", emode, efixed)
         else:
             return workspace
+
+    def _convert_units(self, workspace, target, emode, efixed):
+        return s_api.ConvertUnits(InputWorkspace=workspace,
+                                  OutputWorkspace="__units_converted",
+                                  Target="Wavelength", EMode=emode,
+                                  EFixed=efixed, StoreInADS=False)
+
+    def _get_e_fixed(self, workspace):
+        from IndirectCommon import getEfixed
+        return getEfixed(workspace)
 
     def _process_container_workspace(self, container_workspace, prog_container):
         # Appy container shift if needed
@@ -263,7 +266,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             shifted_container = self._shift_workspace(self._container_workspace, self._can_shift_factor)
             logger.information('Container shifted by %f' % self._can_shift_factor)
         else:
-            shifted_container = self._container_workspace
+            shifted_container = self._clone(self._container_workspace)
 
         # Apply container scale factor if needed
         if self._scale_can:
@@ -275,7 +278,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             scaled_container = shifted_container
 
         # Units should be wavelength
-        return self._convert_units(scaled_container, "Wavelength")
+        return self._convert_units_wavelength(scaled_container)
 
     def _get_correction_factor_workspace(self, factor_type):
         """
@@ -310,6 +313,15 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                                           StoreInADS=False)
         return minuend_workspace - subtrahend_workspace
 
+    def _clone(self, workspace):
+        """
+        Clones the specified workspace.
+        :param workspace:   The workspace to clone.
+        :return:            A clone of the specified workspace.
+        """
+        return s_api.CloneWorkspace(InputWorkspace=workspace,
+                                    OutputWorkspace="cloned",
+                                    StoreInADS=False)
 
     def _correct_sample(self, sample_workspace, a_ss_workspace):
         """
@@ -317,7 +329,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
 
         logger.information('Correcting sample')
-        return sample_workspace / self._convert_units(a_ss_workspace, "Wavelength")
+        return sample_workspace / self._convert_units_wavelength(a_ss_workspace)
 
     def _correct_sample_can(self, sample_workspace, container_workspace, factor_workspaces):
         """
@@ -326,8 +338,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Correcting sample and container')
 
-        factor_workspaces_wavelength = { factor : self._convert_units(workspace, "Wavelength") for factor, workspace
-                                         in factor_workspaces.items() }
+        factor_workspaces_wavelength = {factor : self._convert_units_wavelength(workspace) for factor, workspace
+                                        in factor_workspaces.items()}
 
         if self._rebin_container_ws:
             container_workspace = s_api.RebinToWorkspace(WorkspaceToRebin=container_workspace,
