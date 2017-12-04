@@ -25,6 +25,7 @@ import os
 # 3rd-party modules
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
+from qtpy.QtWidgets import QAction
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -75,3 +76,25 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     else:
         return loadUiType(filepath)
 
+
+def create_action(parent, text, on_triggered=None, shortcut=None,
+                  shortcut_context=None):
+    """Create a QAction based on the give properties
+
+    :param parent: The parent object
+    :param text: Text string to display
+    :param on_triggered: An optional slot to call on the triggered signal
+    :param shortcut: An optional shortcut
+    :param shortcut_context: An optional context for the supplied shortcut.
+    Only applies if a shortcut has been given
+    :return: A new QAction object
+    """
+    action = QAction(text, parent)
+    if on_triggered is not None:
+        action.triggered.connect(on_triggered)
+    if shortcut is not None:
+        action.setShortcut(shortcut)
+        if shortcut_context is not None:
+            action.setShortcutContext(shortcut_context)
+
+    return action
