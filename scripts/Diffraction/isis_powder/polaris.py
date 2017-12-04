@@ -44,9 +44,11 @@ class Polaris(AbstractInst):
 
     def create_total_scattering_pdf(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        # Validate that required files exist
-        # generate pdf
-        pdf_output = polaris_algs.generate_ts_pdf(focused_ws=self._inst_settings.focused_ws,
+        # Generate pdf
+        run_details = self._get_run_details(self._inst_settings.run_number)
+        focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
+        pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
+                                                  focus_file_path=focus_file_path,
                                                   merge_banks=self._inst_settings.merge_banks)
         return pdf_output
 
