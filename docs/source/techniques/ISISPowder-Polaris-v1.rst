@@ -176,14 +176,25 @@ from focused POLARIS data, with a view performing further total scattering analy
 With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
 the focused_workspace.
 
+This function requires the run_number you which to analyse. The focused file for this run number must
+either be loaded in Mantid with the naming format given by the *focus* method:
+
+*<run number>-Results-<TOF/D>-Grp*
+
+for example:
+
+12345-Results-TOF-Grp
+
+Or the focused file must be in the output directory of the POLARIS instrument.
+
 
 Example
 =======
 
 ..  code-block:: python
 
-  polaris_example.set_sample(focused_workspace=focused_ws,
-                             merge_banks=False)
+  polaris_example.create_total_scattering_pdf(run_number='12345',
+                                              merge_banks=False)
 
 .. _calibration_mapping_polaris-isis-powder-ref:
 
