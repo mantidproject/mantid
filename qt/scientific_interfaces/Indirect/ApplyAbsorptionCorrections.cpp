@@ -152,7 +152,7 @@ void ApplyAbsorptionCorrections::run() {
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
   IAlgorithm_sptr applyCorrAlg =
-      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrections");
+      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
@@ -475,6 +475,7 @@ bool ApplyAbsorptionCorrections::validate() {
           continue;
         }
 
+        /*
         // Check X unit is wavelength
         Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
         if (xUnit->caption() != "Wavelength") {
@@ -482,7 +483,7 @@ bool ApplyAbsorptionCorrections::validate() {
                         QString::fromStdString(factorWs->getName()) +
                         " is not in wavelength";
           uiv.addErrorMessage(msg);
-        }
+        }*/
       }
     }
   }
