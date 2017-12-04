@@ -645,7 +645,8 @@ void NormaliseToMonitor::performHistogramDivision(
     monitorWorkspaceIndex++;
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
-    for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+    for (int64_t i = 0; i < int64_t(outputWorkspace->getNumberHistograms());
+         ++i) {
       PARALLEL_START_INTERUPT_REGION
       const auto &specDef = specInfo.spectrumDefinition(i);
 
