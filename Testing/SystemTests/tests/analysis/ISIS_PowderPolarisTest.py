@@ -100,8 +100,9 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
     pdf_output = None
 
     def runTest(self):
-        focused_ws = mantid.Load(Filename="ISIS_Powder-POLARIS98533_FocusSempty.nxs")  # Reference from focus output
-        self.pdf_output = run_total_scattering(focused_ws, False)
+        # Load Focused ws
+        mantid.LoadNexus(Filename="ISIS_Powder-POLARIS98533_FocusSempty.nxs", OutputWorkspace='98533-Results-TOF-Grp')
+        self.pdf_output = run_total_scattering('98533', False)
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
@@ -117,9 +118,9 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
                                    places=3)
 
 
-def run_total_scattering(focused_ws, merge_banks):
-    pdf_inst_obj = setup_inst_object(mode="pdf")
-    return pdf_inst_obj.create_total_scattering_pdf(focused_workspace=focused_ws,
+def run_total_scattering(run_number, merge_banks):
+    pdf_inst_obj = setup_inst_object(mode="PDF")
+    return pdf_inst_obj.create_total_scattering_pdf(run_number=run_number,
                                                     merge_banks=merge_banks)
 
 
