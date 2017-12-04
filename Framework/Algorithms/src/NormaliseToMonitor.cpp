@@ -115,7 +115,14 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  // Only check if number of histograms is small, else this takes too long!
+  std::vector<size_t> indexList;
+  if (inputWS->getNumberHistograms() < 100000) {
+    indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  } else {
+    indexList = std::vector<size_t>(mon.begin(), mon.end());
+  }
+
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -379,6 +386,9 @@ void NormaliseToMonitor::checkProperties(
   m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
   // Or is it in a separate workspace
   bool sepWS{monWS};
+  if (m_syncScanInput && sepWS)
+    throw std::runtime_error("Can not currently use a separate monitor "
+                             "workspace with a detector scan input workspace.");
   // or monitor ID
   bool monIDs = !monID->isDefault();
   // something has to be set
@@ -532,12 +542,16 @@ bool NormaliseToMonitor::setIntegrationProps(
   // Yes integration is going to be used...
 
   // Now check the end X values are within the X value range of the workspace
-  if (isEmpty(m_integrationMin) || m_integrationMin < m_monitor->x(0).front()) {
+  if ((isEmpty(m_integrationMin) ||
+       m_integrationMin < m_monitor->x(0).front()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range minimum set to workspace min: "
                     << m_integrationMin << '\n';
     m_integrationMin = m_monitor->x(0).front();
   }
-  if (isEmpty(m_integrationMax) || m_integrationMax > m_monitor->x(0).back()) {
+  if ((isEmpty(m_integrationMax) ||
+       m_integrationMax > m_monitor->x(0).back()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range maximum set to workspace max: "
                     << m_integrationMax << '\n';
     m_integrationMax = m_monitor->x(0).back();
@@ -610,11 +624,14 @@ void NormaliseToMonitor::performHistogramDivision(
 
   size_t monitorWorkspaceIndex = 0;
 
+  Progress prog(this, 0.0, 1.0, m_workspaceIndexes.size());
   const auto &specInfo = inputWorkspace->spectrumInfo();
   for (const auto workspaceIndex : m_workspaceIndexes) {
     // Errors propagated according to
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
+
+    prog.report("Performing normalisation");
 
     size_t timeIndex = 0;
     if (m_syncScanInput)
@@ -627,7 +644,10 @@ void NormaliseToMonitor::performHistogramDivision(
     const double yErrorFactor = pow(divisorError * newYFactor, 2);
     monitorWorkspaceIndex++;
 
-    for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
+    for (int64_t i = 0; i < int64_t(outputWorkspace->getNumberHistograms());
+         ++i) {
+      PARALLEL_START_INTERUPT_REGION
       const auto &specDef = specInfo.spectrumDefinition(i);
 
       if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
@@ -644,7 +664,9 @@ void NormaliseToMonitor::performHistogramDivision(
       }
 
       outputWorkspace->setHistogram(i, hist);
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 }
 
