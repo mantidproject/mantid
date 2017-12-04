@@ -141,10 +141,10 @@ GCC_DIAG_ON(cast-qual)
 void export_AlgorithmFactory() {
 
   class_<AlgorithmDescriptor>("AlgorithmDescriptor")
-    .def_readonly("name", &AlgorithmDescriptor::name)
-    .def_readonly("alias", &AlgorithmDescriptor::alias)
-    .def_readonly("category", &AlgorithmDescriptor::category)
-    .def_readonly("version", &AlgorithmDescriptor::version);
+      .def_readonly("name", &AlgorithmDescriptor::name)
+      .def_readonly("alias", &AlgorithmDescriptor::alias)
+      .def_readonly("category", &AlgorithmDescriptor::category)
+      .def_readonly("version", &AlgorithmDescriptor::version);
 
   class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl",
                                                    no_init)

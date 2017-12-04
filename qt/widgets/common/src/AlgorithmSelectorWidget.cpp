@@ -179,7 +179,7 @@ void AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate(
 namespace {
 
 bool AlgorithmDescriptorLess(const AlgorithmDescriptor &d1,
-                               const AlgorithmDescriptor &d2) {
+                             const AlgorithmDescriptor &d2) {
   if (d1.category < d2.category)
     return true;
   else if (d1.category == d2.category && d1.name < d2.name)
@@ -192,7 +192,7 @@ bool AlgorithmDescriptorLess(const AlgorithmDescriptor &d1,
 }
 
 bool AlgorithmDescriptorNameLess(const AlgorithmDescriptor &d1,
-                                    const AlgorithmDescriptor &d2) {
+                                 const AlgorithmDescriptor &d2) {
   return d1.name < d2.name;
 }
 }
