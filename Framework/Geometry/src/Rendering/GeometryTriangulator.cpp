@@ -169,7 +169,7 @@ size_t GeometryTriangulator::numFaces() const {
 void GeometryTriangulator::setupPoints() {
   m_nPoints = numPoints();
   if (m_nPoints > 0) {
-    int index = 0;
+    size_t index = 0;
     m_points.resize(m_nPoints * 3);
     TopExp_Explorer Ex;
     for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
@@ -195,7 +195,7 @@ void GeometryTriangulator::setupFaces() {
     m_faces.resize(m_nFaces * 3);
     TopExp_Explorer Ex;
     int maxindex = 0;
-    int index = 0;
+    size_t index = 0;
     for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
