@@ -94,7 +94,7 @@ void export_leaf_classes() {
       .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
            (arg("self"), arg("name"), arg("startProgress") = -1.0,
             arg("endProgress") = -1.0, arg("enableLogging") = true,
-            arg("version") = -1),
+            arg("version") = -1, arg("useTempWorkspaceNames") = true),
            "Creates and intializes a named child algorithm. Output workspaces "
            "are given a dummy name.")
       .def("declareProperty",

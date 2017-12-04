@@ -734,16 +734,19 @@ void Algorithm::store() {
  *algorithm
  *  @param version ::        The version of the child algorithm to create. By
  *default gives the latest version.
+ *  @param useTempWorkspaceNames :: If true then add placeholder names to
+*workspaces that are never added to the ADS, due to running as a child
+*algorithm, to preserve the algorithm history
  *  @return shared pointer to the newly created algorithm object
  */
-Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
-                                               const double startProgress,
-                                               const double endProgress,
-                                               const bool enableLogging,
-                                               const int &version) {
+Algorithm_sptr Algorithm::createChildAlgorithm(
+    const std::string &name, const double startProgress,
+    const double endProgress, const bool enableLogging, const int &version,
+    const bool useTempWorkspaceNames) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
-  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
+  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging,
+                        useTempWorkspaceNames);
   return alg;
 }
 
@@ -756,7 +759,8 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
 void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
                                       const double startProgress,
                                       const double endProgress,
-                                      const bool enableLogging) {
+                                      const bool enableLogging,
+                                      const bool useTempWorkspaceNames) {
   // set as a child
   alg->setChild(true);
   alg->setLogging(enableLogging);
@@ -775,7 +779,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   for (auto prop : props) {
     auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
-      if (prop->value().empty()) {
+      if (prop->value().empty() && useTempWorkspaceNames) {
         prop->createTemporaryValue();
       }
     }
@@ -1301,7 +1305,7 @@ bool Algorithm::processGroups() {
   // ---------- Create all the output workspaces ----------------------------
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
     Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
-    if (prop) {
+    if (prop && !prop->value().empty()) {
       auto outWSGrp = boost::make_shared<WorkspaceGroup>();
       outGroups.push_back(outWSGrp);
       // Put the GROUP in the ADS
@@ -1317,7 +1321,7 @@ bool Algorithm::processGroups() {
     Algorithm_sptr alg_sptr = this->createChildAlgorithm(
         this->name(), progress_proportion * static_cast<double>(entry),
         progress_proportion * (1 + static_cast<double>(entry)),
-        this->isLogging(), this->version());
+        this->isLogging(), this->version(), false);
     // Don't make the new algorithm a child so that it's workspaces are stored
     // correctly
     alg_sptr->setChild(false);
@@ -1370,6 +1374,8 @@ bool Algorithm::processGroups() {
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
+        if (inName.empty())
+          continue;
         std::string outName;
         if (m_groupsHaveSimilarNames) {
           outName.append(inName).append("_").append(
@@ -1419,6 +1425,10 @@ bool Algorithm::processGroups() {
     // this has to be done after execute() because a workspace must exist
     // when it is added to a group
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
+      Property *prop =
+          dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+      if (prop && prop->value().empty())
+        continue;
       // And add it to the output group
       outGroups[owp]->add(outputWSNames[owp]);
     }
