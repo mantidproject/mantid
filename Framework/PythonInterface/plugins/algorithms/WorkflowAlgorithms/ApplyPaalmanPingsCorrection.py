@@ -143,7 +143,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Convert Units back to original
         efixed = self._get_e_fixed(output_workspace)
-        emode = output_workspace.getEMode()
+        emode = str(output_workspace.getEMode())
         output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
         self.setProperty('OutputWorkspace', output_workspace)
         prog_wrkflow.report('Algorithm Complete')
@@ -251,7 +251,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     def _convert_units(self, workspace, target, emode, efixed):
         return s_api.ConvertUnits(InputWorkspace=workspace,
                                   OutputWorkspace="__units_converted",
-                                  Target="Wavelength", EMode=emode,
+                                  Target=target, EMode=emode,
                                   EFixed=efixed, StoreInADS=False)
 
     def _get_e_fixed(self, workspace):
@@ -266,19 +266,17 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             shifted_container = self._shift_workspace(self._container_workspace, self._can_shift_factor)
             logger.information('Container shifted by %f' % self._can_shift_factor)
         else:
-            shifted_container = self._clone(self._container_workspace)
+            shifted_container = self._container_workspace
 
         # Apply container scale factor if needed
         if self._scale_can:
             # Use temp workspace so we don't modify original data
             prog_container.report('Scaling can')
-            scaled_container = shifted_container * self._can_scale_factor
+            scaled_container = self._convert_units_wavelength(shifted_container * self._can_scale_factor)
             logger.information('Container scaled by %f' % self._can_scale_factor)
+            return scaled_container
         else:
-            scaled_container = shifted_container
-
-        # Units should be wavelength
-        return self._convert_units_wavelength(scaled_container)
+            return shifted_container
 
     def _get_correction_factor_workspace(self, factor_type):
         """
