@@ -501,8 +501,11 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   const size_t count = propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
-        p->getSettings()->isEnabled(this)) {
+    bool is_enabled = true;
+    if (p->getSettings()) {
+      is_enabled = p->getSettings()->isEnabled(this);
+    }
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) && is_enabled) {
       jsonMap[p->name()] = p->value();
     }
   }

@@ -401,17 +401,17 @@ public:
 
   void test_asStringWithNotEnabledProperty() {
     PropertyManagerHelper mgr;
-    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 42));
-    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", true));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Semaphor", true));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Crossing", 42));
     mgr.setPropertySettings(
-        "Prop1", make_unique<EnabledWhenProperty>(
-                     "Prop2", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
+        "Crossing", make_unique<EnabledWhenProperty>(
+                     "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"Prop1\":\"42\",\"Prop2\":\"1\"}\n");
-    mgr.setProperty("Prop2", false);
+                      "{\"Crossing\":\"42\",\"Semaphor\":\"1\"}\n");
+    mgr.setProperty("Semaphor", false);
     TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true),
-                      "{\"Prop2\":\"0\"}\n");
+                      "{\"Semaphor\":\"0\"}\n");
   }
 
   void test_asString() {
