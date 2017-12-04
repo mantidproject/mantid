@@ -5,7 +5,7 @@ import unittest
 from PyQt4.QtTest import QTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
-from mantidqt.utility.gui_test import *
+from mantidqt.utils.qt.testing import *
 
 
 mock_get_algorithm_descriptors = Mock()

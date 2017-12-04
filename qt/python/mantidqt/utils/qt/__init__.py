@@ -23,7 +23,7 @@ import os
 from contextlib import contextmanager
 
 # 3rd-party modules
-from qtpy.uic import loadUi
+from PyQt4.uic import loadUi
 
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):
