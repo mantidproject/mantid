@@ -143,6 +143,37 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
   return e;
 }
 
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  WorkspaceMap outputs;
+  outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
+  outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  const size_t nHisto = inputs.mmWS->getNumberHistograms();
+  for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
+    const auto &mmY = inputs.mmWS->y(wsIndex);
+    const auto &ppY = inputs.ppWS->y(wsIndex);
+    auto &mmYOut = outputs.mmWS->mutableY(wsIndex);
+    auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
+    for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
+      const auto F1 = (*efficiencies.F1)[binIndex];
+      const auto P1 = (*efficiencies.P1)[binIndex];
+      Eigen::Matrix2d F1m;
+      F1m <<             1.,      0.,
+             (F1 - 1.) / F1, 1. / F1;
+      const double divisor = (2. * P1 - 1.);
+      const double diag = (P1 - 1.) / divisor;
+      const double off = P1 / divisor;
+      Eigen::Matrix2d P1m;
+      P1m << diag,  off,
+              off, diag;
+      const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);
+      const auto corrected = P1m * F1m * intensities;
+      ppYOut = corrected[0];
+      mmYOut = corrected[1];
+    }
+  }
+  return outputs;
+}
+
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   if (!inputs.mpWS) {

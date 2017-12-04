@@ -61,6 +61,7 @@ private:
   void init() override;
   void exec() override;
   EfficiencyMap efficiencyFactors();
+  WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
