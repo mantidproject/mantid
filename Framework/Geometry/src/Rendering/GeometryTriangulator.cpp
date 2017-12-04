@@ -3,6 +3,7 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <climits>
 
 #ifdef ENABLE_OPENCASCADE
 // Squash a warning coming out of an OpenCascade header
@@ -57,7 +58,7 @@ Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
 GeometryTriangulator::GeometryTriangulator(const Object *obj)
-    : m_isTriangulated(false) {
+    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0) {
   m_obj = obj;
 #ifdef ENABLE_OPENCASCADE
   m_objSurface = nullptr;
@@ -121,14 +122,15 @@ void GeometryTriangulator::OCAnalyzeObject() {
     if (top == nullptr) {
       m_objSurface.reset(new TopoDS_Shape());
       return;
-    }
-    // Traverse through Rule
-    TopoDS_Shape Result = const_cast<Rule *>(top)->analyze();
-    try {
-      m_objSurface.reset(new TopoDS_Shape(Result));
-      BRepMesh_IncrementalMesh(Result, 0.001);
-    } catch (StdFail_NotDone &) {
-      g_log.error("Cannot build the geometry. Check the geometry definition");
+    } else {
+      // Traverse through Rule
+      TopoDS_Shape Result = const_cast<Rule *>(top)->analyze();
+      try {
+        m_objSurface.reset(new TopoDS_Shape(Result));
+        BRepMesh_IncrementalMesh(Result, 0.001);
+      } catch (StdFail_NotDone &) {
+        g_log.error("Cannot build the geometry. Check the geometry definition");
+      }
     }
   }
 
