@@ -1,5 +1,5 @@
 #include "MantidGeometry/Rendering/Renderer.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
@@ -9,6 +9,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <climits>
 
 #ifdef ENABLE_OPENCASCADE
 // Squash a warning coming out of an OpenCascade header
@@ -302,7 +303,7 @@ void Renderer::doRender(detail::GeometryTriangulator &triangulator) const {
 // Render OpenCascade Shape
 void Renderer::doRender(const TopoDS_Shape &ObjSurf) const {
   glBegin(GL_TRIANGLES);
-  if (ObjSurf.IsNull()) {
+  if (!ObjSurf.IsNull()) {
     TopExp_Explorer Ex;
     for (Ex.Init(ObjSurf, TopAbs_FACE); Ex.More(); Ex.Next()) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
