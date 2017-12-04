@@ -22,6 +22,7 @@ Powder Diffraction
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
+- After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
 
 Engineering Diffraction
 -----------------------
