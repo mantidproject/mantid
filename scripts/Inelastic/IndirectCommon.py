@@ -109,7 +109,7 @@ def getWSprefix(wsname):
 
 
 def getEfixed(workspace):
-    if isinstance(str, workspace):
+    if isinstance(workspace, str):
         inst = s_api.mtd[workspace].getInstrument()
     else:
         inst = workspace.getInstrument()
