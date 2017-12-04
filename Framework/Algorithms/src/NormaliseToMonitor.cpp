@@ -388,9 +388,9 @@ void NormaliseToMonitor::checkProperties(
   bool sepWS{monWS};
   if (m_syncScanInput && sepWS)
     throw std::runtime_error("Can not currently use a separate monitor "
-                             "workspace with a detector scan input workspace.")
-        // or monitor ID
-        bool monIDs = !monID->isDefault();
+                             "workspace with a detector scan input workspace.");
+  // or monitor ID
+  bool monIDs = !monID->isDefault();
   // something has to be set
   // One and only one of these properties should have been set
   // input from separate workspace is overwritten by monitor spectrum
@@ -624,11 +624,14 @@ void NormaliseToMonitor::performHistogramDivision(
 
   size_t monitorWorkspaceIndex = 0;
 
+  Progress prog(this, 0.0, 1.0, m_workspaceIndexes.size());
   const auto &specInfo = inputWorkspace->spectrumInfo();
   for (const auto workspaceIndex : m_workspaceIndexes) {
     // Errors propagated according to
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
+
+    prog.report("Performing normalisation");
 
     size_t timeIndex = 0;
     if (m_syncScanInput)
