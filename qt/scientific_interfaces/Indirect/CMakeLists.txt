@@ -89,7 +89,7 @@ set ( INC_FILES
 
 set ( MOC_FILES
     AbsorptionCorrections.h
-    ApplyPaalmanPings.h
+    ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
     ConvFit.h
