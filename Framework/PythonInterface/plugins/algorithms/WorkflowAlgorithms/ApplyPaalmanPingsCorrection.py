@@ -79,17 +79,17 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
         if self._use_corrections:
             prog_corr.report('Preprocessing corrections')
-            factor_workspaces = self._get_factor_workspaces()
 
             if self._use_can:
                 # Use container factors
                 prog_corr.report('Correcting sample and container')
+                factor_workspaces = self._get_factor_workspaces()
                 output_workspace = self._correct_sample_can(sample_ws_wavelength, container_ws_wavelength,
                                                             factor_workspaces)
                 correction_type = 'sample_and_can_corrections'
             else:
                 # Use sample factor only
-                output_workspace = self._correct_sample(sample_ws_wavelength, factor_workspaces['acc'])
+                output_workspace = self._correct_sample(sample_ws_wavelength, self._corrections_workspace[0])
                 correction_type = 'sample_corrections_only'
                 # Add corrections filename to log values
                 prog_corr.report('Correcting sample')
@@ -317,7 +317,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
 
         logger.information('Correcting sample')
-        return sample_workspace / a_ss_workspace
+        return sample_workspace / self._convert_units(a_ss_workspace, "Wavelength")
 
     def _correct_sample_can(self, sample_workspace, container_workspace, factor_workspaces):
         """
@@ -326,17 +326,15 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Correcting sample and container')
 
-        def convert_units_wavelength(workspace):
-            return self._convert_units(workspace, "Wavelength")
-
-        factor_workspaces_wavelength = { factor : convert_units_wavelength(workspace) for factor, workspace
+        factor_workspaces_wavelength = { factor : self._convert_units(workspace, "Wavelength") for factor, workspace
                                          in factor_workspaces.items() }
 
         if self._rebin_container_ws:
             container_workspace = s_api.RebinToWorkspace(WorkspaceToRebin=container_workspace,
                                                          WorkspaceToMatch=factor_workspaces_wavelength['acc'],
-                                                         OutputWorkspace="rebinned")
-        return self._corrections_approximation(sample_workspace, container_workspace, factor_workspaces)
+                                                         OutputWorkspace="rebinned",
+                                                         StoreInADS=False)
+        return self._corrections_approximation(sample_workspace, container_workspace, factor_workspaces_wavelength)
 
     def _three_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
         acc = factor_workspaces['acc']
