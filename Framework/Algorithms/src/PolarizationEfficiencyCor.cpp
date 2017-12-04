@@ -83,6 +83,9 @@ void PolarizationEfficiencyCor::exec() {
   const EfficiencyMap efficiencies = efficiencyFactors();
   WorkspaceMap outputs;
   switch (inputs.size()) {
+  case 1:
+    outputs = directBeamCorrections(inputs, efficiencies);
+    break;
   case 2:
     break;
   case 3:
@@ -141,6 +144,23 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
     // Ignore other histograms such as 'Phi' in ILL's efficiency ws.
   }
   return e;
+}
+
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  WorkspaceMap outputs;
+  outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  const size_t nHisto = inputs.mmWS->getNumberHistograms();
+  for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
+    const auto &ppY = inputs.ppWS->y(wsIndex);
+    auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
+    for (size_t binIndex = 0; binIndex < ppY.size(); ++binIndex) {
+      const auto P1 = (*efficiencies.P1)[binIndex];
+      const auto P2 = (*efficiencies.P2)[binIndex];
+      const double f = 1. - P1 - P2 + 2. * P1 * P2;
+      ppYOut[binIndex] = ppY[binIndex] / f;
+    }
+  }
+  return outputs;
 }
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {

@@ -61,6 +61,7 @@ private:
   void init() override;
   void exec() override;
   EfficiencyMap efficiencyFactors();
+  WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
