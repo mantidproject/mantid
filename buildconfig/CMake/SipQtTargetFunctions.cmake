@@ -43,23 +43,34 @@ function ( mtd_add_sip_module )
     set ( SIP_INCLUDES "${SIP_INCLUDES}%Include ${_sip_file}\n" )
     if ( NOT _directory )
       set ( _directory ${CMAKE_CURRENT_LIST_DIR} )
+    elseif ( NOT IS_ABSOLUTE _directory )
+      set ( _directory ${CMAKE_CURRENT_LIST_DIR}/${_directory} )
     endif()
     list ( APPEND _sip_include_flags "-I${_directory}" )
+    list ( APPEND _sip_include_deps "${_directory}/${_sip_file}" )
   endforeach ()
-  set ( _module_spec ${CMAKE_CURRENT_BINARY_DIR}/${PARSED_MODULE_NAME}.sip )
-  configure_file ( ${_sipmodule_template_path} ${_module_spec} )
+
+  # Add absolute paths for header dependencies
+  foreach ( _header ${PARSED_HEADER_DEPENDS} )
+    if ( IS_ABSOLUTE ${_header} )
+      list ( APPEND _sip_include_deps "${_header}" )
+    else ()
+      list ( APPEND _sip_include_deps "${CMAKE_CURRENT_LIST_DIR}/${_header}" )
+    endif()
+  endforeach ()
 
   # Run sip code generator
+  set ( _module_spec ${CMAKE_CURRENT_BINARY_DIR}/${PARSED_MODULE_NAME}.sip )
+  configure_file ( ${_sipmodule_template_path} ${_module_spec} )
   set ( _pyqt_sip_dir ${PYQT${PARSED_PYQT_VERSION}_SIP_DIR} )
   list ( APPEND _sip_include_flags "-I${_pyqt_sip_dir}" )
   set ( _pyqt_sip_flags ${PYQT${PARSED_PYQT_VERSION}_SIP_FLAGS} )
   set ( _sip_generated_cpp ${CMAKE_CURRENT_BINARY_DIR}/sip${PARSED_MODULE_NAME}part0.cpp )
   add_custom_command ( OUTPUT ${_sip_generated_cpp}
-
     COMMAND ${SIP_EXECUTABLE}
       ${_sip_include_flags} ${_pyqt_sip_flags}
       -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -e ${_module_spec}
-    DEPENDS ${_module_spec} ${PARSED_SIP_SRCS} ${PARSED_HEADER_DEPS} ${SIP_INCLUDE_DIR}/sip.h
+    DEPENDS ${_module_spec} ${_sip_include_deps} ${SIP_INCLUDE_DIR}/sip.h
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
