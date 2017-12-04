@@ -12,16 +12,16 @@
 
 namespace {
 namespace Prop {
-constexpr char *DIRECTIONS{"PolarizationDirections"};
+constexpr char *FLIPPERS{"Flippers"};
 constexpr char *EFFICIENCIES{"Efficiencies"};
 constexpr char *INPUT_WS{"InputWorkspace"};
 constexpr char *OUTPUT_WS{"OutputWorkspace"};
 }
-namespace PolDir {
-constexpr char *MM{"--"};
-constexpr char *MP{"-+"};
-constexpr char *PM{"+-"};
-constexpr char *PP{"++"};
+namespace Flippers {
+constexpr char *OffOff{"00"};
+constexpr char *OffOn{"01"};
+constexpr char *OnOff{"10"};
+constexpr char *OnOn{"11"};
 }
 
 }
@@ -62,10 +62,10 @@ void PolarizationEfficiencyCor::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::INPUT_WS, "",
                                                              Kernel::Direction::Input),
       "A group of workspaces to be corrected.");
-  const std::vector<std::string> defaultDirections{{PolDir::PP, PolDir::PM, PolDir::MP, PolDir::MM}};
+  const std::vector<std::string> defaultFlippers{{Flippers::OffOff, Flippers::OffOn, Flippers::OnOff, Flippers::OnOn}};
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::DIRECTIONS, defaultDirections, boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 4)),
-        "A list of polarization directions (++, +-, -+, --) corresponding to each input workspace.");
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::FLIPPERS, defaultFlippers, boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 4)),
+        "A list of flipper configurations (accepted values: 00, 01, 10 and 11) corresponding to each input workspace.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
                                                              Kernel::Direction::Output),
@@ -98,19 +98,19 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceM
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
-    names.emplace_back(outWSName + "_" + PolDir::MM);
+    names.emplace_back(outWSName + "_++");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
   }
   if (outputs.mpWS) {
-    names.emplace_back(outWSName + "_" + PolDir::MP);
+    names.emplace_back(outWSName + "_-+");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mpWS);
   }
   if (outputs.pmWS) {
-    names.emplace_back(outWSName + "_" + PolDir::PM);
+    names.emplace_back(outWSName + "_+-");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.pmWS);
   }
   if (outputs.ppWS) {
-    names.emplace_back(outWSName + "_" + PolDir::PP);
+    names.emplace_back(outWSName + "_++");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.ppWS);
   }
   auto group = createChildAlgorithm("GroupWorkspaces");
@@ -219,24 +219,24 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections() {
   API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
   // TODO: Validate dirs in validateInputs().
-  const std::vector<std::string> dirs = getProperty(Prop::DIRECTIONS);
+  const std::vector<std::string> flippers = getProperty(Prop::FLIPPERS);
   WorkspaceMap inputs;
-  for (size_t i = 0; i < dirs.size(); ++i) {
+  for (size_t i = 0; i < flippers.size(); ++i) {
     auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(inGroup->getItem(i));
     if (!ws) {
       throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
-    const auto &dir = dirs[i];
-    if (dir == PolDir::MM) {
+    const auto &f = flippers[i];
+    if (f == Flippers::OnOn) {
       inputs.mmWS = ws;
-    } else if (dir == PolDir::MP) {
+    } else if (f == Flippers::OnOff) {
       inputs.mpWS = ws;
-    } else if (dir == PolDir::PM) {
+    } else if (f == Flippers::OffOn) {
       inputs.pmWS = ws;
-    } else if (dir == PolDir::PP) {
+    } else if (f == Flippers::OffOff) {
       inputs.ppWS = ws;
     } else {
-      throw std::runtime_error(std::string{"Unknown entry in "} + Prop::DIRECTIONS);
+      throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);
     }
   }
   return inputs;
