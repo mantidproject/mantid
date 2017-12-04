@@ -128,9 +128,10 @@ void QDataProcessorWidget::createTable() {
 #endif
   ui.viewTable->setHeader(header);
 
-  ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;} QTreeView::item "
-                              "{border-color: lightGray; border-style: solid; border-width: 0.5px;} "
-                              "QTreeView::item:selected {background-color: lightBlue; color: black}");
+  ui.viewTable->setStyleSheet(
+      "QTreeView {font-size:11pt;} QTreeView::item "
+      "{border-color: lightGray; border-style: solid; border-width: 0.5px;} "
+      "QTreeView::item:selected {background-color: lightBlue; color: black}");
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
