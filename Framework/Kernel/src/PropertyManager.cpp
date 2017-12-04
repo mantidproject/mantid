@@ -505,7 +505,8 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
     if (p->getSettings()) {
       is_enabled = p->getSettings()->isEnabled(this);
     }
-    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) && is_enabled) {
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
+        is_enabled) {
       jsonMap[p->name()] = p->value();
     }
   }

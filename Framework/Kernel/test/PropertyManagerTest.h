@@ -404,8 +404,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Semaphor", true));
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Crossing", 42));
     mgr.setPropertySettings(
-        "Crossing", make_unique<EnabledWhenProperty>(
-                     "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
+        "Crossing",
+        make_unique<EnabledWhenProperty>(
+            "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
                       "{\"Crossing\":\"42\",\"Semaphor\":\"1\"}\n");
