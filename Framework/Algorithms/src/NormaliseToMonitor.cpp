@@ -386,8 +386,11 @@ void NormaliseToMonitor::checkProperties(
   m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
   // Or is it in a separate workspace
   bool sepWS{monWS};
-  // or monitor ID
-  bool monIDs = !monID->isDefault();
+  if (m_syncScanInput && sepWS)
+    throw std::runtime_error("Can not currently use a separate monitor "
+                             "workspace with a detector scan input workspace.")
+        // or monitor ID
+        bool monIDs = !monID->isDefault();
   // something has to be set
   // One and only one of these properties should have been set
   // input from separate workspace is overwritten by monitor spectrum
@@ -539,12 +542,16 @@ bool NormaliseToMonitor::setIntegrationProps(
   // Yes integration is going to be used...
 
   // Now check the end X values are within the X value range of the workspace
-  if (isEmpty(m_integrationMin) || m_integrationMin < m_monitor->x(0).front()) {
+  if ((isEmpty(m_integrationMin) ||
+       m_integrationMin < m_monitor->x(0).front()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range minimum set to workspace min: "
                     << m_integrationMin << '\n';
     m_integrationMin = m_monitor->x(0).front();
   }
-  if (isEmpty(m_integrationMax) || m_integrationMax > m_monitor->x(0).back()) {
+  if ((isEmpty(m_integrationMax) ||
+       m_integrationMax > m_monitor->x(0).back()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range maximum set to workspace max: "
                     << m_integrationMax << '\n';
     m_integrationMax = m_monitor->x(0).back();
