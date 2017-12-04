@@ -142,9 +142,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                            LogText=sam_base)
 
         # Convert Units back to original
-        efixed = self._get_e_fixed(output_workspace)
         emode = str(output_workspace.getEMode())
+        efixed = 0.0
+        if emode == "Indirect":
+            efixed = self._get_e_fixed(output_workspace)
         output_workspace = self._convert_units(output_workspace, sample_unit, emode, efixed)
+
         self.setProperty('OutputWorkspace', output_workspace)
         prog_wrkflow.report('Algorithm Complete')
 
