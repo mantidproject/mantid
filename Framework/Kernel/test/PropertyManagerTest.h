@@ -399,12 +399,13 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
   }
 
-  void test_asStringWithNotEnabledProperty(){
+  void test_asStringWithNotEnabledProperty() {
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 42));
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", true));
-    mgr.setPropertySettings("Prop1", make_unique<EnabledWhenProperty>("Prop2",
-        Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
+    mgr.setPropertySettings(
+        "Prop1", make_unique<EnabledWhenProperty>(
+                     "Prop2", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
                       "{\"Prop1\":\"42\",\"Prop2\":\"1\"}\n");
