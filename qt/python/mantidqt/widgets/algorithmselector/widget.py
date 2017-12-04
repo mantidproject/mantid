@@ -3,7 +3,7 @@ import re
 from PyQt4.QtCore import QModelIndex, pyqtSignal
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem
-from mantidqt.utility import block_signals
+from mantidqt.utils.qt import block_signals
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
