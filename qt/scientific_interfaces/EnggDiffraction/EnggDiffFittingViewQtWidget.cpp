@@ -271,12 +271,13 @@ void EnggDiffFittingViewQtWidget::resetCanvas() {
 
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-    bool plotSinglePeaks) {
+    bool plotSinglePeaks, const std::string &xAxisLabel) {
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
     resetCanvas();
   }
+  m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, xAxisLabel.c_str());
 
   // when only plotting focused workspace
   if (focused) {

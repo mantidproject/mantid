@@ -115,7 +115,8 @@ public:
   void resetCanvas() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused, bool plotSinglePeaks) override;
+                     bool focused, bool plotSinglePeaks,
+                     const std::string &xAxisLabel) override;
 
   void addRunNoItem(std::string runNo) override;
 
