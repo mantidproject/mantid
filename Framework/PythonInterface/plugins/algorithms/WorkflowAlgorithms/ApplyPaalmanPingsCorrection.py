@@ -288,8 +288,15 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         @param factor_type Factory type (ass, acc, acsc, assc)
         @return Full name of workspace (None if not found)
         """
+        if factor_type == 'ass':
+            def predicate(workspace_name):
+                return factor_type in workspace_name and not 'assc' in workspace_name
+        else:
+            def predicate(workspace_name):
+                return factor_type in workspace_name
+
         for workspace in self._corrections_workspace:
-            if factor_type in workspace.getName():
+            if predicate(workspace.getName()):
                 return workspace
         return None
 
