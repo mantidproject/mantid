@@ -115,7 +115,14 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  // Only check if number of histograms is small, else this takes too long!
+  std::vector<size_t> indexList;
+  if (inputWS->getNumberHistograms() < 1000) {
+    std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  } else {
+    indexList = std::vector<size_t>(mon.begin(), mon.end());
+  }
+
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -627,7 +634,9 @@ void NormaliseToMonitor::performHistogramDivision(
     const double yErrorFactor = pow(divisorError * newYFactor, 2);
     monitorWorkspaceIndex++;
 
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+      PARALLEL_START_INTERUPT_REGION
       const auto &specDef = specInfo.spectrumDefinition(i);
 
       if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
@@ -644,7 +653,9 @@ void NormaliseToMonitor::performHistogramDivision(
       }
 
       outputWorkspace->setHistogram(i, hist);
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 }
 
