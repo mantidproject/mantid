@@ -282,9 +282,9 @@ void Renderer::doRender(detail::GeometryTriangulator &triangulator) const {
   glBegin(GL_TRIANGLES);
   V3D normal;
   for (size_t i = 0; i < triangulator.numTriangleFaces(); i++) {
-    int index1 = faces[i * 3] * 3;
-    int index2 = faces[i * 3 + 1] * 3;
-    int index3 = faces[i * 3 + 2] * 3;
+    auto index2 = static_cast<size_t>(faces[i * 3 + 1] * 3);
+    auto index3 = static_cast<size_t>(faces[i * 3 + 2] * 3);
+    auto index1 = static_cast<size_t>(faces[i * 3] * 3);
     // Calculate normal and normalize
     V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
     V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);
