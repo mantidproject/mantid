@@ -17,8 +17,9 @@ add_dependencies ( workbench workbench_resources mantidqt )
 
 # ctest targets
 set ( TEST_FILES
-  workbench/config/test/user_test.py
-  workbench/test/import_test.py
+  workbench/config/test/test_user.py
+
+  workbench/test/test_import.py
 )
 
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}

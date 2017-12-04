@@ -35,7 +35,9 @@ if ( ENABLE_WORKBENCH )
 
   # ctest targets
   set ( PYTHON_TEST_FILES
-    mantidqt/test/import_test.py
+    mantidqt/test/test_import.py
+
+    mantidqt/utils/test_qt_utils.py
   )
 
   # Tests

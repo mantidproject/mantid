@@ -28,8 +28,9 @@ class ConfigUserTest(TestCase):
     def setUpClass(cls):
         if not hasattr(cls, 'cfg'):
             defaults = {
-                'main': {'a_default_key': 100,
-                         'bool_option': False
+                'main': {
+                    'a_default_key': 100,
+                    'bool_option': False
                 },
             }
             cls.cfg = UserConfig(cls.__name__, cls.__name__, defaults)
