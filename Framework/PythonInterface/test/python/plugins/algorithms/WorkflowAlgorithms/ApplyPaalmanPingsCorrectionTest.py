@@ -5,7 +5,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
                               SplineInterpolation, ApplyPaalmanPingsCorrection,
-                              DeleteWorkspace)
+                              DeleteWorkspace, GroupWorkspaces)
 import numpy
 
 
@@ -131,6 +131,22 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                                            CanWorkspace=self._can_ws,
                                            CanShiftFactor = 0.03)
 
+        self._verify_workspace(corr, 'sample_and_can_corrections')
+
+    def test_two_factor_approximation(self):
+        factors = ['acc', 'ass']
+
+        def is_factor(workspace):
+            return any([factor in workspace.getName() for factor in factors])
+
+        filtered_corr = filter(is_factor, self._corrections_ws)
+        correction_names = [correction.getName() for correction in filtered_corr]
+        corrections = GroupWorkspaces(InputWorkspaces=correction_names)
+
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CorrectionsWorkspace=corrections,
+                                           CanWorkspace=self._can_ws,
+                                           CanShiftFactor = 0.03)
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_container_input_workspace_not_unintentionally_rebinned(self):
