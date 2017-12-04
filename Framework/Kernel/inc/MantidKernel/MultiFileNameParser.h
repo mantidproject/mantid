@@ -108,15 +108,17 @@ public:
   /// Return the parsed underscore string.
   std::string underscoreString() const { return m_underscoreString; }
   /// Return the parsed run string.
-  std::string runString() const { return m_runString; }
+  std::string runString() const;
   /// Return the parsed extension string.
-  std::string extString() const { return m_extString; }
+  std::string extString() const { return m_multiExtString; }
 
 private:
   /// Clear all member variables.
   void clear();
   /// Split the string to parse into its component parts.
   void split();
+  /// Extracts an extension from a run string.
+  std::string extractExtension(const std::string &runString);
   /// A vector of vectors of the parsed runs.
   std::vector<std::vector<unsigned int>> m_runs;
   /// A vector of vectors of the parsed file names.
@@ -125,7 +127,9 @@ private:
   std::string m_multiFileName;
   /// The various sections of the given string to parse.
   std::string m_dirString, m_instrumentAlias, m_underscoreString, m_runString,
-      m_extString;
+      m_extString, m_multiExtString;
+  /// The run strings parsed in each step.
+  std::vector<std::string> m_runStrings;
   /// The instrument-specific run zero padding value.
   // int m_zeroPadding;
   /// All the valid instrument names.

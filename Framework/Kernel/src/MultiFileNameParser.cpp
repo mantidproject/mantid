@@ -216,6 +216,7 @@ bool ReverseCaselessCompare::operator()(const std::string &a,
 Parser::Parser()
     : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(),
       m_instrumentAlias(), m_underscoreString(), m_runString(), m_extString(),
+      m_multiExtString(), m_runStrings(),
       // m_zeroPadding(),
       m_validInstNames() {
   ConfigServiceImpl &config = ConfigService::Instance();
@@ -231,6 +232,13 @@ Parser::Parser()
   }
 }
 
+/*
+ * @return  The parsed run string.
+ */
+std::string Parser::runString() const {
+  return boost::algorithm::join(m_runStrings, ", ");
+}
+
 /**
  * Takes the given multiFileName string, and calls other parts of the parser
  * to generate a corresponding vector of vectors of file names.
@@ -239,8 +247,12 @@ Parser::Parser()
  *parsed.
  */
 void Parser::parse(const std::string &multiFileName) {
+  if (multiFileName.empty())
+    throw std::runtime_error("No file name to parse.");
+
   // Clear any contents of the member variables.
   clear();
+  m_multiExtString = extractExtension(multiFileName);
 
   // Return error if there are any adjacent + or , operators.
   boost::smatch invalid_substring;
@@ -338,13 +350,15 @@ Parser::parseStep(const std::string &multiFileName) {
 
   // Split the string to be parsed into sections, and do some validation.
   split();
+  m_runStrings.push_back(m_runString);
 
   // Parse the run section into unsigned ints we can use.
   m_runs = parseMultiRunString(m_runString);
 
   // Set up helper functor.
-  GenerateFileName generateFileName(m_dirString, m_extString,
-                                    m_instrumentAlias);
+  const std::string &extString =
+      m_extString.empty() ? m_multiExtString : m_extString;
+  GenerateFileName generateFileName(m_dirString, extString, m_instrumentAlias);
 
   // Generate complete file names for each run using helper functor.
   std::vector<std::vector<std::string>> fileNames;
@@ -381,16 +395,11 @@ void Parser::clear() {
  *string.
  */
 void Parser::split() {
-  if (m_multiFileName.empty())
-    throw std::runtime_error("No file name to parse.");
-
   // (We shun the use of Poco::File here as it is unable to deal with certain
   // combinations of special characters, for example double commas.)
 
   // Get the extension, if there is one.
-  size_t lastDot = m_multiFileName.find_last_of('.');
-  if (lastDot != std::string::npos)
-    m_extString = m_multiFileName.substr(lastDot);
+  m_extString = extractExtension(m_multiFileName);
 
   // Get the directory, if there is one.
   size_t lastSeparator = m_multiFileName.find_last_of("/\\");
@@ -460,6 +469,18 @@ void Parser::split() {
   }
 }
 
+/*
+ * Extracts the file extension found at the end of the specified run string.
+ *
+ * @return  The extracted file extension.
+ */
+std::string Parser::extractExtension(const std::string &runString) {
+  size_t lastDot = runString.find_last_of('.');
+  if (lastDot != std::string::npos)
+    return runString.substr(lastDot);
+  return "";
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Helper functor.
 /////////////////////////////////////////////////////////////////////////////
@@ -490,7 +511,7 @@ operator()(const std::vector<unsigned int> &runs) {
 
   std::transform(runs.begin(), runs.end(), std::back_inserter(fileNames),
                  (*this) // Call other overloaded function operator.
-                 );
+  );
 
   return fileNames;
 }
@@ -564,7 +585,7 @@ void RunRangeList::addRunRange(std::pair<unsigned int, unsigned int> range) {
 /////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Parses a string containing a run "token".
  *
