@@ -34,6 +34,7 @@ void export_DateAndTime() {
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"))
       .def("setToMinimum", &DateAndTime::setToMinimum, arg("self"))
       .def("__str__", &ISO8601StringPlusSpace, arg("self"))
+      .def("__long__", &DateAndTime::totalNanoseconds, arg("self"))
       .def("__int__", &DateAndTime::totalNanoseconds, arg("self"))
       .def(self == self)
       .def(self != self)

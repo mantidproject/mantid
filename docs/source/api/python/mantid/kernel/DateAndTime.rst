@@ -23,7 +23,7 @@ To convert an array of :class:`mantid.kernel.DateAndTime`, such as in
 .. code-block:: python
 
    pcharge = wksp.run()['proton_charge']
-   times = np.array(pcharge.times, dtype=np.int) * np.timedelta64(1,'ns') + np.datetime64('1990-01-01T00:00')
+   times = np.array(pcharge.times, dtype=np.int64) * np.timedelta64(1,'ns') + np.datetime64('1990-01-01T00:00')
 
 .. module:`mantid.kernel`
 
