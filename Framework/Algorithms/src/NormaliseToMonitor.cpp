@@ -117,7 +117,7 @@ bool MonIDPropChanger::monitorIdReader(
   // got the index of correspondent spectra.
   // Only check if number of histograms is small, else this takes too long!
   std::vector<size_t> indexList;
-  if (inputWS->getNumberHistograms() < 1000) {
+  if (inputWS->getNumberHistograms() < 100000) {
     std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
   } else {
     indexList = std::vector<size_t>(mon.begin(), mon.end());
