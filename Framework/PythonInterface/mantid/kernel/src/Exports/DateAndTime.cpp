@@ -64,8 +64,7 @@ void export_time_duration() {
            arg("self"),
            "Get the total number of microseconds truncating any remaining "
            "digits")
-      .def(
-          "total_nanoseconds", &time_duration::total_nanoseconds, arg("self"),
-          "Get the total number of nanoseconds truncating any remaining digits")
-      ;
+      .def("total_nanoseconds", &time_duration::total_nanoseconds, arg("self"),
+           "Get the total number of nanoseconds truncating any remaining "
+           "digits");
 }
