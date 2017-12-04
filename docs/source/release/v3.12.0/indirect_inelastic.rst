@@ -14,6 +14,7 @@ New
 Improved
 ########
 
+- :ref:`algm-ApplyPaalmanPingsCorrection` now accepts a corrections group containing only an :math:`A_{s,s}` and an :math:`A_{c,c}` workspace (produced by :ref:`algm-CalculateMonteCarloAbsorption`).
 - BASISReduction now permits the user to exclude a contiguous time segment from the reduction process.
 - BASISReduction option noMonitorNorm changed to MonitorNorm.
 
@@ -65,6 +66,8 @@ New
 
 Improved
 ########
+- The Apply Paalman Pings interface has been renamed to Apply Absorption Correction.
+- The Apply Absorption Correction interface no longer requires workspaces to be in units of wavelength (this is done within :ref:`algm-ApplyPaalmanPingsCorrection`).
 
 Bugfixes
 ########
