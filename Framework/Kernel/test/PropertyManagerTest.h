@@ -5,11 +5,13 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/OptionalBool.h"
+#include "../inc/MantidKernel/EnabledWhenProperty.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -397,6 +399,20 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
   }
 
+  void test_asStringWithNotEnabledProperty(){
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 42));
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop2", true));
+    mgr.setPropertySettings("Prop1", make_unique<EnabledWhenProperty>("Prop2",
+        Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
+
+    TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
+                      "{\"Prop1\":\"42\",\"Prop2\":\"1\"}\n");
+    mgr.setProperty("Prop2", false);
+    TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true),
+                      "{\"Prop2\":\"0\"}\n");
+  }
+
   void test_asString() {
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Prop1", 10));
@@ -458,7 +474,7 @@ public:
     using namespace Mantid::Kernel;
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
-        make_unique<MockNonSerializableProperty>("PropertyName", 0)));
+        make_unique<MockNonSerializableProperty>("PropdertyName", 0)));
     TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
     TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
     // Set to non-default value.

@@ -4,6 +4,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/IPropertySettings.h"
 
 #include <json/json.h>
 
@@ -500,7 +501,8 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   const size_t count = propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault())) {
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
+            p->getSettings()->isEnabled(this) ) {
       jsonMap[p->name()] = p->value();
     }
   }
