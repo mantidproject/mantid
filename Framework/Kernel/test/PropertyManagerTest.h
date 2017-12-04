@@ -476,7 +476,7 @@ public:
     using namespace Mantid::Kernel;
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
-        make_unique<MockNonSerializableProperty>("PropdertyName", 0)));
+        make_unique<MockNonSerializableProperty>("PropertyName", 0)));
     TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
     TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
     // Set to non-default value.
