@@ -194,6 +194,7 @@ set ( SRC_FILES
 	src/ModeratorTzeroLinear.cpp
 	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
+	src/MostLikelyMean.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
@@ -526,6 +527,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
+	inc/MantidAlgorithms/MostLikelyMean.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
@@ -862,6 +864,7 @@ set ( TEST_FILES
 	ModeratorTzeroTest.h
 	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
+	MostLikelyMeanTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
