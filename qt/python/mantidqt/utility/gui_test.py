@@ -1,6 +1,6 @@
 import types
-from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QApplication
 
 
 def gui_test(test):

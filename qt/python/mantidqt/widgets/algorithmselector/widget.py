@@ -1,10 +1,10 @@
 from __future__ import absolute_import, print_function
+import re
+from PyQt4.QtCore import QModelIndex, pyqtSignal
 from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from PyQt4.QtGui import QTreeWidgetItem
-from PyQt4.QtCore import QModelIndex, pyqtSignal
-from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 from mantidqt.utility import block_signals
-import re
+from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
 def get_name_and_version_from_item_label(item_label):

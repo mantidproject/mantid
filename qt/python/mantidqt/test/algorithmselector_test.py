@@ -1,11 +1,11 @@
 from __future__ import print_function
-import unittest
 from collections import Counter
+from mock import Mock, patch, call
+import unittest
+from PyQt4.QtTest import QTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utility.gui_test import *
-from mock import Mock, patch, call
-from PyQt4.QtTest import QTest
 
 
 mock_get_algorithm_descriptors = Mock()
