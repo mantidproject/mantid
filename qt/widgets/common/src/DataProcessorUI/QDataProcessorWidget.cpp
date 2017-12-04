@@ -188,6 +188,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
   connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),

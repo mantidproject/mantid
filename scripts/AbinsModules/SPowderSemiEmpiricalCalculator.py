@@ -638,14 +638,13 @@ class SPowderSemiEmpiricalCalculator(object):
         Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
         :param array_x: numpy array with frequencies
         :param array_y: numpy array with S
-        :returns: rebined frequencies, rebined S
+        :returns: rebined frequencies
         """
-        inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
-        output_array_y = np.asarray(
-            a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-            dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-
-        return output_array_y
+        indices = array_x != self._bins[-1]
+        array_x = array_x[indices]
+        array_y = array_y[indices]
+        maximum_index = min(len(array_x), len(array_y))
+        return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index])[0]
 
     def _rebin_data_opt(self, array_x=None, array_y=None):
         """
@@ -655,15 +654,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: rebined frequencies, rebined S
         """
         if self._bins.size > array_x.size:
-            output_array_x = array_x
-            output_array_y = array_y
+            return array_x, array_y
         else:
-            inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
-            output_array_x = self._frequencies
-            output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                                        dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-
-        return output_array_x, output_array_y
+            output_array_y = self._rebin_data_full(array_x, array_y)
+            return self._frequencies, output_array_y
 
     def _fix_empty_array(self, array_y=None):
         """

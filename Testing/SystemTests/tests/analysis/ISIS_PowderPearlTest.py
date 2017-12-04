@@ -42,7 +42,6 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     existing_config = config['datasearch.directories']
     focus_mode = None
-    tolerance = None
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -56,8 +55,8 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
         return True
 
     def validate(self):
-        self.tolerance = 1e-6
-        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),\
+        self.tolerance = 0.05  # Required for difference in spline data between operating systems
+        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
                "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
 
     def cleanup(self):
@@ -111,7 +110,8 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return self.focus_results.getName(), "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
         try:
@@ -134,8 +134,9 @@ class CreateCalTest(stresstesting.MantidStressTest):
         setup_mantid_paths()
         self.calibration_results = run_create_cal()
 
-    def valid(self):
-        return self.calibration_results.getName(), "ISIS_Powder-PEARL00098494_grouped.nxs"
+    def validate(self):
+        self.tolerance = 1e-5
+        return "PRL98494_tt88_grouped", "ISIS_Powder-PEARL98494_grouped.nxs"
 
     def cleanup(self):
         try:

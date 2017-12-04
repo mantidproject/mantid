@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
@@ -20,6 +19,7 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
@@ -59,6 +59,9 @@ class RunTabPresenter(object):
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
 
+        def on_data_changed(self):
+            self._presenter.on_data_changed()
+
         def on_manage_directories(self):
             self._presenter.on_manage_directories()
 
@@ -93,6 +96,9 @@ class RunTabPresenter(object):
 
         # Masking table presenter
         self._masking_table_presenter = MaskingTablePresenter(self)
+
+        # Beam centre presenter
+        self._beam_centre_presenter = BeamCentrePresenter(self)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
@@ -152,6 +158,9 @@ class RunTabPresenter(object):
             # Set appropriate view for the masking table presenter
             self._masking_table_presenter.set_view(self._view.masking_table)
 
+            # Set the appropriate view for the beam centre presenter
+            self._beam_centre_presenter.set_view(self._view.beam_centre)
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -177,13 +186,13 @@ class RunTabPresenter(object):
 
             # 4. Populate the model
             self._state_model = StateGuiModel(user_file_items)
-
             # 5. Update the views.
             self._update_view_from_state_model()
 
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
@@ -220,10 +229,20 @@ class RunTabPresenter(object):
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
                                    " to the Mantid search directories! See here for more details: {}".format(str(e)))
+
+    def on_data_changed(self):
+        # 1. Populate the selected instrument and the correct detector selection
+        self._setup_instrument_specific_settings()
+
+        # 2. Perform calls on child presenters
+        self._masking_table_presenter.on_update_rows()
+        self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def on_processed_clicked(self):
         """
@@ -245,7 +264,7 @@ class RunTabPresenter(object):
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   "has been loaded")
+                                   " has been loaded")
             property_manager_service = PropertyManagerService()
             property_manager_service.add_states_to_pmds(states)
 
@@ -255,9 +274,9 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
-        except:
+        except Exception as e:
             self._view.halt_process_flag()
-            raise
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
@@ -285,6 +304,7 @@ class RunTabPresenter(object):
         # Make sure that the sub-presenters are up to date with this change
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def _add_to_hidden_options(self, row, property_name, property_value):
         """
@@ -520,6 +540,12 @@ class RunTabPresenter(object):
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
 
+        # Beam Centre
+        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
+
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
         fit_type = self._state_model.transmission_sample_fit_type
@@ -616,6 +642,11 @@ class RunTabPresenter(object):
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
+    def _set_on_view_with_view(self, attribute_name, view):
+        attribute = getattr(self._state_model, attribute_name)
+        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+            setattr(view, attribute_name, attribute)
+
     def _get_state_model_with_view_update(self):
         """
         Goes through all sub presenters and update the state model based on the views.
@@ -628,7 +659,6 @@ class RunTabPresenter(object):
         # If we don't have a state model then return None
         if state_model is None:
             return state_model
-
         # Run tab view
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
@@ -707,6 +737,10 @@ class RunTabPresenter(object):
         self._set_on_state_model("phi_limit_use_mirror", state_model)
         self._set_on_state_model("radius_limit_min", state_model)
         self._set_on_state_model("radius_limit_max", state_model)
+
+        # Beam Centre
+        self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
+        self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
 
         return state_model
 
@@ -872,11 +906,10 @@ class RunTabPresenter(object):
         try:
             state = director.create_state(row)
             states.update({row: state})
-        except ValueError as e:
-            error_msg = "There was a bad entry for row {}. Ensure that the path to your files has been added to the " \
-                        "Mantid search directories! See here for more details: {}"
-            self.sans_logger.error(error_msg.format(row, str(e)))
-            raise RuntimeError(error_msg.format(row, str(e)))
+        except (ValueError, RuntimeError) as e:
+            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                               "been added to the Mantid search directories! See here for more "
+                               "details: {}".format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """
