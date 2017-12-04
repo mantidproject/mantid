@@ -15,7 +15,8 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent) {
+ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
+    : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
@@ -251,8 +252,9 @@ void ApplyAbsorptionCorrections::run() {
           break;
         default:
           m_batchAlgoRunner->clearQueue();
-          g_log.error("ApplyAbsorptionCorrections cannot run with corrections that do "
-                      "not match sample binning.");
+          g_log.error(
+              "ApplyAbsorptionCorrections cannot run with corrections that do "
+              "not match sample binning.");
           return;
         }
       }
@@ -331,8 +333,8 @@ void ApplyAbsorptionCorrections::run() {
 * @param toInterpolate Pointer to the workspace to interpolate
 * @param toMatch Name of the workspace to match
 */
-void ApplyAbsorptionCorrections::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
-                                             std::string toMatch) {
+void ApplyAbsorptionCorrections::addInterpolationStep(
+    MatrixWorkspace_sptr toInterpolate, std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
   interpolationProps["WorkspaceToMatch"] = toMatch;
 
@@ -616,8 +618,8 @@ void ApplyAbsorptionCorrections::plotCurrentPreview() {
  * @param curveColor  The color of the curve to plot in the preview.
  */
 void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
-                                      MatrixWorkspace_sptr &ws,
-                                      const QColor &curveColor) {
+                                               MatrixWorkspace_sptr &ws,
+                                               const QColor &curveColor) {
 
   // Check whether the selected spectra is now out of bounds with
   // respect to the specified workspace.
