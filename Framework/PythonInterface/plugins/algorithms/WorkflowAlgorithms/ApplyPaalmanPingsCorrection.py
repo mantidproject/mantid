@@ -89,7 +89,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 correction_type = 'sample_and_can_corrections'
             else:
                 # Use sample factor only
-                output_workspace = self._correct_sample(sample_ws_wavelength, factor_workspaces)
+                output_workspace = self._correct_sample(sample_ws_wavelength, factor_workspaces['acc'])
                 correction_type = 'sample_corrections_only'
                 # Add corrections filename to log values
                 prog_corr.report('Correcting sample')
@@ -102,8 +102,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             output_workspace = self._subtract(sample_ws_wavelength, container_ws_wavelength)
             correction_type = 'can_subtraction'
             # Add container filename to log values
-            can_cut = self._can_ws_name.index('_')
-            can_base = self._can_ws_name[:can_cut]
+            can_base = self.getPropertyValue("CanWorkspace")
+            can_base = can_base[:can_base.index('_')]
             prog_corr.report('Adding container filename')
             s_api.AddSampleLog(Workspace=output_workspace,
                                LogName='container_filename',
@@ -135,8 +135,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                            LogText=correction_type)
 
         # Add original sample as log entry
-        sam_cut = self._sample_ws_name.index('_')
-        sam_base = self._sample_ws_name[:sam_cut]
+        sam_base = self.getPropertyValue("SampleWorkspace")
+        sam_base = sam_base[:sam_base.index('_')]
         prog_wrkflow.report('Adding sample filename')
         s_api.AddSampleLog(Workspace=output_workspace,
                            LogName='sample_filename',
@@ -166,23 +166,23 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             if self._corrections_workspace.size() == 0:
                 issues['CorrectionsWorkspace'] = "No corrections found in the supplied corrections workspace group."
             else:
-                corrections_name = self.getPropertyValue("CorrectionsWorkspace")
                 corrections_issues = []
 
                 for factor in self._factors:
-                    if (corrections_name + "_" + factor) not in self._corrections_workspace:
+                    if not any(factor in correction_name for correction_name
+                               in self._corrections_workspace.getNames()):
                         corrections_issues.append(factor + " workspace not present in corrections workspace group.\n")
 
                 if corrections_issues:
                     issues['CorrectionsWorkspace'] = "\n".join(corrections_issues)
 
-        sample_ws = s_api.mtd[self._sample_ws_name]
+        sample_ws = self.getProperty("SampleWorkspace").value
         if isinstance(sample_ws, MatrixWorkspace):
             sample_unit_id = sample_ws.getAxis(0).getUnit().unitID()
 
             # Check sample and container X axis units match
             if self._use_can:
-                can_ws = s_api.mtd[self._can_ws_name]
+                can_ws = self.getProperty("CanWorkspace").value
                 if isinstance(can_ws, MatrixWorkspace):
                     can_unit_id = can_ws.getAxis(0).getUnit().unitID()
                     if can_unit_id != sample_unit_id:
@@ -206,7 +206,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._use_corrections = bool(self._corrections_workspace)
 
         # Get container workspace
-        self._container_workspace = self.getProperty('CanWorkspace')
+        self._container_workspace = self.getProperty('CanWorkspace').value
         self._use_can = bool(self._container_workspace)
         self._can_scale_factor = self.getProperty('CanScaleFactor').value
         self._scale_can = self._can_scale_factor != 1.0
@@ -218,7 +218,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_corrections:
             if self._corrections_workspace.size() == 1:
-                self._factors = ['ass']
+                self._factors = ['acc']
             if self._corrections_workspace.size() == 2:
                 self._factors = ['acc', 'ass']
                 self._corrections_approximation = self._two_factor_corrections_approximation
@@ -263,7 +263,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             shifted_container = self._shift_workspace(self._container_workspace, self._can_shift_factor)
             logger.information('Container shifted by %f' % self._can_shift_factor)
         else:
-            shifted_container = s_api.mtd[self._can_ws_name]
+            shifted_container = self._container_workspace
 
         # Apply container scale factor if needed
         if self._scale_can:
@@ -335,7 +335,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if self._rebin_container_ws:
             container_workspace = s_api.RebinToWorkspace(WorkspaceToRebin=container_workspace,
                                                          WorkspaceToMatch=factor_workspaces_wavelength['acc'],
-                                                         OutputWorkspace="")
+                                                         OutputWorkspace="rebinned")
         return self._corrections_approximation(sample_workspace, container_workspace, factor_workspaces)
 
     def _three_factor_corrections_approximation(self, sample_workspace, container_workspace, factor_workspaces):
