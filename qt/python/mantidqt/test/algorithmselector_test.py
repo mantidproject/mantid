@@ -1,5 +1,5 @@
 from __future__ import print_function
-from collections import Counter
+from collections import Counter, namedtuple
 from mock import Mock, patch, call
 import unittest
 from PyQt4.QtTest import QTest
@@ -8,13 +8,33 @@ from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utils.qt.testing import *
 
 
+AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
-mock_get_algorithm_descriptors.return_value = [['Rebin', 1, 'Transform', ''],
-                                               ['Rebin', 1, 'Transform\\Rebin', ''],
-                                               ['Load', 1, 'Data', ''],
-                                               ['DoStuff', 1, 'Stuff', ''],
-                                               ['DoStuff', 2, 'Stuff', ''],
+mock_get_algorithm_descriptors.return_value = [AlgorithmDescriptorMock(name='Rebin', version=1,
+                                                                       category='Transform', alias=''),
+                                               AlgorithmDescriptorMock(name='Rebin', version=1,
+                                                                       category='Transform\\Rebin', alias=''),
+                                               AlgorithmDescriptorMock(name='Load', version=1,
+                                                                       category='Data', alias=''),
+                                               AlgorithmDescriptorMock(name='DoStuff', version=1,
+                                                                       category='Stuff', alias=''),
+                                               AlgorithmDescriptorMock(name='DoStuff', version=2,
+                                                                       category='Stuff', alias=''),
                                                ]
+
+
+class AlgorithmFactoryTest(unittest.TestCase):
+
+    def test_getDescriptors(self):
+        from mantid import AlgorithmFactory
+        descriptors = AlgorithmFactory.getDescriptors(True)
+        self.assertGreater(len(descriptors), 0)
+        d = descriptors[0]
+        self.assertFalse(isinstance(d, AlgorithmDescriptorMock))
+        self.assertTrue(hasattr(d, 'name'))
+        self.assertTrue(hasattr(d, 'alias'))
+        self.assertTrue(hasattr(d, 'category'))
+        self.assertTrue(hasattr(d, 'version'))
 
 
 @patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)

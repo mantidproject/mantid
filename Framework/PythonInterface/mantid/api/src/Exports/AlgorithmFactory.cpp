@@ -68,12 +68,8 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
   auto descriptors = self.getDescriptors(includeHidden);
   list pyDescriptors;
   for (auto &descr : descriptors) {
-    list descrList;
-    descrList.append(descr.name);
-    descrList.append(descr.version);
-    descrList.append(descr.category);
-    descrList.append(descr.alias);
-    pyDescriptors.append(descrList);
+    boost::python::object d(descr);
+    pyDescriptors.append(d);
   }
   return pyDescriptors;
 }
@@ -143,6 +139,12 @@ GCC_DIAG_ON(cast-qual)
 // clang-format on
 
 void export_AlgorithmFactory() {
+
+  class_<AlgorithmDescriptor>("AlgorithmDescriptor")
+    .def_readonly("name", &AlgorithmDescriptor::name)
+    .def_readonly("alias", &AlgorithmDescriptor::alias)
+    .def_readonly("category", &AlgorithmDescriptor::category)
+    .def_readonly("version", &AlgorithmDescriptor::version);
 
   class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl",
                                                    no_init)

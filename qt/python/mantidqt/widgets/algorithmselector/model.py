@@ -51,11 +51,10 @@ class AlgorithmSelectorModel(object):
         algorithm_names = []
         data = {}
         for descriptor in descriptors:
-            # d is a list of [name, version, category, alias]
-            name, version, categories, alias = tuple(descriptor)
-            if name not in algorithm_names:
-                algorithm_names.append(name)
-            categories = categories.split('\\')
+            # descriptor is a class with data fields: name, alias, category, version
+            if descriptor.name not in algorithm_names:
+                algorithm_names.append(descriptor.name)
+            categories = descriptor.category.split('\\')
             # Create nested dictionaries in which the key is a category and the value
             # is a similar dictionary with sub-categories as keys
             d = data
@@ -68,7 +67,7 @@ class AlgorithmSelectorModel(object):
             if self.algorithm_key not in d:
                 d[self.algorithm_key] = {}
             d = d[self.algorithm_key]
-            if name not in d:
-                d[name] = []
-            d[name].append(version)
+            if descriptor.name not in d:
+                d[descriptor.name] = []
+            d[descriptor.name].append(descriptor.version)
         return algorithm_names, data
