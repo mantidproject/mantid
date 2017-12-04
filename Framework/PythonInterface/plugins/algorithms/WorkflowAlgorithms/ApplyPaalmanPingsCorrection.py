@@ -1,14 +1,13 @@
-#pylint: disable=no-init,too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
-                       PropertyMode, MatrixWorkspace, Progress
+    PropertyMode, MatrixWorkspace, Progress
 from mantid.kernel import Direction, logger
 
 
 class ApplyPaalmanPingsCorrection(PythonAlgorithm):
-
     _sample_ws_name = None
     _corrections_ws_name = None
     _use_can = False
@@ -54,9 +53,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='RebinCanToSample',
                              defaultValue=True,
-                             doc=('Enable or disable RebinToWorkspace on CanWorkspace.'))
+                             doc='Enable or disable RebinToWorkspace on CanWorkspace.')
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
         if not self._use_corrections:
             logger.information('Not using corrections')
@@ -72,7 +71,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         container_ws_wavelength = (self._process_container_workspace(self._container_workspace, prog_container)
                                    if self._use_can else None)
-
 
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
         if self._use_corrections:
@@ -230,8 +228,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 self._corrections_approximation = self._three_factor_corrections_approximation
 
     def _shift_workspace(self, workspace, shift_factor):
-        return s_api.ScaleX(InputWorkspace=self._container_workspace,
-                            Factor=self._can_shift_factor,
+        return s_api.ScaleX(InputWorkspace=workspace,
+                            Factor=shift_factor,
                             OutputWorkspace="__shifted",
                             Operation="Add", StoreInADS=False)
 
@@ -239,7 +237,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         unit = workspace.getAxis(0).getUnit().unitID()
 
         if unit != 'Wavelength':
-        # Configure conversion
+            # Configure conversion
             if unit == 'dSpacing' or unit == 'DeltaE':
                 if unit == 'dSpacing':
                     emode = 'Elastic'
@@ -266,10 +264,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if self._shift_can:
             # Use temp workspace so we don't modify data
             prog_container.report('Shifting can')
-            shifted_container = self._shift_workspace(self._container_workspace, self._can_shift_factor)
+            shifted_container = self._shift_workspace(container_workspace, self._can_shift_factor)
             logger.information('Container shifted by %f' % self._can_shift_factor)
         else:
-            shifted_container = self._container_workspace
+            shifted_container = container_workspace
 
         # Apply container scale factor if needed
         if self._scale_can:
@@ -290,7 +288,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
         if factor_type == 'ass':
             def predicate(workspace_name):
-                return factor_type in workspace_name and not 'assc' in workspace_name
+                return factor_type in workspace_name and 'assc' not in workspace_name
         else:
             def predicate(workspace_name):
                 return factor_type in workspace_name
@@ -304,7 +302,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
         :return:    A dictionary of the factors to the factor workspaces.
         """
-        return {factor : self._get_correction_factor_workspace(factor) for factor in self._factors}
+        return {factor: self._get_correction_factor_workspace(factor) for factor in self._factors}
 
     def _subtract(self, minuend_workspace, subtrahend_workspace):
         """
@@ -346,7 +344,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Correcting sample and container')
 
-        factor_workspaces_wavelength = {factor : self._convert_units_wavelength(workspace) for factor, workspace
+        factor_workspaces_wavelength = {factor: self._convert_units_wavelength(workspace) for factor, workspace
                                         in factor_workspaces.items()}
 
         if self._rebin_container_ws:
@@ -366,6 +364,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         acc = factor_workspaces['acc']
         ass = factor_workspaces['ass']
         return (sample_workspace / ass) - (container_workspace / acc)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ApplyPaalmanPingsCorrection)
