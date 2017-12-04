@@ -61,9 +61,12 @@ private:
   void init() override;
   void exec() override;
   EfficiencyMap efficiencyFactors();
-  WorkspaceMap fullCorrections(const WorkspaceMap &inputs);
-  API::WorkspaceGroup_sptr groupOutput(WorkspaceMap &outputs);
+  WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
   WorkspaceMap mapInputsToDirections();
+  void solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void solve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
 };
 
 } // namespace Algorithms

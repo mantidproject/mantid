@@ -23,6 +23,7 @@ constexpr char *MP{"-+"};
 constexpr char *PM{"+-"};
 constexpr char *PP{"++"};
 }
+
 }
 
 namespace Mantid {
@@ -79,19 +80,21 @@ void PolarizationEfficiencyCor::init() {
  */
 void PolarizationEfficiencyCor::exec() {
   const auto inputs = mapInputsToDirections();
+  const EfficiencyMap efficiencies = efficiencyFactors();
   WorkspaceMap outputs;
   switch (inputs.size()) {
   case 2:
     break;
   case 3:
+    outputs = threeInputCorrections(inputs, efficiencies);
     break;
   case 4:
-    outputs = fullCorrections(inputs);
+    outputs = fullCorrections(inputs, efficiencies);
   }
   setProperty(Prop::OUTPUT_WS, groupOutput(outputs));
 }
 
-API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(WorkspaceMap &outputs) {
+API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
@@ -140,9 +143,19 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
   return e;
 }
 
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const PolarizationEfficiencyCor::WorkspaceMap &inputs) {
-  EfficiencyMap efficiencies = efficiencyFactors();
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  WorkspaceMap fullInputs = inputs;
+  if (!inputs.mpWS) {
+    solve01(fullInputs, efficiencies);
+  } else {
+    solve10(fullInputs, efficiencies);
+  }
+  return fullCorrections(fullInputs, efficiencies);
+}
+
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap outputs;
+  // TODO check if history is retained with create().
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
   outputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mpWS);
   outputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
@@ -229,5 +242,43 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
   return inputs;
 }
 
+void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  using namespace Mantid::DataObjects;
+  inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
+  const auto &F1 = *efficiencies.F1;
+  const auto &F2 = *efficiencies.F2;
+  const auto &P1 = *efficiencies.P1;
+  const auto &P2 = *efficiencies.P2;
+  const auto nHisto = inputs.pmWS->getNumberHistograms();
+  for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
+    const auto &I00 = inputs.ppWS->y(wsIndex);
+    const auto &I10 = inputs.mpWS->y(wsIndex);
+    const auto &I11 = inputs.mpWS->y(wsIndex);
+    const auto a = 2. * P1 - 1;
+    const auto b = P1 - P2;
+    const auto divisor = F1 * a - b;
+    const auto c = I00 - I10;
+    inputs.pmWS->mutableY(wsIndex) = F1 * I00 * a - (I11 + c) * b - F2 * c * (2. * P2 - 1) / divisor;
+  }
+}
+
+void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
+  const auto &F1 = *efficiencies.F1;
+  const auto &F2 = *efficiencies.F2;
+  const auto &P1 = *efficiencies.P1;
+  const auto &P2 = *efficiencies.P2;
+  const auto nHisto = inputs.mpWS->getNumberHistograms();
+  for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
+    const auto &I00 = inputs.ppWS->y(wsIndex);
+    const auto &I01 = inputs.pmWS->y(wsIndex);
+    const auto &I11 = inputs.mpWS->y(wsIndex);
+    const auto a = 2. * P2 - 1;
+    const auto b = P1 - P2;
+    const auto divisor = F2 * a + b;
+    const auto c = I01 - I00;
+    inputs.mpWS->mutableY(wsIndex) = F1 * c * (2. * P1 - 1) + (I11 - c) * b + F2 * I00 * a / divisor;
+  }
+}
 } // namespace Algorithms
 } // namespace Mantid
