@@ -21,6 +21,7 @@ Powder Diffraction
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
+- New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - :ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` and :ref:`PowderDiffILLCalibration <algm-PowderDiffILLCalibration>` enable the basic data reduction for D20 scanning powder diffractometer at ILL.
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 - After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
