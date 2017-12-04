@@ -1,14 +1,16 @@
-class SignalBlocker(object):
-
-    def __init__(self, widget):
-        self.widget = widget
-
-    def __enter__(self):
-        self.widget.blockSignals(True)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.widget.blockSignals(False)
+from contextlib import contextmanager
 
 
+@contextmanager
 def block_signals(widget):
-    return SignalBlocker(widget)
+    """
+    A context manager that helps to block widget's signals temporarily. Usage:
+
+        with block_signals(widget):
+            widget.do_actions_that_emit_signals()
+
+    :param widget: A Qt widget signals from which should be blocked.
+    """
+    widget.blockSignals(True)
+    yield
+    widget.blockSignals(False)
