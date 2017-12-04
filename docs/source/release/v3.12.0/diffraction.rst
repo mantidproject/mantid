@@ -28,7 +28,7 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
-- :ref:`algm-GSASIIRefineFitPeaks>` has been re-integrated with the
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` has been re-integrated with the
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
   within Mantid.
 - Usability improvements in the GUI:
@@ -44,6 +44,10 @@ Single Crystal Diffraction
 - In HB3A reduction intervace, section for downloading experimental data via http server has been removed from main UI.
 
 - :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` now has option to specify background shell instead of using default background determination.
+
+- :ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` now has options to specify number of iterations to refine UB and also resolution of the search through possible orientations.  Minimum angle between a,b,c vectors reduced for large unit cells.
+
+- :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB. 
 
 
 Imaging

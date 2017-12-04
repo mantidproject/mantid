@@ -1,11 +1,8 @@
-/***************************************************************************/
-/**
- This file is a SIP file for binding C++ methods of the
- MantidQt widgets (SliceViewer in particular)
- to Python.
-
-*/
-/***************************************************************************/
+/**************************************************************************/
+/** This file is a SIP file for binding C++ methods of the MantidQt widgets
+ *  to Python.
+ */
+/**************************************************************************/
 
 %Include qwttypes.sip
 
@@ -1439,6 +1436,8 @@ MantidQt::RefDetectorViewer::RefIVConnections* RefMatrixWSImageView::getConnecti
 }; // end namespace
 }; // end namespace
 
+
+
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -1446,7 +1445,22 @@ namespace MantidWidgets
 
 //*WIKI* == Classes ==
 //*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
+class MessageDisplay : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MessageDisplay.h"
+%End
+
+public:
+	MessageDisplay(QWidget *parent = nullptr);
+	void setSource(const QString &source);
+	void attachLoggingChannel();
+
+};
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -1482,7 +1496,6 @@ public:
 
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
-
 
 namespace MantidQt
 {
