@@ -111,6 +111,7 @@ public slots:
   /// Sets enabled status for polarisation corrections and parameters
   void setPolarisationOptionsEnabled(bool enable) override;
   void setDetectorCorrectionEnabled(bool enable) override;
+
 private:
   /// Initialise the interface
   void initLayout();

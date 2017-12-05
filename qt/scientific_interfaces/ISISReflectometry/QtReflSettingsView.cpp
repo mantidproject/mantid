@@ -72,7 +72,6 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
   m_isPolCorrEnabled = enable;
 }
 
-
 /* Sets default values for all experiment settings given a list of default
 * values.
 */

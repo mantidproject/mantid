@@ -130,7 +130,7 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
 }
 
 std::string ReflSettingsPresenter::asPythonBool(bool value) {
-  return value ? "True" : "False"
+  return value ? "True" : "False";
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'

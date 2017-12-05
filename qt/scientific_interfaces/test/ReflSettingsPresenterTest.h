@@ -171,7 +171,7 @@ public:
     EXPECT_CALL(mockView, detectorCorrectionEnabled())
         .Times(Exactly(1))
         .WillOnce(Return(true))
-    EXPECT_CALL(mockView, getDetectorCorrectionType())
+            EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(Exactly(1))
         .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getTransmissionRuns())
