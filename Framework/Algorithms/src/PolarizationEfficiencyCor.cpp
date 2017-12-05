@@ -148,17 +148,27 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
 }
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  using namespace boost::math;
   WorkspaceMap outputs;
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &ppY = inputs.ppWS->y(wsIndex);
+    const auto &ppE = inputs.ppWS->e(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
+    auto &ppEOut = outputs.ppWS->mutableE(wsIndex);
     for (size_t binIndex = 0; binIndex < ppY.size(); ++binIndex) {
       const auto P1 = efficiencies.P1->y()[binIndex];
       const auto P2 = efficiencies.P2->y()[binIndex];
       const double f = 1. - P1 - P2 + 2. * P1 * P2;
       ppYOut[binIndex] = ppY[binIndex] / f;
+      const auto P1E = efficiencies.P1->e()[binIndex];
+      const auto P2E = efficiencies.P2->e()[binIndex];
+      const auto e1 = pow<2>(P1E * (2. * P1 - 1.) / pow<2>(f) * ppY[binIndex]);
+      const auto e2 = pow<2>(P2E * (2. * P2 - 1.) / pow<2>(f) * ppY[binIndex]);
+      const auto e3 = ppE[binIndex] / pow<2>(f);
+      const auto errorSum = std::sqrt(e1 + e2 + e3);
+      ppEOut[binIndex] = errorSum;
     }
   }
   return outputs;
