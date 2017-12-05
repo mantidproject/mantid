@@ -157,6 +157,7 @@ signals:
   void processButtonClicked();
   void processingFinished();
   void instrumentHasChanged();
+  void dataChanged(const QModelIndex &, const QModelIndex &);
 
 private:
   // initialise the interface

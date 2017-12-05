@@ -218,6 +218,8 @@ class AbstractInst(object):
         # Prepend the file extension used if it was set, this groups the files nicely in the file browser
         # Also remove the dot at the start so we don't make hidden files in *nix systems
         file_name = run_details.file_extension[1:] + file_name if run_details.file_extension else file_name
+        file_name += run_details.output_suffix if run_details.output_suffix is not None else ""
+
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))

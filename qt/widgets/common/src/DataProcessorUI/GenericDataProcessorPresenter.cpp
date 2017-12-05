@@ -961,7 +961,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   auto isUnrestrictedProperty =
       [&restrictedProps](QString const &propertyName) -> bool {
         return std::find(restrictedProps.begin(), restrictedProps.end(),
-                         propertyName) != restrictedProps.end();
+                         propertyName) == restrictedProps.end();
       };
 
   // Parse and set any user-specified options
