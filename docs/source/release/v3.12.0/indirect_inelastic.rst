@@ -14,7 +14,8 @@ New
 Improved
 ########
 
-- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process
+- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process.
+- BASISReduction option noMonitorNorm changed to MonitorNorm.
 
 Vesuvio
 -------
@@ -78,5 +79,12 @@ Improved
 
 Bugfixes
 ########
+
+Abins
+-----
+
+Improved
+########
+- Performance of Abins routines significantly improved (a factor of 10-20 times for data size of 4000).
 
 :ref:`Release 3.12.0 <v3.12.0>`

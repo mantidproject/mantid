@@ -136,6 +136,9 @@ private:
   /// Structured bank flag
   boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
 
+  /// Component names
+  boost::shared_ptr<std::vector<std::string>> m_names;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
 

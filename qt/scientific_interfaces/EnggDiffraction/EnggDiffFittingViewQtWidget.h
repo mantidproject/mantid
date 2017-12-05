@@ -95,12 +95,6 @@ public:
 
   void enableFitAllButton(bool enable) const override;
 
-  void clearFittingComboBox() const override;
-
-  void enableFittingComboBox(bool enable) const override;
-
-  int getFittingComboIdx(std::string bank) const override;
-
   void clearFittingListWidget() const override;
 
   void enableFittingListWidget(bool enable) const override;
@@ -109,20 +103,19 @@ public:
 
   std::string getFittingListWidgetCurrentValue() const override;
 
+  bool listWidgetHasSelectedRow() const override;
+
   void setFittingListWidgetCurrentRow(int idx) const override;
 
-  std::string fittingPeaksData() const override;
+  std::string getExpectedPeaksInput() const override;
 
   void setPeakList(const std::string &peakList) const override;
-
-  void setBankEmit() override;
 
   void resetCanvas() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused, bool plotSinglePeaks) override;
-
-  void addBankItem(std::string bankID) override;
+                     bool focused, bool plotSinglePeaks,
+                     const std::string &xAxisLabel) override;
 
   void addRunNoItem(std::string runNo) override;
 
@@ -178,7 +171,6 @@ private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
   void resetFittingMode();
-  void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
   void loadClicked();

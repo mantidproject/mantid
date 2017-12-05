@@ -17,7 +17,7 @@ Workbench
 
 - Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
 - Fixed an issue where updating a workspace changes the number format from decimal to scientific notation if the workspace is being viewed.
-
+- Added :mod:`mantid.plots` to provide convenience functions for plotting mantid workspaces with matplotlib
 
 SliceViewer and Vates Simple Interface
 --------------------------------------
