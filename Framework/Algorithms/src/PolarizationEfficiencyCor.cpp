@@ -165,15 +165,20 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
 }
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  using namespace boost::math;
   WorkspaceMap outputs;
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &mmY = inputs.mmWS->y(wsIndex);
+    const auto &mmE = inputs.mmWS->e(wsIndex);
     const auto &ppY = inputs.ppWS->y(wsIndex);
+    const auto &ppE = inputs.ppWS->y(wsIndex);
     auto &mmYOut = outputs.mmWS->mutableY(wsIndex);
+    auto &mmEOut = outputs.mmWS->mutableE(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
+    auto &ppEOut = outputs.ppWS->mutableE(wsIndex);
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
       const auto F1 = efficiencies.F1->y()[binIndex];
       const auto P1 = efficiencies.P1->y()[binIndex];
@@ -187,9 +192,29 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
       P1m << diag,  off,
               off, diag;
       const Eigen::Vector2d intensities(ppY[binIndex], mmY[binIndex]);
-      const auto corrected = P1m * F1m * intensities;
+      const auto PFProduct = P1m * F1m;
+      const auto corrected = PFProduct * intensities;
       ppYOut = corrected[0];
       mmYOut = corrected[1];
+      const auto F1E = efficiencies.F1->e()[binIndex];
+      const auto P1E = efficiencies.P1->e()[binIndex];
+      const auto elemE1 = -1. / pow<2>(F1) * F1E;
+      Eigen::Matrix2d F1Em;
+      F1Em <<      0.,     0.,
+              -elemE1, elemE1;
+      const auto elemE2 = 1. / pow<2>(divisor) * P1E;
+      Eigen::Matrix2d P1Em;
+      P1Em <<  elemE2, -elemE2,
+              -elemE2,  elemE2;
+      const Eigen::Vector2d errors(ppE[binIndex], mmE[binIndex]);
+      const auto e1 = (F1Em * P1m * intensities).array();
+      const auto e2 = (F1m * P1Em * intensities).array();
+      const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
+      const auto sqErrors = (errors.array() * errors.array()).matrix();
+      const auto e3 = (sqPFProduct * sqErrors).array();
+      const auto errorSum = (e1 * e1 + e2 * e2 + e3).sqrt();
+      ppEOut[binIndex] = errorSum[0];
+      mmEOut[binIndex] = errorSum[1];
     }
   }
   return outputs;
@@ -366,6 +391,7 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
     const auto divisor = F1 * a - b;
     const auto c = I00 - I10;
     inputs.pmWS->mutableY(wsIndex) = F1 * I00 * a - (I11 + c) * b - F2 * c * (2. * P2 - 1) / divisor;
+    // The errors are left to zero.
   }
 }
 
@@ -385,6 +411,7 @@ void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMa
     const auto divisor = F2 * a + b;
     const auto c = I01 - I00;
     inputs.mpWS->mutableY(wsIndex) = F1 * c * (2. * P1 - 1) + (I11 - c) * b + F2 * I00 * a / divisor;
+    // The errors are left to zero.
   }
 }
 } // namespace Algorithms
