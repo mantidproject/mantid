@@ -51,10 +51,10 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
 void ApplyAbsorptionCorrections::setup() {}
 
 /**
-* Disables corrections when using S(Q, w) as input data.
-*
-* @param dataName Name of new data source
-*/
+ * Disables corrections when using S(Q, w) as input data.
+ *
+ * @param dataName Name of new data source
+ */
 void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   // Remove old curves
   m_uiForm.ppPreview->removeSpectrum("Sample");
@@ -163,7 +163,6 @@ void ApplyAbsorptionCorrections::run() {
   absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   // Get Can and Clone
   MatrixWorkspace_sptr canClone;
   if (useCan) {
@@ -214,49 +213,47 @@ void ApplyAbsorptionCorrections::run() {
     applyCorrAlg->setProperty("RebinCanToSample", rebinContainer);
   }
 
-  if (useCorrections) {
-    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+  QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-    WorkspaceGroup_sptr corrections =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            correctionsWsName.toStdString());
-    bool interpolateAll = false;
-    for (size_t i = 0; i < corrections->size(); i++) {
-      MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+  WorkspaceGroup_sptr corrections =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          correctionsWsName.toStdString());
+  bool interpolateAll = false;
+  for (size_t i = 0; i < corrections->size(); i++) {
+    MatrixWorkspace_sptr factorWs =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
-      // Check for matching binning
-      if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
-                       factorWs->blocksize() != 1)) {
-        int result;
-        if (interpolateAll) {
-          result = QMessageBox::Yes;
-        } else {
-          std::string text = "Number of bins on sample and " +
-                             factorWs->getName() +
-                             " workspace does not match.\n" +
-                             "Would you like to interpolate this workspace to "
-                             "match the sample?";
+    // Check for matching binning
+    if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
+                     factorWs->blocksize() != 1)) {
+      int result;
+      if (interpolateAll) {
+        result = QMessageBox::Yes;
+      } else {
+        std::string text = "Number of bins on sample and " +
+                           factorWs->getName() +
+                           " workspace does not match.\n" +
+                           "Would you like to interpolate this workspace to "
+                           "match the sample?";
 
-          result = QMessageBox::question(
-              NULL, tr("Interpolate corrections?"), tr(text.c_str()),
-              QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
-        }
+        result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
+                                       tr(text.c_str()), QMessageBox::YesToAll,
+                                       QMessageBox::Yes, QMessageBox::No);
+      }
 
-        switch (result) {
-        case QMessageBox::YesToAll:
-          interpolateAll = true;
-        // fall through
-        case QMessageBox::Yes:
-          addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
-          break;
-        default:
-          m_batchAlgoRunner->clearQueue();
-          g_log.error(
-              "ApplyAbsorptionCorrections cannot run with corrections that do "
-              "not match sample binning.");
-          return;
-        }
+      switch (result) {
+      case QMessageBox::YesToAll:
+        interpolateAll = true;
+      // fall through
+      case QMessageBox::Yes:
+        addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+        break;
+      default:
+        m_batchAlgoRunner->clearQueue();
+        g_log.error(
+            "ApplyAbsorptionCorrections cannot run with corrections that do "
+            "not match sample binning.");
+        return;
       }
     }
 
@@ -282,14 +279,9 @@ void ApplyAbsorptionCorrections::run() {
     correctionType = "anl";
     break;
   }
-  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
 
-  // Using corrections
-  if (m_uiForm.ckUseCorrections->isChecked()) {
-    outputWsName += "_" + correctionType + "_Corrected";
-  } else {
-    outputWsName += "_Subtracted";
-  }
+  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
+  outputWsName += "_" + correctionType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
@@ -326,13 +318,13 @@ void ApplyAbsorptionCorrections::run() {
 }
 
 /**
-* Adds a spline interpolation as a step in the calculation for using legacy
-*correction factor
-* workspaces.
-*
-* @param toInterpolate Pointer to the workspace to interpolate
-* @param toMatch Name of the workspace to match
-*/
+ * Adds a spline interpolation as a step in the calculation for using legacy
+ *correction factor
+ * workspaces.
+ *
+ * @param toInterpolate Pointer to the workspace to interpolate
+ * @param toMatch Name of the workspace to match
+ */
 void ApplyAbsorptionCorrections::addInterpolationStep(
     MatrixWorkspace_sptr toInterpolate, std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
@@ -350,10 +342,10 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 }
 
 /**
-* Handles completion of the abs. correction algorithm.
-*
-* @param error True if algorithm failed.
-*/
+ * Handles completion of the abs. correction algorithm.
+ *
+ * @param error True if algorithm failed.
+ */
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
@@ -384,10 +376,10 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
 }
 
 /**
-* Handles completion of the unit conversion and saving algorithm.
-*
-* @param error True if algorithm failed.
-*/
+ * Handles completion of the unit conversion and saving algorithm.
+ *
+ * @param error True if algorithm failed.
+ */
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
@@ -431,10 +423,6 @@ bool ApplyAbsorptionCorrections::validate() {
   MatrixWorkspace_sptr sampleWs;
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
-  bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
-
-  if (!(useCan || useCorrections))
-    uiv.addErrorMessage("Must use either container subtraction or corrections");
 
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
@@ -455,37 +443,24 @@ bool ApplyAbsorptionCorrections::validate() {
           "Sample and can workspaces must contain the same type of data.");
   }
 
-  if (useCorrections) {
-    if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
-      uiv.addErrorMessage(
-          "Use Correction must contain a corrections file or workspace.");
-    } else {
+  if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
+    uiv.addErrorMessage(
+        "Correction selector must contain a corrections file or workspace.");
+  } else {
 
-      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
-      WorkspaceGroup_sptr corrections =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              correctionsWsName.toStdString());
-      for (size_t i = 0; i < corrections->size(); i++) {
-        // Check it is a MatrixWorkspace
-        MatrixWorkspace_sptr factorWs =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(
-                corrections->getItem(i));
-        if (!factorWs) {
-          QString msg = "Correction factor workspace " + QString::number(i) +
-                        " is not a MatrixWorkspace";
-          uiv.addErrorMessage(msg);
-          continue;
-        }
-
-        /*
-        // Check X unit is wavelength
-        Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
-        if (xUnit->caption() != "Wavelength") {
-          QString msg = "Correction factor workspace " +
-                        QString::fromStdString(factorWs->getName()) +
-                        " is not in wavelength";
-          uiv.addErrorMessage(msg);
-        }*/
+    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+    WorkspaceGroup_sptr corrections =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            correctionsWsName.toStdString());
+    for (size_t i = 0; i < corrections->size(); i++) {
+      // Check it is a MatrixWorkspace
+      MatrixWorkspace_sptr factorWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+      if (!factorWs) {
+        QString msg = "Correction factor workspace " + QString::number(i) +
+                      " is not a MatrixWorkspace";
+        uiv.addErrorMessage(msg);
+        continue;
       }
     }
   }
@@ -504,10 +479,10 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 /**
-* Handles when the type of geometry changes
-*
-* Updates the file extension to search for
-*/
+ * Handles when the type of geometry changes
+ *
+ * Updates the file extension to search for
+ */
 void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
   QString ext("");
   switch (index) {
@@ -529,10 +504,10 @@ void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
 }
 
 /**
-* Replots the preview plot.
-*
-* @param wsIndex Spectrum index to plot
-*/
+ * Replots the preview plot.
+ *
+ * @param wsIndex Spectrum index to plot
+ */
 void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
@@ -585,8 +560,8 @@ void ApplyAbsorptionCorrections::plotClicked() {
 }
 
 /**
-* Plots the current spectrum displayed in the preview plot
-*/
+ * Plots the current spectrum displayed in the preview plot
+ */
 void ApplyAbsorptionCorrections::plotCurrentPreview() {
   QStringList workspaces = QStringList();
 
