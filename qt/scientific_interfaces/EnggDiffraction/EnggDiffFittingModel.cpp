@@ -181,7 +181,9 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
   }
 
   const std::string alignedWSName = FOCUSED_WS_NAME + "_d";
-  alignDetectors(getFocusedWorkspace(runNumber, bank), alignedWSName);
+  cloneWorkspace(getFocusedWorkspace(runNumber, bank), alignedWSName);
+  alignDetectors(alignedWSName, alignedWSName);
+
   alignDetectors(FITTED_PEAKS_WS_NAME, FITTED_PEAKS_WS_NAME);
 
   const auto &ADS = Mantid::API::AnalysisDataService::Instance();
