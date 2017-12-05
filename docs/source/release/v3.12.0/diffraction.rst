@@ -35,6 +35,7 @@ Engineering Diffraction
 - Usability improvements in the GUI:
   - The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message
   - Improved progress reporting for Calibration and Focus
+  - Improved unit conversions when using the peak picker
 
 Single Crystal Diffraction
 --------------------------
