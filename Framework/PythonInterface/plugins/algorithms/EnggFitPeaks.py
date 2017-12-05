@@ -89,7 +89,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         peaks_table_name = self.getPropertyValue("OutFittedPeaksTable")
         fitted_peaks = self._fit_all_peaks(in_wks, wks_index,
-                                           (found_peaks, expected_peaks_tof), peaks_table_name)
+                                           (found_peaks, expected_peaks), peaks_table_name)
 
         # mandatory output
         self.setProperty('FittedPeaks', fitted_peaks)
