@@ -55,7 +55,7 @@ void setProperty(IPropertyManager &self, const boost::python::object &name,
   std::string namestr;
   try {
     namestr = pyObjToStr(name);
-  } catch (std::invalid_argument &e) {
+  } catch (std::invalid_argument &) {
     throw std::invalid_argument("Failed to convert property name to a string");
   }
 
