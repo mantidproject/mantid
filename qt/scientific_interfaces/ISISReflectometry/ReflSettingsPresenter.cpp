@@ -129,6 +129,10 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
   return boost::algorithm::join(options, ",");
 }
 
+std::string ReflSettingsPresenter::asPythonBool(bool value) {
+  return value ? "True" : "False"
+}
+
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */
@@ -257,12 +261,13 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("ProcessingInstructions=" + procInst);
     }
 
-    if (m_view->detectorCorrectionEnabled()) {
-      // Add correction type
-      auto correctionType = m_view->getDetectorCorrectionType();
-      if (!correctionType.empty())
-        options.push_back("DetectorCorrectionType=" + correctionType);
-    }
+    auto correctDetectors = asPythonBool(m_view->detectorCorrectionEnabled());
+    options.push_back("CorrectDetectors=" + correctDetectors);
+
+    // Add correction type
+    auto correctionType = m_view->getDetectorCorrectionType();
+    if (!correctionType.empty())
+      options.push_back("DetectorCorrectionType=" + correctionType);
   }
 
   return boost::algorithm::join(options, ",");

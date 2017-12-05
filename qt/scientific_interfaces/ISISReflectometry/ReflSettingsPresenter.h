@@ -70,6 +70,7 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void wrapWithQuotes(std::string &str) const;
+  static std::string asPythonBool(bool value);
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);

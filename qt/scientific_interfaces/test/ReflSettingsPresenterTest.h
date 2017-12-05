@@ -168,6 +168,9 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled())
+        .Times(Exactly(1))
+        .WillOnce(Return(true))
     EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(Exactly(1))
         .WillOnce(Return("VerticalShift"));
@@ -206,7 +209,8 @@ public:
     TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(optionsVec[21], "CorrectDetectors=True");
+    TS_ASSERT_EQUALS(optionsVec[22], "DetectorCorrectionType=VerticalShift");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
@@ -346,6 +350,7 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
     EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+    EXPECT_CALL(mockView, detectorCorrectionEnabled()).Times(Exactly(0));
 
     // Experiment settings should be called
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));
