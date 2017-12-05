@@ -196,6 +196,11 @@ sansInstrument(const Mantid::Kernel::V3D &sourcePos,
                const Mantid::Kernel::V3D &samplePos,
                const Mantid::Kernel::V3D &trolley1Pos,
                const Mantid::Kernel::V3D &trolley2Pos);
+
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithPSDTubes(const size_t nTubes = 3,
+                             const size_t nPixelsPerTube = 50,
+                             const bool mirrorTubes = false);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

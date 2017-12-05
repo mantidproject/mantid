@@ -300,6 +300,7 @@ set ( SRC_FILES
 	src/StripVanadiumPeaks2.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
+	src/SumOverlappingTubes.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
@@ -633,6 +634,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
+	inc/MantidAlgorithms/SumOverlappingTubes.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
@@ -951,6 +953,7 @@ set ( TEST_FILES
 	StripVanadiumPeaksTest.h
 	SumEventsByLogValueTest.h
 	SumNeighboursTest.h
+	SumOverlappingTubesTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h

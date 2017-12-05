@@ -26,14 +26,15 @@ class MaxEntPresenterTest(unittest.TestCase):
         #signals
         #needed for connect in presenter
         self.view.maxEntButtonSignal=mock.Mock()
+        self.view.cancelSignal=mock.Mock()
         # functions
         self.view.addItems=mock.MagicMock()
         self.view.initMaxEntInput=mock.Mock(return_value={"InputWorkspace":"testWS","EvolChi":"out",
                                             "ReconstructedData":"out2","ReconstructedImage":"out3","EvolAngle":"out4"})
         self.view.addRaw=mock.Mock()
         self.view.isRaw=mock.Mock(return_value=False)
-        self.view.deactivateButton=mock.Mock()
-        self.view.activateButton=mock.Mock()
+        self.view.deactivateCalculateButton=mock.Mock()
+        self.view.activateCalculateButton=mock.Mock()
          #set presenter
         self.presenter=maxent_presenter.MaxEntPresenter(self.view,self.model,self.load)
 
@@ -65,11 +66,11 @@ class MaxEntPresenterTest(unittest.TestCase):
 
     def test_activateButton(self):
         self.presenter.activate()
-        assert(self.view.activateButton.call_count==1)
+        assert(self.view.activateCalculateButton.call_count==1)
 
     def test_deactivateButton(self):
         self.presenter.deactivate()
-        assert(self.view.deactivateButton.call_count==1)
+        assert(self.view.deactivateCalculateButton.call_count==1)
 
 
 if __name__ == '__main__':

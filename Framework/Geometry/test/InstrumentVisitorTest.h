@@ -384,6 +384,30 @@ public:
                       &componentInfo->shape(1 /*another detector*/));
   }
 
+  void test_names() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    // Visit everything
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto componentInfo = std::move(std::get<0>(wrappers));
+
+    // Check root name
+    TS_ASSERT_EQUALS("basic_rect", componentInfo->name(componentInfo->root()));
+    // Backward check that we get the right index
+    TS_ASSERT_EQUALS(componentInfo->indexOf("basic_rect"),
+                     componentInfo->root());
+
+    // Check all names are the same in old instrument and component info
+    for (size_t index = 0; index < componentInfo->size(); ++index) {
+      TS_ASSERT_EQUALS(componentInfo->componentID(index)->getName(),
+                       componentInfo->name(index));
+    }
+  }
+
   void test_purge_scale_factors() {
 
     // Create a very basic instrument to visit

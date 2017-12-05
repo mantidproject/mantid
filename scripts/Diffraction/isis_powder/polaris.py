@@ -28,7 +28,8 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
-                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                           sample_details=self._sample_details)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -98,12 +99,6 @@ class Polaris(AbstractInst):
             prefix = polaris_new_name if use_new_name else polaris_old_name
 
             return prefix + str(run_number)
-
-    def _generate_output_file_name(self, run_number_string):
-        suffix = self._inst_settings.suffix
-        if suffix is None:
-            suffix = ""
-        return Polaris._generate_input_file_name(run_number_string) + suffix
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode

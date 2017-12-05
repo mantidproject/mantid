@@ -37,6 +37,7 @@ attr_mapping = \
         ParamMapEntry(ext_name="run_in_cycle",                 int_name="run_in_range"),
         ParamMapEntry(ext_name="run_number",                   int_name="run_number"),
         ParamMapEntry(ext_name="spline_coefficient",           int_name="spline_coefficient"),
+        ParamMapEntry(ext_name="suffix",                       int_name="suffix", optional=True),
         ParamMapEntry(ext_name="tt88_grouping_filename",       int_name="tt88_grouping"),
         ParamMapEntry(ext_name="tt70_grouping_filename",       int_name="tt70_grouping"),
         ParamMapEntry(ext_name="tt35_grouping_filename",       int_name="tt35_grouping"),
