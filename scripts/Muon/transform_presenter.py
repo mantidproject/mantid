@@ -29,6 +29,9 @@ class TransformPresenter(object):
         # connect
         self.view.selection.changeMethodSignal.connect(self.updateDisplay)
 
+    def close(self):
+        self.MaxEntPresenter.cancel()
+
     #switch the view
     def updateDisplay(self,index):
         self.view.hideAll()
