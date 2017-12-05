@@ -36,6 +36,8 @@ public:
   bool isSearchRunning() const;
   /// Block execution and wait for all threads to finish processing
   void waitForDone();
+  /// Destroy the static thread pool instance
+  static void destroyThreadPool();
 
 signals:
   // Signal emitted to cancel any already running workers
@@ -46,13 +48,13 @@ private slots:
   void searchFinished();
 
 private:
+  /// Get a handle to the static file finder thread pool instance
+  const std::unique_ptr<QThreadPool> &poolInstance() const;
   /// Cancel the currently running worker
   void cancelWorker();
   /// Connect worker to relevant signals/slots
   void connectWorker(const QObject *parent, const FindFilesWorker *worker);
 
-  /// Handle to a local QThread pool
-  static QThreadPool m_pool;
   /// Handle to the allocator function for creating new worker threads
   ThreadAllocator m_workerAllocator;
   /// Flag set if a search is currently running

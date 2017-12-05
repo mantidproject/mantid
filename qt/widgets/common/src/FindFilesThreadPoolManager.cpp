@@ -6,6 +6,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
 #include <QCoreApplication>
@@ -17,7 +18,29 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
-QThreadPool FindFilesThreadPoolManager::m_pool;
+
+// Thread pool to run file finder workers on
+static std::unique_ptr<QThreadPool> tp = {nullptr};
+
+/** Get a handle to the static thread pool managed by this class.
+ *
+ * @return a unique pointer to the QThreadPool
+ */
+const std::unique_ptr<QThreadPool>& FindFilesThreadPoolManager::poolInstance() const {
+  if(!tp)
+    tp = make_unique<QThreadPool>();
+  return tp;
+}
+
+/** Destroy the static thread pool managed by this class
+ *
+ * This should be used to destroy the static thread pool at the end of the
+ * application's lifetime.
+ */
+void MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool() {
+  if (tp)
+    tp.reset();
+}
 
 FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
   // Default allocator function. This just creates a new worker
@@ -53,7 +76,7 @@ void FindFilesThreadPoolManager::createWorker(
 
   // pass ownership to the thread pool
   // we do not need to worry about deleting worker
-  m_pool.start(worker);
+  poolInstance()->start(worker);
   m_searchIsRunning = true;
 }
 
@@ -114,7 +137,7 @@ bool FindFilesThreadPoolManager::isSearchRunning() const {
  * have finished executing. Using this in a GUI thread will cause the GUI
  * to freeze up.
  */
-void FindFilesThreadPoolManager::waitForDone() { m_pool.waitForDone(); }
+void FindFilesThreadPoolManager::waitForDone() { poolInstance()->waitForDone(); }
 
 /** Mark the search as being finished.
  */
