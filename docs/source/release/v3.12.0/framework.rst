@@ -52,4 +52,13 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 
+Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
+
+.. code-block:: python
+
+   from mantid.simpleapi import Segfault
+   import json
+   props = json.loads('{"DryRun":true}')
+   Segfault(**props)
+
 :ref:`Release 3.12.0 <v3.12.0>`
