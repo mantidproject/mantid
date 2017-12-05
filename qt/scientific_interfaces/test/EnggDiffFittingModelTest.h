@@ -233,12 +233,12 @@ public:
         {"X", "Y", "Z"}};
 
     const std::array<std::array<double, numberOfColumns>, numberOfRows>
-        targetTableValues = {{{1, 2, 3}, {4, 5, 6}}};
+        targetTableValues = {{{{1, 2, 3}}, {{4, 5, 6}}}};
 
     auto targetTable = createDummyTable(columnHeadings, targetTableValues);
 
     const std::array<std::array<double, numberOfColumns>, numberOfRows>
-        copyTableValues = {{{7, 8, 9}, {10, 11, 12}}};
+        copyTableValues = {{{{7, 8, 9}}, {{10, 11, 12}}}};
 
     auto copyTable = createDummyTable(columnHeadings, copyTableValues);
 
