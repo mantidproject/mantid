@@ -8,10 +8,11 @@ if ( CXXTEST_FOUND )
             NexusGeometry
             Geometry
             Nexus
+            API
             ${NEXUS_LIBRARIES}
             ${HDF5_LIBRARIES}
             ${HDF5_HL_LIBRARIES} )
-  add_dependencies ( NexusGeometryTest Geometry)
+  add_dependencies ( NexusGeometryTest Geometry API)
   add_dependencies ( FrameworkTests NexusGeometryTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET NexusGeometryTest PROPERTY FOLDER "UnitTests" )

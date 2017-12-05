@@ -4,29 +4,30 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/FilterChannel.h"
-#include "MantidKernel/StdoutChannel.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/FilterChannel.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
+#include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
-#include <Poco/Util/LoggingConfigurator.h>
-#include <Poco/Util/SystemConfiguration.h>
-#include <Poco/Util/PropertyFileConfiguration.h>
-#include <Poco/LoggingFactory.h>
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Environment.h>
+#include <Poco/File.h>
+#include <Poco/LoggingFactory.h>
+#include <Poco/Path.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
+#include <Poco/Util/LoggingConfigurator.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
+#include <Poco/Util/SystemConfiguration.h>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/Channel.h>
@@ -34,25 +35,25 @@
 #include <Poco/DOM/Node.h>
 #include <Poco/Exception.h>
 #include <Poco/Instantiator.h>
-#include <Poco/Pipe.h>
-#include <Poco/Platform.h>
-#include <Poco/String.h>
 #include <Poco/Logger.h>
 #include <Poco/LoggingRegistry.h>
+#include <Poco/Pipe.h>
 #include <Poco/PipeStream.h>
+#include <Poco/Platform.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/String.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
 #include <algorithm>
+#include <ctype.h>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
 #include <utility>
-#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -243,7 +244,8 @@ ConfigServiceImpl::ConfigServiceImpl()
                       << " revision " << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
                       << DateAndTime::getCurrentTime().toFormattedString(
-                             "%Y-%m-%dT%H:%MZ") << "\n";
+                             "%Y-%m-%dT%H:%MZ")
+                      << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
@@ -427,11 +429,11 @@ bool ConfigServiceImpl::readFile(const std::string &filename,
 }
 
 /** Registers additional logging filter channels
-* @param filterChannelName The name to refer to the filter channel, this should
-* be unique
-* @param pChannel a pointer to the channel to be registered, if blank, then the
-* channel must already be registered with the logging registry in Poco
-*/
+ * @param filterChannelName The name to refer to the filter channel, this should
+ * be unique
+ * @param pChannel a pointer to the channel to be registered, if blank, then the
+ * channel must already be registered with the logging registry in Poco
+ */
 void ConfigServiceImpl::registerLoggingFilterChannel(
     const std::string &filterChannelName, Poco::Channel *pChannel) {
   m_filterChannels.push_back(filterChannelName);
@@ -1002,13 +1004,13 @@ void ConfigServiceImpl::getKeysRecursive(
 }
 
 /**
-* Recursively gets a list of all config options.
-*
-* This function is needed as Boost Python does not like calling function with
-* default arguments.
-*
-* @return Vector containing all config options
-*/
+ * Recursively gets a list of all config options.
+ *
+ * This function is needed as Boost Python does not like calling function with
+ * default arguments.
+ *
+ * @return Vector containing all config options
+ */
 std::vector<std::string> ConfigServiceImpl::keys() const {
   std::vector<std::string> allKeys;
   getKeysRecursive("", allKeys);
@@ -1387,9 +1389,9 @@ std::string ConfigServiceImpl::getTempDir() {
 }
 
 /** Gets the absolute path of the appdata directory
-*
-* @returns The absolute path of the appdata directory
-*/
+ *
+ * @returns The absolute path of the appdata directory
+ */
 std::string ConfigServiceImpl::getAppDataDir() {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
@@ -1417,10 +1419,10 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 }
 
 /**
-  * Get the full path to the executing program (i.e. whatever Mantid is embedded
+ * Get the full path to the executing program (i.e. whatever Mantid is embedded
  * in)
-  * @returns A string containing the full path the the executable
-  */
+ * @returns A string containing the full path the the executable
+ */
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
@@ -1657,9 +1659,9 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
-* Sets the search directories for XML instrument definition files (IDFs)
-* @param directories An ordered list of paths for instrument searching
-*/
+ * Sets the search directories for XML instrument definition files (IDFs)
+ * @param directories An ordered list of paths for instrument searching
+ */
 void ConfigServiceImpl::setInstrumentDirectories(
     const std::vector<std::string> &directories) {
   m_InstrumentDirs = directories;
@@ -2039,25 +2041,80 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
+std::string ConfigServiceImpl::getFullPath(const std::string &filename,
+                                           const bool ignoreDirs,
+                                           Poco::Glob::Options options) const {
+  std::string fName = Kernel::Strings::strip(filename);
+  g_log.debug() << "getFullPath(" << fName << ")\n";
+  // If this is already a full path, nothing to do
+  if (Poco::Path(fName).isAbsolute())
+    return fName;
+
+  // First try the path relative to the current directory. Can throw in some
+  // circumstances with extensions that have wild cards
+  try {
+    Poco::File fullPath(Poco::Path().resolve(fName));
+    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
+      return fullPath.path();
+  } catch (std::exception &) {
+  }
+
+  const std::vector<std::string> &searchPaths =
+      Kernel::ConfigService::Instance().getDataSearchDirs();
+  for (const auto &searchPath : searchPaths) {
+    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
+// On windows globbing is note working properly with network drives
+// for example a network drive containing a $
+// For this reason, and since windows is case insensitive anyway
+// a special case is made for windows
+#ifdef _WIN32
+    if (fName.find("*") != std::string::npos) {
+#endif
+      Poco::Path path(searchPath, fName);
+      std::set<std::string> files;
+      Kernel::Glob::glob(path, files, options);
+      if (!files.empty()) {
+        Poco::File matchPath(*files.begin());
+        if (ignoreDirs && matchPath.isDirectory()) {
+          continue;
+        }
+        return *files.begin();
+      }
+#ifdef _WIN32
+    } else {
+      Poco::Path path(searchPath, fName);
+      Poco::File file(path);
+      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
+        return path.toString();
+      }
+    }
+#endif
+  }
+  return "";
+}
+
 /** Sets the log level priority for the File log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-*/
+ * @param logLevel the integer value of the log level to set, 1=Critical,
+ * 7=Debug
+ */
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
   setFilterChannelLogLevel(m_filterChannels[0], logLevel);
 }
 /** Sets the log level priority for the Console log channel
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-*/
+ * @param logLevel the integer value of the log level to set, 1=Critical,
+ * 7=Debug
+ */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
   setFilterChannelLogLevel(m_filterChannels[1], logLevel);
 }
 
 /** Sets the Log level for a filter channel
-* @param filterChannelName the channel name of the filter channel to change
-* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-* @throws std::invalid_argument if the channel name is incorrect or it is not a
-* filterChannel
-*/
+ * @param filterChannelName the channel name of the filter channel to change
+ * @param logLevel the integer value of the log level to set, 1=Critical,
+ * 7=Debug
+ * @throws std::invalid_argument if the channel name is incorrect or it is not a
+ * filterChannel
+ */
 void ConfigServiceImpl::setFilterChannelLogLevel(
     const std::string &filterChannelName, int logLevel) {
   Poco::Channel *channel = nullptr;
@@ -2088,7 +2145,7 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
 }
 
 /** Finds the lowest Log level for all registered filter channels
-*/
+ */
 int ConfigServiceImpl::FindLowestFilterLevel() const {
   int lowestPriority = Logger::Priority::PRIO_FATAL;
   // Find the lowest level of all of the filter channels

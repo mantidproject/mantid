@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/IArchiveSearch.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
+#include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -12,15 +12,15 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
-#include <boost/regex.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 
 #include <boost/algorithm/string.hpp>
 
@@ -39,7 +39,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
 bool containsWildCard(const std::string &ext) {
   return std::string::npos != ext.find('*');
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace API {
@@ -107,53 +107,9 @@ bool FileFinderImpl::getCaseSensitive() const {
  */
 std::string FileFinderImpl::getFullPath(const std::string &filename,
                                         const bool ignoreDirs) const {
-  std::string fName = Kernel::Strings::strip(filename);
-  g_log.debug() << "getFullPath(" << fName << ")\n";
-  // If this is already a full path, nothing to do
-  if (Poco::Path(fName).isAbsolute())
-    return fName;
 
-  // First try the path relative to the current directory. Can throw in some
-  // circumstances with extensions that have wild cards
-  try {
-    Poco::File fullPath(Poco::Path().resolve(fName));
-    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
-      return fullPath.path();
-  } catch (std::exception &) {
-  }
-
-  const std::vector<std::string> &searchPaths =
-      Kernel::ConfigService::Instance().getDataSearchDirs();
-  for (const auto &searchPath : searchPaths) {
-    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
-// On windows globbing is note working properly with network drives
-// for example a network drive containing a $
-// For this reason, and since windows is case insensitive anyway
-// a special case is made for windows
-#ifdef _WIN32
-    if (fName.find("*") != std::string::npos) {
-#endif
-      Poco::Path path(searchPath, fName);
-      std::set<std::string> files;
-      Kernel::Glob::glob(path, files, m_globOption);
-      if (!files.empty()) {
-        Poco::File matchPath(*files.begin());
-        if (ignoreDirs && matchPath.isDirectory()) {
-          continue;
-        }
-        return *files.begin();
-      }
-#ifdef _WIN32
-    } else {
-      Poco::Path path(searchPath, fName);
-      Poco::File file(path);
-      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
-        return path.toString();
-      }
-    }
-#endif
-  }
-  return "";
+  return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs,
+                                                       m_globOption);
 }
 
 /** Run numbers can be followed by an allowed string. Check if there is
@@ -597,8 +553,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -616,8 +573,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
@@ -794,5 +752,5 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
   return result;
 }
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid

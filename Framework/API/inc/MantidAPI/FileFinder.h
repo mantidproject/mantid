@@ -4,12 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "Poco/Glob.h"
 
-#include <vector>
 #include <set>
+#include <vector>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -91,18 +92,18 @@ private:
                              const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
-  int m_globOption;
+  Poco::Glob::Options m_globOption;
 };
 
 typedef Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // MANTID_API_FILEFINDER_H_
