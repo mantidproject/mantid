@@ -62,15 +62,19 @@ class LoadAndMerge(PythonAlgorithm):
 
     def _create_fresh_loader(self):
         """
-            Creates a fresh instance of the specific loader. It is needed for safety,
-            since there might be loaders, that do not reset their private members.
-            So running on the same instance can potentially cause problems
-            Also the output will always be on ADS, since this algorithm relies on
-            MergeRuns, which does not work outside ADS
+            Creates a fresh instance of the specific loader.
             @return : initialized and configured loader
         """
-        alg = self.createChildAlgorithm(self._loader, version=self._version)
-        alg.setAlwaysStoreInADS(True)
+        # We need to create a fresh instance for each file, since
+        # there might be loaders that do not reset their private members after execution.
+        # So running on the same instance can potentially cause problems.
+        # Also the output will always be on ADS, since this algorithm relies on
+        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
+        # Moreover, this should NOT be run as child, since in that case if we run a loader
+        # having an additional optional output workspace, but without requesting the optional output,
+        # it will still be produced with some hidden temporary name (__TMPx...).
+        # This is related to replaying the history, or might as well be a bug in Algorithm base class.
+        alg = AlgorithmManager.create(self._loader, self._version)
         alg.initialize()
         for key in self._loader_options.keys():
             alg.setPropertyValue(key, self._loader_options.getPropertyValue(key))
@@ -108,20 +112,27 @@ class LoadAndMerge(PythonAlgorithm):
                 to_group.append(runnumber)
             else:
                 runnumbers = self._prefix
-                first = ''
+                merged = ''
                 for i, run in enumerate(runs_to_sum):
                     runnumber = os.path.basename(run).split('.')[0]
                     runnumbers += '_' + runnumber
                     runnumber = self._prefix + runnumber
                     self._load(run, runnumber)
                     if i == 0:
-                        first = runnumber
+                        merged = runnumber
                     else:
-                        MergeRuns(InputWorkspaces=[first, runnumber],
-                                  OutputWorkspace=first, **merge_options)
+                        # we need to merge to a temp name, and rename later,
+                        # since if the merged is a group workspace,
+                        # it's items will be orphaned
+                        tmp_merged = '__tmp_' + merged
+                        MergeRuns(InputWorkspaces=[merged, runnumber],
+                                  OutputWorkspace=tmp_merged, **merge_options)
                         DeleteWorkspace(Workspace=runnumber)
+                        DeleteWorkspace(Workspace=merged)
+                        RenameWorkspace(InputWorkspace=tmp_merged, OutputWorkspace=merged)
+
                 runnumbers = runnumbers[1:]
-                RenameWorkspace(InputWorkspace=first, OutputWorkspace=runnumbers)
+                RenameWorkspace(InputWorkspace=merged, OutputWorkspace=runnumbers)
                 to_group.append(runnumbers)
 
         if len(to_group) != 1:

@@ -8,7 +8,8 @@ from mantid.simpleapi import LoadAndMerge, config, mtd
 class LoadAndMergeTest(unittest.TestCase):
 
     def setUp(self):
-        config.setFacility('ILL')
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
         config.appendDataSearchSubDir('ILL/D20/')
 
@@ -91,6 +92,29 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertTrue(isinstance(out7.getItem(1), MatrixWorkspace))
         self.assertEquals(out7.getItem(0).getName(),'IRS26173')
         self.assertEquals(out7.getItem(1).getName(),'IRS26174')
+        mtd.clear()
+
+    def test_multi_period_loader_list(self):
+        out8 = LoadAndMerge(Filename='MUSR00015196,00015197.nxs')
+        self.assertTrue(out8)
+        self.assertTrue(isinstance(out8, WorkspaceGroup))
+        self.assertEquals(out8.getNumberOfEntries(), 4)
+        self.assertEquals(out8.getItem(0).getName(),'MUSR00015196_1')
+        self.assertEquals(out8.getItem(1).getName(),'MUSR00015196_2')
+        self.assertEquals(out8.getItem(2).getName(),'MUSR00015197_1')
+        self.assertEquals(out8.getItem(3).getName(),'MUSR00015197_2')
+        mtd.clear()
+
+    def test_multi_period_loader_sum(self):
+        out9 = LoadAndMerge(Filename='MUSR00015196+00015197.nxs')
+        self.assertTrue(out9)
+        self.assertTrue(isinstance(out9, MatrixWorkspace))
+        self.assertTrue('MUSR00015196' not in mtd)
+        self.assertTrue('MUSR00015197' not in mtd)
+        self.assertTrue('MUSR00015196_1' not in mtd)
+        self.assertTrue('MUSR00015196_2' not in mtd)
+        self.assertTrue('MUSR00015197_1' not in mtd)
+        self.assertTrue('MUSR00015197_2' not in mtd)
         mtd.clear()
 
 if __name__ == "__main__":
