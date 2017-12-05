@@ -24,6 +24,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         self.runList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     def show_file_picker(self, extensions, search_directories):
+        assert(len(extensions) > 0)
         previous_directories = self._previous_directory_settings()
         default_directory = search_directories[0]
         directory = self._previous_or_default_directory(previous_directories, default_directory)
@@ -46,10 +47,7 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
 
     def _filter_for_extensions(self, extensions):
-        if extensions:
-            return "Files ( *" + " *".join(extensions) + ")"
-        else:
-            return "Files ()"
+        return "Files ( *" + " *".join(extensions) + ")"
 
     def show_directories_manager(self):
         MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
