@@ -69,7 +69,7 @@ IObject_sptr createCappedCylinder(double radius, double height,
 void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
                            std::string name = "moderator") {
   ObjComponent *source =
-      new ObjComponent(name, Object_sptr(new Object), instrument.get());
+      new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
   source->setPos(sourcePos);
   instrument->add(source);
   instrument->markAsSource(source);
@@ -77,7 +77,7 @@ void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
   // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
+  IObject_sptr sampleSphere =
       createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
   ObjComponent *sample =
       new ObjComponent("sample", sampleSphere, instrument.get());
@@ -376,7 +376,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
 
   // One object
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
   // Just increment pixel ID's
@@ -676,7 +676,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
   const double radius(1.0);
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
       V3D(0.0, 1.0, 0.0), "pixelShape");
   for (size_t i = 0; i < nTubes; ++i) {
