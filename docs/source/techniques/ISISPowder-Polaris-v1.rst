@@ -176,7 +176,7 @@ from focused POLARIS data, with a view performing further total scattering analy
 With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
 the focused_workspace.
 
-This function requires the run_number you which to analyse. The focused file for this run number must
+This function requires the run_number you wish to analyse. The focused file for this run number must
 either be loaded in Mantid with the naming format given by the *focus* method:
 
 *<run number>-Results-<TOF/D>-Grp*
