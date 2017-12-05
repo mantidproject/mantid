@@ -68,6 +68,7 @@ void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
   m_isPolCorrEnabled = enable;
 }
 
+
 /* Sets default values for all experiment settings given a list of default
 * values.
 */
@@ -331,11 +332,14 @@ std::string QtReflSettingsView::getDetectorCorrectionType() const {
   return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
 }
 
+bool QtReflSettingsView::detectorCorrectionEnabled() const {
+  return m_ui.correctDetectorsCheckBox->isChecked();
+}
+
 /** Returns the status of experiment settings group
 * @return :: the status of the checkable group
 */
 bool QtReflSettingsView::experimentSettingsEnabled() const {
-
   return m_ui.expSettingsGroup->isChecked();
 }
 

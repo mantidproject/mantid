@@ -98,6 +98,8 @@ public:
   bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled
   bool instrumentSettingsEnabled() const override;
+  /// Check if detector correction is enabled
+  bool detectorCorrectionEnabled() const override;
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
