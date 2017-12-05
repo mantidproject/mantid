@@ -32,7 +32,8 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertTrue(work_handler_mock.return_value.process.call_args[0][1] == find_beam_centre)
         self.assertTrue(work_handler_mock.return_value.process.call_args[0][3] == self.presenter._beam_centre_model)
 
-    def test_that_on_run_clicked_updates_model_from_view(self):
+    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.WorkHandler')
+    def test_that_on_run_clicked_updates_model_from_view(self, work_handler_mock):
         self.view.left_right = False
         self.view.lab_pos_1 = 100
         self.view.lab_pos_2 = -100
