@@ -106,16 +106,16 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~4 Angstrom will be checked.
-        # expected_peak_values = [bin_index, y_value] (each list item is a bank (1-5))
-        expected_peak_values = [[7,  0.149],
-                                [11, 0.285],
-                                [23, 0.504],
-                                [37, 0.382],
-                                [52, 0.700]]
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
+        # After rebin this is at X index 51
+        mantid.SaveNexus(Filename='~\\total_scattering_output.nxs', InputWorkspace=self.pdf_output)
+        expected_peak_values = [0.0187231,
+                                0.0583586,
+                                0.2241280,
+                                0.2752230,
+                                1.0252800]
         for index, ws in enumerate(self.pdf_output):
-            self.assertAlmostEqual(ws.dataY(0)[expected_peak_values[index][0]], expected_peak_values[index][1],
-                                   places=3)
+            self.assertAlmostEqual(ws.dataY(0)[51], expected_peak_values[index], places=3)
 
 
 def run_total_scattering(run_number, merge_banks):

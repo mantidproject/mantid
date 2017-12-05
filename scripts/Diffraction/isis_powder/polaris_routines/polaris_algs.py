@@ -83,6 +83,8 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
         raise RuntimeError("Merging banks is currently not supported")
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
                                             Filter=True)
+    pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+                                         PreserveEvents=True)
     return pdf_output
 
 
