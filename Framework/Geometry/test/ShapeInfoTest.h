@@ -94,22 +94,6 @@ public:
     TS_ASSERT_EQUALS(m_shapeInfo.points()[1], axis);
   }
 
-  void testSetSegmentedSphere() {
-    V3D center(0, 0, 0);
-    V3D axis(1, 0, 0);
-    double radius = 10;
-    double height = 5;
-    m_shapeInfo.setSegmentedCylinder(center, axis, radius, height);
-
-    TS_ASSERT_EQUALS(m_shapeInfo.shape(),
-                     ShapeInfo::GeometryShape::SEGMENTED_CYLINDER);
-    TS_ASSERT_EQUALS(m_shapeInfo.radius(), radius);
-    TS_ASSERT_EQUALS(m_shapeInfo.height(), height);
-    TS_ASSERT_EQUALS(m_shapeInfo.points().size(), 2);
-    TS_ASSERT_EQUALS(m_shapeInfo.points()[0], center);
-    TS_ASSERT_EQUALS(m_shapeInfo.points()[1], axis);
-  }
-
   void testGetObjectGeometry() {
     V3D center(0, 0, 0);
     double radius = 10;

@@ -46,8 +46,6 @@ public:
     SPHERE,            ///< SPHERE
     CYLINDER,          ///< CYLINDER
     CONE,              ///< CONE
-    SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis).
-                       /// Sizes of segments are important.
   };
 
 private:
@@ -83,9 +81,6 @@ public:
   /// sets the geometry handler for a cone
   void setCone(const Kernel::V3D &center, const Kernel::V3D &axis,
                double radius, double height);
-  /// sets the geometry handler for a segmented cylinder
-  void setSegmentedCylinder(const Kernel::V3D &center, const Kernel::V3D &axis,
-                            double radius, double height);
 
   bool operator==(const ShapeInfo &other);
 };

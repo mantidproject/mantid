@@ -49,21 +49,16 @@ void ShapeInfo::setSphere(const V3D &c, double r) {
   m_radius = r;
   m_height = 0;
 }
+
 void ShapeInfo::setCylinder(const V3D &c, const V3D &a, double r, double h) {
   m_shape = GeometryShape::CYLINDER;
   m_points.assign({c, a});
   m_radius = r;
   m_height = h;
 }
+
 void ShapeInfo::setCone(const V3D &c, const V3D &a, double r, double h) {
   m_shape = GeometryShape::CONE;
-  m_points.assign({c, a});
-  m_radius = r;
-  m_height = h;
-}
-void ShapeInfo::setSegmentedCylinder(const V3D &c, const V3D &a, double r,
-                                     double h) {
-  m_shape = GeometryShape::SEGMENTED_CYLINDER;
   m_points.assign({c, a});
   m_radius = r;
   m_height = h;
