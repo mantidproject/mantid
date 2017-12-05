@@ -19,7 +19,6 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
         self.parent_presenter._file_information = mock.MagicMock()
         self.parent_presenter._file_information.get_instrument = mock.MagicMock(return_value = SANSInstrument.LARMOR)
-        self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.view = create_mock_beam_centre_tab()
 
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.WorkHandler')
@@ -34,6 +33,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.WorkHandler')
     def test_that_on_run_clicked_updates_model_from_view(self, work_handler_mock):
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.view.left_right = False
         self.view.lab_pos_1 = 100
         self.view.lab_pos_2 = -100
@@ -46,6 +46,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -0.1)
 
     def test_that_set_options_is_called_on_update_rows(self):
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.presenter.set_view(self.view)
 
         self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
@@ -63,7 +64,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
 
     @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
     def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self, beam_centre_model_mock):
-        self.parent_presenter._file_information = None#mock.MagicMock(return_value = None)
+        self.parent_presenter._file_information = None
         self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.presenter.set_view(self.view)
 
@@ -71,6 +72,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter._beam_centre_model.set_scaling.assert_not_called()
 
     def test_that_on_processing_finished_updates_view_and_model(self):
+        self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.presenter.set_view(self.view)
         result = {'pos1': 0.1, 'pos2': -0.1}
 
