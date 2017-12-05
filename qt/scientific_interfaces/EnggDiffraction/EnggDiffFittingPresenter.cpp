@@ -1,6 +1,8 @@
 #include "EnggDiffFittingPresenter.h"
 #include "EnggDiffFittingPresWorker.h"
 #include "IEnggDiffFittingModel.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
