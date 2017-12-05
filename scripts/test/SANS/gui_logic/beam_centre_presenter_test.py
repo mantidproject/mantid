@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-import mantid
 import unittest
 import sys
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
@@ -11,8 +10,6 @@ if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
