@@ -337,7 +337,8 @@ Fitting
 
 The Fitting tab provides a graphical interface which fits an expected
 diffraction pattern and visualises them. The pattern is specified by
-providing a list of dSpacing values where Bragg peaks are expected.
+providing a list of peak centre values where Bragg peaks are expected.
+These values can have units of either TOF of dSpacing but **not** both.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
