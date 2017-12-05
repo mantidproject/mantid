@@ -30,11 +30,12 @@ class EnggFitPeaks(PythonAlgorithm):
                              "Index of the spectra to fit peaks in")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),
-                             "A list of dSpacing values to be translated into TOF to find expected peaks.")
+                             "A list of peak centre values to be translated into TOF (if required) to find expected "
+                             "peaks.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile", defaultValue="",
                                           action=FileAction.OptionalLoad, extensions=[".csv"]),
-                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             "Load from file a list of peak centre values to be translated into TOF (if required) to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
