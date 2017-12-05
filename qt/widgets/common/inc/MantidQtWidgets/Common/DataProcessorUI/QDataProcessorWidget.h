@@ -150,8 +150,8 @@ public:
 
   void skipProcessing() override;
 
-  void enableGrouping();
-  void disableGrouping();
+  void enableGrouping() override;
+  void disableGrouping() override;
 
 signals:
   void processButtonClicked();
