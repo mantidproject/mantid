@@ -250,11 +250,15 @@ public:
     for (size_t rowIndex = 0; rowIndex < numberOfRows * 2; ++rowIndex) {
       std::cout << "ROW " << rowIndex << "\n";
       API::TableRow row = targetTable->getRow(rowIndex);
-      double expectedX = static_cast<double>(rowIndex) * 3 + 1;
-      double expectedY = static_cast<double>(rowIndex) * 3 + 2;
-      double expectedZ = static_cast<double>(rowIndex) * 3 + 3;
+      const double expectedX = static_cast<double>(rowIndex) * 3 + 1;
+      const double expectedY = static_cast<double>(rowIndex) * 3 + 2;
+      const double expectedZ = static_cast<double>(rowIndex) * 3 + 3;
 
-      double x, y, z;
+      // x, y and z must be initialized to keep RHEL7 happy
+      auto x = expectedX + 1;
+      auto y = expectedY + 1;
+      auto z = expectedZ + 1;
+
       TS_ASSERT_THROWS_NOTHING(row >> x >> y >> z);
       TS_ASSERT_EQUALS(x, expectedX);
       TS_ASSERT_EQUALS(y, expectedY);
