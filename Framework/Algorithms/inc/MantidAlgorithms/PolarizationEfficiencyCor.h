@@ -6,8 +6,8 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramY;
+namespace API {
+class ISpectrum;
 }
 
 namespace Algorithms {
@@ -52,10 +52,10 @@ private:
   };
 
   struct EfficiencyMap {
-    const HistogramData::HistogramY *P1{nullptr};
-    const HistogramData::HistogramY *P2{nullptr};
-    const HistogramData::HistogramY *F1{nullptr};
-    const HistogramData::HistogramY *F2{nullptr};
+    const API::ISpectrum *P1{nullptr};
+    const API::ISpectrum *P2{nullptr};
+    const API::ISpectrum *F1{nullptr};
+    const API::ISpectrum *F2{nullptr};
   };
 
   void init() override;

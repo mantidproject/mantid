@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/math/special_functions/pow.hpp>
 #include <Eigen/Dense>
 
 namespace {
@@ -133,13 +134,13 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
   for (size_t i = 0; i != vertAxis->length(); ++i) {
     const auto label = vertAxis->label(i);
     if (label == "P1") {
-      e.P1 = &factorWS->y(i);
+      e.P1 = &factorWS->getSpectrum(i);
     } else if (label == "P2") {
-      e.P2 = &factorWS->y(i);
+      e.P2 = &factorWS->getSpectrum(i);
     } else if (label == "F1") {
-      e.F1 = &factorWS->y(i);
+      e.F1 = &factorWS->getSpectrum(i);
     } else if (label == "F2") {
-      e.F2 = &factorWS->y(i);
+      e.F2 = &factorWS->getSpectrum(i);
     }
     // Ignore other histograms such as 'Phi' in ILL's efficiency ws.
   }
@@ -154,8 +155,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
     const auto &ppY = inputs.ppWS->y(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
     for (size_t binIndex = 0; binIndex < ppY.size(); ++binIndex) {
-      const auto P1 = (*efficiencies.P1)[binIndex];
-      const auto P2 = (*efficiencies.P2)[binIndex];
+      const auto P1 = efficiencies.P1->y()[binIndex];
+      const auto P2 = efficiencies.P2->y()[binIndex];
       const double f = 1. - P1 - P2 + 2. * P1 * P2;
       ppYOut[binIndex] = ppY[binIndex] / f;
     }
@@ -174,8 +175,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
     auto &mmYOut = outputs.mmWS->mutableY(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
-      const auto F1 = (*efficiencies.F1)[binIndex];
-      const auto P1 = (*efficiencies.P1)[binIndex];
+      const auto F1 = efficiencies.F1->y()[binIndex];
+      const auto P1 = efficiencies.P1->y()[binIndex];
       Eigen::Matrix2d F1m;
       F1m <<             1.,      0.,
              (F1 - 1.) / F1, 1. / F1;
@@ -205,6 +206,7 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCor
 }
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  using namespace boost::math;
   WorkspaceMap outputs;
   // TODO check if history is retained with create().
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
@@ -214,29 +216,37 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &mmY = inputs.mmWS->y(wsIndex);
+    const auto &mmE = inputs.mmWS->e(wsIndex);
     const auto &mpY = inputs.mpWS->y(wsIndex);
+    const auto &mpE = inputs.mpWS->e(wsIndex);
     const auto &pmY = inputs.pmWS->y(wsIndex);
+    const auto &pmE = inputs.pmWS->e(wsIndex);
     const auto &ppY = inputs.ppWS->y(wsIndex);
+    const auto &ppE = inputs.ppWS->e(wsIndex);
     auto &mmYOut = outputs.mmWS->mutableY(wsIndex);
+    auto &mmEOut = outputs.mmWS->mutableE(wsIndex);
     auto &mpYOut = outputs.mpWS->mutableY(wsIndex);
+    auto &mpEOut = outputs.mpWS->mutableE(wsIndex);
     auto &pmYOut = outputs.pmWS->mutableY(wsIndex);
+    auto &pmEOut = outputs.pmWS->mutableE(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
+    auto &ppEOut = outputs.ppWS->mutableE(wsIndex);
     for (size_t binIndex = 0; binIndex < mmY.size(); ++binIndex) {
       // Note that F1 and F2 correspond to 1-F1 and 1-F2 in [Wildes, 1999].
-      const auto F1 = (*efficiencies.F1)[binIndex];
-      const auto F2 = (*efficiencies.F2)[binIndex];
-      const auto P1 = (*efficiencies.P1)[binIndex];
-      const auto P2 = (*efficiencies.P2)[binIndex];
+      const auto F1 = efficiencies.F1->y()[binIndex];
+      const auto F2 = efficiencies.F2->y()[binIndex];
+      const auto P1 = efficiencies.P1->y()[binIndex];
+      const auto P2 = efficiencies.P2->y()[binIndex];
       // These are inverted forms of the efficiency matrices.
       const auto diag1 = 1. / F1;
-      const auto off1 = (F1 - 1.) * diag1;
+      const auto off1 = (F1 - 1.) / F1;
       Eigen::Matrix4d F1m;
       F1m <<   1.,   0.,    0.,    0.,
                0.,   1.,    0.,    0.,
              off1,   0., diag1,    0.,
                0., off1,    0., diag1;
       const auto diag2 = 1. / F2;
-      const auto off2 = (F2 - 1.) * diag2;
+      const auto off2 = (F2 - 1.) / F2;
       Eigen::Matrix4d F2m;
       F2m <<   1.,    0.,   0.,    0.,
              off2, diag2,   0.,    0.,
@@ -257,11 +267,57 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
                 0.,    0., diag4,  off4,
                 0.,    0.,  off4, diag4;
       const Eigen::Vector4d intensities(ppY[binIndex], pmY[binIndex], mpY[binIndex], mmY[binIndex]);
-      const auto corrected = P2m * P1m * F2m * F1m * intensities;
+      const auto FProduct = F2m * F1m;
+      const auto PProduct = P2m * P1m;
+      const auto PFProduct = PProduct * FProduct;
+      const auto corrected = PFProduct * intensities;
       ppYOut[binIndex] = corrected[0];
       pmYOut[binIndex] = corrected[1];
       mpYOut[binIndex] = corrected[2];
       mmYOut[binIndex] = corrected[3];
+      const auto F1E = efficiencies.F1->e()[binIndex];
+      const auto F2E = efficiencies.F2->e()[binIndex];
+      const auto P1E = efficiencies.P1->e()[binIndex];
+      const auto P2E = efficiencies.P2->e()[binIndex];
+      // The error matrices here are element-wise algebraic derivatives of
+      // the matrices above, multiplied by the error.
+      const auto elemE1 = - 1. / pow<2>(F1) * F1E;
+      Eigen::Matrix4d F1Em;
+      F1Em <<      0.,      0.,     0.,     0.,
+                   0.,      0.,     0.,     0.,
+              -elemE1,      0., elemE1,     0.,
+                   0., -elemE1,     0., elemE1;
+      const auto elemE2 = - 1. / pow<2>(F2) * F2E;
+      Eigen::Matrix4d F2Em;
+      F2Em <<      0.,     0.,      0.,     0.,
+              -elemE2, elemE2,      0.,     0.,
+                   0.,     0.,      0.,     0.,
+                   0.,     0., -elemE2, elemE2;
+      const auto elemE3 = 1. / pow<2>(2. * P1 - 1.) * P1E;
+      Eigen::Matrix4d P1Em;
+      P1Em <<  elemE3,      0., -elemE3,      0.,
+                   0.,  elemE3,      0., -elemE3,
+              -elemE3,      0.,  elemE3,      0.,
+                   0., -elemE3,      0.,  elemE3;
+      const auto elemE4 = 1. / pow<2>(2. * P2 - 1.) * P2E;
+      Eigen::Matrix4d P2Em;
+      P2Em <<  elemE4, -elemE4,      0.,      0.,
+              -elemE4,  elemE4,      0.,      0.,
+                   0.,      0.,  elemE4, -elemE4,
+                   0.,      0., -elemE4,  elemE4;
+      const Eigen::Vector4d errors(ppE[binIndex], pmE[binIndex], mpE[binIndex], mmE[binIndex]);
+      const auto e1 = (P2Em * P1m * FProduct * intensities).array();
+      const auto e2 = (P2m * P1Em * FProduct * intensities).array();
+      const auto e3 = (PProduct * F2Em * F1m * intensities).array();
+      const auto e4 = (PProduct * F2m * F1Em * intensities).array();
+      const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
+      const auto sqErrors = (errors.array() * errors.array()).matrix();
+      const auto e5 =  (sqPFProduct * sqErrors).array();
+      const auto errorSum = (e1 * e1 + e2 * e2 + e3 * e3 + e4 * e4 + e5).sqrt();
+      ppEOut[binIndex] = errorSum[0];
+      pmEOut[binIndex] = errorSum[1];
+      mpEOut[binIndex] = errorSum[2];
+      mmEOut[binIndex] = errorSum[3];
     }
   }
   return outputs;
@@ -296,10 +352,10 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
 void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace Mantid::DataObjects;
   inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
-  const auto &F1 = *efficiencies.F1;
-  const auto &F2 = *efficiencies.F2;
-  const auto &P1 = *efficiencies.P1;
-  const auto &P2 = *efficiencies.P2;
+  const auto &F1 = efficiencies.F1->y();
+  const auto &F2 = efficiencies.F2->y();
+  const auto &P1 = efficiencies.P1->y();
+  const auto &P2 = efficiencies.P2->y();
   const auto nHisto = inputs.pmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
@@ -315,10 +371,10 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
 
 void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
-  const auto &F1 = *efficiencies.F1;
-  const auto &F2 = *efficiencies.F2;
-  const auto &P1 = *efficiencies.P1;
-  const auto &P2 = *efficiencies.P2;
+  const auto &F1 = efficiencies.F1->y();
+  const auto &F2 = efficiencies.F2->y();
+  const auto &P1 = efficiencies.P1->y();
+  const auto &P2 = efficiencies.P2->y();
   const auto nHisto = inputs.mpWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
