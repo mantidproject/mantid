@@ -4,6 +4,8 @@ import math
 from mantid.kernel import *
 from mantid.api import *
 
+import mantid.simpleapi as mantid
+
 
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
@@ -11,6 +13,8 @@ class EnggFitPeaks(PythonAlgorithm):
     # Max limit on the estimated error of a center for it to be accepted as a good fit
     # (in percentage of the center value)
     CENTER_ERROR_LIMIT = 10
+
+    _expected_peaks_are_in_tof = True
 
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
@@ -59,7 +63,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get peaks in dSpacing from file
         expected_peaks = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                              self.getProperty('ExpectedPeaks').value)
+                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expected_peaks) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -77,6 +81,7 @@ class EnggFitPeaks(PythonAlgorithm):
             expected_peaks_tof = sorted(expected_peaks)
         else:
             expected_peaks_tof = sorted(self._expected_peaks_in_tof(expected_peaks, in_wks, wks_index))
+            self._expected_peaks_are_in_tof = False
             if not self._any_expected_peaks_in_ws_range(in_wks, expected_peaks_tof):
                 raise ValueError("Expected peak centres lie outside the limits of the workspace x axis")
 
@@ -140,7 +145,7 @@ class EnggFitPeaks(PythonAlgorithm):
             endx = endx + 3*inc
             startx = startx - 2*inc
 
-        return (startx, endx)
+        return startx, endx
 
     def _fit_all_peaks(self, in_wks, wks_index, peaks, peaks_table_name):
         """
@@ -161,6 +166,9 @@ class EnggFitPeaks(PythonAlgorithm):
         @returns a table with parameters for every fitted peak.
 
         """
+
+        if self._expected_peaks_are_in_tof:
+            peaks = (peaks[0], self._expected_peaks_in_d(peaks[1], in_wks))
 
         found_peaks = peaks[0]
         fitted_peaks = self._create_fitted_peaks_table(peaks_table_name)
@@ -195,6 +203,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 continue
 
             fitted_params = {}
+
             fitted_params['dSpacing'] = peaks[1][i]
             fitted_params['Chi'] = chi_over_dof
             self._add_parameters_to_map(fitted_params, param_table)
@@ -248,7 +257,7 @@ class EnggFitPeaks(PythonAlgorithm):
         peak.setParameter('S', sigma)
         peak.setParameter('I', intensity)
 
-        # Fit using predicted window and a proper function with approximated initital values
+        # Fit using predicted window and a proper function with approximated initial values
         fit_alg = self.createChildAlgorithm('Fit')
         fit_function = 'name=LinearBackground;{0}'.format(peak)
         fit_alg.setProperty('Function', fit_function)
@@ -259,7 +268,7 @@ class EnggFitPeaks(PythonAlgorithm):
         (startx, endx) = self._estimate_start_end_fitting_range(center, width)
         fit_alg.setProperty('StartX', startx)
         fit_alg.setProperty('EndX', endx)
-        self.log().debug("Fitting for peak expectd in (d-spacing): {0}, Fitting peak function: "
+        self.log().debug("Fitting for peak expected in (d-spacing): {0}, Fitting peak function: "
                          "{1}, with startx: {2}, endx: {3}".
                          format(expected_center, fit_function, startx, endx))
         fit_alg.execute()
@@ -289,6 +298,36 @@ class EnggFitPeaks(PythonAlgorithm):
         find_peaks_alg.execute()
         found_peaks = find_peaks_alg.getProperty('PeaksList').value
         return found_peaks
+
+    def _expected_peaks_in_d(self, expected_peaks, input_ws):
+        run = input_ws.getRun()
+
+        if run.hasProperty("difc"):
+            difc = run.getLogData("difc").value
+            return self._gsas_convert_to_d(expected_peaks, run, difc)
+
+        return self._convert_peaks_to_d_using_convert_units(expected_peaks, input_ws)
+
+    def _gsas_convert_to_d(self, expected_peaks, run, difc):
+        print("gsas")
+        tzero = run.getLogData("tzero").value if run.hasProperty("tzero") else 0
+        difa = run.getLogData("difa").value if run.hasProperty("difa") else 0
+        return [self._gsas_convert_single_peak_to_d(peak, difa, difc, tzero) for peak in expected_peaks]
+
+    def _gsas_convert_single_peak_to_d(self, peak_tof, difa, difc, tzero):
+        if difa < 0:
+            return (-difc / (2 * difa)) - math.sqrt(peak_tof / difa + math.pow(difc / 2 * difa, 2) - tzero / difa)
+        if difa > 0:
+            return (-difc / (2 * difa)) + math.sqrt(peak_tof / difa + math.pow(difc / 2 * difa, 2) - tzero / difa)
+        return (peak_tof - tzero) / difc
+
+    def _convert_peaks_to_d_using_convert_units(self, expected_peaks, input_ws):
+        print("convertunits")
+        print(expected_peaks)
+        y_values = [1] * (len(expected_peaks) - 1)
+        ws_tof = mantid.CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
+        ws_d = mantid.ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
+        return ws_d.readX(0)
 
     def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
         """
@@ -328,7 +367,7 @@ class EnggFitPeaks(PythonAlgorithm):
             # If the log difc is present, then use these GSAS calibration parameters from the logs
             return [(epd * difc + tzero) for epd in expected_peaks]
 
-        # When receiving a (for example) focussed workspace we still do not know how
+        # When receiving a (for example) focused workspace we still do not know how
         # to properly deal with it. CreateWorkspace won't copy the instrument sample
         # and source even if given the option ParentWorkspace. Resort to old style
         # hard-coded calculation.
@@ -376,7 +415,7 @@ class EnggFitPeaks(PythonAlgorithm):
                                "incomplete for the original workspace / file.".
                                format(len(peaks_tof), len(expected_peaks)))
 
-        tof_values = [peaks_tof[i] for i in range(0,len(peaks_tof))]
+        tof_values = [peaks_tof[i] for i in range(0, len(peaks_tof))]
         # catch potential failures because of geometry issues, etc.
         if tof_values == expected_peaks:
             vals = self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
