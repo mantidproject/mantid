@@ -70,9 +70,10 @@ class BeamCentrePresenter(object):
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
+        self._view.set_run_button_to_normal()
 
     def on_processing_error(self, error):
-        pass
+        self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
         # Get the state information for the first row.
@@ -92,6 +93,9 @@ class BeamCentrePresenter(object):
         # Run the task
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
+        state_copy.convert_to_q.q_min = self._beam_centre_model.q_min
+        state_copy.convert_to_q.q_max = self._beam_centre_model.q_max
+
         self._work_handler.process(listener, find_beam_centre, state_copy, self._beam_centre_model)
 
     def _update_beam_model_from_view(self):
@@ -100,11 +104,15 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.max_iterations = self._view.max_iterations
         self._beam_centre_model.tolerance = self._view.tolerance
         self._beam_centre_model.left_right = self._view.left_right
+        self._beam_centre_model.verbose = self._view.verbose
+        self._beam_centre_model.COM = self._view.COM
         self._beam_centre_model.up_down = self._view.up_down
         self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1 / self._beam_centre_model.scale_1
         self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2 / self._beam_centre_model.scale_2
         self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
         self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
+        self._beam_centre_model.q_min = self._view.q_min
+        self._beam_centre_model.q_max = self._view.q_max
 
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
@@ -125,6 +133,8 @@ def find_beam_centre(state, beam_centre_model):
     :param beam_centre_model: An instance of the BeamCentreModel class.
     :returns: The centre position found.
     """
+    import pydevd
+    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     centre_finder = SANSCentreFinder()
     find_direction = None
     if beam_centre_model.up_down and beam_centre_model.left_right:
@@ -134,7 +144,20 @@ def find_beam_centre(state, beam_centre_model):
     elif beam_centre_model.left_right:
         find_direction = FindDirectionEnum.Up_Down
 
-    centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max, max_iter=beam_centre_model.max_iterations,
+    if beam_centre_model.COM:
+        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
+                               max_iter=beam_centre_model.max_iterations,
+                               x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2,
+                               tolerance=beam_centre_model.tolerance,
+                               find_direction=find_direction, reduction_method=False)
+
+        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
+                               max_iter=beam_centre_model.max_iterations,
+                               x_start=centre['pos1'], y_start=centre['pos2'],
+                               tolerance=beam_centre_model.tolerance,
+                               find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
+    else:
+        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max, max_iter=beam_centre_model.max_iterations,
                            x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
-                           find_direction=find_direction, reduction_method=True)
+                           find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
     return centre

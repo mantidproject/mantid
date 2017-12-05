@@ -75,7 +75,7 @@ class SANSCentreFinder(object):
         super(SANSCentreFinder, self).__init__()
 
     def __call__(self, state, r_min = 0.06, r_max = 0.026, max_iter = 20, x_start = 0.0, y_start = 0.0,
-                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True):
+                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False):
         """
         This is the start of the beam centre finder algorithm.
 
@@ -93,14 +93,15 @@ class SANSCentreFinder(object):
         self.validate_inputs(state, r_min, r_max, max_iter, x_start, y_start, tolerance)
 
         if reduction_method:
-            return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance, find_direction)
+            return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance,
+                                                  find_direction, verbose)
         else:
             return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance)
 
     @staticmethod
-    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction):
+    def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose):
         # Perform the beam centre finder algorithm
-        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction)
+        return centre_finder_new(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction, verbose)
 
     @staticmethod
     def _execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance):

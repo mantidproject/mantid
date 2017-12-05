@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1015</width>
-    <height>418</height>
+    <height>422</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,6 +71,13 @@
          <string>Options</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QLabel" name="label_8">
            <property name="text">
@@ -88,37 +95,10 @@
          <item row="1" column="1">
           <widget class="QLineEdit" name="r_min_line_edit"/>
          </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>to</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="3">
           <widget class="QLineEdit" name="r_max_line_edit"/>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Max iterations</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="max_iterations_line_edit"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Tolerance</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="tolerance_line_edit"/>
-         </item>
-         <item row="4" column="0">
+         <item row="6" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
             <string>Find Beam Centre for:</string>
@@ -126,16 +106,77 @@
           </widget>
          </item>
          <item row="4" column="1">
+          <widget class="QLineEdit" name="max_iterations_line_edit"/>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Max iterations</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLineEdit" name="tolerance_line_edit"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Tolerance</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
           <widget class="QCheckBox" name="left_right_check_box">
            <property name="text">
             <string>Left/Right</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="3">
+         <item row="6" column="3">
           <widget class="QCheckBox" name="up_down_check_box">
            <property name="text">
             <string>Up/Down</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QCheckBox" name="verbose_check_box">
+           <property name="text">
+            <string>Verbose</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="q_min_line_edit"/>
+         </item>
+         <item row="7" column="3">
+          <widget class="QCheckBox" name="COM_check_box">
+           <property name="text">
+            <string>Initial COM</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QLineEdit" name="q_max_line_edit"/>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Q Limits</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>from</string>
            </property>
           </widget>
          </item>

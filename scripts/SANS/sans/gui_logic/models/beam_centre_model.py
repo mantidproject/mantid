@@ -22,6 +22,10 @@ class BeamCentreModel(object):
         self._hab_pos_1 = ''
         self.scale_1 = 1000
         self.scale_2 = 1000
+        self.COM = False
+        self.verbose = False
+        self.q_min = 0.01
+        self.q_max = 0.1
 
         if instrument == SANSInstrument.LOQ:
             self.r_max = 200
@@ -60,6 +64,22 @@ class BeamCentreModel(object):
         self._r_max = value
 
     @property
+    def q_min(self):
+        return self._q_min
+
+    @q_min.setter
+    def q_min(self, value):
+        self._q_min = value
+
+    @property
+    def q_max(self):
+        return self._q_max
+
+    @q_max.setter
+    def q_max(self, value):
+        self._q_max = value
+
+    @property
     def left_right(self):
         return self._left_right
 
@@ -74,6 +94,22 @@ class BeamCentreModel(object):
     @up_down.setter
     def up_down(self, value):
         self._up_down = value
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value):
+        self._verbose = value
+
+    @property
+    def COM(self):
+        return self._COM
+
+    @COM.setter
+    def COM(self, value):
+        self._COM = value
 
     @property
     def tolerance(self):

@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
 from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm
+from sans.common.general_functions import create_child_algorithm, create_managed_non_child_algorithm
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -14,6 +14,15 @@ from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.algorithm_detail.single_execution import perform_can_subtraction
+from mantid import AnalysisDataService
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+# this should happen when this is called from outside Mantidplot and only then,
+# the result is that attempting to plot will raise an exception
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -85,6 +94,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.declareProperty('Direction', FindDirectionEnum.to_string(FindDirectionEnum.All), direction=Direction.Input,
                              doc="The search direction is an enumerable which can be either All, LeftRight or UpDown")
 
+        self.declareProperty('Verbose', False, direction=Direction.Input,
+                             doc="Whether to keep workspaces from each iteration in ADS.")
+
         # ----------
         # Output
         # ----------
@@ -103,6 +115,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         progress = self._get_progress()
         self.scale_1 = 1000
         self.scale_2 = 1000
+        verbose = self.getProperty('Verbose').value
 
         x_start = self.getProperty("Position1Start").value
         y_start = self.getProperty("Position2Start").value
@@ -163,6 +176,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
+            if mantidplot:
+                output_workspaces = self._publish_to_ADS(sample_quartiles)
+                if verbose:
+                    self._rename_and_group_workspaces(j, output_workspaces)
+
             residueLR = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
                                                   sample_quartiles[MaskingQuadrant.Right])
             residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
@@ -170,6 +188,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if(j == 0):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR) + "  SY=" + str(residueTB))
+                if mantidplot:
+                    graph_handle = self._plot_quartiles(output_workspaces)
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR > resLR_old:
@@ -185,6 +205,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                     # this is the success criteria, we've close enough to the center
                     logger.notice("Converged - check if stuck in local minimum! ")
                     break
+
             if j == max_iterations:
                 logger.notice("Out of iterations, new coordinates may not be the best")
 
@@ -195,6 +216,26 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.setProperty("Centre2", centre2)
 
         logger.notice("Centre coordinates updated: [{}, {}]".format(centre1*self.scale_1, centre2*self.scale_2))
+
+    def _rename_and_group_workspaces(self, index, output_workspaces):
+        to_group = []
+        for workspace in output_workspaces:
+            CloneWorkspace(InputWorkspace=workspace, OutputWorkspace='{}_{}'.format(workspace, index))
+            to_group.append('{}_{}'.format(workspace, index))
+        GroupWorkspaces(InputWorkspaces=to_group,OutputWorkspace='Iteration_{}'.format(index))
+
+    def _publish_to_ADS(self, sample_quartiles):
+        output_workspaces = []
+        for key in sample_quartiles:
+            output_workspaces.append(MaskingQuadrant.to_string(key))
+            AnalysisDataService.addOrReplace(MaskingQuadrant.to_string(key), sample_quartiles[key])
+
+        return output_workspaces
+
+    def _plot_quartiles(self, output_workspaces):
+        graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
+        graph_handle.activeLayer().logLogAxes()
+        return graph_handle
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

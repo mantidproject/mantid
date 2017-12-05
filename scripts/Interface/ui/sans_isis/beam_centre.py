@@ -77,6 +77,9 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.r_min_line_edit.setValidator(positive_double_validator)
         self.r_max_line_edit.setValidator(positive_double_validator)
 
+        self.q_min_line_edit.setValidator(positive_double_validator)
+        self.q_max_line_edit.setValidator(positive_double_validator)
+
         self.max_iterations_line_edit.setValidator(positive_integer_validator)
         self.tolerance_line_edit.setValidator(positive_double_validator)
 
@@ -90,6 +93,10 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.tolerance = options.tolerance
         self.left_right = options.left_right
         self.up_down = options.up_down
+        self.verbose = options.verbose
+        self.COM = options.COM
+        self.q_min = options.q_min
+        self.q_max = options.q_max
 
     def update_simple_line_edit_field(self, line_edit, value):
         gui_element = getattr(self, line_edit)
@@ -128,6 +135,22 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.update_simple_line_edit_field(line_edit="r_max_line_edit", value=value)
 
     @property
+    def q_max(self):
+        return self.get_simple_line_edit_field(line_edit="q_max_line_edit", expected_type=float)
+
+    @q_max.setter
+    def q_max(self, value):
+        self.update_simple_line_edit_field(line_edit="q_max_line_edit", value=value)
+
+    @property
+    def q_min(self):
+        return self.get_simple_line_edit_field(line_edit="q_min_line_edit", expected_type=float)
+
+    @q_min.setter
+    def q_min(self, value):
+        self.update_simple_line_edit_field(line_edit="q_min_line_edit", value=value)
+
+    @property
     def max_iterations(self):
         return self.get_simple_line_edit_field(line_edit="max_iterations_line_edit", expected_type=int)
 
@@ -158,6 +181,22 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
     @up_down.setter
     def up_down(self, value):
         self.up_down_check_box.setChecked(value)
+
+    @property
+    def verbose(self):
+        return self.verbose_check_box.isChecked()
+
+    @verbose.setter
+    def verbose(self, value):
+        self.verbose_check_box.setChecked(value)
+
+    @property
+    def COM(self):
+        return self.COM_check_box.isChecked()
+
+    @COM.setter
+    def COM(self, value):
+        self.COM_check_box.setChecked(value)
 
     @property
     def lab_pos_1(self):
