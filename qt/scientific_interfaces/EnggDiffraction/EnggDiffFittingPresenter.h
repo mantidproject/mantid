@@ -80,13 +80,8 @@ public:
 
   void plotFitPeaksCurves();
 
-  void setBankItems(const std::vector<std::string> &bankFiles);
-
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
-
-  void setDefaultBank(const std::vector<std::string> &splittedBaseName,
-                      const std::string &selectedFile);
 
 protected:
   void processStart();
@@ -115,10 +110,8 @@ private:
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
-  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
-
-  void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &expectedPeaks);
+  void validateFittingInputs(const std::string &focusedRunNo,
+                             const std::string &expectedPeaks);
 
   // TODO make this const when the global is removed
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
@@ -148,15 +141,9 @@ private:
   std::vector<std::string> processMultiRun(const std::string &userInput);
 
   std::vector<std::string>
-  processSingleRun(const std::string &userInputBasename,
-                   const std::vector<std::string> &splitBaseName);
+  processSingleRun(const std::string &userInputBasename);
 
-  std::vector<std::string>
-  processFullPathInput(const Poco::Path &pocoFilePath,
-                       const std::vector<std::string> &splitBaseName);
-
-  // whether to use AlignDetectors to convert units
-  static const bool g_useAlignDetectors;
+  std::vector<std::string> processFullPathInput(const Poco::Path &pocoFilePath);
 
   static int g_fitting_runno_counter;
 

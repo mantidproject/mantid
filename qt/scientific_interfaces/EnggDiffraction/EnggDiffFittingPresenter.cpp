@@ -1,4 +1,6 @@
 #include "EnggDiffFittingPresenter.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
@@ -37,9 +39,51 @@ std::string listWidgetLabelFromRunAndBankNumber(const int runNumber,
                                                 const size_t bank) {
   return std::to_string(runNumber) + "_" + std::to_string(bank);
 }
+
+// Remove commas at the start and end of the string,
+// as well as any adjacent to another (eg ,, gets corrected to ,)
+std::string stripExtraCommas(std::string &expectedPeaks) {
+  if (!expectedPeaks.empty()) {
+
+    g_log.debug() << "Validating the expected peak list.\n";
+
+    const auto comma = ',';
+
+    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
+      size_t j = i + 1;
+
+      if (expectedPeaks[i] == comma && expectedPeaks[i] == expectedPeaks[j]) {
+        expectedPeaks.erase(j, 1);
+        i--;
+
+      } else {
+        ++j;
+      }
+    }
+
+    size_t strLength = expectedPeaks.length() - 1;
+    if (expectedPeaks.at(0) == ',') {
+      expectedPeaks.erase(0, 1);
+      strLength -= 1;
+    }
+
+    if (expectedPeaks.at(strLength) == ',') {
+      expectedPeaks.erase(strLength, 1);
+    }
+  }
+  return expectedPeaks;
 }
 
-const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
+std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
+  std::string label = unit->unitID();
+  if (label == "TOF") {
+    label += " (us)";
+  } else if (label == "dSpacing") {
+    label += " (A)";
+  }
+  return label;
+}
+}
 
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
@@ -275,14 +319,13 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // or when default bank is set or changed, the text-field is updated with
     // selected bank directory which would trigger this function again
     if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
-      foundFullFilePaths =
-          processFullPathInput(pocoUserPathInput, splitBaseName);
+      foundFullFilePaths = processFullPathInput(pocoUserPathInput);
       // if given a multi-run
     } else if (userPathInput.find("-") != std::string::npos) {
       foundFullFilePaths = processMultiRun(userPathInput);
       // try to process using single run
     } else {
-      foundFullFilePaths = processSingleRun(userPathInput, splitBaseName);
+      foundFullFilePaths = processSingleRun(userPathInput);
     }
   } catch (std::invalid_argument &ia) {
     // If something went wrong stop and print error only
@@ -312,13 +355,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   * to update drop down for available banks and various widgets on the GUI
   *
   * @param filePath The user entered file path as a Poco Path
-  * @param splitBaseName The base file name split by the `_` delimiter
   *
   * @return The full file path as a vector of strings to make this
   * consistent with the other file processing methods
   */
-std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
-    const Poco::Path &filePath, const std::vector<std::string> &splitBaseName) {
+std::vector<std::string>
+EnggDiffFittingPresenter::processFullPathInput(const Poco::Path &filePath) {
 
   std::vector<std::string> foundRunNumbers;
   std::vector<std::string> foundFullFilePaths;
@@ -350,12 +392,6 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   const bool singleRunMode = m_view->getFittingSingleRunMode();
   // if not run mode or bank mode: to avoid recreating widgets
   if (!multiRunMode && !singleRunMode) {
-
-    // add bank to the combo-box
-    setBankItems(foundFullFilePaths);
-    // set the bank widget according to selected bank file
-    setDefaultBank(splitBaseName, filePath.toString());
-
     // Skips this step if it is multiple run because widget already
     // updated
     setRunNoItems(foundRunNumbers, false);
@@ -469,8 +505,7 @@ EnggDiffFittingPresenter::processMultiRun(const std::string &userInput) {
 }
 
 std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
-    const std::string &userInputBasename,
-    const std::vector<std::string> &splitBaseName) {
+    const std::string &userInputBasename) {
 
   const auto focusDir = m_view->focusingDir();
 
@@ -540,9 +575,6 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   // add bank to the combo-box and list view
   // recreates bank widget for every run (multi-run) depending on
   // number of banks file found for given run number in folder
-
-  setBankItems(foundFilePaths);
-  setDefaultBank(splitBaseName, userInputBasename);
 
   return foundFilePaths;
 }
@@ -781,13 +813,12 @@ void EnggDiffFittingPresenter::processLogMsg() {
 }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
+  std::string fittingPeaks = m_view->getExpectedPeaksInput();
 
-  std::string fittingPeaks = m_view->fittingPeaksData();
+  const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
+  m_view->setPeakList(normalisedPeakCentres);
 
-  // validate fitting data as it will remain the same through out
-  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
-
-  g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
+  g_log.debug() << "Focused files found are: " << normalisedPeakCentres << '\n';
   for (const auto &dir : g_multi_run_directories) {
     g_log.debug() << dir << '\n';
   }
@@ -796,8 +827,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
-
-        inputChecksBeforeFitting(g_multi_run_directories[i], fitPeaksData);
+        validateFittingInputs(g_multi_run_directories[i],
+                              normalisedPeakCentres);
       } catch (std::invalid_argument &ia) {
         m_view->userWarning("Error in the inputs required for fitting",
                             ia.what());
@@ -816,7 +847,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
     // disable GUI to avoid any double threads
     m_view->enableCalibrateFocusFitUserActions(false);
     m_view->enableFitAllButton(false);
-    // startAsyncFittingWorker
+
     // doFitting()
     // WORK OUT WHAT TO DO HERE
     // startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
@@ -838,15 +869,16 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   int runNumber;
   size_t bank;
   std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(listLabel);
+  std::string fittingPeaks = m_view->getExpectedPeaksInput();
+
+  const std::string normalisedPeakCentres = stripExtraCommas(fittingPeaks);
+  m_view->setPeakList(normalisedPeakCentres);
+
+  g_log.debug() << "the expected peaks are: " << normalisedPeakCentres << '\n';
+
   const auto filename = m_model->getWorkspaceFilename(runNumber, bank);
-  std::string fittingPeaks = m_view->fittingPeaksData();
-
-  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
-
-  g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
-
   try {
-    inputChecksBeforeFitting(filename, fitPeaksData);
+    validateFittingInputs(filename, normalisedPeakCentres);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
@@ -865,10 +897,10 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   // disable GUI to avoid any double threads
   m_view->enableCalibrateFocusFitUserActions(false);
 
-  startAsyncFittingWorker(runNumber, bank, fitPeaksData);
+  startAsyncFittingWorker(runNumber, bank, normalisedPeakCentres);
 }
 
-void EnggDiffFittingPresenter::inputChecksBeforeFitting(
+void EnggDiffFittingPresenter::validateFittingInputs(
     const std::string &focusedRunFilename, const std::string &expectedPeaks) {
   if (focusedRunFilename.empty()) {
     throw std::invalid_argument(
@@ -913,43 +945,6 @@ std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
   std::vector<std::string> splitBaseName;
   boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
   return splitBaseName;
-}
-
-std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
-    std::string &expectedPeaks) const {
-
-  if (!expectedPeaks.empty()) {
-
-    g_log.debug() << "Validating the expected peak list.\n";
-
-    auto *comma = ",";
-
-    for (size_t i = 0; i < expectedPeaks.size() - 1; i++) {
-      size_t j = i + 1;
-
-      if (expectedPeaks[i] == *comma && expectedPeaks[i] == expectedPeaks[j]) {
-        expectedPeaks.erase(j, 1);
-        i--;
-
-      } else {
-        ++j;
-      }
-    }
-
-    size_t strLength = expectedPeaks.length() - 1;
-    if (expectedPeaks.at(0) == ',') {
-      expectedPeaks.erase(0, 1);
-      strLength -= 1;
-    }
-
-    if (expectedPeaks.at(strLength) == ',') {
-      expectedPeaks.erase(strLength, 1);
-    }
-
-    m_view->setPeakList(expectedPeaks);
-  }
-
-  return expectedPeaks;
 }
 
 void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
@@ -1013,7 +1008,7 @@ void EnggDiffFittingPresenter::addPeakToList() {
     stream << std::fixed << std::setprecision(4) << peakCentre;
     auto strPeakCentre = stream.str();
 
-    auto curExpPeaksList = m_view->fittingPeaksData();
+    auto curExpPeaksList = m_view->getExpectedPeaksInput();
 
     std::string comma = ",";
 
@@ -1090,58 +1085,8 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
                         "File " + fileDir +
                             " , could not be found. Please try again!");
   } else {
-    auto expPeaks = m_view->fittingPeaksData();
+    auto expPeaks = m_view->getExpectedPeaksInput();
     outfile << expPeaks;
-  }
-}
-
-void EnggDiffFittingPresenter::setBankItems(
-    const std::vector<std::string> &bankFiles) {
-
-  if (bankFiles.empty()) {
-    // upon invalid file
-    // disable the widgets when only one related file found
-    m_view->enableFittingComboBox(false);
-
-    m_view->clearFittingComboBox();
-    return;
-  }
-
-  // delete previous bank added to the list
-  m_view->clearFittingComboBox();
-
-  try {
-    // Keep track of current loop iteration for banks
-    int index = 0;
-    for (const auto &filePath : bankFiles) {
-
-      const Poco::Path bankFile(filePath);
-      const std::string strVecFile = bankFile.toString();
-      // split the directory from m_fitting_runno_dir_vec
-      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
-
-      // get the last split in vector which will be bank
-      std::string bankID = (vecFileSplit.back());
-
-      bool digit = isDigit(bankID);
-
-      if (digit || bankID == "cropped") {
-        m_view->addBankItem(bankID);
-      } else {
-        QString qBank = QString("Bank %1").arg(index + 1);
-        m_view->addBankItem(qBank.toStdString());
-        ++index;
-      }
-    }
-
-    m_view->enableFittingComboBox(true);
-
-  } catch (std::runtime_error &re) {
-    m_view->userWarning("Unable to insert items: ",
-                        "Could not add banks to "
-                        "combo-box or list widget; " +
-                            static_cast<std::string>(re.what()) +
-                            ". Please try again");
   }
 }
 
@@ -1200,33 +1145,6 @@ void EnggDiffFittingPresenter::setRunNoItems(
   }
 }
 
-void EnggDiffFittingPresenter::setDefaultBank(
-    const std::vector<std::string> &splittedBaseName,
-    const std::string &selectedFile) {
-
-  if (!splittedBaseName.empty()) {
-
-    std::string bankID = (splittedBaseName.back());
-    auto combo_data = m_view->getFittingComboIdx(bankID);
-
-    if (combo_data > -1) {
-      m_view->setBankIdComboBox(combo_data);
-    } else {
-      m_view->setFittingRunNo(selectedFile);
-    }
-  }
-  // check if the vector is not empty so that the first directory
-  // can be assigned to text-field when number is given
-  else if (!m_view->getFittingRunNumVec().empty()) {
-    auto firstDir = m_view->getFittingRunNumVec().at(0);
-    const auto &intialDir = firstDir;
-    m_view->setFittingRunNo(intialDir);
-  }
-  // if nothing found related to text-field input
-  else if (!m_view->getFittingRunNo().empty())
-    m_view->setFittingRunNo(selectedFile);
-}
-
 bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
@@ -1259,7 +1177,9 @@ void EnggDiffFittingPresenter::plotFocusedFile(
                                   " Is this a focused file?");
     }
 
-    m_view->setDataVector(focusedData, true, plotSinglePeaks);
+    m_view->setDataVector(
+        focusedData, true, plotSinglePeaks,
+        generateXAxisLabel(focusedPeaksWS->getAxis(0)->unit()));
 
   } catch (std::runtime_error &re) {
     g_log.error()
@@ -1291,7 +1211,8 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
-      m_view->setDataVector(singlePeaksData, false, true);
+      m_view->setDataVector(singlePeaksData, false, true,
+                            generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
 
     } else {
