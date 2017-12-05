@@ -57,10 +57,10 @@ class EnggFitPeaks(PythonAlgorithm):
         import EnggUtils
 
         # Get peaks in dSpacing from file
-        expected_peaks_dsp = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+        expected_peaks = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                               self.getProperty('ExpectedPeaks').value)
 
-        if len(expected_peaks_dsp) < 1:
+        if len(expected_peaks) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         # Get expected peaks in TOF for the detector
@@ -72,9 +72,12 @@ class EnggFitPeaks(PythonAlgorithm):
 
         wks_index = self.getProperty("WorkspaceIndex").value
 
-        # FindPeaks will return a list of peaks sorted by the centre found. Sort the peaks as well,
-        # so we can match them with fitted centres later.
-        expected_peaks_tof = sorted(self._expected_peaks_in_tof(expected_peaks_dsp, in_wks, wks_index))
+        if self._any_expected_peaks_in_ws_range(in_wks, expected_peaks):
+            expected_peaks_tof = sorted(expected_peaks)
+        else:
+            expected_peaks_tof = sorted(self._expected_peaks_in_tof(expected_peaks, in_wks, wks_index))
+            if not self._any_expected_peaks_in_ws_range(in_wks, expected_peaks_tof):
+                raise ValueError("Expected peak centres lie outside the limits of the workspace x axis")
 
         found_peaks = self._peaks_from_find_peaks(in_wks, expected_peaks_tof, wks_index)
         if found_peaks.rowCount() < len(expected_peaks_tof):
@@ -85,10 +88,23 @@ class EnggFitPeaks(PythonAlgorithm):
 
         peaks_table_name = self.getPropertyValue("OutFittedPeaksTable")
         fitted_peaks = self._fit_all_peaks(in_wks, wks_index,
-                                           (found_peaks, expected_peaks_dsp), peaks_table_name)
+                                           (found_peaks, expected_peaks), peaks_table_name)
 
         # mandatory output
         self.setProperty('FittedPeaks', fitted_peaks)
+
+    def _any_expected_peaks_in_ws_range(self, input_ws, expected_peaks):
+        x_axis = input_ws.readX(0)
+        x_min = min(x_axis)
+        x_max = max(x_axis)
+
+        for peak_centre in expected_peaks:
+            if self._expected_peak_in_ws_range(x_min, x_max, peak_centre):
+                return True
+        return False
+
+    def _expected_peak_in_ws_range(self, ws_x_min, ws_x_max, expected_peak_centre):
+        return ws_x_min <= expected_peak_centre <= ws_x_max
 
     def _get_default_peaks(self):
         """

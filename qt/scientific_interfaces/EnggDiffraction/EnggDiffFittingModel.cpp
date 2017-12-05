@@ -106,28 +106,23 @@ void EnggDiffFittingModel::setDifcTzero(
 }
 
 void EnggDiffFittingModel::enggFitPeaks(const int runNumber, const size_t bank,
-                                        const std::string &expectedPeaks) {
+  const std::string &expectedPeaks) {
   const auto ws = getFocusedWorkspace(runNumber, bank);
   auto enggFitPeaksAlg =
-      Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
+    Mantid::API::AlgorithmManager::Instance().create("EnggFitPeaks");
 
-  try {
-    enggFitPeaksAlg->initialize();
-    enggFitPeaksAlg->setProperty("InputWorkspace", ws);
-    if (!expectedPeaks.empty()) {
-      enggFitPeaksAlg->setProperty("ExpectedPeaks", expectedPeaks);
-    }
-    enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
-    enggFitPeaksAlg->execute();
-
-    API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-    const auto fitResultsTable =
-        ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
-    addFitResults(runNumber, bank, fitResultsTable);
-  } catch (std::exception) {
-    throw std::runtime_error(
-        "Could not run the algorithm EnggFitPeaks successfully.");
+  enggFitPeaksAlg->initialize();
+  enggFitPeaksAlg->setProperty("InputWorkspace", ws);
+  if (!expectedPeaks.empty()) {
+    enggFitPeaksAlg->setProperty("ExpectedPeaks", expectedPeaks);
   }
+  enggFitPeaksAlg->setProperty("FittedPeaks", FIT_RESULTS_TABLE_NAME);
+  enggFitPeaksAlg->execute();
+
+  API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
+  const auto fitResultsTable =
+    ADS.retrieveWS<API::ITableWorkspace>(FIT_RESULTS_TABLE_NAME);
+  addFitResults(runNumber, bank, fitResultsTable);
 }
 
 void EnggDiffFittingModel::saveDiffFittingAscii(

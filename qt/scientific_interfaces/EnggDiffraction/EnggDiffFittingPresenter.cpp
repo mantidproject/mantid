@@ -962,7 +962,15 @@ void EnggDiffFittingPresenter::doFitting(const int runNumber, const size_t bank,
 
   // run the algorithm EnggFitPeaks with workspace loaded above
   // requires unit in Time of Flight
-  m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
+  try {
+    m_model->enggFitPeaks(runNumber, bank, expectedPeaks);
+  } catch (const std::runtime_error &exc) {
+    g_log.error() << "Could not run the algorithm EnggFitPeaks successfully."
+                  << exc.what();
+    m_view->userError("Could not run the algorithm EnggFitPeaks successfully",
+                      exc.what());
+    return;
+  }
 
   const auto outFilename = m_view->getCurrentInstrument() +
                            std::to_string(runNumber) +
