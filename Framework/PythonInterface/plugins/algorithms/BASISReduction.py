@@ -635,15 +635,14 @@ class BASISReduction(PythonAlgorithm):
         ws_name: str
             Name of the workspace from which to retrieve and modify the logs
         """
+        def jsonify(value):
+            r"""Cast non-standard objects to their closest standard
+            representation to enable JSON serialiation"""
+            if isinstance(value, np.ndarray):
+                return value.tolist()
+            return value
         if self._as_json is None:
-            self._as_json = {'properties': {}}
-            #self._as_json = json.loads(str(self))
-            def jsonify(value):
-                r"""Cast non-standard objects to their closest standard
-                representation to enable JSON serialiation"""
-                if isinstance(value, np.ndarray):
-                    return value.tolist()
-                return value
+            self._as_json = json.loads(str(self))
             # Force serialization of the following properties even if having
             # their default values
             forced = {name: jsonify(self.getProperty(name).value)
