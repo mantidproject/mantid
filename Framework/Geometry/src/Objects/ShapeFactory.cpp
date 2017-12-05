@@ -1455,16 +1455,6 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     shapeInfo.setCylinder(parsePosition(pElemCentre), normVec,
                           std::stod(pElemRadius->getAttribute("val")),
                           std::stod(pElemHeight->getAttribute("val")));
-  } else if (pElem->tagName() == "segmented-cylinder") {
-    Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
-    Element *pElemAxis = getShapeElement(pElem, "axis");
-    Element *pElemRadius = getShapeElement(pElem, "radius");
-    Element *pElemHeight = getShapeElement(pElem, "height");
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
-    shapeInfo.setSegmentedCylinder(parsePosition(pElemCentre), normVec,
-                                   std::stod(pElemRadius->getAttribute("val")),
-                                   std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");

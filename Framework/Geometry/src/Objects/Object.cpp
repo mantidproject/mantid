@@ -1805,8 +1805,7 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case detail::ShapeInfo::GeometryShape::CYLINDER:
-  case detail::ShapeInfo::GeometryShape::SEGMENTED_CYLINDER: {
+  case detail::ShapeInfo::GeometryShape::CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];

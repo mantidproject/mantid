@@ -88,7 +88,6 @@ void Renderer::renderShape(const ShapeInfo &shapeInfo) const {
     doRenderCone(shapeInfo);
     break;
   case ShapeInfo::GeometryShape::CYLINDER:
-  case ShapeInfo::GeometryShape::SEGMENTED_CYLINDER:
     doRenderCylinder(shapeInfo);
     break;
   default:
@@ -249,10 +248,8 @@ void Renderer::doRenderCylinder(const ShapeInfo &shapeInfo) const {
   glMultMatrixd(mat);
   auto radius = shapeInfo.radius();
   auto height = shapeInfo.height();
-  bool segmented =
-      shapeInfo.shape() == ShapeInfo::GeometryShape::SEGMENTED_CYLINDER;
   gluCylinder(qobj, radius, radius, height, Cylinder::g_nslices,
-              segmented ? 1 : Cylinder::g_nstacks);
+              Cylinder::g_nstacks);
   gluQuadricTexture(qobj, false);
   gluDisk(qobj, 0, radius, Cylinder::g_nslices, 1);
   glTranslated(0.0, 0.0, height);
