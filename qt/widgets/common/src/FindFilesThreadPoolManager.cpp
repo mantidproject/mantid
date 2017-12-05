@@ -18,7 +18,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
-
 // Thread pool to run file finder workers on
 static std::unique_ptr<QThreadPool> tp = {nullptr};
 
@@ -26,8 +25,9 @@ static std::unique_ptr<QThreadPool> tp = {nullptr};
  *
  * @return a unique pointer to the QThreadPool
  */
-const std::unique_ptr<QThreadPool>& FindFilesThreadPoolManager::poolInstance() const {
-  if(!tp)
+const std::unique_ptr<QThreadPool> &
+FindFilesThreadPoolManager::poolInstance() const {
+  if (!tp)
     tp = make_unique<QThreadPool>();
   return tp;
 }
@@ -137,7 +137,9 @@ bool FindFilesThreadPoolManager::isSearchRunning() const {
  * have finished executing. Using this in a GUI thread will cause the GUI
  * to freeze up.
  */
-void FindFilesThreadPoolManager::waitForDone() { poolInstance()->waitForDone(); }
+void FindFilesThreadPoolManager::waitForDone() {
+  poolInstance()->waitForDone();
+}
 
 /** Mark the search as being finished.
  */
