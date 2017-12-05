@@ -31,7 +31,7 @@ class UserConfig(object):
     """
 
     # The raw QSettings instance
-    settings = None
+    qsettings = None
     defaults = None
 
     def __init__(self, organization, application, defaults=None):
@@ -43,27 +43,28 @@ class UserConfig(object):
         form of nested dict instances
         """
         # Loads the saved settings if found
-        self.settings = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                                  organization, application)
+        self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope,
+                                   organization, application)
         self.defaults = defaults
 
     def all_keys(self):
-        return self.settings.allKeys()
+        return self.qsettings.allKeys()
 
     @property
     def filename(self):
-        return self.settings.fileName()
+        return self.qsettings.fileName()
 
     def get(self, section, option):
         """
         Return a value for an option in a given section. If not
-        specified in the saved settings then the defaults are
-        consulted. If no option is found then a KeyError is raised
+        specified in the saved settings then the initial
+        defaults are consulted. If no option is found then
+        a KeyError is raised
         :param section: A string section name
         :param option: A string option name
         :return: The value of the option
         """
-        value = self.settings.value(self._settings_path(section, option))
+        value = self.qsettings.value(self._settings_path(section, option))
         if not value:
             value = self._get_default_or_raise(section, option)
 
@@ -76,7 +77,7 @@ class UserConfig(object):
         :param option: A string option name
         :param value: The value of the setting
         """
-        self.settings.setValue(self._settings_path(section, option), value)
+        self.qsettings.setValue(self._settings_path(section, option), value)
 
     # -------------------------------------------------------------------------
     # "Private" methods
@@ -101,10 +102,11 @@ class UserConfig(object):
         """
         value = None
         if self.defaults and section in self.defaults:
-            value = self.defaults[section].get(option, None)
-        if not value:
-            raise KeyError("Unknown config item requested: " +
-                           self._settings_path(section, option))
+            try:
+                value = self.defaults[section][option]
+            except KeyError:
+                raise KeyError("Unknown config item requested: " +
+                               self._settings_path(section, option))
         return value
 
     def _settings_path(self, section, option):

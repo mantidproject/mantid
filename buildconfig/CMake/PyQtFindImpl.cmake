@@ -16,8 +16,10 @@
 # PYQT${major_version}_SIP_DIR - The directory holding the PyQt .sip files.
 #
 # PYQT${major_version}_SIP_FLAGS - The SIP flags used to build PyQt.
+#
+# PYQT${major_version}_RCC - The location of the resource compiler program
 function (find_pyqt major_version)
-  if (PYQT${major_version}_VERSION)
+  if (PYQT${major_version}_RCC)
     # Already in cache, be silent
     set (PYQT${major_version}_FOUND TRUE)
   else ()
@@ -41,6 +43,10 @@ function (find_pyqt major_version)
 
         string (REGEX MATCH ".*\npyqt_pyuic:([^\n]+).*$" _dummy ${_pyqt_config})
         set (PYQT${major_version}_PYUIC "${CMAKE_MATCH_1}" CACHE STRING "Location of the pyuic script")
+
+        # find the pyrcc compiler
+        find_file ( _pyrcc_path${major_version} "pyrcc${major_version}" PATHS ${CMAKE_MODULE_PATH} )
+        set (PYQT${major_version}_RCC "${_pyrcc_path${major_version}}" CACHE STRING "Location of the pyrcc driver")
 
         if (NOT IS_DIRECTORY "${PYQT${major_version}_SIP_DIR}")
           message (WARNING "The base directory where PyQt${major_version}'s SIP files are installed could not be determined.\n"
