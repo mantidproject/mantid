@@ -41,11 +41,11 @@ class MANTID_GEOMETRY_DLL ShapeInfo {
 public:
   enum class GeometryShape {
     NOSHAPE = 0,
-    CUBOID,            ///< CUBOID
-    HEXAHEDRON,        ///< HEXAHEDRON
-    SPHERE,            ///< SPHERE
-    CYLINDER,          ///< CYLINDER
-    CONE,              ///< CONE
+    CUBOID,     ///< CUBOID
+    HEXAHEDRON, ///< HEXAHEDRON
+    SPHERE,     ///< SPHERE
+    CYLINDER,   ///< CYLINDER
+    CONE,       ///< CONE
   };
 
 private:

@@ -107,7 +107,6 @@ public:
 
     TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
-
 };
 
 #endif
