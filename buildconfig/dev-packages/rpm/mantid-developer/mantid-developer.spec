@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.24
+Version:        1.25
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -15,9 +15,10 @@ License:        GPL
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fedora:Requires: rpmfusion-nonfree-release}
-Requires: clang
-Requires: cmake-gui >= 2.8.12
 %{?rhel:Requires: epel-release}
+Requires: clang
+%{?fedora:Requires: cmake-gui}
+%{?rhel:Requires: cmake3-gui}
 %if 0%{?el6}
 Requires: boost157-devel
 %else
@@ -146,6 +147,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
+- Added cmake3-gui for rhel
 
 * Wed Nov 22 2017 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added Qt5, PyQt5 and QtPy dependencies
