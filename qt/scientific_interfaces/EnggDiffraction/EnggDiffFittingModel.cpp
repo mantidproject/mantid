@@ -181,7 +181,7 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
   }
 
   const std::string alignedWSName = FOCUSED_WS_NAME + "_d";
-  cloneWorkspace(getFocusedWorkspace(runNumber, bank), alignedWSName);
+  cloneWorkspace(focusedWS, alignedWSName);
   alignDetectors(alignedWSName, alignedWSName);
 
   alignDetectors(FITTED_PEAKS_WS_NAME, FITTED_PEAKS_WS_NAME);
