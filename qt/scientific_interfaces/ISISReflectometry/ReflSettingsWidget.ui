@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
+    <width>980</width>
     <height>603</height>
    </rect>
   </property>
@@ -61,26 +61,6 @@
           <property name="text">
            <string>AnalysisMode</string>
           </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="analysisModeComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
-           <property name="text">
-            <string>PointDetectorAnalysis</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>MultiDetectorAnalysis</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item row="1" column="0">
@@ -210,6 +190,79 @@
           <property name="text">
            <string>Stitch1DMany</string>
           </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="summationTypeLabel">
+          <property name="text">
+           <string>SummationType</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="reductionTypeLabel">
+          <property name="text">
+           <string>ReductionType</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="analysisModeComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>PointDetectorAnalysis</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>MultiDetectorAnalysis</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QComboBox" name="summationTypeComboBox">
+          <property name="currentText">
+           <string>SumInLambda</string>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>SumInLambda</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SumInQ</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QComboBox" name="reductionTypeComboBox">
+          <item>
+           <property name="text">
+            <string>Normal</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DivergentBeam</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>NonFlatSample</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
