@@ -170,8 +170,8 @@ public:
         .WillOnce(Return("3,4"));
     EXPECT_CALL(mockView, detectorCorrectionEnabled())
         .Times(Exactly(1))
-        .WillOnce(Return(true))
-            EXPECT_CALL(mockView, getDetectorCorrectionType())
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(Exactly(1))
         .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getTransmissionRuns())
