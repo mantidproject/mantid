@@ -33,15 +33,11 @@
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="logMessageWindow">
-   <property name="windowTitle">
-    <string>Message Display</string>
-   </property>
+  <widget class="QDockWidget" name="dockWidget_2">
    <attribute name="dockWidgetArea">
-    <number>4</number>
+    <number>1</number>
    </attribute>
-   <widget class="MessageDisplay" name="messagedisplay"/>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
   </widget>
   <action name="actionQuit">
    <property name="text">
@@ -52,14 +48,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MessageDisplay</class>
-   <extends>QWidget</extends>
-   <header>mantidqt.widgets.messagedisplay</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

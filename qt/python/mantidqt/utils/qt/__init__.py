@@ -25,7 +25,7 @@ import os
 # 3rd-party modules
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
-from qtpy.QtWidgets import QAction
+from qtpy.QtWidgets import QAction, QMenu
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -98,3 +98,16 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
             action.setShortcutContext(shortcut_context)
 
     return action
+
+
+def add_actions(target, actions):
+    """Add a collection of actions to a relevant
+    target (menu or toolbar)
+    :param target: An instance of QMenu or QToolbar
+    :param actions: A collection of actions to be added
+    """
+    for action in actions:
+        if isinstance(action, QMenu):
+            target.addMenu(action)
+        elif isinstance(action, QAction):
+            target.addAction(action)

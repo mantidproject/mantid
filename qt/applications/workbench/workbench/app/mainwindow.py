@@ -90,45 +90,83 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 
 # -----------------------------------------------------------------------------
-# Utilities
+# Utilities/Widgets
 # -----------------------------------------------------------------------------
 from mantidqt.py3compat import qbytearray_to_str  # noqa
+from mantidqt.utils.qt import add_actions, create_action  # noqa
 from workbench.config.main import CONF  # noqa
-from workbench.external.mantid import prepare_mantid_env
+from workbench.external.mantid import prepare_mantid_env  # noqa
 
 # -----------------------------------------------------------------------------
 # MainWindow
 # -----------------------------------------------------------------------------
 
+
 class MainWindow(QMainWindow):
+
+    DOCKOPTIONS = QMainWindow.AllowTabbedDocks|QMainWindow.AllowNestedDocks
+
     def __init__(self):
         QMainWindow.__init__(self)
-        self.splash = SPLASH
-        self.maximized_flag = None
-        MAIN_APP.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
-        # Loading the Ui file and creating the widgets can take some time so it is done
-        # here in stages allow another call to splash screen update and hence
-        # QApplication::processEvents as the event loop is not running yet.
-        self.set_splash('Loading main ui')
-        ui_cls, _ = load_ui(__file__, 'mainwindow.ui')
-        self.set_splash()
-        self._ui = ui_cls()
-        self._ui.setupUi(self)
+        qapp = QApplication.instance()
+        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+
+        self.setWindowTitle("Mantid Workbench")
+
+        # -- instance attributes --
+        # widgets
+        self.messagedisplay = None
+
+        # Menus
+        self.file_menu = None
+        self.file_menu_actions = None
+
+        # Allow splash screen text to be overridden in set_splash
+        self.splash = SPLASH
+
+        # Layout
+        self.setDockOptions(self.DOCKOPTIONS)
 
     def setup(self):
+        self.create_menus()
+        self.create_actions()
+        self.populate_menus()
+
+        # widgets
+        self.set_splash("Loading message display")
+        from workbench.plugins.logmessagedisplay import LogMessageDisplay
+        self.messagedisplay = LogMessageDisplay(self)
+
         self.setup_layout()
 
-        # Logging window
-        self._ui.messagedisplay.attachLoggingChannel()
+
+    def create_menus(self):
+        self.file_menu = self.menuBar().addMenu("&File")
+
+    def create_actions(self):
+        action_quit = create_action(self, "&Quit", on_triggered=self.close,
+                                    shortcut="Ctrl+Q",
+                                    shortcut_context=Qt.ApplicationShortcut)
+        self.file_menu_actions = [action_quit]
+
+    def populate_menus(self):
+        # Link to menus
+        add_actions(self.file_menu, self.file_menu_actions)
 
     def setup_layout(self):
         settings = self.load_window_settings('window/')
         hexstate = settings[0]
         if hexstate is None:
-            # First execution:
-            self.setWindowState(Qt.WindowMaximized)
+            self.setup_for_first_run()
+
         self.set_window_settings(*settings)
+
+    def setup_for_first_run(self):
+        """Assume this is a first run of the application and set layouts
+        accordingly"""
+        self.setWindowState(Qt.WindowMaximized)
+        self.setup_default_layouts()
 
     def set_splash(self, msg=None):
         if not self.splash:
@@ -163,7 +201,7 @@ class MainWindow(QMainWindow):
         is_maximized = get_func(section, prefix + 'is_maximized')
         is_fullscreen = get_func(section, prefix + 'is_fullscreen')
         return hexstate, window_size, pos, is_maximized, \
-               is_fullscreen
+            is_fullscreen
 
     def get_window_settings(self):
         """Return current window settings
@@ -252,10 +290,10 @@ def start_workbench(app):
     main_window = MainWindow()
     main_window.setup()
 
-    preloaded_packages = ('mantid', 'matplotlib')
-    for name in preloaded_packages:
-        main_window.set_splash('Preloading ' + name)
-        importlib.import_module('mantid')
+    # preloaded_packages = ('mantid', 'matplotlib')
+    # for name in preloaded_packages:
+    #     main_window.set_splash('Preloading ' + name)
+    #     importlib.import_module('mantid')
 
     main_window.show()
     if main_window.splash:

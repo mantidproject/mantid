@@ -32,5 +32,6 @@ class MessageDisplay : QWidget, Configurable {
 %End
 
 public:
+  MessageDisplay(QWidget *parent = 0);
   void attachLoggingChannel();
 };

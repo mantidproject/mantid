@@ -20,9 +20,9 @@ from __future__ import (absolute_import, division, print_function,
 import unittest
 
 from qtpy.QtCore import QObject, Qt
-from qtpy.QtWidgets import QAction, QApplication
+from qtpy.QtWidgets import QAction, QApplication, QMenu, QToolBar
 
-from mantidqt.utils.qt import create_action
+from mantidqt.utils.qt import add_actions, create_action
 
 QAPP = None
 
@@ -68,6 +68,38 @@ class CreateActionTest(unittest.TestCase):
     def test_shortcut_context_not_used_if_shortcut_given(self):
         action = create_action(None, "Test Action", shortcut_context=Qt.ApplicationShortcut)
         self.assertEqual(Qt.WindowShortcut, action.shortcutContext())
+
+
+class AddActionsTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        global QAPP
+        if QApplication.instance() is None:
+            QAPP = QApplication([''])
+
+    def test_add_actions_with_qmenu_target(self):
+        test_act_1 = create_action(None, "Test Action 1")
+        test_act_2 = create_action(None, "Test Action 2")
+        test_menu = QMenu()
+        add_actions(test_menu, [test_act_1, test_act_2])
+        self.assertFalse(test_menu.isEmpty())
+
+    def test_add_actions_with_qtoolbar_target(self):
+        test_act_1 = create_action(None, "Test Action 1")
+        test_act_2 = create_action(None, "Test Action 2")
+        test_toolbar = QToolBar()
+        # There seems to be no easy access to check the size of the list
+        # so check the number of children increases by 2
+        nchildren_before = len(test_toolbar.children())
+        add_actions(test_toolbar, [test_act_1, test_act_2])
+        self.assertEquals(nchildren_before + 2, len(test_toolbar.children()))
+
+    def test_add_actions_with_bad_target_raises_attribute_error(self):
+        test_act_1 = create_action(None, "Test Action 1")
+        test_act_2 = create_action(None, "Test Action 2")
+        test_toolbar = QObject()
+        self.assertRaises(AttributeError, add_actions, test_toolbar, [test_act_1, test_act_2])
 
 
 if __name__ == "__main__":
