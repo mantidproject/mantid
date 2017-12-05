@@ -81,6 +81,7 @@ public:
   virtual bool instrumentSettingsEnabled() const = 0;
   virtual bool detectorCorrectionEnabled() const = 0;
 
+
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
   virtual void setInstDefaults(const std::vector<double> &,
@@ -89,7 +90,8 @@ public:
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
   /// Set polarisation corrections and parameters enabled/disabled
-  virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
+  virtual void setPolarisationOptionsEnabled(bool enable) = 0;
+  virtual void setDetectorCorrectionEnabled(bool enable) = 0;
 };
 }
 }

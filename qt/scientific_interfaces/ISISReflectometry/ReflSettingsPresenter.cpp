@@ -257,21 +257,25 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("ProcessingInstructions=" + procInst);
     }
 
-    // Add correction type
-    auto correctionType = m_view->getDetectorCorrectionType();
-    if (!correctionType.empty())
-      options.push_back("DetectorCorrectionType=" + correctionType);
+    if (m_view->detectorCorrectionEnabled()) {
+      // Add correction type
+      auto correctionType = m_view->getDetectorCorrectionType();
+      if (!correctionType.empty())
+        options.push_back("DetectorCorrectionType=" + correctionType);
+    }
   }
 
   return boost::algorithm::join(options, ",");
 }
 
 /** Receives specified transmission runs from the view and loads them into the
-*ADS. Returns a string with transmission runs so that they are considered in the
+*ADS. Returns a string with transmission runs so that they are considered in
+*the
 *reduction
 *
 * @param loadRuns :: If true, will try to load transmission runs as well
-* @return :: transmission run(s) as a string that will be used for the reduction
+* @return :: transmission run(s) as a string that will be used for the
+*reduction
 */
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
   auto transmissionRunsString = m_view->getTransmissionRuns();

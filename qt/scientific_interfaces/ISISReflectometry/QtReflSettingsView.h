@@ -109,8 +109,8 @@ public slots:
   void requestExpDefaults() const;
   void requestInstDefaults() const;
   /// Sets enabled status for polarisation corrections and parameters
-  void setPolarisationOptionsEnabled(bool enable) const override;
-
+  void setPolarisationOptionsEnabled(bool enable) override;
+  void setDetectorCorrectionEnabled(bool enable) override;
 private:
   /// Initialise the interface
   void initLayout();
@@ -122,7 +122,6 @@ private:
   /// Whether or not polarisation corrections should be enabled
   mutable bool m_isPolCorrEnabled;
 };
-
 } // namespace Mantid
 } // namespace CustomInterfaces
 
