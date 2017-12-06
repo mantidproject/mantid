@@ -6,8 +6,9 @@ from IndirectReductionCommon import load_files
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (AddSampleLog, AlignDetectors, CropWorkspace, DeleteWorkspace, DiffractionFocussing,
-                              MergeRuns, NormaliseByCurrent, RebinToWorkspace, ReplaceSpecialValues)
+from mantid.simpleapi import (AddSampleLog, AlignDetectors, CloneWorkspace, CropWorkspace, DeleteWorkspace,
+                              DiffractionFocussing, MergeRuns, NormaliseByCurrent, RebinToWorkspace,
+                              ReplaceSpecialValues)
 
 
 # pylint: disable=too-few-public-methods
@@ -94,6 +95,16 @@ class DRangeToWorkspaceMap(object):
 
             if all(map(x_range_differs, self._map[d_range])):
                 self._map[d_range].append(workspace)
+
+    def transform(self, morphism):
+        """
+        Transforms this DRange Map, by applying the specified morphism to
+        each key-value pair in the map.
+
+        :param morphism:    The morphism to apply.
+        """
+        self._map = {d_range : morphism(d_range, workspace)
+                     for d_range, workspace in self._map.items()}
 
     def combine(self, d_range_map, combinator):
         """
@@ -203,7 +214,12 @@ def average_ws_list(ws_list):
         raise RuntimeError("getAverageWs: Trying to take an average of nothing")
 
     if num_workspaces == 1:
-        return ws_list[0]
+        if mtd.doesExist(ws_list[0].getName()):
+            return CloneWorkspace(InputWorkspace=ws_list[0],
+                                  OutputWorkspace=ws_list[0].getName() + "_clone",
+                                  StoreInADS=False)
+        else:
+            return ws_list[0]
 
     return sum(ws_list) / num_workspaces
 
@@ -348,6 +364,37 @@ def rebin_and_average(ws_list):
     @param ws_list The workspace list to rebin and average.
     """
     return average_ws_list(rebin_to_smallest(*ws_list))
+
+
+def diffraction_calibrator(calibration_file):
+    """
+    Creates a diffraction calibrator, which takes a DRange and a workspace
+    and returns a calibrated workspace.
+
+    :param calibration_file:    The calibration file to use.
+    :return:                    A diffraction calibrator.
+    """
+
+    def calibrator(d_range, workspace):
+        normalised = NormaliseByCurrent(InputWorkspace=workspace,
+                                        OutputWorkspace="normalised_sample",
+                                        StoreInADS=False, EnableLogging=False)
+
+        aligned = AlignDetectors(InputWorkspace=normalised,
+                                 CalibrationFile=calibration_file,
+                                 OutputWorkspace="aligned_sample",
+                                 StoreInADS=False, EnableLogging=False)
+
+        focussed = DiffractionFocussing(InputWorkspace=aligned,
+                                        GroupingFileName=calibration_file,
+                                        OutputWorkspace="focussed_sample",
+                                        StoreInADS=False, EnableLogging=False)
+
+        return CropWorkspace(InputWorkspace=focussed,
+                             XMin=d_range[0], XMax=d_range[1],
+                             OutputWorkspace="calibrated_sample",
+                             StoreInADS=False, EnableLogging=False)
+    return calibrator
 
 
 # pylint: disable=no-init,too-many-instance-attributes
@@ -495,11 +542,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         else:
             result_map = self._sam_ws_map
 
-        # Run necessary algorithms on the Sample workspaces.
-        self._calibrate_runs_in_map(result_map)
+        calibrator = diffraction_calibrator(self._cal)
 
-        # Run necessary algorithms on the Vanadium workspaces.
-        self._calibrate_runs_in_map(self._van_ws_map)
+        # Calibrate the Sample workspaces.
+        result_map.transform(calibrator)
+
+        # Calibrate the Vanadium workspaces.
+        self._van_ws_map.transform(calibrator)
 
         # Divide all sample files by the corresponding vanadium files.
         result_map = result_map.combine(self._van_ws_map, divide_workspace)
@@ -527,11 +576,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         elif len(result_map) == 1:
             output_ws = list(result_map.values())[0]
         else:
-            logger.error("D-Ranges found in runs have no overlap:\n" +
-                         "Found Sample D-Ranges: " + ", ".join(map(str, self._sam_ws_map.keys())) + "\n" +
-                         "Found Container D-Ranges: " + ", ".join(map(str, self._con_ws_map.keys())) + "\n" +
-                         "Found Vanadium D-Ranges: " + ", ".join(map(str, self._van_ws_map.keys())))
-            return
+            error_msg = "D-Ranges found in runs have no overlap:\n" + \
+                        "Found Sample D-Ranges: " + ", ".join(map(str, self._sam_ws_map.keys())) + "\n" + \
+                        "Found Vanadium D-Ranges: " + ", ".join(map(str, self._van_ws_map.keys()))
+
+            if self._container_files:
+                error_msg += "\nFound Container D-Ranges: " + ", ".join(map(str, self._con_ws_map.keys()))
+            raise RuntimeError(error_msg)
 
         if self._output_ws_name:
             mtd.addOrReplace(self._output_ws_name, output_ws)
@@ -603,8 +654,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         try:
             int_ranges = [[int(x) for x in str_range] for str_range in str_ranges]
         except BaseException:
-            raise ValueError('Provided list, "' + string + '", was incorrectly formatted\n'
-                                                           '')
+            raise ValueError('Provided list, "' + string + '", was incorrectly formatted\n')
 
         # Expand integer ranges formed from a string 'a-b', to a range from a to b
         # Single provided integers remain the same
@@ -629,28 +679,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 raise RuntimeError("Could not locate sample file: " + run)
 
         return run_files
-
-    def _calibrate_runs_in_map(self, drange_map):
-
-        for d_range, wrksp in drange_map.items():
-            normalised = NormaliseByCurrent(InputWorkspace=wrksp,
-                                            OutputWorkspace="normalised_sample",
-                                            StoreInADS=False, EnableLogging=False)
-
-            aligned = AlignDetectors(InputWorkspace=normalised,
-                                     CalibrationFile=self._cal,
-                                     OutputWorkspace="aligned_sample",
-                                     StoreInADS=False, EnableLogging=False)
-
-            focussed = DiffractionFocussing(InputWorkspace=aligned,
-                                            GroupingFileName=self._cal,
-                                            OutputWorkspace="focussed_sample",
-                                            StoreInADS=False, EnableLogging=False)
-
-            drange_map[d_range] = CropWorkspace(InputWorkspace=focussed,
-                                                XMin=d_range[0], XMax=d_range[1],
-                                                OutputWorkspace="calibrated_sample",
-                                                StoreInADS=False, EnableLogging=False)
 
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
