@@ -35,6 +35,7 @@ set_target_properties ( VatesAlgorithms PROPERTIES OUTPUT_NAME MantidVatesAlgori
 
 target_link_libraries( VatesAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 ${MANTID_SUBPROJECT_LIBS}
+VatesAPI
 vtkCommonCore
 vtkCommonDataModel
 ${vtkjsoncpp_LIBRARIES}
