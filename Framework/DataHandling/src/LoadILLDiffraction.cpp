@@ -124,6 +124,7 @@ void LoadILLDiffraction::exec() {
 
   m_filename = getPropertyValue("Filename");
 
+  m_scanVar.clear();
   progress.report("Loading the scanned variables");
   loadScanVars();
 

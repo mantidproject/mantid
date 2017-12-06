@@ -5,6 +5,8 @@
 # brief: create a library target for linked against Qt
 # The global ENABLE_MANTIDPLOT option controls if a Qt4 target
 # is created.
+# The global ENABLE_WORKBENCH option controls if a Qt5 target
+# is created.
 # To limit the Qt version for a specfic library use
 # QT_VERSION, e.g.
 #
@@ -18,13 +20,20 @@ function (mtd_add_qt_library)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 
 # name: mtd_add_qt_executable
 # brief: create a library target for linked against Qt
 # The global ENABLE_MANTIDPLOT option controls if a Qt4 target
+# is created.
+# The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
 # To limit the Qt version for a specfic library use
 # QT_VERSION, e.g.
@@ -38,7 +47,12 @@ function (mtd_add_qt_executable)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_target (EXCUTABLE QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 
@@ -100,6 +114,10 @@ function (mtd_add_qt_target)
   set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   set ( _all_defines ${PARSED_DEFS};${PARSED_QT${PARSED_QT_VERSION}_DEFS} )
   if (PARSED_QT_VERSION EQUAL 4)
+    # Workaround Qt compiler detection
+    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+    # https://bugreports.qt.io/browse/QTBUG-39142
+    list ( APPEND _all_defines Q_COMPILER_INITIALIZER_LISTS )
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp ( 4 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT4_SRC} ${MOC_GENERATED})
@@ -253,11 +271,17 @@ function (mtd_add_qt_test_executable)
   # libraries
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
   if (PARSED_QT_VERSION EQUAL 4)
-   set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
+    set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
+    # Workaround Qt compiler detection
+    # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
+    # https://bugreports.qt.io/browse/QTBUG-39142
+    set_target_properties ( ${_target_name} PROPERTIES
+      COMPILE_DEFINITIONS Q_COMPILER_INITIALIZER_LISTS
+    )
   elseif (PARSED_QT_VERSION EQUAL 5)
-   set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
+    set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
   else ()
-   message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
+    message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})

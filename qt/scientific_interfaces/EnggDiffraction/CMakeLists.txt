@@ -1,5 +1,5 @@
 set ( SRC_FILES
-    EnggDiffFittingModel.cpp
+	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffractionPresenter.cpp
@@ -17,13 +17,13 @@ set ( INC_FILES
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
 )
 
 set ( MOC_FILES
-    EnggDiffFittingModel.h
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h

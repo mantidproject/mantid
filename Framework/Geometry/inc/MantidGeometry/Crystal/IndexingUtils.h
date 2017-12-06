@@ -55,7 +55,8 @@ public:
                         const std::vector<Kernel::V3D> &q_vectors,
                         OrientedLattice &lattice, double required_tolerance,
                         int base_index, size_t num_initial,
-                        double degrees_per_step, bool fixAll = false);
+                        double degrees_per_step, bool fixAll = false,
+                        int iterations = 1);
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the range of possible real space unit cell edge lengths.
@@ -69,7 +70,7 @@ public:
   static double Find_UB(Kernel::DblMatrix &UB,
                         const std::vector<Kernel::V3D> &q_vectors, double min_d,
                         double max_d, double required_tolerance,
-                        double degrees_per_step);
+                        double degrees_per_step, int iterations = 4);
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(Kernel::DblMatrix &UB,
