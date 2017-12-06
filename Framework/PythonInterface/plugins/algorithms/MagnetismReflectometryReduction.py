@@ -4,7 +4,6 @@
 """
 from __future__ import (absolute_import, division, print_function)
 import math
-import functools
 import numpy as np
 from mantid.api import *
 from mantid.simpleapi import *
