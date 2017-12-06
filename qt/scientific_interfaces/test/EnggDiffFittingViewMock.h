@@ -42,8 +42,8 @@ public:
   // virtual std::string fittingRunNo() const;
   MOCK_CONST_METHOD0(getFittingRunNo, std::string());
 
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+  // virtual std::string getExpectedPeaksInput() const;
+  MOCK_CONST_METHOD0(getExpectedPeaksInput, std::string());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
@@ -143,9 +143,9 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void setDataVector
-  MOCK_METHOD3(setDataVector,
+  MOCK_METHOD4(setDataVector,
                void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-                    bool plotSinglePeaks));
+                    bool plotSinglePeaks, const std::string &xAxisLabel));
 
   // virtual void resetCanvas
   MOCK_METHOD0(resetCanvas, void());

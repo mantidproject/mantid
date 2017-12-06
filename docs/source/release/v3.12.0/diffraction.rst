@@ -21,6 +21,7 @@ Powder Diffraction
 - New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
 - :ref:`PDCalibration <algm-PDCalibration>` returns three more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths, and one for observed resolution.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports D2B files with calibrated data.
+- New algorithm :ref:`algm-SumOverlappingTubes` combines a detector scan for D2B into a single workspace.
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 - After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
 
@@ -28,7 +29,7 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
-- :ref:`algm-GSASIIRefineFitPeaks>` has been re-integrated with the
+- :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` has been re-integrated with the
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
   within Mantid.
 - Usability improvements in the GUI:
@@ -39,11 +40,15 @@ Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
 
-- HB3A reduction interface has been enhanced.  A child window is added to it for users to pre-process scans and save the processed and merged data to NeXus files in order to save time when they start to reduce and visualize the data. A record file is generated along with processed scans to record the calibration information. During data reduction, scans that have been processed in pre-processing will be loaded automatically from corresponding MD files. 
+- HB3A reduction interface has been enhanced.  A child window is added to it for users to pre-process scans and save the processed and merged data to NeXus files in order to save time when they start to reduce and visualize the data. A record file is generated along with processed scans to record the calibration information. During data reduction, scans that have been processed in pre-processing will be loaded automatically from corresponding MD files.
 
 - In HB3A reduction intervace, section for downloading experimental data via http server has been removed from main UI.
 
 - :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` now has option to specify background shell instead of using default background determination.
+
+- :ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` now has options to specify number of iterations to refine UB and also resolution of the search through possible orientations.  Minimum angle between a,b,c vectors reduced for large unit cells.
+
+- :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB. 
 
 
 Imaging
