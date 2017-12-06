@@ -36,6 +36,11 @@ function (find_qscintilla qt_version)
       qt5scintilla2
       libqscintilla2-qt5.dylib
     )
+    if ( MSVC )
+      set ( _qsci_lib_paths
+        ${THIRD_PARTY_DIR}/lib/qt5/lib
+      )
+    endif()
     set ( _qsci_include_paths
       ${Qt5Core_INCLUDE_DIRS}
     )

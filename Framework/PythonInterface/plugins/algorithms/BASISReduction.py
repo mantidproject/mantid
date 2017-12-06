@@ -4,11 +4,12 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as sapi
-from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory,\
-    FileProperty, FileAction
-from mantid.kernel import IntArrayProperty, StringListValidator,\
-    FloatArrayProperty, EnabledWhenProperty,\
-    FloatArrayLengthValidator, Direction, PropertyCriterion
+from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
+                        FileAction, AnalysisDataService)
+from mantid.kernel import (IntArrayProperty, StringListValidator,
+                           FloatArrayProperty, EnabledWhenProperty,
+                           FloatArrayLengthValidator, Direction,
+                           PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
 
@@ -62,7 +63,7 @@ class BASISReduction(PythonAlgorithm):
         self._normalizeToFirst = False
 
         # properties related to monitor
-        self._noMonNorm = None
+        self._MonNorm = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -102,8 +103,8 @@ class BASISReduction(PythonAlgorithm):
 
         self.declareProperty("RunNumbers", "", "Sample run numbers")
         self.declareProperty("DoIndividual", False, "Do each run individually")
-        self.declareProperty("NoMonitorNorm", False,
-                             "Stop monitor normalization")
+        self.declareProperty("MonitorNorm", True,
+                             "Normalization with wavelength-dependent monitor counts")
         self.declareProperty('ExcludeTimeSegment', '',
                              'Exclude a contigous time segment; '+
                              'Examples: "71546:0-60" filter run 71546 from '+
@@ -205,7 +206,7 @@ class BASISReduction(PythonAlgorithm):
         self._qBins = self.getProperty("MomentumTransferBins").value
         self._qBins[0] -= self._qBins[1]/2.0  # leftmost bin boundary
         self._qBins[2] += self._qBins[1]/2.0  # rightmost bin boundary
-        self._noMonNorm = self.getProperty("NoMonitorNorm").value
+        self._MonNorm = self.getProperty("MonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
         maskfile = self.getProperty("MaskFile").value
         self._maskFile = maskfile if maskfile else\
@@ -359,9 +360,10 @@ class BASISReduction(PythonAlgorithm):
                 if self._normalizationType == "by Q slice":
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
             if self.getProperty("ExcludeTimeSegment").value:
-                sapi.DeleteWorkspace('splitted_unfiltered')
                 sapi.DeleteWorkspace('splitter')
-                sapi.DeleteWorkspace('TOFCorrectWS')
+                [sapi.DeleteWorkspace(name) for name in
+                 ('splitted_unfiltered', 'TOFCorrectWS') if
+                 AnalysisDataService.doesExist(name)]
 
     def _getRuns(self, rlist, doIndiv=True):
         """
@@ -426,7 +428,7 @@ class BASISReduction(PythonAlgorithm):
             if str(run)+':' in self.getProperty("ExcludeTimeSegment").value:
                 self._filterEvents(str(run), ws_name)
 
-            if not self._noMonNorm:
+            if self._MonNorm:
                 sapi.LoadNexusMonitors(Filename=run_file,
                                        OutputWorkspace=mon_ws_name)
 
@@ -435,7 +437,7 @@ class BASISReduction(PythonAlgorithm):
                           RHSWorkspace=ws_name,
                           OutputWorkspace=sam_ws)
                 sapi.DeleteWorkspace(ws_name)
-            if mon_ws != mon_ws_name and not self._noMonNorm:
+            if mon_ws != mon_ws_name and self._MonNorm:
                 sapi.Plus(LHSWorkspace=mon_ws,
                           RHSWorkspace=mon_ws_name,
                           OutputWorkspace=mon_ws)
@@ -454,7 +456,7 @@ class BASISReduction(PythonAlgorithm):
                           Target='Wavelength',
                           EMode='Indirect')
 
-        if not self._noMonNorm:
+        if self._MonNorm:
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
@@ -490,7 +492,7 @@ class BASISReduction(PythonAlgorithm):
         self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
         self._calibData(wsName, wsName_mon)
         if not self._debugMode:
-            if not self._noMonNorm:
+            if self._MonNorm:
                 sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
