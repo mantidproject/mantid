@@ -109,7 +109,7 @@ private:
   Mantid::API::ITableWorkspace_sptr
   createCalibrationParamsTable(Mantid::API::MatrixWorkspace_const_sptr inputWS);
 
-  void convertFromDistribution(const std::string &wsName);
+  void convertFromDistribution(Mantid::API::MatrixWorkspace_sptr inputWS);
 
   void alignDetectors(const std::string &inputWSName,
                       const std::string &outputWSName);
