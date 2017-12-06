@@ -9,6 +9,9 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-- The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak will be at twice *BraggAngle*.
+- The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector
+  will be rotated such that the reflected peak will be at twice *BraggAngle*.
+- The ISIS Reflectometry interface now has a checkbox 'CorrectDetectors' which maps to the
+  corresponding property in :ref:`algm-ReflectometryReductionOneAuto`.
 
 :ref:`Release 3.12.0 <v3.12.0>`
