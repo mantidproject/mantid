@@ -350,11 +350,12 @@ void EnggDiffFittingPresenter::processLogMsg() {
   }
 }
 
-void EnggDiffFittingPresenter::processRemoveRun(){
+void EnggDiffFittingPresenter::processRemoveRun() {
   const auto workspaceLabel = m_view->getFittingListWidgetCurrentValue();
 
   if (workspaceLabel) {
-    const auto runBankPair = runAndBankNumberFromListWidgetLabel(*workspaceLabel);
+    const auto runBankPair =
+        runAndBankNumberFromListWidgetLabel(*workspaceLabel);
     const auto bank = runBankPair.first;
     const auto runNumber = runBankPair.second;
     m_model->removeRun(bank, runNumber);
@@ -362,11 +363,11 @@ void EnggDiffFittingPresenter::processRemoveRun(){
     const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
     std::vector<std::string> listWidgetLabels;
     std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
-                 std::back_inserter(listWidgetLabels),
-                 [](const std::pair<int, size_t> &pair) {
-                   return listWidgetLabelFromRunAndBankNumber(pair.first,
-                                                              pair.second);
-                 });
+                   std::back_inserter(listWidgetLabels),
+                   [](const std::pair<int, size_t> &pair) {
+                     return listWidgetLabelFromRunAndBankNumber(pair.first,
+                                                                pair.second);
+                   });
     m_view->updateFittingListWidget(listWidgetLabels);
   } else {
     m_view->userWarning("No run selected",

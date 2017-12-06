@@ -160,7 +160,7 @@ public:
   // virtual void updateFittingListWidget(const std::vector<std::string> &rows)
   // = 0;
   MOCK_METHOD1(updateFittingListWidget,
-	       void(const std::vector<std::string> &rows));
+               void(const std::vector<std::string> &rows));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
