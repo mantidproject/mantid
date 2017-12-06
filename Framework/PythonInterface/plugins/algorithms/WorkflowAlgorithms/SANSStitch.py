@@ -289,8 +289,6 @@ class SANSStitch(DataProcessorAlgorithm):
         merge_mask = self.getProperty('MergeMask').value
         merge_min = self.getProperty('MergeMin').value
         merge_max = self.getProperty('MergeMax').value
-        fit_min = self.getProperty('FitMin').value
-        fit_max = self.getProperty('FitMax').value
 
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
@@ -299,6 +297,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
+
         if self.getProperty('ProcessCan').value:
             cF_can = self.getProperty('HABCountsCan').value
             cR_can = self.getProperty('LABCountsCan').value
@@ -333,10 +332,6 @@ class SANSStitch(DataProcessorAlgorithm):
         nF = self._crop_to_x_range(nF, min_q, max_q)
         nR = self._crop_to_x_range(nR, min_q, max_q)
 
-        if merge_mask and self.getProperty('ProcessCan').value:
-            cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min,
-                                                                          merge_max)
-
         if merge_mask:
             cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
 
@@ -349,6 +344,10 @@ class SANSStitch(DataProcessorAlgorithm):
             cR_can = self._crop_to_x_range(cR_can, min_q, max_q)
             nF_can = self._crop_to_x_range(nF_can, min_q, max_q)
             nR_can = self._crop_to_x_range(nR_can, min_q, max_q)
+
+            if merge_mask:
+                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min,
+                                                                              merge_max)
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,

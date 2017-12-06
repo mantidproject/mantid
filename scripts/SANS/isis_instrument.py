@@ -137,9 +137,9 @@ class DetectorBank(object):
 
     class _MergeRange(object):
         """
-            Stores property about the detector which is used specify the merge ranges after the data has been reduced.
+            Stores property about the detector which is used to specify the merge ranges after the data has been reduced.
         """
-        def __init__(self, q_max=None, q_min=None):
+        def __init__(self, q_min=None, q_max=None):
             """
                 @param q_max: Default to None. Merge region maximum
                 @param q_min: Default to 0.0. Merge region minimum
