@@ -49,6 +49,8 @@ class EISFDiffSphere(IFunction1D):
     undergoing diffusion but confined to a spherical volume
     """
 
+    vecbessel = np.vectorize(lambda z: j1(z) / z)
+
     def category(self):
         return 'QuasiElastic'
 
@@ -74,8 +76,7 @@ class EISFDiffSphere(IFunction1D):
             Function values
         """
         zs = self.getParameterValue('R') * np.asarray(xvals)
-        return self.getParameterValue('A') *\
-            np.array([np.square(3 * j1(z) / z) for z in zs])
+        return self.getParameterValue('A') * np.square(3 * self.vecbessel(zs))
 
     def functionDeriv1D(self, xvals, jacobian):
         r"""Calculate the partial derivatives
