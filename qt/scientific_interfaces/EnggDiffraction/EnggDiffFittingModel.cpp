@@ -76,6 +76,14 @@ EnggDiffFittingModel::getFitResults(const int runNumber,
   return getFromRunMap(runNumber, bank, m_fitParamsMap);
 }
 
+void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank){
+  m_wsFilenameMap[bank - 1].erase(runNumber);
+  m_focusedWorkspaceMap[bank - 1].erase(runNumber);
+  m_fitParamsMap[bank - 1].erase(runNumber);
+  m_fittedPeaksMap[bank - 1].erase(runNumber);
+  m_alignedWorkspaceMap[bank - 1].erase(runNumber);
+}
+
 void EnggDiffFittingModel::setDifcTzero(
     const int runNumber, const size_t bank,
     const std::vector<GSASCalibrationParms> &calibParams) {
