@@ -12,6 +12,7 @@ function (find_qscintilla qt_version)
       qscintilla2
       libqscintilla2
       qscintilla2_qt4
+      libqscintilla2_qt4.dylib
     )
     set ( _qsci_lib_names_debug
       qscintilla2d
@@ -21,9 +22,10 @@ function (find_qscintilla qt_version)
     )
     set ( _qsci_include_paths
       ${QT_INCLUDE_DIR}
-      # required for OSX
-      /usr/local/include
     )
+    if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+      list ( APPEND _qsci_include_paths /usr/local/opt/qscintilla2qt4/include )
+    endif ()
   else()
     if ( NOT Qt5_FOUND)
       message ( FATAL_ERROR "find_package ( Qt5 ...) must be called first" )
@@ -34,7 +36,7 @@ function (find_qscintilla qt_version)
       libqt5scintilla2
       libqscintilla2-qt5
       qt5scintilla2
-      libqscintilla2-qt5.dylib
+      libqscintilla2_qt5.dylib
     )
     if ( MSVC )
       set ( _qsci_lib_paths
@@ -44,6 +46,9 @@ function (find_qscintilla qt_version)
     set ( _qsci_include_paths
       ${Qt5Core_INCLUDE_DIRS}
     )
+    if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+      list ( APPEND _qsci_include_paths /usr/local/opt/qscintilla2/include )
+    endif ()
   endif()
 
   set ( _include_var QSCINTILLA_QT${qt_version}_INCLUDE_DIR )
@@ -67,7 +72,7 @@ function (find_qscintilla qt_version)
     if ( NOT QScintillaQt${qt_version}_FIND_QUIETLY )
       message ( STATUS "Found QScintilla2 linked against Qt${qt_version}: ${${_library_var}}")
     endif()
-    
+
     set ( _target_name Qt${qt_version}::Qscintilla )
     add_library ( ${_target_name} SHARED IMPORTED )
     if ( WIN32 )
