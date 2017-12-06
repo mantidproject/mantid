@@ -99,7 +99,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         state = self._get_state()
         state_serialized = state.property_manager
         logger = Logger("CentreFinder")
+        logger.notice("Starting centre finder routine...")
         progress = self._get_progress()
+        self.scale_1 = 1000
+        self.scale_2 = 1000
 
         x_start = self.getProperty("Position1Start").value
         y_start = self.getProperty("Position2Start").value
@@ -108,6 +111,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         sample_scatter_monitor = self._get_cloned_workspace("SampleScatterMonitorWorkspace")
         sample_transmission = self._get_cloned_workspace("SampleTransmissionWorkspace")
         sample_direct = self._get_cloned_workspace("SampleDirectWorkspace")
+
+        instrument = sample_scatter.getInstrument()
+        if instrument.getName() == 'LARMOR':
+            self.scale_1 = 1.0
 
         can_scatter = self._get_cloned_workspace("CanScatterWorkspace")
         can_scatter_monitor = self._get_cloned_workspace("CanScatterMonitorWorkspace")
@@ -135,7 +142,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             position_2_step = 0.0
         elif find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Up_Down):
             position_1_step = 0.0
-
         centre1 = x_start
         centre2 = y_start
         resLR_old = 0.0
@@ -162,7 +168,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                   sample_quartiles[MaskingQuadrant.Bottom])
             if(j == 0):
-                logger.notice("Itr " + str(j) + ": (" + str(1000 * centre1) + ", " + str(1000 * centre2) + ")  SX="
+                logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR) + "  SY=" + str(residueTB))
             else:
                 # have we stepped across the y-axis that goes through the beam center?
@@ -172,19 +178,23 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB > resTB_old:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Itr " + str(j) + ": (" + str(1000 * centre1) + ", " + str(1000 * centre2) + ")  SX="
+                logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR) + "  SY=" + str(residueTB))
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
                     logger.notice("Converged - check if stuck in local minimum! ")
                     break
+            if j == max_iterations:
+                logger.notice("Out of iterations, new coordinates may not be the best")
 
             resLR_old = residueLR
             resTB_old = residueTB
 
         self.setProperty("Centre1", centre1)
         self.setProperty("Centre2", centre2)
+
+        logger.notice("Centre coordinates updated: [{}, {}]".format(centre1*self.scale_1, centre2*self.scale_2))
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

@@ -1080,7 +1080,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     """
     COORD1STEP = ReductionSingleton().inst.cen_find_step
     COORD2STEP = ReductionSingleton().inst.cen_find_step2
-
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
     coord1_scale_factor = XSF
