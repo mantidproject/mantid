@@ -309,7 +309,6 @@ class EnggFitPeaks(PythonAlgorithm):
         return self._convert_peaks_to_d_using_convert_units(expected_peaks, input_ws)
 
     def _gsas_convert_to_d(self, expected_peaks, run, difc):
-        print("gsas")
         tzero = run.getLogData("tzero").value if run.hasProperty("tzero") else 0
         difa = run.getLogData("difa").value if run.hasProperty("difa") else 0
         return [self._gsas_convert_single_peak_to_d(peak, difa, difc, tzero) for peak in expected_peaks]
@@ -322,8 +321,6 @@ class EnggFitPeaks(PythonAlgorithm):
         return (peak_tof - tzero) / difc
 
     def _convert_peaks_to_d_using_convert_units(self, expected_peaks, input_ws):
-        print("convertunits")
-        print(expected_peaks)
         y_values = [1] * (len(expected_peaks) - 1)
         ws_tof = mantid.CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
         ws_d = mantid.ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
