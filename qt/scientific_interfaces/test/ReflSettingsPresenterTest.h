@@ -54,9 +54,17 @@ public:
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(1)
         .WillOnce(Return(true));
+
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
+    EXPECT_CALL(mockView, getStartOverlap())
+        .Times(Exactly(1))
+        .WillOnce(Return("10"));
+    EXPECT_CALL(mockView, getEndOverlap())
+        .Times(Exactly(1))
+        .WillOnce(Return("12"));
+
     EXPECT_CALL(mockView, getMonitorIntegralMin())
         .Times(Exactly(1))
         .WillOnce(Return("4"));
@@ -81,13 +89,6 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -180,12 +181,13 @@ public:
         .WillOnce(Return("10"));
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
+        .WillOnce(Return("12"));
     EXPECT_CALL(mockView, getSummationType())
         .Times(Exactly(1))
         .WillOnce(Return("SumInLambda"));
     EXPECT_CALL(mockView, getReductionType())
         .Times(Exactly(1))
-        .WillOnce(Return("DivergentBeam"));    .WillOnce(Return("12"));
+        .WillOnce(Return("DivergentBeam"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -201,20 +203,20 @@ public:
     TS_ASSERT_EQUALS(optionsVec[7], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
     TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[10], "FirstTransmissionRun=INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[11], "SecondTransmissionRun=INTER00013464");
-    TS_ASSERT_EQUALS(optionsVec[12], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[13], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[15], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[17], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
-    TS_ASSERT_EQUALS(optionsVec[22], "ReductionType=DivergentBeam");
-    TS_ASSERT_EQUALS(optionsVec[23], "SummationType=SumInLambda");
+    TS_ASSERT_EQUALS(optionsVec[10], "ReductionType=DivergentBeam");
+    TS_ASSERT_EQUALS(optionsVec[11], "SummationType=SumInLambda");
+    TS_ASSERT_EQUALS(optionsVec[12], "FirstTransmissionRun=INTER00013463");
+    TS_ASSERT_EQUALS(optionsVec[13], "SecondTransmissionRun=INTER00013464");
+    TS_ASSERT_EQUALS(optionsVec[14], "NormalizeByIntegratedMonitors=True");
+    TS_ASSERT_EQUALS(optionsVec[15], "MonitorIntegrationWavelengthMin=4");
+    TS_ASSERT_EQUALS(optionsVec[16], "MonitorIntegrationWavelengthMax=10");
+    TS_ASSERT_EQUALS(optionsVec[17], "MonitorBackgroundWavelengthMin=12");
+    TS_ASSERT_EQUALS(optionsVec[18], "MonitorBackgroundWavelengthMax=17");
+    TS_ASSERT_EQUALS(optionsVec[19], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[20], "WavelengthMax=15");
+    TS_ASSERT_EQUALS(optionsVec[21], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[22], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[23], "DetectorCorrectionType=VerticalShift");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));

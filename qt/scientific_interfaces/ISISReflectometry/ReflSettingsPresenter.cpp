@@ -80,14 +80,6 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     auto endOv = m_view->getEndOverlap();
     if (!endOv.empty())
       options.push_back("EndOverlap=" + endOv);
-
-    auto reductionType = m_view->getReductionType();
-    if (!reductionType.empty())
-      options.push_back("ReductionType=" + reductionType);
-
-    auto summationType = m_view->getSummationType();
-    if (!summationType.empty())
-      options.push_back("SummationType=" + summationType);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -204,6 +196,14 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     auto endOv = m_view->getEndOverlap();
     if (!endOv.empty())
       options.push_back("EndOverlap=" + endOv);
+
+    auto reductionType = m_view->getReductionType();
+    if (!reductionType.empty())
+      options.push_back("ReductionType=" + reductionType);
+
+    auto summationType = m_view->getSummationType();
+    if (!summationType.empty())
+      options.push_back("SummationType=" + summationType);
 
     // Add transmission runs
     auto transRuns = this->getTransmissionRuns(true);
