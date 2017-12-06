@@ -52,6 +52,7 @@ public:
     ShutDown,    ///< closing the interface
     LogMsg,      ///< need to send a message to the Mantid log system
     selectRun,   ///< update plot with new run selected from list widget
+    removeRun,   ///< remove a run from the model and the list widget
   };
 
   /**
