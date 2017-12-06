@@ -379,7 +379,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
 
   // Get information about the shape and size of a detector
   std::string type;
-  int otype;
+  detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
   boost::shared_ptr<const Object> obj = group.front()->shape();
@@ -388,9 +388,9 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
         "Found ObjComponent without shape");
   }
   obj->GetObjectGeom(otype, vectors, radius, height);
-  if (otype == 1) {
+  if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
     type = "box";
-  } else if (otype == 4) {
+  } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
     type = "cylinder";
   } else {
     throw std::runtime_error(
@@ -582,7 +582,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
       // inverse the vz axis
       vz = vz * (-1);
     }
-    obj_str << "<segmented-cylinder id=\"stick\">";
+    obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
     obj_str << "x=\"" << Cmass.X();
     obj_str << "\" y=\"" << Cmass.Y();
@@ -592,7 +592,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
             << vz.Z() << "\" /> ";
     obj_str << "<radius val=\"" << radius << "\" />";
     obj_str << "<height val=\"" << hz << "\" />";
-    obj_str << "</segmented-cylinder>";
+    obj_str << "</cylinder>";
   }
 
   if (!obj_str.str().empty()) {

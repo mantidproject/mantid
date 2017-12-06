@@ -2,9 +2,8 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -60,7 +59,7 @@ Object::Object(const std::string &shapeXML)
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  handle = boost::make_shared<CacheGeometryHandler>(this);
+  handle = boost::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -809,7 +808,7 @@ int Object::calcValidType(const Kernel::V3D &Pt,
 * shape.
 */
 double Object::solidAngle(const Kernel::V3D &observer) const {
-  if (this->NumberOfTriangles() > 30000)
+  if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
   return triangleSolidAngle(observer);
 }
@@ -1006,28 +1005,25 @@ double Object::triangleSolidAngle(const V3D &observer) const {
 
   // If the object is a simple shape use the special methods
   double height(0.0), radius(0.0);
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, radius, height);
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID:
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID:
     return CuboidSolidAngle(observer, geometry_vectors);
     break;
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return SphereSolidAngle(observer, geometry_vectors, radius);
     break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return CylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
     break;
-  case GluGeometryHandler::GeometryType::CONE:
+  case detail::ShapeInfo::GeometryShape::CONE:
     return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
     break;
@@ -1036,10 +1032,10 @@ double Object::triangleSolidAngle(const V3D &observer) const {
     {
       return rayTraceSolidAngle(observer);
     } else { // Compute a generic shape that has been triangulated
-      double *vertices = this->getTriangleVertices();
-      int *faces = this->getTriangleFaces();
+      const auto &vertices = this->getTriangleVertices().get();
+      const auto &faces = this->getTriangleFaces().get();
       double sangle(0.0), sneg(0.0);
-      for (int i = 0; i < nTri; i++) {
+      for (size_t i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
         V3D vp1 =
             V3D(vertices[3 * p1], vertices[3 * p1 + 1], vertices[3 * p1 + 2]);
@@ -1088,7 +1084,7 @@ double Object::triangleSolidAngle(const V3D &observer,
     }
   }
 
-  int nTri = this->NumberOfTriangles();
+  auto nTri = this->numberOfTriangles();
   //
   // If triangulation is not available fall back to ray tracing method, unless
   // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
@@ -1096,19 +1092,16 @@ double Object::triangleSolidAngle(const V3D &observer,
   //
   if (nTri == 0) {
     double height = 0.0, radius(0.0);
-    int type;
+    detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
     this->GetObjectGeom(type, vectors, radius, height);
-    GluGeometryHandler::GeometryType gluType =
-        static_cast<GluGeometryHandler::GeometryType>(type);
-
-    switch (gluType) {
-    case GluGeometryHandler::GeometryType::CUBOID:
+    switch (type) {
+    case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
       return CuboidSolidAngle(observer, vectors);
       break;
-    case GluGeometryHandler::GeometryType::SPHERE:
+    case detail::ShapeInfo::GeometryShape::SPHERE:
       return SphereSolidAngle(observer, vectors, radius);
       break;
     default:
@@ -1120,10 +1113,10 @@ double Object::triangleSolidAngle(const V3D &observer,
     //
     return rayTraceSolidAngle(observer); // so is this
   }
-  double *vertices = this->getTriangleVertices();
-  int *faces = this->getTriangleFaces();
+  const auto &vertices = this->getTriangleVertices().get();
+  const auto &faces = this->getTriangleFaces().get();
   double sangle(0.0), sneg(0.0);
-  for (int i = 0; i < nTri; i++) {
+  for (size_t i = 0; i < nTri; i++) {
     int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
     // would be more efficient to pre-multiply the vertices (copy of) by these
     // factors beforehand
@@ -1487,15 +1480,13 @@ double Object::ConeSolidAngle(const V3D &observer,
  * @return The volume.
  */
 double Object::volume() const {
-  int type;
+  detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
   std::vector<Kernel::V3D> vectors;
   this->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
     // point.
@@ -1525,9 +1516,9 @@ double Object::volume() const {
     volume += brt.scalar_prod(brb.cross_prod(blb));
     return volume / 6;
   }
-  case GluGeometryHandler::GeometryType::SPHERE:
+  case detail::ShapeInfo::GeometryShape::SPHERE:
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
-  case GluGeometryHandler::GeometryType::CYLINDER:
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
     return M_PI * radius * radius * height;
   default:
     // Fall back to Monte Carlo method.
@@ -1713,10 +1704,10 @@ void Object::calcBoundingBoxByRule() {
  */
 void Object::calcBoundingBoxByVertices() {
   // Grab vertex information
-  auto vertCount = this->NumberOfPoints();
-  auto vertArray = this->getTriangleVertices();
+  auto vertCount = this->numberOfVertices();
 
-  if (vertCount && vertArray) {
+  if (vertCount > 0) {
+    const auto &vertArray = this->getTriangleVertices().get();
     // Unreasonable extents to be overwritten by loop
     constexpr double huge = 1e10;
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -1724,7 +1715,7 @@ void Object::calcBoundingBoxByVertices() {
     maxX = maxY = maxZ = -huge;
 
     // Loop over all vertices and determine minima and maxima on each axis
-    for (int i = 0; i < vertCount; ++i) {
+    for (size_t i = 0; i < vertCount; ++i) {
       auto vx = vertArray[3 * i + 0];
       auto vy = vertArray[3 * i + 1];
       auto vz = vertArray[3 * i + 2];
@@ -1757,19 +1748,16 @@ void Object::calcBoundingBoxByGeometry() {
   double minX, maxX, minY, maxY, minZ, maxZ;
 
   // Shape geometry data
-  int type(0);
+  detail::ShapeInfo::GeometryShape type;
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
 
-  // Will only work for shapes handled by GluGeometryHandler
+  // Will only work for shapes with ShapeInfo
   handle->GetObjectGeom(type, vectors, radius, height);
-  GluGeometryHandler::GeometryType gluType =
-      static_cast<GluGeometryHandler::GeometryType>(type);
-
   // Type of shape is given as a simple integer
-  switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID: {
+  switch (type) {
+  case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
     auto &lfb = vectors[0]; // Left-Front-Bottom
     auto &lft = vectors[1]; // Left-Front-Top
@@ -1802,7 +1790,7 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::HEXAHEDRON: {
+  case detail::ShapeInfo::GeometryShape::HEXAHEDRON: {
     // These will be replaced by more realistic values in the loop below
     minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
     maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
@@ -1817,8 +1805,7 @@ void Object::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
-  case GluGeometryHandler::GeometryType::CYLINDER:
-  case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
+  case detail::ShapeInfo::GeometryShape::CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     auto &base = vectors[0];
     auto &axis = vectors[1];
@@ -1841,7 +1828,7 @@ void Object::calcBoundingBoxByGeometry() {
     maxZ = std::max(base.Z(), top.Z()) + rz;
   } break;
 
-  case GluGeometryHandler::GeometryType::CONE: {
+  case detail::ShapeInfo::GeometryShape::CONE: {
     auto &tip = vectors[0];            // Tip-point of cone
     auto &axis = vectors[1];           // Normalized axis
     auto base = tip + (axis * height); // Center of base
@@ -2068,7 +2055,7 @@ void Object::draw() const {
   if (handle == nullptr)
     return;
   // Render the Object
-  handle->Render();
+  handle->render();
 }
 
 /**
@@ -2080,7 +2067,7 @@ void Object::initDraw() const {
   if (handle == nullptr)
     return;
   // Render the Object
-  handle->Initialize();
+  handle->initialize();
 }
 /**
 * set vtkGeometryCache writer
@@ -2133,49 +2120,42 @@ void Object::updateGeometryHandler() {
 
 // Initialize Draw Object
 
-/**
-* get number of triangles
-* @return the number of triangles
-*/
-int Object::NumberOfTriangles() const {
+size_t Object::numberOfTriangles() const {
   if (handle == nullptr)
     return 0;
-  return handle->NumberOfTriangles();
+  return handle->numberOfTriangles();
 }
-
-/**
-* get number of points
-*/
-int Object::NumberOfPoints() const {
+size_t Object::numberOfVertices() const {
   if (handle == nullptr)
     return 0;
-  return handle->NumberOfPoints();
+  return handle->numberOfPoints();
 }
-
 /**
 * get vertices
 */
-double *Object::getTriangleVertices() const {
+boost::optional<const std::vector<double> &>
+Object::getTriangleVertices() const {
   if (handle == nullptr)
-    return nullptr;
+    return boost::none;
   return handle->getTriangleVertices();
 }
 
 /**
 * get faces
 */
-int *Object::getTriangleFaces() const {
+boost::optional<const std::vector<int> &> Object::getTriangleFaces() const {
   if (handle == nullptr)
-    return nullptr;
+    return boost::none;
   return handle->getTriangleFaces();
 }
 
 /**
 * get info on standard shapes
 */
-void Object::GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                           double &myradius, double &myheight) const {
-  type = 0;
+void Object::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                           std::vector<Kernel::V3D> &vectors, double &myradius,
+                           double &myheight) const {
+  type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (handle == nullptr)
     return;
   handle->GetObjectGeom(type, vectors, myradius, myheight);
