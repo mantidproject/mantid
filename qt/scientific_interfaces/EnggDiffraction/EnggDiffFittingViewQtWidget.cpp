@@ -1,7 +1,9 @@
 #include "EnggDiffFittingViewQtWidget.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "EnggDiffFittingModel.h"
 #include "EnggDiffFittingPresenter.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
@@ -54,7 +56,9 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
+  m_presenter.reset(new EnggDiffFittingPresenter(
+      this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+      mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
@@ -95,9 +99,6 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 
   connect(m_ui.listWidget_fitting_run_num, SIGNAL(itemSelectionChanged()), this,
           SLOT(listViewFittingRun()));
-
-  connect(m_ui.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setBankDir(int)));
 
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
@@ -158,7 +159,6 @@ void EnggDiffFittingViewQtWidget::readSettings() {
   // user params
   m_ui.lineEdit_pushButton_run_num->setText(
       qs.value("user-params-fitting-focused-file", "").toString());
-  m_ui.comboBox_bank->setCurrentIndex(0);
   m_ui.lineEdit_fitting_peaks->setText(
       qs.value("user-params-fitting-peaks-to-fit", "").toString());
 
@@ -186,7 +186,6 @@ void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.pushButton_fit->setEnabled(enable);
   m_ui.pushButton_clear_peak_list->setEnabled(enable);
   m_ui.pushButton_save_peak_list->setEnabled(enable);
-  m_ui.comboBox_bank->setEnabled(enable);
   m_ui.groupBox_fititng_preview->setEnabled(enable);
 }
 
@@ -309,12 +308,13 @@ void EnggDiffFittingViewQtWidget::resetCanvas() {
 
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-    bool plotSinglePeaks) {
+    bool plotSinglePeaks, const std::string &xAxisLabel) {
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
     resetCanvas();
   }
+  m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, xAxisLabel.c_str());
 
   // when only plotting focused workspace
   if (focused) {
@@ -491,14 +491,6 @@ void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const {
   m_ui.pushButton_fit_all->setEnabled(enable);
 }
 
-void EnggDiffFittingViewQtWidget::clearFittingComboBox() const {
-  m_ui.comboBox_bank->clear();
-}
-
-void EnggDiffFittingViewQtWidget::enableFittingComboBox(bool enable) const {
-  m_ui.comboBox_bank->setEnabled(enable);
-}
-
 void EnggDiffFittingViewQtWidget::clearFittingListWidget() const {
   m_ui.listWidget_fitting_run_num->clear();
 }
@@ -516,13 +508,13 @@ EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
   return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
 }
 
+bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
+  return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
+}
+
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
     int idx) const {
   m_ui.listWidget_fitting_run_num->setCurrentRow(idx);
-}
-
-int EnggDiffFittingViewQtWidget::getFittingComboIdx(std::string bank) const {
-  return m_ui.comboBox_bank->findText(QString::fromStdString(bank));
 }
 
 void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
@@ -563,7 +555,7 @@ void EnggDiffFittingViewQtWidget::showToolTipHelp() {
   QCoreApplication::sendEvent(m_ui.pushButton_tooltip, toolTipEvent);
 }
 
-std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
+std::string EnggDiffFittingViewQtWidget::getExpectedPeaksInput() const {
 
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
 }
@@ -571,17 +563,6 @@ std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
 void EnggDiffFittingViewQtWidget::setPeakList(
     const std::string &peakList) const {
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
-}
-
-void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
-
-void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
-  QComboBox *bankName = m_ui.comboBox_bank;
-  bankName->setCurrentIndex(idx);
-}
-
-void EnggDiffFittingViewQtWidget::addBankItem(std::string bankID) {
-  m_ui.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 
 void EnggDiffFittingViewQtWidget::addRunNoItem(std::string runNo) {
