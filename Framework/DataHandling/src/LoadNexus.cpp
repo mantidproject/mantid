@@ -263,12 +263,16 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   const size_t count = loader->propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *prop = loaderProps[i];
-    if (dynamic_cast<IWorkspaceProperty *>(prop) &&
-        prop->direction() == Direction::Output) {
+    const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    if (wsProp && prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            name, loader->getPropertyValue(name), Direction::Output));
+        if (wsProp->isOptional()) {
+          continue;
+        } else {
+          declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+              name, loader->getPropertyValue(name), Direction::Output));
+        }
       }
       Workspace_sptr wkspace = loader->getProperty(name);
       setProperty(name, wkspace);
