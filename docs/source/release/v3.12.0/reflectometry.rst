@@ -11,6 +11,7 @@ Reflectometry Changes
 
 - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector
   will be rotated such that the reflected peak will be at twice *BraggAngle*.
+- The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - Two new boxes have been added to the settings tab of the ISIS Reflectometry interface,
   'ReductionType' and 'SummationType' which are passed to the corresponding parameters of
   :ref:`algm-ReflectometryReductionOneAuto`.
