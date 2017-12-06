@@ -30,9 +30,10 @@ import numpy as np
 try:
     from scipy.special import spherical_jn
 
-    def j1(z): return spherical_jn(range(2), z)
-    def j1d(z): return spherical_jn(range(2), z, derivative=True)
+    def j1(z): return spherical_jn(1, z)
+    def j1d(z): return spherical_jn(1, z, derivative=True)
 except ImportError:
+    # spherical_jn removed from scipy >= 1.0.0
     from scipy.special import sph_jn
 
     def j1(z): return sph_jn(1, z)[0][1]
@@ -47,18 +48,43 @@ class EISFDiffSphere(IFunction1D):
     """
 
     def category(self):
-        return "QuasiElastic"
+        return 'QuasiElastic'
 
     def init(self):
         # Active fitting parameters
-        self.declareParameter("R", 1.0, 'Sphere radius, in Angstroms')
+        self.declareParameter('R', 1.0, 'Sphere radius, in Angstroms')
 
     def function1D(self, xvals):
-        zs = self.getParameterValue("R") * np.asarray(xvals)
+        r"""Calculate the intensities
+
+        Parameters
+        ----------
+        xvals : sequence of floats
+          The domain where to evaluate the function
+        jacobian: 2D array
+          partial derivative of the function with respect to the fitting
+          parameters evaluated at the domain.
+
+        Returns
+        -------
+        numpy.ndarray
+            Function values
+        """
+        zs = self.getParameterValue('R') * np.asarray(xvals)
         return np.array([np.square(3 * j1(z) / z) for z in zs])
 
     def functionDeriv1D(self, xvals, jacobian):
-        radius = self.getParameterValue("R")
+        r"""Calculate the partial derivatives
+
+        Parameters
+        ----------
+        xvals : sequence of floats
+          The domain where to evaluate the function
+        jacobian: 2D array
+          partial derivatives of the function with respect to the fitting
+          parameters, evaluated at the domain.
+        """
+        radius = self.getParameterValue('R')
         i = 0
         for x in xvals:
             z = radius * x
