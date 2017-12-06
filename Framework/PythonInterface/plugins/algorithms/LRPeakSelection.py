@@ -141,15 +141,15 @@ class PeakFinderDerivation(object):
 
         px_offset = 0
         while int(_deri_min_pixel_value - px_offset) < len(_counts) \
-            and int(_deri_min_pixel_value - px_offset) > 0 \
-            and abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
+                and int(_deri_min_pixel_value - px_offset) > 0 \
+                and abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_min_final_value = _pixel[int(_deri_min_pixel_value - px_offset)]
 
         px_offset = 0
         while int(round(_deri_max_pixel_value + px_offset)) < len(_counts)-1 \
-            and int(round(_deri_max_pixel_value + px_offset)) >= 0 \
-            and abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
+                and int(round(_deri_max_pixel_value + px_offset)) >= 0 \
+                and abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_max_final_value = _pixel[int(round(_deri_max_pixel_value + px_offset))]
 
