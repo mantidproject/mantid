@@ -108,7 +108,6 @@ class TotalScatteringTest(stresstesting.MantidStressTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 51
-        mantid.SaveNexus(Filename='~\\total_scattering_output.nxs', InputWorkspace=self.pdf_output)
         expected_peak_values = [0.0187231,
                                 0.0583586,
                                 0.2241280,
