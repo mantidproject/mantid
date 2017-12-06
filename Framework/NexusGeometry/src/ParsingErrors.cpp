@@ -4,8 +4,8 @@
 
 #include "MantidNexusGeometry/ParsingErrors.h"
 
-namespace Mantid{
-namespace NexusGeometry{
+namespace Mantid {
+namespace NexusGeometry {
 
 // TODO, the following needs work.
 /**
@@ -14,18 +14,17 @@ namespace NexusGeometry{
  * @param pError
  * @return suggested error message
  */
-std::string ParseErrors::ParsingErrorMessages(ParsingErrors pError){
-    switch (pError){
-        case OPENING_FILE_ERROR:
-            return "File failed to open or does not exist";
-        case OPENING_ROOT_GROUP_ERROR:
-            return "Failed to open file root \"/\"";
-        case NO_ERROR:
-          return "Parsing Completed";
-        default:
-          return "Parsing Completed";
-    }
+std::string ParseErrors::ParsingErrorMessages(ParsingErrors pError) {
+  switch (pError) {
+  case OPENING_FILE_ERROR:
+    return "File failed to open or does not exist";
+  case OPENING_ROOT_GROUP_ERROR:
+    return "Failed to open file root \"/\"";
+  case NO_ERROR:
+    return "Parsing Completed";
+  default:
+    return "Parsing Completed";
+  }
 }
-
 }
 }

@@ -22,7 +22,9 @@ DECLARE_ALGORITHM(LoadNexusGeometry)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadNexusGeometry::name() const { return "LoadNexusGeometry"; }
+const std::string LoadNexusGeometry::name() const {
+  return "LoadNexusGeometry";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadNexusGeometry::version() const { return 1; }
@@ -41,34 +43,38 @@ const std::string LoadNexusGeometry::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadNexusGeometry::init() {
-  declareProperty("Filename" "", "Name of OFF Nexus Geometry File");
+  declareProperty("Filename"
+                  "",
+                  "Name of OFF Nexus Geometry File");
   declareProperty("InstrumentName", "", "Name of Instrument");
 
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                             Direction::Output),
-      "An output workspace.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadNexusGeometry::exec() {
-    std::string fileName = getProperty("Filename");
-    std::string instName = getProperty("InstrumentName");
-    auto workspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  std::string fileName = getProperty("Filename");
+  std::string instName = getProperty("InstrumentName");
+  auto workspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
 
-    NexusGeometry::iAbstractBuilder_sptr iAbsBuilder_sptr = std::shared_ptr<NexusGeometry::iAbstractBuilder>(new NexusGeometry::iAbstractBuilder(instName));
+  NexusGeometry::iAbstractBuilder_sptr iAbsBuilder_sptr =
+      std::shared_ptr<NexusGeometry::iAbstractBuilder>(
+          new NexusGeometry::iAbstractBuilder(instName));
 
-    NexusGeometry::NexusGeometryParser OFFparser = NexusGeometry::NexusGeometryParser(fileName, iAbsBuilder_sptr);
-    //Parse nexus geomtry
-    NexusGeometry::ParsingErrors exitStatus = OFFparser.parseNexusGeometry();
-    std::cout << exitStatus << std::endl;
-    // Add instrument to the workspace
-    iAbsBuilder_sptr->_unAbstractInstrument()->parseTreeAndCacheBeamline();
-    workspace->setInstrument(iAbsBuilder_sptr->_unAbstractInstrument());
-    workspace->populateInstrumentParameters();
-    setProperty("OutputWorkspace", workspace);
+  NexusGeometry::NexusGeometryParser OFFparser =
+      NexusGeometry::NexusGeometryParser(fileName, iAbsBuilder_sptr);
+  // Parse nexus geomtry
+  NexusGeometry::ParsingErrors exitStatus = OFFparser.parseNexusGeometry();
+  std::cout << exitStatus << std::endl;
+  // Add instrument to the workspace
+  iAbsBuilder_sptr->_unAbstractInstrument()->parseTreeAndCacheBeamline();
+  workspace->setInstrument(iAbsBuilder_sptr->_unAbstractInstrument());
+  workspace->populateInstrumentParameters();
+  setProperty("OutputWorkspace", workspace);
 }
 
 } // namespace DataHandling

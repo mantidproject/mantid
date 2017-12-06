@@ -365,8 +365,8 @@ typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>
-    &ConfigValChangeNotification_ptr;
+typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged> &
+    ConfigValChangeNotification_ptr;
 
 } // namespace Kernel
 } // namespace Mantid

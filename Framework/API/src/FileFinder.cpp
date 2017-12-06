@@ -587,9 +587,8 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",",
-      Mantid::Kernel::StringTokenizer::TOK_TRIM |
-          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -607,9 +606,8 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-",
-        Mantid::Kernel::StringTokenizer::TOK_TRIM |
-            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
