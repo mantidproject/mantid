@@ -98,6 +98,8 @@ public:
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD0(getSummationType, std::string());
+  MOCK_CONST_METHOD0(getReductionType, std::string());
   MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));

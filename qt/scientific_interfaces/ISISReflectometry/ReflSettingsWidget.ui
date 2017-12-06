@@ -228,20 +228,14 @@
         </item>
         <item row="0" column="3">
          <widget class="QComboBox" name="summationTypeComboBox">
-          <property name="currentText">
-           <string>SumInLambda</string>
-          </property>
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
           <item>
            <property name="text">
-            <string>SumInLambda</string>
+            <string>SumInQ</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>SumInQ</string>
+            <string>SumInLambda</string>
            </property>
           </item>
          </widget>

@@ -323,6 +323,14 @@ std::string QtReflSettingsView::getProcessingInstructions() const {
   return m_ui.procInstEdit->text().toStdString();
 }
 
+std::string QtReflSettingsView::getReductionType() const {
+  return m_ui.reductionTypeComboBox->currentText().toStdString();
+}
+
+std::string QtReflSettingsView::getSummationType() const {
+  return m_ui.summationTypeComboBox->currentText().toStdString();
+}
+
 /** Return selected correction type
 * @return :: selected correction type
 */
