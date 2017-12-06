@@ -87,6 +87,7 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
+
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -179,12 +180,17 @@ public:
         .WillOnce(Return("10"));
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
-        .WillOnce(Return("12"));
+    EXPECT_CALL(mockView, getSummationType())
+        .Times(Exactly(1))
+        .WillOnce(Return("SumInLambda"));
+    EXPECT_CALL(mockView, getReductionType())
+        .Times(Exactly(1))
+        .WillOnce(Return("DivergentBeam"));    .WillOnce(Return("12"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
+    TS_ASSERT_EQUALS(optionsVec.size(), 24);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
@@ -207,6 +213,8 @@ public:
     TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
     TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(optionsVec[22], "ReductionType=DivergentBeam");
+    TS_ASSERT_EQUALS(optionsVec[23], "SummationType=SumInLambda");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
