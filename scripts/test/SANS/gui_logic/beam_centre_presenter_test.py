@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-import mantid
 import unittest
 import sys
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
@@ -19,24 +18,26 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
         self.parent_presenter._file_information = mock.MagicMock()
         self.parent_presenter._file_information.get_instrument = mock.MagicMock(return_value = SANSInstrument.LARMOR)
-        self.presenter = BeamCentrePresenter(self.parent_presenter)
         self.view = create_mock_beam_centre_tab()
+        self.WorkHandler = mock.MagicMock()
+        self.BeamCentreModel = mock.MagicMock()
+        self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel)
 
-    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.WorkHandler')
-    def test_that_on_run_clicked_calls_find_beam_centre(self, work_handler_mock):
-        self.presenter = BeamCentrePresenter(self.parent_presenter)
+    def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.set_view(self.view)
         self.presenter.on_run_clicked()
 
-        self.assertTrue(work_handler_mock.return_value.process.call_count == 1)
-        self.assertTrue(work_handler_mock.return_value.process.call_args[0][1] == find_beam_centre)
-        self.assertTrue(work_handler_mock.return_value.process.call_args[0][3] == self.presenter._beam_centre_model)
+        self.assertEqual(self.presenter._work_handler.process.call_count, 1)
+        self.assertTrue(self.presenter._work_handler.process.call_args[0][1] == find_beam_centre)
+        self.assertTrue(self.presenter._work_handler.process.call_args[0][3] == self.presenter._beam_centre_model)
 
     def test_that_on_run_clicked_updates_model_from_view(self):
         self.view.left_right = False
         self.view.lab_pos_1 = 100
         self.view.lab_pos_2 = -100
         self.presenter.set_view(self.view)
+        self.presenter._beam_centre_model.scale_1 = 1000
+        self.presenter._beam_centre_model.scale_2 = 1000
 
         self.presenter.on_run_clicked()
 
@@ -52,18 +53,15 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_update_rows()
         self.assertTrue(self.view.set_options.call_count == 2)
 
-    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
-    def test_that_set_scaling_is_called_on_update_rows_when_file_information_exists(self, beam_centre_model_mock):
-        self.presenter = BeamCentrePresenter(self.parent_presenter)
+    def test_that_set_scaling_is_called_on_update_rows_when_file_information_exists(self):
         self.presenter.set_view(self.view)
 
         self.presenter.on_update_rows()
         self.presenter._beam_centre_model.set_scaling.assert_called_once_with(SANSInstrument.LARMOR)
 
-    @mock.patch('sans.gui_logic.presenter.beam_centre_presenter.BeamCentreModel')
-    def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self, beam_centre_model_mock):
-        self.parent_presenter._file_information = None#mock.MagicMock(return_value = None)
-        self.presenter = BeamCentrePresenter(self.parent_presenter)
+    def test_that_set_scaling_is_not_called_when_file_information_does_not_exist(self):
+        self.parent_presenter._file_information = None
+        self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel)
         self.presenter.set_view(self.view)
 
         self.presenter.on_update_rows()
@@ -72,9 +70,10 @@ class BeamCentrePresenterTest(unittest.TestCase):
     def test_that_on_processing_finished_updates_view_and_model(self):
         self.presenter.set_view(self.view)
         result = {'pos1': 0.1, 'pos2': -0.1}
+        self.presenter._beam_centre_model.scale_1 = 1000
+        self.presenter._beam_centre_model.scale_2 = 1000
 
         self.presenter.on_processing_finished_centre_finder(result)
-
         self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
         self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
         self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])

@@ -36,6 +36,8 @@ from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class RunTabPresenter(object):
@@ -98,7 +100,7 @@ class RunTabPresenter(object):
         self._masking_table_presenter = MaskingTablePresenter(self)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self)
+        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
