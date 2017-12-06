@@ -123,6 +123,11 @@ void LoadNexus::runLoadMuonNexus() {
   // Set the workspace property
   std::string outputWorkspace = "OutputWorkspace";
   loadMuonNexus->setPropertyValue(outputWorkspace, m_workspace);
+  loadMuonNexus->setPropertyValue("DeadTimeTable",
+                                  m_workspace + "_DeadTimeTable");
+  loadMuonNexus->setPropertyValue("DetectorGroupingTable",
+                                  m_workspace + "DetectorGroupingTable");
+
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
   std::vector<int> specList = getProperty("SpectrumList");
@@ -263,16 +268,12 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   const size_t count = loader->propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *prop = loaderProps[i];
-    const auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
-    if (wsProp && prop->direction() == Direction::Output) {
+    if (dynamic_cast<IWorkspaceProperty *>(prop) &&
+        prop->direction() == Direction::Output) {
       const std::string &name = prop->name();
       if (!this->existsProperty(name)) {
-        if (wsProp->isOptional()) {
-          continue;
-        } else {
-          declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-              name, loader->getPropertyValue(name), Direction::Output));
-        }
+        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            name, loader->getPropertyValue(name), Direction::Output));
       }
       Workspace_sptr wkspace = loader->getProperty(name);
       setProperty(name, wkspace);
