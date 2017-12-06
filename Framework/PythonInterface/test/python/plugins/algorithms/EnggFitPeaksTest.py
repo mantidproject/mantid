@@ -256,7 +256,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             EnggFitPeaks(InputWorkspace=input_ws, WorkspaceIndex=0, ExpectedPeaks=[35000.0, 40000.0],
                          FittedPeaks="peaks")
         except RuntimeError as e:
-            error_msg = e.message.split("\n")[0]
+            error_msg = e.args[0].split("\n")[0]
 
         self.assertEquals(error_msg, "Expected peak centres lie outside the limits of the workspace x axis")
 
