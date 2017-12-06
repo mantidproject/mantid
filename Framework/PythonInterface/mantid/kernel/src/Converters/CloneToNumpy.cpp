@@ -36,7 +36,8 @@ PyObject *clone1D(const std::vector<ElementType> &cvector) {
 }
 
 /**
- * Specialisation for vector<DateAndTime> that stores the underlying data differently
+ * Specialisation for vector<DateAndTime> that stores the underlying data
+ * differently
  * Returns a new numpy array with the a copy of the data vector of np.datetime64
  */
 template <>
