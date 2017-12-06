@@ -62,6 +62,28 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
                                              "MOCK15-suf.nxs")
         self.assertEquals(output_paths["nxs_filename"], expected_nxs_filename)
 
+    def test_set_valid_beam_parameters(self):
+        # Setup basic instrument mock
+        cal_dir = self._create_temp_dir()
+        out_dir = self._create_temp_dir()
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir)
+
+        # Test valid parameters are retained
+        mock_inst.set_beam_parameters(height=1.234, width=2)
+        self.assertEqual(mock_inst._beam_parameters['height'], 1.234)
+        self.assertEqual(mock_inst._beam_parameters['width'], 2)
+
+    def test_set_invalid_beam_parameters(self):
+        # Setup basic instrument mock
+        cal_dir = self._create_temp_dir()
+        out_dir = self._create_temp_dir()
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir)
+
+        # Test combination of positive / negative raise exceptions
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=1.234, width=-2)
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=2)
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=-2)
+
 
 class _MockInst(AbstractInst):
 
