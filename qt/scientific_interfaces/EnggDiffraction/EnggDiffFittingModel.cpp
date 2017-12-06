@@ -84,7 +84,7 @@ EnggDiffFittingModel::getFitResults(const int runNumber,
 
 namespace {
 
-template<size_t S, typename T>
+template <size_t S, typename T>
 void removeFromRunMapAndADS(const int runNumber, const size_t bank,
                             RunMap<S, T> &map,
                             Mantid::API::AnalysisDataServiceImpl &ADS) {
@@ -99,7 +99,7 @@ void removeFromRunMapAndADS(const int runNumber, const size_t bank,
 
 } // anonymous namespace
 
-void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank){
+void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank) {
   m_wsFilenameMap[bank - 1].erase(runNumber);
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();

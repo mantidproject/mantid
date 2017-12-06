@@ -575,7 +575,7 @@ public:
         .WillOnce(Return(std::vector<std::pair<int, size_t>>(
             {std::make_pair(123, 2), std::make_pair(456, 1)})));
     EXPECT_CALL(mockView, updateFittingListWidget(
-                            std::vector<std::string>({"123_2", "456_1"})));
+                              std::vector<std::string>({"123_2", "456_1"})));
 
     pres.notify(IEnggDiffFittingPresenter::removeRun);
 

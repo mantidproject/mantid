@@ -157,7 +157,8 @@ public:
   /**
   * Update the fitting list widget with a list of workspace run and bank numbers
   */
-  virtual void updateFittingListWidget(const std::vector<std::string> &rows) = 0;
+  virtual void
+  updateFittingListWidget(const std::vector<std::string> &rows) = 0;
 
   /**
   * @return The text on the current selected row of the list widget
