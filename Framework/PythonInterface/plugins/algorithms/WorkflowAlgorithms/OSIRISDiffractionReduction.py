@@ -442,18 +442,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         except RuntimeError as exc:
             issues['Sample'] = str(exc)
 
-        num_samples = len(self._sample_runs)
-        num_vanadium = len(self._vanadium_runs)
-
-        if num_samples > num_vanadium:
-            run_num_mismatch = 'You must input at least as many vanadium files as sample files'
-            issues['Sample'] = run_num_mismatch
-            issues['Vanadium'] = run_num_mismatch
-        if self._container_files:
-            num_containers = len(self._container_files)
-            if num_samples != num_containers:
-                issues['Container'] = 'You must input the same number of sample and container runs'
-
         return issues
 
     # pylint: disable=too-many-branches
