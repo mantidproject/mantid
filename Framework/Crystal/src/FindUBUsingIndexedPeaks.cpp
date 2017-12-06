@@ -19,10 +19,10 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   this->declareProperty("Tolerance", 0.1, mustBePositive,
                         "Indexing Tolerance (0.1)");
@@ -51,7 +51,7 @@ void FindUBUsingIndexedPeaks::exec() {
     if (IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
                                              // just check for (0,0,0)
     {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+      q_vectors.push_back(peaks[i].getQLabFrame());
       hkl_vectors.emplace_back(std::round(hkl[0]), std::round(hkl[1]),
                                std::round(hkl[2]));
       indexed_count++;
@@ -77,7 +77,7 @@ void FindUBUsingIndexedPeaks::exec() {
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
     for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+      q_vectors.push_back(peaks[i].getQLabFrame());
     }
     double tolerance = this->getProperty("Tolerance");
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);

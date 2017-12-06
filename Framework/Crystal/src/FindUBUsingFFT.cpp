@@ -26,11 +26,11 @@ const std::string FindUBUsingFFT::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   // use negative values, force user to input all parameters
@@ -64,7 +64,7 @@ void FindUBUsingFFT::exec() {
 
   std::vector<V3D> q_vectors;
   for (size_t i = 0; i < n_peaks; i++) {
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+    q_vectors.push_back(peaks[i].getQLabFrame());
   }
 
   Matrix<double> UB(3, 3, false);

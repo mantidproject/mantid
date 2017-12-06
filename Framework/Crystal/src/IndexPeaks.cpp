@@ -18,23 +18,23 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("Tolerance", 0.15, mustBePositive,
+                                              Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int> >("NumIndexed", 0, Direction::Output),
       "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(make_unique<PropertyWithValue<double> >(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
@@ -93,7 +93,7 @@ void IndexPeaks::exec() {
     int run = run_numbers[run_index];
     for (size_t i = 0; i < n_peaks; i++) {
       if (peaks[i].getRunNumber() == run)
-        q_vectors.push_back(peaks[i].getQSampleFrame());
+        q_vectors.push_back(peaks[i].getQLabFrame());
     }
 
     Matrix<double> tempUB(UB);
@@ -120,8 +120,9 @@ void IndexPeaks::exec() {
     {                              // which is usually sufficient
       try {
         IndexingUtils::Optimize_UB(tempUB, miller_indices, q_vectors);
-      } catch (...) // If there is any problem, such as too few
-      {             // independent peaks, just use the original UB
+      }
+      catch (...) // If there is any problem, such as too few
+      {           // independent peaks, just use the original UB
         tempUB = UB;
         done = true;
       }
@@ -149,7 +150,7 @@ void IndexPeaks::exec() {
     }
 
     total_indexed += num_indexed;
-    total_error = average_error * num_indexed;
+    total_error += average_error * num_indexed;
 
     // tell the user how many were indexed in each run
     if (run_numbers.size() > 1) {
