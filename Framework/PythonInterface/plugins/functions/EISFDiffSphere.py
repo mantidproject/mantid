@@ -55,7 +55,7 @@ class EISFDiffSphere(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter('A', 1.0, 'Amplitude')
-        self.declareParameter('R', 1.0, 'Sphere radius, in Angstroms')
+        self.declareParameter('R', 1.0, 'Sphere radius, inverse units of Q.')
 
     def function1D(self, xvals):
         r"""Calculate the intensities
