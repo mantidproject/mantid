@@ -6,6 +6,7 @@
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
+#include "MantidTypes/Core/DateAndTime.h"
 #include <numpy/arrayobject.h>
 
 #include <boost/python/type_id.hpp>
@@ -22,6 +23,7 @@ namespace Converters {
 DEFINE_TYPE_MAPPING(int, NPY_INT)
 DEFINE_TYPE_MAPPING(long, NPY_LONG)
 DEFINE_TYPE_MAPPING(long long, NPY_LONGLONG)
+DEFINE_TYPE_MAPPING(Mantid::Types::Core::DateAndTime, NPY_INT64)
 DEFINE_TYPE_MAPPING(unsigned int, NPY_UINT)
 DEFINE_TYPE_MAPPING(unsigned long, NPY_ULONG)
 DEFINE_TYPE_MAPPING(unsigned long long, NPY_ULONGLONG)
