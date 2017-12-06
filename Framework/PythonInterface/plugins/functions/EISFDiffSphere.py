@@ -75,7 +75,7 @@ class EISFDiffSphere(IFunction1D):
         """
         zs = self.getParameterValue('R') * np.asarray(xvals)
         return self.getParameterValue('A') *\
-               np.array([np.square(3 * j1(z) / z) for z in zs])
+            np.array([np.square(3 * j1(z) / z) for z in zs])
 
     def functionDeriv1D(self, xvals, jacobian):
         r"""Calculate the partial derivatives
