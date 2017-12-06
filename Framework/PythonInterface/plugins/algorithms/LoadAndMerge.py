@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os.path
 from mantid.kernel import Direction, StringContainsValidator, PropertyManagerProperty
 from mantid.api import AlgorithmFactory, AlgorithmManager, MultipleFileProperty, \
-    WorkspaceProperty, PythonAlgorithm, FileLoaderRegistry
+    WorkspaceProperty, PythonAlgorithm, FileLoaderRegistry, Progress
 from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, mtd
 
 
@@ -13,6 +13,7 @@ class LoadAndMerge(PythonAlgorithm):
     _version = None
     _loader_options = None
     _prefix = ''
+    _progress = None
 
     def name(self):
         return "LoadMergeRuns"
@@ -55,6 +56,7 @@ class LoadAndMerge(PythonAlgorithm):
             @param run : the full file path
             @param runnumber : the run number
         """
+        self._progress.report('Loading '+runnumber)
         alg = self._create_fresh_loader()
         alg.setPropertyValue('Filename', run)
         alg.setPropertyValue('OutputWorkspace', runnumber)
@@ -74,7 +76,9 @@ class LoadAndMerge(PythonAlgorithm):
         # having an additional optional output workspace, but without requesting the optional output,
         # it will still be produced with some hidden temporary name (__TMPx...).
         # This is related to replaying the history, or might as well be a bug in Algorithm base class.
-        alg = AlgorithmManager.create(self._loader, self._version)
+        # alg = AlgorithmManager.create(self._loader, self._version)
+        alg = self.createChildAlgorithm(self._loader, self._version)
+        alg.setAlwaysStoreInADS(True)
         alg.initialize()
         for key in self._loader_options.keys():
             alg.setPropertyValue(key, self._loader_options.getPropertyValue(key))
@@ -82,6 +86,9 @@ class LoadAndMerge(PythonAlgorithm):
 
     def PyExec(self):
         runs = self.getProperty('Filename').value
+        runs_as_str = self.getPropertyValue('Filename')
+        number_runs = runs_as_str.count(',') + runs_as_str.count('+') + 1
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=number_runs)
         self._loader = self.getPropertyValue('LoaderName')
         self._version = self.getProperty('LoaderVersion').value
         self._loader_options = self.getProperty('LoaderOptions').value
