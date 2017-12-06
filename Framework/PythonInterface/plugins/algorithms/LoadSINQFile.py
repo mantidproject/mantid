@@ -108,5 +108,6 @@ class LoadSINQFile(PythonAlgorithm):
 
         return int(matches.group(1))
 
+
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)

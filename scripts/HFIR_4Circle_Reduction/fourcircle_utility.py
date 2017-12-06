@@ -1,6 +1,15 @@
 #pylint: disable=W0633,R0913,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+import csv
 import os
-import urllib2
+try:
+    # python3
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import URLError
 import socket
 import numpy
 import math
@@ -22,12 +31,12 @@ def check_url(url, read_lines=False):
     lines = None
     try:
         # Access URL
-        url_stream = urllib2.urlopen(url, timeout=2)
+        url_stream = urlopen(url, timeout=2)
 
         # Read lines
         if read_lines is True:
             lines = url_stream.readlines()
-    except urllib2.URLError as url_error:
+    except URLError as url_error:
         url_stream = url_error
     except socket.timeout:
         return False, 'Time out. Try again!'
@@ -95,7 +104,7 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     if rectangular is False:
         raise RuntimeError('Non-rectangular detector is not supported yet.')
 
-    print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
+    print('[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner)))
 
     # part 1
     xml_str = '<?xml version="1.0"?>\n'
@@ -127,13 +136,13 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
 
     det_sub_xml = ''
     if False:
-        for col_number in xrange(start_col, end_col+1):
+        for col_number in range(start_col, end_col+1):
             start_det_id = 1 + col_number * NUM_DET_ROW + start_row
             end_det_id = 1 + col_number * NUM_DET_ROW + end_row
             det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
     else:
-        # print '[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row)
-        # print '[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col)
+        # print('[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row))
+        # print('[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col))
         for row_number in range(start_row, end_row+1):
             start_det_id = 1 + row_number * num_det_row + start_col
             end_det_id = 1 + row_number * num_det_row + end_col
@@ -325,7 +334,7 @@ def parse_int_array(int_array_str):
             # Integer range
             two_terms = level0_term.split("-")
             temp_list = []
-            for i in xrange(2):
+            for i in range(2):
                 value_str = two_terms[i]
                 try:
                     int_value = int(value_str)
@@ -550,8 +559,11 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     # check
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+    assert isinstance(pt_list, list), 'Pt list {0} must be a list but not a {1}' \
+                                      ''.format(pt_list, type(pt_list))
+
+    if len(pt_list) == 0:
+        raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
                                                      pt_list[0], pt_list[-1])
@@ -570,10 +582,14 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     :return:
     """
     # check
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+    assert isinstance(instrument_name, str), 'Instrument name {0} shall be a string but not a {1}' \
+                                             ''.format(instrument_name, type(instrument_name))
+    assert isinstance(exp_no, int) and isinstance(scan_no, int),\
+        'Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer.' \
+        ''.format(exp_no, type(exp_no), scan_no, type(scan_no))
+    assert isinstance(pt_list, list), 'Pt list {0} shall be a list but not a {1}'.format(pt_list, type(pt_list))
+    if len(pt_list) == 0:
+        raise RuntimeWarning('Pt list cannot be empty.')
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
                                                          pt_list[0], pt_list[-1])
@@ -664,7 +680,7 @@ def load_hb3a_md_data(file_name):
     intensities = numpy.zeros((len(raw_lines), ))
 
     # parse
-    for i in xrange(len(raw_lines)):
+    for i in range(len(raw_lines)):
         line = raw_lines[i].strip()
 
         # skip empty line
@@ -673,7 +689,7 @@ def load_hb3a_md_data(file_name):
 
         # set value
         terms = line.split(',')
-        for j in xrange(3):
+        for j in range(3):
             xyz_points[i][j] = float(terms[j])
         intensities[i] = float(terms[3])
     # END-FOR
@@ -771,3 +787,141 @@ def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):
         return False
 
     return True
+
+
+def write_pre_process_record(file_name, record_dict):
+    """write the pre-processed record file
+    :param file_name:
+    :param record_dict: dictionary related to record
+    :return:
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    assert isinstance(record_dict, dict), 'One entry of record {0} must be given in a dictionary but not a {1}.' \
+                                          ''.format(record_dict, type(record_dict))
+
+    # write record
+    is_new_file = not os.path.exists(file_name)
+
+    with open(file_name, 'w') as csv_file:
+        field_names = record_dict.keys()
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+
+        # write header
+        if is_new_file:
+            writer.writeheader()
+
+        # write row
+        writer.writerow(record_dict)
+    # END-WITH
+
+    return
+
+
+def pre_processed_file_name(exp_number, scan, output_dir):
+    """
+
+    :param exp_number:
+    :param scan:
+    :param output_dir:
+    :return:
+    """
+    # check inputs
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(scan, int), 'Scan number must be an integer'
+    assert output_dir is None or isinstance(output_dir, str), 'Output directory must be a None or a string.'
+
+    md_file_name = 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan)
+    if output_dir is not None:
+        md_file_name = os.path.join(output_dir, md_file_name)
+
+    return md_file_name
+
+
+"""
+NOTE
+1. a CSV file in appending mode
+2. file's name is standard and defined in fourcircile_utility
+3. csv file contains:
+    Scan, MD file path, detector-sample distance, peak center pixel (int, int), wave length
+"""
+
+
+def pre_processed_record_file(exp_number, md_dir):
+    """ form the name of the pre-processed scans' record file
+    :param exp_number:
+    :param md_dir:
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(md_dir, str), 'Target directory must be a string'
+
+    record_file_name = os.path.join(md_dir, 'Exp{0}Record.txt'.format(exp_number))
+
+    return record_file_name
+
+
+def pre_processed_record_header():
+    """ give the header in pre-processed scan's record file in CSV format
+    :return:
+    """
+    return ['Scan', 'MD', 'DetSampleDistance', 'Center', 'WaveLength']
+
+
+def pre_processed_record_make(scan_number, file_name, distance, center_x, center_y, wave_length):
+    """ make a pre-processed scan's entry in record file
+    :param scan_number:
+    :param file_name:
+    :param distance:
+    :param center_x:
+    :param center_y:
+    :param wave_length:
+    :return: a dictionary
+    """
+    record = {'Scan': scan_number,
+              'MD': file_name,
+              'DetSampleDistance': distance,
+              'Center': (center_x, center_y),
+              'WaveLength': wave_length}
+
+    return record
+
+
+def read_pre_process_record(file_name):
+    """ Read a pre-processed scan record file
+    :param file_name:
+    :return: a dictionary
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    if os.path.exists(file_name) is False:
+        raise RuntimeError('Pre-processed scan record file {0} does not exist.'.format(file_name))
+
+    # load file
+    scan_record_dict = dict()
+    with open(file_name, 'r') as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row_dict in reader:
+            scan_number = int(row_dict['Scan'])
+
+            if len(row_dict['DetSampleDistance']) > 0:
+                row_dict['DetSampleDistance'] = float(row_dict['DetSampleDistance'])
+            else:
+                row_dict['DetSampleDistance'] = None
+
+            if len(row_dict['WaveLength']) > 0:
+                row_dict['WaveLength'] = float(row_dict['WaveLength'])
+            else:
+                row_dict['WaveLength'] = None
+
+            center_str = row_dict['Center'].replace('(', '').replace(')', '').replace(',', ' ').strip()
+            tup_str = center_str.split()
+            row_dict['Center'] = int(tup_str[0]), int(tup_str[1])
+
+            scan_record_dict[scan_number] = row_dict
+    # END-WITH
+
+    return scan_record_dict

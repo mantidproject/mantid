@@ -149,10 +149,10 @@ private:
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
 
-  void appendCalibInstPrefix(const std::string vanNo,
+  void appendCalibInstPrefix(const std::string &vanNo,
                              std::string &outVanName) const;
 
-  void appendCalibInstPrefix(const std::string vanNo, const std::string cerNo,
+  void appendCalibInstPrefix(const std::string &vanNo, const std::string &cerNo,
                              std::string &outVanName,
                              std::string &outCerName) const;
 
@@ -215,7 +215,7 @@ private:
                                const std::string &inputDirCalib,
                                Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                                Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
-                               bool forceRecalc, const std::string specNos);
+                               bool forceRecalc, const std::string &specNos);
 
   void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
                                         const std::string &inputDirCalib,
@@ -227,7 +227,7 @@ private:
       const std::string &preIntegFilename, const std::string &preCurvesFilename,
       Mantid::API::ITableWorkspace_sptr &vanIntegWS,
       Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
-      const std::string specNos);
+      const std::string &specNos);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
@@ -242,7 +242,7 @@ private:
   void inputChecksBeforeRebinPulses(const std::string &runNo, size_t nperiods,
                                     double timeStep);
 
-  Mantid::API::Workspace_sptr loadToPreproc(const std::string runNo);
+  Mantid::API::Workspace_sptr loadToPreproc(const std::string &runNo);
 
   virtual void startAsyncRebinningTimeWorker(const std::string &runNo,
                                              double bin,
@@ -285,7 +285,7 @@ private:
   void copyFocusedToUserAndAll(const std::string &fullFilename);
 
   // generates appropriate names for table workspaces
-  std::string outFitParamsTblNameGenerator(const std::string specNos,
+  std::string outFitParamsTblNameGenerator(const std::string &specNos,
                                            size_t bank_i) const;
 
   // generates the pycode string which can be passed to view
@@ -311,10 +311,6 @@ private:
 
   /// paths the user has "browsed to", to add them to the search path
   std::vector<std::string> m_browsedToPaths;
-
-  /// The message to tell the user that an RB number is needed
-  const static std::string g_shortMsgRBNumberRequired;
-  const static std::string g_msgRBNumberRequired;
 
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;

@@ -434,14 +434,14 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   std::string sasIBlockData;
   std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    auto intensities = m_workspace->points(i);
+    const auto intensities = m_workspace->points(i);
     auto intensityDeltas = m_workspace->pointStandardDeviations(i);
     if (!intensityDeltas)
       intensityDeltas =
           HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    auto &ydata = m_workspace->y(i);
-    auto &edata = m_workspace->e(i);
-    for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
+    const auto &ydata = m_workspace->y(i);
+    const auto &edata = m_workspace->e(i);
+    for (size_t j = 0; j < ydata.size(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
       std::stringstream x;
       x << intensities[j];

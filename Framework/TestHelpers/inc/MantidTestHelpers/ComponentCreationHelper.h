@@ -18,12 +18,16 @@
 
 // Forward declarations
 namespace Mantid {
+namespace Kernel {
+class Quat;
+}
 namespace Geometry {
 class CompAssembly;
 class ObjComponent;
 class DetectorGroup;
 class DetectorsRing;
 class IDetector;
+class Instrument;
 }
 }
 
@@ -164,6 +168,12 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
     const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
     const double cylRadius = 0.004, const double cylHeight = 0.0002);
 
+void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
+                        int idStart, int pixels, double pixelSpacing,
+                        std::string bankName,
+                        const Mantid::Kernel::V3D &bankPos,
+                        const Mantid::Kernel::Quat &bankRot);
+
 /// Create a test instrument with n panels of rectangular detectors,
 /// pixels*pixels in size, a source and spherical sample shape.
 Mantid::Geometry::Instrument_sptr
@@ -186,6 +196,11 @@ sansInstrument(const Mantid::Kernel::V3D &sourcePos,
                const Mantid::Kernel::V3D &samplePos,
                const Mantid::Kernel::V3D &trolley1Pos,
                const Mantid::Kernel::V3D &trolley2Pos);
+
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithPSDTubes(const size_t nTubes = 3,
+                             const size_t nPixelsPerTube = 50,
+                             const bool mirrorTubes = false);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

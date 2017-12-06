@@ -55,6 +55,7 @@ set ( EXPORT_FILES
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
+  src/Exports/StringContainsValidator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -75,6 +76,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
   src/Registry/MappingTypeHandler.cpp
+  src/Registry/PropertyManagerFactory.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
@@ -109,6 +111,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
@@ -185,7 +188,7 @@ add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILE
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Kernel ${Boost_LIBRARIES}
+target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Types Kernel ${Boost_LIBRARIES}
                         ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} ${TBB_LIBRARIES} 
 			${TBB_MALLOC_LIBRARIES} )
 

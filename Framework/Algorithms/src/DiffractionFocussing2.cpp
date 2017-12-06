@@ -109,7 +109,7 @@ void DiffractionFocussing2::exec() {
     throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
   // --- Do we need to read the grouping workspace? ----
-  if (groupingFileName != "") {
+  if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
     IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty(

@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import math
 from abc import (ABCMeta, abstractmethod)
 from six import (with_metaclass)
-from sans.common.enums import (SANSInstrument, SampleShape)
+from sans.common.enums import (SANSInstrument, SANSFacility, SampleShape)
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 
@@ -82,10 +82,9 @@ class DivideByVolumeFactory(object):
     @staticmethod
     def create_divide_by_volume(state):
         data = state.data
-        instrument = data.instrument
+        facility = data.facility
 
-        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ  # noqa
-        if is_isis_instrument:
+        if facility is SANSFacility.ISIS:
             divider = DivideByVolumeISIS()
         else:
             raise RuntimeError("DivideVolumeFactory: Other instruments are not implemented yet.")
@@ -149,12 +148,11 @@ class MultiplyByAbsoluteScaleFactory(object):
     def create_multiply_by_absolute(state):
         data = state.data
         instrument = data.instrument
+        facility = data.facility
 
-        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or \
-                             SANSInstrument.LOQ  # noqa
         if instrument is SANSInstrument.LOQ:
             multiplier = MultiplyByAbsoluteScaleLOQ()
-        elif is_isis_instrument:
+        elif facility is SANSFacility.ISIS:
             multiplier = MultiplyByAbsoluteScaleISIS()
         else:
             raise NotImplementedError("MultiplyByAbsoluteScaleFactory: Other instruments are not implemented yet.")

@@ -5,14 +5,19 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -27,6 +32,42 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace RunCombinationOptions;
+
+namespace {
+/*
+ * Here we build up the correct time indexes for the workspace being added. If
+ *the scan times for the addee workspace and output workspace are the same this
+ *builds the same indexing as the workspace had before. Otherwise, the correct
+ *time indexes are set here.
+ */
+std::vector<SpectrumDefinition>
+buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                   const DetectorInfo &addeeDetInfo,
+                   const DetectorInfo &outDetInfo,
+                   const DetectorInfo &newOutDetInfo) {
+  std::vector<SpectrumDefinition> newAddeeSpecDefs;
+
+  for (auto &specDef : addeeSpecDefs) {
+    for (auto &index : specDef) {
+      SpectrumDefinition newSpecDef;
+      if (addeeDetInfo.scanInterval(index) == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeDetInfo.scanInterval(index) ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
+        }
+      }
+      newAddeeSpecDefs.push_back(newSpecDef);
+    }
+  }
+
+  return newAddeeSpecDefs;
+}
+}
 
 /// Initialisation method
 void MergeRuns::init() {
@@ -119,7 +160,8 @@ void MergeRuns::exec() {
     // At least one is not event workspace ----------------
 
     // This gets the list of workspaces
-    m_inMatrixWS = this->validateInputs(inputs);
+    RunCombinationHelper combHelper;
+    m_inMatrixWS = combHelper.validateInputWorkspaces(inputs, g_log);
 
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
@@ -132,6 +174,8 @@ void MergeRuns::exec() {
         *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
         sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
         sampleLogsFailTolerances);
+
+    auto isScanning = outWS->detectorInfo().isScanning();
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
@@ -168,7 +212,10 @@ void MergeRuns::exec() {
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        outWS = outWS + addee;
+        if (isScanning)
+          outWS = buildScanningOutputWorkspace(outWS, addee);
+        else
+          outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
         sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
@@ -188,6 +235,58 @@ void MergeRuns::exec() {
     // Set the final workspace to the output property
     setProperty("OutputWorkspace", outWS);
   }
+}
+
+MatrixWorkspace_sptr
+MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
+                                        const MatrixWorkspace_sptr &addeeWS) {
+  const auto numOutputSpectra =
+      outWS->getNumberHistograms() + addeeWS->getNumberHistograms();
+
+  MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
+      *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
+
+  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+
+  if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
+    // In this case the detector info objects were identical. We just add the
+    // workspaces as we normally would for MergeRuns.
+    g_log.information()
+        << "Workspaces had identical detector scan information and were "
+           "merged.";
+    return outWS + addeeWS;
+  } else if (newOutWS->detectorInfo().scanSize() != numOutputSpectra) {
+    throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
+                             "with some, but not all overlapping scan "
+                             "intervals is not currently supported.");
+  }
+
+  g_log.information()
+      << "Workspaces had different, non-overlapping scan intervals "
+         "so spectra will be appended.";
+
+  auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
+  const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
+
+  const auto newAddeeSpecDefs =
+      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
+                         outWS->detectorInfo(), newOutWS->detectorInfo());
+
+  outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
+                     newAddeeSpecDefs.end());
+
+  auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
+  newIndexInfo.setSpectrumDefinitions(std::move(outSpecDefs));
+  newOutWS->setIndexInfo(newIndexInfo);
+
+  for (size_t i = 0; i < outWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i, outWS->histogram(i));
+
+  for (size_t i = 0; i < addeeWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i + outWS->getNumberHistograms(),
+                           addeeWS->histogram(i));
+
+  return newOutWS;
 }
 
 /** Build up addition tables for merging eventlists together.
@@ -366,17 +465,6 @@ void MergeRuns::execEvent() {
 }
 
 //------------------------------------------------------------------------------------------------
-/// @cond
-// Local function used within validateInputs() below in a call to
-// std::list::sort(compare)
-// to order the input workspaces by the start of their frame (i.e. the first X
-// value).
-static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
-  return (first->x(0).front() < second->x(0).front());
-}
-/// @endcond
-
-//------------------------------------------------------------------------------------------------
 /** Validate the input event workspaces
  *
  *  @param  inputWorkspaces The names of the input workspaces
@@ -422,65 +510,6 @@ bool MergeRuns::validateInputsForEventWorkspaces(
 
   // We got here: all are event workspaces
   return true;
-}
-
-//------------------------------------------------------------------------------------------------
-/** Checks that the input workspace all exist, that they are the same size, have
- * the same units
- *  and the same instrument name. Will throw if they don't.
- *  @param  inputWorkspaces The names of the input workspaces
- *  @return A list of pointers to the input workspace, ordered by increasing
- * frame starting point
- *  @throw  Exception::NotFoundError If an input workspace doesn't exist
- *  @throw  std::invalid_argument    If the input workspaces are not compatible
- */
-std::list<API::MatrixWorkspace_sptr>
-MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
-  std::list<MatrixWorkspace_sptr> inWS;
-
-  RunCombinationHelper combHelper;
-
-  for (size_t i = 0; i < inputWorkspaces.size(); ++i) {
-    MatrixWorkspace_sptr ws;
-    // Fetch the next input workspace - throw an error if it's not there
-    try {
-      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          inputWorkspaces[i]);
-      if (!ws) {
-        g_log.error() << "Input workspace " << inputWorkspaces[i]
-                      << " not found.\n";
-        throw Kernel::Exception::NotFoundError("Data Object",
-                                               inputWorkspaces[i]);
-      }
-      inWS.push_back(ws);
-    } catch (Exception::NotFoundError &) {
-      g_log.error() << "Input workspace " << inputWorkspaces[i]
-                    << " not found.\n";
-      throw;
-    }
-    // Check that it has common binning
-    if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
-      g_log.error("Input workspaces must have common binning for all spectra");
-      throw std::invalid_argument(
-          "Input workspaces must have common binning for all spectra");
-    }
-    // Check a few things are the same for all input workspaces
-    if (i == 0) {
-      combHelper.setReferenceProperties(ws);
-    } else {
-      std::string compatibility = combHelper.checkCompatibility(ws);
-      if (!compatibility.empty()) {
-        g_log.error("Input workspaces are not compatible: " + compatibility);
-        throw std::invalid_argument("Input workspaces are not compatible: " +
-                                    compatibility);
-      }
-    }
-  }
-
-  // Order the workspaces by ascending frame (X) starting point
-  inWS.sort(compare);
-
-  return inWS;
 }
 
 //------------------------------------------------------------------------------------------------

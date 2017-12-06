@@ -36,8 +36,7 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel
-    : public QObject {
+class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel : public QObject {
   Q_OBJECT
 
 public:

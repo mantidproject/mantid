@@ -278,5 +278,6 @@ class BASISReduction311(PythonAlgorithm):
                        RHSWorkspace=mon_ws,
                        OutputWorkspace=sam_ws)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction311)

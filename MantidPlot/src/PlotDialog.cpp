@@ -49,7 +49,7 @@
 #include <MantidQtWidgets/Common/pixmaps.h>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>
@@ -76,7 +76,7 @@ using namespace MantidQt::API;
 
 PlotDialog::PlotDialog(bool showExtended, ApplicationWindow *app,
                        MultiLayer *ml, Qt::WFlags fl)
-    : QDialog(ml, fl), d_app(app), d_ml(0) {
+    : QDialog(ml, fl), d_app(app), d_ml(nullptr) {
   setObjectName("PlotDialog");
   setWindowTitle(tr("MantidPlot - Plot details"));
   setModal(true);
@@ -1214,7 +1214,7 @@ void PlotDialog::setColorMapName() {
   if (grayScaleBox->isChecked()) {
     mLabelCurrentColormap->setText("Map: Greyscale");
   } else {
-    Spectrogram *sp = NULL;
+    Spectrogram *sp = nullptr;
     QTreeWidgetItem *it = listBox->currentItem();
     if (it) {
       CurveTreeItem *item = dynamic_cast<CurveTreeItem *>(it);
@@ -3058,7 +3058,7 @@ Graph *CurveTreeItem::graph() {
   if (l) {
     return l->graph();
   } else {
-    return NULL;
+    return nullptr;
   }
 }
 

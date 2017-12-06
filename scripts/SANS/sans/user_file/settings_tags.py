@@ -44,6 +44,7 @@ monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
 # Det
 det_fit_range = namedtuple('det_fit_range', 'start, stop, use_fit')
 
+
 # ------------------------------------------------------------------
 # --- State director keys ------------------------------------------
 # ------------------------------------------------------------------
@@ -135,6 +136,7 @@ class BackId(object):
 # -- OTHER - not settable in user file
 @serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
                    "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
-                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix")
+                   "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
+                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "show_transmission")
 class OtherId(object):
     pass

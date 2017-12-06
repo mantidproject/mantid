@@ -3,18 +3,21 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import absorb_corrections, common
+from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, \
                                              CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
 from isis_powder.polaris_routines import polaris_advanced_config
+from six import PY3
 
 
-def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(1, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj)
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj,
+        is_vanadium=is_vanadium)
     return ws_to_correct
 
 
@@ -55,6 +58,24 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
     return output
 
 
+def save_unsplined_vanadium(vanadium_ws, output_path):
+    converted_workspaces = []
+
+    for ws_index in range(vanadium_ws.getNumberOfEntries()):
+        ws = vanadium_ws.getItem(ws_index)
+        previous_units = ws.getAxis(0).getUnit().unitID()
+
+        if previous_units != WORKSPACE_UNITS.tof:
+            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+
+        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+        converted_workspaces.append(ws)
+
+    converted_group = mantid.GroupWorkspaces(",".join(ws.getName() for ws in converted_workspaces))
+    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_group)
+
+
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
     output_workspaces = list(workspaces_to_mask)
 
@@ -71,7 +92,16 @@ def _read_masking_file(masking_file_path):
     all_banks_masking_list = []
     bank_masking_list = []
     ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
-    with open(masking_file_path) as mask_file:
+
+    # Python 3 requires the encoding to be included so an Angstrom
+    # symbol can be read, I'm assuming all file read here are
+    # `latin-1` which may not be true in the future. Python 2 `open`
+    # doesn't have an encoding option
+    if PY3:
+        encoding = {"encoding": "latin-1"}
+    else:
+        encoding = {}
+    with open(masking_file_path, **encoding) as mask_file:
         for line in mask_file:
             if line.startswith(ignore_line_prefixes):
                 # Push back onto new bank

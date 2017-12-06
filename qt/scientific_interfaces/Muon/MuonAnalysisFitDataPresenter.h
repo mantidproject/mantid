@@ -61,8 +61,7 @@ public:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisFitDataPresenter
-    : public QObject {
+class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisFitDataPresenter : public QObject {
   Q_OBJECT
 public:
   /// Constructor overload with default arguments
@@ -122,8 +121,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
-  void storeNormalization(std::string wsName) const;
-  void setTFAsymmState(const bool state) { m_isItTFAsymm = state; };
+  void storeNormalization(std::string wsName, bool addToTable) const;
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);
@@ -199,7 +197,6 @@ private:
   bool m_overwrite;
   /// Key for where "current run" file is
   boost::optional<Muon::CurrentRun> m_currentRun;
-  bool m_isItTFAsymm;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

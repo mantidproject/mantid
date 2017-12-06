@@ -57,8 +57,7 @@ protected:
   virtual bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const = 0;
   /// Returns the size of the new X vector
-  virtual std::size_t
-  getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
+  virtual std::size_t getNewXSize(const std::size_t ySize) const = 0;
   /// Calculate the X point values. Implement in an inheriting class.
   virtual Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
       const Kernel::cow_ptr<HistogramData::HistogramX> inputX) const = 0;
@@ -68,6 +67,8 @@ private:
   void init() override;
   /// Override exec
   void exec() override;
+
+  std::size_t getNewYSize(const API::MatrixWorkspace_sptr inputWS);
 
   /// Set the X data on given spectra
   void setXData(API::MatrixWorkspace_sptr outputWS,

@@ -122,8 +122,6 @@ private:
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
-  std::list<API::MatrixWorkspace_sptr>
-  validateInputs(const std::vector<std::string> &inputWorkspaces);
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
@@ -141,6 +139,9 @@ private:
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
+  API::MatrixWorkspace_sptr
+  buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
+                               const API::MatrixWorkspace_sptr &addee);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
 

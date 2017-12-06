@@ -4,11 +4,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "ALCHelper.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
 namespace MantidQt {
+namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(
@@ -160,16 +161,16 @@ void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
 void ALCBaselineModellingPresenter::updateDataCurve() {
   MatrixWorkspace_const_sptr data = m_model->data();
   assert(data);
-  m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
-                       ALCHelper::curveErrorsFromWs(data, 0));
+  m_view->setDataCurve(*(QwtHelper::curveDataFromWs(data, 0)),
+                       QwtHelper::curveErrorsFromWs(data, 0));
 }
 
 void ALCBaselineModellingPresenter::updateCorrectedCurve() {
   if (MatrixWorkspace_const_sptr correctedData = m_model->correctedData()) {
-    m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
-                              ALCHelper::curveErrorsFromWs(correctedData, 0));
+    m_view->setCorrectedCurve(*(QwtHelper::curveDataFromWs(correctedData, 0)),
+                              QwtHelper::curveErrorsFromWs(correctedData, 0));
   } else {
-    m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
+    m_view->setCorrectedCurve(*(QwtHelper::emptyCurveData()),
                               std::vector<double>());
   }
 }
@@ -179,9 +180,9 @@ void ALCBaselineModellingPresenter::updateBaselineCurve() {
 
     const auto &xValues = m_model->data()->x(0);
     m_view->setBaselineCurve(
-        *(ALCHelper::curveDataFromFunction(fittedFunc, xValues.rawData())));
+        *(QwtHelper::curveDataFromFunction(fittedFunc, xValues.rawData())));
   } else {
-    m_view->setBaselineCurve(*(ALCHelper::emptyCurveData()));
+    m_view->setBaselineCurve(*(QwtHelper::emptyCurveData()));
   }
 }
 

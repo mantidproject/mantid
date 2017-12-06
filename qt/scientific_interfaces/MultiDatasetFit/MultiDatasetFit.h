@@ -38,8 +38,7 @@ class PlotController;
  * multi-dataset fit
  * and displaying the results.
  */
-class MANTIDQT_MULTIDATASETFIT_DLL MultiDatasetFit
-    : public API::UserSubWindow {
+class MANTIDQT_MULTIDATASETFIT_DLL MultiDatasetFit : public API::UserSubWindow {
   Q_OBJECT
 public:
   /// The name of the interface as registered into the factory
@@ -47,7 +46,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "General"; }
   /// Constructor
-  MultiDatasetFit(QWidget *parent = NULL);
+  MultiDatasetFit(QWidget *parent = nullptr);
   /// Destructor
   ~MultiDatasetFit() override;
   /// Get the name of the output matrix workspace for the i-th spectrum

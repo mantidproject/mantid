@@ -72,16 +72,18 @@ Usage
     # Basic reduction with no transmission run
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoSimple
 
     The first four IvsLam Y values are: [ 5.3860e-06, 9.3330e-06, 6.9796e-06, 6.5687e-06 ]
-    The first four IvsQ Y values are: [ 6.1526e-04, 7.7591e-04, 9.1161e-04, 1.0912e-03 ]
+    The first four IvsQ Y values are: [ 1.3648e-03, 1.9490e-03, 2.7277e-03, 4.0995e-03 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Reduce a Run with a transmission run**
@@ -93,16 +95,18 @@ Output:
     # Basic reduction with a transmission run
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoTrans
 
     The first four IvsLam Y values are: [ 3.2705e-05, 5.5450e-05, 3.9630e-05, 3.5770e-05 ]
-    The first four IvsQ Y values are: [ 8.4835e-01, 1.0204e+00, 1.3771e+00, 1.2833e+00 ]
+    The first four IvsQ Y values are: [ 9.3930e-01, 1.3251e+00, 1.2766e+00, 1.1977e+00 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Reduce a Run overloading default parameters**
@@ -113,16 +117,18 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoOverload
 
     The first four IvsLam Y values are: [ 5.3868e-06, 9.3344e-06, 6.9807e-06, 6.5696e-06 ]
-    The first four IvsQ Y values are: [ 6.1535e-04, 7.7602e-04, 9.1174e-04, 1.0913e-03 ]
+    The first four IvsQ Y values are: [ 1.3650e-03, 1.9493e-03, 2.7281e-03, 4.1001e-03 ]
     Theta out is the same as theta in: 0.7
 
 **Example - Polynomial correction**
@@ -137,7 +143,7 @@ Output:
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=1)
 
     def findByName(histories, name):
-        return filter(lambda x: x.name() == name, histories)[0]
+        return next(x for x in histories if x.name() == name)
 
     # Find the PolynomialCorrection entry in the workspace's history
     algHist = IvsLam.getHistory()
@@ -147,7 +153,7 @@ Output:
 
     coefProp = findByName(polyCorHist.getProperties(), "Coefficients")
 
-    print "Coefficients: '" + coefProp.value() + "'"
+    print("Coefficients: '{}'".format(coefProp.value()))
 
 Output:
 

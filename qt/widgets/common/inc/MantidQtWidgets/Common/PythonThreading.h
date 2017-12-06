@@ -5,6 +5,15 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 //------------------------------------------------------------------------------
+// Python Interpreter
+//------------------------------------------------------------------------------
+class EXPORT_OPT_MANTIDQT_COMMON PythonInterpreter {
+public:
+  static void initialize();
+  static void finalize();
+};
+
+//------------------------------------------------------------------------------
 // PythonGIL
 //------------------------------------------------------------------------------
 /**
@@ -13,36 +22,20 @@
  *
  */
 class EXPORT_OPT_MANTIDQT_COMMON PythonGIL {
+
+public:
+  static bool locked();
+
 public:
   PythonGIL();
+  PythonGIL(const PythonGIL &) = delete;
+  PythonGIL &operator=(const PythonGIL &) = delete;
 
   void acquire();
   void release();
 
 private:
-  PythonGIL(const PythonGIL &);
-  /// Current GIL state
   PyGILState_STATE m_state;
-};
-
-//------------------------------------------------------------------------------
-// RecursiveGlobalInterpreterLock
-//------------------------------------------------------------------------------
-
-/**
- * A thread can call acquire multiple times and will only be unlocked
- * when a corresponding number of release calls are made.
- */
-class EXPORT_OPT_MANTIDQT_COMMON RecursivePythonGIL {
-public:
-  RecursivePythonGIL();
-
-  void acquire();
-  void release();
-
-private:
-  int m_count;
-  PythonGIL m_lock;
 };
 
 //------------------------------------------------------------------------------
@@ -64,7 +57,5 @@ private:
 
 /// Typedef for scoped lock
 typedef ScopedGIL<PythonGIL> ScopedPythonGIL;
-/// Typedef for scoped recursive lock
-typedef ScopedGIL<RecursivePythonGIL> ScopedRecursivePythonGIL;
 
 #endif /* PYTHONTHREADING_H_ */

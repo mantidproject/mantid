@@ -1,8 +1,9 @@
 #include "MuonAnalysisFitFunctionPresenter.h"
-#include "../MultiDatasetFit/MDFEditLocalParameterDialog.h"
 #include "MantidAPI/IFunction.h"
+#include "MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
+
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 
@@ -41,8 +42,6 @@ void MuonAnalysisFitFunctionPresenter::doConnect() {
     connect(fitBrowser, SIGNAL(errorsEnabled(bool)), this,
             SLOT(handleErrorsEnabled(bool)));
     connect(fitBrowser, SIGNAL(fitUndone()), this, SLOT(handleFitFinished()));
-    connect(fitBrowser, SIGNAL(functionLoaded(const QString &)), this,
-            SLOT(handleFunctionLoaded(const QString &)));
     connect(fitBrowser, SIGNAL(workspacesToFitChanged(int)), this,
             SLOT(updateNumberOfDatasets(int)));
     connect(fitBrowser, SIGNAL(userChangedDatasetIndex(int)), this,
@@ -173,17 +172,6 @@ void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
 }
 
 /**
- * Called when a saved setup is loaded into the fit property browser.
- * Update the function browser with this loaded function.
- * @param funcString :: [input] Loaded function as a string
- */
-void MuonAnalysisFitFunctionPresenter::handleFunctionLoaded(
-    const QString &funcString) {
-  m_funcBrowser->clear();
-  m_funcBrowser->setFunction(funcString);
-}
-
-/**
  * Called when the number of datasets to fit is changed in the model.
  * Update the view with the new number of datasets.
  *
@@ -251,17 +239,7 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
   m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
   m_multiFitState = state;
 }
-/**
-* Turn TF Asymmetry mode on/off.
-* Turning it off hides the function browser and data selector so that
-* the fitting works as it used to pre-Mantid 3.8.
-* @param state :: [input] On/off for TF Asymmetry mode.
-*/
-void MuonAnalysisFitFunctionPresenter::setTFAsymmState(
-    Muon::TFAsymmState state) {
-  m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
-  m_TFAsymmState = state;
-}
+
 /**
  * Set the given function in the model (fit property browser).
  *

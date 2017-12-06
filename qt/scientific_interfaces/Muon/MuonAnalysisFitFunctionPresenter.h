@@ -47,8 +47,6 @@ public:
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
-  /// Toggle TF Asymmetry mode
-  void setTFAsymmState(Muon::TFAsymmState state);
 
   /// Set function in model (fit property browser)
   void setFunctionInModel(const Mantid::API::IFunction_sptr &function);
@@ -66,8 +64,6 @@ public slots:
   void handleModelCleared();
   /// Pass show/hide parameter errors to function browser
   void handleErrorsEnabled(bool enabled);
-  /// When a saved setup is loaded, update the function browser
-  void handleFunctionLoaded(const QString &funcString);
   /// When number of datasets to fit changes, update function browser
   void updateNumberOfDatasets(int nDatasets);
   /// When "edit local parameter" button is clicked, launch dialog
@@ -86,8 +82,6 @@ private:
   MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
   /// Whether multi fitting is disabled(function browser is hidden) or enabled
   Muon::MultiFitState m_multiFitState;
-  /// Whether TF Asymmetry is disabled or enabled
-  Muon::TFAsymmState m_TFAsymmState;
 };
 
 } // namespace CustomInterfaces

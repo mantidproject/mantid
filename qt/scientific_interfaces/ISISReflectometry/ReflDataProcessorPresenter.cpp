@@ -3,13 +3,14 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflFromStdStringMap.h"
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -20,18 +21,18 @@ namespace CustomInterfaces {
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
-* @param postprocessor : A DataProcessorPostprocessingAlgorithm
+* @param processor : A ProcessingAlgorithm
+* @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const ProcessingAlgorithm &processor,
+    const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, postprocessMap, loader) {}
@@ -72,9 +73,10 @@ void ReflDataProcessorPresenter::process() {
     return;
 
   // Get global settings
-  m_preprocessingOptions = m_mainPresenter->getPreprocessingOptionsAsString();
+  this->setPreprocessingOptions(
+      m_mainPresenter->getPreprocessingOptionsAsString());
   m_processingOptions = m_mainPresenter->getProcessingOptions();
-  m_postprocessingOptions = m_mainPresenter->getPostprocessingOptions();
+  this->setPostprocessingOptions(m_mainPresenter->getPostprocessingOptions());
 
   // Get time slicing type
   auto timeSlicingType = m_mainPresenter->getTimeSlicingType();

@@ -18,12 +18,12 @@ class FrequencyPowderGenerator(object):
         """
         Generates frequencies for the given order of quantum event.
 
-        @param previous_array: array with frequencies for the previous quantum event
-        @param previous_coefficients: coefficients which correspond to the previous order quantum event
-        @param fundamentals_array: array with frequencies for fundamentals
-        @param fundamentals_coefficients: coefficients for fundamentals
-        @param quantum_order: number of quantum order event for which new array should be constructed
-        @return: array with frequencies for the required quantum number event, array which stores coefficients for all
+        :param previous_array: array with frequencies for the previous quantum event
+        :param previous_coefficients: coefficients which correspond to the previous order quantum event
+        :param fundamentals_array: array with frequencies for fundamentals
+        :param fundamentals_coefficients: coefficients for fundamentals
+        :param quantum_order: number of quantum order event for which new array should be constructed
+        :returns: array with frequencies for the required quantum number event, array which stores coefficients for all
                  frequencies
         """
         if not (isinstance(fundamentals_array, np.ndarray) and

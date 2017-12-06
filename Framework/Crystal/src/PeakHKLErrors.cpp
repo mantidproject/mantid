@@ -51,7 +51,7 @@ void PeakHKLErrors::init() {
   declareParameter("GonRotz", 0.0,
                    "1st Rotation of Goniometer about the z axis");
   initMode = 1;
-  if (OptRuns == "")
+  if (OptRuns.empty())
     return;
 
   initMode = 2;

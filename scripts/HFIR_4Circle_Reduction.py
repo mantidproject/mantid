@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import reduce4circleGUI
 from PyQt4 import QtGui, QtCore
 import sys
@@ -10,6 +11,7 @@ def qapp():
     else:
         _app = QtGui.QApplication(sys.argv)
     return _app
+
 
 # try to defeat X11 unsafe thread
 QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)

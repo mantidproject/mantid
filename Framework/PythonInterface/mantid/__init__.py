@@ -74,6 +74,8 @@ import mantid.kernel as kernel
 import mantid.geometry as geometry
 import mantid.api as api
 import mantid.dataobjects as dataobjects
+import mantid._plugins as _plugins
+import mantid.plots as plots
 
 ###############################################################################
 # Make the aliases from each module accessible in a the mantid namspace

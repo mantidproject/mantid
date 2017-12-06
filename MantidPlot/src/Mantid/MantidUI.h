@@ -22,7 +22,7 @@
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 #include "MantidPlotUtilities.h"
 
@@ -240,7 +240,7 @@ public:
   /// Plot a 1D graph for an integrated mdworkspace
   MultiLayer *plotMDList(const QStringList &wsNames, const int plotAxis,
                          const Mantid::API::MDNormalization normalization,
-                         const bool showError, MultiLayer *plotWindow = NULL,
+                         const bool showError, MultiLayer *plotWindow = nullptr,
                          bool clearWindow = false);
 
   /// Plot a "tiled" plot (with subplots)
@@ -271,14 +271,14 @@ public slots:
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = true,
          GraphOptions::CurveType style = GraphOptions::Unspecified,
-         MultiLayer *plotWindow = NULL, bool clearWindow = false,
+         MultiLayer *plotWindow = nullptr, bool clearWindow = false,
          bool waterfallPlot = false);
 
   MultiLayer *
   plot1D(const QString &wsName, const std::set<int> &indexList,
          bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-         bool errs = false, MultiLayer *plotWindow = NULL,
+         bool errs = false, MultiLayer *plotWindow = nullptr,
          bool clearWindow = false, bool waterfallPlot = false);
 
   MultiLayer *
@@ -286,7 +286,7 @@ public slots:
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false,
          GraphOptions::CurveType style = GraphOptions::Unspecified,
-         MultiLayer *plotWindow = NULL, bool clearWindow = false,
+         MultiLayer *plotWindow = nullptr, bool clearWindow = false,
          bool waterfallPlot = false, const QString &log = "",
          const std::set<double> &customLogValues = std::set<double>(),
          const bool multipleSpectra = false);
@@ -294,7 +294,7 @@ public slots:
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-         bool errs = false, MultiLayer *plotWindow = NULL,
+         bool errs = false, MultiLayer *plotWindow = nullptr,
          bool clearWindow = false, bool waterfallPlot = false,
          const QString &log = "",
          const std::set<double> &customLogValues = std::set<double>()) override;
@@ -319,7 +319,7 @@ public slots:
   MultiLayer *drawSingleColorFillPlot(
       const QString &wsName,
       GraphOptions::CurveType curveType = GraphOptions::ColorMap,
-      MultiLayer *window = NULL, bool hidden = false);
+      MultiLayer *window = nullptr, bool hidden = false);
 
   // Create a 1d graph form specified spectra in a MatrixWorkspace
   MultiLayer *plotSpectraRange(
@@ -510,7 +510,7 @@ public slots:
   // Execute an algorithm with the given parameter list
   void showAlgorithmDialog(const QString &algName,
                            QHash<QString, QString> paramList,
-                           Mantid::API::AlgorithmObserver *obs = NULL,
+                           Mantid::API::AlgorithmObserver *obs = nullptr,
                            int version = -1) override;
   // Execute an algorithm
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
@@ -616,12 +616,9 @@ private:
 
   /// This method accepts user inputs and executes loadraw/load nexus
   /// algorithm
-  std::string extractLogTime(Mantid::Kernel::DateAndTime value,
+  std::string extractLogTime(Mantid::Types::Core::DateAndTime value,
                              bool useAbsoluteDate,
-                             Mantid::Kernel::DateAndTime start);
-
-  /// extracts the files from a mimedata object that have a .py extension
-  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
+                             Mantid::Types::Core::DateAndTime start);
 
   // Whether new plots shoul re-use the same plot instance (for every
   // different

@@ -20,6 +20,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'BioSANS_exp61_scan0004_0001.xml',
                 'BioSANS_flood_data.xml',
                 'BioSANS_sample_trans.xml',
+                'C6H5Cl-Gaussian.log',
                 'CNCS_TS_2008_08_18.dat',
                 'DISF_NaF.cdl',
                 'det_corrected7.dat',
@@ -106,7 +107,10 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'TolueneLargerOrderAbins.out',
                 'TolueneScale.out',
                 'TolueneScratchAbins.out',
-                'SingleCrystalDiffuseReduction_UB.mat'
+                'SingleCrystalDiffuseReduction_UB.mat',
+                'Na2SiF6_DMOL3.outmol',
+                'FE_ALPHA.cif',
+                'template_ENGINX_241391_236516_North_bank.prm'
                 ]
 
 EXPECTED_EXT = '.expected'

@@ -401,7 +401,7 @@
   <customwidget>
    <class>MplPlot3dCanvas</class>
    <extends>QGraphicsView</extends>
-   <header>mplgraphicsview3d.h</header>
+   <header>HFIR_4Circle_Reduction/mplgraphicsview3d.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

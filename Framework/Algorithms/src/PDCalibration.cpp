@@ -4,10 +4,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -17,8 +21,12 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
+#include <algorithm>
 #include <cassert>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
 #include <limits>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,7 +53,6 @@ DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
-const double CHISQ_BAD = 1.e9; // hopefully much worse than possible
 }
 
 /// private inner class
@@ -57,7 +64,7 @@ public:
 
     // convert workspace index into detector id
     const auto &spectrum = wksp->getSpectrum(wkspIndex);
-    const auto detIds = spectrum.getDetectorIDs();
+    const auto &detIds = spectrum.getDetectorIDs();
     if (detIds.size() != 1) {
       throw std::runtime_error("Summed pixels is not currently supported");
     }
@@ -99,6 +106,8 @@ public:
         inTofPos.push_back(peaksInD[i]);
         inTofWindows.push_back(peaksInDWindows[2 * i]);
         inTofWindows.push_back(peaksInDWindows[2 * i + 1]);
+      } else if (centre < tofMax) {
+        badPeakOffset = i;
       }
     }
     std::transform(inTofPos.begin(), inTofPos.end(), inTofPos.begin(), toTof);
@@ -113,6 +122,7 @@ public:
   std::vector<double> inTofPos;
   std::vector<double> inTofWindows;
   std::vector<double> inDPos;
+  std::size_t badPeakOffset{0}; ///< positions that will not be fit
 };
 
 //----------------------------------------------------------------------------------------------
@@ -247,6 +257,10 @@ void PDCalibration::init() {
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
+                      "DiagnosticWorkspaces", "", Direction::Output),
+                  "Workspaces to promote understanding of calibration results");
+
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("SignalWorkspace", inputGroup);
@@ -296,6 +310,29 @@ std::map<std::string, std::string> PDCalibration::validateInputs() {
 
   return messages;
 }
+
+namespace {
+
+bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
+  const auto columnNames = table->getColumnNames();
+  return (std::find(columnNames.begin(), columnNames.end(),
+                    std::string("dasid")) != columnNames.end());
+}
+
+/// @return Conversion factor or 1. if it is unknown
+double getWidthToFWHM(const std::string &peakshape) {
+  if (peakshape == "Gaussian") {
+    return 2 * std::sqrt(2. * std::log(2.));
+  } else if (peakshape == "Lorentzian") {
+    return 2.;
+  } else if (peakshape == "BackToBackExponential") {
+    return 1.; // TODO the conversion isn't document in the function
+  } else {
+    return 1.;
+  }
+}
+
+} //  end of anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
@@ -354,7 +391,16 @@ void PDCalibration::exec() {
   double minPeakHeight = getProperty("MinimumPeakHeight");
   double maxChiSquared = getProperty("MaxChiSq");
 
-  calParams = getPropertyValue("CalibrationParameters");
+  const std::string calParams = getPropertyValue("CalibrationParameters");
+  if (calParams == std::string("DIFC"))
+    m_numberMaxParams = 1;
+  else if (calParams == std::string("DIFC+TZERO"))
+    m_numberMaxParams = 2;
+  else if (calParams == std::string("DIFC+TZERO+DIFA"))
+    m_numberMaxParams = 3;
+  else
+    throw std::runtime_error(
+        "Encountered impossible CalibrationParameters value");
 
   m_uncalibratedWS = loadAndBin();
   setProperty("SignalWorkspace", m_uncalibratedWS);
@@ -369,6 +415,7 @@ void PDCalibration::exec() {
   } else {
     createNewCalTable();
   }
+  createInformationWorkspaces();
 
   std::string maskWSName = getPropertyValue("OutputCalibrationTable");
   maskWSName += "_mask";
@@ -380,6 +427,13 @@ void PDCalibration::exec() {
       m_uncalibratedWS->getInstrument());
   setProperty("MaskWorkspace", maskWS);
 
+  const std::string peakFunction = getProperty("PeakFunction");
+  const double WIDTH_TO_FWHM = getWidthToFWHM(peakFunction);
+  if (WIDTH_TO_FWHM == 1.) {
+    g_log.notice() << "Unknown conversion for \"" << peakFunction
+                   << "\", found peak widths and resolution should not be "
+                      "directly compared to delta-d/d";
+  }
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
@@ -400,14 +454,14 @@ void PDCalibration::exec() {
       continue;
 
     auto alg = createChildAlgorithm("FindPeaks");
-    alg->setLoggingOffset(2);
+    alg->setLoggingOffset(3);
     alg->setProperty("InputWorkspace", m_uncalibratedWS);
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
     alg->setProperty("PeakPositions", peaks.inTofPos);
     alg->setProperty("FitWindows", peaks.inTofWindows);
     alg->setProperty<int>("FWHM", getProperty("FWHM"));
     alg->setProperty<int>("Tolerance", getProperty("Tolerance"));
-    alg->setProperty<std::string>("PeakFunction", getProperty("PeakFunction"));
+    alg->setProperty<std::string>("PeakFunction", peakFunction);
     alg->setProperty<std::string>("BackgroundType",
                                   getProperty("BackgroundType"));
     alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
@@ -422,16 +476,23 @@ void PDCalibration::exec() {
     alg->executeAsChildAlg();
     API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
 
+    // includes peaks that aren't used in the fit
+    const size_t numPeaks = m_peaksInDspacing.size();
+    std::vector<double> tof_vec_full(numPeaks, std::nan(""));
     std::vector<double> d_vec;
     std::vector<double> tof_vec;
+    std::vector<double> width_vec_full(numPeaks, std::nan(""));
+    std::vector<double> height_vec_full(numPeaks, std::nan(""));
+    std::vector<double> height2; // the square of the peak height
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
-      double centre = fittedTable->getRef<double>("centre", i);
-      double height = fittedTable->getRef<double>("height", i);
-      double chi2 = fittedTable->getRef<double>("chi2", i);
+      const double centre = fittedTable->getRef<double>("centre", i);
+      const double width = fittedTable->getRef<double>("width", i);
+      const double height = fittedTable->getRef<double>("height", i);
+      const double chi2 = fittedTable->getRef<double>("chi2", i);
 
       // check chi-square
-      if (chi2 > maxChiSquared || chi2 < 0) {
+      if (chi2 > maxChiSquared || chi2 < 0.) {
         continue;
       }
 
@@ -460,14 +521,39 @@ void PDCalibration::exec() {
 
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
+      height2.push_back(height * height);
+      tof_vec_full[i + peaks.badPeakOffset] = centre;
+      width_vec_full[i + peaks.badPeakOffset] = width;
+      height_vec_full[i + peaks.badPeakOffset] = height;
     }
 
-    if (d_vec.empty()) {
+    if (d_vec.size() < 2) { // not enough peaks were found
       maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
       double difc = 0., t0 = 0., difa = 0.;
-      fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
+      fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
+
+      const auto rowNum = m_detidToRow[peaks.detid];
+      double chisq = 0.;
+      auto converter =
+          Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
+      for (std::size_t i = 0; i < numPeaks; ++i) {
+        if (std::isnan(tof_vec_full[i]))
+          continue;
+        const double dspacing = converter(tof_vec_full[i]);
+        const double temp = m_peaksInDspacing[i] - dspacing;
+        chisq += (temp * temp);
+        m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
+        m_peakWidthTable->cell<double>(rowNum, i + 1) =
+            WIDTH_TO_FWHM * converter(width_vec_full[i]);
+        m_peakHeightTable->cell<double>(rowNum, i + 1) = height_vec_full[i];
+      }
+      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 1) =
+          chisq;
+      m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 2) =
+          chisq / static_cast<double>(numPeaks - 1);
+
       setCalibrationValues(peaks.detid, difc, difa, t0);
     }
     prog.report();
@@ -475,152 +561,233 @@ void PDCalibration::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // sort the calibration workspaces
+  m_calibrationTable = sortTableWorkspace(m_calibrationTable);
+  setProperty("OutputCalibrationTable", m_calibrationTable);
+
+  // fix-up the diagnostic workspaces
+  m_calibrationTable = sortTableWorkspace(m_peakPositionTable);
+  m_calibrationTable = sortTableWorkspace(m_peakWidthTable);
+  m_calibrationTable = sortTableWorkspace(m_peakHeightTable);
+
+  // a derived table from the position and width
+  auto resolutionWksp = calculateResolutionTable();
+
+  // set the diagnostic workspaces out
+  const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
+  auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
+  API::AnalysisDataService::Instance().addOrReplace(
+      partials_prefix + "_dspacing", m_peakPositionTable);
+  diagnosticGroup->addWorkspace(m_peakPositionTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_width",
+                                                    m_peakWidthTable);
+  diagnosticGroup->addWorkspace(m_peakWidthTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_height",
+                                                    m_peakHeightTable);
+  diagnosticGroup->addWorkspace(m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      partials_prefix + "_resolution", resolutionWksp);
+  diagnosticGroup->addWorkspace(resolutionWksp);
+  setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
-void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
-                                     const std::vector<double> &tof,
-                                     double &difc, double &t0, double &difa) {
-  double num_peaks = static_cast<double>(d.size());
-  double sumX = 0.;
-  double sumY = 0.;
-  double sumX2 = 0.;
-  double sumXY = 0.;
-  double sumX2Y = 0.;
-  double sumX3 = 0.;
-  double sumX4 = 0.;
+namespace { // anonymous namespace
+            /**
+             * Helper function for calculating costs in gsl.
+             * @param v vector of parameters that are being modified by gsl (difc, tzero,
+             * difa)
+             * @param params The parameters being used for the fit
+             * @return Sum of the errors
+             */
+double gsl_costFunction(const gsl_vector *v, void *peaks) {
+  // this array is [numPeaks, numParams, vector<tof>, vector<dspace>,
+  // vector<height^2>]
+  // index as      [0,        1,         2,         , 2+n           , 2+2n]
+  const std::vector<double> *peakVec =
+      reinterpret_cast<std::vector<double> *>(peaks);
+  // number of peaks being fit
+  const size_t numPeaks = static_cast<size_t>(peakVec->at(0));
+  // number of parameters
+  const size_t numParams = static_cast<size_t>(peakVec->at(1));
+  // std::cout << "numPeaks=" << numPeaks << " numParams=" << numParams <<
+  // std::endl;
 
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX2 += d[i] * d[i];
-    sumXY += d[i] * tof[i];
+  // isn't strictly necessary, but makes reading the code much easier
+  const std::vector<double> tofObs(peakVec->begin() + 2,
+                                   peakVec->begin() + 2 + numPeaks);
+  const std::vector<double> dspace(peakVec->begin() + (2 + numPeaks),
+                                   peakVec->begin() + (2 + 2 * numPeaks));
+  const std::vector<double> height2(peakVec->begin() + (2 + 2 * numPeaks),
+                                    peakVec->begin() + (2 + 3 * numPeaks));
+
+  // create the function to convert tof to dspacing
+  double difc = gsl_vector_get(v, 0);
+  double tzero = 0.;
+  double difa = 0.;
+  if (numParams > 1) {
+    tzero = gsl_vector_get(v, 1);
+    if (numParams > 2)
+      difa = gsl_vector_get(v, 2);
+  }
+  auto converter =
+      Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
+
+  // calculate the sum of the residuals from observed peaks
+  double errsum = 0.0;
+  for (size_t i = 0; i < numPeaks; ++i) {
+    const double tofCalib = converter(dspace[i]);
+    const double errsum_i = std::fabs(tofObs[i] - tofCalib) * height2[i];
+    errsum += errsum_i;
   }
 
-  // DIFC only
-  double difc0 = sumXY / sumX2;
-  // Get out early if only DIFC is needed.
-  if (calParams == "DIFC" || num_peaks < 3) {
-    difc = difc0;
-    return;
-  }
+  return errsum;
+}
 
-  // DIFC and t0
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX += d[i];
-    sumY += tof[i];
-  }
+// returns the errsum, the conversion parameters are done by in/out parameters
+// to the function
+// if the fit fails it returns 0.
+double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
+                        double &difa) {
+  const size_t numParams = static_cast<size_t>(peaks[1]);
 
-  double difc1 = 0;
-  double tZero1 = 0;
-  double determinant = num_peaks * sumX2 - sumX * sumX;
-  if (determinant != 0) {
-    difc1 = (num_peaks * sumXY - sumX * sumY) / determinant;
-    tZero1 = sumY / num_peaks - difc1 * sumX / num_peaks;
-  }
-
-  // calculated chi squared for each fit
-  double chisq0 = 0;
-  double chisq1 = 0;
-  for (size_t i = 0; i < d.size(); ++i) {
-    // difc chi-squared
-    double temp = difc0 * d[i] - tof[i];
-    chisq0 += (temp * temp);
-
-    // difc and t0 chi-squared
-    temp = tZero1 + difc1 * d[i] - tof[i];
-    chisq1 += (temp * temp);
-  }
-
-  // Get reduced chi-squared
-  chisq0 = chisq0 / (num_peaks - 1);
-  chisq1 = chisq1 / (num_peaks - 2);
-
-  // check that the value is reasonable, only need to check minimum
-  // side since difa is not in play - shift to a higher minimum
-  // means something went wrong
-  if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin) ||
-      difc1 <= 0. || tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
-    difc1 = 0;
-    tZero1 = 0;
-    chisq1 = CHISQ_BAD;
-  }
-
-  // Select difc, t0 depending on CalibrationParameters chosen and
-  // number of peaks fitted.
-  if (calParams == "DIFC+TZERO" || num_peaks == 3) {
-    // choose best one according to chi-squared
-    if (chisq0 < chisq1) {
-      difc = difc0;
-    } else {
-      difc = difc1;
-      t0 = tZero1;
+  // initial starting point as [DIFC, 0, 0]
+  gsl_vector *fitParams = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(fitParams, 0.0); // set all parameters to zero
+  gsl_vector_set(fitParams, 0, difc);
+  if (numParams > 1) {
+    gsl_vector_set(fitParams, 1, t0);
+    if (numParams > 2) {
+      gsl_vector_set(fitParams, 2, difa);
     }
-    return;
   }
 
-  // DIFC, t0 and DIFA
-  for (size_t i = 0; i < d.size(); ++i) {
-    sumX2Y += d[i] * d[i] * tof[i];
-    sumX3 += d[i] * d[i] * d[i];
-    sumX4 += d[i] * d[i] * d[i] * d[i];
+  // Set initial step sizes
+  gsl_vector *stepSizes = gsl_vector_alloc(numParams);
+  gsl_vector_set_all(stepSizes, 0.1);
+  gsl_vector_set(stepSizes, 0, 0.01);
+
+  // Initialize method and iterate
+  gsl_multimin_function minex_func;
+  minex_func.n = numParams;
+  minex_func.f = &gsl_costFunction;
+  minex_func.params = &peaks;
+
+  // Set up GSL minimzer - simplex is overkill
+  const gsl_multimin_fminimizer_type *minimizerType =
+      gsl_multimin_fminimizer_nmsimplex;
+  gsl_multimin_fminimizer *minimizer =
+      gsl_multimin_fminimizer_alloc(minimizerType, numParams);
+  gsl_multimin_fminimizer_set(minimizer, &minex_func, fitParams, stepSizes);
+
+  // Finally do the fitting
+  size_t iter = 0; // number of iterations
+  const size_t MAX_ITER = 75 * numParams;
+  int status = 0;
+  double size;
+  do {
+    iter++;
+    status = gsl_multimin_fminimizer_iterate(minimizer);
+    if (status)
+      break;
+
+    size = gsl_multimin_fminimizer_size(minimizer);
+    status = gsl_multimin_test_size(size, 1e-4);
+
+  } while (status == GSL_CONTINUE && iter < MAX_ITER);
+
+  // only update calibration values on successful fit
+  double errsum = 0.; // return 0. if fit didn't work
+  std::string status_msg = gsl_strerror(status);
+  if (status_msg == "success") {
+    difc = gsl_vector_get(minimizer->x, 0);
+    if (numParams > 1) {
+      t0 = gsl_vector_get(minimizer->x, 1);
+      if (numParams > 2) {
+        difa = gsl_vector_get(minimizer->x, 2);
+      }
+    }
+    // return from gsl_costFunction can be accessed as fval
+    errsum = minimizer->fval;
   }
 
-  double tZero2 = 0;
-  double difc2 = 0;
-  double difa2 = 0;
-  determinant = num_peaks * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
-                sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
-                sumX * sumX * sumX4 - num_peaks * sumX3 * sumX3;
-  if (determinant != 0) {
-    tZero2 =
-        (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
-         sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
-        determinant;
-    difc2 = (num_peaks * sumXY * sumX4 + sumY * sumX3 * sumX2 +
-             sumX2 * sumX * sumX2Y - sumX2 * sumXY * sumX2 -
-             sumY * sumX * sumX4 - num_peaks * sumX3 * sumX2Y) /
-            determinant;
-    difa2 = (num_peaks * sumX2 * sumX2Y + sumX * sumXY * sumX2 +
-             sumY * sumX * sumX3 - sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y -
-             num_peaks * sumXY * sumX3) /
-            determinant;
+  // free memory
+  gsl_vector_free(fitParams);
+  gsl_vector_free(stepSizes);
+  gsl_multimin_fminimizer_free(minimizer);
+
+  return errsum;
+}
+
+} // end of anonymous namespace
+
+void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                                        const std::vector<double> &tof,
+                                        const std::vector<double> &height2,
+                                        double &difc, double &t0,
+                                        double &difa) {
+  const size_t numPeaks = d.size();
+  if (numPeaks <= 1) {
+    return; // don't do anything
+  }
+  // number of fit parameters 1=[DIFC], 2=[DIFC,TZERO], 3=[DIFC,TZERO,DIFA]
+  // set the maximum number of parameters that will be used
+  // statistics doesn't support having too few peaks
+  size_t maxParams = std::min<size_t>(numPeaks - 1, m_numberMaxParams);
+
+  // this must have the same layout as the unpacking in gsl_costFunction above
+  std::vector<double> peaks(numPeaks * 3 + 2, 0.);
+  peaks[0] = static_cast<double>(d.size());
+  peaks[1] = 1.; // number of parameters to fit
+  for (size_t i = 0; i < numPeaks; ++i) {
+    peaks[i + 2] = tof[i];
+    peaks[i + 2 + numPeaks] = d[i];
+    peaks[i + 2 + 2 * numPeaks] = height2[i];
   }
 
-  // calculated reduced chi squared for each fit
-  double chisq2 = 0;
-  for (size_t i = 0; i < d.size(); ++i) {
-    double temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
-    chisq2 += (temp * temp);
-  }
-  chisq2 = chisq2 / (num_peaks - 3);
-
-  // check that the value is reasonable, only need to check minimum
-  // side since difa is not in play - shift to a higher minimum
-  // or a lower maximum means something went wrong
-  if (m_tofMin <
-          Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
-      m_tofMax <
-          Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
-      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax ||
-      difa2 < m_difaMin || difa2 > m_difaMax) {
-    tZero2 = 0;
-    difc2 = 0;
-    difa2 = 0;
-    chisq2 = CHISQ_BAD;
+  // calculate a starting DIFC
+  double difc_start = difc;
+  if (difc_start == 0.) {
+    const double d_sum = std::accumulate(d.begin(), d.end(), 0.);
+    const double tof_sum = std::accumulate(tof.begin(), tof.end(), 0.);
+    difc_start = tof_sum / d_sum; // number of peaks falls out of division
   }
 
-  // Select difc, t0 and difa depending on CalibrationParameters chosen and
-  // number of peaks fitted.
-  if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
-    difc = difc0;
-    t0 = 0.;
-    difa = 0.;
-  } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
-    difc = difc1;
-    t0 = tZero1;
-    difa = 0.;
-  } else {
-    difc = difc2;
-    t0 = tZero2;
-    difa = difa2;
+  // save the best values so far
+  double best_errsum = std::numeric_limits<double>::max();
+  double best_difc = 0.;
+  double best_t0 = 0.;
+  double best_difa = 0.;
+
+  // loop over possible number of parameters
+  for (size_t numParams = 1; numParams <= maxParams; ++numParams) {
+    peaks[1] = static_cast<double>(numParams);
+    double difc_local = difc_start;
+    double t0_local = 0.;
+    double difa_local = 0.;
+    double errsum = fitDIFCtZeroDIFA(peaks, difc_local, t0_local, difa_local);
+    if (errsum > 0.) {
+      // normalize by degrees of freedom
+      errsum = errsum / static_cast<double>(numPeaks - numParams);
+      // save the best and forget the rest
+      if (errsum < best_errsum) {
+        if (difa_local > m_difaMax || difa_local < m_difaMin)
+          continue; // unphysical fit
+        if (t0_local > m_tzeroMax || t0_local < m_tzeroMin)
+          continue; // unphysical fit
+        best_errsum = errsum;
+        best_difc = difc_local;
+        best_t0 = t0_local;
+        best_difa = difa_local;
+      }
+    }
+  }
+
+  // check that something actually fit and set to the best result
+  if (best_difc > 0. && best_errsum < std::numeric_limits<double>::max()) {
+    difc = best_difc;
+    t0 = best_t0;
+    difa = best_difa;
   }
 }
 
@@ -707,6 +874,7 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
   const double filterBadPulses = getProperty("FilterBadPulses");
 
   auto alg = createChildAlgorithm("LoadEventAndCompress");
+  alg->setLoggingOffset(1);
   alg->setProperty("Filename", filename);
   alg->setProperty("MaxChunkSize", maxChunkSize);
   alg->setProperty("FilterByTofMin", m_tofMin);
@@ -741,6 +909,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 
     g_log.information("Subtracting background");
     auto algMinus = createChildAlgorithm("Minus");
+    algMinus->setLoggingOffset(1);
     algMinus->setProperty("LHSWorkspace", signalWS);
     algMinus->setProperty("RHSWorkspace", backWS);
     algMinus->setProperty("OutputWorkspace", signalWS);
@@ -750,6 +919,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 
     g_log.information("Compressing data");
     auto algCompress = createChildAlgorithm("CompressEvents");
+    algCompress->setLoggingOffset(1);
     algCompress->setProperty("InputWorkspace", signalWS);
     algCompress->setProperty("OutputWorkspace", signalWS);
     algCompress->executeAsChildAlg();
@@ -764,6 +934,7 @@ MatrixWorkspace_sptr PDCalibration::loadAndBin() {
 API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   g_log.information("Binning data in time-of-flight");
   auto rebin = createChildAlgorithm("Rebin");
+  rebin->setLoggingOffset(1);
   rebin->setProperty("InputWorkspace", wksp);
   rebin->setProperty("OutputWorkspace", wksp);
   rebin->setProperty("Params", getPropertyValue("TofBinning"));
@@ -774,19 +945,11 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   return wksp;
 }
 
-namespace {
-
-bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
-  const auto columnNames = table->getColumnNames();
-  return (std::find(columnNames.begin(), columnNames.end(),
-                    std::string("dasid")) != columnNames.end());
-}
-}
-
 void PDCalibration::loadOldCalibration() {
   // load the old one
   std::string filename = getProperty("PreviousCalibration");
   auto alg = createChildAlgorithm("LoadDiffCal");
+  alg->setLoggingOffset(1);
   alg->setProperty("Filename", filename);
   alg->setProperty("WorkspaceName", "NOMold"); // TODO
   alg->setProperty("MakeGroupingWorkspace", false);
@@ -817,7 +980,6 @@ void PDCalibration::loadOldCalibration() {
     m_calibrationTable->addColumn("int", "dasid");
   m_calibrationTable->addColumn("double", "tofmin");
   m_calibrationTable->addColumn("double", "tofmax");
-  setProperty("OutputCalibrationTable", m_calibrationTable);
 
   // copy over the values
   for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount();
@@ -844,9 +1006,10 @@ void PDCalibration::createNewCalTable() {
   // create new calibraion table for when an old one isn't loaded
   // using the signal workspace and CalculateDIFC
   auto alg = createChildAlgorithm("CalculateDIFC");
+  alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", m_uncalibratedWS);
   alg->executeAsChildAlg();
-  API::MatrixWorkspace_sptr difcWS = alg->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_const_sptr difcWS = alg->getProperty("OutputWorkspace");
 
   // create a new workspace
   m_calibrationTable = boost::make_shared<DataObjects::TableWorkspace>();
@@ -878,6 +1041,111 @@ void PDCalibration::createNewCalTable() {
     newRow << 0.;      // tofmin
     newRow << DBL_MAX; // tofmax
   }
+}
+
+void PDCalibration::createInformationWorkspaces() {
+  // table for the fitted location of the various peaks
+  m_peakPositionTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakWidthTable = boost::make_shared<DataObjects::TableWorkspace>();
+  m_peakHeightTable = boost::make_shared<DataObjects::TableWorkspace>();
+
+  m_peakPositionTable->addColumn("int", "detid");
+  m_peakWidthTable->addColumn("int", "detid");
+  m_peakHeightTable->addColumn("int", "detid");
+
+  for (double dSpacing : m_peaksInDspacing) {
+    std::stringstream namess;
+    namess << "@" << std::setprecision(5) << dSpacing;
+    m_peakPositionTable->addColumn("double", namess.str());
+    m_peakWidthTable->addColumn("double", namess.str());
+    m_peakHeightTable->addColumn("double", namess.str());
+  }
+  m_peakPositionTable->addColumn("double", "chisq");
+  m_peakPositionTable->addColumn("double", "normchisq");
+  // residuals aren't needed for FWHM or height
+
+  // convert the map of m_detidToRow to be a vector of detector ids
+  std::vector<detid_t> detIds(m_detidToRow.size());
+  for (const auto &it : m_detidToRow) {
+    detIds[it.second] = it.first;
+  }
+
+  // copy the detector ids from the main table and add lots of NaNs
+  for (const auto &detId : detIds) {
+    API::TableRow newPosRow = m_peakPositionTable->appendRow();
+    API::TableRow newWidthRow = m_peakWidthTable->appendRow();
+    API::TableRow newHeightRow = m_peakHeightTable->appendRow();
+
+    newPosRow << detId;
+    newWidthRow << detId;
+    newHeightRow << detId;
+
+    for (double dSpacing : m_peaksInDspacing) {
+      UNUSED_ARG(dSpacing);
+      newPosRow << std::nan("");
+      newWidthRow << std::nan("");
+      newHeightRow << std::nan("");
+    }
+  }
+}
+
+API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
+  DataObjects::SpecialWorkspace2D_sptr resolutionWksp =
+      boost::make_shared<DataObjects::SpecialWorkspace2D>(
+          m_uncalibratedWS->getInstrument());
+  resolutionWksp->setTitle("average width/height");
+
+  // assume both tables have the same number of rows b/c the algorithm created
+  // both
+  // they are also in the same order
+  // accessing cells is done by (row, col)
+  const size_t numRows = m_peakPositionTable->rowCount();
+  const size_t numPeaks = m_peaksInDspacing.size();
+  std::vector<double> resolution; // vector of non-nan resolutions
+  for (size_t rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+    resolution.clear();
+    // first column is detid
+    const detid_t detId =
+        static_cast<detid_t>(m_peakPositionTable->Int(rowIndex, 0));
+    for (size_t peakIndex = 1; peakIndex < numPeaks + 1; ++peakIndex) {
+      const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
+      if (std::isnormal(pos)) {
+        resolution.push_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
+                             pos);
+      }
+    }
+
+    if (resolution.empty()) {
+      resolutionWksp->setValue(detId, 0.,
+                               0.); // instrument view doesn't like nan
+    } else {
+      // calculate the mean
+      const double mean =
+          std::accumulate(resolution.begin(), resolution.end(), 0.) /
+          static_cast<double>(resolution.size());
+      double stddev = 0.;
+      for (const auto value : resolution) {
+        stddev += (value - mean) * (value * mean);
+      }
+      stddev = std::sqrt(stddev / static_cast<double>(resolution.size() - 1));
+      resolutionWksp->setValue(detId, mean, stddev);
+    }
+  }
+
+  return resolutionWksp;
+}
+
+API::ITableWorkspace_sptr
+PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
+  auto alg = createChildAlgorithm("SortTableWorkspace");
+  alg->setLoggingOffset(1);
+  alg->setProperty("InputWorkspace", table);
+  alg->setProperty("OutputWorkspace", table);
+  alg->setProperty("Columns", "detid");
+  alg->executeAsChildAlg();
+  table = alg->getProperty("OutputWorkspace");
+
+  return table;
 }
 
 } // namespace Algorithms

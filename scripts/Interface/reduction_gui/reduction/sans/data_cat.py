@@ -192,7 +192,7 @@ class DataCatalog(object):
         try:
             self._create_db(db_path, replace_db)
         except Exception as msg:
-            logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
+            logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_info()[1])
             logger.exception(msg)
 
     def _create_db(self, db_path, replace_db):

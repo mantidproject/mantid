@@ -1,6 +1,8 @@
 #
 # GUI Utility Methods
 #
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import math
 import numpy
 import os
@@ -34,8 +36,8 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
     matrix = numpy.ndarray(shape=matrix_shape, dtype='float')
     term_index = 0
-    for i_row in xrange(matrix_shape[0]):
-        for j_col in xrange(matrix_shape[1]):
+    for i_row in range(matrix_shape[0]):
+        for j_col in range(matrix_shape[1]):
             matrix[i_row][j_col] = matrix_terms[term_index]
             term_index += 1
 
@@ -116,7 +118,7 @@ def map_to_color(data_array, base_color, change_color_flag):
 
         color_value_list = [None, None, None]
 
-        for i_color in xrange(3):
+        for i_color in range(3):
             c_flag = change_color_flag[i_color]
             if c_flag:
                 # this color will be changed for color map
@@ -156,7 +158,7 @@ def map_to_color(data_array, base_color, change_color_flag):
     num_steps_color = int(math.pow(float(max(data_array)), 1./num_changes)+0.5)
 
     # calculate
-    for array_index in xrange(array_size):
+    for array_index in range(array_size):
         value = data_array[array_index]
         rgb = convert_value_to_color(base_color, change_color_flag, num_changes, num_steps_color, value)
         color_list[array_index] = rgb
@@ -170,7 +172,8 @@ def parse_float_array(array_str):
     :param array_str:
     :return: boolean, list of floats/error message
     """
-    assert isinstance(array_str, str), 'Input array for parsing must be of type string.'
+    assert isinstance(array_str, str), 'Input array {0} for parsing must be of type string but not a {1}.' \
+                                       ''.format(array_str, type(array_str))
     array_str = array_str.replace(',', ' ')
     array_str = array_str.replace('\n', ' ')
     array_str = array_str.replace('\t ', ' ')
@@ -240,7 +243,7 @@ def parse_integer_list(array_str, expected_size=None):
             else:
                 raise RuntimeError('Unable to parse %s due to value error' % int_str)
 
-            integer_list.extend(xrange(start_value, end_value+1))
+            integer_list.extend(range(start_value, end_value+1))
     # END-FOR
 
     # check size
@@ -259,7 +262,8 @@ def parse_float_editors(line_edits, allow_blank=False):
     - return a list of float
     :param line_edits: list/line edit
     :param allow_blank: flag to allow blanks
-    :return: (True, list of floats); (False, error message)
+    :return: (True, list of floats); (False, error message).  If blank is allowed, None value is used for the blank
+        LineEdit.
     """
     # Set flag
     return_single_value = False

@@ -266,7 +266,7 @@ void CrystalFieldMultiSpectrum::calcExcitations(
   // using an index instead of a name for performance reasons
   auto &source = dynamic_cast<Peaks &>(*m_source);
   double intensityScaling;
-  if (source.m_IntensityScalingIdx.size() == 0) {
+  if (source.m_IntensityScalingIdx.empty()) {
     intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
   } else {
     intensityScaling = getParameter(source.m_IntensityScalingIdx[iSpec]);
@@ -384,6 +384,7 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
       updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i],
                      m_FWHMs[i], i);
     }
+    fun.checkFunction();
   } catch (std::out_of_range &) {
     buildTargetFunction();
     return;

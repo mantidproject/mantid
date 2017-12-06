@@ -7,7 +7,7 @@
 #include "AlgorithmDialog.h"
 
 #include <QHash>
-#include <QtCore/qvariant.h>
+#include <QVariant>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Property.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
@@ -56,7 +56,7 @@ class GenericDialog : public AlgorithmDialog {
 
 public:
   // Constructor
-  GenericDialog(QWidget *parent = 0);
+  GenericDialog(QWidget *parent = nullptr);
   // Destructor
   ~GenericDialog() override;
 

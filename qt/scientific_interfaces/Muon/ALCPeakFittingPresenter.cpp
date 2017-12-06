@@ -4,11 +4,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "ALCHelper.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
 namespace MantidQt {
+namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view,
@@ -69,7 +70,7 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // If PeakPicker is changed, it should be enabled, which means a peak function
   // should be selected
   // (See onCurrentFunctionChanged)
-  assert(index);
+  assert(bool(index));
 
   auto peakFunc = m_view->peakPicker();
 
@@ -101,10 +102,10 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
   if (fittedPeaks && dataWS) {
     auto x = dataWS->x(0);
     m_view->setFittedCurve(
-        *(ALCHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
+        *(QwtHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
     m_view->setFunction(fittedPeaks);
   } else {
-    m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+    m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
     m_view->setFunction(IFunction_const_sptr());
   }
 }
@@ -112,10 +113,10 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
 void ALCPeakFittingPresenter::onDataChanged() {
   auto dataWS = m_model->data();
   if (dataWS) {
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
-                         ALCHelper::curveErrorsFromWs(m_model->data(), 0));
+    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_model->data(), 0)),
+                         QwtHelper::curveErrorsFromWs(m_model->data(), 0));
   } else {
-    m_view->setDataCurve(*(ALCHelper::emptyCurveData()), Mantid::MantidVec{});
+    m_view->setDataCurve(*(QwtHelper::emptyCurveData()), Mantid::MantidVec{});
   }
 }
 
@@ -149,7 +150,7 @@ bool ALCPeakFittingPresenter::plotGuessOnGraph() {
   if (func && dataWS) {
     auto xdata = dataWS->x(0);
     m_view->setFittedCurve(
-        *(ALCHelper::curveDataFromFunction(func, xdata.rawData())));
+        *(QwtHelper::curveDataFromFunction(func, xdata.rawData())));
     plotted = true;
   }
   return plotted;
@@ -159,7 +160,7 @@ bool ALCPeakFittingPresenter::plotGuessOnGraph() {
  * Removes any fit function from the graph.
  */
 void ALCPeakFittingPresenter::removePlots() {
-  m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+  m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
   m_view->changePlotGuessState(false);
   m_guessPlotted = false;
 }

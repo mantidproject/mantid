@@ -1,7 +1,8 @@
+from __future__ import (absolute_import, division, print_function)
 import os
 
 from PyQt4 import QtGui, QtCore
-import ui_PeakIntegrationSpreadSheet
+from . import ui_PeakIntegrationSpreadSheet
 
 
 class PeaksIntegrationReportDialog(QtGui.QDialog):
@@ -68,13 +69,13 @@ class PeaksIntegrationReportDialog(QtGui.QDialog):
         assert isinstance(peak_integration_summary, dict)
 
         if len(peak_integration_summary) == 0:
-            print '[WARNING] There is no peak integration summary given for the report.'
+            print('[WARNING] There is no peak integration summary given for the report.')
             return
 
         scan_number_list = sorted(peak_integration_summary.keys())
         for scan_number in scan_number_list:
-            print '[DB...BAT] Scan {0} Peak integration report keys: {1}' \
-                  ''.format(scan_number, peak_integration_summary[scan_number].keys())
+            print('[DB...BAT] Scan {0} Peak integration report '
+                  'keys: {1}'.format(scan_number, peak_integration_summary[scan_number].keys()))
 
             spice_hkl = peak_integration_summary[scan_number]['SPICE HKL']
             calculated_hkl = peak_integration_summary[scan_number]['Mantid HKL']

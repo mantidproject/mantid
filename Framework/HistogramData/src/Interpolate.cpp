@@ -8,10 +8,12 @@
 #include <sstream>
 
 using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
 namespace {
+
+/// Enumeration for supported interpolation types.
+enum class InterpolationType { LINEAR, CSPLINE };
 
 constexpr const char *LINEAR_NAME = "Linear";
 constexpr const char *CSPLINE_NAME = "CSpline";
@@ -66,9 +68,14 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  * @param output A histogram where interpolated values are store
  * @throw runtime_error Signals that the sanity check failed.
  */
-void sanityCheck(const Histogram &input, const Histogram &output) {
+void sanityCheck(const Histogram &input, const Histogram &output,
+                 const size_t minInputSize) {
   const auto inPoints = input.points();
   const auto outPoints = output.points();
+  if (inPoints.size() < minInputSize) {
+    throw std::runtime_error(
+        "interpolate - input histogram has too few points");
+  }
   if (outPoints.front() < inPoints.front() ||
       outPoints.back() > inPoints.back()) {
     throw std::runtime_error("interpolate - input does not cover all points in "
@@ -79,9 +86,6 @@ void sanityCheck(const Histogram &input, const Histogram &output) {
         "interpolate - input X data must be sorted in ascending order.");
   }
 }
-
-/// Enumeration for supported interpolation types.
-enum class InterpolationType { LINEAR, CSPLINE };
 
 /**
  * Perform interpolation in place
@@ -188,6 +192,22 @@ namespace Mantid {
 namespace HistogramData {
 
 /**
+ * Return the minimum size of input points for cpline interpolation.
+ * @return the minimum number of points
+ */
+size_t minSizeForCSplineInterpolation() {
+  return gsl_interp_type_min_size(gsl_interp_cspline);
+}
+
+/**
+ * Return the minimum size of input points for linear interpolation.
+ * @return the minimum number of points
+ */
+size_t minSizeForLinearInterpolation() {
+  return gsl_interp_type_min_size(gsl_interp_linear);
+}
+
+/**
  * Linearly interpolate through the y values of a histogram assuming that the
  * calculated "nodes" are stepSize apart. Currently errors are not treated.
  * @param input Input histogram defining x values and containing calculated
@@ -198,7 +218,7 @@ namespace HistogramData {
  * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
-  sanityCheck(input, stepSize, 2, LINEAR_NAME);
+  sanityCheck(input, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
 
   HistogramY ynew(input.y().size());
   interpolateYLinearInplace(input, stepSize, ynew);
@@ -219,7 +239,7 @@ Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
  * @param stepSize See interpolateLinear
  */
 void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
-  sanityCheck(inOut, stepSize, 2, LINEAR_NAME);
+  sanityCheck(inOut, stepSize, minSizeForLinearInterpolation(), LINEAR_NAME);
   interpolateYLinearInplace(inOut, stepSize, inOut.mutableY());
 }
 
@@ -229,7 +249,7 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
  * @param output A histogram containing the interpolated values
  */
 void interpolateLinearInplace(const Histogram &input, Histogram &output) {
-  sanityCheck(input, output);
+  sanityCheck(input, output, minSizeForLinearInterpolation());
   const auto &points = input.points().rawData();
   const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();
@@ -249,7 +269,7 @@ void interpolateLinearInplace(const Histogram &input, Histogram &output) {
  * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
-  sanityCheck(input, stepSize, 4, CSPLINE_NAME);
+  sanityCheck(input, stepSize, minSizeForCSplineInterpolation(), CSPLINE_NAME);
 
   HistogramY ynew(input.y().size());
   interpolateYCSplineInplace(input, stepSize, ynew);
@@ -270,7 +290,7 @@ Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
  * @param stepSize See interpolateCSpline
  */
 void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
-  sanityCheck(inOut, stepSize, 4, CSPLINE_NAME);
+  sanityCheck(inOut, stepSize, minSizeForCSplineInterpolation(), CSPLINE_NAME);
   interpolateYCSplineInplace(inOut, stepSize, inOut.mutableY());
 }
 
@@ -280,7 +300,7 @@ void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
  * @param output A histogram where to store the interpolated values
  */
 void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
-  sanityCheck(input, output);
+  sanityCheck(input, output, minSizeForCSplineInterpolation());
   const auto &points = input.points().rawData();
   const auto &y = input.y().rawData();
   const auto &interpPoints = output.points();

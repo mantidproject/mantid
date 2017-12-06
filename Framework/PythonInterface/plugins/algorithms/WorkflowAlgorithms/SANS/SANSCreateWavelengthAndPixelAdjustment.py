@@ -226,5 +226,6 @@ class SANSCreateWavelengthAndPixelAdjustment(DataProcessorAlgorithm):
                                                           " only one histogram."})
         return errors
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSCreateWavelengthAndPixelAdjustment)

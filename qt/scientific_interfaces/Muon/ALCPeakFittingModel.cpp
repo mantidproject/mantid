@@ -1,7 +1,5 @@
 #include "ALCPeakFittingModel.h"
 
-#include "ALCHelper.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"

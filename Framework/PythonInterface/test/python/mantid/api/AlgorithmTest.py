@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
+import six
 
 import unittest
+import json
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
-
-###########################################################
 
 class AlgorithmTest(unittest.TestCase):
 
@@ -52,7 +52,37 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3","OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+
+    def test_execute_succeeds_with_unicode_props(self):
+        data = [1.0,2.0,3.0]
+        kwargs = {'child':True}
+        unitx = 'Wavelength'
+        if six.PY2:
+            # force a property value to be unicode to assert conversion happens correctly
+            # this is only an issue in python2
+            kwargs[unicode('UnitX')] = unicode(unitx)
+        else:
+            kwargs['UnitX'] = unitx
+
+
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,**kwargs)
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+        self.assertEquals(alg.getProperty('NSpec').value, 1)
+        self.assertEquals(type(alg.getProperty('NSpec').value), int)
+        self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
+        ws = alg.getProperty('OutputWorkspace').value
+        self.assertTrue(ws.getMemorySize() > 0.0 )
+
+        as_str = str(alg)
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+
+    def test_execute_succeeds_with_unicode_kwargs(self):
+        props = json.loads('{"DryRun":true}') # this is always unicode
+        alg = run_algorithm('Segfault', **props)
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
         alg = AlgorithmManager.createUnmanaged('Load')
@@ -84,13 +114,14 @@ class AlgorithmTest(unittest.TestCase):
     def test_createChildAlgorithm_respects_keyword_arguments(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         try:
-            child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True)
+            child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,
+                                                        endProgress=0.9,enableLogging=True)
         except Exception as exc:
             self.fail("Expected createChildAlgorithm not to throw but it did: %s" % (str(exc)))
 
         # Unknown keyword
-        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True, unknownKW=1)
+        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,
+                          endProgress=0.9,enableLogging=True, unknownKW=1)
 
 if __name__ == '__main__':
     unittest.main()
-

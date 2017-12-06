@@ -11,6 +11,8 @@
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
 
+#include <QDropEvent>
+#include <QSettings>
 #include <boost/make_shared.hpp>
 
 namespace MantidQt {
@@ -29,7 +31,8 @@ namespace SpectrumView {
  */
 SpectrumView::SpectrumView(QWidget *parent)
     : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
-      m_sliderHandler(NULL), m_rangeHandler(NULL), m_emodeHandler(NULL) {
+      m_sliderHandler(nullptr), m_rangeHandler(nullptr),
+      m_emodeHandler(nullptr) {
   m_ui->setupUi(this);
   connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
           SLOT(changeSpectrumDisplay(int)));
@@ -366,7 +369,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
     spec.writeLine("ColorMapFileName") << colorMapFileName;
 
   spec.writeLine("Workspaces");
-  for (auto source : m_dataSource) {
+  for (const auto &source : m_dataSource) {
     spec << source->getWorkspace()->getName();
   }
 
@@ -395,7 +398,7 @@ std::string SpectrumView::getWindowName() {
 
 std::vector<std::string> SpectrumView::getWorkspaceNames() {
   std::vector<std::string> names;
-  for (auto source : m_dataSource) {
+  for (const auto &source : m_dataSource) {
     names.push_back(source->getWorkspace()->getName());
   }
   return names;

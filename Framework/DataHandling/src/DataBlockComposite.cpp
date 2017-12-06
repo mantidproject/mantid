@@ -412,6 +412,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   // Get intervals for the data blocks which should be removed
   auto removeBlocks = toRemove.getDataBlocks();
   std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
+  toRemoveIntervals.reserve(removeBlocks.size());
   for (const auto &dataBlock : removeBlocks) {
     toRemoveIntervals.emplace_back(dataBlock.getMinSpectrumID(),
                                    dataBlock.getMaxSpectrumID());

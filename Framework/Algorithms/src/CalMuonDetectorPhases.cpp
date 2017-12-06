@@ -19,7 +19,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
@@ -203,22 +202,22 @@ void CalMuonDetectorPhases::extractDetectorInfo(
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);
   // If asym<0, take the absolute value and add \pi to phase
-  // f(x) = A * sin( w * x + p) = -A * sin( w * x + p + PI)
+  // f(x) = A * cos( w * x - p) = -A * cos( w * x - p - PI)
   if (asym < 0) {
     asym = -asym;
-    phase = phase + M_PI;
+    phase = phase - M_PI;
   }
   // Now convert phases to interval [0, 2PI)
-  int factor = static_cast<int>(floor(phase / 2 / M_PI));
+  int factor = static_cast<int>(floor(phase / (2. * M_PI)));
   if (factor) {
-    phase = phase - factor * 2 * M_PI;
+    phase = phase - factor * 2. * M_PI;
   }
   // Copy parameters to new row in results table
   API::TableRow row = resultsTab->appendRow();
   row << static_cast<int>(spectrumNumber) << asym << phase;
 }
 
-/** Creates the fitting function f(x) = A * sin( w*x + p) + B as string
+/** Creates the fitting function f(x) = A * cos( w*x - p) + B as string
 * Two modes:
 * 1) Fixed frequency, no background - for main sequential fit
 * 2) Varying frequency, flat background - for finding frequency from asymmetry
@@ -230,15 +229,15 @@ void CalMuonDetectorPhases::extractDetectorInfo(
 std::string CalMuonDetectorPhases::createFittingFunction(double freq,
                                                          bool fixFreq) {
   // The fitting function is:
-  // f(x) = A * sin ( w * x + p ) [+ B]
+  // f(x) = A * sin ( w * x - p ) [+ B]
   std::ostringstream ss;
   ss << "name=UserFunction,";
   if (fixFreq) {
     // no background
-    ss << "Formula=A*sin(w*x+p),";
+    ss << "Formula=A*cos(w*x-p),";
   } else {
     // flat background
-    ss << "Formula=A*sin(w*x+p)+B,";
+    ss << "Formula=A*cos(w*x-p)+B,";
     ss << "B=0.5,";
   }
   ss << "A=0.5,";

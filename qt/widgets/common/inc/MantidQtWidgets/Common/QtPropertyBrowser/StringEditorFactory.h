@@ -8,7 +8,7 @@ class StringEditorFactory
     : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  StringEditorFactory(QObject *parent = 0)
+  StringEditorFactory(QObject *parent = nullptr)
       : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:

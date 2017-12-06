@@ -11,7 +11,7 @@ from sans.state.calculate_transmission import StateCalculateTransmission
 from sans.state.normalize_to_monitor import StateNormalizeToMonitor
 from sans.state.wavelength_and_pixel_adjustment import StateWavelengthAndPixelAdjustment
 from sans.state.automatic_setters import (automatic_setters)
-from sans.common.enums import SANSInstrument
+from sans.common.enums import SANSFacility
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -23,10 +23,12 @@ class StateAdjustment(StateBase):
     normalize_to_monitor = TypedParameter(StateNormalizeToMonitor, validator_sub_state)
     wavelength_and_pixel_adjustment = TypedParameter(StateWavelengthAndPixelAdjustment, validator_sub_state)
     wide_angle_correction = BoolParameter()
+    show_transmission = BoolParameter()
 
     def __init__(self):
         super(StateAdjustment, self).__init__()
         self.wide_angle_correction = False
+        self.show_transmission = False
 
     def validate(self):
         is_invalid = {}
@@ -80,10 +82,10 @@ class StateAdjustmentBuilder(object):
 
 
 def get_adjustment_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
+    # The data state has most of the information that we require to define the adjustment. For the factory method, only
     # the instrument is of relevance.
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateAdjustmentBuilder()
     else:
         raise NotImplementedError("StateAdjustmentBuilder: Could not find any valid adjustment builder for the "

@@ -60,8 +60,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
-    #pylint: disable=too-many-locals,too-many-branches
-    def PyExec(self):
+    def PyExec(self):  # noqa: C901
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
@@ -255,5 +254,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             _dark(workspace_name, "DefaultDarkCurrentAlgorithm")
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(SANSBeamSpreaderTransmission)

@@ -241,6 +241,18 @@ public:
     TS_ASSERT_THROWS(mcabs->execute(), std::invalid_argument);
   }
 
+  void test_Lower_Limit_for_Number_of_Wavelengths() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Direct, -1, -1};
+    int nlambda{1};
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
+                     std::runtime_error)
+    nlambda = 2;
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "CSpline"),
+                     std::runtime_error)
+  }
+
   void test_event_workspace() {
     auto inputWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 2,

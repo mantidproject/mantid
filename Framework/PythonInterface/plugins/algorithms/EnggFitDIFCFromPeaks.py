@@ -1,4 +1,3 @@
-#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -19,27 +18,27 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
     def PyInit(self):
 
         self.declareProperty(ITableWorkspaceProperty('FittedPeaks', '', Direction.Input),
-                             doc = "Information on fitted peaks, in the format produced by EnggFitPeaks. "
+                             doc="Information on fitted peaks, in the format produced by EnggFitPeaks. "
                              "The table must contain, for every peak fitted the expected peak value "
                              "(in d-spacing), and the parameters fitted. The expected values are given "
                              "in the column labelled 'dSpacing'. When using the back-to-back exponential "
                              "peak function, the 'X0' column must have the fitted peak center.")
 
         self.declareProperty('OutParametersTable', '', direction=Direction.Input,
-                             doc = 'Name for a table workspace with the fitted values calculated by '
+                             doc='Name for a table workspace with the fitted values calculated by '
                              'this algorithm (DIFC and TZERO calibration parameters) for GSAS. '
                              'These two parameters are added as two columns in a single row. If not given, '
                              'the table workspace is not created.')
 
         self.declareProperty('DIFA', 0.0, direction = Direction.Output,
-                             doc = 'Fitted DIFA value. This parameter is not effectively considered and it '
+                             doc='Fitted DIFA value. This parameter is not effectively considered and it '
                              'is always zero in this version of the algorithm.')
 
         self.declareProperty('DIFC', 0.0, direction = Direction.Output,
-                             doc = "Fitted DIFC calibration parameter")
+                             doc="Fitted DIFC calibration parameter")
 
         self.declareProperty('TZERO', 0.0, direction = Direction.Output,
-                             doc = "Fitted TZERO calibration parameter")
+                             doc="Fitted TZERO calibration parameter")
 
     def validateInputs(self):
         errors = dict()
@@ -91,22 +90,22 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
         convert_tbl_alg.setProperty('ColumnX', 'dSpacing')
         convert_tbl_alg.setProperty('ColumnY', 'X0')
         convert_tbl_alg.execute()
-        dSpacingVsTof = convert_tbl_alg.getProperty('OutputWorkspace').value
+        d_tof_conversion_ws = convert_tbl_alg.getProperty('OutputWorkspace').value
 
         # Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
         fit_alg = self.createChildAlgorithm('Fit')
         fit_alg.setProperty('Function', 'name=LinearBackground')
-        fit_alg.setProperty('InputWorkspace', dSpacingVsTof)
+        fit_alg.setProperty('InputWorkspace', d_tof_conversion_ws)
         fit_alg.setProperty('WorkspaceIndex', 0)
         fit_alg.setProperty('CreateOutput', True)
         fit_alg.execute()
         param_table = fit_alg.getProperty('OutputParameters').value
 
-        tzero = param_table.cell('Value', 0) # A0
-        difc = param_table.cell('Value', 1) # A1
-        difa = 0.0 # Not fitted, we may add an option for this later on
+        tzero = param_table.cell('Value', 0)  # A0
+        difc = param_table.cell('Value', 1)  # A1
+        difa = 0.0  # Not fitted, we may add an option for this later on
 
-        return (difa, difc, tzero)
+        return difa, difc, tzero
 
     def _produce_outputs(self, difa, difc, tzero, tbl_name):
         """
@@ -131,7 +130,8 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         # optional outputs
         if tbl_name:
-            EnggUtils.generateOutputParTable(tbl_name, difa, difc, tzero)
+            EnggUtils.generate_output_param_table(tbl_name, difa, difc, tzero)
             self.log().information("Output parameters added into a table workspace: %s" % tbl_name)
+
 
 AlgorithmFactory.subscribe(EnggFitDIFCFromPeaks)

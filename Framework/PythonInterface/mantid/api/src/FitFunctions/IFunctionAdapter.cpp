@@ -183,7 +183,7 @@ boost::python::object
 IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
-  for (auto fun : functions) {
+  for (const auto &fun : functions) {
     list.append(fun);
   }
   return list;

@@ -10,8 +10,8 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include <qwt_plot.h>
@@ -1021,7 +1021,7 @@ int LineViewer::getPlotAxis() const { return m_lineOptions->getPlotAxis(); }
  * @param curveData : Curve Data to read.
  */
 void LineViewer::setupScaleEngine(MantidQwtWorkspaceData &curveData) {
-  QwtScaleEngine *engine = NULL;
+  QwtScaleEngine *engine = nullptr;
   auto from = curveData.getYMin();
   auto to = curveData.getYMax();
 

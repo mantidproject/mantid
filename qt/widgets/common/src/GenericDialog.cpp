@@ -10,21 +10,23 @@
 #include "MantidKernel/MaskedProperty.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
-#include <QScrollArea>
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QLabel>
-#include <QPalette>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QLineEdit>
-#include <QSignalMapper>
-#include <QFileInfo>
+#include <QDesktopWidget>
 #include <QDir>
+#include <QFileInfo>
+#include <QGridLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPalette>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSignalMapper>
+#include <QVBoxLayout>
+
 #include <climits>
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
@@ -42,7 +44,7 @@ using namespace Mantid::API;
 * Default Constructor
 */
 GenericDialog::GenericDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_algoPropertiesWidget(NULL) {}
+    : AlgorithmDialog(parent), m_algoPropertiesWidget(nullptr) {}
 
 /**
 * Destructor

@@ -1,5 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -19,6 +19,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -27,9 +28,8 @@
 #include <functional>
 #include <numeric>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
-using Mantid::Kernel::Strings::toString;
 
 namespace Mantid {
 namespace API {
@@ -106,7 +106,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
  *
  * Used for setting spectrum number and detector ID information of spectra */
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
-  if (m_isInitialized && (indexInfo.storageMode() != storageMode()))
+  if (indexInfo.storageMode() != storageMode())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: "
                                 "Parallel::StorageMode in IndexInfo does not "
                                 "match storage mode in workspace");
@@ -117,15 +117,12 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                                 "does not match number of histograms in "
                                 "workspace");
 
-  for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    getSpectrum(i)
-        .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
-  }
-  setStorageMode(indexInfo.storageMode());
-  *m_indexInfo = indexInfo;
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(indexInfo);
   m_indexInfoNeedsUpdate = false;
   if (!m_indexInfo->spectrumDefinitions())
     buildDefaultSpectrumDefinitions();
+  // Fails if spectrum definitions contain invalid indices.
+  rebuildDetectorIDGroupings();
   // This sets the SpectrumDefinitions for the SpectrumInfo, which may seem
   // counterintuitive at first -- why would setting IndexInfo modify internals
   // of SpectrumInfo? However, logically it would not make sense to assign
@@ -141,10 +138,6 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // are thus assigned by IndexInfo, which acts at a highler level and is
   // typically used at construction time of a workspace, i.e., there is no data
   // in histograms yet which would need to be regrouped.
-  // Fails if spectrum definitions contain invalid indices.
-  rebuildDetectorIDGroupings();
-  // Internally clears the flags that require spectrum definition updates (set
-  // by rebuildDetectorIDGrouping).
   setSpectrumDefinitions(m_indexInfo->spectrumDefinitions());
 }
 
@@ -172,7 +165,13 @@ const std::string MatrixWorkspace::toString() const {
   os << id() << "\n"
      << "Title: " << getTitle() << "\n"
      << "Histograms: " << getNumberHistograms() << "\n"
-     << "Bins: " << blocksize() << "\n";
+     << "Bins: ";
+
+  try {
+    os << blocksize() << "\n";
+  } catch (std::length_error &) {
+    os << "variable\n"; // TODO shouldn't use try/catch
+  }
 
   if (isHistogramData())
     os << "Histogram\n";
@@ -238,8 +237,16 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
+  Indexing::IndexInfo indices(NVectors);
+  // Empty SpectrumDefinitions to indicate no default mapping to detectors.
+  indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(NVectors));
+  return initialize(indices, histogram);
+}
+
+void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
+                                 const HistogramData::Histogram &histogram) {
   // Check validity of arguments
-  if (NVectors == 0 || histogram.x().size() == 0) {
+  if (indexInfo.size() == 0 || histogram.x().empty()) {
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -247,29 +254,13 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized)
     return;
-
-  setNumberOfDetectorGroups(NVectors);
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
-
-  // Invoke init() method of the derived class inside a try/catch clause
-  try {
-    this->init(NVectors, histogram);
-  } catch (std::runtime_error &) {
-    throw;
-  }
+  setStorageMode(indexInfo.storageMode());
+  setNumberOfDetectorGroups(indexInfo.size());
+  init(histogram);
+  setIndexInfo(indexInfo);
 
   // Indicate that this workspace has been initialized to prevent duplicate
   // attempts.
-  m_isInitialized = true;
-}
-
-void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
-                                 const HistogramData::Histogram &histogram) {
-  initialize(indexInfo.size(), histogram);
-  // Reopen initialization since setIndexInfo needs to disable some consistency
-  // checks that prevent setting an incompatible IndexInfo after initialization.
-  m_isInitialized = false;
-  setIndexInfo(indexInfo);
   m_isInitialized = true;
 }
 
@@ -590,6 +581,11 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
  */
 std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
     const std::vector<detid_t> &detIdList) const {
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
+    throw std::runtime_error("MatrixWorkspace: Using getIndicesFromDetectorIDs "
+                             "in a parallel run is most likely incorrect. "
+                             "Aborting.");
+
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto detIDs = getSpectrum(i).getDetectorIDs();
@@ -669,7 +665,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
   // determine the data range
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra;
        workspaceIndex++) {
-    const MantidVec &dataX = this->readX(workspaceIndex);
+    const auto &dataX = this->x(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
     if (std::isfinite(xfront) && std::isfinite(xback)) {
@@ -705,7 +701,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
        wksp_index++) {
     // Get Handle to data
     const Mantid::MantidVec &x = this->readX(wksp_index);
-    const Mantid::MantidVec &y = this->readY(wksp_index);
+    const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
@@ -931,7 +927,8 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  *  @return whether the workspace contains histogram data
  */
 bool MatrixWorkspace::isHistogramData() const {
-  bool isHist = (readX(0).size() != blocksize());
+  // all spectra *should* have the same behavior
+  bool isHist = (x(0).size() != y(0).size());
   // TODOHIST temporary sanity check
   if (isHist) {
     if (getSpectrum(0).histogram().xMode() !=
@@ -957,26 +954,38 @@ bool MatrixWorkspace::isCommonBins() const {
   if (!m_isCommonBinsFlagSet) {
     m_isCommonBinsFlag = true;
 
+    const size_t numHist = getNumberHistograms();
     // there being only one or zero histograms is accepted as not being an error
-    if (blocksize() || getNumberHistograms() > 1) {
-      // otherwise will compare some of the data, to save time just check two
-      // the first and the last
-      const size_t lastSpec = getNumberHistograms() - 1;
-      // Quickest check is to see if they are actually the same vector
-      if (&(readX(0)[0]) != &(readX(lastSpec)[0])) {
-        // Now check numerically
-        const double first =
-            std::accumulate(readX(0).begin(), readX(0).end(), 0.);
-        const double last =
-            std::accumulate(readX(lastSpec).begin(), readX(lastSpec).end(), 0.);
-        if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
+    if (numHist > 1) {
+      const size_t numBins = x(0).size();
+      for (size_t i = 1; i < numHist; ++i) {
+        if (x(i).size() != numBins) {
           m_isCommonBinsFlag = false;
+          break;
         }
+      }
 
-        // handle Nan's and inf's
-        if ((std::isinf(first) != std::isinf(last)) ||
-            (std::isnan(first) != std::isnan(last))) {
-          m_isCommonBinsFlag = false;
+      // there being only one or zero histograms is accepted as not being an
+      // error
+      if (m_isCommonBinsFlag) {
+        // otherwise will compare some of the data, to save time just check two
+        // the first and the last
+        const size_t lastSpec = numHist - 1;
+        // Quickest check is to see if they are actually the same vector
+        if (&(x(0)[0]) != &(x(lastSpec)[0])) {
+          // Now check numerically
+          const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
+          const double last =
+              std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
+          if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
+            m_isCommonBinsFlag = false;
+          }
+
+          // handle Nan's and inf's
+          if ((std::isinf(first) != std::isinf(last)) ||
+              (std::isnan(first) != std::isnan(last))) {
+            m_isCommonBinsFlag = false;
+          }
         }
       }
     }
@@ -1008,8 +1017,8 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
         workspaceIndex, this->getNumberHistograms(),
         "MatrixWorkspace::maskBin,workspaceIndex");
   // Then check the bin index
-  if (binIndex >= this->blocksize())
-    throw Kernel::Exception::IndexError(binIndex, this->blocksize(),
+  if (binIndex >= y(workspaceIndex).size())
+    throw Kernel::Exception::IndexError(binIndex, y(workspaceIndex).size(),
                                         "MatrixWorkspace::maskBin,binIndex");
 
   // this function is marked parallel critical
@@ -1080,6 +1089,16 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   return it->second;
 }
 
+/** Set the list of masked bins for given workspaceIndex. Not thread safe.
+ *
+ * No data is masked and previous masking for any bin for this workspace index
+ * is overridden, so this should only be used for copying flags into a new
+ * workspace, not for performing masking operations. */
+void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
+                                    const MaskList &maskedBins) {
+  m_masks[workspaceIndex] = maskedBins;
+}
+
 /** Sets the internal monitor workspace to the provided workspace.
  *  This method is intended for use by data-loading algorithms.
  *  Note that no checking is performed as to whether this workspace actually
@@ -1139,7 +1158,7 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
 
@@ -1165,7 +1184,7 @@ Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
   return log->lastTime();
@@ -1286,6 +1305,9 @@ public:
       return m_axis.length();
   }
 
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override { return m_axis.length(); }
+
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
@@ -1369,6 +1391,9 @@ public:
   size_t getNBins() const override {
     return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
   }
+
+  /// number of axis points (bin boundaries)
+  size_t getNBoundaries() const override { return m_X.size(); }
 
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
@@ -1494,19 +1519,19 @@ signal_t MatrixWorkspace::getSignalAtCoord(
                                 "Workspace can only have 2 axes, found " +
                                 std::to_string(this->axes()));
 
-  coord_t x = coords[0];
-  coord_t y = coords[1];
+  coord_t xCoord = coords[0];
+  coord_t yCoord = coords[1];
   // First, find the workspace index
   Axis *ax1 = this->getAxis(1);
   size_t wi(-1);
   try {
-    wi = ax1->indexOfValue(y);
+    wi = ax1->indexOfValue(yCoord);
   } catch (std::out_of_range &) {
     return std::numeric_limits<double>::quiet_NaN();
   }
 
   const size_t nhist = this->getNumberHistograms();
-  const auto &yVals = this->readY(wi);
+  const auto &yVals = this->y(wi);
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
   if (normalization == VolumeNormalization && ax1->isNumeric()) {
     size_t uVI; // unused vertical index.
@@ -1520,39 +1545,41 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const auto &X = this->binEdges(wi);
-    auto it = std::lower_bound(X.cbegin(), X.cend(), x);
-    if (it == X.end()) {
-      // Out of range
+    const auto &xVals = x(wi);
+    size_t i;
+    try {
+      if (isHistogramData())
+        i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(),
+                                                        xCoord);
+      else
+        i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(),
+                                                          xCoord);
+    } catch (std::out_of_range &) {
       return std::numeric_limits<double>::quiet_NaN();
-    } else {
-      size_t i = (it - X.begin());
-      if (i > 0) {
-        double y = yVals[i - 1];
-        // What is our normalization factor?
-        switch (normalization) {
-        case NoNormalization:
-          return y;
-        case VolumeNormalization: {
-          // Divide the signal by the area
-          auto volume = yBinSize * (X[i] - X[i - 1]);
-          if (volume == 0.0) {
-            return std::numeric_limits<double>::quiet_NaN();
-          }
-          return y / volume;
-        }
-        case NumEventsNormalization:
-          // Not yet implemented, may not make sense
-          return y;
-        }
-        // This won't happen
-        return y;
-      } else
-        return std::numeric_limits<double>::quiet_NaN();
     }
-  } else
-    // Out of range
+
+    double y = yVals[i];
+    // What is our normalization factor?
+    switch (normalization) {
+    case NoNormalization:
+      return y;
+    case VolumeNormalization: {
+      // Divide the signal by the area
+      auto volume = yBinSize * (xVals[i + 1] - xVals[i]);
+      if (volume == 0.0) {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+      return y / volume;
+    }
+    case NumEventsNormalization:
+      // Not yet implemented, may not make sense
+      return y;
+    }
+    // This won't happen
+    return y;
+  } else {
     return std::numeric_limits<double>::quiet_NaN();
+  }
 }
 
 /** Returns the (normalized) signal at a given coordinates
@@ -1707,14 +1734,14 @@ std::pair<size_t, size_t>
 MatrixWorkspace::getImageStartEndXIndices(size_t i, double startX,
                                           double endX) const {
   if (startX == EMPTY_DBL())
-    startX = readX(i).front();
+    startX = x(i).front();
   auto pStart = getXIndex(i, startX, true);
   if (pStart.second != 0.0) {
     throw std::runtime_error(
         "Start X value is required to be on bin boundary.");
   }
   if (endX == EMPTY_DBL())
-    endX = readX(i).back();
+    endX = x(i).back();
   auto pEnd = getXIndex(i, endX, false, pStart.first);
   if (pEnd.second != 0.0) {
     throw std::runtime_error("End X value is required to be on bin boundary.");
@@ -1769,7 +1796,7 @@ MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop,
 std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x,
                                                      bool isLeft,
                                                      size_t start) const {
-  auto &X = readX(i);
+  auto &X = this->x(i);
   auto nx = X.size();
 
   // if start out of range - search failed
@@ -1884,7 +1911,7 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
-  if (storageMode() == Parallel::StorageMode::Distributed &&
+  if (m_isInitialized && storageMode() == Parallel::StorageMode::Distributed &&
       m_indexInfo->communicator().size() > 1)
     throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
                            "ISpectrum::setSpectrumNo is not possible in MPI "
@@ -1940,13 +1967,18 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
         "the number of spectra in the workspace is not equal to the number of "
         "detectors in the instrument.");
   std::vector<SpectrumDefinition> specDefs(m_indexInfo->size());
-  size_t specIndex = 0;
-  size_t globalSpecIndex = 0;
-  for (size_t detIndex = 0; detIndex < detInfo.size(); ++detIndex) {
-    for (size_t time = 0; time < detInfo.scanCount(detIndex); ++time) {
-      if (m_indexInfo->isOnThisPartition(
-              Indexing::GlobalSpectrumIndex(globalSpecIndex++)))
-        specDefs[specIndex++].add(detIndex, time);
+  if (!detInfo.isScanning() && (numberOfSpectra == m_indexInfo->size())) {
+    for (size_t i = 0; i < numberOfSpectra; ++i)
+      specDefs[i].add(i);
+  } else {
+    size_t specIndex = 0;
+    size_t globalSpecIndex = 0;
+    for (size_t detIndex = 0; detIndex < detInfo.size(); ++detIndex) {
+      for (size_t time = 0; time < detInfo.scanCount(detIndex); ++time) {
+        if (m_indexInfo->isOnThisPartition(
+                Indexing::GlobalSpectrumIndex(globalSpecIndex++)))
+          specDefs[specIndex++].add(detIndex, time);
+      }
     }
   }
   m_indexInfo->setSpectrumDefinitions(std::move(specDefs));
@@ -1956,63 +1988,41 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
   const auto &allDetIDs = detInfo.detectorIDs();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
-  for (size_t i = 0; i < m_indexInfo->size(); ++i) {
+  const auto size = static_cast<int64_t>(m_indexInfo->size());
+  std::atomic<bool> parallelException{false};
+  std::string error;
+#pragma omp parallel for
+  for (int64_t i = 0; i < size; ++i) {
+    auto &spec = getSpectrum(i);
+    // Prevent setting flags that require spectrum definition updates
+    spec.setMatrixWorkspace(nullptr, i);
+    spec.setSpectrumNo(static_cast<specnum_t>(m_indexInfo->spectrumNumber(i)));
     std::set<detid_t> detIDs;
     for (const auto &index : (*specDefs)[i]) {
       const size_t detIndex = index.first;
       const size_t timeIndex = index.second;
-      if (detIndex >= allDetIDs.size())
-        throw std::invalid_argument("MatrixWorkspace: SpectrumDefinition "
-                                    "contains an out-of-range detector index, "
-                                    "i.e., the spectrum definition does not "
-                                    "match the instrument in the workspace.");
-      if (timeIndex >= detInfo.scanCount(detIndex))
-        throw std::invalid_argument(
-            "MatrixWorkspace: SpectrumDefinition contains an out-of-range time "
-            "index for a detector, i.e., the spectrum definition does not "
-            "match the instrument in the workspace.");
-      detIDs.insert(allDetIDs[detIndex]);
+      if (detIndex >= allDetIDs.size()) {
+        parallelException = true;
+        error = "MatrixWorkspace: SpectrumDefinition contains an out-of-range "
+                "detector index, i.e., the spectrum definition does not match "
+                "the instrument in the workspace.";
+      } else if (timeIndex >= detInfo.scanCount(detIndex)) {
+        parallelException = true;
+        error = "MatrixWorkspace: SpectrumDefinition contains an out-of-range "
+                "time index for a detector, i.e., the spectrum definition does "
+                "not match the instrument in the workspace.";
+      } else {
+        detIDs.insert(allDetIDs[detIndex]);
+      }
     }
-    getSpectrum(i).setDetectorIDs(std::move(detIDs));
+    spec.setDetectorIDs(std::move(detIDs));
   }
+  if (parallelException)
+    throw std::invalid_argument(error);
 }
 
 } // namespace API
 } // Namespace Mantid
-
-// Explicit Instantiations of IndexProperty Methods in Algorithm
-namespace Mantid {
-namespace API {
-template DLLExport void
-Algorithm::declareWorkspaceInputProperties<MatrixWorkspace>(
-    const std::string &propertyName, const int allowedIndexTypes,
-    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const MatrixWorkspace_sptr &wksp, IndexType type,
-    const std::string &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::vector<int> &list);
-
-template DLLExport void
-Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::string>(
-    const std::string &name, const std::string &wsName, IndexType type,
-    const std::string &list);
-
-template DLLExport
-    std::tuple<boost::shared_ptr<MatrixWorkspace>, Indexing::SpectrumIndexSet>
-    Algorithm::getWorkspaceAndIndices(const std::string &name) const;
-} // namespace API
-} // namespace Mantid
 
 ///\cond TEMPLATE
 namespace Mantid {

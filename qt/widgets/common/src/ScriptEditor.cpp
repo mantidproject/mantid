@@ -131,7 +131,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
                            const QString &settingsGroup)
     : QsciScintilla(parent), m_filename(""),
       m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-      m_currentExecLine(0), m_completer(NULL), m_previousKey(0),
+      m_currentExecLine(0), m_completer(nullptr), m_previousKey(0),
       m_findDialog(new FindReplaceDialog(this)),
       m_settingsGroup(settingsGroup) {
 // Older versions of QScintilla still use just CR as the line ending, which is
@@ -201,7 +201,7 @@ void ScriptEditor::setLexer(QsciLexer *codelexer) {
   if (!codelexer) {
     if (m_completer) {
       delete m_completer;
-      m_completer = NULL;
+      m_completer = nullptr;
     }
     return;
   }
@@ -214,7 +214,7 @@ void ScriptEditor::setLexer(QsciLexer *codelexer) {
 
   if (m_completer) {
     delete m_completer;
-    m_completer = NULL;
+    m_completer = nullptr;
   }
 
   m_completer = new QsciAPIs(codelexer);
@@ -258,8 +258,8 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
+                                                  "", filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();
@@ -294,7 +294,7 @@ void ScriptEditor::saveScript(const QString &filename) {
   if (!file.open(QIODevice::WriteOnly)) {
     QString msg =
         QString("Could not open file \"%1\" for writing.").arg(filename);
-    throw std::runtime_error(msg.toAscii().data());
+    throw std::runtime_error(qPrintable(msg));
   }
 
   m_filename = filename;

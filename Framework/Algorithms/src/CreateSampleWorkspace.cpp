@@ -35,6 +35,8 @@ using namespace HistogramData;
 using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -309,6 +311,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
+  // there is a oddity here that y is evaluated from x=0, and x is from XMin
+  // changing it requires changing unit tests that use this algorithm
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
@@ -335,7 +339,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
     timeRanges.push_back(double(i + 1));
   }
 
-  builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
+  builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);
   builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
                                        V3D(0, 1, 0));
 
@@ -432,6 +436,7 @@ CreateSampleWorkspace::evalFunction(const std::string &functionString,
     std::string replaceStr = boost::lexical_cast<std::string>(replace_val);
     replaceAll(parsedFuncString, token, replaceStr);
   }
+  g_log.information(parsedFuncString);
 
   IFunction_sptr func_sptr =
       FunctionFactory::Instance().createInitialized(parsedFuncString);

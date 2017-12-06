@@ -70,6 +70,7 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (Types/inc)
 add_subdirectory (Types)
+set ( MANTIDLIBS ${MANTIDLIBS} Types)
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)

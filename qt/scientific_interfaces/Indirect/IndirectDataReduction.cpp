@@ -9,6 +9,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "IndirectMoments.h"
@@ -18,7 +19,6 @@
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
 #include "ISISEnergyTransfer.h"
-#include "ILLCalibration.h"
 #include "ILLEnergyTransfer.h"
 
 #include <QDir>
@@ -76,7 +76,7 @@ IndirectDataReduction::~IndirectDataReduction() {
  */
 void IndirectDataReduction::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_DataReduction"));
+      nullptr, QString("Indirect Data Reduction"));
 }
 
 /**
@@ -117,7 +117,6 @@ void IndirectDataReduction::initLayout() {
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
-  addTab<ILLCalibration>("ILL Calibration");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
@@ -145,9 +144,8 @@ void IndirectDataReduction::initLayout() {
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 
-  std::string facility =
-      Mantid::Kernel::ConfigService::Instance().getString("default.facility");
-  filterUiForFacility(QString::fromStdString(facility));
+  auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  filterUiForFacility(QString::fromStdString(facility.name()));
   emit newInstrumentConfiguration();
 }
 
@@ -465,7 +463,6 @@ void IndirectDataReduction::saveSettings() {
 void IndirectDataReduction::filterUiForFacility(QString facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
                       << '\n';
-
   QStringList enabledTabs;
   QStringList disabledInstruments;
 
@@ -475,8 +472,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
                 << "ISIS Calibration"
                 << "ISIS Diagnostics";
   } else if (facility == "ILL") {
-    enabledTabs << "ILL Energy Transfer"
-                << "ILL Calibration";
+    enabledTabs << "ILL Energy Transfer";
     disabledInstruments << "IN10"
                         << "IN13"
                         << "IN16";
@@ -522,8 +518,7 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
  * Handles showing the manage directory dialog box.
  */
 void IndirectDataReduction::openDirectoryDialog() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
+  auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }

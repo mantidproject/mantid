@@ -7,7 +7,7 @@ from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
 from mantid.simpleapi import (LoadIsawUB, LoadInstrument,
                               SetGoniometer, ConvertToMD, Load,
                               LoadIsawDetCal, LoadMask,
-                              DeleteWorkspace,
+                              DeleteWorkspace, MaskDetectors,
                               ConvertToMDMinMaxGlobal)
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion, Direction
 from mantid import logger
@@ -124,9 +124,11 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
                 LoadIsawDetCal(InputWorkspace='__run', Filename=self.getProperty("DetCal").value)
 
             if _masking:
-                LoadMask(Instrument=mtd['__run'].getInstrument().getName(),
-                         InputFile=self.getProperty("MaskFile").value,
-                         OutputWorkspace='__run')
+                if not mtd.doesExist('__mask'):
+                    LoadMask(Instrument=mtd['__run'].getInstrument().getName(),
+                             InputFile=self.getProperty("MaskFile").value,
+                             OutputWorkspace='__mask')
+                MaskDetectors(Workspace='__run',MaskedWorkspace='__mask')
 
             if self.getProperty('SetGoniometer').value:
                 SetGoniometer(Workspace='__run',
@@ -173,6 +175,9 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
                             OverwriteExisting=False)
             DeleteWorkspace('__run')
             progress.report()
+
+        if mtd.doesExist('__mask'):
+            DeleteWorkspace('__mask')
 
         self.setProperty("OutputWorkspace", mtd[_outWS_name])
 

@@ -55,6 +55,7 @@ private:
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
   void createNewCalTable();
+  void createInformationWorkspaces();
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
@@ -62,13 +63,20 @@ private:
                                    const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
-  void fitDIFCtZeroDIFA(const std::vector<double> &d,
-                        const std::vector<double> &tof, double &difc,
-                        double &t0, double &difa);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                           const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc,
+                           double &t0, double &difa);
+  API::MatrixWorkspace_sptr calculateResolutionTable();
+
+  API::ITableWorkspace_sptr
+  sortTableWorkspace(API::ITableWorkspace_sptr &table);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
+  API::ITableWorkspace_sptr m_peakPositionTable;
+  API::ITableWorkspace_sptr m_peakWidthTable;
+  API::ITableWorkspace_sptr m_peakHeightTable;
   std::vector<double> m_peaksInDspacing;
-  std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin{0.};
   double m_tofMax{0.};
@@ -77,6 +85,7 @@ private:
   double m_difaMin{0.};
   double m_difaMax{0.};
   bool m_hasDasIds{false};
+  size_t m_numberMaxParams{0};
 };
 
 } // namespace Algorithms

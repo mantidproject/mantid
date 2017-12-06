@@ -95,5 +95,6 @@ def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE
 
     det.writeGeom(xml_outfile)
 
+
 if __name__ == "__main__":
     create_geometry()

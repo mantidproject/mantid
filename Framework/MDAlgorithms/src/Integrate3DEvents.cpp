@@ -98,9 +98,9 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
   }
 
   bool invalid_peak =
@@ -248,9 +248,9 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
   }
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
@@ -404,9 +404,9 @@ Integrate3DEvents::ellipseIntegrateEvents(
   std::vector<V3D> eigen_vectors;
   getEigenVectors(cov_matrix, eigen_vectors);
 
-  std::vector<double> sigmas;
+  std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas.push_back(stdDev(some_events, eigen_vectors[i], m_radius));
+    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
   }
 
   bool invalid_peak =

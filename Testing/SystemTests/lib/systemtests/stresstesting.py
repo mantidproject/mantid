@@ -958,7 +958,7 @@ class MantidFrameworkConfig:
         # datasearch
         if self.__datasearch:
             config["datasearch.searcharchive"] = 'On'
-            config['network.default.timeout'] = '1'
+            config['network.default.timeout'] = '5'
 
         # Save this configuration
         config.saveConfig(self.__userPropsFile)

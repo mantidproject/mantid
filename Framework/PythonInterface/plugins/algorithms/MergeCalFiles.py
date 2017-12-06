@@ -96,7 +96,7 @@ class MergeCalFiles(PythonAlgorithm):
 
     #add any lines at the end
         for UDET in updateDict.keys():
-            (offset,select,group)=updateDict.pop(UDET)
+            (offset,select,group)=updateDict[UDET]
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
             linesAdded += 1
@@ -140,6 +140,7 @@ class MergeCalFiles(PythonAlgorithm):
     def FormatLine(self,number,UDET,offset,select,group):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(MergeCalFiles())

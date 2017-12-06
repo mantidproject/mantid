@@ -1,4 +1,5 @@
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import numpy as np
@@ -57,7 +58,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
 
             columns = ["d", "Intensity"]
 
-            print fittedPeaks.rowCount(), referencePeaks.rowCount()
+            print(fittedPeaks.rowCount(), referencePeaks.rowCount())
 
             for i in range(referencePeaks.rowCount()):
                 referenceRow = referencePeaks.row(i)
@@ -104,7 +105,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
                                                            MaximumIterations=100)
 
         # parameters a and ZeroShift
-        self.assertEquals(cell.rowCount(), 2)
+        self.assertEqual(cell.rowCount(), 2)
 
         cell_a = cell.cell(0, 1)
         cell_a_err = cell.cell(0, 2)
@@ -139,7 +140,7 @@ class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
                                                                 OutputIntegratedIntensities=True,
                                                                 MaximumIterations=100)
 
-        self.assertEquals(peaks_ref_2d.rowCount(), peaks_ref_2d_integrated.rowCount())
+        self.assertEqual(peaks_ref_2d.rowCount(), peaks_ref_2d_integrated.rowCount())
 
         for i in range(peaks_ref_2d.rowCount()):
             rowHeight = peaks_ref_2d.row(i)

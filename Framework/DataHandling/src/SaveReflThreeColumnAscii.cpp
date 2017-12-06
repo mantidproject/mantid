@@ -28,7 +28,7 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
   auto samp = m_ws->run();
   std::string title = getProperty("Title");
 
-  if (title != "") // if is toggled
+  if (!title.empty()) // if is toggled
   {
     file << "#" << title << '\n';
   }

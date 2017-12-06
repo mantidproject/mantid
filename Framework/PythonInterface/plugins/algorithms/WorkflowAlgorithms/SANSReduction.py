@@ -85,8 +85,7 @@ class SANSReduction(PythonAlgorithm):
             output_str += self._load_data(data_file, workspace, property_manager, property_manager_name)
         return output_str
 
-    #pylint: disable=too-many-locals,too-many-branches
-    def _py_exec(self):
+    def _py_exec(self):  # noqa: C901
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -472,5 +471,7 @@ class SANSReduction(PythonAlgorithm):
                 Logger("SANSReduction").error("No I(Qx,Qy) output found")
 
         return output_msg
+
+
 #############################################################################################
 AlgorithmFactory.subscribe(SANSReduction)

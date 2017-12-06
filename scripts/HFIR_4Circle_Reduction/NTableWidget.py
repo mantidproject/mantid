@@ -1,5 +1,7 @@
 #pylint: disable=C0103,R0904
 # N(DAV)TableWidget
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import csv
 from PyQt4 import QtGui, QtCore
 
@@ -60,7 +62,7 @@ class NTableWidget(QtGui.QTableWidget):
         self.insertRow(row_number)
 
         # Set values
-        for i_col in xrange(min(len(row_value_list), self.columnCount())):
+        for i_col in range(min(len(row_value_list), self.columnCount())):
             item = QtGui.QTableWidgetItem()
             if row_value_list[i_col] is None:
                 item_value = ''
@@ -191,7 +193,7 @@ class NTableWidget(QtGui.QTableWidget):
             raise IndexError('Index of row (%d) is out of range.' % row_index)
 
         ret_list = list()
-        for i_col in xrange(len(self._myColumnTypeList)):
+        for i_col in range(len(self._myColumnTypeList)):
             c_type = self._myColumnTypeList[i_col]
 
             if c_type == 'checkbox':
@@ -233,7 +235,7 @@ class NTableWidget(QtGui.QTableWidget):
 
         # loop over all the rows
         row_index_list = list()
-        for i_row in xrange(self.rowCount()):
+        for i_row in range(self.rowCount()):
             # check status
             is_checked = self.get_cell_value(i_row, index_status)
             if is_checked == status:
@@ -287,7 +289,7 @@ class NTableWidget(QtGui.QTableWidget):
         :return:
         """
         num_rows = self.rowCount()
-        for i_row in xrange(1, num_rows+1):
+        for i_row in range(1, num_rows+1):
             self.removeRow(num_rows - i_row)
 
         return
@@ -346,7 +348,7 @@ class NTableWidget(QtGui.QTableWidget):
 
         # Loop over all rows. If any row's status is not same as target status, then set it
         num_rows = self.rowCount()
-        for row_index in xrange(num_rows):
+        for row_index in range(num_rows):
             if self.get_cell_value(row_index, status_col_index) != status:
                 self.update_cell_value(row_index, status_col_index, status)
         # END-FOR
@@ -503,7 +505,7 @@ class NTableWidget(QtGui.QTableWidget):
         # get rows
         num_rows = self.rowCount()
         row_content_dict = dict()
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             row_items = self.get_row_value(i_row)
             key_value = self.get_cell_value(i_row, column_index)
             row_content_dict[key_value] = row_items

@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
+  ComputeIncoherentDOSTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py
@@ -38,11 +39,11 @@ set ( TEST_PY_FILES
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
-  GetQsInQENSDataTest.py
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectTransmissionTest.py
+  LoadAndMergeTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py

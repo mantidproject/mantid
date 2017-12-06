@@ -28,7 +28,7 @@ class FindFilesThread : public QThread {
 
 public:
   /// Constructor.
-  FindFilesThread(QObject *parent = NULL);
+  FindFilesThread(QObject *parent = nullptr);
   /// Set the various file-finding values / options.
   void set(QString text, bool isForRunFiles, bool isOptional,
            const QString &algorithmProperty = "");
@@ -142,7 +142,7 @@ public:
   };
 
   /// Default constructor
-  MWRunFiles(QWidget *parent = NULL);
+  MWRunFiles(QWidget *parent = nullptr);
 
   /// Destructor
   ~MWRunFiles() override;

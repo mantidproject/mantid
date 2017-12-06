@@ -215,7 +215,7 @@ bool MantidMatrixExtensionRequest::tableViewMatchesObject(
     MantidMatrixTabExtensionMap &extensions, QObject *object) {
   for (auto it = extensions.begin(); it != extensions.end(); ++it) {
     auto &extension = it->second;
-    if (extension.tableView == object) {
+    if (extension.tableView.get() == object) {
       return true;
     }
   }
@@ -234,7 +234,7 @@ QTableView *MantidMatrixExtensionRequest::getActiveView(
     QTableView *defaultValue) {
   if (extensions.count(type) > 0) {
     auto &extension = extensions[type];
-    return extension.tableView;
+    return extension.tableView.get();
   } else {
     return defaultValue;
   }

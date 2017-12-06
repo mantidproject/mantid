@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
 from sans.common.general_functions import create_child_algorithm
-from sans.common.enums import (SANSInstrument, DataType, FitModeForMerge)
+from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
 
 
@@ -40,11 +40,13 @@ class ISIS1DMerger(Merger):
             get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_sample)
 
         # Get the relevant workspaces from the reduction settings. For this we need to first understand what the
+        # We can have merged reductions
         can_count_primary, can_norm_primary, can_count_secondary, can_norm_secondary = \
             get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_can)
-
         # Get fit parameters
-        shift_factor, scale_factor, fit_mode = get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)
+        shift_factor, scale_factor, fit_mode, fit_min, fit_max, merge_mask, merge_min, merge_max = \
+            get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)
+
         fit_mode_as_string = FitModeForMerge.to_string(fit_mode)
 
         # We need to convert NoFit to None.
@@ -61,6 +63,7 @@ class ISIS1DMerger(Merger):
                           "Mode": fit_mode_as_string,
                           "ScaleFactor": scale_factor,
                           "ShiftFactor": shift_factor,
+                          "MergeMask": merge_mask,
                           "OutputWorkspace": "dummy"}
 
         if can_count_primary is not None and can_norm_primary is not None \
@@ -71,6 +74,19 @@ class ISIS1DMerger(Merger):
                                   "LABNormCan": can_norm_primary,
                                   "ProcessCan": True}
             stitch_options.update(stitch_options_can)
+
+        if fit_min and fit_max:
+            q_range_options = {"FitMin": fit_min,
+                               "FitMax": fit_max}
+            stitch_options.update(q_range_options)
+
+        if merge_mask:
+            if merge_min:
+                q_range_options = {"MergeMin": merge_min}
+                stitch_options.update(q_range_options)
+            if merge_max:
+                q_range_options = {"MergeMax": merge_max}
+                stitch_options.update(q_range_options)
 
         stitch_alg = create_child_algorithm(parent_alg, stitch_name, **stitch_options)
         stitch_alg.execute()
@@ -101,10 +117,9 @@ class MergeFactory(object):
     def create_merger(state):
         # The selection depends on the facility/instrument
         data_info = state.data
-        instrument = data_info.instrument
+        facility = data_info.facility
 
-        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-           instrument is SANSInstrument.SANS2D:
+        if facility is SANSFacility.ISIS:
             merger = ISIS1DMerger()
         else:
             merger = NullMerger()
@@ -141,14 +156,14 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
     # Get primary reduction information for specified data type, i.e. sample or can
     primary = reduction_mode_vs_output_bundles[primary_detector]
     primary_for_data_type = next((setting for setting in primary if is_data_type(setting)), None)
-    primary_count = primary_for_data_type.output_workspace_count
-    primary_norm = primary_for_data_type.output_workspace_norm
+    primary_count = None if primary_for_data_type is None else primary_for_data_type.output_workspace_count
+    primary_norm = None if primary_for_data_type is None else primary_for_data_type.output_workspace_norm
 
     # Get secondary reduction information for specified data type, i.e. sample or can
     secondary = reduction_mode_vs_output_bundles[secondary_detector]
     secondary_for_data_type = next((setting for setting in secondary if is_data_type(setting)), None)
-    secondary_count = secondary_for_data_type.output_workspace_count
-    secondary_norm = secondary_for_data_type.output_workspace_norm
+    secondary_count = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_count
+    secondary_norm = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_norm
     return primary_count, primary_norm, secondary_count, secondary_norm
 
 
@@ -162,7 +177,18 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
     reduction_settings_collection = next(iter(list(reduction_mode_vs_output_bundles.values())))
     state = reduction_settings_collection[0].state
     reduction_info = state.reduction
-    return reduction_info.merge_shift, reduction_info.merge_scale, reduction_info.merge_fit_mode
+
+    if reduction_info.merge_range_min:
+        fit_min = reduction_info.merge_range_min
+    else:
+        fit_min = None
+    if reduction_info.merge_range_max:
+        fit_max = reduction_info.merge_range_max
+    else:
+        fit_max = None
+
+    return reduction_info.merge_shift, reduction_info.merge_scale, reduction_info.merge_fit_mode, fit_min, fit_max,\
+        reduction_info.merge_mask, reduction_info.merge_min, reduction_info.merge_max
 
 
 def is_sample(x):

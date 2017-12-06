@@ -14,6 +14,7 @@ namespace MDAlgorithms {
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 using namespace Mantid::HistogramData;
+using Mantid::Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateFlux)
@@ -146,7 +147,7 @@ void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS,
       integrateSpectraEvents<DataObjects::WeightedEvent>(*eventWS, integrWS);
       return;
     case (API::TOF):
-      integrateSpectraEvents<DataObjects::TofEvent>(*eventWS, integrWS);
+      integrateSpectraEvents<TofEvent>(*eventWS, integrWS);
       return;
     }
   } else {
@@ -190,6 +191,12 @@ void IntegrateFlux::integrateSpectraEvents(
         break;
       sum += evnt->weight();
       outY[i] = sum;
+    }
+
+    while (x != X.end()) {
+      outY[i] = sum;
+      ++x;
+      ++i;
     }
   }
 }

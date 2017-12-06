@@ -91,7 +91,7 @@ Algorithm::Algorithm()
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
-      m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
+      m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
@@ -140,7 +140,10 @@ bool Algorithm::isChild() const { return m_isChildAlgorithm; }
  *  @param isChild :: True - the algorithm is a child algorithm.  False - this
  * is a full managed algorithm.
  */
-void Algorithm::setChild(const bool isChild) { m_isChildAlgorithm = isChild; }
+void Algorithm::setChild(const bool isChild) {
+  m_isChildAlgorithm = isChild;
+  this->setAlwaysStoreInADS(!isChild);
+}
 
 /**
  * Change the state of the history recording flag. Only applicable for
@@ -159,6 +162,11 @@ void Algorithm::enableHistoryRecordingForChild(const bool on) {
 void Algorithm::setAlwaysStoreInADS(const bool doStore) {
   m_alwaysStoreInADS = doStore;
 }
+
+/** Returns true if we always store in the AnalysisDataService.
+ *  @return true if output is saved to the AnalysisDataService.
+ */
+bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
 
 /** Set whether the algorithm will rethrow exceptions
  * @param rethrow :: true if you want to rethrow exception.
@@ -437,7 +445,7 @@ bool Algorithm::execute() {
   }
 
   notificationCenter().postNotification(new StartedNotification(this));
-  Mantid::Kernel::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime startTime;
 
   // Return a failure if the algorithm hasn't been initialized
   if (!isInitialized()) {
@@ -549,7 +557,7 @@ bool Algorithm::execute() {
         m_running = true;
       }
 
-      startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+      startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
@@ -568,9 +576,8 @@ bool Algorithm::execute() {
         linkHistoryWithLastChild();
       }
 
-      // Put any output workspaces into the AnalysisDataService - if this is not
-      // a child algorithm
-      if (!isChild() || m_alwaysStoreInADS)
+      // Put the output workspaces into the AnalysisDataService - if requested
+      if (m_alwaysStoreInADS)
         this->store();
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
@@ -736,6 +743,20 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
                                                const int &version) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
+  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
+  return alg;
+}
+
+/** Setup algorithm as child algorithm.
+ *
+ * Used internally by createChildAlgorithm. Arguments are as documented there.
+ * Can also be used manually for algorithms created otherwise. This allows
+ * running algorithms that are not declared into the factory as child
+ * algorithms. */
+void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
+                                      const double startProgress,
+                                      const double endProgress,
+                                      const bool enableLogging) {
   // set as a child
   alg->setChild(true);
   alg->setLogging(enableLogging);
@@ -744,8 +765,8 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   try {
     alg->initialize();
   } catch (std::runtime_error &) {
-    throw std::runtime_error("Unable to initialise Child Algorithm '" + name +
-                             "'");
+    throw std::runtime_error("Unable to initialise Child Algorithm '" +
+                             alg->name() + "'");
   }
 
   // If output workspaces are nameless, give them a temporary name to satisfy
@@ -776,8 +797,6 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
     m_ChildAlgorithms.push_back(weakPtr);
   }
-
-  return alg;
 }
 
 //=============================================================================================
@@ -897,6 +916,7 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
   setLoggingOffset(proxy.getLoggingOffset());
   setAlgStartupLogging(proxy.getAlgStartupLogging());
   setChild(proxy.isChild());
+  setAlwaysStoreInADS(proxy.getAlwaysStoreInADS());
 }
 
 /** Fills History, Algorithm History and Algorithm Parameters
@@ -1205,13 +1225,14 @@ bool Algorithm::checkGroups() {
  *
  * @return whether processGroups succeeds.
  */
-bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
+bool Algorithm::doCallProcessGroups(
+    Mantid::Types::Core::DateAndTime &startTime) {
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
   // CheckWorkspacesMatch, RenameWorkspace)
 
-  startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+  startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
 
@@ -1244,7 +1265,7 @@ bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
 
   if (completed) {
     // in the base processGroups each individual exec stores its outputs
-    if (!m_usingBaseProcessGroups && (!isChild() || m_alwaysStoreInADS))
+    if (!m_usingBaseProcessGroups && m_alwaysStoreInADS)
       this->store();
 
     // Get how long this algorithm took to run
@@ -1330,7 +1351,11 @@ bool Algorithm::processGroups() {
         // Set the property using the name of that workspace
         if (Property *prop =
                 dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
-          alg->setPropertyValue(prop->name(), ws->getName());
+          if (ws->getName().empty()) {
+            alg->setProperty(prop->name(), ws);
+          } else {
+            alg->setPropertyValue(prop->name(), ws->getName());
+          }
         } else {
           throw std::logic_error("Found a Workspace property which doesn't "
                                  "inherit from Property.");
@@ -1711,7 +1736,7 @@ void Algorithm::execMasterOnly() {
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
   // If there is no output we can simply do nothing.
-  if (m_pureOutputWorkspaceProps.size() == 0)
+  if (m_pureOutputWorkspaceProps.empty())
     return;
   // Does Algorithm have exactly one input and one output workspace property?
   if (m_inputWorkspaceProps.size() == 1 &&

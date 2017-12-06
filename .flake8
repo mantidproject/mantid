@@ -1,5 +1,5 @@
 [flake8]
-ignore = E114,E115,E116,E121,E123,E126,E133,E2,E704,W503,F403,F405,F999
+ignore = E114,E115,E116,E121,E123,E126,E133,E2,E704,E722,E741,E743,W503,F403,F405,F999
 exclude =
     .git,
     buildconfig,
@@ -14,7 +14,9 @@ exclude =
     installers,
     instrument,
     MantidPlot,
-    qt,
+    qt/paraview_ext,
+    qt/scientific_interfaces,
+    qt/widgets,
     scripts/test,
     Testing/PerformanceTests,
     Testing/SystemTests/lib,

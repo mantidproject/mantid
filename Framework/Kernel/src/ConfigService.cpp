@@ -47,7 +47,7 @@
 #include <boost/regex.hpp>
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <exception>
 #include <fstream>
 #include <functional>
@@ -196,8 +196,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   // absolute paths
   m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
   m_ConfigPaths.emplace("plugins.directory", true);
-  m_ConfigPaths.emplace("pvplugins.directory", true);
-  m_ConfigPaths.emplace("mantidqt.plugins.directory", true);
+  m_ConfigPaths.emplace("pvplugins.directory", false);
+  m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
   m_ConfigPaths.emplace("instrumentDefinition.directory", true);
   m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
   m_ConfigPaths.emplace("groupingFiles.directory", true);
@@ -243,9 +243,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   g_log.information() << "This is Mantid version " << MantidVersion::version()
                       << " revision " << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
-                      << DateAndTime::getCurrentTime().toFormattedString(
-                             "%Y-%m-%dT%H:%MZ")
-                      << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime()
+                             .toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
@@ -374,7 +373,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     bool good = readFile(filename, temp);
 
     // check if we have failed to open the file
-    if ((!good) || (temp == "")) {
+    if ((!good) || (temp.empty())) {
       if (filename == getUserPropertiesDir() + m_user_properties_file_name) {
         // write out a fresh file
         createUserPropertiesFile();
@@ -384,7 +383,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
 
     // store the property string
-    if ((append) && (m_PropertyString != "")) {
+    if ((append) && (!m_PropertyString.empty())) {
       m_PropertyString = m_PropertyString + "\n" + temp;
     } else {
       m_PropertyString = temp;
@@ -1994,25 +1993,6 @@ void ConfigServiceImpl::addObserver(
 void ConfigServiceImpl::removeObserver(
     const Poco::AbstractObserver &observer) const {
   m_notificationCenter.removeObserver(observer);
-}
-
-/*
-Checks to see whether the pvplugins.directory variable is set. If it is set,
-assume
-we have built Mantid with ParaView
-@return True if paraview is available or not disabled.
-*/
-bool ConfigServiceImpl::pvPluginsAvailable() const {
-  std::string pvpluginsDir = getString("pvplugins.directory");
-  return !pvpluginsDir.empty();
-}
-
-/**
- * Gets the path to the ParaView plugins
- * @returns A string giving the directory of the ParaView plugins
- */
-const std::string ConfigServiceImpl::getPVPluginsPath() const {
-  return getString("pvplugins.directory");
 }
 
 /*

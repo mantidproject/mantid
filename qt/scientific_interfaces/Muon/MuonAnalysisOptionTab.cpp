@@ -72,7 +72,6 @@ void MuonAnalysisOptionTab::initLayout() {
   m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 0);
   m_autoSaver.registerWidget(m_uiForm.chkEnableMultiFit, "enableMultiFit",
                              false);
-  m_autoSaver.registerWidget(m_uiForm.chkTFAsymm, "enableTFAsymm", false);
   m_autoSaver.endGroup();
 
   // Set validators for double fields
@@ -135,8 +134,6 @@ void MuonAnalysisOptionTab::initLayout() {
           SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.chkEnableMultiFit, SIGNAL(stateChanged(int)), this,
           SIGNAL(multiFitStateChanged(int)));
-  connect(m_uiForm.chkTFAsymm, SIGNAL(stateChanged(int)), this,
-          SIGNAL(TFAsymmStateChanged(int)));
 }
 
 /**
@@ -144,7 +141,7 @@ void MuonAnalysisOptionTab::initLayout() {
 */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon_Analysis"), QString("settings"));
+      nullptr, QString("Muon Analysis"), QString("settings"));
 }
 
 /*
@@ -152,7 +149,7 @@ void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
 */
 void MuonAnalysisOptionTab::rebinHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon_Analysis"), QString("data-binning"));
+      nullptr, QString("Muon Analysis"), QString("data-binning"));
 }
 
 /**
@@ -395,17 +392,6 @@ Muon::MultiFitState MuonAnalysisOptionTab::getMultiFitState() const {
     return Muon::MultiFitState::Enabled;
   } else {
     return Muon::MultiFitState::Disabled;
-  }
-}
-/**
-* Returns whether or not "enable TFAsymmetry" is set.
-* @returns whether the checkbox is ticked
-*/
-Muon::TFAsymmState MuonAnalysisOptionTab::getTFAsymmState() const {
-  if (m_uiForm.chkTFAsymm->isChecked()) {
-    return Muon::TFAsymmState::Enabled;
-  } else {
-    return Muon::TFAsymmState::Disabled;
   }
 }
 }

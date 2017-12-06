@@ -1,9 +1,10 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_background_script import Background
 from reduction_gui.widgets.base_widget import BaseWidget
-from hfir_sample_data import BeamSpreader, DirectBeam
+from reduction_gui.widgets.sans.hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background
 
 

@@ -58,4 +58,5 @@ class LoadMultipleGSS(PythonAlgorithm):
             self.__load(directory, wksp)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
 
+
 AlgorithmFactory.subscribe(LoadMultipleGSS)

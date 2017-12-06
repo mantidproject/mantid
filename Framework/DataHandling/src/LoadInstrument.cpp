@@ -23,14 +23,6 @@
 #include <fstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -42,10 +34,6 @@ using namespace Geometry;
 
 std::recursive_mutex LoadInstrument::m_mutex;
 
-/// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm() {}
-
-//------------------------------------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
@@ -74,14 +62,21 @@ void LoadInstrument::init() {
       make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
           boost::make_shared<MandatoryValidator<OptionalBool>>()),
-      "If true then a 1:1 map between the spectrum numbers and "
-      "detector/monitor IDs is set up as follows: the detector/monitor IDs in "
+      "If set to True then a 1:1 map between the spectrum numbers and "
+      "detector/monitor IDs is set up such that the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "
       "in that order to the spectra in the workspace. For example if the IDF "
-      "has defined detectors/monitors with ID = 1, 5 and 10 and the workspace "
-      "contains 3 spectra with numbers 1,2,3 (and workspace indices 0,1, and "
-      "2) then spectrum number 1 is associated with det ID=1, spectrum number "
-      "2 with det ID=5 and spectrum number 3 with det ID=10");
+      "has defined detectors/monitors with IDs 1, 5, 10 and the workspace "
+      "contains 3 spectra with numbers 1, 2, 3 (and workspace indices 0, 1, 2) "
+      "then spectrum number 1 is associated with detector ID 1, spectrum "
+      "number 2 with detector ID 5 and spectrum number 3 with detector ID 10."
+      "If the number of spectra and detectors do not match then the operation "
+      "is performed until the maximum number of either is reached. For example "
+      "if there are 12 spectra and 50 detectors then the first 12 detectors "
+      "are assigned to the 12 spectra in the workspace."
+      "If set to False then the spectrum numbers and detector IDs of the "
+      "workspace are not modified."
+      "This property must be set to either True or False.");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -189,16 +184,17 @@ void LoadInstrument::exec() {
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
+    m_workspace->setInstrument(instrument);
+
+    // populate parameter map of workspace
+    m_workspace->populateInstrumentParameters();
+
+    // LoadParameterFile modifies the base instrument stored in the IDS so this
+    // must also be protected by the lock until LoadParameterFile is fixed.
+    // check if default parameter file is also present, unless loading from
+    if (!m_filename.empty())
+      runLoadParameterFile();
   }
-  // Add the instrument to the workspace
-  m_workspace->setInstrument(instrument);
-
-  // populate parameter map of workspace
-  m_workspace->populateInstrumentParameters();
-
-  // check if default parameter file is also present, unless loading from
-  if (!m_filename.empty())
-    runLoadParameterFile();
 
   // Set the monitors output property
   setProperty("MonitorList", instrument->getMonitors());

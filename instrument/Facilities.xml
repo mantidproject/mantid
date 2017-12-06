@@ -363,6 +363,11 @@
     </livedata>
   </instrument>
 
+  <instrument name="ZOOM">
+    <technique>Small Angle Scattering</technique>
+    <zeropadding size="8"/>
+  </instrument>
+
 </facility>
 
 
@@ -492,6 +497,9 @@
 
    <instrument name="VULCAN" beamline="7">
 	<technique>Neutron Diffraction</technique>
+        <livedata>
+      <connection name="event" address="bl7-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="CORELLI" beamline="9">
@@ -588,7 +596,7 @@
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
   </instrument>
 
   <instrument name="IN5">
@@ -644,6 +652,10 @@
   </instrument>
 
   <instrument name="D17">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="Figaro">
     <technique>Reflectometry</technique>
   </instrument>
 
@@ -761,6 +773,10 @@
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
+
+  <instrument name="POWTEX">
+	<technique>Neutron Diffraction</technique>
+  </instrument>
 </facility>
 
 <!-- ANSTO -->
@@ -783,14 +799,14 @@
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="histo" address="localhost:56789" listener="ISISHistoDataListener" />
+      <connection name="histo" address="127.0.0.1:56789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
 
   <instrument name="ISIS_Event">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="event" address="localhost:59876" listener="ISISLiveEventDataListener" />
+      <connection name="event" address="127.0.0.1:59876" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
 
@@ -807,7 +823,7 @@
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="ISIS_Kafka_Event">
     <technique>Test Listener</technique>
     <livedata>

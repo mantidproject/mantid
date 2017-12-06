@@ -1,23 +1,22 @@
 """
-    This module defines a simple function-style API for running Mantid
-    algorithms. Each algorithm within Mantid is mapped to a Python
-    function of the same name with the parameters of the algorithm becoming
-    arguments to the function.
+This module defines a simple function-style API for running Mantid
+algorithms. Each algorithm within Mantid is mapped to a Python
+function of the same name with the parameters of the algorithm becoming
+arguments to the function.
 
-    For example:
+For example:
 
-    The Rebin algorithm is mapped to this Python function:
+The Rebin algorithm is mapped to this Python function:
 
-        Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
+   Rebin(InputWorkspace, OutputWorkspace, Params, PreserveEvents=None, Version=1)
 
-    It returns the output workspace and this workspace has the same name as
-    the variable it is assigned to, i.e.
+It returns the output workspace and this workspace has the same name as
+the variable it is assigned to, i.e.
 
-       rebinned = Rebin(input, Params = '0.1,0.05,10')
+   rebinned = Rebin(input, Params = '0.1,0.05,10')
 
-    would call Rebin with the given parameters and create a workspace called 'rebinned'
-    and assign it to the rebinned variable
-
+would call Rebin with the given parameters and create a workspace called 'rebinned'
+and assign it to the rebinned variable
 """
 from __future__ import (absolute_import, division,
                         print_function)
@@ -36,6 +35,7 @@ from .kernel.funcinspect import customise_func as _customise_func
 from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
+from .fitfunctions import *
 
 # ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
@@ -44,6 +44,10 @@ __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD", "IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
+# The "magic" keyword to run as a child algorithm explicitly without storing on ADS
+__STORE_KEYWORD__ = "StoreInADS"
+# This is the default value for __STORE_KEYWORD__
+__STORE_ADS_DEFAULT__ = True
 
 
 def specialization_exists(name):
@@ -155,6 +159,7 @@ def Load(*args, **kwargs):
     algm = _create_algorithm_object('Load', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
@@ -258,17 +263,25 @@ def StartLiveData(*args, **kwargs):
                                     startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
-    try:
-        algm.setProperty('Instrument', instrument)  # Must be set first
-    except ValueError as ve:
-        raise ValueError('Problem when setting Instrument. This is the detailed error '
-                         'description: ' + str(ve))
+    _set_store_ads(algm, kwargs)
 
-    # Remove from keywords so it is not set twice
-    try:
-        del kwargs['Instrument']
-    except KeyError:
-        pass
+    # Some properties have side effects and must be set separately
+    def handleSpecialProperty(name, value=None):
+        try:
+            if value is None:
+                value = kwargs[name]
+            algm.setProperty(name, value)
+            kwargs.pop(name, None)
+        except ValueError as ve:
+            raise ValueError('Problem when setting %s. This is the detailed error '
+                             'description: %s' % (name, str(ve)))
+        except KeyError:
+            pass  # ignore if kwargs[name] doesn't exist
+
+    # Listener properties depend on these values, so they must be set first
+    handleSpecialProperty('Instrument', instrument)
+    handleSpecialProperty('Connection')
+    handleSpecialProperty('Listener')
 
     # LHS Handling currently unsupported for StartLiveData
     lhs = _kernel.funcinspect.lhs_info()
@@ -295,73 +308,86 @@ def StartLiveData(*args, **kwargs):
 
 # ---------------------------- Fit ---------------------------------------------
 
-
-def fitting_algorithm(f):
+def fitting_algorithm(inout=False):
     """
-    Decorator generating code for fitting algorithms (currently Fit and CalculateChiSquared).
-    When applied to a function definition this decorator replaces its code with code of
-    function 'wrapper' defined below.
+    Decorator generating code for fitting algorithms (Fit, CalculateChiSquared,
+    EvaluateFunction).
+    When applied to a function definition this decorator replaces its code
+    with code of function 'wrapper' defined below.
+    :param inout: if True, return also the InOut properties of algorithm f
     """
-    def wrapper(*args, **kwargs):
-        function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
-        # Remove from keywords so it is not set twice
-        if "Function" in kwargs:
-            del kwargs['Function']
-        if "InputWorkspace" in kwargs:
-            del kwargs['InputWorkspace']
+    def inner_fitting_algorithm(f):
+        """
+        :param f: algorithm calling Fit
+        """
+        def wrapper(*args, **kwargs):
+            function, input_workspace = _get_mandatory_args(function_name,
+                ["Function", "InputWorkspace"], *args, **kwargs)
+            # Remove from keywords so it is not set twice
+            if "Function" in kwargs:
+                del kwargs['Function']
+            if "InputWorkspace" in kwargs:
+                del kwargs['InputWorkspace']
 
-        # Check for behaviour consistent with old API
-        if type(function) == str and function in _api.AnalysisDataService:
-            raise ValueError("Fit API has changed. The function must now come "
-                             "first in the argument list and the workspace second.")
-        # Create and execute
-        algm = _create_algorithm_object(function_name)
-        _set_logging_option(algm, kwargs)
-        if 'EvaluationType' in kwargs:
-            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
-            del kwargs['EvaluationType']
-        algm.setProperty('Function', function)  # Must be set first
-        if input_workspace is not None:
-            algm.setProperty('InputWorkspace', input_workspace)
-        else:
-            del algm['InputWorkspace']
+            # Check for behaviour consistent with old API
+            if type(function) == str and function in _api.AnalysisDataService:
+                msg = "Fit API has changed. The function must now come " + \
+                      "first in the argument list and the workspace second."
+                raise ValueError(msg)
+            # Deal with case where function is a FunctionWrapper.
+            if isinstance(function,FunctionWrapper):
+                function = function.__str__()
 
-        # Set all workspace properties before others
-        for key in list(kwargs.keys()):
-            if key.startswith('InputWorkspace_'):
-                algm.setProperty(key, kwargs[key])
-                del kwargs[key]
+            # Create and execute
+            algm = _create_algorithm_object(function_name)
+            _set_logging_option(algm, kwargs)
+            _set_store_ads(algm, kwargs)
+            if 'EvaluationType' in kwargs:
+                algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+                del kwargs['EvaluationType']
+            algm.setProperty('Function', function)  # Must be set first
+            if input_workspace is not None:
+                algm.setProperty('InputWorkspace', input_workspace)
+            else:
+                del algm['InputWorkspace']
 
-        lhs = _lhs_info()
-        # Check for any properties that aren't known and warn they will not be used
-        for key in list(kwargs.keys()):
-            if key not in algm:
-                logger.warning("You've passed a property (%s) to %s() that doesn't"
-                               " apply to any of the input workspaces." % (key, function_name))
-                del kwargs[key]
-        set_properties(algm, **kwargs)
-        algm.execute()
+            # Set all workspace properties before others
+            for key in list(kwargs.keys()):
+                if key.startswith('InputWorkspace_'):
+                    algm.setProperty(key, kwargs[key])
+                    del kwargs[key]
 
-        return _gather_returns(function_name, lhs, algm)
-    # end
-    function_name = f.__name__
-    signature = ("\bFunction, InputWorkspace", "**kwargs")
-    fwrapper = _customise_func(wrapper, function_name, signature,
-                               f.__doc__)
-    if function_name not in __SPECIALIZED_FUNCTIONS__:
-        __SPECIALIZED_FUNCTIONS__.append(function_name)
-    return fwrapper
+            lhs = _lhs_info()
+            # Check for unknown properties and warn they will not be used
+            for key in list(kwargs.keys()):
+                if key not in algm:
+                    msg = 'Property {} to {} does not apply to any of the ' +\
+                          ' input workspaces'.format(key, function_name)
+                    logger.warning(msg)
+                    del kwargs[key]
+            set_properties(algm, **kwargs)
+            algm.execute()
+            return _gather_returns(function_name, lhs, algm, inout=inout)
+        # end
+        function_name = f.__name__
+        signature = ("\bFunction, InputWorkspace", "**kwargs")
+        fwrapper = _customise_func(wrapper, function_name, signature, f.__doc__)
+        if function_name not in __SPECIALIZED_FUNCTIONS__:
+            __SPECIALIZED_FUNCTIONS__.append(function_name)
+        return fwrapper
+    return inner_fitting_algorithm
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm(inout=True)
 def Fit(*args, **kwargs):
     """
     Fit defines the interface to the fitting within Mantid.
     It can work with arbitrary data sources and therefore some options
     are only available when the function & workspace type are known.
 
-    This simple wrapper takes the Function (as a string) & the InputWorkspace
+    This simple wrapper takes the Function (as a string or a
+    FunctionWrapper object) and the InputWorkspace
     as the first two arguments. The remaining arguments must be
     specified by keyword.
 
@@ -373,10 +399,10 @@ def Fit(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def CalculateChiSquared(*args, **kwargs):
     """
-    This function calculates chi squared claculation for a function and a data set.
+    This function calculates chi squared calculation for a function and a data set.
     The data set is defined in a way similar to Fit algorithm.
 
     Example:
@@ -388,7 +414,7 @@ def CalculateChiSquared(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def EvaluateFunction(*args, **kwargs):
     """
     This function evaluates a function on a data set.
@@ -494,6 +520,7 @@ def CutMD(*args, **kwargs):
     algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
 
     # Now check that all the kwargs we've got are correct
     for key in kwargs.keys():
@@ -578,7 +605,12 @@ def RenameWorkspace(*args, **kwargs):
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
     algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
                                     endProgress=_endProgress)
-    _set_logging_option(algm, kwargs)
+    _set_logging_option(algm, arguments)
+    algm.setAlwaysStoreInADS(True)
+    # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+        raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
+
     for key, val in arguments.items():
         algm.setProperty(key, val)
 
@@ -750,6 +782,17 @@ def _is_workspace_property(prop):
         # Doesn't look like a workspace property
         return False
 
+def _is_function_property(prop):
+    """
+    Returns True if the property is a fit function
+
+    :param prop: A property object
+    :type Property
+    :return:  True if the property is considered a fit function
+    """
+    if isinstance(prop, _api.FunctionProperty):
+        return True
+    return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -807,7 +850,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -818,6 +861,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
        lhs of the function call and the names of these variables.
        :param algm_obj: An executed algorithm object.
        :param ignore_regex: A list of strings containing regex expressions to match
+       :param inout : gather also the InOut properties if True.
        against property names that will be ignored & not returned.
     """
     if ignore_regex is None:
@@ -839,23 +883,30 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
         ignore_regex[index] = re.compile(expr)
 
     retvals = OrderedDict()
-    for name in algm_obj.outputProperties():
+    names = algm_obj.outputProperties()
+    if inout:
+        names.extend(algm_obj.inoutProperties())
+    for name in names:
         if ignore_property(name, ignore_regex):
             continue
         prop = algm_obj.getProperty(name)
-        # Parent algorithms store their workspaces in the ADS
-        # Child algorithms should store their workspaces in the property
-        # but they don't at the moment while the issues with history recording Python Child Algs
-        # is resolved: ticket #5157
+
         if _is_workspace_property(prop):
-            value_str = prop.valueAsStr
-            try:
-                retvals[name] = _api.AnalysisDataService[value_str]
-            except KeyError:
-                if not prop.isOptional():
-                    raise RuntimeError("Internal error. Output workspace property '%s' on "
-                                       "algorithm '%s' has not been stored correctly."
-                                       "Please contact development team." % (name,  algm_obj.name()))
+            value = None
+            if hasattr(prop, 'value'):
+                value = prop.value
+            if value is not None:
+                retvals[name] = value
+            else:
+                try:
+                    value_str = prop.valueAsStr
+                    retvals[name] = _api.AnalysisDataService[value_str]
+                except KeyError:
+                    if not prop.isOptional() and prop.direction == _kernel.Direction.InOut:
+                        raise RuntimeError("Mandatory InOut workspace property '%s' on "
+                                           "algorithm '%s' has not been set correctly. " % (name,  algm_obj.name()))
+        elif _is_function_property(prop):
+            retvals[name] = FunctionWrapper(prop.value)
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value
@@ -903,6 +954,20 @@ def _set_logging_option(algm_obj, kwargs):
         del kwargs[__LOGGING_KEYWORD__]
 
 
+def _set_store_ads(algm_obj, kwargs):
+    """
+        Sets to always store in ADS, unless StoreInADS=False
+
+        :param algm_obj: An initialised algorithm object
+        :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
+    """
+    if __STORE_KEYWORD__ in kwargs:
+        algm_obj.setAlwaysStoreInADS(kwargs[__STORE_KEYWORD__])
+        del kwargs[__STORE_KEYWORD__]
+    else:
+        algm_obj.setAlwaysStoreInADS(__STORE_ADS_DEFAULT__)
+
+
 def set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm. There is no guarantee of
@@ -914,11 +979,7 @@ def set_properties(alg_object, *args, **kwargs):
     def do_set_property(name, new_value):
         if new_value is None:
             return
-        # The correct parent/child relationship is not quite set up yet: #5157
-        # ChildAlgorithms in Python are marked as children but their output is in the
-        # ADS meaning we cannot just set DataItem properties by new_value. At the moment
-        # they are just set with strings
-        if isinstance(new_value, _kernel.DataItem):
+        if isinstance(new_value, _kernel.DataItem) and new_value.name():
             alg_object.setPropertyValue(key, new_value.name())
         else:
             alg_object.setProperty(key, new_value)
@@ -970,6 +1031,7 @@ def _create_algorithm_function(name, version, algm_object):
 
         algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
+        _set_store_ads(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
@@ -1028,12 +1090,7 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
             kwargs['startProgress'] = float(startProgress)
             kwargs['endProgress'] = float(endProgress)
         alg = parent.createChildAlgorithm(name, **kwargs)
-
         alg.setLogging(parent.isLogging())  # default is to log if parent is logging
-
-        # Historic: simpleapi functions always put stuff in the ADS
-        #           If we change this we culd potentially break many users' algorithms
-        alg.setAlwaysStoreInADS(True)
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically

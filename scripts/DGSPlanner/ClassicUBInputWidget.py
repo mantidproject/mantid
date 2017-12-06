@@ -217,6 +217,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
         #update the GUI
         self.updateGui()
 
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     mainForm=ClassicUBInputWidget()

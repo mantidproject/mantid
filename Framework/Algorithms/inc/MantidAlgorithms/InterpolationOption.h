@@ -49,6 +49,7 @@ public:
 
   std::unique_ptr<Kernel::Property> property() const;
   std::string propertyDoc() const;
+  std::string validateInputSize(const size_t size) const;
 
   void applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const;
   void applyInPlace(const HistogramData::Histogram &in,

@@ -18,6 +18,7 @@ namespace Mantid {
 //---------------------------------------------------------------------------
 namespace Kernel {
 class InstrumentInfo;
+class FacilityInfo;
 }
 namespace API {
 
@@ -61,6 +62,8 @@ public:
                            const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
+  std::vector<IArchiveSearch_sptr>
+  getArchiveSearch(const Kernel::FacilityInfo &facility) const;
   std::string findRun(const std::string &hintstr,
                       const std::set<std::string> &exts) const;
   std::string findRun(

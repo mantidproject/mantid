@@ -1,4 +1,7 @@
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace HistogramData {
@@ -251,8 +254,12 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   // 0 points -> 0 edges, otherwise edges are 1 more than points.
   if (xMode() == XMode::Points && target > 0)
     target++;
-  if (target != binEdges.size())
-    throw std::logic_error("Histogram: size mismatch of BinEdges\n");
+  if (target != binEdges.size()) {
+    std::stringstream msg;
+    msg << "Histogram: size mismatch of BinEdges: (" << target
+        << " != " << binEdges.size() << ")";
+    throw std::logic_error(msg.str());
+  }
 }
 
 /** Resets the size of the internal x, dx, y, and e data structures
@@ -262,7 +269,7 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   std::vector::resize which either truncates the current values
   or applies zero padding. */
 void Histogram::resize(size_t n) {
-  auto newXSize = xMode() == XMode::Points ? n : n + 1;
+  auto newXSize = (xMode() == XMode::Points || n == 0) ? n : n + 1;
 
   m_x.access().mutableRawData().resize(newXSize);
   if (m_y) {
@@ -276,6 +283,14 @@ void Histogram::resize(size_t n) {
   if (m_dx) {
     m_dx.access().mutableRawData().resize(n);
   }
+}
+
+HistogramIterator Histogram::begin() const {
+  return HistogramIterator(*this, 0);
+}
+
+HistogramIterator Histogram::end() const {
+  return HistogramIterator(*this, size());
 }
 
 } // namespace HistogramData

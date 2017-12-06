@@ -13,8 +13,8 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1) {
-  if (m_zoomablePlottingWidget == NULL) {
+      m_default(defaultPresenter), m_owner(nullptr), m_zoomedPeakIndex(-1) {
+  if (m_zoomablePlottingWidget == nullptr) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
 }
@@ -337,7 +337,12 @@ void CompositePeaksPresenter::setShown(
     return m_default->setShown(shown);
   }
   auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  (*iterator)->setShown(shown);
+  if (iterator == m_subjects.end())
+    return;
+
+  auto presenter = *iterator;
+  if (presenter)
+    presenter->setShown(shown);
 }
 
 /**

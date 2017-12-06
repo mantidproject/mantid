@@ -6,11 +6,11 @@ from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import (with_metaclass)
 import copy
-
+import json
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
-                                   FloatWithNoneParameter, rename_descriptor_names)
+                                   FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
-                               SANSInstrument, DetectorType)
+                               SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.automatic_setters import (automatic_setters)
 
@@ -36,6 +36,9 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 class StateReductionMode(StateReductionBase, StateBase):
     reduction_mode = ClassTypeParameter(ReductionMode)
     reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    merge_max = FloatWithNoneParameter()
+    merge_min = FloatWithNoneParameter()
+    merge_mask = BoolParameter()
 
     # Fitting
     merge_fit_mode = ClassTypeParameter(FitModeForMerge)
@@ -58,6 +61,9 @@ class StateReductionMode(StateReductionBase, StateBase):
         self.merge_fit_mode = FitModeForMerge.NoFit
         self.merge_range_min = None
         self.merge_range_max = None
+        self.merge_max = None
+        self.merge_min = None
+        self.merge_mask = False
 
         # Set the detector names to empty strings
         self.detector_names = {DetectorType.to_string(DetectorType.LAB): "",
@@ -80,7 +86,14 @@ class StateReductionMode(StateReductionBase, StateBase):
         return self.detector_names[bank_type]
 
     def validate(self):
-        pass
+        is_invalid = {}
+        if self.merge_max and self.merge_min:
+            if self.merge_min > self.merge_max:
+                is_invalid.update({"StateReduction": "The minimum of the merge region is greater than the maximum."})
+
+        if is_invalid:
+            raise ValueError("StateReduction: The provided inputs are illegal. "
+                             "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -119,10 +132,10 @@ class StateReductionModeBuilder(object):
 
 
 def get_reduction_mode_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
-    # the instrument is of relevance.
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    # The data state has most of the information that we require to define the reduction_mode.
+    # For the factory method, only the facility/instrument is of relevance.
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateReductionModeBuilder(data_info)
     else:
         raise NotImplementedError("StateReductionBuilder: Could not find any valid reduction builder for the "

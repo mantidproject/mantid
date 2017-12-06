@@ -3,7 +3,7 @@ from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
 from math import sqrt
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSInstrument)
+from sans.common.enums import (SANSFacility)
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
@@ -145,10 +145,8 @@ class QResolutionCalculatorFactory(object):
     @staticmethod
     def create_q_resolution_calculator(state):
         data = state.data
-        instrument = data.instrument
-        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or\
-                             instrument is SANSInstrument.LOQ  # noqa
-        if is_isis_instrument:
+        facility = data.facility
+        if facility is SANSFacility.ISIS:
             convert_to_q = state.convert_to_q
             if convert_to_q.use_q_resolution:
                 q_resolution = QResolutionCalculatorISIS()

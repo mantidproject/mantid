@@ -41,7 +41,7 @@ public:
     boost::shared_ptr<ADARA::BankedEventPkt> pkt =
         basicPacketTests<ADARA::BankedEventPkt>(
             bankedEventPacket, sizeof(bankedEventPacket), 728504567, 761741666);
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 0x3C);
       TS_ASSERT_EQUALS(pkt->pulseCharge(), 1549703);
       TS_ASSERT_EQUALS(pkt->pulseEnergy(), 937987556);
@@ -74,7 +74,7 @@ public:
     boost::shared_ptr<ADARA::BeamMonitorPkt> pkt =
         basicPacketTests<ADARA::BeamMonitorPkt>(
             beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 0x3c);
       TS_ASSERT_EQUALS(pkt->flags(), 0);
       TS_ASSERT_EQUALS(pkt->pulseCharge(), 1549703);
@@ -88,7 +88,7 @@ public:
     boost::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
         basicPacketTests<ADARA::DeviceDescriptorPkt>(
             devDesPacket, sizeof(devDesPacket), 726785379, 0);
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       // Basic XML validation
       Poco::XML::DOMParser parser;
       TS_ASSERT_THROWS_NOTHING(
@@ -102,7 +102,7 @@ public:
         basicPacketTests<ADARA::RunStatusPkt>(
             runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
 
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->runNumber(), 13247);
       TS_ASSERT_EQUALS(pkt->runStart(), 728503297);
       TS_ASSERT_EQUALS(pkt->status(), ADARA::RunStatus::STATE);
@@ -118,7 +118,7 @@ public:
     boost::shared_ptr<ADARA::RTDLPkt> pkt = basicPacketTests<ADARA::RTDLPkt>(
         rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
 
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->cycle(), 60);
       TS_ASSERT_EQUALS(pkt->vetoFlags(), 0x4);
       TS_ASSERT_EQUALS(pkt->badVeto(), false);
@@ -142,7 +142,7 @@ public:
         basicPacketTests<ADARA::VariableDoublePkt>(
             variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
 
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->devId(), 2);
       TS_ASSERT_EQUALS(pkt->varId(), 1);
       TS_ASSERT_EQUALS(pkt->status(), 0);
@@ -158,7 +158,7 @@ public:
         basicPacketTests<ADARA::VariableU32Pkt>(
             variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
 
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->devId(), 2);
       TS_ASSERT_EQUALS(pkt->varId(), 3);
       TS_ASSERT_EQUALS(pkt->status(), 0);
@@ -222,10 +222,10 @@ private:
 
     // verify that we can cast the packet to the type we expect it to be
     boost::shared_ptr<T> pkt = boost::dynamic_pointer_cast<T>(m_pkt);
-    TS_ASSERT(pkt != NULL);
+    TS_ASSERT(pkt != nullptr);
 
     // Make sure we have a valid packet before attempting the remaining tests
-    if (pkt != NULL) {
+    if (pkt != nullptr) {
       TS_ASSERT_EQUALS(pkt->packet_length(), len)
       TS_ASSERT_EQUALS(pkt->payload_length(), len - sizeof(ADARA::Header))
 
@@ -253,7 +253,7 @@ private:
     // dataLen is 0
 
     unsigned char *bufferAddr = bufferFillAddress();
-    TS_ASSERT(bufferAddr != 0);
+    TS_ASSERT(bufferAddr != nullptr);
     TS_ASSERT(bufferAddr ==
               m_initialBufferAddr); // verify that there's nothing in the buffer
 

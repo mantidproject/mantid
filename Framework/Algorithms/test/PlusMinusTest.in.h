@@ -264,8 +264,8 @@ public:
       // checkData won't work on this one, do a few checks here
       TS_ASSERT_EQUALS( work_out3->size(), work_in2->size() );
       TS_ASSERT_EQUALS( work_out3->readX(1), work_in2->readX(1) );
-      TS_ASSERT_EQUALS( work_out3->readY(2)[6], 3.0 );
-      TS_ASSERT_EQUALS( work_out3->readE(3)[4], 4.0 );
+      TS_ASSERT_EQUALS( work_out3->y(2)[6], 3.0 );
+      TS_ASSERT_EQUALS( work_out3->e(3)[4], 4.0 );
     }
 
     checkData(work_in1, work_in2, work_out1);
@@ -844,14 +844,19 @@ public:
       bool breakOut=false;
       for (size_t wi=0; wi < work_out1->getNumberHistograms(); wi++)
       {
-        for (size_t i=0; i<work_out1->blocksize(); i++)
+        const auto &xIn = work_in1->x(wi);
+        const auto &xOut = work_out1->x(wi);
+        const auto &yOut = work_out1->y(wi);
+        const auto &eOut = work_out1->e(wi);
+        const size_t numBins = yOut.size();
+        for (size_t i=0; i<numBins; i++)
         {
           std::ostringstream mess;
           mess << message << ", evaluated at wi " << wi << ", i " << i;
           
-          TS_ASSERT_DELTA(work_in1->readX(wi)[i], work_out1->readX(wi)[i], 0.0001);
-          double sig3 = work_out1->readY(wi)[i];
-          double err3 = work_out1->readE(wi)[i];
+          TS_ASSERT_DELTA(xIn[i], xOut[i], 0.0001);
+          double sig3 = yOut[i];
+          double err3 = eOut[i];
           TSM_ASSERT_DELTA(mess.str(), sig3, expectedValue, 0.0001);
           TSM_ASSERT_DELTA(mess.str(), err3, expectedError, 0.0001);
           if (fabs(err3 - expectedError) > 0.001)
@@ -875,33 +880,34 @@ public:
 //      return true;
 //    if (ws2Index/work_in2->blocksize() >= work_in2->getNumberHistograms())
 //      return true;
-    double sig1 = work_in1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-    double sig2 = work_in2->readY(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-    double sig3 = work_out1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    const size_t work_in1_blksize = work_in1->blocksize();
+    const size_t work_in2_blksize = work_in2->blocksize();
 
-    TS_ASSERT_DELTA(work_in1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()],
-        work_out1->readX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+    const double sig1 = work_in1->readY(i/work_in1_blksize)[i%work_in1_blksize];
+    const double sig2 = work_in2->readY(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
+    const double sig3 = work_out1->readY(i/work_in1_blksize)[i%work_in1_blksize];
 
-    double err1 = work_in1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
-    double err2 = work_in2->readE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-    double err3 = work_out1->readE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    TS_ASSERT_DELTA(work_in1->readX(i/work_in1_blksize)[i%work_in1_blksize],
+        work_out1->readX(i/work_in1_blksize)[i%work_in1_blksize], 0.0001);
 
-    double expectValue, expectError;
+    const double err1 = work_in1->readE(i/work_in1_blksize)[i%work_in1_blksize];
+    const double err2 = work_in2->readE(ws2Index/work_in2_blksize)[ws2Index%work_in2_blksize];
+    const double err3 = work_out1->readE(i/work_in1_blksize)[i%work_in1_blksize];
+
+    double expectValue;
     //Compute the expectation
     if (DO_PLUS)
       expectValue = sig1 + sig2;
     else
       expectValue = sig1 - sig2;
 
-    expectError = sqrt(err1*err1 + err2*err2);;
-
-    double diff = err3 - expectError;
-    if (diff < 0) diff = -diff;
+    const double expectError = sqrt(err1*err1 + err2*err2);;
 
     TSM_ASSERT_DELTA(message, sig3, expectValue, 0.0001);
     TSM_ASSERT_DELTA(message, err3, expectError, 0.0001);
 
     // Return false if the error is wrong
+    const double diff = std::abs(err3 - expectError);
     return (diff < 0.0001);
   }
 

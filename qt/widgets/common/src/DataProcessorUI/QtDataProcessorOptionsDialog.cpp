@@ -1,10 +1,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include <qpushbutton.h>
+#include <QPushButton>
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** Constructor */
 QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(
     DataProcessorView *view, DataProcessorPresenter *presenter)
@@ -90,5 +91,6 @@ void QtDataProcessorOptionsDialog::loadOptions() {
   }
 }
 
+} // DataProcessor
 } // MantidWidgets
 } // MantidQt

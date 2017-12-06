@@ -1,9 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "DllConfig.h"
+#include "IEnggDiffFittingModel.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
 #include "IEnggDiffractionCalibration.h"
@@ -55,7 +54,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
 
 public:
   EnggDiffFittingPresenter(
-      IEnggDiffFittingView *view,
+      IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
       boost::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
@@ -73,60 +72,16 @@ public:
   //@}
 
   /// the fitting hard work that a worker / thread will run
-  void doFitting(const std::string &focusedRunNo,
+  void doFitting(const int runNumber, const size_t bank,
                  const std::string &expectedPeaks);
 
-  void runLoadAlg(const std::string focusedFile,
-                  Mantid::API::MatrixWorkspace_sptr &focusedWS);
-
-  void runFittingAlgs(std::string FocusedFitPeaksTableName,
-                      std::string FocusedWSName);
-
-  std::string
-  functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
-                     std::string tableName, size_t row, std::string &startX,
-                     std::string &endX);
-
-  void plotFocusedFile(bool plotSinglePeaks);
+  void plotFocusedFile(bool plotSinglePeaks,
+                       Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
   void plotFitPeaksCurves();
 
-  void runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
-                                  std::string &filePath);
-
-  void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
-                              const std::string &InputName,
-                              const std::string &OutputName,
-                              const std::string &startX,
-                              const std::string &endX);
-
-  void runCropWorkspaceAlg(std::string workspaceName);
-
-  void runAppendSpectraAlg(std::string workspace1Name,
-                           std::string workspace2Name);
-
-  void runRebinToWorkspaceAlg(std::string workspaceName);
-
-  void convertUnits(std::string workspaceName);
-  void runConvertUnitsAlg(std::string workspaceName);
-  void runAlignDetectorsAlg(std::string workspaceName);
-
-  void setDifcTzero(Mantid::API::MatrixWorkspace_sptr wks) const;
-  void getDifcTzero(Mantid::API::MatrixWorkspace_const_sptr wks, double &difc,
-                    double &difa, double &tzero) const;
-
-  void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            const std::string &outputWorkspace);
-
-  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
-
-  void setBankItems(const std::vector<std::string> &bankFiles);
-
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
-
-  void setDefaultBank(const std::vector<std::string> &splittedBaseName,
-                      const std::string &selectedFile);
 
 protected:
   void processStart();
@@ -145,19 +100,18 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(const std::string text) const;
+  bool isDigit(const std::string &text) const;
+
+  void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void
-  startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
-                          const std::string &expectedPeaks);
+  virtual void startAsyncFittingWorker(const int runNumber, const size_t bank,
+                                       const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
-  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
-
-  void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &expectedPeaks);
+  void validateFittingInputs(const std::string &focusedRunNo,
+                             const std::string &expectedPeaks);
 
   // TODO make this const when the global is removed
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
@@ -184,18 +138,12 @@ private:
   getAllBrowsedFilePaths(const std::string &inputFullPath,
                          std::vector<std::string> &foundFullFilePaths);
 
-  std::vector<std::string> processMultiRun(const std::string userInput);
+  std::vector<std::string> processMultiRun(const std::string &userInput);
 
   std::vector<std::string>
-  processSingleRun(const std::string &userInputBasename,
-                   const std::vector<std::string> &splitBaseName);
+  processSingleRun(const std::string &userInputBasename);
 
-  std::vector<std::string>
-  processFullPathInput(const Poco::Path &pocoFilePath,
-                       const std::vector<std::string> &splitBaseName);
-
-  // whether to use AlignDetectors to convert units
-  static const bool g_useAlignDetectors;
+  std::vector<std::string> processFullPathInput(const Poco::Path &pocoFilePath);
 
   static int g_fitting_runno_counter;
 
@@ -225,8 +173,14 @@ private:
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
 
+  /// Associated model for this presenter
+  std::unique_ptr<IEnggDiffFittingModel> m_model;
+
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;
+
+  /// Handle the user selecting a different run to plot
+  void processSelectRun();
 };
 
 } // namespace CustomInterfaces

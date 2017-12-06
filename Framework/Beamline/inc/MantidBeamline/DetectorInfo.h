@@ -69,7 +69,9 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  size_t scanSize() const;
   bool isScanning() const;
+  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -109,6 +111,10 @@ private:
   void initScanIntervals();
   void initIndices();
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
+  std::vector<bool> buildMergeSyncScanIndices(const DetectorInfo &other) const;
+  void checkSizes(const DetectorInfo &other) const;
+  void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
+                               const size_t index2) const;
   bool m_isSyncScan{true};
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
@@ -119,7 +125,9 @@ private:
   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
       nullptr};
+  /// For (detector index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  /// For linear index -> (detector index, time index) conversions
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };

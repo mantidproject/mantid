@@ -49,7 +49,7 @@ Test 3: Old style data analysis GUI
 -----------------------------------
 
 - Still on the *Settings* tab from test 2, leave rebinning on and make sure that "Enable multiple fitting" is turned **off**. (It should be off by default).
-- Go to the *Data Analysis* tab. The interface should contain a fit property browser.
+- Go to the *Data Analysis* tab. The interface should contain a fit property browser. The ``TF Asymmetry Mode`` should be unticked. 
 - Set up an ``Abragam`` function with ``Omega=8.5``, ``Tau=0.5`` and fit the data. The fit should be done to the rebinned data.
 
 Test 4: Fit to raw data
@@ -68,4 +68,4 @@ Test 5: New style data analysis GUI
 Teardown
 --------
 
-Before moving to group 2, clear any existing fit curves, then go to the *Settings* tab and set rebinning back to "None". Leave the "Enable multiple fitting" option turned on.
+Before moving to group 2, go to the *Settings* tab and set rebinning back to "None". Leave the "Enable multiple fitting" option turned on.

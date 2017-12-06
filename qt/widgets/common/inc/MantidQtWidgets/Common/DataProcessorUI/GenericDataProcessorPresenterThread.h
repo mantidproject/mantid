@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 GenericDataProcessorPresenterThread class to handle a single worker
@@ -55,8 +56,6 @@ public:
     worker->moveToThread(this);
   }
 
-  ~GenericDataProcessorPresenterThread() override { emit finished(); }
-
 public slots:
   void workerFinished(const int exitCode) {
     Q_UNUSED(exitCode);
@@ -68,6 +67,7 @@ private:
   QObject *const m_worker;
 };
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
 

@@ -19,7 +19,6 @@
 
 #include <cfloat>
 
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
@@ -27,8 +26,6 @@ using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::StructuredDetector;
-using Mantid::Geometry::IDetector;
-using Mantid::Geometry::Object;
 
 namespace MantidQt {
 namespace MantidWidgets {

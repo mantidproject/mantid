@@ -4,7 +4,6 @@ set ( SRC_FILES
 	ALCBaselineModellingView.cpp
 	ALCDataLoadingPresenter.cpp
 	ALCDataLoadingView.cpp
-	ALCHelper.cpp
 	ALCInterface.cpp
 	ALCLatestFileFinder.cpp
 	ALCPeakFittingModel.cpp
@@ -31,13 +30,12 @@ set ( INC_FILES
 	ALCBaselineModellingView.h
 	ALCDataLoadingPresenter.h
 	ALCDataLoadingView.h
-	ALCHelper.h
 	ALCInterface.h
 	ALCLatestFileFinder.h
 	ALCPeakFittingModel.h
 	ALCPeakFittingPresenter.h
 	ALCPeakFittingView.h
-    DllConfig.h
+        DllConfig.h
 	IALCBaselineModellingModel.h
 	IALCBaselineModellingView.h
 	IALCDataLoadingView.h
@@ -56,7 +54,7 @@ set ( INC_FILES
 	MuonSequentialFitDialog.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
     ALCDataLoadingPresenter.h
@@ -77,7 +75,7 @@ set ( MOC_FILES
     MuonSequentialFitDialog.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     ALCBaselineModellingView.ui
     ALCDataLoadingView.ui
     ALCInterface.ui
@@ -86,46 +84,29 @@ set ( UI_FILES
     MuonSequentialFitDialog.ui
 )
 
-include_directories ( ../../qt/widgets/common/inc )
-
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
-
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MultiDatasetFit )
-
-# Use a precompiled header where they are supported
-enable_precompiled_headers( PrecompiledHeader.h  ALL_SRC )
-add_library ( MantidScientificInterfacesMuon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-# Set the name of the generated library
-set_target_properties ( MantidScientificInterfacesMuon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_MUONINTERFACE )
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesMuon PROPERTY FOLDER "ScientificInterfaces" )
-endif()
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidScientificInterfacesMuon PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
-endif ()
-
-find_Package(Threads)
-
-target_link_libraries ( MantidScientificInterfacesMuon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            MantidQtWidgetsCommon
-            MantidScientificInterfacesMultiDatasetFit
-            ${CORE_MANTIDLIBS}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${JSONCPP_LIBRARIES}
-            ${CMAKE_THREAD_LIBS_INIT})
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidScientificInterfacesMuon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMuon
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_MUONINTERFACE
+  PRECOMPILED PrecompiledHeader.h
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
+  QT4_LINK_LIBS
+      Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
+    MantidScientificInterfacesMultiDatasetFit
+  INSTALL_DIR_BASE
+    ${PLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../../Contents/MacOS
+    @loader_path/../../plugins/qt4
+)

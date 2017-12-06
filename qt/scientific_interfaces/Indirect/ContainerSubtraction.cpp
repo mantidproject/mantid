@@ -40,120 +40,51 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 void ContainerSubtraction::setup() {}
 
 void ContainerSubtraction::run() {
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
-  IAlgorithm_sptr applyCorrAlg =
-      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
-  applyCorrAlg->initialize();
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_sampleWorkspaceName);
-  m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
+  if (!m_csSampleWS)
+    return;
+  if (!m_csContainerWS)
+    return;
+
+  m_originalSampleUnits = m_csSampleWS->getAxis(0)->unit()->unitID();
 
   // Check if using shift / scale
   const bool shift = m_uiForm.ckShiftCan->isChecked();
   const bool scale = m_uiForm.ckScaleCan->isChecked();
 
-  // If not in wavelength then do conversion
-  if (m_originalSampleUnits != "Wavelength") {
-    g_log.information(
-        "Sample workspace not in wavelength, need to convert to continue.");
-    absCorProps["SampleWorkspace"] =
-        addConvertUnitsStep(sampleWs, "Wavelength");
-  } else {
-    absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
-  }
-
-  const auto canName = m_uiForm.dsContainer->getCurrentDataName().toStdString();
-  const auto cloneName = "__algorithm_can";
-
-  IAlgorithm_sptr cloneAlg =
-      AlgorithmManager::Instance().create("CloneWorkspace");
-  cloneAlg->initialize();
-  cloneAlg->setLogging(false);
-  cloneAlg->setProperty("InputWorkspace", canName);
-  cloneAlg->setProperty("OutputWorkspace", cloneName);
-  cloneAlg->execute();
-
-  MatrixWorkspace_sptr canWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
-
-  // Check for same binning across sample and container
+  auto containerWs = m_csContainerWS;
   if (shift) {
+    containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
+    containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
+  } else if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
+    containerWs = requestRebinToSample(containerWs);
 
-    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-    scaleX->initialize();
-    scaleX->setLogging(false);
-    scaleX->setProperty("InputWorkspace", canWs);
-    scaleX->setProperty("Factor", m_uiForm.spShift->value());
-    scaleX->setProperty("Operation", "Add");
-    scaleX->setProperty("OutputWorkspace", cloneName);
-    scaleX->execute();
-
-    IAlgorithm_sptr rebin =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setLogging(false);
-    rebin->setProperty("WorkspaceToRebin", cloneName);
-    rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-    rebin->setProperty("OutputWorkspace", cloneName);
-    rebin->execute();
-
-  } else {
-    if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
-      const char *text =
-          "Binning on sample and container does not match."
-          "Would you like to rebin the container to match the sample?";
-
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
-                                         QMessageBox::Yes, QMessageBox::No,
-                                         QMessageBox::NoButton);
-
-      if (result == QMessageBox::Yes) {
-        IAlgorithm_sptr rebin =
-            AlgorithmManager::Instance().create("RebinToWorkspace");
-        rebin->initialize();
-        rebin->setProperty("WorkspaceToRebin", canWs);
-        rebin->setProperty("WorkspaceToMatch", sampleWs);
-        rebin->setProperty("OutputWorkspace", cloneName);
-        rebin->execute();
-      } else {
-        m_batchAlgoRunner->clearQueue();
-        g_log.error("Cannot apply absorption corrections using a sample and "
-                    "container with different binning.");
-        return;
-      }
+    if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
+      g_log.error("Cannot apply container corrections using a sample and "
+                  "container with different binning.");
+      return;
     }
   }
 
-  // If not in wavelength then do conversion
-  std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
-  if (originalCanUnits != "Wavelength") {
-    g_log.information("Container workspace not in wavelength, need to "
-                      "convert to continue.");
-    absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
-  } else {
-    absCorProps["CanWorkspace"] = cloneName;
-  }
+  if (scale)
+    containerWs = scaleWorkspace(containerWs, m_uiForm.spCanScale->value());
 
-  if (scale) {
-    double canScaleFactor = m_uiForm.spCanScale->value();
-    applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
-  }
+  auto outputWs = minusWorkspace(m_csSampleWS, containerWs);
+  m_pythonExportWsName = createOutputName();
+  AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName, outputWs);
+  containerSubtractionComplete();
+}
 
-  // Generate output workspace name
-  QString QStrContainerWs = QString::fromStdString(m_containerWorkspaceName);
-  auto QStrSampleWs = QString::fromStdString(m_sampleWorkspaceName);
+std::string ContainerSubtraction::createOutputName() {
+  QString QStrContainerWs = QString::fromStdString(m_csContainerWS->getName());
+  auto QStrSampleWs = QString::fromStdString(m_csSampleWS->getName());
   int sampleNameCutIndex = QStrSampleWs.lastIndexOf("_");
   if (sampleNameCutIndex == -1)
     sampleNameCutIndex = QStrSampleWs.length();
 
-  MatrixWorkspace_sptr containerWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_containerWorkspaceName);
   std::string runNum = "";
   int containerNameCutIndex = 0;
-  if (containerWs->run().hasProperty("run_number")) {
-    runNum = containerWs->run().getProperty("run_number")->value();
+  if (m_csContainerWS->run().hasProperty("run_number")) {
+    runNum = m_csContainerWS->run().getProperty("run_number")->value();
   } else {
     containerNameCutIndex = QStrContainerWs.indexOf("_");
     if (containerNameCutIndex == -1)
@@ -168,41 +99,7 @@ void ContainerSubtraction::run() {
   }
 
   outputWsName += "_red";
-
-  applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
-
-  // Add corrections algorithm to queue
-  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
-
-  // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(absCorComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
-
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = outputWsName.toStdString();
-}
-
-/**
- * Adds a rebin to workspace step to the calculation for when using a sample and
- *container that
- * have different binning.
- *
- * @param toRebin
- * @param toMatch
- */
-void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
-  rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
-
-  IAlgorithm_sptr rebinAlg =
-      AlgorithmManager::Instance().create("RebinToWorkspace");
-  rebinAlg->initialize();
-
-  rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
-  rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
-
-  m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
+  return outputWsName.toStdString();
 }
 
 /**
@@ -219,33 +116,20 @@ bool ContainerSubtraction::validate() {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
   if (samValid && canValid) {
-    // Check Sample is of same type as container (e.g. _red/_sqw)
-    const auto QStrSampleName = QString::fromStdString(m_sampleWorkspaceName);
-    const auto sampleType = QStrSampleName.right(
-        QStrSampleName.length() - QStrSampleName.lastIndexOf("_"));
-    const QString containerName = m_uiForm.dsContainer->getCurrentDataName();
-    const QString containerType = containerName.right(
-        containerName.length() - containerName.lastIndexOf("_"));
+    // Check Sample is of same type as container
+    const auto containerType = m_csContainerWS->YUnit();
+    const auto sampleType = m_csSampleWS->YUnit();
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
-    g_log.debug() << "Container type is: " << containerType.toStdString()
-                  << '\n';
+    g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
+    g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
 
     if (containerType != sampleType)
-      uiv.addErrorMessage(
-          "Sample and can workspaces must contain the same type of data.");
-
-    // Get Workspaces for histogram checking
-    MatrixWorkspace_sptr sampleWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_sampleWorkspaceName);
-    MatrixWorkspace_sptr containerWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerName.toStdString());
+      uiv.addErrorMessage("Sample and can workspaces must contain the same "
+                          "type of data; have the same Y-Unit.");
 
     // Check sample has the same number of Histograms as the contianer
-    const size_t sampleHist = sampleWs->getNumberHistograms();
-    const size_t containerHist = containerWs->getNumberHistograms();
+    const size_t sampleHist = m_csSampleWS->getNumberHistograms();
+    const size_t containerHist = m_csContainerWS->getNumberHistograms();
 
     if (sampleHist != containerHist) {
       uiv.addErrorMessage(
@@ -274,28 +158,30 @@ void ContainerSubtraction::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
   m_uiForm.ppPreview->removeSpectrum("Sample");
 
-  // Get new workspace
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
-  m_uiForm.spPreviewSpec->setMaximum(
-      static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
+  m_csSampleWS = convertToHistogram(m_csSampleWS);
+  // Get new workspace
+  if (m_csSampleWS) {
+    m_uiForm.spPreviewSpec->setMaximum(
+        static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
-  // Plot the sample curve
-  plotInPreview("Sample", m_csSampleWS, Qt::black);
-  m_sampleWorkspaceName = dataName.toStdString();
+    // Plot the sample curve
+    plotInPreview("Sample", m_csSampleWS, Qt::black);
 
-  // Set min/max container shift
-  auto min = m_csSampleWS->getXMin();
-  auto max = m_csSampleWS->getXMax();
+    // Set min/max container shift
+    auto min = m_csSampleWS->getXMin();
+    auto max = m_csSampleWS->getXMax();
 
-  m_uiForm.spShift->setMinimum(min);
-  m_uiForm.spShift->setMaximum(max);
+    m_uiForm.spShift->setMinimum(min);
+    m_uiForm.spShift->setMaximum(max);
+  }
 }
 
 /**
-* Displays the container data on the plot preview
-* @param dataName Name of new data source
-*/
+ * Displays the container data on the plot preview
+ * @param dataName Name of new data source
+ */
 void ContainerSubtraction::newContainer(const QString &dataName) {
   // Remove old container and fit
   m_uiForm.ppPreview->removeSpectrum("Subtracted");
@@ -304,14 +190,8 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
-
-  // Clone container for use in preprocessing
-  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-  clone->initialize();
-  clone->setProperty("InputWorkspace", m_csContainerWS);
-  clone->setProperty("Outputworkspace", "__processed_can");
-  clone->execute();
-  m_containerWorkspaceName = "__processed_can";
+  m_csContainerWS = convertToHistogram(m_csContainerWS);
+  m_transformedContainerWS = m_csContainerWS;
 
   // Plot new container
   plotInPreview("Container", m_csContainerWS, Qt::red);
@@ -321,35 +201,27 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
  * Handles Container curve in the miniplot when scale or shift is updated
  */
 void ContainerSubtraction::updateCan() {
-  if (m_uiForm.dsContainer->getCurrentDataName().compare("") != 0) {
-    IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
-    scale->initialize();
-    scale->setLogging(false);
-    scale->setProperty(
-        "InputWorkspace",
-        m_uiForm.dsContainer->getCurrentDataName().toStdString());
-    scale->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    scale->setProperty("Operation", "Multiply");
-    scale->setProperty("Factor", m_uiForm.spCanScale->value());
-    scale->execute();
-    IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-    scaleX->initialize();
-    scaleX->setLogging(false);
-    scaleX->setProperty("InputWorkspace", m_containerWorkspaceName);
-    scaleX->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    scaleX->setProperty("Factor", m_uiForm.spShift->value());
-    scaleX->setProperty("Operation", "Add");
-    scaleX->execute();
-  }
-  if (m_sampleWorkspaceName.compare("") != 0) {
-    IAlgorithm_sptr rebin =
-        AlgorithmManager::Instance().create("RebinToWorkspace");
-    rebin->initialize();
-    rebin->setLogging(false);
-    rebin->setProperty("WorkspaceToRebin", m_containerWorkspaceName);
-    rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-    rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
-    rebin->execute();
+  auto shift = m_uiForm.ckShiftCan->isChecked();
+  auto scale = m_uiForm.ckScaleCan->isChecked();
+
+  if (m_csContainerWS) {
+    m_transformedContainerWS = m_csContainerWS;
+
+    if (shift) {
+      m_transformedContainerWS =
+          shiftWorkspace(m_transformedContainerWS, m_uiForm.spShift->value());
+      m_transformedContainerWS =
+          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+    } else if (m_csSampleWS &&
+               !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
+      m_transformedContainerWS =
+          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+    }
+
+    if (scale) {
+      m_transformedContainerWS = scaleWorkspace(m_transformedContainerWS,
+                                                m_uiForm.spCanScale->value());
+    }
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
@@ -361,56 +233,27 @@ void ContainerSubtraction::updateCan() {
  */
 void ContainerSubtraction::plotPreview(int wsIndex) {
   m_uiForm.ppPreview->clear();
-
-  // Plot sample
-  if (m_csSampleWS) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Sample", QString::fromStdString(m_sampleWorkspaceName), wsIndex,
-        Qt::black);
-  }
+  m_uiForm.ppPreview->setUpdatesEnabled(false);
 
   // Plot container
   if (m_csContainerWS) {
-    m_uiForm.ppPreview->addSpectrum(
-        "Container", QString::fromStdString(m_containerWorkspaceName), wsIndex,
-        Qt::red);
+    m_uiForm.ppPreview->addSpectrum("Container", m_transformedContainerWS,
+                                    wsIndex, Qt::red);
+  }
+
+  // Plot sample
+  if (m_csSampleWS) {
+    m_uiForm.ppPreview->addSpectrum("Sample", m_csSampleWS, wsIndex, Qt::black);
   }
 
   // Plot result
   if (!m_pythonExportWsName.empty()) {
     m_uiForm.ppPreview->addSpectrum(
         "Subtracted", QString::fromStdString(m_pythonExportWsName), wsIndex,
-        Qt::green);
+        Qt::blue);
   }
-
+  m_uiForm.ppPreview->setUpdatesEnabled(true);
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
-}
-
-void ContainerSubtraction::postProcessComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(postProcessComplete(bool)));
-
-  if (error) {
-    emit showMessageBox("Unable to process corrected workspace.\nSee Results "
-                        "Log for more details.");
-    return;
-  }
-
-  // Handle preview plot
-  plotPreview(m_uiForm.spPreviewSpec->value());
-
-  // Clean up unwanted workspaces
-  IAlgorithm_sptr deleteAlg =
-      AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", "__algorithm_can");
-  deleteAlg->execute();
-  const auto conv =
-      AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
-  if (conv) {
-    deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
-    deleteAlg->execute();
-  }
 }
 
 /**
@@ -418,26 +261,8 @@ void ContainerSubtraction::postProcessComplete(bool error) {
  *
  * @param error True if algorithm failed.
  */
-void ContainerSubtraction::absCorComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(absCorComplete(bool)));
-
-  if (error) {
-    emit showMessageBox(
-        "Unable to apply corrections.\nSee Results Log for more details.");
-    return;
-  }
-
-  // Convert back to original sample units
-  if (m_originalSampleUnits != "Wavelength") {
-    m_csSubtractedWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_pythonExportWsName);
-    std::string eMode("");
-    if (m_originalSampleUnits == "dSpacing")
-      eMode = "Elastic";
-    addConvertUnitsStep(m_csSubtractedWS, m_originalSampleUnits, "", eMode);
-  }
+void ContainerSubtraction::containerSubtractionComplete() {
+  plotPreview(m_uiForm.spPreviewSpec->value());
 
   if (m_uiForm.ckShiftCan->isChecked()) {
     IAlgorithm_sptr shiftLog =
@@ -451,15 +276,11 @@ void ContainerSubtraction::absCorComplete(bool error) {
         "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
+
   // Enable post process plotting and saving
   m_uiForm.cbPlotOutput->setEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
-
-  // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(postProcessComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -490,8 +311,8 @@ void ContainerSubtraction::plotClicked() {
 }
 
 /**
-* Plots the current spectrum displayed in the preview plot
-*/
+ * Plots the current spectrum displayed in the preview plot
+ */
 void ContainerSubtraction::plotCurrentPreview() {
   QStringList workspaces = QStringList();
 
@@ -514,14 +335,14 @@ void ContainerSubtraction::plotCurrentPreview() {
 }
 
 /*
-* Plots the selected spectra (selected by the Spectrum spinner) of the specified
-* workspace. The resultant curve will be given the specified name and the
-* specified colour.
-*
-* @param curveName   The name of the curve to plot in the preview.
-* @param ws          The workspace whose spectra to plot in the preview.
-* @param curveColor  The color of the curve to plot in the preview.
-*/
+ * Plots the selected spectra (selected by the Spectrum spinner) of the
+ * specified workspace. The resultant curve will be given the specified name and
+ * the specified colour.
+ *
+ * @param curveName   The name of the curve to plot in the preview.
+ * @param ws          The workspace whose spectra to plot in the preview.
+ * @param curveColor  The color of the curve to plot in the preview.
+ */
 void ContainerSubtraction::plotInPreview(const QString &curveName,
                                          MatrixWorkspace_sptr &ws,
                                          const QColor &curveColor) {
@@ -548,6 +369,128 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
     m_spectra = specNo;
     m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) {
+  const char *text =
+      "Binning on sample and container does not match."
+      "Would you like to rebin the container to match the sample?";
+
+  int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
+                                     QMessageBox::Yes, QMessageBox::No,
+                                     QMessageBox::NoButton);
+
+  if (result == QMessageBox::Yes)
+    return rebinToWorkspace(workspace, convertToHistogram(m_csSampleWS));
+  else
+    return workspace;
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::shiftWorkspace(MatrixWorkspace_sptr workspace,
+                                     double shiftValue) {
+  auto shiftAlg = shiftAlgorithm(workspace, shiftValue);
+  shiftAlg->execute();
+  return shiftAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::scaleWorkspace(MatrixWorkspace_sptr workspace,
+                                     double scaleValue) {
+  auto scaleAlg = scaleAlgorithm(workspace, scaleValue);
+  scaleAlg->execute();
+  return scaleAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::minusWorkspace(MatrixWorkspace_sptr lhsWorkspace,
+                                     MatrixWorkspace_sptr rhsWorkspace) {
+  auto minusAlg = minusAlgorithm(lhsWorkspace, rhsWorkspace);
+  minusAlg->execute();
+  return minusAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::rebinToWorkspace(MatrixWorkspace_sptr workspaceToRebin,
+                                       MatrixWorkspace_sptr workspaceToMatch) {
+  auto rebinAlg = rebinToWorkspaceAlgorithm(workspaceToRebin, workspaceToMatch);
+  rebinAlg->execute();
+  return rebinAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) {
+  auto convertAlg = convertToHistogramAlgorithm(workspace);
+  convertAlg->execute();
+  return convertAlg->getProperty("OutputWorkspace");
+}
+
+IAlgorithm_sptr
+ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
+                                     double shiftValue) {
+  IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
+  shift->initialize();
+  shift->setChild(true);
+  shift->setLogging(false);
+  shift->setProperty("InputWorkspace", workspace);
+  shift->setProperty("Operation", "Add");
+  shift->setProperty("Factor", shiftValue);
+  shift->setProperty("OutputWorkspace", "shifted");
+  return shift;
+}
+
+IAlgorithm_sptr
+ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
+                                     double scaleValue) {
+  IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
+  scale->initialize();
+  scale->setChild(true);
+  scale->setLogging(false);
+  scale->setProperty("InputWorkspace", workspace);
+  scale->setProperty("Operation", "Multiply");
+  scale->setProperty("Factor", scaleValue);
+  scale->setProperty("OutputWorkspace", "scaled");
+  return scale;
+}
+
+IAlgorithm_sptr
+ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
+                                     MatrixWorkspace_sptr rhsWorkspace) {
+  IAlgorithm_sptr minus = AlgorithmManager::Instance().create("Minus");
+  minus->initialize();
+  minus->setChild(true);
+  minus->setLogging(false);
+  minus->setProperty("LHSWorkspace", lhsWorkspace);
+  minus->setProperty("RHSWorkspace", rhsWorkspace);
+  minus->setProperty("OutputWorkspace", "subtracted");
+  return minus;
+}
+
+IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
+    MatrixWorkspace_sptr workspaceToRebin,
+    MatrixWorkspace_sptr workspaceToMatch) {
+  IAlgorithm_sptr rebin =
+      AlgorithmManager::Instance().create("RebinToWorkspace");
+  rebin->initialize();
+  rebin->setChild(true);
+  rebin->setLogging(false);
+  rebin->setProperty("WorkspaceToRebin", workspaceToRebin);
+  rebin->setProperty("WorkspaceToMatch", workspaceToMatch);
+  rebin->setProperty("OutputWorkspace", "rebinned");
+  return rebin;
+}
+
+IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
+    MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr convert =
+      AlgorithmManager::Instance().create("ConvertToHistogram");
+  convert->initialize();
+  convert->setChild(true);
+  convert->setLogging(false);
+  convert->setProperty("InputWorkspace", workspace);
+  convert->setProperty("OutputWorkspace", "converted");
+  return convert;
 }
 
 } // namespace CustomInterfaces

@@ -7,10 +7,12 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
@@ -19,6 +21,27 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IPropertyManager)
 
 namespace {
+
+/**
+ * Convert a python object to a string or throw an exception. This will convert
+ * unicode strings in python2 via utf8.
+ */
+std::string pyObjToStr(const boost::python::object &value) {
+  extract<std::string> extractor(value);
+
+  std::string valuestr;
+  if (extractor.check()) {
+    valuestr = extractor();
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    valuestr = extract<std::string>(str(value).encode("utf-8"))();
+#endif
+  } else {
+    throw std::invalid_argument("Failed to convert python object a string");
+  }
+  return valuestr;
+}
+
 /**
  * Set the value of a property from the value within the
  * boost::python object
@@ -27,22 +50,41 @@ namespace {
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void setProperty(IPropertyManager &self, const std::string &name,
+void setProperty(IPropertyManager &self, const boost::python::object &name,
                  const boost::python::object &value) {
-  typedef extract<std::string> from_pystr;
-  // String values can be set directly
-  from_pystr cppstr(value);
-  if (cppstr.check()) {
-    self.setPropertyValue(name, cppstr());
+  std::string namestr;
+  try {
+    namestr = pyObjToStr(name);
+  } catch (std::invalid_argument &) {
+    throw std::invalid_argument("Failed to convert property name to a string");
+  }
+
+  extract<std::string> valuecpp(value);
+  if (valuecpp.check()) {
+    self.setPropertyValue(namestr, valuecpp());
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    self.setPropertyValue(namestr,
+                          extract<std::string>(str(value).encode("utf-8"))());
+#endif
   } else {
     try {
-      Property *p = self.getProperty(name);
+      Property *p = self.getProperty(namestr);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
-      entry.set(&self, name, value);
+      entry.set(&self, namestr, value);
     } catch (std::invalid_argument &e) {
-      throw std::invalid_argument("When converting parameter \"" + name +
+      throw std::invalid_argument("When converting parameter \"" + namestr +
                                   "\": " + e.what());
     }
+  }
+}
+
+void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
+  const boost::python::list keys = kwargs.keys();
+  const size_t numItems = boost::python::len(keys);
+  for (size_t i = 0; i < numItems; ++i) {
+    const boost::python::object value = kwargs[keys[i]];
+    setProperty(self, keys[i], value);
   }
 }
 
@@ -53,10 +95,11 @@ void setProperty(IPropertyManager &self, const std::string &name,
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareProperty(IPropertyManager &self, const std::string &name,
+void declareProperty(IPropertyManager &self, const boost::python::object &name,
                      boost::python::object value) {
+  std::string nameStr = pyObjToStr(name);
   auto p = std::unique_ptr<Property>(
-      Registry::PropertyWithValueFactory::create(name, value, 0));
+      Registry::PropertyWithValueFactory::create(nameStr, value, 0));
   self.declareProperty(std::move(p));
 }
 
@@ -68,9 +111,11 @@ void declareProperty(IPropertyManager &self, const std::string &name,
  * @param name :: The name of the property
  * @param value :: The value of the property as a bpl object
  */
-void declareOrSetProperty(IPropertyManager &self, const std::string &name,
+void declareOrSetProperty(IPropertyManager &self,
+                          const boost::python::object &name,
                           boost::python::object value) {
-  bool propExists = self.existsProperty(name);
+  std::string nameStr = pyObjToStr(name);
+  bool propExists = self.existsProperty(nameStr);
   if (propExists) {
     setProperty(self, name, value);
   } else {
@@ -112,6 +157,27 @@ boost::python::list getKeys(IPropertyManager &self) {
 
   return result;
 }
+
+/**
+ * Retrieve the property with the specified name (key) in the
+ * IPropertyManager. If no property exists with the specified
+ * name, return the specified default value.
+ *
+ * @param self  The calling IPropertyManager object
+ * @param name  The name (key) of the property to retrieve
+ * @param value The default value to return if no property
+ *              exists with the specified key.
+ * @return      The property with the specified key. If no
+ *              such property exists, return the default value.
+ */
+Property *get(IPropertyManager &self, const std::string &name,
+              const boost::python::object &value) {
+  try {
+    return self.getPointerToProperty(name);
+  } catch (Exception::NotFoundError &) {
+    return Registry::PropertyWithValueFactory::create(name, value, 0).release();
+  }
+}
 }
 
 void export_IPropertyManager() {
@@ -145,6 +211,8 @@ void export_IPropertyManager() {
       .def("setProperty", &setProperty,
            (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property")
+      .def("setProperties", &setProperties, (arg("self"), arg("kwargs")),
+           "Set a collection of properties from a dict")
 
       .def("setPropertySettings", &setPropertySettings,
            (arg("self"), arg("name"), arg("settingsManager")),
@@ -182,5 +250,10 @@ void export_IPropertyManager() {
       .def("keys", &getKeys, arg("self"))
       .def("values", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),
-           "Returns the list of properties managed by this object");
+           "Returns the list of properties managed by this object")
+      .def("get", &get, (arg("self"), arg("name"), arg("value")),
+           return_value_policy<return_by_value>(),
+           "Returns the property of the given name. Use .value to give the "
+           "value. If property with given name does not exist, returns given "
+           "default value.");
 }

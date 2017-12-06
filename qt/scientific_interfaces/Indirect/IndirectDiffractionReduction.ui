@@ -97,7 +97,7 @@
        <item row="2" column="2">
         <widget class="QCheckBox" name="ckSumFiles">
          <property name="text">
-          <string>Sum Files</string>
+          <string>Sum Sample Files</string>
          </property>
         </widget>
        </item>
@@ -182,7 +182,7 @@
     <item>
      <widget class="QStackedWidget" name="swVanadium">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="pageCalibration">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -217,26 +217,6 @@
              </property>
              <property name="instrumentOverride" stdset="0">
               <string>OSIRIS</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QSpinBox" name="spDRange">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>11</number>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="ckManualDRange">
-             <property name="text">
-              <string>Manual dRange:</string>
              </property>
             </widget>
            </item>
@@ -538,16 +518,43 @@
       <property name="title">
        <string>Options</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QCheckBox" name="ckIndividualGrouping">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled spectra are not grouped and the output workspace will contain one spectrum per detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
+        <widget class="QCheckBox" name="ckManualGrouping">
          <property name="text">
-          <string>Use Individual Grouping</string>
+          <string>Use Manual Grouping</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lbNoGroups">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Number of Groups:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spNumberGroups">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -744,9 +751,6 @@
   <tabstop>leRebinStart_CalibOnly</tabstop>
   <tabstop>leRebinWidth_CalibOnly</tabstop>
   <tabstop>leRebinEnd_CalibOnly</tabstop>
-  <tabstop>ckManualDRange</tabstop>
-  <tabstop>spDRange</tabstop>
-  <tabstop>ckIndividualGrouping</tabstop>
   <tabstop>cbPlotType</tabstop>
   <tabstop>ckGSS</tabstop>
   <tabstop>ckNexus</tabstop>
@@ -757,22 +761,6 @@
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>ckManualDRange</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spDRange</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>64</x>
-     <y>245</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>108</x>
-     <y>245</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>ckUseCan</sender>
    <signal>toggled(bool)</signal>
@@ -816,7 +804,7 @@
      <y>316</y>
     </hint>
     <hint type="destinationlabel">
-     <x>39</x>
+     <x>58</x>
      <y>325</y>
     </hint>
    </hints>
@@ -848,8 +836,40 @@
      <y>268</y>
     </hint>
     <hint type="destinationlabel">
-     <x>249</x>
+     <x>268</x>
      <y>287</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckManualGrouping</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spNumberGroups</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>278</x>
+     <y>427</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckManualGrouping</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbNoGroups</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>194</x>
+     <y>427</y>
     </hint>
    </hints>
   </connection>

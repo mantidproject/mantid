@@ -49,7 +49,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MuonAnalysisResultTableTab : public QWidget {
   Q_OBJECT
 public:
-  MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm);
+  explicit MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm);
 
   // Refresh the label list and re-populate the tables
   void refresh();

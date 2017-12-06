@@ -42,7 +42,7 @@ public:
       LogLog,
       General
     };
-    Transform(TransformType type);
+    explicit Transform(TransformType type);
     ~Transform();
     void init();
     std::vector<double> functionConstants();
@@ -72,7 +72,7 @@ public:
     InterceptDerived,
     InterceptUnits
   };
-  SANSPlotSpecial(QWidget *parent = 0);
+  explicit SANSPlotSpecial(QWidget *parent = nullptr);
   ~SANSPlotSpecial() override;
 
 public slots:

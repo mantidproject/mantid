@@ -405,21 +405,21 @@ void MDNormDirectSC::cacheDimensionXValues() {
                                (PhysicalConstants::h * PhysicalConstants::h);
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
-    m_hX.resize(hDim.getNBins());
+    m_hX.resize(hDim.getNBoundaries());
     for (size_t i = 0; i < m_hX.size(); ++i) {
       m_hX[i] = hDim.getX(i);
     }
   }
   if (!m_kIntegrated) {
     auto &kDim = *m_normWS->getDimension(m_kIdx);
-    m_kX.resize(kDim.getNBins());
+    m_kX.resize(kDim.getNBoundaries());
     for (size_t i = 0; i < m_kX.size(); ++i) {
       m_kX[i] = kDim.getX(i);
     }
   }
   if (!m_lIntegrated) {
     auto &lDim = *m_normWS->getDimension(m_lIdx);
-    m_lX.resize(lDim.getNBins());
+    m_lX.resize(lDim.getNBoundaries());
     for (size_t i = 0; i < m_lX.size(); ++i) {
       m_lX[i] = lDim.getX(i);
     }
@@ -427,7 +427,7 @@ void MDNormDirectSC::cacheDimensionXValues() {
   if (!m_dEIntegrated) {
     // NOTE: store k final instead
     auto &eDim = *m_normWS->getDimension(m_eIdx);
-    m_eX.resize(eDim.getNBins());
+    m_eX.resize(eDim.getNBoundaries());
     for (size_t i = 0; i < m_eX.size(); ++i) {
       double temp = m_Ei - eDim.getX(i);
       temp = std::max(temp, 0.);

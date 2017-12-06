@@ -36,15 +36,13 @@ struct DatasetParams {
 };
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
-/// Whether TF Asymmetry is enabled or disabled
-enum class TFAsymmState { Enabled, Disabled };
 }
 
 namespace MuonAnalysisHelper {
 
 /// Sets double validator for specified field
 MANTIDQT_MUONINTERFACE_DLL void setDoubleValidator(QLineEdit *field,
-                                                      bool allowEmpty = false);
+                                                   bool allowEmpty = false);
 
 /// Returns a first period MatrixWorkspace in a run workspace
 MANTIDQT_MUONINTERFACE_DLL Mantid::API::MatrixWorkspace_sptr
@@ -89,8 +87,8 @@ findConsecutiveRuns(const std::vector<int> &runs);
 
 /// Replaces sample log value
 MANTIDQT_MUONINTERFACE_DLL void replaceLogValue(const std::string &wsName,
-                                                   const std::string &logName,
-                                                   const std::string &logValue);
+                                                const std::string &logName,
+                                                const std::string &logValue);
 
 /// Finds all of the values for a log
 MANTIDQT_MUONINTERFACE_DLL std::vector<std::string>
@@ -132,8 +130,8 @@ MANTIDQT_MUONINTERFACE_DLL bool isReloadGroupingNecessary(
 
 /// Parse run label into instrument and runs
 MANTIDQT_MUONINTERFACE_DLL void parseRunLabel(const std::string &label,
-                                                 std::string &instrument,
-                                                 std::vector<int> &runNumbers);
+                                              std::string &instrument,
+                                              std::vector<int> &runNumbers);
 
 /// Get colors for workspaces to go in table
 MANTIDQT_MUONINTERFACE_DLL QMap<int, QColor> getWorkspaceColors(
@@ -204,7 +202,8 @@ class MANTIDQT_MUONINTERFACE_DLL DoubleOrEmptyValidator
   Q_OBJECT
 
 public:
-  DoubleOrEmptyValidator(QObject *parent = NULL) : QDoubleValidator(parent) {}
+  DoubleOrEmptyValidator(QObject *parent = nullptr)
+      : QDoubleValidator(parent) {}
 
   // See QValidator
   QValidator::State validate(QString &input, int &pos) const override {

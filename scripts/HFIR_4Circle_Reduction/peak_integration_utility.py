@@ -1,4 +1,6 @@
 # Utility methods to do peak integration
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import math
 from scipy.optimize import curve_fit
@@ -28,8 +30,8 @@ def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     theta = math.asin(sin_theta)
     factor = numpy.sin(2 * theta) * motor_step
 
-    # print '[DB...BAT Lorentz] Q-sample = {0}, wavelength = {1}, motor step = {2}, theta = {3} --> factor = {4}.' \
-    #       ''.format(q_sample, wavelength, motor_step, theta, factor)
+    # print('[DB...BAT Lorentz] Q-sample = {0}, wavelength = {1}, motor step = {2}, theta = {3} --> factor = {4}.' \
+    #       ''.format(q_sample, wavelength, motor_step, theta, factor))
 
     return factor
 
@@ -175,11 +177,11 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(vec_y, numpy.ndarray), 'Input vec_y must be a numpy.ndarray but not a {0}.'.format(vec_y)
     assert isinstance(vec_e, numpy.ndarray), 'Input vec_e must be a numpy.ndarray but not a {0}.'.format(vec_e)
 
-    # print '[DB] Vec X: ', vec_x
-    # print '[DB] Vec Y: ', vec_y
-    # print '[DB] Vec e: ', vec_e
-    # print '[DB] Start values: ', start_value_list
-    # print '[DB] Find start value by fit: ', find_start_value_by_fit
+    # print('[DB] Vec X: ', vec_x)
+    # print('[DB] Vec Y: ', vec_y)
+    # print('[DB] Vec e: ', vec_e)
+    # print('[DB] Start values: ', start_value_list)
+    # print('[DB] Find start value by fit: ', find_start_value_by_fit)
 
     # starting value
     if isinstance(start_value_list, list):
@@ -192,13 +194,13 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
         # get result
         start_value_list = [start_x0, start_sigma, start_a, 0.0]
 
-        # print '[DB] Start value by fit: ', start_value_list
+        # print('[DB] Start value by fit: ', start_value_list)
 
     else:
         # guess starting value via observation
         start_value_list = find_gaussian_start_values_by_observation(vec_x, vec_y)
 
-        # print '[DB] Start value by observation: ', start_value_list
+        # print('[DB] Start value by observation: ', start_value_list)
     # END-IF-ELSE
 
     """
@@ -216,7 +218,7 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     x0, sigma, a, b = fit2_coeff
     model_vec_y = gaussian_linear_background(vec_x, x0, sigma, a, b)
 
-    print 'Covariance matrix: ', fit2_cov_matrix
+    print('Covariance matrix: ', fit2_cov_matrix)
 
     cost = calculate_penalty(model_vec_y, vec_y)
 
@@ -264,9 +266,9 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
 
     # fit
     gauss_error, gauss_parameters, cov_matrix = fit_gaussian_linear_background(vec_x, vec_y, vec_e)
-    # print '[DB] Overall Gaussian error = ', gauss_error
-    # print '[DB] Gaussian fitted parameters = ', gauss_parameters
-    # print '[DB] Gaussian covariance matrix = ', cov_matrix
+    # print('[DB] Overall Gaussian error = ', gauss_error)
+    # print('[DB] Gaussian fitted parameters = ', gauss_parameters)
+    # print('[DB] Gaussian covariance matrix = ', cov_matrix)
 
     # function parameters (in order): x0, sigma, a, b
     # construct parameter dictionary and error dictionary
@@ -377,7 +379,7 @@ def gaussian_linear_background(x, x0, sigma, a, b):
     """
     # gaussian + linear background
 
-    # print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
+    # print('[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b)
     return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
 
 
@@ -411,7 +413,7 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
 
     # I = A\times s\times\sqrt{2 pi}
     peak_intensity = gauss_a * gauss_sigma * numpy.sqrt(2. * numpy.pi)
-    # print '[DB] Gaussian Peak Intensity: A * S * sqrt(2 Pi) == ', gauss_a, gauss_sigma, ' --> peak intensity = ', peak_intensity
+    # print('[DB] Gaussian Peak Intensity: A * S * sqrt(2 Pi) == ', gauss_a, gauss_sigma, ' --> peak intensity = ', peak_intensity)
 
     # calculate error
     # \sigma_I^2 = 2\pi (A^2\cdot \sigma_s^2 + \sigma_A^2\cdot s^2 + 2\cdot A\cdot s\cdot \sigma_{As})
@@ -546,7 +548,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
     num_peaks = out_peak_ws.rowCount()
 
-    for i_peak in xrange(num_peaks):
+    for i_peak in range(num_peaks):
         peak_i = out_peak_ws.getPeak(i_peak)
         run_number_i = peak_i.getRunNumber() % 1000
         intensity_i = peak_i.getIntensity()
@@ -727,7 +729,6 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
 
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
-    error_2 = 0.
     used_pt_list = list()
 
     # raw intensity
@@ -756,7 +757,7 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
 
         used_pt_list.append(pt)
 
-        # print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
+        # print('[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i))
     # END-FOR
 
     # error = sqrt(sum I_i) * delta

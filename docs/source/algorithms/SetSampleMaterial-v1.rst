@@ -43,12 +43,14 @@ expressed as ``V0.951 Nb0.049``. *Warning: Using this representation will
 calculate all properties except for SampleNumberDensity which must be
 set manually if required*
 
-Isotopes may also be included in a material composition, and can be specified
-alone (as in ``Li7``), or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).
-Note, however, that No Spaces or Hyphens are allowed in an isotope symbol
-specification. Also Note that for isotopes specified in a molecular expression,
-the isotope must be enclosed by parenthesis, except for two special cases,
-``D`` and ``T``, which stand for ``H2`` and ``H3``, respectively.
+Isotopes may also be included in a :py:obj:`material
+<mantid.kernel.Material>` composition, and can be specified alone (as
+in ``Li7``), or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).
+Note, however, that No Spaces or Hyphens are allowed in an isotope
+symbol specification. Also Note that for isotopes specified in a
+molecular expression, the isotope must be enclosed by parenthesis,
+except for two special cases, ``D`` and ``T``, which stand for ``H2``
+and ``H3``, respectively.
 
 Cross Section Calculations
 ##########################

@@ -1,12 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
-
-
-def skip_tests():
-    return not hasattr(np, "einsum")
 
 
 class HelperTestingClass(object):
@@ -18,14 +13,20 @@ class HelperTestingClass(object):
         self._atoms = ""
         self._sum_contributions = True
         self._cross_section_factor = "Incoherent"
-        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out"}
+        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
         self._scale = 1.0
+        self._bin_width = 1.0
 
-        self._dft_program = None
+        self._ab_initio_program = None
         self._quantum_order_event = None
         self._system_name = None
+
+    def set_bin_width(self, width):
+        if not (isinstance(width, float) and 1.0 <= width <= 10.0):
+            raise ValueError("Invalid bin width: {}. ".format(width) + "Valid range is [1.0, 10.0] cm^-1")
+        self._bin_width = width
 
     def set_instrument_name(self, instrument_name=None):
 
@@ -41,12 +42,12 @@ class HelperTestingClass(object):
         else:
             raise ValueError("Wrong scale.")
 
-    def set_dft_program(self, dft_program=None):
+    def set_ab_initio_program(self, ab_initio_program=None):
 
-        if dft_program in AbinsConstants.ALL_SUPPORTED_DFT_PROGRAMS:
-            self._dft_program = dft_program
+        if ab_initio_program in AbinsConstants.ALL_SUPPORTED_AB_INITIO_PROGRAMS:
+            self._ab_initio_program = ab_initio_program
         else:
-            raise RuntimeError("Unsupported DFT program: %s " % dft_program)
+            raise RuntimeError("Unsupported ab initio program: %s " % ab_initio_program)
 
     def set_order(self, order=None):
 
@@ -74,9 +75,10 @@ class HelperTestingClass(object):
         """
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
         """
-        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions,
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
@@ -92,24 +94,28 @@ class HelperTestingClass(object):
         wrk_name = self._system_name
 
         # T = 10 K
-        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
-              QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
-              OutputWorkspace=wrk_name + "init")
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
+              ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=wrk_name + "init")
 
         # T = 20 K
-        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+              TemperatureInKelvin=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "_mod")
 
         # T = 10 K
-        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
-              QuantumOrderEventsNumber=str(self._quantum_order_event),
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
 
     def case_restart_diff_order(self, order=None):
@@ -121,10 +127,11 @@ class HelperTestingClass(object):
         """
         self.case_from_scratch()
         DeleteWorkspace(self._output_name)
-        Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
-              Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
-              QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
+              Scale=self._scale, QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=self._output_name)
 
     def __del__(self):
@@ -155,16 +162,13 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "TolueneScratchAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.case_from_scratch()
@@ -188,16 +192,13 @@ class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "Crystalb3lypScratchAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
         self.case_from_scratch()
@@ -218,16 +219,13 @@ class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "TolueneTAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
@@ -251,16 +249,13 @@ class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingC
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "TolueneLargerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
@@ -284,16 +279,13 @@ class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "TolueneSmallerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
@@ -311,9 +303,6 @@ class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     _ref_result = None
     tolerance = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -321,7 +310,7 @@ class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 
         name = "TolueneScale"
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CRYSTAL")
+        self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
 
@@ -341,15 +330,12 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
-        name = "Na2SiF6"
+        name = "Na2SiF6_CASTEP"
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_ab_initio_program("CASTEP")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.set_cross_section(cross_section="Total")
@@ -369,15 +355,12 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
         name = "Mapi"
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_ab_initio_program("CASTEP")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
         self.case_from_scratch()
@@ -386,4 +369,110 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
     def validate(self):
 
         self.tolerance = 1e-1
+        return self._output_name, self.ref_result
+
+
+class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Na2SiF6_DMOL3"
+
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("DMOL3")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "C6H5Cl-Gaussian"
+
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("GAUSSIAN")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Incoherent")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsBinWidth(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation with bin width different than the default value is correct.
+    Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
+    3 cm^-1. This system test should be fast so no need for excludeInPullRequests flag.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+        name = "BenzeneBinWidthCASTEP"
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_cross_section(cross_section="Incoherent")
+        self.set_bin_width(width=3.0)
+        self.case_from_scratch()
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsCASTEPIsotopes(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation of the system with isotopic substitutions: H -> 2H, Li -> 7Li,
+    produces correct results. Input data is generated by CASTEP. This system test should be fast so no need for
+    excludeInPullRequests flag.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+        name = "LiOH_H2O_2D2O_CASTEP"
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_cross_section(cross_section="Incoherent")
+        self.set_bin_width(width=2.0)
+        self.case_from_scratch()
+
+    def validate(self):
+        self.tolerance = 1e-2
         return self._output_name, self.ref_result

@@ -2,8 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
-from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMove, StateMoveDetector,
-                             get_move_builder)
+from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
+                             StateMoveDetector, get_move_builder)
 from sans.state.data import get_data_builder
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType)
 from state_test_helper import assert_validate_error, assert_raises_nothing
@@ -83,7 +83,7 @@ class StateMoveWorkspaceSANS2DTest(unittest.TestCase):
         self.assertTrue(state.lab_detector_x == 0.0)
         self.assertTrue(state.lab_detector_z == 0.0)
         self.assertTrue(state.monitor_names == {})
-        self.assertTrue(state.monitor_4_offset == 0.0)
+        self.assertTrue(state.monitor_n_offset == 0.0)
 
 
 class StateMoveWorkspaceLARMORTest(unittest.TestCase):
@@ -94,6 +94,17 @@ class StateMoveWorkspaceLARMORTest(unittest.TestCase):
     def test_that_can_set_and_get_values(self):
         state = StateMoveLARMOR()
         self.assertTrue(state.bench_rotation == 0.0)
+        self.assertTrue(state.monitor_names == {})
+
+
+class StateMoveWorkspaceZOOMTest(unittest.TestCase):
+    def test_that_is_sans_state_data_object(self):
+        state = StateMoveZOOM()
+        self.assertTrue(isinstance(state, StateMove))
+
+    def test_that_can_set_and_get_values(self):
+        state = StateMoveZOOM()
+        self.assertTrue(len(state.detectors) == 1)
         self.assertTrue(state.monitor_names == {})
 
 
@@ -168,6 +179,10 @@ class StateMoveBuilderTest(unittest.TestCase):
         self.assertTrue(DetectorType.to_string(DetectorType.HAB) not in state.detectors)
         self.assertTrue(state.monitor_names[str(5)] == "monitor5")
         self.assertTrue(len(state.monitor_names) == 5)
+
+    def test_that_state_for_zoom_can_be_built(self):
+        # TODO when data becomes available
+        pass
 
 
 if __name__ == '__main__':

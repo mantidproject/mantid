@@ -20,6 +20,7 @@
     instrument settings.
 
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
@@ -509,7 +510,7 @@ class Reducer(object):
                     if result is not None and len(str(result)) > 0:
                         self.log_text += "%s\n" % str(result)
                 except:
-                    self.log_text += "\n%s\n" % sys.exc_value
+                    self.log_text += "\n%s\n" % sys.exc_info()[1]
                     raise
 
         # any clean up, possibly removing workspaces

@@ -3,12 +3,12 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QLineEdit>
-#include <QtCore/QVariant>
-#include <QtCore/QDebug>
-#include <QtCore/QString>
+#include <QDoubleSpinBox>
+#include <QDoubleValidator>
+#include <QLineEdit>
+#include <QVariant>
+#include <QDebug>
+#include <QString>
 
 namespace MantidQt {
 namespace API {
@@ -16,7 +16,7 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_COMMON QScienceSpinBox : public QDoubleSpinBox {
   Q_OBJECT
 public:
-  QScienceSpinBox(QWidget *parent = 0);
+  QScienceSpinBox(QWidget *parent = nullptr);
 
   int decimals() const;
   void setDecimals(int value);

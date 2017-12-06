@@ -4,6 +4,7 @@
 Force for ILL backscattering raw
 """
 
+from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
@@ -23,7 +24,7 @@ def Iblock(a, first):  # read Ascii block of Integers
     line2 = a[first + 1]
     val = ExtractInt(line2)
     numb = val[0]
-    lines = numb / 10
+    lines = numb // 10
     last = numb - 10 * lines
     if line1.startswith('I'):
         error = ''
@@ -50,7 +51,7 @@ def Fblock(a, first):  # read Ascii block of Floats
     line2 = a[first + 1]
     val = ExtractInt(line2)
     numb = val[0]
-    lines = numb / 5
+    lines = numb // 5
     last = numb - 5 * lines
     if line1.startswith('F'):
         error = ''
@@ -175,7 +176,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     # raw spectra
     val = ExtractInt(asc[next + 3])
     npt = val[0]
-    lgrp = 5 + npt / 10
+    lgrp = 5 + npt // 10
     val = ExtractInt(asc[next + 1])
     if instr == 'IN10':
         nsp = int(val[2])
@@ -198,7 +199,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
             imax = m
             ymax = ym[m]
     new = imax - imin
-    imid = new / 2 + 1
+    imid = new // 2 + 1
     if instr == 'IN10':
         DRV = 18.706  # fast drive
         vmax = freq * DRV
@@ -446,7 +447,7 @@ def ChangeAngles(inWS, instr, theta):
 def InstrParas(ws, instr, ana, refl):
     idf_dir = config['instrumentDefinition.directory']
     idf = idf_dir + instr + '_Definition.xml'
-    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=False)
+    LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=True)
     ipf = idf_dir + instr + '_' + ana + '_' + refl + '_Parameters.xml'
     LoadParameterFile(Workspace=ws, Filename=ipf)
 

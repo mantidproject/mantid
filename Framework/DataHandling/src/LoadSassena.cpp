@@ -136,6 +136,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
   if (getProperty("SortByQVectors")) {
     std::vector<mypair> qvmodpair;
+    qvmodpair.reserve(nq);
     for (int iq = 0; iq < nq; iq++)
       qvmodpair.emplace_back(qvmod[iq], iq);
     std::sort(qvmodpair.begin(), qvmodpair.end(), compare);

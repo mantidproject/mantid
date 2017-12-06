@@ -62,7 +62,7 @@ void LoadNexusGeometry::exec() {
 
     NexusGeometry::NexusGeometryParser OFFparser = NexusGeometry::NexusGeometryParser(fileName, iAbsBuilder_sptr);
     //Parse nexus geomtry
-    NexusGeometry::ParsingErrors exitStatus = OFFparser.ParseNexusGeometry();
+    NexusGeometry::ParsingErrors exitStatus = OFFparser.parseNexusGeometry();
     std::cout << exitStatus << std::endl;
     // Add instrument to the workspace
     iAbsBuilder_sptr->_unAbstractInstrument()->parseTreeAndCacheBeamline();

@@ -42,8 +42,8 @@ public:
   // virtual std::string fittingRunNo() const;
   MOCK_CONST_METHOD0(getFittingRunNo, std::string());
 
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
+  // virtual std::string getExpectedPeaksInput() const;
+  MOCK_CONST_METHOD0(getExpectedPeaksInput, std::string());
 
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
@@ -96,8 +96,14 @@ public:
   // return idx of current selected row of list widget
   MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
 
+  // gets whether the list widget has a selected row
+  MOCK_CONST_METHOD0(listWidgetHasSelectedRow, bool());
+
   // sets the current row of the fitting list widget
   MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
+
+  // gets current value of the fitting list widget
+  MOCK_CONST_METHOD0(getFittingListWidgetCurrentValue, std::string());
 
   // sets the peak list according to the QString given
   MOCK_CONST_METHOD1(setPeakList, void(const std::string &peakList));
@@ -137,9 +143,9 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 
   // virtual void setDataVector
-  MOCK_METHOD3(setDataVector,
+  MOCK_METHOD4(setDataVector,
                void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-                    bool plotSinglePeaks));
+                    bool plotSinglePeaks, const std::string &xAxisLabel));
 
   // virtual void resetCanvas
   MOCK_METHOD0(resetCanvas, void());

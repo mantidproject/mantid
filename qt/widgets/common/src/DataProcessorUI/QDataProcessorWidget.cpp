@@ -1,13 +1,17 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
+#include <QClipboard>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QWhatsThis>
 #include <QWidget>
-#include <qinputdialog.h>
-#include <qmessagebox.h>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -16,6 +20,7 @@ const QString DataProcessorSettingsGroup =
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 using namespace Mantid::API;
 
 /** Constructor
@@ -33,13 +38,23 @@ QDataProcessorWidget::QDataProcessorWidget(
 }
 
 /** Delegating constructor
+ * @param whitelist :: [input] The white list
+ * @param parent :: [input] The parent of this view
+ */
+QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
+                                           QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist),
+          parent) {}
+
+/** Delegating constructor
 * @param whitelist :: [input] The white list
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
 */
-QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &algorithm, QWidget *parent)
+QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
+                                           const ProcessingAlgorithm &algorithm,
+                                           QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
                                                                      algorithm),
@@ -51,10 +66,10 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param algorithm :: [input] The processing algorithm
 * @param parent :: [input] The parent of this view
 */
-QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorPreprocessMap &preprocessMap,
-    const DataProcessorProcessingAlgorithm &algorithm, QWidget *parent)
+QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
+                                           const PreprocessMap &preprocessMap,
+                                           const ProcessingAlgorithm &algorithm,
+                                           QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm),
@@ -67,9 +82,8 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &algorithm,
-    const DataProcessorPostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
               whitelist, algorithm, postprocessor),
@@ -83,10 +97,9 @@ QDataProcessorWidget::QDataProcessorWidget(
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorPreprocessMap &preprocessMap,
-    const DataProcessorProcessingAlgorithm &algorithm,
-    const DataProcessorPostprocessingAlgorithm &postprocessor, QWidget *parent)
+    const WhiteList &whitelist, const PreprocessMap &preprocessMap,
+    const ProcessingAlgorithm &algorithm,
+    const PostprocessingAlgorithm &postprocessor, QWidget *parent)
     : QDataProcessorWidget(
           Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm, postprocessor),
@@ -104,9 +117,14 @@ void QDataProcessorWidget::createTable() {
 
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
-  header->setMovable(true);
   header->setStretchLastSection(true);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
+#else
+  header->setSectionsMovable(true);
+  header->setSectionResizeMode(QHeaderView::ResizeToContents);
+#endif
   ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes
@@ -123,13 +141,12 @@ void QDataProcessorWidget::createTable() {
 * @param commands :: A vector of actions (commands)
 */
 void QDataProcessorWidget::addActions(
-    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+    std::vector<std::unique_ptr<Command>> commands) {
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
-    m_commands.push_back(
-        Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-            ui.rowToolBar, std::move(command)));
+    m_commands.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
+        ui.rowToolBar, std::move(command)));
   }
 
   // Add actions to context menu
@@ -165,12 +182,15 @@ Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
 void QDataProcessorWidget::showTable(
-    boost::shared_ptr<AbstractDataProcessorTreeModel> model) {
+    boost::shared_ptr<AbstractTreeModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
   connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
@@ -209,6 +229,7 @@ void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
 void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
     int index) {
   ui.comboProcessInstrument->setCurrentIndex(index);
+  emit instrumentHasChanged();
 }
 
 /**
@@ -418,6 +439,7 @@ void QDataProcessorWidget::setInstrumentList(const QString &instruments,
   int index =
       ui.comboProcessInstrument->findData(defaultInstrument, Qt::DisplayRole);
   ui.comboProcessInstrument->setCurrentIndex(index);
+  emit instrumentHasChanged();
 }
 
 /**
@@ -601,12 +623,18 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
     QStringList map = (*it).split(",");
     for (auto jt = map.begin(); jt != map.end(); ++jt) {
       QStringList pair = (*jt).split(":");
-      if (pair.size() != 2) {
+
+      // The entry can be of the for "key:value" or of the form "key:" if
+      // nothing is to be set in the column.
+      if (pair.size() == 1) {
+        runsMap[row][pair[0]] = "";
+      } else if (pair.size() == 2) {
+        runsMap[row][pair[0]] = pair[1];
+      } else {
         giveUserCritical("Could not transfer runs to processing table",
                          "Transfer failed");
         return;
       }
-      runsMap[row][pair[0]] = pair[1];
     }
     row++;
   }
@@ -614,9 +642,59 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
   m_presenter->transfer(runsMap);
 }
 
+/** Get a cell from the table
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent
+ * @param parentColumn : the row index of the parent
+ * @return : the value in the cell as a string
+*/
+QString QDataProcessorWidget::getCell(int row, int column, int parentRow,
+                                      int parentColumn) {
+
+  return QString::fromStdString(
+      m_presenter->getCell(row, column, parentRow, parentColumn));
+}
+
+/** Set a value in the table
+ *
+ * @param value : the new value
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent
+ * @param parentColumn : the row index of the parent
+*/
+void QDataProcessorWidget::setCell(const QString &value, int row, int column,
+                                   int parentRow, int parentColumn) {
+
+  m_presenter->setCell(row, column, parentRow, parentColumn,
+                       value.toStdString());
+}
+
+int QDataProcessorWidget::getNumberOfRows() {
+  return m_presenter->getNumberOfRows();
+}
+
+void QDataProcessorWidget::clearTable() {
+  const auto numberOfRows = getNumberOfRows();
+  std::set<int> groups;
+  for (int index = 0; index < numberOfRows; ++index) {
+    groups.insert(groups.end(), index);
+  }
+  setSelection(groups);
+  m_presenter->clearTable();
+}
+
 void QDataProcessorWidget::setForcedReProcessing(bool forceReProcessing) {
   m_presenter->setForcedReProcessing(forceReProcessing);
 }
 
+QString QDataProcessorWidget::getCurrentInstrument() const {
+  return ui.comboProcessInstrument->currentText();
+}
+
+void QDataProcessorWidget::skipProcessing() { m_presenter->skipProcessing(); }
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

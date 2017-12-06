@@ -93,8 +93,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine x-dimension mapping.");
     }
     m_xDimension = *xDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(xDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(xDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *yDimensionElement = geometryXMLElement->getChildElement(
@@ -112,8 +114,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine y-dimension mapping.");
     }
     m_yDimension = *yDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(yDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(yDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *zDimensionElement = geometryXMLElement->getChildElement(
@@ -131,8 +135,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine z-dimension mapping.");
     }
     m_zDimension = *zDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(zDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(zDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *tDimensionElement = geometryXMLElement->getChildElement(
@@ -150,8 +156,10 @@ void MDGeometryXMLParser::execute() {
     }
     m_tDimension = *tDimensionIt;
     if (!vecNonMappedDims.empty()) {
-      vecNonMappedDims.erase(std::remove_if(
-          vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(tDimId)));
+      vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                            vecNonMappedDims.end(),
+                                            findID(tDimId)),
+                             vecNonMappedDims.end());
     }
   }
   m_vecNonMappedDims = vecNonMappedDims; // Copy with strong guarantee.

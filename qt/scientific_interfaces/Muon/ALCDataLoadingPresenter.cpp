@@ -6,9 +6,9 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
 
-#include "ALCHelper.h"
 #include "MuonAnalysisHelper.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 #include "ALCLatestFileFinder.h"
 
 #include <Poco/ActiveResult.h>
@@ -206,8 +206,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
-                         ALCHelper::curveErrorsFromWs(m_loadedData, 0));
+    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_loadedData, 0)),
+                         QwtHelper::curveErrorsFromWs(m_loadedData, 0));
 
     emit dataChanged();
 
@@ -295,8 +295,8 @@ void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
     // Set the data
     m_loadedData = data;
     // Plot the data
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
-                         ALCHelper::curveErrorsFromWs(m_loadedData, 0));
+    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_loadedData, 0)),
+                         QwtHelper::curveErrorsFromWs(m_loadedData, 0));
 
   } else {
     std::invalid_argument("Cannot load an empty workspace");

@@ -94,7 +94,7 @@ void MuonFitPropertyBrowser::init() {
 
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty *settingsGroup(NULL);
+  QtProperty *settingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
@@ -103,7 +103,7 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettings.beginGroup("");
 
   /* Create function group */
-  QtProperty *multiFitSettingsGroup(NULL);
+  QtProperty *multiFitSettingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   multiFitSettingsGroup = m_groupManager->addProperty("Data");
@@ -239,7 +239,13 @@ void MuonFitPropertyBrowser::init() {
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
+  m_TFAsymmMode = m_boolManager->addProperty("TF Asymmetry Mode");
+  bool TFAsymmMode =
+      settings.value("TF Asymmetry Mode", QVariant(false)).toBool();
+  m_boolManager->setValue(m_TFAsymmMode, TFAsymmMode);
+
   customSettingsGroup->addSubProperty(m_minimizer);
+  customSettingsGroup->addSubProperty(m_TFAsymmMode);
   customSettingsGroup->addSubProperty(m_plotDiff);
   customSettingsGroup->addSubProperty(m_rawData);
   customSettingsGroup->addSubProperty(m_showParamErrors);
@@ -277,6 +283,8 @@ void MuonFitPropertyBrowser::init() {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+  // disable TFAsymm mode by default
+  setTFAsymmMode(TFAsymmMode);
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -340,6 +348,12 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
 * @param prop :: A pointer to the function name property
 */
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
+  if (m_workspaceNames.empty()) {
+    if (this->isVisible()) {
+      g_log.error("No Data available. Please load Some data.");
+    }
+    return;
+  }
   if (!m_changeSlotsEnabled)
     return;
   if (prop == m_groupsToFit) {
@@ -507,6 +521,10 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
+  }
+  if (prop == m_TFAsymmMode) {
+    const bool val = m_boolManager->value(prop);
+    setTFAsymmMode(val);
   }
   if (prop == m_keepNorm) {
     const bool val = m_boolManager->value(prop);
@@ -1087,7 +1105,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 
   // Group output together
   std::string groupName = fitAlg->getPropertyValue("Output");
-  std::string baseName = groupName;
+  const std::string &baseName = groupName;
   if (ads.doesExist(groupName)) {
     ads.deepRemoveGroup(groupName);
   }
@@ -1166,8 +1184,6 @@ std::string MuonFitPropertyBrowser::outputName() const {
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
-  modifyFitMenu(m_fitActionEvaluate, !enabled);
-  modifyFitMenu(m_fitActionSeqFit, !enabled);
   // set default selection (all groups)
   if (enabled) {
     setAllGroups();
@@ -1252,7 +1268,7 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   }
   clearGroupCheckboxes();
   QSettings settings;
-  for (const auto group : groups) {
+  for (const auto &group : groups) {
     addGroupCheckbox(group);
   }
 }
@@ -1326,7 +1342,7 @@ void MuonFitPropertyBrowser::setAllGroups() {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    for (auto group : m_groupsList) {
+    for (const auto &group : m_groupsList) {
       if (iter.key().toStdString() == group) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1341,7 +1357,7 @@ void MuonFitPropertyBrowser::setAllPairs() {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     bool isItGroup = false;
-    for (auto group : m_groupsList) {
+    for (const auto &group : m_groupsList) {
       if (iter.key().toStdString() == group) {
         isItGroup = true;
       }
@@ -1439,7 +1455,7 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 
   clearPeriodCheckboxes();
 
-  for (const auto group : periods) {
+  for (const auto &group : periods) {
     addPeriodCheckbox(group);
   }
 }
@@ -1449,11 +1465,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
   if (m_periodBoxes.size() > 1) {
-    for (auto iter = m_periodBoxes.constBegin();
+    for (auto iter = std::next(m_periodBoxes.constBegin());
          iter != m_periodBoxes.constEnd(); ++iter) {
-      if (iter != m_periodBoxes.constBegin()) {
-        delete (iter);
-      }
+      delete (*iter);
     }
   }
   m_periodsToFitOptions.clear();
@@ -1514,10 +1528,9 @@ QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 void MuonFitPropertyBrowser::setChosenPeriods(
     const QStringList &chosenPeriods) {
   clearChosenPeriods();
-  for (auto selected : chosenPeriods) {
+  for (const auto &selected : chosenPeriods) {
     for (auto iter = m_periodBoxes.constBegin();
          iter != m_periodBoxes.constEnd(); ++iter) {
-      auto tmp = iter.key();
       if (iter.key() == selected) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1532,7 +1545,6 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
-    auto tmp = iter.key();
     if (iter.key() == period) {
       m_boolManager->setValue(iter.value(), true);
     }
@@ -1650,6 +1662,9 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
   m_groupsList = groupNames;
+}
+void MuonFitPropertyBrowser::setTFAsymm(bool state) {
+  m_boolManager->setValue(m_TFAsymmMode, state);
 }
 
 } // MantidQt

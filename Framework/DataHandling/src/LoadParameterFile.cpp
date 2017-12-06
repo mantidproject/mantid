@@ -19,10 +19,6 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 using Poco::XML::AutoPtr;
 using Mantid::Geometry::InstrumentDefinitionParser;
 
@@ -35,9 +31,6 @@ using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
 using Geometry::Instrument_sptr;
-
-/// Empty default constructor
-LoadParameterFile::LoadParameterFile() : Algorithm() {}
 
 /// Initialisation method.
 void LoadParameterFile::init() {
