@@ -266,7 +266,7 @@ public:
     }
   }
 
-  void test_removeRun(){
+  void test_removeRun() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
     addSampleWorkspaceToModel(123, 1, model);
