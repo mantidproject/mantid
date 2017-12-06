@@ -31,6 +31,8 @@ public:
   virtual std::string getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const = 0;
 
+  virtual void removeRun(const int runNumber, const size_t bank) = 0;
+
   virtual void loadWorkspaces(const std::string &filenames) = 0;
 
   virtual std::vector<std::pair<int, size_t>>
