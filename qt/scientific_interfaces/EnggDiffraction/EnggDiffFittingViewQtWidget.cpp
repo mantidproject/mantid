@@ -489,7 +489,7 @@ void EnggDiffFittingViewQtWidget::updateFittingListWidget(
   const std::vector<std::string>& rows) {
   clearFittingListWidget();
   std::for_each(rows.begin(), rows.end(),
-                [&](const auto &rowLabel) { addRunNoItem(rowLabel); });
+                [&](const auto &rowLabel) { this->addRunNoItem(rowLabel); });
 
 }
 
