@@ -36,7 +36,7 @@ public:
   ~NexusGeometryParser() = default;
 
   /// OFF INSTRUMENT GEOMETRY PARSER - returns exit status to LoadNexusGeometry
-  ParsingErrors ParseNexusGeometry();
+  ParsingErrors parseNexusGeometry();
 
 private:
   objectHolder shape = objectHolder();

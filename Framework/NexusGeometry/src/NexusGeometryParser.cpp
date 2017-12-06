@@ -70,7 +70,7 @@ NexusGeometryParser::NexusGeometryParser(
 }
 
 /// OFF NEXUS GEOMETRY PARSER
-ParsingErrors NexusGeometryParser::ParseNexusGeometry() {
+ParsingErrors NexusGeometryParser::parseNexusGeometry() {
   // Determine if nexusFile was successfully opened
   switch (this->exitStatus) {
   case NO_ERROR:
@@ -110,8 +110,6 @@ ParsingErrors NexusGeometryParser::ParseNexusGeometry() {
     this->parseAndAddSource();
     this->parseAndAddSample();
   } catch (H5::Exception &ex) {
-    std::string exp = ex.getDetailMsg();
-    auto stack = ex.getFuncName();
     this->exitStatus = UNKNOWN_ERROR;
   }
 
