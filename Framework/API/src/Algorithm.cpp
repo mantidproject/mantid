@@ -734,19 +734,16 @@ void Algorithm::store() {
  *algorithm
  *  @param version ::        The version of the child algorithm to create. By
  *default gives the latest version.
- *  @param useTempWorkspaceNames :: If true then add placeholder names to
-*workspaces that are never added to the ADS, due to running as a child
-*algorithm, to preserve the algorithm history
  *  @return shared pointer to the newly created algorithm object
  */
-Algorithm_sptr Algorithm::createChildAlgorithm(
-    const std::string &name, const double startProgress,
-    const double endProgress, const bool enableLogging, const int &version,
-    const bool useTempWorkspaceNames) {
+Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
+                                               const double startProgress,
+                                               const double endProgress,
+                                               const bool enableLogging,
+                                               const int &version) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
-  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging,
-                        useTempWorkspaceNames);
+  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
   return alg;
 }
 
@@ -759,8 +756,7 @@ Algorithm_sptr Algorithm::createChildAlgorithm(
 void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
                                       const double startProgress,
                                       const double endProgress,
-                                      const bool enableLogging,
-                                      const bool useTempWorkspaceNames) {
+                                      const bool enableLogging) {
   // set as a child
   alg->setChild(true);
   alg->setLogging(enableLogging);
@@ -779,7 +775,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   for (auto prop : props) {
     auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
-      if (prop->value().empty() && useTempWorkspaceNames) {
+      if (prop->value().empty() && !wsProp->isOptional()) {
         prop->createTemporaryValue();
       }
     }
@@ -1321,7 +1317,7 @@ bool Algorithm::processGroups() {
     Algorithm_sptr alg_sptr = this->createChildAlgorithm(
         this->name(), progress_proportion * static_cast<double>(entry),
         progress_proportion * (1 + static_cast<double>(entry)),
-        this->isLogging(), this->version(), false);
+        this->isLogging(), this->version());
     // Don't make the new algorithm a child so that it's workspaces are stored
     // correctly
     alg_sptr->setChild(false);

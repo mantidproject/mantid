@@ -52,19 +52,14 @@ DataProcessorAlgorithm::DataProcessorAlgorithm()
 *algorithm
 *  @param version ::        The version of the child algorithm to create. By
 *default gives the latest version.
-*  @param useTempWorkspaceNames :: If true then add placeholder names to
-*workspaces that are never added to the ADS, due to running as a child
-*algorithm, to preserve the algorithm history
 *  @return shared pointer to the newly created algorithm object
 */
 boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(
     const std::string &name, const double startProgress,
-    const double endProgress, const bool enableLogging, const int &version,
-    const bool useTempWorkspaceNames) {
+    const double endProgress, const bool enableLogging, const int &version) {
   // call parent method to create the child algorithm
   auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress,
-                                             enableLogging, version,
-                                             useTempWorkspaceNames);
+                                             enableLogging, version);
   alg->enableHistoryRecordingForChild(this->isRecordingHistoryForChild());
   if (this->isRecordingHistoryForChild()) {
     // pass pointer to the history object created in Algorithm to the child

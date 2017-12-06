@@ -291,12 +291,11 @@ public:
   virtual boost::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
-      const int &version = -1, const bool useTempWorkspaceNames = true);
+      const int &version = -1);
   void setupAsChildAlgorithm(boost::shared_ptr<Algorithm> algorithm,
                              const double startProgress = -1.,
                              const double endProgress = -1.,
-                             const bool enableLogging = true,
-                             const bool useTempWorkspaceNames = true);
+                             const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
