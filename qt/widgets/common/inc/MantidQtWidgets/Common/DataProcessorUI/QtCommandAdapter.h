@@ -54,10 +54,10 @@ public:
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     if (m_adaptee->hasChildren()) {
-      createSubmenu(menu);
+      initializeSubmenu(menu);
     } else {
       // We are dealing with an action
-      createAction(menu);
+      initializeAction(menu);
     }
   };
 
@@ -73,7 +73,7 @@ public:
       return;
 
     // We are dealing with an action
-    createAction(toolbar, true);
+    initializeAction(toolbar, true);
   };
 
   /** Set the action to be enabled/disabled according
@@ -110,7 +110,7 @@ private:
    *
    * @param menu : the parent menu to add the submenu to
    */
-  void createSubmenu(QMenu *menu) {
+  void initializeSubmenu(QMenu *menu) {
     // We are dealing with a submenu
     // Add the submenu. Note that menu takes ownership of submenu.
     QMenu *submenu = menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
@@ -128,7 +128,7 @@ private:
    * @param widget : The widget to add the action to
    * @param shortcut : Whether or not to add a shortcut
    */
-  void createAction(QWidget *widget, bool shortcut = false) {
+  void initializeAction(QWidget *widget, bool shortcut = false) {
     m_action = Mantid::Kernel::make_unique<QAction>(m_adaptee->name(), this);
     m_action->setIcon(QIcon(m_adaptee->icon()));
     m_action->setSeparator(m_adaptee->isSeparator());
