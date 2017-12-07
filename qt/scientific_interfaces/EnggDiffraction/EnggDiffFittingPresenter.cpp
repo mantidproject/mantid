@@ -250,7 +250,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
     try {
       // should now plot the focused workspace when single peak fitting
       // process fails
-      plotFitPeaksCurves();
+      plotAlignedWorkspace(m_view->plotFittedPeaksEnabled());
 
     } catch (std::runtime_error &re) {
       g_log.error() << "Unable to finish the plotting of the graph for "
@@ -615,8 +615,8 @@ void EnggDiffFittingPresenter::updatePlot() {
     const bool fitResultsExist = m_model->hasFittedPeaksForRun(runNumber, bank);
     const bool plotFittedPeaksEnabled = m_view->plotFittedPeaksEnabled();
 
-    if (fitResultsExist && plotFittedPeaksEnabled) {
-      plotFitPeaksCurves();
+    if (fitResultsExist) {
+      plotAlignedWorkspace(plotFittedPeaksEnabled);
     } else {
       if (plotFittedPeaksEnabled) {
         m_view->userWarning("Cannot plot fitted peaks",
@@ -625,7 +625,7 @@ void EnggDiffFittingPresenter::updatePlot() {
                             "instead.");
       }
       const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-      plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
+      plotFocusedFile(false, ws);
     }
   }
 }
@@ -677,7 +677,7 @@ void EnggDiffFittingPresenter::plotFocusedFile(
   }
 }
 
-void EnggDiffFittingPresenter::plotFitPeaksCurves() {
+void EnggDiffFittingPresenter::plotAlignedWorkspace(const bool plotFittedPeaks) {
   try {
 
     // detaches previous plots from canvas
@@ -686,7 +686,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     const auto listLabel = m_view->getFittingListWidgetCurrentValue();
     if (!listLabel) {
       m_view->userWarning("Invalid run number or bank",
-                          "Tried to plot a focused file which does not exist");
+        "Tried to plot a focused file which does not exist");
       return;
     }
     int runNumber;
@@ -697,24 +697,14 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
-    if (m_model->hasFittedPeaksForRun(runNumber, bank)){
-      if (m_view->plotFittedPeaksEnabled()) {
-        g_log.debug() << "single peaks fitting being plotted now.\n";
-        auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
-        auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
-        m_view->setDataVector(singlePeaksData, false, true,
-          generateXAxisLabel(ws->getAxis(0)->unit()));
-        m_view->showStatus("Peaks fitted successfully");
-      }
-    } else {
-      g_log.notice()
-          << "Focused workspace has been plotted to the "
-             "graph; further peaks can be adding using Peak Tools.\n";
-      g_log.warning() << "Peaks could not be plotted as the fitting process "
-                         "did not finish correctly.\n";
-      m_view->showStatus("No peaks could be fitted");
+    if (plotFittedPeaks) {
+      g_log.debug() << "single peaks fitting being plotted now.\n";
+      auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
+      auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
+      m_view->setDataVector(singlePeaksData, false, true,
+        generateXAxisLabel(ws->getAxis(0)->unit()));
+      m_view->showStatus("Peaks fitted successfully");
     }
-
   } catch (std::runtime_error) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "

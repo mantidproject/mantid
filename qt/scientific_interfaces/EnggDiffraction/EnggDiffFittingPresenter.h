@@ -78,7 +78,7 @@ public:
   void plotFocusedFile(bool plotSinglePeaks,
                        Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
-  void plotFitPeaksCurves();
+  void plotAlignedWorkspace(const bool plotFittedPeaks);
 
 protected:
   void processStart();
