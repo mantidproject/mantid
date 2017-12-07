@@ -84,6 +84,10 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=2)
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=-2)
 
+        # Test non-numerical input
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height='height', width=-2)
+        self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=True)
+
 
 class _MockInst(AbstractInst):
 

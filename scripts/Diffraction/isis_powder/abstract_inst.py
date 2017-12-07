@@ -69,6 +69,11 @@ class AbstractInst(object):
         :param width: Width of the beam (mm).
         :return:
         """
+        try:
+            height = float(height)
+            width = float(width)
+        except ValueError:
+                raise ValueError("Beam height and width must be numbers.")
         if height <= 0 or width <= 0:
             raise ValueError("Beam height and width must be more than 0.")
         else:
