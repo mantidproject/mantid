@@ -109,7 +109,7 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceM
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
   if (outputs.mmWS) {
-    names.emplace_back(outWSName + "_++");
+    names.emplace_back(outWSName + "_--");
     API::AnalysisDataService::Instance().addOrReplace(names.back(), outputs.mmWS);
   }
   if (outputs.mpWS) {
