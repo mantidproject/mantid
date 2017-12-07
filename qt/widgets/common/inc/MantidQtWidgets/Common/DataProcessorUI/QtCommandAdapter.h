@@ -117,10 +117,12 @@ private:
     QMenu *submenu = menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
     // Add the actions
     auto &children = m_adaptee->getChildren();
-    for (auto &child : children) {
-      m_childAdapters.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
-          submenu, std::move(child)));
-    }
+    std::transform(children.begin(), children.end(),
+                   std::back_inserter(m_childAdapters),
+                   [&submenu](Command_uptr &child) {
+                     return Mantid::Kernel::make_unique<QtCommandAdapter>(
+                         submenu, std::move(child));
+                   });
   }
 
   /**
