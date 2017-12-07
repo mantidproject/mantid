@@ -1253,7 +1253,7 @@ void InstrumentDefinitionParser::appendAssembly(
     }
     if (pType->getAttribute("object_created") == "no") {
       pType->setAttribute("object_created", "yes");
-      boost::shared_ptr<Geometry::Object> obj = objAss->createOutline();
+      boost::shared_ptr<Geometry::IObject> obj = objAss->createOutline();
       if (obj) {
         mapTypeNameToShape[pType->getAttribute("name")] = obj;
       } else { // object failed to be created
@@ -1402,7 +1402,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
@@ -1502,7 +1502,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   // Given that this leaf component is actually an assembly, its constituent
   // component detector shapes comes from its type attribute.
   const std::string shapeType = pType->getAttribute("type");
-  boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
+  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
@@ -2460,7 +2460,7 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
   g_log.information("Loading geometry cache from " + cacheFullPath);
   // create a vtk reader
-  std::map<std::string, boost::shared_ptr<Geometry::Object>>::iterator objItr;
+  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
   boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
       new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();
@@ -2499,7 +2499,7 @@ InstrumentDefinitionParser::writeAndApplyCache(
   const std::string cacheFullPath = usedCache->getFileFullPathStr();
   g_log.information() << "Creating cache in " << cacheFullPath << "\n";
   // create a vtk writer
-  std::map<std::string, boost::shared_ptr<Geometry::Object>>::iterator objItr;
+  std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
   boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
       new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end();

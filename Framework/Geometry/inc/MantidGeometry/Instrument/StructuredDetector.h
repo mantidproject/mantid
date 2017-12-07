@@ -6,7 +6,7 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include <string>
 #include <vector>
 
@@ -139,7 +139,7 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
