@@ -2,11 +2,14 @@ from __future__ import print_function
 from collections import Counter, namedtuple
 from mock import Mock, patch, call
 import unittest
-from PyQt4.QtTest import QTest
+from qtpy.QtTest import QTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.utils.qt.testing import *
+from mantidqt.utils.qt.plugins import setup_library_paths
 
+
+setup_library_paths()
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()

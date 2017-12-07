@@ -18,8 +18,8 @@
 """
 from __future__ import absolute_import
 import types
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QApplication
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QApplication
 
 
 def gui_test(test):

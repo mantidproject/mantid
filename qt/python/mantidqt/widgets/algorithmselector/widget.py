@@ -1,8 +1,8 @@
 from __future__ import absolute_import, print_function
 import re
-from PyQt4.QtCore import QModelIndex, pyqtSignal
-from PyQt4.QtGui import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
-from PyQt4.QtGui import QTreeWidgetItem
+from qtpy.QtCore import QModelIndex, Signal, Qt
+from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
+from qtpy.QtWidgets import QTreeWidgetItem
 from mantidqt.utils.qt import block_signals
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
@@ -24,11 +24,11 @@ def get_name_and_version_from_item_label(item_label):
     return None
 
 
-class AlgorithmSelectorWidget(QWidget, IAlgorithmSelectorView):
+class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
-    execute_selected_algorithm = pyqtSignal(str, int)
+    execute_selected_algorithm = Signal(str, int)
 
     def __init__(self, parent=None, include_hidden=False):
         """

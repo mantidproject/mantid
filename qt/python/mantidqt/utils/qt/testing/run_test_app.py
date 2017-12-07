@@ -34,8 +34,10 @@ If specified the script is imported and run after the widget is created.
 from __future__ import absolute_import, print_function
 import sys
 import traceback
-from PyQt4.QtCore import Qt, QTimer, QPoint
-from PyQt4.QtGui import QApplication, QContextMenuEvent, QAction
+from qtpy.QtCore import Qt, QTimer, QPoint
+from qtpy.QtGui import QContextMenuEvent
+from qtpy.QtWidgets import QApplication, QAction
+from mantidqt.utils.qt.plugins import setup_library_paths
 
 
 class Tester(object):
@@ -114,6 +116,7 @@ def open_in_window(widget_name, script):
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
     """
+    setup_library_paths()
     app = QApplication([""])
 
     w = create_widget(widget_name)
