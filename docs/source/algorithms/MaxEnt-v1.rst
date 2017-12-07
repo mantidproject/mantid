@@ -24,7 +24,7 @@ the calculated or reconstructed data, :math:`\chi^2_{target}` is value of the in
 property ChiTargetOverN and :math:`N'` the number of measured data point. The image is a set of numbers
 :math:`\{x_0, x_1, \dots, x_{N-1}\}` related to the measured data via a 1D Fourier transform:
 
-.. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
+.. math:: d_m = \frac{1}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
 
 where :math:`N` is the number of image points, which can be made different from :math:`N'` and
 is controlled by the input algorithm property ResolutionFactor, see examples further below.
