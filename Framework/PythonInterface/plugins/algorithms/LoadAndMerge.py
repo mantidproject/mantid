@@ -71,7 +71,7 @@ class LoadAndMerge(PythonAlgorithm):
         # there might be loaders that do not reset their private members after execution.
         # So running on the same instance can potentially cause problems.
         # Also the output will always be on ADS, since this algorithm relies on
-        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)        
+        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
         alg = self.createChildAlgorithm(self._loader, self._version)
         alg.setAlwaysStoreInADS(True)
         alg.initialize()
