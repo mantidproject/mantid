@@ -152,7 +152,7 @@ void MaxEnt::init() {
       "Distance penalty applied to the current image at each iteration.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MaxAngle", 0.05, mustBeNonNegative, Direction::Input),
+                      "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
                   "Maximum degree of non-parallelism between S and C.");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
