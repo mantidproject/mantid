@@ -152,7 +152,7 @@ void QDataProcessorWidget::addActions(
   // Add actions to context menu
   m_contextMenu = new QMenu(this);
   for (const auto &command : m_commands) {
-    if (command->getAction())
+    if (command->hasAction())
       m_contextMenu->addAction(command->getAction());
   }
 

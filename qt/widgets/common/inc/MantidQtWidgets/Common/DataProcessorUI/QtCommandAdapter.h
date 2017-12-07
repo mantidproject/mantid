@@ -102,6 +102,7 @@ public:
       m_action->setEnabled(isProcessing);
   }
 
+  bool hasAction() { return m_action != nullptr; }
   QAction *getAction() { return m_action.get(); }
 
 private:
