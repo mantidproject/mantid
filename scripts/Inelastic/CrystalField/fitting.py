@@ -1114,6 +1114,7 @@ class CrystalFieldSite(object):
 
     def __add__(self, other):
         from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        from CrystalField import CrystalField
         if isinstance(other, CrystalField):
             abundances = [self.abundance, 1.0]
         elif isinstance(other, CrystalFieldSite):
