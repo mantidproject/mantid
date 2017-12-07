@@ -688,14 +688,15 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
-    if (m_fittingFinishedOK && m_view->plotFittedPeaksEnabled()) {
-      g_log.debug() << "single peaks fitting being plotted now.\n";
-      auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
-      auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
-      m_view->setDataVector(singlePeaksData, false, true,
-                            generateXAxisLabel(ws->getAxis(0)->unit()));
-      m_view->showStatus("Peaks fitted successfully");
-
+    if (m_model->hasFittedPeaksForRun(runNumber, bank)){
+      if (m_view->plotFittedPeaksEnabled()) {
+        g_log.debug() << "single peaks fitting being plotted now.\n";
+        auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
+        auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
+        m_view->setDataVector(singlePeaksData, false, true,
+          generateXAxisLabel(ws->getAxis(0)->unit()));
+        m_view->showStatus("Peaks fitted successfully");
+      }
     } else {
       g_log.notice()
           << "Focused workspace has been plotted to the "
