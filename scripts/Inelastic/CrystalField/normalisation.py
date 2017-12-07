@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from CrystalField.energies import energies as CFEnergy
+from CrystalField.fitting import ionname2Nre
 from six import iteritems
 from six import string_types
 
@@ -9,13 +10,14 @@ def _get_normalisation(nre, bnames):
     """ Helper function to calculate the normalisation factor.
         Defined as: ||Blm|| = sum_{Jz,Jz'} |<Jz|Blm|Jz'>|^2 / (2J+1)
     """
-    J = [0, 5./2, 4, 9./2, 4, 5./2, 0, 7./2, 6, 15./2, 8, 15./2, 6, 7./2]
+    Jvals = [0, 5./2, 4, 9./2, 4, 5./2, 0, 7./2, 6, 15./2, 8, 15./2, 6, 7./2]
+    J = (-nre / 2.) if (nre < 0) else Jvals[nre]
     retval = {}
     for bname in bnames:
         bdict = {bname: 1}
         ee, vv, ham = CFEnergy(nre, **bdict)
         Omat = np.mat(ham)
-        norm = np.trace(np.real(Omat * np.conj(Omat))) / (2*J[nre]+1)
+        norm = np.trace(np.real(Omat * np.conj(Omat))) / (2*J+1)
         retval[bname] = np.sqrt(np.abs(norm)) * np.sign(norm)
     return retval
 
@@ -25,12 +27,11 @@ def _parse_args(**kwargs):
     """
     # Some definitions
     Blms = ['B20', 'B21', 'B22', 'B40', 'B41', 'B42', 'B43', 'B44', 'B60', 'B61', 'B62', 'B63', 'B64', 'B65', 'B66']
-    Ions = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb']
     # Some Error checking
     if 'Ion' not in kwargs.keys() and 'IonNum' not in kwargs.keys():
         raise NameError('You must specify the ion using either the ''Ion'', ''IonNum'' keywords')
     if 'Ion' in kwargs.keys():
-        nre = [id for id, val in enumerate(Ions) if val == kwargs['Ion']][0] + 1
+        nre = ionname2Nre(kwargs['Ion'])
     else:
         nre = kwargs['IonNum']
     # Now parses the list of input crystal field parameters
@@ -184,9 +185,8 @@ def split2range(*args, **kwargs):
     # Error checking
     if 'Ion' not in argin.keys() and 'IonNum' not in argin.keys():
         raise NameError('You must specify the ion using either the ''Ion'', ''IonNum'' keywords')
-    Ions = ['Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb']
     if 'Ion' in argin.keys():
-        nre = [ id for id,val in enumerate(Ions) if val==kwargs['Ion'] ][0] + 1
+        nre = ionname2Nre(kwargs['Ion'])
     else:
         nre = argin['IonNum']
     if 'EnergySplitting' not in argin.keys():

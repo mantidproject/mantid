@@ -28,17 +28,33 @@ def makeWorkspace(xArray, yArray):
 def islistlike(arg):
     return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
 
+def ionname2Nre(ionname):
+    ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
+                   'Tb': 8, 'Dy': 9, 'Ho': 10, 'Er': 11, 'Tm': 12, 'Yb': 13}
+    if ionname not in ion_nre_map.keys():
+        msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
+              (ionname, ', '.join(list(ion_nre_map.keys())))
+        arbitraryJ = re.match('[SJsj]([0-9\.]+)', ionname)
+        if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
+            nre = int(-float(arbitraryJ.group(1)) * 2.)
+            if nre < -99:
+                raise RuntimeError('J value ' + str(-nre / 2) + ' is too large.')
+        else:
+            raise RuntimeError(msg+', S<n>, J<n>')
+    else:
+        nre = ion_nre_map[ionname]
+    return nre
 
 #pylint: disable=too-many-instance-attributes,too-many-public-methods
 class CrystalField(object):
     """Calculates the crystal fields for one ion"""
 
-    ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
-                   'Tb': 8, 'Dy': 9, 'Ho': 10, 'Er': 11, 'Tm': 12, 'Yb': 13}
-
     allowed_symmetries = ['C1', 'Ci', 'C2', 'Cs', 'C2h', 'C2v', 'D2', 'D2h', 'C4', 'S4', 'C4h',
                           'D4', 'C4v', 'D2d', 'D4h', 'C3', 'S6', 'D3', 'C3v', 'D3d', 'C6', 'C3h',
                           'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh']
+
+    lande_g = [6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0, 2.0,
+               3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.]
 
     default_peakShape = 'Gaussian'
     default_background = 'FlatBackground'
@@ -269,7 +285,6 @@ class CrystalField(object):
         return out
 
     def makeMultiSpectrumFunction(self):
-        import re
         return re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
 
     @property
@@ -290,10 +305,7 @@ class CrystalField(object):
         ...
         cf.Ion = 'Pr'
         """
-        if value not in self.ion_nre_map.keys():
-            msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
-                  (value, ', '.join(list(self.ion_nre_map.keys())))
-            raise RuntimeError(msg)
+        self._nre = ionname2Nre(value)
         self.crystalFieldFunction.setAttributeValue('Ion', value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
@@ -993,12 +1005,10 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        import re
         ties = re.match('ties=\((.*?)\)', str(self.crystalFieldFunction))
         return ties.group(1) if ties else ''
 
     def _getFieldConstraints(self):
-        import re
         constraints = re.match('constraints=\((.*?)\)', str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
@@ -1035,9 +1045,8 @@ class CrystalField(object):
         """
         if self._dirty_eigensystem:
             import CrystalField.energies as energies
-            nre = self.ion_nre_map[self.Ion]
             self._eigenvalues, self._eigenvectors, self._hamiltonian = \
-                energies.energies(nre, **self._getFieldParameters())
+                energies.energies(self._nre, **self._getFieldParameters())
             self._dirty_eigensystem = False
 
     def _calcPeaksList(self, i):
