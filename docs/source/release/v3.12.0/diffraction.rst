@@ -33,9 +33,10 @@ Engineering Diffraction
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
   within Mantid.
 - Usability improvements in the GUI:
-  - The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message
-  - Improved progress reporting for Calibration and Focus
-
+  + The "Invalid RB number" popup window in the GUI has been replaced with a more user-friendly message
+  + Improved progress reporting for Calibration and Focus
+  + Enabled multi-run fitting and plotting in the Fitting tab
+     
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.

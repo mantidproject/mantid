@@ -150,7 +150,6 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
   const auto focusedWS = getFocusedWorkspace(runNumber, bank);
 
   const size_t numberOfPeaks = fitFunctionParams->rowCount();
-  const std::string fittedPeaksWSName = "engggui_fitting_single_peaks";
 
   for (size_t i = 0; i < numberOfPeaks; ++i) {
     const auto functionDescription = createFunctionString(fitFunctionParams, i);
@@ -169,31 +168,48 @@ void EnggDiffFittingModel::createFittedPeaksWS(const int runNumber,
                             singlePeakWSName);
 
     if (i == 0) {
-      cloneWorkspace(focusedWS, fittedPeaksWSName);
-      setDataToClonedWS(singlePeakWSName, fittedPeaksWSName);
+      cloneWorkspace(focusedWS, FITTED_PEAKS_WS_NAME);
+      setDataToClonedWS(singlePeakWSName, FITTED_PEAKS_WS_NAME);
     } else {
       const std::string clonedWSName =
           "__engggui_cloned_peaks_" + std::to_string(i);
       cloneWorkspace(focusedWS, clonedWSName);
       setDataToClonedWS(singlePeakWSName, clonedWSName);
 
-      appendSpectra(fittedPeaksWSName, clonedWSName);
+      appendSpectra(FITTED_PEAKS_WS_NAME, clonedWSName);
     }
   }
 
   const std::string alignedWSName = FOCUSED_WS_NAME + "_d";
-  alignDetectors(getFocusedWorkspace(runNumber, bank), alignedWSName);
-  alignDetectors(fittedPeaksWSName, fittedPeaksWSName);
+  cloneWorkspace(focusedWS, alignedWSName);
+  alignDetectors(alignedWSName, alignedWSName);
+
+  alignDetectors(FITTED_PEAKS_WS_NAME, FITTED_PEAKS_WS_NAME);
 
   const auto &ADS = Mantid::API::AnalysisDataService::Instance();
 
   const auto fittedPeaksWS =
-      ADS.retrieveWS<Mantid::API::MatrixWorkspace>(fittedPeaksWSName);
+      ADS.retrieveWS<Mantid::API::MatrixWorkspace>(FITTED_PEAKS_WS_NAME);
   addToRunMap(runNumber, bank, m_fittedPeaksMap, fittedPeaksWS);
 
   const auto alignedFocusedWS =
       ADS.retrieveWS<Mantid::API::MatrixWorkspace>(alignedWSName);
   addToRunMap(runNumber, bank, m_alignedWorkspaceMap, alignedFocusedWS);
+}
+
+size_t EnggDiffFittingModel::getNumFocusedWorkspaces() const {
+  size_t numWorkspaces = 0;
+
+  for (const auto &bank : m_focusedWorkspaceMap) {
+    numWorkspaces += bank.size();
+  }
+  return numWorkspaces;
+}
+
+bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
+                                                const size_t bank) const {
+  return m_fittedPeaksMap[bank - 1].find(runNumber) !=
+         m_fittedPeaksMap[bank - 1].end();
 }
 
 Mantid::API::MatrixWorkspace_sptr
@@ -255,7 +271,7 @@ void EnggDiffFittingModel::rebinToFocusedWorkspace(
 
 void EnggDiffFittingModel::cloneWorkspace(
     const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-    const std::string &outputWSName) {
+    const std::string &outputWSName) const {
   auto cloneWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
   cloneWSAlg->initialize();
@@ -275,7 +291,7 @@ void EnggDiffFittingModel::setDataToClonedWS(const std::string &wsToCopyName,
 }
 
 void EnggDiffFittingModel::appendSpectra(const std::string &ws1Name,
-                                         const std::string &ws2Name) {
+                                         const std::string &ws2Name) const {
   auto appendSpectraAlg =
       Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
 
@@ -363,8 +379,8 @@ void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
   loadAlg->execute();
 }
 
-void EnggDiffFittingModel::renameWorkspace(API::MatrixWorkspace_sptr inputWS,
-                                           const std::string &newName) {
+void EnggDiffFittingModel::renameWorkspace(API::Workspace_sptr inputWS,
+                                           const std::string &newName) const {
   auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
   renameAlg->setProperty("InputWorkspace", inputWS);
   renameAlg->setProperty("OutputWorkspace", newName);
@@ -400,6 +416,64 @@ std::vector<int> EnggDiffFittingModel::getAllRunNumbers() const {
   }
 
   return runNumbers;
+}
+
+void EnggDiffFittingModel::mergeTables(
+    const API::ITableWorkspace_sptr tableToCopy,
+    API::ITableWorkspace_sptr targetTable) const {
+  for (size_t i = 0; i < tableToCopy->rowCount(); ++i) {
+    API::TableRow rowToCopy = tableToCopy->getRow(i);
+    API::TableRow newRow = targetTable->appendRow();
+
+    for (size_t j = 0; j < tableToCopy->columnCount(); ++j) {
+      double valueToCopy;
+      rowToCopy >> valueToCopy;
+      newRow << valueToCopy;
+    }
+  }
+}
+
+void EnggDiffFittingModel::addAllFitResultsToADS() const {
+  auto fitParamsTable = Mantid::API::WorkspaceFactory::Instance().createTable();
+  renameWorkspace(fitParamsTable, FIT_RESULTS_TABLE_NAME);
+
+  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
+
+  for (const auto &runNumberBankPair : runNumberBankPairs) {
+    const int runNumber = runNumberBankPair.first;
+    const size_t bank = runNumberBankPair.second;
+
+    const auto singleWSFitResults = getFitResults(runNumber, bank);
+
+    if (runNumberBankPair == *runNumberBankPairs.begin()) {
+      // First element - copy column headings over
+      const auto columnHeaders = singleWSFitResults->getColumnNames();
+      for (const auto &header : columnHeaders) {
+        fitParamsTable->addColumn("double", header);
+      }
+    }
+    mergeTables(singleWSFitResults, fitParamsTable);
+  }
+}
+
+void EnggDiffFittingModel::addAllFittedPeaksToADS() const {
+  const auto runNumberBankPairs = getRunNumbersAndBankIDs();
+  if (runNumberBankPairs.size() < 1) {
+    return;
+  }
+  const auto firstWSLabel = runNumberBankPairs[0];
+  auto fittedPeaksWS =
+      getFittedPeaksWS(firstWSLabel.first, firstWSLabel.second);
+  cloneWorkspace(fittedPeaksWS, FITTED_PEAKS_WS_NAME);
+
+  for (size_t i = 1; i < runNumberBankPairs.size(); ++i) {
+    const auto wsLabel = runNumberBankPairs[i];
+    const int runNumber = wsLabel.first;
+    const size_t bank = wsLabel.second;
+
+    auto wsToAppend = getFittedPeaksWS(runNumber, bank);
+    appendSpectra(FITTED_PEAKS_WS_NAME, wsToAppend->getName());
+  }
 }
 
 namespace {
@@ -537,6 +611,8 @@ const std::string EnggDiffFittingModel::FOCUSED_WS_NAME =
     "engggui_fitting_focused_ws";
 const std::string EnggDiffFittingModel::FIT_RESULTS_TABLE_NAME =
     "engggui_fitting_fitpeaks_params";
+const std::string EnggDiffFittingModel::FITTED_PEAKS_WS_NAME =
+    "engggui_fitting_single_peaks";
 
 const double EnggDiffFittingModel::DEFAULT_DIFA = 0.0;
 const double EnggDiffFittingModel::DEFAULT_DIFC = 18400.0;
