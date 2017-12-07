@@ -14,6 +14,6 @@ Reflectometry Changes
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface.
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and
-:ref:`algm-ReflectometryReductionOneAuto`
+  :ref:`algm-ReflectometryReductionOneAuto`
 
 :ref:`Release 3.12.0 <v3.12.0>`
