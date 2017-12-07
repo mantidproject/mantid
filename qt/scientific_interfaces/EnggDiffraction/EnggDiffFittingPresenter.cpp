@@ -676,7 +676,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK, ws);
 
-    if (m_fittingFinishedOK) {
+    if (m_fittingFinishedOK && m_view->plotFittedPeaksEnabled()) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
       auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
