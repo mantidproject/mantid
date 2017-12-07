@@ -83,7 +83,7 @@ void setProperty(IPropertyManager &self, const boost::python::object &name,
 void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
 #if PY_MAJOR_VERSION >= 3
   const object view = kwargs.attr("items");
-  const object objectItems = itemIter(handle<>(PyObject_GetIter(view.ptr())));
+  const object objectItems(handle<>(PyObject_GetIter(view.ptr())));
 #else
   const object objectItems = kwargs.iteritems();
 #endif
