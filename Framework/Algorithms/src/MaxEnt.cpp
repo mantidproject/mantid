@@ -245,6 +245,20 @@ void MaxEnt::exec() {
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
+  // For now have the requirement that data must have non-zero
+  // (and positive!) errors
+  for (size_t s = 0; s < nspec; s++) {
+    auto errors = inWS->e(s).rawData();
+
+    size_t npoints = errors.size();
+    for (size_t i = 0; i < npoints; i++) {
+      if (errors[i] <= 0.0) {
+        throw std::invalid_argument(
+          "Input data must have non-zero errors.");
+      }
+    }
+  }
+
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
   if (complexData) {

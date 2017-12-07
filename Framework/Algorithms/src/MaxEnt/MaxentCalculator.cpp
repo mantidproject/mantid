@@ -317,10 +317,8 @@ MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
 
   double chisq = 0;
   for (size_t i = 0; i < npoints; i++) {
-    if (m_errors[i] != 0.0) {
-      double term = (m_data[i] - data[i]) / m_errors[i];
-      chisq += term * term;
-    }
+    double term = (m_data[i] - data[i]) / m_errors[i];
+    chisq += term * term;
   }
   return chisq / dpoints;
 }
