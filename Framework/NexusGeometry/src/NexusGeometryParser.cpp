@@ -60,9 +60,9 @@ NexusGeometryParser::NexusGeometryParser(
     H5File file(fileName, H5F_ACC_RDONLY);
     this->nexusFile = file;
     this->rootGroup = this->nexusFile.openGroup("/");
-  } catch (FileIException e) {
+  } catch (FileIException &e) {
     this->exitStatus = OPENING_FILE_ERROR;
-  } catch (GroupIException e) {
+  } catch (GroupIException &e) {
     this->exitStatus = OPENING_ROOT_GROUP_ERROR;
   }
   // Initialize the instrumentAbstractBuilder
@@ -156,7 +156,7 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups() {
   // Open all instrument groups within rawDataGroups
   std::vector<Group> instrumentGroupPaths;
   for (std::vector<Group>::iterator iter = rawDataGroupPaths.begin();
-       iter < rawDataGroupPaths.end(); iter++) {
+       iter != rawDataGroupPaths.end(); ++iter) {
     std::vector<Group> instrumentGroups =
         this->openSubGroups(*iter, NX_INSTRUMENT);
     instrumentGroupPaths.insert(instrumentGroupPaths.end(),
@@ -166,7 +166,7 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups() {
   // Open all detector groups within instrumentGroups
   std::vector<Group> detectorGroupPaths;
   for (std::vector<Group>::iterator iter = instrumentGroupPaths.begin();
-       iter < instrumentGroupPaths.end(); iter++) {
+       iter != instrumentGroupPaths.end(); ++iter) {
     // Open sub detector groups
     std::vector<Group> detectorGroups = this->openSubGroups(*iter, NX_DETECTOR);
     // Append to detectorGroups vector
