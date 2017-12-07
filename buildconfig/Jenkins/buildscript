@@ -35,6 +35,7 @@ export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 ###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
+# we use cmake3 on rhel because cmake is too old
 if [ $(command -v cmake3) ]; then
     CMAKE_EXE=cmake3
     CPACK_EXE=cpack3
