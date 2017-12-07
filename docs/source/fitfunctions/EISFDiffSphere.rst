@@ -1,8 +1,8 @@
-.. _func-ElasticDiffSphere:
+.. _func-EISFDiffSphere:
 
-=================
+==============
 EISFDiffSphere
-=================
+==============
 
 .. index:: EISFDiffSphere
 
