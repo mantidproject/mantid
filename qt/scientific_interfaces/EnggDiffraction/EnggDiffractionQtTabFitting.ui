@@ -247,6 +247,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="checkBox_plotFittedPeaks">
+          <property name="text">
+           <string>Plot fitted peaks</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_19">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

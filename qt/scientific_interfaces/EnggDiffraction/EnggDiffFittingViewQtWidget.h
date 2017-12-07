@@ -161,6 +161,8 @@ public:
     m_currentInst = newInstrument;
   }
 
+  bool plotFittedPeaksEnabled() const override;
+
 protected:
   void initLayout();
 

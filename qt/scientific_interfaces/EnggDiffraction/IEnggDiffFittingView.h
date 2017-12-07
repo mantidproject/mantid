@@ -265,6 +265,11 @@ public:
    * @param newInstrument the new instrument that is selected
    */
   virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
+
+  /**
+  * Get whether the user has selected to plot reconstructed peaks over the run
+  */
+  virtual bool plotFittedPeaksEnabled() const = 0;
 };
 
 } // namespace CustomInterfaces

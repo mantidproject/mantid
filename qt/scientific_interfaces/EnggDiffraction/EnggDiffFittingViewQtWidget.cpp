@@ -76,6 +76,10 @@ EnggDiffFittingViewQtWidget::~EnggDiffFittingViewQtWidget() {
   }
 }
 
+bool EnggDiffFittingViewQtWidget::plotFittedPeaksEnabled() const {
+  return m_ui.checkBox_plotFittedPeaks->isChecked();
+}
+
 void EnggDiffFittingViewQtWidget::initLayout() {
   m_ui.setupUi(this);
 
