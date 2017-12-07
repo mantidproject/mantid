@@ -45,6 +45,10 @@ Improved
 
 Bugfixes
 ########
+- The X-Limits for all of the Indirect Data Analysis interfaces are now correctly updated when data is loaded.
+- In the IqtFit interface, the 'AO' parameter now defaults to 0.
+- The mini preview plot now updates correctly in the Indirect Data Analysis interfaces, when the fit function is changed; when changed to a function that wasn't used in the most recent fit, will plot only the sample, else will plot the sample, fit and difference.
+- Plotting individual parameters of the fit in the interface ('Plot Options'), will no longer produce an error in the ConvFit interface, when plotting 'FWHM'.
 
 Data Reduction Interfaces
 -------------------------
@@ -57,6 +61,13 @@ Improved
 
 Bugfixes
 ########
+
+Indirect Diffraction
+--------------------
+
+Improved
+########
+- Manual D-Range option removed from the indirect diffraction reduction interface; D-Ranges are now automatically calculated for sample, container and vanadium runs.
 
 Corrections Interfaces
 ----------------------
