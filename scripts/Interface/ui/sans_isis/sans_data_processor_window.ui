@@ -353,7 +353,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1922,6 +1922,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="BeamCentre" name="beam_centre"/>
        </widget>
       </item>
      </layout>
@@ -1962,6 +1963,12 @@ QGroupBox::title {
    <class>MaskingTable</class>
    <extends>QWidget</extends>
    <header>ui.sans_isis.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BeamCentre</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.beam_centre</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
