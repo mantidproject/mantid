@@ -5,7 +5,6 @@ import copy
 from mantid.kernel import Logger
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
-from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.sans_batch import SANSCentreFinder
 from sans.common.enums import FindDirectionEnum
 
@@ -29,7 +28,7 @@ class BeamCentrePresenter(object):
         def on_processing_error(self, error):
             self._presenter.on_processing_error_centre_finder(error)
 
-    def __init__(self, parent_presenter):
+    def __init__(self, parent_presenter, WorkHandler, BeamCentreModel):
         super(BeamCentrePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter

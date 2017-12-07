@@ -202,7 +202,7 @@ private:
 class LoadILLPolarizationFactorsTestPerformance : public CxxTest::TestSuite {
 public:
   void test_loadingLargeHistogram() {
-    const size_t nBins = 100000000;
+    const size_t nBins = 1000000;
     const std::vector<double> y(nBins, 1.0);
     Mantid::HistogramData::Counts counts(y);
     std::vector<double> x(nBins + 1);
@@ -211,14 +211,16 @@ public:
     const Mantid::HistogramData::Histogram h(edges, counts);
     Mantid::API::MatrixWorkspace_sptr ws =
         Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(1, h);
-    LoadILLPolarizationFactors alg;
-    alg.setRethrows(true);
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("Filename", "ILL/D17/PolarizationFactors.txt");
-    alg.setProperty("OutputWorkspace", "LoadILLPolarizationFactorsTest");
-    alg.setProperty("WavelengthReference", ws);
-    alg.execute();
+    for (size_t i = 0; i < 100; ++i) {
+      LoadILLPolarizationFactors alg;
+      alg.setRethrows(true);
+      alg.setChild(true);
+      alg.initialize();
+      alg.setProperty("Filename", "ILL/D17/PolarizationFactors.txt");
+      alg.setProperty("OutputWorkspace", "LoadILLPolarizationFactorsTest");
+      alg.setProperty("WavelengthReference", ws);
+      alg.execute();
+    }
   }
 };
 

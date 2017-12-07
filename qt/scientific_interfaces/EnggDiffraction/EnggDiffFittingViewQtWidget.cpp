@@ -93,13 +93,6 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(returnPressed()), this,
           SLOT(loadClicked()));
 
-  connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
-
-  connect(this, SIGNAL(setBank()), this, SLOT(listViewFittingRun()));
-
-  connect(m_ui.listWidget_fitting_run_num, SIGNAL(itemSelectionChanged()), this,
-          SLOT(listViewFittingRun()));
-
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
 
@@ -234,10 +227,6 @@ void EnggDiffFittingViewQtWidget::fitAllClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
 }
 
-void EnggDiffFittingViewQtWidget::FittingRunNo() {
-  m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
-}
-
 void EnggDiffFittingViewQtWidget::addClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
 }
@@ -248,32 +237,6 @@ void EnggDiffFittingViewQtWidget::browseClicked() {
 
 void EnggDiffFittingViewQtWidget::saveClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
-}
-
-void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
-
-  const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
-  // idx must correspond to an element and the vector cant be empty
-  if (size_t(idx) < runNoDirSize && runNoDirSize > 0) {
-
-    std::string bankDir = m_fitting_runno_dir_vec[idx];
-    Poco::Path fpath(bankDir);
-
-    setFittingRunNo(bankDir);
-  }
-}
-
-void EnggDiffFittingViewQtWidget::listViewFittingRun() {
-
-  if (m_fittingMutliRunMode) {
-    auto listView = m_ui.listWidget_fitting_run_num;
-    auto currentRow = listView->currentRow();
-    auto item = listView->item(currentRow);
-    QString itemText = item->text();
-
-    setFittingRunNo(itemText.toStdString());
-    FittingRunNo();
-  }
 }
 
 void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
@@ -474,16 +437,15 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
     return;
   }
 
-  // MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(paths[0]);
-  setFittingRunNo(paths.join(",").toStdString());
-  // getBanks();
+  setFocusedFileNames(paths.join(",").toStdString());
 }
 
-void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
-  m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(path));
+void EnggDiffFittingViewQtWidget::setFocusedFileNames(
+    const std::string &paths) {
+  m_ui.lineEdit_pushButton_run_num->setText(QString::fromStdString(paths));
 }
 
-std::string EnggDiffFittingViewQtWidget::getFittingRunNo() const {
+std::string EnggDiffFittingViewQtWidget::getFocusedFileNames() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
 }
 
@@ -503,9 +465,12 @@ int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
   return m_ui.listWidget_fitting_run_num->currentRow();
 }
 
-std::string
+boost::optional<std::string>
 EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
-  return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
+  if (listWidgetHasSelectedRow()) {
+    return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
+  }
+  return boost::none;
 }
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
