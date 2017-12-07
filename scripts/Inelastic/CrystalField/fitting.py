@@ -852,6 +852,22 @@ class CrystalField(object):
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
+    def getDipoleMatrix(self):
+        """Returns the dipole transition matrix as a numpy array"""
+        from scipy.constants import physical_constants
+        from CrystalField.energies import energies
+        self._calcEigensystem()
+        _, _, hx = energies(self._nre, BextX=1.0)
+        _, _, hy = energies(self._nre, BextY=1.0)
+        _, _, hz = energies(self._nre, BextZ=1.0)
+        ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
+        iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
+        iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
+        gj = 2. if (self._nre < 1) else lande_g[self._nre - 1]
+        gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
+        trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
+        return trans / (gJuB ** 2)
+
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         from mantidplot import plotSpectrum
