@@ -53,7 +53,7 @@ public:
   QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
-    if (m_adaptee->hasChild()) {
+    if (m_adaptee->hasChildren()) {
       createSubmenu(menu);
     } else {
       // We are dealing with an action
@@ -69,7 +69,7 @@ public:
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
     // Sub-menus cannot be added to a toolbar
-    if (m_adaptee->hasChild())
+    if (m_adaptee->hasChildren())
       return;
 
     // We are dealing with an action
@@ -115,10 +115,10 @@ private:
     // Add the submenu. Note that menu takes ownership of submenu.
     QMenu *submenu = menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
     // Add the actions
-    auto &child = m_adaptee->getChild();
-    for (auto &ch : child) {
+    auto &children = m_adaptee->getChildren();
+    for (auto &child : children) {
       m_childAdapters.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
-          submenu, std::move(ch)));
+          submenu, std::move(child)));
     }
   }
 

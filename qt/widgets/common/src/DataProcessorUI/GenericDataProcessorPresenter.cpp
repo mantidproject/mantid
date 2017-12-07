@@ -1613,7 +1613,7 @@ GenericDataProcessorPresenter::publishCommands() {
 
   // "Open Table" needs the list of "child" commands, i.e. the list of
   // available workspaces in the ADS
-  commands.at(0)->setChild(getTableList());
+  commands.at(0)->setChildren(getTableList());
 
   return commands;
 }
