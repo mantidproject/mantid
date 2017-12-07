@@ -71,12 +71,7 @@ class LoadAndMerge(PythonAlgorithm):
         # there might be loaders that do not reset their private members after execution.
         # So running on the same instance can potentially cause problems.
         # Also the output will always be on ADS, since this algorithm relies on
-        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)
-        # Moreover, this should NOT be run as child, since in that case if we run a loader
-        # having an additional optional output workspace, but without requesting the optional output,
-        # it will still be produced with some hidden temporary name (__TMPx...).
-        # This is related to replaying the history, or might as well be a bug in Algorithm base class.
-        # alg = AlgorithmManager.create(self._loader, self._version)
+        # MergeRuns, which does not work outside ADS (because of WorkspaceGroup input)        
         alg = self.createChildAlgorithm(self._loader, self._version)
         alg.setAlwaysStoreInADS(True)
         alg.initialize()
