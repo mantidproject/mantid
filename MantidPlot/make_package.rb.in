@@ -47,19 +47,6 @@ def findQScintilla2(lib_dir)
     end
 end
 
-# Find the qt folder. This is different depending on
-# what tap you're using in homebrew
-def findQtFolder()
-    if Dir.exist?("/usr/local/opt/qt@4")
-        return '/usr/local/opt/qt@4'
-    elsif Dir.exist?("/usr/local/opt/qt")
-        return '/usr/local/opt/qt'
-    else
-        p 'Could not find the qt folder'
-        exit 1
-    end
-end
-
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 ParaView_dir = Pathname.new("@ParaView_DIR@")
@@ -243,13 +230,6 @@ if( "@MAKE_VATES@" == "ON" )
    end
 end
 
-qt_folder = findQtFolder()
-if not Dir.exist?("#{qt_folder}/plugins")
-    p "Cannot find the Qt4 plugins folder"
-    p "You probably need to simlink the plugins folder in #{qt_folder}/lib/qt/plugins to #{qt_folder}/plugins"
-    exit 1
-end
-
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
 if Dir.exist?("Contents/PlugIns")
@@ -305,7 +285,7 @@ end
 pyqt4_patterns = ["**/PyQt4/*.so"]
 change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
 
-QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"#{qt_folder}/lib")
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"/usr/local/opt/qt@4/lib")
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"

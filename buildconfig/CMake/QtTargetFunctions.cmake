@@ -5,6 +5,8 @@
 # brief: create a library target for linked against Qt
 # The global ENABLE_MANTIDPLOT option controls if a Qt4 target
 # is created.
+# The global ENABLE_WORKBENCH option controls if a Qt5 target
+# is created.
 # To limit the Qt version for a specfic library use
 # QT_VERSION, e.g.
 #
@@ -18,13 +20,20 @@ function (mtd_add_qt_library)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 
 # name: mtd_add_qt_executable
 # brief: create a library target for linked against Qt
 # The global ENABLE_MANTIDPLOT option controls if a Qt4 target
+# is created.
+# The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
 # To limit the Qt version for a specfic library use
 # QT_VERSION, e.g.
@@ -38,7 +47,12 @@ function (mtd_add_qt_executable)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_target (EXCUTABLE QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 
@@ -261,7 +275,7 @@ function (mtd_add_qt_test_executable)
     # Workaround Qt compiler detection
     # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
     # https://bugreports.qt.io/browse/QTBUG-39142
-    set_target_properties ( ${_target_name} PROPERTIES 
+    set_target_properties ( ${_target_name} PROPERTIES
       COMPILE_DEFINITIONS Q_COMPILER_INITIALIZER_LISTS
     )
   elseif (PARSED_QT_VERSION EQUAL 5)
