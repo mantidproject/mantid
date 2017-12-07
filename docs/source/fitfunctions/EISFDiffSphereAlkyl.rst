@@ -1,4 +1,4 @@
-.. _func-ElasticDiffSphere:
+.. _func-EISFDiffSphereAlkyl:
 
 ===================
 EISFDiffSphereAlkyl
