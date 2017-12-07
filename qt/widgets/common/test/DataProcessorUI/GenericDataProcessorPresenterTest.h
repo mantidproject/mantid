@@ -363,6 +363,38 @@ private:
     return ws;
   }
 
+  // Expect the view's widgets to be set in a particular state according to
+  // whether
+  // processing or not
+  void expectViewWidgetsSetToState(MockDataProcessorView &mockDataProcessorView,
+                                   Cardinality numTimes, bool isProcessing) {
+    // Update menu items according to whether processing or not
+    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(isProcessing))
+        .Times(numTimes);
+
+    // These widgets are only enabled if not processing
+    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(!isProcessing))
+        .Times(numTimes);
+  }
+
+  // Expect the view's widgets to be set in the paused state
+  void expectViewWidgetsSetToPausedState(
+      MockDataProcessorView &mockDataProcessorView, Cardinality numTimes) {
+    expectViewWidgetsSetToState(mockDataProcessorView, numTimes, false);
+  }
+
+  // Expect the view's widgets to be set in the processing state
+  void expectViewWidgetsSetToProcessingState(
+      MockDataProcessorView &mockDataProcessorView, Cardinality numTimes) {
+    expectViewWidgetsSetToState(mockDataProcessorView, numTimes, true);
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created
   // statically
@@ -1026,16 +1058,7 @@ public:
     GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
-    // Expect the views' widgets to be set in the paused state
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(false))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(true))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(true))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(true)).Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(true))
-        .Times(AtLeast(1));
+    expectViewWidgetsSetToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
@@ -1074,13 +1097,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return(QString("Params = \"0.1\"")));
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(true)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(false)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(false))
-        .Times(1);
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(false)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(false))
-        .Times(1);
+    expectViewWidgetsSetToProcessingState(mockDataProcessorView, Exactly(1));
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
@@ -1153,13 +1170,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
     EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(true)).Times(0);
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(false)).Times(0);
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(false))
-        .Times(0);
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(false)).Times(0);
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(false))
-        .Times(0);
+    expectViewWidgetsSetToProcessingState(mockDataProcessorView, Exactly(0));
     EXPECT_CALL(mockMainPresenter, resume()).Times(0);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -3514,16 +3525,7 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     auto presenter = makeDefaultPresenter();
-    // Expect the views' widgets to be set in the paused state initially
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(false))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(true))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(true))
-        .Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(true)).Times(AtLeast(1));
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(true))
-        .Times(AtLeast(1));
+    expectViewWidgetsSetToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
@@ -3532,13 +3534,7 @@ public:
     EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
 
     // User hits the 'pause' button
-    // Expect the active view's widgets to be set in the paused state
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(false)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(true)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(true))
-        .Times(1);
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(true)).Times(1);
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(true)).Times(1);
+    expectViewWidgetsSetToPausedState(mockDataProcessorView, Exactly(1));
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 
