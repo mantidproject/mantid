@@ -52,7 +52,7 @@ const std::string PolarizationEfficiencyCor::summary() const {
 }
 
 size_t PolarizationEfficiencyCor::WorkspaceMap::size() const noexcept {
-  return mmWS ? 1 : 0 + mpWS ? 1 : 0 + pmWS ? 1 : 0 + ppWS ? 1 : 0;
+  return (mmWS ? 1 : 0) + (mpWS ? 1 : 0) + (pmWS ? 1 : 0) + (ppWS ? 1 : 0);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ void PolarizationEfficiencyCor::init() {
       "A group of workspaces to be corrected.");
   const std::vector<std::string> defaultFlippers{{Flippers::OffOff, Flippers::OffOn, Flippers::OnOff, Flippers::OnOn}};
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::FLIPPERS, defaultFlippers, boost::make_shared<Kernel::ArrayLengthValidator<double>>(2, 4)),
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::FLIPPERS, defaultFlippers, boost::make_shared<Kernel::ArrayLengthValidator<std::string>>(2, 4)),
         "A list of flipper configurations (accepted values: 00, 01, 10 and 11) corresponding to each input workspace.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
