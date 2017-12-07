@@ -330,6 +330,8 @@ void QDataProcessorWidget::setInstrumentComboEnabled(const bool enabled) {
 * @param enabled :: true if it should be enabled
 */
 void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
+  // Remember the original edit triggers so that we can revert
+  // back to them when re-enabling
   static const auto editTriggers = ui.viewTable->editTriggers();
 
   if (enabled)
