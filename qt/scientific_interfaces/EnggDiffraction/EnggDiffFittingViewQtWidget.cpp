@@ -76,10 +76,6 @@ EnggDiffFittingViewQtWidget::~EnggDiffFittingViewQtWidget() {
   }
 }
 
-bool EnggDiffFittingViewQtWidget::plotFittedPeaksEnabled() const {
-  return m_ui.checkBox_plotFittedPeaks->isChecked();
-}
-
 void EnggDiffFittingViewQtWidget::initLayout() {
   m_ui.setupUi(this);
 
@@ -124,6 +120,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.listWidget_fitting_run_num,
           SIGNAL(itemClicked(QListWidgetItem *)), this,
           SLOT(listWidget_fitting_run_num_clicked(QListWidgetItem *)));
+
+  connect(m_ui.checkBox_plotFittedPeaks, SIGNAL(stateChanged(int)), this,
+          SLOT(plotFittedPeaksStateChanged()));
 
   // Tool-tip button
   connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
@@ -241,6 +240,10 @@ void EnggDiffFittingViewQtWidget::browseClicked() {
 
 void EnggDiffFittingViewQtWidget::saveClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
+}
+
+void EnggDiffFittingViewQtWidget::plotFittedPeaksStateChanged() {
+  m_presenter->notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
 }
 
 void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
@@ -484,6 +487,10 @@ bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
     int idx) const {
   m_ui.listWidget_fitting_run_num->setCurrentRow(idx);
+}
+
+bool EnggDiffFittingViewQtWidget::plotFittedPeaksEnabled() const {
+  return m_ui.checkBox_plotFittedPeaks->isChecked();
 }
 
 void EnggDiffFittingViewQtWidget::plotSeparateWindow() {

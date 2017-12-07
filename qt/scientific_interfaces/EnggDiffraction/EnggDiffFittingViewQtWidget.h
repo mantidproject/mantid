@@ -185,6 +185,7 @@ private slots:
   void plotSeparateWindow();
   void showToolTipHelp();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
+  void plotFittedPeaksStateChanged();
 
 private:
   /// Setup the interface (tab UI)

@@ -87,6 +87,7 @@ protected:
   void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
+  void processUpdatePlotFitPeaks();
 
   /// clean shut down of model, view, etc.
   void cleanup();
@@ -96,6 +97,8 @@ protected slots:
   void fittingFinished();
 
 private:
+  void updatePlot();
+
   bool isDigit(const std::string &text) const;
 
   void warnFileNotFound(const std::exception &ex);

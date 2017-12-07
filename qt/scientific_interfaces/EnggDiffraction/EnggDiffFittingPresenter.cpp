@@ -177,6 +177,10 @@ void EnggDiffFittingPresenter::notify(
   case IEnggDiffFittingPresenter::selectRun:
     processSelectRun();
     break;
+
+  case IEnggDiffFittingPresenter::updatePlotFittedPeaks:
+    processUpdatePlotFitPeaks();
+    break;
   }
 }
 
@@ -282,19 +286,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
 }
 
 void EnggDiffFittingPresenter::processSelectRun() {
-  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
-  if (listLabel) {
-    int runNumber;
-    size_t bank;
-    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
-
-    if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
-      plotFitPeaksCurves();
-    } else {
-      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
-      plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
-    }
-  }
+  updatePlot();
 }
 
 void EnggDiffFittingPresenter::processStart() {}
@@ -347,6 +339,10 @@ void EnggDiffFittingPresenter::processLogMsg() {
   for (size_t i = 0; i < msgs.size(); i++) {
     g_log.information() << msgs[i] << '\n';
   }
+}
+
+void EnggDiffFittingPresenter::processUpdatePlotFitPeaks() {
+  updatePlot();
 }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
@@ -606,6 +602,22 @@ void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
   } else {
     auto expPeaks = m_view->getExpectedPeaksInput();
     outfile << expPeaks;
+  }
+}
+
+void EnggDiffFittingPresenter::updatePlot() {
+  const auto listLabel = m_view->getFittingListWidgetCurrentValue();
+  if (listLabel) {
+    int runNumber;
+    size_t bank;
+    std::tie(runNumber, bank) = runAndBankNumberFromListWidgetLabel(*listLabel);
+
+    if (m_model->hasFittedPeaksForRun(runNumber, bank)) {
+      plotFitPeaksCurves();
+    } else {
+      const auto ws = m_model->getFocusedWorkspace(runNumber, bank);
+      plotFocusedFile(m_model->hasFittedPeaksForRun(runNumber, bank), ws);
+    }
   }
 }
 
