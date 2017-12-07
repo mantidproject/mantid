@@ -285,9 +285,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
   m_multiRunMode = false;
 }
 
-void EnggDiffFittingPresenter::processSelectRun() {
-  updatePlot();
-}
+void EnggDiffFittingPresenter::processSelectRun() { updatePlot(); }
 
 void EnggDiffFittingPresenter::processStart() {}
 
@@ -341,9 +339,7 @@ void EnggDiffFittingPresenter::processLogMsg() {
   }
 }
 
-void EnggDiffFittingPresenter::processUpdatePlotFitPeaks() {
-  updatePlot();
-}
+void EnggDiffFittingPresenter::processUpdatePlotFitPeaks() { updatePlot(); }
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
   m_multiRunMode = true;
@@ -677,7 +673,8 @@ void EnggDiffFittingPresenter::plotFocusedFile(
   }
 }
 
-void EnggDiffFittingPresenter::plotAlignedWorkspace(const bool plotFittedPeaks) {
+void EnggDiffFittingPresenter::plotAlignedWorkspace(
+    const bool plotFittedPeaks) {
   try {
 
     // detaches previous plots from canvas
@@ -686,7 +683,7 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(const bool plotFittedPeaks) 
     const auto listLabel = m_view->getFittingListWidgetCurrentValue();
     if (!listLabel) {
       m_view->userWarning("Invalid run number or bank",
-        "Tried to plot a focused file which does not exist");
+                          "Tried to plot a focused file which does not exist");
       return;
     }
     int runNumber;
@@ -702,7 +699,7 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(const bool plotFittedPeaks) 
       auto singlePeaksWS = m_model->getFittedPeaksWS(runNumber, bank);
       auto singlePeaksData = QwtHelper::curveDataFromWs(singlePeaksWS);
       m_view->setDataVector(singlePeaksData, false, true,
-        generateXAxisLabel(ws->getAxis(0)->unit()));
+                            generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
     }
   } catch (std::runtime_error) {

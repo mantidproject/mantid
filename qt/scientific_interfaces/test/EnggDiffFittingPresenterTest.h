@@ -581,9 +581,8 @@ public:
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    EXPECT_CALL(mockView, 
-                setDataVector(testing::_, testing::_, testing::_, testing::_))
-        .Times(2);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
@@ -595,69 +594,65 @@ public:
   void test_updatePlotFittedPeaksNoFittedPeaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     auto mockModel = Mantid::Kernel::make_unique<
-      testing::NiceMock<MockEnggDiffFittingModel>>();
+        testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
-      .Times(1)
-      .WillOnce(Return(boost::optional<std::string>("123_1")));
+        .Times(1)
+        .WillOnce(Return(boost::optional<std::string>("123_1")));
     EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
-      .Times(1)
-      .WillOnce(Return(false));
+        .Times(1)
+        .WillOnce(Return(false));
     EXPECT_CALL(*mockModel_ptr, getFocusedWorkspace(123, 1))
-      .Times(1)
-      .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+        .Times(1)
+        .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, plotFittedPeaksEnabled())
-      .Times(1)
-      .WillOnce(Return(true));
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1))
-      .Times(0);
-    EXPECT_CALL(mockView,
-      setDataVector(testing::_, testing::_, testing::_, testing::_))
-      .Times(1);
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1)).Times(0);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(1);
     EXPECT_CALL(mockView, userWarning("Cannot plot fitted peaks", testing::_))
-      .Times(1);
+        .Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
-      "Mock not used as expected. Some EXPECT_CALL conditions were not "
-      "satisfied.",
-      testing::Mock::VerifyAndClearExpectations(&mockView))
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_updatePlotSuccessfulFitPlotPeaksDisabled() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     auto mockModel = Mantid::Kernel::make_unique<
-      testing::NiceMock<MockEnggDiffFittingModel>>();
+        testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
-      .Times(2)
-      .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
+        .Times(2)
+        .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
     EXPECT_CALL(*mockModel_ptr, hasFittedPeaksForRun(123, 1))
-      .Times(1)
-      .WillOnce(Return(true));
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*mockModel_ptr, getAlignedWorkspace(123, 1))
-      .Times(1)
-      .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+        .Times(1)
+        .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
     EXPECT_CALL(mockView, plotFittedPeaksEnabled())
-      .Times(1)
-      .WillOnce(Return(false));
-    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1))
-      .Times(0);
-    EXPECT_CALL(mockView,
-      setDataVector(testing::_, testing::_, testing::_, testing::_))
-      .Times(1);
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(123, 1)).Times(0);
+    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
+                                        testing::_)).Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
-      "Mock not used as expected. Some EXPECT_CALL conditions were not "
-      "satisfied.",
-      testing::Mock::VerifyAndClearExpectations(&mockView))
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
 private:

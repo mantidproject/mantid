@@ -270,7 +270,6 @@ public:
   * Get whether the user has selected to plot reconstructed peaks over the run
   */
   virtual bool plotFittedPeaksEnabled() const = 0;
-
 };
 
 } // namespace CustomInterfaces
