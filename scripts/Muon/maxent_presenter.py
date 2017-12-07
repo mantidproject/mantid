@@ -17,6 +17,7 @@ class MaxEntPresenter(object):
         self.getWorkspaceNames()
         #connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
+        self.view.cancelSignal.connect(self.cancel)
 
     #functions
     def getWorkspaceNames(self):
@@ -36,16 +37,20 @@ class MaxEntPresenter(object):
         self.thread.setInputs(inputs,runName)
         self.thread.start()
 
+    def cancel(self):
+        if self.thread is not None:
+            self.thread.cancel()
+
     def handleFinished(self):
         self.activate()
         self.thread.deleteLater()
         self.thread=None
 
     def activate(self):
-        self.view.activateButton()
+        self.view.activateCalculateButton()
 
     def deactivate(self):
-        self.view.deactivateButton()
+        self.view.deactivateCalculateButton()
 
     def getMaxEntInput(self):
         inputs=self.view.initMaxEntInput()
