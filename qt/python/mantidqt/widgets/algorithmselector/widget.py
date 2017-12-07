@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function
 import re
-from qtpy.QtCore import QModelIndex, Signal, Qt
+from qtpy.QtCore import QModelIndex, Signal
 from qtpy.QtWidgets import QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout, QHBoxLayout, QCompleter
 from qtpy.QtWidgets import QTreeWidgetItem
 from mantidqt.utils.qt import block_signals
