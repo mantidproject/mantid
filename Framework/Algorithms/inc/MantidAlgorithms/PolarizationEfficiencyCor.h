@@ -63,6 +63,7 @@ private:
   EfficiencyMap efficiencyFactors();
   WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);

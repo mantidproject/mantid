@@ -13,6 +13,7 @@
 
 namespace {
 namespace Prop {
+constexpr char *ANALYZER{"Analyzer"};
 constexpr char *FLIPPERS{"Flippers"};
 constexpr char *EFFICIENCIES{"Efficiencies"};
 constexpr char *INPUT_WS{"InputWorkspace"};
@@ -24,7 +25,6 @@ constexpr char *OffOn{"01"};
 constexpr char *OnOff{"10"};
 constexpr char *OnOn{"11"};
 }
-
 }
 
 namespace Mantid {
@@ -74,12 +74,14 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(
         Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
         "A workspace containing the efficiency factors P1, P2, F1 and F2 as histograms");
+  declareProperty(Prop::ANALYZER, true, "True if analyzer was used during the experiment, false otherwise.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PolarizationEfficiencyCor::exec() {
+  const bool analyzer = getProperty(Prop::ANALYZER);
   const auto inputs = mapInputsToDirections();
   const EfficiencyMap efficiencies = efficiencyFactors();
   WorkspaceMap outputs;
@@ -88,6 +90,11 @@ void PolarizationEfficiencyCor::exec() {
     outputs = directBeamCorrections(inputs, efficiencies);
     break;
   case 2:
+    if (analyzer) {
+      twoInputCorrections(inputs, efficiencies);
+    } else {
+      analyzerlessCorrections(inputs, efficiencies);
+    }
     break;
   case 3:
     outputs = threeInputCorrections(inputs, efficiencies);
@@ -228,6 +235,118 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
     }
   }
   return outputs;
+}
+
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  using namespace boost::math;
+  WorkspaceMap fullInputs = inputs;
+  fullInputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
+  fullInputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  const auto &F1 = efficiencies.F1->y();
+  const auto &F1E = efficiencies.F1->e();
+  const auto &F2 = efficiencies.F2->y();
+  const auto &F2E = efficiencies.F2->e();
+  const auto &P1 = efficiencies.P1->y();
+  const auto &P1E = efficiencies.P1->e();
+  const auto &P2 = efficiencies.P2->y();
+  const auto &P2E = efficiencies.P2->e();
+  const auto nHisto = inputs.mpWS->getNumberHistograms();
+  for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
+    const auto &I00 = inputs.ppWS->y(wsIndex);
+    const auto &E00 = inputs.ppWS->e(wsIndex);
+    const auto &I11 = inputs.mmWS->y(wsIndex);
+    const auto &E11 = inputs.mmWS->e(wsIndex);
+    auto &I01 = inputs.pmWS->mutableY(wsIndex);
+    auto &E01 = inputs.pmWS->mutableE(wsIndex);
+    auto &I10 = inputs.mpWS->mutableY(wsIndex);
+    auto &E10 = inputs.mpWS->mutableE(wsIndex);
+    for (size_t binIndex = 0; binIndex != I00.size(); ++binIndex) {
+      const auto i00 = I00[binIndex];
+      const auto i11 = I11[binIndex];
+      const auto f1 = F1[binIndex];
+      const auto f2 = F2[binIndex];
+      const auto p1 = P1[binIndex];
+      const auto p2 = P2[binIndex];
+      const auto a = -1. + p1 + 2. * p2 - 2. * p1 * p2;
+      const auto b = -1. + 2. * p1;
+      const auto c = -1. + 2. * p2;
+      const auto d = -1. + p2;
+      // Case: 01
+      const auto divisor = f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c);
+      I01[binIndex] = (f2 * i11 * p1 * a - f1 * i00 * b * (-f2 * pow<2>(c) + pow<2>(f2 * c) + d * p2)) / divisor;
+      // Error estimates.
+      // Derivatives of the above with respect to i00, i11, f1, etc.
+      const auto pmdi00 = -((f1 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
+                            (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2.* p2))));
+      const auto pmdi11 = (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
+          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdf1 = -(((-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) * (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) - f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+                           pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) - (i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
+          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdf2 = -(((f1 * (-1. + 2. * p1) * (-1. + p1 + p2) * (-1 + 2 * p2) + p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) * (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) - f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2))) /
+                           pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (-f1 * i00 * (-1. + 2. * p1) * (-pow<2>(1. - 2. * p2) + 2 * f2 * pow<2>(1. - 2. * p2)) +
+                         i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2)) /
+          (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) + f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdp1 = -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+                             f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) +
+                                pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) * (f2 * p1 * (1. - 2. * p2) +
+                             f1 * f2 * (-1. + 2. * p1) * (-1. + 2. * p2) +
+                             f2 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                             2. * f1 * ((1. - p2) * p2 +
+                                f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
+                              f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (f2 * i11 * p1 * (1. - 2. * p2) +
+                         f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+                         2. * f1 * i00 * (-f2 * pow<2>(1. - 2. * p2) +
+                            pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) / (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                         f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto pmdp2 = -(((f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
+                             f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) +
+                                pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) * (f2 * (2. - 2. * p1) * p1 +
+                             f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
+                                f2 * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                           f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
+                              f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (f2 * i11 * (2. - 2. * p1) * p1 -
+                         f1 * i00 * (-1. + 2. * p1) * (-1. + 4. * f2 * (1. - 2. * p2) - 4. * pow<2>(f2) * (1. - 2. * p2) +
+                            2. * p2)) / (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                         f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto e01_I00 = pow<2>(pmdi00 * E00[binIndex]);
+      const auto e01_I11 = pow<2>(pmdi11 * E11[binIndex]);
+      const auto e01_F1 = pow<2>(pmdf1 * F1E[binIndex]);
+      const auto e01_F2 = pow<2>(pmdf2 * F2E[binIndex]);
+      const auto e01_P1 = pow<2>(pmdp1 * P1E[binIndex]);
+      const auto e01_P2 = pow<2>(pmdp2 * P2E[binIndex]);
+      E01[binIndex] = std::sqrt(e01_I00 + e01_I11 + e01_F1 + e01_F2 + e01_P1 + e01_P2);
+      // Case: 10
+      I10[binIndex] = (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) / divisor;
+      // Derivatives of the above with respect to i00, i11, f1, etc.
+      const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c + f2 * p1 * a) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdi11 = -((f1 * b * d * p2) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
+      const auto mpdf1 = -((b * ((1. - p2) * p2 + f2 * (p1 + d) * c) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+                         pow<2>(f2 * p1 * a * + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (-2. * f1 * f2 * i00 * pow<2>(b) * c + b * (-i11 * d * p2 + f2 * i00 * b * c)) /
+          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdf2 = -(((f1 * b * (p1 + d) * c + p1 * a) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
+                         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c + i00 * p1 * a) /
+          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdp1 = -(((-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c)) * (f2 * p1 * -c + f1 * f2 * b * c + f2 * a + 2. * f1 * (-d * p2 + f2 * (p1 + d) * c))) /
+                         pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (f2 * i00 * p1 * -c + 4. * pow<2>(f1) * f2 * i00 * -b * c + 2. * f1 * f2 * i00 * b * c + f2 * i00 * a + 2. * f1 * (-i11 * d * p2 + f2 * i00 * b * c)) /
+          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto mpdp2 = -(((f2 * (2. - 2. * p1) * p1 + f1 * b * (1. - 2. * p2 + 2. * f2 * (p1 + d) + f2 * c)) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b *(-i11 * d * p2 + f2 * i00 * b * c))) / pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
+          (-2. * pow<2>(f1) * f2 * i00 * pow<2>(b) + f2 * i00 * (2. - 2. * p1) * p1 + f1 * b * (2. * f2 * i00 * b - i11 * d - i11 * p2)) /
+          (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
+      const auto e10_I00 = pow<2>(mpdi00 * E00[binIndex]);
+      const auto e10_I11 = pow<2>(mpdi11 * E11[binIndex]);
+      const auto e10_F1 = pow<2>(mpdf1 * F1E[binIndex]);
+      const auto e10_F2 = pow<2>(mpdf2 * F2E[binIndex]);
+      const auto e10_P1 = pow<2>(mpdp1 * P1E[binIndex]);
+      const auto e10_P2 = pow<2>(mpdp2 * P2E[binIndex]);
+      E10[binIndex] = std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
+    }
+  }
+  return fullCorrections(fullInputs, efficiencies);
 }
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
@@ -395,7 +514,7 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
     const auto &I10 = inputs.mpWS->y(wsIndex);
-    const auto &I11 = inputs.mpWS->y(wsIndex);
+    const auto &I11 = inputs.mmWS->y(wsIndex);
     const auto a = 2. * P1 - 1;
     const auto b = P1 - P2;
     const auto divisor = F1 * a - b;
@@ -415,7 +534,7 @@ void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMa
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
     const auto &I01 = inputs.pmWS->y(wsIndex);
-    const auto &I11 = inputs.mpWS->y(wsIndex);
+    const auto &I11 = inputs.mmWS->y(wsIndex);
     const auto a = 2. * P2 - 1;
     const auto b = P1 - P2;
     const auto divisor = F2 * a + b;
