@@ -18,11 +18,11 @@ For more information see:
 
 McStas and Mantid integration
 -----------------------------
-McStas works by assembling a C file from instrument information which is then compiled and can be 
+McStas works by assembling a C file from instrument information which is then compiled and can be
 run to simulate neutron scattering experiments.
 
-When compiled, McStas instrument code is not automatically configured to produce files in 
-:ref:`NeXus <NexusFile>` format. Mantid also requires the instrument information it reads to be saved as 
+When compiled, McStas instrument code is not automatically configured to produce files in
+:ref:`NeXus <Nexus file>` format. Mantid also requires the instrument information it reads to be saved as
 an :ref:`Instrument Definition File <InstrumentDefinitionFile>`. Instructions on how to do this can be found on the `McStas and Mantid wiki page <https://github.com/McStasMcXtrace/McCode/wiki/McStas-and-Mantid>`_ in the McStas repository.
 
 Once the NeXus data has been generated it can be loaded into Mantid using :ref:`algm-LoadMcstas`.

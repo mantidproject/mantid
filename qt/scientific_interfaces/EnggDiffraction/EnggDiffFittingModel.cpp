@@ -26,13 +26,19 @@ bool isDigit(const std::string &text) {
 }
 
 template <typename T, size_t S>
+bool runMapContains(const int runNumber, const size_t bank,
+                    const RunMap<S, T> &map) {
+  return map[bank - 1].find(runNumber) != map[bank - 1].end();
+}
+
+template <typename T, size_t S>
 T getFromRunMap(const int runNumber, const size_t bank,
-                const RunMap<S, T> map) {
+                const RunMap<S, T> &map) {
   if (bank < 1 || bank > map.size()) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
   }
-  if (map[bank - 1].find(runNumber) == map[bank - 1].end()) {
+  if (!runMapContains(runNumber, bank, map)) {
     throw std::invalid_argument("Tried to access invalid run number " +
                                 std::to_string(runNumber) + " for bank " +
                                 std::to_string(bank));
@@ -74,6 +80,33 @@ Mantid::API::ITableWorkspace_sptr
 EnggDiffFittingModel::getFitResults(const int runNumber,
                                     const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_fitParamsMap);
+}
+
+namespace {
+
+template <size_t S, typename T>
+void removeFromRunMapAndADS(const int runNumber, const size_t bank,
+                            RunMap<S, T> &map,
+                            Mantid::API::AnalysisDataServiceImpl &ADS) {
+  if (runMapContains(runNumber, bank, map)) {
+    const auto name = getFromRunMap(runNumber, bank, map)->getName();
+    map[bank - 1].erase(runNumber);
+    if (ADS.doesExist(name)) {
+      ADS.remove(name);
+    }
+  }
+}
+
+} // anonymous namespace
+
+void EnggDiffFittingModel::removeRun(const int runNumber, const size_t bank) {
+  m_wsFilenameMap[bank - 1].erase(runNumber);
+
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  removeFromRunMapAndADS(runNumber, bank, m_focusedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_fittedPeaksMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_alignedWorkspaceMap, ADS);
+  removeFromRunMapAndADS(runNumber, bank, m_fitParamsMap, ADS);
 }
 
 void EnggDiffFittingModel::setDifcTzero(

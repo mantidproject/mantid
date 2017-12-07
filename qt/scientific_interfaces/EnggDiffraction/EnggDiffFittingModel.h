@@ -33,6 +33,8 @@ public:
   std::string getWorkspaceFilename(const int runNumber,
                                    const size_t bank) const override;
 
+  void removeRun(const int runNumber, const size_t bank) override;
+
   void loadWorkspaces(const std::string &filenames) override;
 
   std::vector<std::pair<int, size_t>> getRunNumbersAndBankIDs() const override;

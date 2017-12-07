@@ -15,5 +15,7 @@ void export_FileLoaderRegistry() {
       .def("Instance", &FileLoaderRegistry::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FileLoaderRegistry singleton instance")
+      .def("chooseLoader", &FileLoaderRegistryImpl::chooseLoader,
+           (arg("self"), arg("file_path")), "Returns the winning algorithm")
       .staticmethod("Instance");
 }

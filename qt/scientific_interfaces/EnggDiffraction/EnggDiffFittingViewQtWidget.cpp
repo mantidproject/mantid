@@ -124,6 +124,10 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   // Tool-tip button
   connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
 
+  // Remove run button
+  connect(m_ui.pushButton_remove_run, SIGNAL(released()), this,
+          SLOT(removeRunClicked()));
+
   m_ui.dataPlot->setCanvasBackground(Qt::white);
   m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
   m_ui.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
@@ -243,6 +247,10 @@ void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
     QListWidgetItem *clickedItem) {
   const auto label = clickedItem->text();
   m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
+}
+
+void EnggDiffFittingViewQtWidget::removeRunClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::removeRun);
 }
 
 void EnggDiffFittingViewQtWidget::resetFittingMode() {
@@ -475,6 +483,14 @@ EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
 
 bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
   return m_ui.listWidget_fitting_run_num->selectedItems().size() != 0;
+}
+
+void EnggDiffFittingViewQtWidget::updateFittingListWidget(
+    const std::vector<std::string> &rows) {
+  clearFittingListWidget();
+  std::for_each(rows.begin(), rows.end(), [&](const std::string &rowLabel) {
+    this->addRunNoItem(rowLabel);
+  });
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(

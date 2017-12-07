@@ -558,6 +558,33 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
+  void test_removeRun() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
+        &mockView, std::move(mockModel), nullptr, nullptr);
+
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
+        .Times(1)
+        .WillOnce(Return(boost::optional<std::string>("123_1")));
+    EXPECT_CALL(*mockModel_ptr, removeRun(123, 1));
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::pair<int, size_t>>(
+            {std::make_pair(123, 2), std::make_pair(456, 1)})));
+    EXPECT_CALL(mockView, updateFittingListWidget(
+                              std::vector<std::string>({"123_2", "456_1"})));
+
+    pres.notify(IEnggDiffFittingPresenter::removeRun);
+
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
 private:
   std::unique_ptr<testing::NiceMock<MockEnggDiffFittingView>> m_view;
   std::unique_ptr<MantidQt::CustomInterfaces::EnggDiffFittingPresenter>
