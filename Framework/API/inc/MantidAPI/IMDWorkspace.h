@@ -170,6 +170,9 @@ public:
   // Check if this class is an instance of MDHistoWorkspace
   virtual bool isMDHistoWorkspace() const { return false; }
 
+  // Check if this class has an oriented lattice on a sample object
+  virtual bool hasOrientedLattice() const = 0;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;

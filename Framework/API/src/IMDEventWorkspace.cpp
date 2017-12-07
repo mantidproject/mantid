@@ -1,5 +1,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using Mantid::coord_t;
@@ -41,9 +43,17 @@ bool IMDEventWorkspace::threadSafe() const { return !this->isFileBacked(); }
 
 //-----------------------------------------------------------------------------------------------
 
-/**
+/** Returns true is any experiment info sample has an oriented lattice
  */
-const std::string IMDEventWorkspace::toString() const {
+ bool IMDEventWorkspace::hasOrientedLattice() const {
+   for (auto i = 0; i < MultipleExperimentInfos::getNumExperimentInfo(); i++) {
+     if (MultipleExperimentInfos::getExperimentInfo(i)->sample().hasOrientedLattice()) {
+       return true;
+     }
+   }
+   return false;
+ }
+ const std::string IMDEventWorkspace::toString() const {
   std::ostringstream os;
   os << IMDWorkspace::toString();
 

@@ -16,6 +16,7 @@
 
 #include <MantidAPI/FileProperty.h>
 #include <MantidAPI/IMDEventWorkspace.h>
+#include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/IPeaksWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
@@ -1054,13 +1055,11 @@ void QWorkspaceDockView::addClearMenuItems(QMenu *menu, const QString &wsName) {
 
 bool QWorkspaceDockView::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
-  auto alg = m_mantidUI->createAlgorithm("HasUB");
-
-  if (alg) {
-    alg->setLogging(false);
-    alg->setPropertyValue("Workspace", wsName);
-    executeAlgorithmAsync(alg, true);
-    hasUB = alg->getProperty("HasUB");
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+  IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  if (ws && wsIMD)
+  {
+    bool hasUB = wsIMD->hasOrientedLattice();
   }
   return hasUB;
 }

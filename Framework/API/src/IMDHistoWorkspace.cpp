@@ -1,4 +1,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
@@ -12,6 +14,15 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
+
+bool IMDHistoWorkspace::hasOrientedLattice() const {
+  for (auto i = 0; i < MultipleExperimentInfos::getNumExperimentInfo(); i++) {
+    if (MultipleExperimentInfos::getExperimentInfo(i)->sample().hasOrientedLattice()) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const std::string IMDHistoWorkspace::toString() const {
   std::ostringstream os;
