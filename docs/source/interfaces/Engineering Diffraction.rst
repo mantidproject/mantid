@@ -424,6 +424,11 @@ Peak* button should also be enabled. If the user choose to load the focus
 workspace or if fitting fails with the given peaks then the focused
 workspace will be plotted so that the user can select the peaks manually.
 
+If you've run a fit but you can't see the reconstructed peaks, make sure
+the checkbox **Plot fitted peaks** is checked - if the fit was successful,
+then clicking this should show the results. Equally, if you want to hide
+fitted peaks, just uncheck this box and they will disappear.
+
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
 near the peak's center.
