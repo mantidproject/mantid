@@ -284,7 +284,7 @@ void IndirectFitAnalysisTab::unFixSelectedItem() {
  * @param prop  The property to check for fixability.
  * @return      True if the property is fixable, False otherwise.
  */
-bool IndirectFitAnalysisTab::isFixable(QtProperty *prop) {
+bool IndirectFitAnalysisTab::isFixable(QtProperty const *prop) const {
   return prop->propertyManager() == m_dblManager;
 }
 
@@ -294,7 +294,7 @@ bool IndirectFitAnalysisTab::isFixable(QtProperty *prop) {
  * @param prop  The property to check.
  * @return      True if the property is fixed, False otherwise.
  */
-bool IndirectFitAnalysisTab::isFixed(QtProperty *prop) {
+bool IndirectFitAnalysisTab::isFixed(QtProperty const *prop) const {
   return prop->propertyManager() == m_stringManager;
 }
 
