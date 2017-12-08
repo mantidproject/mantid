@@ -498,19 +498,18 @@ private:
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
   }
 
-  // Some lists of commonly used input/output workspace names
-  std::vector<std::string> m_defaultInputWorkspaces = {"TestWorkspace"};
-
-  std::vector<std::string> m_defaultOutputWorkspaces = {
-      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345",
-      "IvsLam_TOF_12345",        "TOF_12345",
-      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346",
-      "IvsLam_TOF_12346",        "TOF_12346",
+  // A list of commonly used input/output workspace names
+  std::vector<std::string> m_defaultWorkspaces = {
+      "TestWorkspace",           "TOF_12345",      "TOF_12346",
+      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345", "IvsLam_TOF_12345",
+      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346", "IvsLam_TOF_12346",
       "IvsQ_TOF_12345_TOF_12346"};
 
-  std::vector<std::string> m_defaultOutputWorkspacesNoPreprocessing = {
-      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345", "IvsLam_TOF_12345", "12345",
-      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346", "IvsLam_TOF_12346", "12346",
+  // Same as above but input workspaces don't have TOF_ prefix
+  std::vector<std::string> m_defaultWorkspacesNoPrefix = {
+      "TestWorkspace",           "12345",          "12346",
+      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345", "IvsLam_TOF_12345",
+      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346", "IvsLam_TOF_12346",
       "IvsQ_TOF_12345_TOF_12346"};
 
   void checkWorkspacesExistInADS(std::vector<std::string> workspaceNames) {
@@ -520,9 +519,6 @@ private:
 
   void removeWorkspacesFromADS(std::vector<std::string> workspaceNames) {
     for (auto &ws : workspaceNames)
-      AnalysisDataService::Instance().remove(ws);
-
-    for (auto &ws : m_defaultOutputWorkspaces)
       AnalysisDataService::Instance().remove(ws);
   }
 
@@ -1132,9 +1128,8 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
-    removeWorkspacesFromADS(m_defaultInputWorkspaces);
-    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
+    checkWorkspacesExistInADS(m_defaultWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1168,7 +1163,7 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1211,9 +1206,8 @@ public:
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
-    removeWorkspacesFromADS(m_defaultInputWorkspaces);
-    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
+    checkWorkspacesExistInADS(m_defaultWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1260,7 +1254,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "1");
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
+    checkWorkspacesExistInADS(m_defaultWorkspaces);
     AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -1297,9 +1291,8 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
-    removeWorkspacesFromADS(m_defaultInputWorkspaces);
-    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
+    checkWorkspacesExistInADS(m_defaultWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1332,7 +1325,7 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
+    removeWorkspacesFromADS(m_defaultWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -2913,9 +2906,8 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspacesNoPreprocessing);
-    removeWorkspacesFromADS(m_defaultInputWorkspaces);
-    removeWorkspacesFromADS(m_defaultOutputWorkspacesNoPreprocessing);
+    checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);
+    removeWorkspacesFromADS(m_defaultWorkspacesNoPrefix);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -3068,9 +3060,8 @@ public:
         out->x(0)[3], 0.11248, 1e-5);
 
     // Check output and tidy up
-    checkWorkspacesExistInADS(m_defaultOutputWorkspacesNoPreprocessing);
-    removeWorkspacesFromADS(m_defaultInputWorkspaces);
-    removeWorkspacesFromADS(m_defaultOutputWorkspacesNoPreprocessing);
+    checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);
+    removeWorkspacesFromADS(m_defaultWorkspacesNoPrefix);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
