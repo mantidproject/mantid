@@ -173,7 +173,7 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
       const auto P2E = efficiencies.P2->e()[binIndex];
       const auto e1 = pow<2>(P1E * (2. * P1 - 1.) / pow<2>(f) * ppY[binIndex]);
       const auto e2 = pow<2>(P2E * (2. * P2 - 1.) / pow<2>(f) * ppY[binIndex]);
-      const auto e3 = ppE[binIndex] / pow<2>(f);
+      const auto e3 = pow<2>(ppE[binIndex] / f);
       const auto errorSum = std::sqrt(e1 + e2 + e3);
       ppEOut[binIndex] = errorSum;
     }
