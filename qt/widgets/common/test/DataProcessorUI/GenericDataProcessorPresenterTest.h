@@ -366,6 +366,19 @@ private:
     return ws;
   }
 
+  std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+  }
+
+  std::unique_ptr<GenericDataProcessorPresenterNoThread>
+  makeDefaultPresenterNoThread() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterNoThread>(
+        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+  }
+
   // Expect the view's widgets to be set in a particular state according to
   // whether processing or not
   void expectUpdateViewState(MockDataProcessorView &mockDataProcessorView,
@@ -535,16 +548,14 @@ public:
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
-    GenericDataProcessorPresenter presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+    auto presenter = makeDefaultPresenterNoThread();
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
     // Check that the presenter updates the whitelist adding columns 'Group' and
     // 'Options'
-    auto whitelist = presenter.getWhiteList();
+    auto whitelist = presenter->getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
     TS_ASSERT_EQUALS(whitelist.name(0), "Run(s)");
     TS_ASSERT_EQUALS(whitelist.name(7), "Options");
@@ -1113,18 +1124,14 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
+    auto presenter = makeDefaultPresenterNoThread();
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
-    // Now accept the views
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1142,7 +1149,7 @@ public:
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
@@ -1157,17 +1164,15 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-    presenter.skipProcessing();
+    presenter->skipProcessing();
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1185,7 +1190,7 @@ public:
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectCallResume(mockMainPresenter, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     removeWorkspacesFromADS(m_defaultOutputWorkspaces);
@@ -1198,18 +1203,16 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
     auto ws =
-        createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+        createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     ws->String(0, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1226,8 +1229,8 @@ public:
     expectGetProperties(mockMainPresenter, Exactly(2));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
-    presenter.notify(DataProcessorPresenter::SaveFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::SaveFlag);
 
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1250,20 +1253,18 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
     auto ws =
-        createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+        createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     ws->String(0, ThetaCol) = "";
     ws->String(0, ScaleCol) = "";
     ws->String(1, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1280,8 +1281,8 @@ public:
     expectGetProperties(mockMainPresenter, Exactly(2));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
-    presenter.notify(DataProcessorPresenter::SaveFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::SaveFlag);
 
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
         "TestWorkspace");
@@ -1305,15 +1306,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
     rowlist[0].insert(0);
@@ -1335,7 +1334,7 @@ public:
     expectGetProperties(mockMainPresenter, Exactly(2));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
@@ -1351,15 +1350,13 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1376,7 +1373,7 @@ public:
     expectGetProperties(mockMainPresenter, Exactly(2));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     removeWorkspacesFromADS(m_defaultOutputWorkspaces);
@@ -1469,13 +1466,11 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenterNoThread presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
+    auto presenter = makeDefaultPresenterNoThread();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-    auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
+    auto ws = createWorkspace("TestWorkspace", presenter->getWhiteList());
     TableRow row = ws->appendRow();
     row << "1"
         << "dataA"
@@ -1501,7 +1496,7 @@ public:
     createTOFWorkspace("dataB");
 
     expectGetWorkspace(mockDataProcessorView, Exactly(1));
-    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
     grouplist.insert(0);
@@ -1514,7 +1509,7 @@ public:
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
     expectGetProperties(mockMainPresenter, Exactly(2));
     expectCallResume(mockMainPresenter, Exactly(1));
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
     TS_ASSERT(
@@ -1542,12 +1537,6 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-  }
-
-  std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
   }
 
   void testBadWorkspaceType() {
