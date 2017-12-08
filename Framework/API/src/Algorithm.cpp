@@ -163,6 +163,11 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
   m_alwaysStoreInADS = doStore;
 }
 
+/** Returns true if we always store in the AnalysisDataService.
+ *  @return true if output is saved to the AnalysisDataService.
+ */
+bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
+
 /** Set whether the algorithm will rethrow exceptions
  * @param rethrow :: true if you want to rethrow exception.
  */
@@ -738,6 +743,20 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
                                                const int &version) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
+  setupAsChildAlgorithm(alg, startProgress, endProgress, enableLogging);
+  return alg;
+}
+
+/** Setup algorithm as child algorithm.
+ *
+ * Used internally by createChildAlgorithm. Arguments are as documented there.
+ * Can also be used manually for algorithms created otherwise. This allows
+ * running algorithms that are not declared into the factory as child
+ * algorithms. */
+void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
+                                      const double startProgress,
+                                      const double endProgress,
+                                      const bool enableLogging) {
   // set as a child
   alg->setChild(true);
   alg->setLogging(enableLogging);
@@ -746,8 +765,8 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   try {
     alg->initialize();
   } catch (std::runtime_error &) {
-    throw std::runtime_error("Unable to initialise Child Algorithm '" + name +
-                             "'");
+    throw std::runtime_error("Unable to initialise Child Algorithm '" +
+                             alg->name() + "'");
   }
 
   // If output workspaces are nameless, give them a temporary name to satisfy
@@ -778,8 +797,6 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
     m_ChildAlgorithms.push_back(weakPtr);
   }
-
-  return alg;
 }
 
 //=============================================================================================
@@ -1334,7 +1351,11 @@ bool Algorithm::processGroups() {
         // Set the property using the name of that workspace
         if (Property *prop =
                 dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
-          alg->setPropertyValue(prop->name(), ws->getName());
+          if (ws->getName().empty()) {
+            alg->setProperty(prop->name(), ws);
+          } else {
+            alg->setPropertyValue(prop->name(), ws->getName());
+          }
         } else {
           throw std::logic_error("Found a Workspace property which doesn't "
                                  "inherit from Property.");

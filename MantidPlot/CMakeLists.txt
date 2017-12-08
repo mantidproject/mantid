@@ -72,6 +72,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/MatrixSizeDialog.cpp
                    src/MatrixValuesDialog.cpp
                    src/MdiSubWindow.cpp
+                   src/MdPlottingCmapsProvider.cpp
                    src/MultiLayer.cpp
                    src/MultiPeakFit.cpp
                    src/MultiPeakFitTool.cpp
@@ -269,6 +270,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/MatrixSizeDialog.h
                    src/MatrixValuesDialog.h
                    src/MdiSubWindow.h
+                   src/MdPlottingCmapsProvider.h
                    src/MultiLayer.h
                    src/MultiPeakFit.h
                    src/MultiPeakFitTool.h
@@ -443,13 +445,13 @@ set( SRC_UNITY_IGNORE_FILES )
 # disabled. In order for VS2010 to to this correctly the second
 # custom command below is required along with the committed
 # src/sipqti.cpp.rule file.
-set ( MANTIDQTPYTHON_SIP_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython)
+set ( MANTIDQTPYTHON_SIP_INCLUDES -I ${CMAKE_CURRENT_BINARY_DIR}/../qt/python/mantidqtpython -I ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython )
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
-                          -I ${PYQT4_SIP_DIR} -I ${MANTIDQTPYTHON_SIP_DIR}  ${PYQT4_SIP_FLAGS}
+                          -I ${PYQT4_SIP_DIR} ${MANTIDQTPYTHON_SIP_INCLUDES}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
-                     DEPENDS src/qti.sip ${SIP_HDRS}
+                     DEPENDS src/qti.sip ${SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
 )
 
@@ -674,13 +676,12 @@ endif()
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 find_package ( QwtPlot3d REQUIRED )
 include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
-find_package ( QScintilla REQUIRED )
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+find_package ( QScintillaQt4 REQUIRED )
 
 ###########################################################################
 # Now create the target and add its dependencies and flags
@@ -689,20 +690,9 @@ include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
-
-include_directories ( src )
-include_directories ( src/lib/include )
-include_directories ( src/lib/3rdparty/qtcolorpicker/src )
-
-include_directories ( ../qt/widgets/common/inc )
-include_directories ( ../qt/widgets/instrumentview/inc )
-include_directories ( ../qt/widgets/sliceviewer/inc )
-include_directories ( ../qt/widgets/spectrumviewer/inc )
-include_directories ( ../qt/widgets/factory/inc )
-# ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/common )
-include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer )
-
+if ( MSVC )
+  add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
+endif ()
 
 ###########################################################################
 # Application icon files
@@ -787,30 +777,43 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
                                                         ${CONFIG_RESET_SCRIPT_FILE} ${IPYTHON_INSTALL_FILES}
 )
 
+target_include_directories ( MantidPlot PRIVATE
+  src
+  src/lib/include
+  src/lib/3rdparty/qtcolorpicker/src
+  ../qt/widgets/common/inc
+  ../qt/widgets/instrumentview/inc
+  ../qt/widgets/sliceviewer/inc
+  ../qt/widgets/spectrumviewer/inc
+  ../qt/widgets/factory/inc
+)
+
 # Library dependencies
-target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            ${CORE_MANTIDLIBS}
-            MantidQtWidgetsCommon
-            MantidQtWidgetsInstrumentView
-            MantidQtWidgetsSliceViewer
-            MantidQtWidgetsFactory
-            MantidQtWidgetsSpectrumViewer
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${GSL_LIBRARIES}
-            ${MUPARSER_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
-            ${QWTPLOT3D_LIBRARIES}
-            ${QSCINTILLA_LIBRARIES}
-            ${PYTHON_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-            ${OPENGL_LIBRARIES}
+target_link_libraries ( MantidPlot LINK_PRIVATE
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS}
+  MantidQtWidgetsCommonQt4
+  MantidQtWidgetsLegacyQwtQt4
+  MantidQtWidgetsFactoryQt4
+  MantidQtWidgetsInstrumentViewQt4
+  MantidQtWidgetsSliceViewerQt4
+  MantidQtWidgetsSpectrumViewerQt4
+  ${Boost_LIBRARIES}
+  ${POCO_LIBRARIES}
+  ${GSL_LIBRARIES}
+  ${MUPARSER_LIBRARIES}
+  ${QT_LIBRARIES}
+  Qwt5
+  ${QWTPLOT3D_LIBRARIES}
+  Qt4::Qscintilla
+  ${PYTHON_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${OPENGL_LIBRARIES}
 )
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
-  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering )
+  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
 
 if (WITH_ASAN)
@@ -823,6 +826,8 @@ add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
 endif ()
+
+set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
 
 ###########################################################################
 # Custom Info.plist file for OS X
@@ -888,55 +893,28 @@ if ( MAKE_VATES )
  list  ( APPEND MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
 endif ()
 
-if ( 0 )
-	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
-	message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
-	message (STATUS "Your CMAKE_BINARY_DIR string is '${CMAKE_BINARY_DIR}'")
-	message (STATUS "Your BIN_DIR string is '${BIN_DIR}'")
-	message (STATUS "Your CMAKE_LIBRARY_OUTPUT_DIRECTORY string is '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'")
-	message (STATUS "Your CMAKE_CFG_INTDIR string is '${CMAKE_CFG_INTDIR}'")
-	message (STATUS "Your CMAKE_CURRENT_BINARY_DIR string is '${CMAKE_CURRENT_BINARY_DIR}'")
+
+# Screenshots destination
+if ("$ENV{WORKSPACE}" STREQUAL "")
+  set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
+else ()
+  set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
 endif ()
 
+# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+# Make a ctest target for each file
+foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
+  # Add the test. Name of test = name of the file
+  add_test ( NAME ${PYFILE} COMMAND $<TARGET_FILE:MantidPlot> -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+  # Set the previously-built environment
+  set_tests_properties ( ${PYFILE} PROPERTIES
+    RUN_SERIAL 1
+    ENVIRONMENT "${TEST_ENVIRONMENT}"
+    TIMEOUT ${TESTING_TIMEOUT} )
+endforeach ()
 
-# Check system version
-if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
-  	# This is RHEL5. GUI tests hang on this platform for some reason
-  	message ( "RHEL5 hangs on GUI tests. Disabling MantidPlot python tests." )
-else ()
-	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
-	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
-
-	# Screenshots destination
-	if ("$ENV{WORKSPACE}" STREQUAL "")
-		set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
-	else ()
-		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
-	endif ()
-
-	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-
-	# Fixes for Darwin (MacOS)
-	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
-		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-	endif ()
-
-	# Make a ctest target for each file
-	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
-	 	# Add the test. Name of test = name of the file
-		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
-		# Set the previously-built environment
-		set_tests_properties ( ${PYFILE} PROPERTIES
-                           RUN_SERIAL 1
-                           ENVIRONMENT "${TEST_ENVIRONMENT}"
-                           TIMEOUT ${TESTING_TIMEOUT} )
-	endforeach ()
-
-    add_dependencies( GUITests MantidPlot )
-endif()
+add_dependencies( GUITests MantidPlot )
 
 ###########################################################################
 # Installation settings

@@ -38,20 +38,26 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
-class CreateVanadiumTest(stresstesting.MantidStressTest):
+class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
-    calibration_results = None
     existing_config = config['datasearch.directories']
+    focus_mode = None
 
     def requiredFiles(self):
         return _gen_required_files()
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration()
+        run_vanadium_calibration(focus_mode=self.focus_mode)
+
+    def skipTests(self):
+        # Don't actually run this test, as it is a dummy for the focus-mode-specific tests
+        return True
 
     def validate(self):
-        return calibration_validator(self.calibration_results)
+        self.tolerance = 0.05  # Required for difference in spline data between operating systems
+        return "PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode), \
+               "Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"
 
     def cleanup(self):
         try:
@@ -60,6 +66,34 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         finally:
             mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
+
+
+class CreateVanadiumAllTest(_CreateVanadiumTest):
+    focus_mode = "all"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumTransTest(_CreateVanadiumTest):
+    focus_mode = "trans"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumGroupsTest(_CreateVanadiumTest):
+    focus_mode = "groups"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumModsTest(_CreateVanadiumTest):
+    focus_mode = "mods"
+
+    def skipTests(self):
+        return False
 
 
 class FocusTest(stresstesting.MantidStressTest):
@@ -76,7 +110,33 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return focus_validation(self.focus_results)
+        self.tolerance = 1e-10  # Required for difference in spline data between operating systems
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
+class CreateCalTest(stresstesting.MantidStressTest):
+
+    calibration_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.calibration_results = run_create_cal()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        return "PRL98494_tt88_grouped", "ISIS_Powder-PEARL98494_grouped.nxs"
 
     def cleanup(self):
         try:
@@ -89,7 +149,8 @@ class FocusTest(stresstesting.MantidStressTest):
 
 def _gen_required_files():
     required_run_numbers = ["98472", "98485",  # create_van
-                            "98507", "98472_splined"]  # Focus (Si)
+                            "98507", "98472_splined",  # Focus (Si)
+                            "98494"]  # create_cal (Ce)
 
     # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
@@ -97,20 +158,19 @@ def _gen_required_files():
     return input_files
 
 
-def run_vanadium_calibration():
+def run_create_cal():
+    ceria_run = 98494
+    inst_obj = setup_inst_object(tt_mode="tt88", focus_mode="all")
+    return inst_obj.create_cal(run_number=ceria_run)
+
+
+def run_vanadium_calibration(focus_mode):
     vanadium_run = 98507  # Choose arbitrary run in the cycle 17_1
 
-    inst_obj = setup_inst_object(mode="tt70")
+    inst_obj = setup_inst_object(tt_mode="tt70", focus_mode=focus_mode)
 
     # Run create vanadium twice to ensure we get two different output splines / files
     inst_obj.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True)
-
-    # Check the spline looks good and was saved
-    if not os.path.exists(spline_path):
-        raise RuntimeError("Could not find output spline at the following path: " + spline_path)
-    splined_ws = mantid.Load(Filename=spline_path)
-
-    return splined_ws
 
 
 def run_focus():
@@ -124,45 +184,21 @@ def run_focus():
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
-    inst_object = setup_inst_object(mode="tt70")
+    inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
-                             perform_attenuation=True, attenuation_file_path=attenuation_path,
-                             focus_mode="Trans")
-
-
-def calibration_validator(results):
-    # Get the name of the grouped workspace list
-    reference_file_name = "ISIS_Powder-PEARL00098472_splined.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def focus_validation(results):
-    reference_file_name = "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
-
-
-def _compare_ws(reference_file_name, results):
-    ref_ws = mantid.Load(Filename=reference_file_name)
-
-    is_valid = True if len(results) > 0 else False
-
-    for ws, ref in zip(results, ref_ws):
-        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
-            is_valid = False
-            print (ws.getName() + " was not equal to: " + ref.getName())
-
-    return is_valid
+                             perform_attenuation=True, attenuation_file_path=attenuation_path)
 
 
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
 
-def setup_inst_object(mode):
+def setup_inst_object(tt_mode, focus_mode):
     user_name = "Test"
 
     inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=mode)
+                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=tt_mode,
+                     focus_mode=focus_mode)
     return inst_obj
 
 

@@ -596,7 +596,7 @@
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
   </instrument>
 
   <instrument name="IN5">
@@ -799,14 +799,14 @@
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="histo" address="localhost:56789" listener="ISISHistoDataListener" />
+      <connection name="histo" address="127.0.0.1:56789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
 
   <instrument name="ISIS_Event">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="event" address="localhost:59876" listener="ISISLiveEventDataListener" />
+      <connection name="event" address="127.0.0.1:59876" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
 

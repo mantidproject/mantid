@@ -108,7 +108,7 @@ protected:
                  Mantid::API::IFunction_sptr function);
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_sptr func);
+  createGuessWorkspace(Mantid::API::IFunction_sptr func, size_t wsIndex);
 
   std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
                                     const std::vector<double> &dataX);
@@ -117,6 +117,22 @@ protected:
   createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
                            const std::vector<double> &dataX,
                            const std::vector<double> &dataY);
+
+  Mantid::API::IFunction_sptr
+  createPopulatedFunction(const std::string &funcName,
+                          Mantid::API::IFunction_sptr comp, QtProperty *group,
+                          bool tie = false, const std::string &pref = "");
+
+  Mantid::API::IFunction_sptr
+  createPopulatedFunction(const std::string &funcName, QtProperty *group,
+                          bool tie = false, const std::string &pref = "");
+
+  void populateFunction(Mantid::API::IFunction_sptr func, QtProperty *group,
+                        bool tie = false, const std::string &pref = "");
+
+  void populateFunction(Mantid::API::IFunction_sptr func,
+                        Mantid::API::IFunction_sptr comp, QtProperty *group,
+                        bool tie = false, const std::string &pref = "");
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
@@ -154,6 +170,8 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
+  int m_guessSpectrum;
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;

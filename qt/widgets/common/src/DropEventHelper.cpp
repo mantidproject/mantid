@@ -1,9 +1,9 @@
-
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
+#include <QMimeData>
+#include <QFileInfo>
 #include <QStringList>
 #include <QUrl>
-#include <QFileInfo>
 
 // Compile on OSX only.
 #if defined(__APPLE__)

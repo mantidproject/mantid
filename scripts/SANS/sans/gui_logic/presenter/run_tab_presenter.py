@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService, FileFinder, WorkspaceFactory)
 from mantid.kernel import (Property)
@@ -20,6 +19,7 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
+from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
@@ -30,12 +30,14 @@ from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
                                        CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
                                        CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
                                        OPTIONS_SEPARATOR, OPTIONS_INDEX,
-                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
+                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX, USER_FILE_INDEX)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class RunTabPresenter(object):
@@ -58,6 +60,12 @@ class RunTabPresenter(object):
 
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
+
+        def on_data_changed(self):
+            self._presenter.on_data_changed()
+
+        def on_manage_directories(self):
+            self._presenter.on_manage_directories()
 
     def __init__(self, facility, view=None):
         super(RunTabPresenter, self).__init__()
@@ -90,6 +98,9 @@ class RunTabPresenter(object):
 
         # Masking table presenter
         self._masking_table_presenter = MaskingTablePresenter(self)
+
+        # Beam centre presenter
+        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
@@ -149,6 +160,9 @@ class RunTabPresenter(object):
             # Set appropriate view for the masking table presenter
             self._masking_table_presenter.set_view(self._view.masking_table)
 
+            # Set the appropriate view for the beam centre presenter
+            self._beam_centre_presenter.set_view(self._view.beam_centre)
+
     def on_user_file_load(self):
         """
         Loads the user file. Populates the models and the view.
@@ -159,7 +173,6 @@ class RunTabPresenter(object):
 
             if not user_file_path:
                 return
-
             # 2. Get the full file path
             user_file_path = FileFinder.getFullPath(user_file_path)
             if not os.path.exists(user_file_path):
@@ -175,13 +188,13 @@ class RunTabPresenter(object):
 
             # 4. Populate the model
             self._state_model = StateGuiModel(user_file_items)
-
             # 5. Update the views.
             self._update_view_from_state_model()
 
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
@@ -205,7 +218,6 @@ class RunTabPresenter(object):
             # 2. Read the batch file
             batch_file_parser = BatchCsvParser(batch_file_path)
             parsed_rows = batch_file_parser.parse_batch_file()
-
             # 3. Clear the table
             self._view.clear_table()
 
@@ -219,10 +231,20 @@ class RunTabPresenter(object):
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._settings_diagnostic_tab_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
                                    " to the Mantid search directories! See here for more details: {}".format(str(e)))
+
+    def on_data_changed(self):
+        # 1. Populate the selected instrument and the correct detector selection
+        self._setup_instrument_specific_settings()
+
+        # 2. Perform calls on child presenters
+        self._masking_table_presenter.on_update_rows()
+        self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def on_processed_clicked(self):
         """
@@ -244,7 +266,7 @@ class RunTabPresenter(object):
             states = self.get_states()
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   "has been loaded")
+                                   " has been loaded")
             property_manager_service = PropertyManagerService()
             property_manager_service.add_states_to_pmds(states)
 
@@ -254,12 +276,15 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
-        except:
+        except Exception as e:
             self._view.halt_process_flag()
-            raise
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_manage_directories(self):
+        self._view.show_directory_manager()
 
     def on_mask_file_add(self):
         """
@@ -281,6 +306,7 @@ class RunTabPresenter(object):
         # Make sure that the sub-presenters are up to date with this change
         self._masking_table_presenter.on_update_rows()
         self._settings_diagnostic_tab_presenter.on_update_rows()
+        self._beam_centre_presenter.on_update_rows()
 
     def _add_to_hidden_options(self, row, property_name, property_value):
         """
@@ -460,6 +486,7 @@ class RunTabPresenter(object):
         self._set_on_view("reduction_mode")
         self._set_on_view("event_slices")
         self._set_on_view("event_binning")
+        self._set_on_view("merge_mask")
 
         self._set_on_view("wavelength_step_type")
         self._set_on_view("wavelength_min")
@@ -484,6 +511,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
+        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -513,6 +541,12 @@ class RunTabPresenter(object):
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
+
+        # Beam Centre
+        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
+        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
 
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
@@ -610,6 +644,11 @@ class RunTabPresenter(object):
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
+    def _set_on_view_with_view(self, attribute_name, view):
+        attribute = getattr(self._state_model, attribute_name)
+        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+            setattr(view, attribute_name, attribute)
+
     def _get_state_model_with_view_update(self):
         """
         Goes through all sub presenters and update the state model based on the views.
@@ -622,7 +661,6 @@ class RunTabPresenter(object):
         # If we don't have a state model then return None
         if state_model is None:
             return state_model
-
         # Run tab view
         self._set_on_state_model("zero_error_free", state_model)
         self._set_on_state_model("save_types", state_model)
@@ -633,6 +671,9 @@ class RunTabPresenter(object):
         self._set_on_state_model("merge_shift_fit", state_model)
         self._set_on_state_model("merge_q_range_start", state_model)
         self._set_on_state_model("merge_q_range_stop", state_model)
+        self._set_on_state_model("merge_mask", state_model)
+        self._set_on_state_model("merge_max", state_model)
+        self._set_on_state_model("merge_min", state_model)
 
         # Settings tab
         self._set_on_state_model("reduction_dimensionality", state_model)
@@ -663,6 +704,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
+        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 
@@ -697,6 +739,10 @@ class RunTabPresenter(object):
         self._set_on_state_model("phi_limit_use_mirror", state_model)
         self._set_on_state_model("radius_limit_min", state_model)
         self._set_on_state_model("radius_limit_max", state_model)
+
+        # Beam Centre
+        self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
+        self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
 
         return state_model
 
@@ -795,6 +841,7 @@ class RunTabPresenter(object):
             can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
             can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
             output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
+            user_file = self._view.get_cell(row=row, column=USER_FILE_INDEX, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -815,6 +862,7 @@ class RunTabPresenter(object):
                                                 can_direct=can_direct,
                                                 can_direct_period=can_direct_period,
                                                 output_name=output_name,
+                                                user_file = user_file,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -839,17 +887,31 @@ class RunTabPresenter(object):
         for row in rows:
             self.sans_logger.information("Generating state for row {}".format(row))
             if not self.is_empty_row(row):
-                try:
-                    state = gui_state_director.create_state(row)
-                    states.update({row: state})
-                except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                           "been added to the Mantid search directories! See here for more "
-                                           "details: {}".format(row, str(e)))
-                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                                       "been added to the Mantid search directories! See here for more "
-                                       "details: {}".format(row, str(e)))
+                row_user_file = table_model.get_row_user_file(row)
+                if row_user_file:
+                    user_file_path = FileFinder.getFullPath(row_user_file)
+                    if not os.path.exists(user_file_path):
+                        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
+                                           " has been specified.".format(user_file_path))
+
+                    user_file_reader = UserFileReader(user_file_path)
+                    user_file_items = user_file_reader.read_user_file()
+
+                    row_state_model = StateGuiModel(user_file_items)
+                    row_gui_state_director = GuiStateDirector(table_model, row_state_model, self._facility)
+                    self._create_row_state(row_gui_state_director, states, row)
+                else:
+                    self._create_row_state(gui_state_director, states, row)
         return states
+
+    def _create_row_state(self, director, states, row):
+        try:
+            state = director.create_state(row)
+            states.update({row: state})
+        except (ValueError, RuntimeError) as e:
+            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                               "been added to the Mantid search directories! See here for more "
+                               "details: {}".format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """

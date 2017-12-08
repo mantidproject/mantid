@@ -7,8 +7,11 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -308,6 +311,29 @@ std::map<std::string, std::string> PDCalibration::validateInputs() {
   return messages;
 }
 
+namespace {
+
+bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
+  const auto columnNames = table->getColumnNames();
+  return (std::find(columnNames.begin(), columnNames.end(),
+                    std::string("dasid")) != columnNames.end());
+}
+
+/// @return Conversion factor or 1. if it is unknown
+double getWidthToFWHM(const std::string &peakshape) {
+  if (peakshape == "Gaussian") {
+    return 2 * std::sqrt(2. * std::log(2.));
+  } else if (peakshape == "Lorentzian") {
+    return 2.;
+  } else if (peakshape == "BackToBackExponential") {
+    return 1.; // TODO the conversion isn't document in the function
+  } else {
+    return 1.;
+  }
+}
+
+} //  end of anonymous namespace
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -401,6 +427,13 @@ void PDCalibration::exec() {
       m_uncalibratedWS->getInstrument());
   setProperty("MaskWorkspace", maskWS);
 
+  const std::string peakFunction = getProperty("PeakFunction");
+  const double WIDTH_TO_FWHM = getWidthToFWHM(peakFunction);
+  if (WIDTH_TO_FWHM == 1.) {
+    g_log.notice() << "Unknown conversion for \"" << peakFunction
+                   << "\", found peak widths and resolution should not be "
+                      "directly compared to delta-d/d";
+  }
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
@@ -428,7 +461,7 @@ void PDCalibration::exec() {
     alg->setProperty("FitWindows", peaks.inTofWindows);
     alg->setProperty<int>("FWHM", getProperty("FWHM"));
     alg->setProperty<int>("Tolerance", getProperty("Tolerance"));
-    alg->setProperty<std::string>("PeakFunction", getProperty("PeakFunction"));
+    alg->setProperty<std::string>("PeakFunction", peakFunction);
     alg->setProperty<std::string>("BackgroundType",
                                   getProperty("BackgroundType"));
     alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
@@ -512,7 +545,8 @@ void PDCalibration::exec() {
         const double temp = m_peaksInDspacing[i] - dspacing;
         chisq += (temp * temp);
         m_peakPositionTable->cell<double>(rowNum, i + 1) = dspacing;
-        m_peakWidthTable->cell<double>(rowNum, i + 1) = width_vec_full[i];
+        m_peakWidthTable->cell<double>(rowNum, i + 1) =
+            WIDTH_TO_FWHM * converter(width_vec_full[i]);
         m_peakHeightTable->cell<double>(rowNum, i + 1) = height_vec_full[i];
       }
       m_peakPositionTable->cell<double>(rowNum, m_peaksInDspacing.size() + 1) =
@@ -537,6 +571,9 @@ void PDCalibration::exec() {
   m_calibrationTable = sortTableWorkspace(m_peakWidthTable);
   m_calibrationTable = sortTableWorkspace(m_peakHeightTable);
 
+  // a derived table from the position and width
+  auto resolutionWksp = calculateResolutionTable();
+
   // set the diagnostic workspaces out
   const std::string partials_prefix = getPropertyValue("DiagnosticWorkspaces");
   auto diagnosticGroup = boost::make_shared<API::WorkspaceGroup>();
@@ -549,6 +586,9 @@ void PDCalibration::exec() {
   API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_height",
                                                     m_peakHeightTable);
   diagnosticGroup->addWorkspace(m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(
+      partials_prefix + "_resolution", resolutionWksp);
+  diagnosticGroup->addWorkspace(resolutionWksp);
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
@@ -905,15 +945,6 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   return wksp;
 }
 
-namespace {
-
-bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
-  const auto columnNames = table->getColumnNames();
-  return (std::find(columnNames.begin(), columnNames.end(),
-                    std::string("dasid")) != columnNames.end());
-}
-}
-
 void PDCalibration::loadOldCalibration() {
   // load the old one
   std::string filename = getProperty("PreviousCalibration");
@@ -1056,6 +1087,52 @@ void PDCalibration::createInformationWorkspaces() {
       newHeightRow << std::nan("");
     }
   }
+}
+
+API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
+  DataObjects::SpecialWorkspace2D_sptr resolutionWksp =
+      boost::make_shared<DataObjects::SpecialWorkspace2D>(
+          m_uncalibratedWS->getInstrument());
+  resolutionWksp->setTitle("average width/height");
+
+  // assume both tables have the same number of rows b/c the algorithm created
+  // both
+  // they are also in the same order
+  // accessing cells is done by (row, col)
+  const size_t numRows = m_peakPositionTable->rowCount();
+  const size_t numPeaks = m_peaksInDspacing.size();
+  std::vector<double> resolution; // vector of non-nan resolutions
+  for (size_t rowIndex = 0; rowIndex < numRows; ++rowIndex) {
+    resolution.clear();
+    // first column is detid
+    const detid_t detId =
+        static_cast<detid_t>(m_peakPositionTable->Int(rowIndex, 0));
+    for (size_t peakIndex = 1; peakIndex < numPeaks + 1; ++peakIndex) {
+      const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
+      if (std::isnormal(pos)) {
+        resolution.push_back(m_peakWidthTable->Double(rowIndex, peakIndex) /
+                             pos);
+      }
+    }
+
+    if (resolution.empty()) {
+      resolutionWksp->setValue(detId, 0.,
+                               0.); // instrument view doesn't like nan
+    } else {
+      // calculate the mean
+      const double mean =
+          std::accumulate(resolution.begin(), resolution.end(), 0.) /
+          static_cast<double>(resolution.size());
+      double stddev = 0.;
+      for (const auto value : resolution) {
+        stddev += (value - mean) * (value * mean);
+      }
+      stddev = std::sqrt(stddev / static_cast<double>(resolution.size() - 1));
+      resolutionWksp->setValue(detId, mean, stddev);
+    }
+  }
+
+  return resolutionWksp;
 }
 
 API::ITableWorkspace_sptr

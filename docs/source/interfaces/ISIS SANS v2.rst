@@ -60,10 +60,43 @@ Data Table
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **9** | **Select instrument**    | Selects the instrument to use. Note that this setting is used to resolve run numbers.   |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **10**| **Options**              | This column allows the user to provide row specific settings. Currently only            |
-|       |                          | **WavelengthMin** and **WavelengthMax** can be set here.                                |
+| **10**| **Unused Functionality** | These icons are not used                                                                |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 
+Columns
+^^^^^^^
+
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleScatter**        |   Scatter data file to use. This is the only mandatory field                                    |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **ssp**                  |   Sample scatter period, if not specified all periods will be used (where applicable)           |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleTrans**          |   Transmission data file to use.                                                                |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **stp**                  |   Sample scatter period, if not specified all periods will be used (where applicable)           |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **SampleDirect**         |   Direct data file to use                                                                       |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **sdp**                  |   Sample direct period, if not specified all periods will be used (where applicable)            |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanScatter**           |   Scatter datafile for can run                                                                  |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **csp**                  |   Can scatter period, if not specified all periods will be used (where applicable)              |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanTrans**             |   Transmission datafile for can run                                                             |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **ctp**                  |   Can transmission period, if not specified all periods will be used (where applicable)         |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **CanDirect**            |   Direct datafile for can run                                                                   |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **OutputName**           |   Name of output workspace                                                                      |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
+|                          |   otherwise the default file will be used.                                                      |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
+|                          |   and WavelengthMax can be set here.                                                            |
++--------------------------+-------------------------------------------------------------------------------------------------+
 
 Save Options
 ^^^^^^^^^^^^
@@ -132,21 +165,22 @@ General
    :width: 800px
 
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **1** | **Reduction dimensionality** | Allows the user to choose either a 1D or 2D reduction                                        |
-+-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **2** | **Reduction mode**           | The user can choose to either perform a reduction on the low angle bank (**LAB**),           |
+| **1** | **Reduction mode**           | The user can choose to either perform a reduction on the low angle bank (**LAB**),           |
 |       |                              | the high angle bank (**HAB**), on both (**Both**) or she can perform a merged (**Merged**).  |
 |       |                              | If a merged reduction is enabled, then further settings are required (see below).            |
 |       |                              | A merged reduction essentially means that the reduced result from the                        |
 |       |                              | low angle bank and the high angle bank are stitched together.                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **3** | **Merge scale**              | Sets the scale of a merged reduction. If the **Fit** check-box is enabled, then this scale is|
+| **2** | **Merge scale**              | Sets the scale of a merged reduction. If the **Fit** check-box is enabled, then this scale is|
 |       |                              | being fitted.                                                                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **4** | **Merge shift**              | Sets the shift of a merged reduction. If the **Fit** check-box is enabled, then this shift is|
+| **3** | **Merge shift**              | Sets the shift of a merged reduction. If the **Fit** check-box is enabled, then this shift is|
 |       |                              | being fitted.                                                                                |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
-| **5** | **Merge custom q range**     | Describes the q region which should be used to determine the merge parameters.               |
+| **4** | **Merge fit custom q range** | Describes the q region which should be used to determine the merge parameters.               |
++-------+------------------------------+----------------------------------------------------------------------------------------------+
+| **5** | **Merge custom q range**     | Describes the q region in which the merged data should be used. Outside of this region the   |                            
+|       |                              | uncombined **HAB** or **LAB** data is used.                                                  |
 +-------+------------------------------+----------------------------------------------------------------------------------------------+
 
 Event Slice
@@ -448,7 +482,8 @@ Fit settings
 +-------+--------------------------+------------------------------------------------------------------------------------------------+
 | **5** | **Custom wavelength**    | A custom wavelength range for the fit can be specified here.                                   |
 +-------+--------------------------+------------------------------------------------------------------------------------------------+
-
+| **6** | **Show Transmission**    | Controls whether the transmission workspaces are output during reduction.                      |
++-------+--------------------------+------------------------------------------------------------------------------------------------+
 
 Adjustment files
 ~~~~~~~~~~~~~~~~
@@ -602,6 +637,46 @@ Note that the settings are logically grouped by significant stages in the reduct
 | **wavelength**    | This group contains information about the wavelength conversion.                               |
 +-------------------+---------------------------+--------------------------------------------------------------------+
 
+Beam centre tab
+---------------
+
+.. image::  ../images/sans_isis_v2_beam_centre_tab.png
+   :align: right
+   :width: 800px
+
+.. _Beam:
+
+The beam centre tab allows the position of the beam centre to be set either manually by the user or by running the beam centre
+finder.
+
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **1** | **Centre Position LAB**  | The centre position of the low angle bank. The first coordinate is horizontal           |
+|       |                          | and the second vertical. These boxes are populated by the user file and the values here |
+|       |                          | are used by the reduction.                                                              |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Centre Position HAB**  | The centre position of the high angle bank. The first coordinate is horizontal          |
+|       |                          | and the second vertical. These boxes are populated by the user file and the values here |
+|       |                          | are used by the reduction.                                                              | 
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **3** | **Minimum radius limit** | The minimum radius of the region used to ascertain centre position.                     |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **4** | **Maximum radius limit** | The maximum radius of the region used to ascertain centre position.                     |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **5** | **Max iterations**       | The maximum number of iterations the algorithm will perform before concluding its       |
+|       |                          | search.                                                                                 |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **6** | **Tolerance**            | If the centre position moves by less than this in an iteration the algorithm will       |
+|       |                          | conclude its search.                                                                    |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **7** | **Left/Right**           | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | left/right direction.                                                                   |   
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **8** | **Up/Down**              | Controls whether the beam centre finder searches for the centre in the                  |
+|       |                          | up/down direction.                                                                      |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **9** | **Run**                  | Runs the beam centre finder the boxes **1** and **2** are updated with new              |
+|       |                          | values upon completion.                                                                 |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------

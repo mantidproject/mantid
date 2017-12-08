@@ -117,9 +117,14 @@ void QDataProcessorWidget::createTable() {
 
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
-  header->setMovable(true);
   header->setStretchLastSection(true);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setMovable(true);
   header->setResizeMode(QHeaderView::ResizeToContents);
+#else
+  header->setSectionsMovable(true);
+  header->setSectionResizeMode(QHeaderView::ResizeToContents);
+#endif
   ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes
@@ -183,6 +188,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
   connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),

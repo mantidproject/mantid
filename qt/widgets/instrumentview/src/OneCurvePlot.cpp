@@ -1,12 +1,12 @@
 #include "MantidQtWidgets/InstrumentView/OneCurvePlot.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
+#include <MantidQtWidgets/LegacyQwt/qwt_compat.h>
 #include <qwt_plot_curve.h>
 #include <qwt_scale_div.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
-#include <MantidQtWidgets/Common/qwt_compat.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_scale_widget.h>
 
