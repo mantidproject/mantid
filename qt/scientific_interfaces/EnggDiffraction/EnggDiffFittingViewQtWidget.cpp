@@ -488,9 +488,10 @@ bool EnggDiffFittingViewQtWidget::listWidgetHasSelectedRow() const {
 void EnggDiffFittingViewQtWidget::updateFittingListWidget(
     const std::vector<std::string> &rows) {
   clearFittingListWidget();
-  std::for_each(rows.begin(), rows.end(), [&](const std::string &rowLabel) {
+
+  for (const auto &rowLabel : rows) {
     this->addRunNoItem(rowLabel);
-  });
+  }
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
