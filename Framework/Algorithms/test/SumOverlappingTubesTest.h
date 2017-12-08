@@ -54,9 +54,11 @@ public:
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
 
-    testWS->getInstrument()->getParameterMap()->addBool(
-        testWS->getInstrument()->getBaseComponent(), "mirror_detector_angles",
-        mirrorOutput);
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addBool(testWS->getInstrument()->getBaseComponent(),
+                          "mirror_detector_angles", mirrorOutput);
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "tube-1");
     return testWS;
   }
 
@@ -85,6 +87,10 @@ public:
     // This has to be added to the ADS so that it can be used with the string
     // validator used in the algorithm.
     AnalysisDataService::Instance().add("testWS", testWS);
+
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "tube-1");
 
     return testWS;
   }
@@ -160,7 +166,8 @@ public:
     }
   }
 
-  void test_normal_operation_with_component_specified() {
+  void
+  test_normal_operation_with_component_specified_in_instrument_parameters() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
     SumOverlappingTubes alg;
@@ -168,7 +175,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -185,7 +191,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -230,7 +235,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "-90.0, 22.5, 0.0");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -242,13 +246,16 @@ public:
   void test_non_existent_component() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
+    auto parameterMap = testWS->getInstrument()->getParameterMap();
+    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                            "detector_for_height_axis", "not_a_component");
+
     SumOverlappingTubes alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "not_a_component");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
                             std::string(e.what()),
                             "Component not_a_component could not be found.");
@@ -298,7 +305,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase(6.0);
@@ -316,7 +322,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -343,7 +348,6 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("CropNegativeScatteringAngles", true);
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -391,7 +395,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -436,7 +439,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("ScatteringAngleTolerance", "0.3");
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -463,7 +465,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -489,7 +490,6 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -547,8 +547,6 @@ public:
     alg.setProperty("ScatteringAngleBinning", "22.5");
     if (explicitHeightAxis)
       alg.setProperty("HeightAxis", "0.0, 0.0135");
-    else
-      alg.setProperty("ComponentForHeightAxis", "tube-1");
     alg.setProperty("Normalise", false);
     if (oneDimensional)
       alg.setProperty("OutputType", "1DStraight");

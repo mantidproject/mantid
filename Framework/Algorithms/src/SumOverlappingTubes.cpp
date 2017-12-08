@@ -58,12 +58,6 @@ void SumOverlappingTubes::init() {
       make_unique<PropertyWithValue<bool>>("CropNegativeScatteringAngles",
                                            false, Direction::Input),
       "If true the negative scattering angles are cropped (ignored).");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
-                      "ComponentForHeightAxis", "tube_1", Direction::Input),
-                  "The name of the component to use for the height axis, that "
-                  "is the name of a PSD tube to be used. If specifying this "
-                  "then there is no need to give a value for the HeightBinning "
-                  "option.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
           "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
@@ -85,24 +79,6 @@ void SumOverlappingTubes::init() {
   declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
-}
-
-std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
-  std::map<std::string, std::string> result;
-
-  const std::string componentForHeightAxis =
-      getProperty("ComponentForHeightAxis");
-  const std::string heightAxis = getProperty("HeightAxis");
-
-  if (componentForHeightAxis.empty() && heightAxis.empty()) {
-    std::string message =
-        "Either a component, such as a tube, must be specified "
-        "to get the height axis, or the binning given explicitly.";
-    result["ComponentForHeightAxis"] = message;
-    result["HeightAxis"] = message;
-  }
-
-  return result;
 }
 
 void SumOverlappingTubes::exec() {
@@ -155,20 +131,25 @@ void SumOverlappingTubes::getInputParameters() {
   m_workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
 
   m_outputType = getPropertyValue("OutputType");
+  const auto &instrument = m_workspaceList.front()->getInstrument();
 
   // For D2B at the ILL the detectors are flipped when comparing with other
   // powder diffraction instruments such as D20. It is still desired to show
   // angles as positive however, so here we check if we need to multiple angle
   // calculations by -1.
   m_mirrorDetectors = 1;
-  auto mirrorDetectors =
-      m_workspaceList.front()->getInstrument()->getBoolParameter(
-          "mirror_detector_angles");
+  auto mirrorDetectors = instrument->getBoolParameter("mirror_detector_angles");
   if (!mirrorDetectors.empty() && mirrorDetectors[0])
     m_mirrorDetectors = -1;
 
+  std::string componentName = "";
+  auto componentNameParam =
+      instrument->getStringParameter("detector_for_height_axis");
+  if (!componentNameParam.empty())
+    componentName = componentNameParam[0];
+
   getScatteringAngleBinning();
-  getHeightAxis();
+  getHeightAxis(componentName);
 }
 
 void SumOverlappingTubes::getScatteringAngleBinning() {
@@ -222,9 +203,12 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
                       << m_endScatteringAngle << "\n";
 }
 
-void SumOverlappingTubes::getHeightAxis() {
-  const std::string componentName = getProperty("ComponentForHeightAxis");
+void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
   std::vector<double> heightBinning = getProperty("HeightAxis");
+  if (componentName.length() == 0 && heightBinning.empty())
+    throw std::runtime_error("No detector_for_height_axis parameter for this "
+                             "instrument. Please enter a value for the "
+                             "HeightAxis parameter.");
   if (componentName.length() > 0 && heightBinning.empty()) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
