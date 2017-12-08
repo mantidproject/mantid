@@ -39,6 +39,7 @@ Core Functionality
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
 - Condition to check if a property is enabled when serializing.
+- Workspace locking no longer prevents simple the read operations required to display the workspace conext menu in Mantidplot.
 
 Performance
 -----------
