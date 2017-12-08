@@ -3,7 +3,6 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
-
 class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
     def runTest(self):
         MagnetismReflectometryReduction(RunNumbers=['24949',],
@@ -38,3 +37,15 @@ class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
+
+class MRInspectionTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        nxs_data = LoadEventNexus(Filename="/SNS/REF_M/IPTS-16196/0/24949/NeXus/REF_M_24949_event.nxs", #REF_M_24949", 
+                                  NXentryName="entry-Off_Off",
+                                  OutputWorkspace="r_24949")
+        MRInspectData(Workspace=nxs_data)
+
+    def validate(self):
+        # Simple test to verify that we flagged the data correctly
+        return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
+
