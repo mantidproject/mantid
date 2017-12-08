@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_OBJECT_H_
-#define MANTID_GEOMETRY_OBJECT_H_
+#ifndef MANTID_GEOMETRY_CSGOBJECT_H_
+#define MANTID_GEOMETRY_CSGOBJECT_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -276,4 +276,4 @@ protected:
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
 
-#endif /*MANTID_GEOMETRY_OBJECT_H_*/
+#endif /*MANTID_GEOMETRY_CSGOBJECT_H_*/
