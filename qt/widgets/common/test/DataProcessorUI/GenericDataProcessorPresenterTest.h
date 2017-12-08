@@ -480,6 +480,34 @@ private:
         .WillOnce(Return(answer));
   }
 
+  // Some lists of commonly used input/output workspace names
+  std::vector<std::string> m_defaultInputWorkspaces = {"TestWorkspace"};
+
+  std::vector<std::string> m_defaultOutputWorkspaces = {
+      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345",
+      "IvsLam_TOF_12345",        "TOF_12345",
+      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346",
+      "IvsLam_TOF_12346",        "TOF_12346",
+      "IvsQ_TOF_12345_TOF_12346"};
+
+  std::vector<std::string> m_defaultOutputWorkspacesNoPreprocessing = {
+      "IvsQ_binned_TOF_12345",   "IvsQ_TOF_12345", "IvsLam_TOF_12345", "12345",
+      "IvsQ_binned_TOF_12346",   "IvsQ_TOF_12346", "IvsLam_TOF_12346", "12346",
+      "IvsQ_TOF_12345_TOF_12346"};
+
+  void checkWorkspacesExistInADS(std::vector<std::string> workspaceNames) {
+    for (auto &ws : workspaceNames)
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(ws));
+  }
+
+  void removeWorkspacesFromADS(std::vector<std::string> workspaceNames) {
+    for (auto &ws : workspaceNames)
+      AnalysisDataService::Instance().remove(ws);
+
+    for (auto &ws : m_defaultOutputWorkspaces)
+      AnalysisDataService::Instance().remove(ws);
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created
   // statically
@@ -1116,31 +1144,10 @@ public:
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
-    // Check output workspaces were created as expected
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
+    removeWorkspacesFromADS(m_defaultInputWorkspaces);
+    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1181,16 +1188,7 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1239,31 +1237,10 @@ public:
     TS_ASSERT(ws->String(0, ThetaCol) != "");
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
-    // Check output workspaces were created as expected
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
+    removeWorkspacesFromADS(m_defaultInputWorkspaces);
+    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1316,22 +1293,8 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "22.5");
     TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "1");
 
-    // Check output workspaces were created as expected
-    // Check output workspaces were created as expected
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
-
-    // Tidy up
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
     AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -1374,31 +1337,10 @@ public:
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
-    // Check output workspaces were created as expected
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspaces);
+    removeWorkspacesFromADS(m_defaultInputWorkspaces);
+    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1437,16 +1379,7 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    removeWorkspacesFromADS(m_defaultOutputWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -2999,7 +2932,6 @@ public:
   /// Tests the reduction when no pre-processing algorithms are given
 
   void testProcessNoPreProcessing() {
-
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -3057,25 +2989,10 @@ public:
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
-    // Check output workspaces were created as expected
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("12346"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspacesNoPreprocessing);
+    removeWorkspacesFromADS(m_defaultInputWorkspaces);
+    removeWorkspacesFromADS(m_defaultOutputWorkspacesNoPreprocessing);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -3234,17 +3151,10 @@ public:
         "Logarithmic rebinning should have been applied, with param 0.04",
         out->x(0)[3], 0.11248, 1e-5);
 
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Check output and tidy up
+    checkWorkspacesExistInADS(m_defaultOutputWorkspacesNoPreprocessing);
+    removeWorkspacesFromADS(m_defaultInputWorkspaces);
+    removeWorkspacesFromADS(m_defaultOutputWorkspacesNoPreprocessing);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
