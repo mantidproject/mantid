@@ -256,12 +256,6 @@ void FitPropertyBrowser::init() {
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   initLayout(w);
-
-  using Mantid::API::FunctionFactory;
-  FunctionFactory::Instance().notificationCenter.addObserver(m_updateObserver);
-  connect(this, SIGNAL(functionFactoryUpdateReceived()), this,
-          SLOT(populateFunctionNames()));
-  FunctionFactory::Instance().enableNotifications();
 }
 
 /**
@@ -489,6 +483,14 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
   connect(this, SIGNAL(functionChanged()), SLOT(clearFitResultStatus()));
+
+  // Update available functions in this fit property browser, when the function
+  // factory changes.
+  using Mantid::API::FunctionFactory;
+  FunctionFactory::Instance().notificationCenter.addObserver(m_updateObserver);
+  connect(this, SIGNAL(functionFactoryUpdateReceived()), this,
+    SLOT(populateFunctionNames()));
+  FunctionFactory::Instance().enableNotifications();
 
   // Initial call, as function is not changed when it's created for the first
   // time
