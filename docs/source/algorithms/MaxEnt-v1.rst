@@ -216,6 +216,7 @@ and :ref:`algm-FFT` (right).
    # Do not change these numbers - they test if noise has been added to the alg    
    print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
    print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
+   
 Output:
 
 .. testoutput:: ExMUSR00022725
