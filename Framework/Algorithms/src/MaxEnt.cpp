@@ -151,9 +151,15 @@ void MaxEnt::init() {
           "DistancePenalty", 0.1, mustBeNonNegative, Direction::Input),
       "Distance penalty applied to the current image at each iteration.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
-                  "Maximum degree of non-parallelism between S and C.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "MaxAngle", 0.001, mustBeNonNegative, Direction::Input),
+      "Maximum degree of non-parallelism between S (the entropy) and C "
+      "(chi-squared). These needs to be parallel. Chosing a smaller "
+      "shouldn't change the output. However, if you find this is the "
+      "case please let the Mantid team know since this indicates that "
+      "the default value of this proporty may need changing or "
+      "other changes to this implementation are required.");
 
   mustBePositive = boost::make_shared<BoundedValidator<size_t>>();
   mustBePositive->setLower(1);
