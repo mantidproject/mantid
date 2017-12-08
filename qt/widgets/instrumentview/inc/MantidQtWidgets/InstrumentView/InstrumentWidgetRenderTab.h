@@ -57,6 +57,7 @@ public slots:
   void setMaxValue(double value, bool apply = true);
   void setRange(double minValue, double maxValue, bool apply = true);
   void showAxes(bool on);
+  void showVolumeRender(bool on);
   void displayDetectorsOnly(bool yes);
   void enableGL(bool on);
   void setColorMapAutoscaling(bool);
@@ -113,6 +114,7 @@ private:
   QAction *m_displayDetectorsOnly;
   QAction *m_wireframe;
   QAction *m_lighting;
+  QAction *m_volumeRender;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
   QAction *m_UCorrection;
   QActionGroup *m_precisionActionGroup;

@@ -7,6 +7,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Tolerance.h"
@@ -20,9 +21,112 @@
 using namespace Mantid::Geometry;
 
 namespace {
+
 /// static logger
 Mantid::Kernel::Logger g_log("PanelsSurface");
+
+/**
+ * Given the z axis, define the x and y ones.
+ * @param zaxis :: A given vector in 3d space to become the z axis of a
+ * coordinate system.
+ * @param xaxis :: An output arbitrary vector perpendicular to zaxis.
+ * @param yaxis :: An output arbitrary vector perpendicular to both zaxis and
+ * xaxis.
+ */
+void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
+                    Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) {
+  double R, theta, phi;
+  zaxis.getSpherical(R, theta, phi);
+  if (theta <= 45.0) {
+    xaxis = Mantid::Kernel::V3D(1, 0, 0);
+  } else if (phi <= 45.0) {
+    xaxis = Mantid::Kernel::V3D(0, 1, 0);
+  } else {
+    xaxis = Mantid::Kernel::V3D(0, 0, 1);
+  }
+  yaxis = zaxis.cross_prod(xaxis);
+  yaxis.normalize();
+  xaxis = yaxis.cross_prod(zaxis);
 }
+
+Mantid::Kernel::V3D
+calculateStructuredNormal(const Mantid::Geometry::ComponentInfo &componentInfo,
+                          size_t bankRoot) {
+  // Find norm using Bounding Box coords
+  auto boundingBox = componentInfo.boundingBox(bankRoot);
+  auto minPoint = boundingBox.minPoint();
+  auto maxPoint = boundingBox.maxPoint();
+
+  auto p0 = Mantid::Kernel::V3D(minPoint.X(), minPoint.Y(), 0);
+  auto p1 = Mantid::Kernel::V3D(maxPoint.X(), maxPoint.Y(), 0);
+  auto p2 = Mantid::Kernel::V3D(minPoint.X(), maxPoint.Y(), 0);
+  auto p3 = Mantid::Kernel::V3D(maxPoint.X(), minPoint.Y(), 0);
+
+  Mantid::Kernel::V3D xaxis = p1 - p0;
+  Mantid::Kernel::V3D yaxis = p3 - p0;
+  Mantid::Kernel::V3D normal = xaxis.cross_prod(yaxis);
+  normal.normalize();
+  return normal;
+}
+
+std::pair<QList<ComponentID>, Mantid::Kernel::V3D>
+searchFlatPanels(const ComponentInfo &componentInfo,
+                 const DetectorInfo &detectorInfo, size_t rootIndex,
+                 const std::vector<size_t> &children,
+                 std::vector<bool> &visited) {
+  Mantid::Kernel::V3D normal;
+  bool structuredNormalFound = false;
+  if (componentInfo.isStructuredBank(rootIndex)) {
+    normal = calculateStructuredNormal(componentInfo, rootIndex);
+    structuredNormalFound = true;
+  }
+
+  QList<ComponentID> detectors;
+  Mantid::Kernel::V3D pos0;
+  Mantid::Kernel::V3D x, y;
+  bool normalFound = false;
+
+  for (auto child : children) {
+    if (visited[child])
+      continue;
+    visited[child] = true;
+
+    if (detectorInfo.isMonitor(child))
+      continue;
+    if (!structuredNormalFound) {
+      Mantid::Kernel::V3D pos = detectorInfo.position(child);
+      if (child == children[0])
+        pos0 = pos;
+      else if (child == children[1]) {
+        // at first set the normal to an argbitrary vector orthogonal to
+        // the line between the first two detectors
+        y = pos - pos0;
+        y.normalize();
+        setupBasisAxes(y, normal, x);
+      } else if (fabs(normal.scalar_prod(pos - pos0)) >
+                 Mantid::Kernel::Tolerance) {
+        if (!normalFound) {
+          // when first non-colinear detector is found set the normal
+          x = pos - pos0;
+          x.normalize();
+          normal = x.cross_prod(y);
+          normal.normalize();
+          x = y.cross_prod(normal);
+          normalFound = true;
+        } else {
+          // TODO: Replace somehow with componentInfo name method.
+          /*g_log.warning() << "Assembly " << componentInfo->name(rootIndex)
+          << " isn't flat.\n";*/
+          break;
+        }
+      }
+    }
+    detectors << componentInfo.componentID(child)->getComponentID();
+  }
+  return std::make_pair(detectors, normal);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -72,9 +176,10 @@ void PanelsSurface::init() {
 
   // Pre-calculate all the detector positions (serial because
   // I suspect the IComponent->getPos() method to not be properly thread safe)
-  m_instrActor->cacheDetPos();
+  //m_instrActor->cacheDetPos();
 
-  findFlatBanks();
+  //findFlatBanks();
+  constructFromComponentInfo();
   spreadBanks();
 
   RectF surfaceRect;
@@ -117,31 +222,6 @@ void PanelsSurface::setupAxes() {
   setupBasisAxes(m_zaxis, m_xaxis, m_yaxis);
   m_origin.rx() = m_xaxis.scalar_prod(m_pos);
   m_origin.ry() = m_yaxis.scalar_prod(m_pos);
-}
-
-/**
-* Given the z axis, define the x and y ones.
-* @param zaxis :: A given vector in 3d space to become the z axis of a
-* coordinate system.
-* @param xaxis :: An output arbitrary vector perpendicular to zaxis.
-* @param yaxis :: An output arbitrary vector perpendicular to both zaxis and
-* xaxis.
-*/
-void PanelsSurface::setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
-                                   Mantid::Kernel::V3D &xaxis,
-                                   Mantid::Kernel::V3D &yaxis) const {
-  double R, theta, phi;
-  zaxis.getSpherical(R, theta, phi);
-  if (theta <= 45.0) {
-    xaxis = Mantid::Kernel::V3D(1, 0, 0);
-  } else if (phi <= 45.0) {
-    xaxis = Mantid::Kernel::V3D(0, 1, 0);
-  } else {
-    xaxis = Mantid::Kernel::V3D(0, 0, 1);
-  }
-  yaxis = zaxis.cross_prod(xaxis);
-  yaxis.normalize();
-  xaxis = yaxis.cross_prod(zaxis);
 }
 
 //-----------------------------------------------------------------------------------------------//
@@ -459,6 +539,25 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
   // add the detectors
   if (!detectors.isEmpty()) {
     addFlatBankOfDetectors(bankId, normal, detectors);
+  }
+}
+
+void PanelsSurface::constructFromComponentInfo() {
+  const auto componentInfo = m_instrActor->getComponentInfo();
+  std::vector<bool> visited(componentInfo.size(), false);
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    auto children = componentInfo.detectorsInSubtree(i);
+    
+    if (children.size() > 1) {
+      auto res = searchFlatPanels(componentInfo, detectorInfo, i, children, visited);
+      auto detectors = res.first;
+      auto normal = res.second;
+      if (!detectors.isEmpty())
+        addFlatBankOfDetectors(componentInfo.componentID(i)->getComponentID(),
+                               normal, detectors);
+    }
   }
 }
 

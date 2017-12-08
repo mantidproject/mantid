@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
 #include "MantidQtWidgets/InstrumentView/StructuredDetectorActor.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -15,9 +16,11 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -49,33 +52,44 @@ struct Sqrt {
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
-* Constructor. Creates a tree of GLActors. Each actor is responsible for
-* displaying insrument components in 3D.
-* Some of the components have "pick ID" assigned to them. Pick IDs can be
-* uniquely converted to a RGB colour value
-* which in turn can be used for picking the component from the screen.
-* @param wsName :: Workspace name
-* @param autoscaling :: True to start with autoscaling option on. If on the min
-* and max of
-*   the colormap scale are defined by the min and max of the data.
-* @param scaleMin :: Minimum value of the colormap scale. Used to assign
-* detector colours. Ignored if autoscaling == true.
-* @param scaleMax :: Maximum value of the colormap scale. Used to assign
-* detector colours. Ignored if autoscaling == true.
-*/
+ * Constructor. Creates a tree of GLActors. Each actor is responsible for
+ * displaying insrument components in 3D.
+ * Some of the components have "pick ID" assigned to them. Pick IDs can be
+ * uniquely converted to a RGB colour value
+ * which in turn can be used for picking the component from the screen.
+ * @param wsName :: Workspace name
+ * @param autoscaling :: True to start with autoscaling option on. If on the min
+ * and max of
+ *   the colormap scale are defined by the min and max of the data.
+ * @param scaleMin :: Minimum value of the colormap scale. Used to assign
+ * detector colours. Ignored if autoscaling == true.
+ * @param scaleMax :: Maximum value of the colormap scale. Used to assign
+ * detector colours. Ignored if autoscaling == true.
+ */
 InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
                                  double scaleMin, double scaleMax)
     : m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString())),
-      m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(),
-      m_maskedColor(100, 100, 100), m_failedColor(200, 200, 200) {
+      m_ragged(true), m_autoscaling(autoscaling), m_volumeRender(false),
+      m_defaultPos(), m_maskedColor(100, 100, 100),
+      m_failedColor(200, 200, 200) {
   // settings
   loadSettings();
 
   auto sharedWorkspace = m_workspace.lock();
+
   if (!sharedWorkspace)
     throw std::logic_error(
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
+
+  const auto &componentInfo = sharedWorkspace->componentInfo();
+  const auto &detectorInfo = sharedWorkspace->detectorInfo();
+
+  m_isCompVisible.assign(componentInfo.size(), true);
+  m_pickColors.resize(componentInfo.size());
+
+  for (size_t i = 0; i < componentInfo.size(); ++i)
+    m_pickColors[i] = makePickColor(i);
 
   // set up the color map
   if (!m_currentColorMapFilename.isEmpty()) {
@@ -90,8 +104,9 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   const int nelements = instrument->nelements();
-  if ((nelements == 0) || (nelements == 1 && (instrument->getSource() ||
-                                              instrument->getSample())) ||
+  if ((nelements == 0) ||
+      (nelements == 1 &&
+       (instrument->getSource() || instrument->getSample())) ||
       (nelements == 2 && instrument->getSource() && instrument->getSample())) {
     QMessageBox::warning(nullptr, "MantidPlot - Warning",
                          "This instrument appears to contain no detectors",
@@ -100,28 +115,42 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // this adds actors for all instrument components to the scene and fills in
   // m_detIDs
-  m_scene.addActor(new CompAssemblyActor(*this, instrument->getComponentID()));
-  setupPickColors();
+  // m_scene.addActor(new CompAssemblyActor(*this,
+  // instrument->getComponentID()));  setupPickColors();
 
   if (!m_showGuides) {
     // hide guide and other components
     showGuides(m_showGuides);
   }
+
+  m_displayListId[0] = 0;
+  m_displayListId[1] = 0;
+  m_useDisplayList[0] = false;
+  m_useDisplayList[1] = false;
 }
 
 /**
-* Destructor
-*/
-InstrumentActor::~InstrumentActor() { saveSettings(); }
+ * Destructor
+ */
+InstrumentActor::~InstrumentActor()
+{
+  for (size_t i = 0; i < 2; ++i) {
+    if (m_displayListId[i] != 0) {
+      glDeleteLists(m_displayListId[i], 1);
+    }
+  }
+
+  saveSettings();
+}
 
 /**
-* Set up the workspace: calculate the value ranges, set the colours.
-* @param sharedWorkspace :: A shared pointer to the workspace.
-* @param scaleMin :: Minimum limit on the color map axis. If autoscale this
-* value is ignored.
-* @param scaleMax :: Maximum limit on the color map axis. If autoscale this
-* value is ignored.
-*/
+ * Set up the workspace: calculate the value ranges, set the colours.
+ * @param sharedWorkspace :: A shared pointer to the workspace.
+ * @param scaleMin :: Minimum limit on the color map axis. If autoscale this
+ * value is ignored.
+ * @param scaleMax :: Maximum limit on the color map axis. If autoscale this
+ * value is ignored.
+ */
 void InstrumentActor::setUpWorkspace(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
     double scaleMin, double scaleMax) {
@@ -171,13 +200,13 @@ void InstrumentActor::setUpWorkspace(
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
-* When selecting a component in the InstrumentTreeWidget
-*
-* @param visitor :: Visitor to be accepted bu this actor.
-* @param rule :: A rule defining visitor acceptance by assembly actors.
-*/
+ * When selecting a component in the InstrumentTreeWidget
+ *
+ * @param visitor :: Visitor to be accepted bu this actor.
+ * @param rule :: A rule defining visitor acceptance by assembly actors.
+ */
 bool InstrumentActor::accept(GLActorVisitor &visitor, VisitorAcceptRule rule) {
-  bool ok = m_scene.accept(visitor, rule);
+  bool ok = true; // m_scene.accept(visitor, rule);
   visitor.visit(this);
   invalidateDisplayLists();
   return ok;
@@ -185,25 +214,25 @@ bool InstrumentActor::accept(GLActorVisitor &visitor, VisitorAcceptRule rule) {
 
 bool InstrumentActor::accept(GLActorConstVisitor &visitor,
                              GLActor::VisitorAcceptRule rule) const {
-  bool ok = m_scene.accept(visitor, rule);
+  bool ok = true; // m_scene.accept(visitor, rule);
   visitor.visit(this);
   return ok;
 }
 
 void InstrumentActor::setChildVisibility(bool on) {
-  m_scene.setChildVisibility(on);
-  auto guidesVisitor = SetVisibleNonDetectorVisitor(m_showGuides);
-  m_scene.accept(guidesVisitor);
+  // m_scene.setChildVisibility(on);
+  // auto guidesVisitor = SetVisibleNonDetectorVisitor(m_showGuides);
+  // m_scene.accept(guidesVisitor);
 }
 
 bool InstrumentActor::hasChildVisible() const {
-  return m_scene.hasChildVisible();
+  return true; // m_scene.hasChildVisible();
 }
 
 /** Returns the workspace relating to this instrument view.
-*  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
-*  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
-*/
+ *  !!!! DON'T USE THIS TO GET HOLD OF THE INSTRUMENT !!!!
+ *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
+ */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
   auto sharedWorkspace = m_workspace.lock();
 
@@ -214,9 +243,17 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
   return sharedWorkspace;
 }
 
+void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound,
+                                     Mantid::Kernel::V3D &maxBound) const {
+  const auto &componentInfo = getComponentInfo();
+  auto bb = componentInfo.boundingBox(componentInfo.root());
+  minBound = bb.minPoint();
+  maxBound = bb.maxPoint();
+}
+
 /** Returns the mask workspace relating to this instrument view as a
  * MatrixWorkspace
-*/
+ */
 MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const {
   if (!m_maskWorkspace) {
     initMaskHelper();
@@ -225,7 +262,7 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const {
 }
 
 /** set the mask workspace
-*/
+ */
 void InstrumentActor::setMaskMatrixWorkspace(
     MatrixWorkspace_sptr wsMask) const {
   m_maskWorkspace = wsMask;
@@ -252,10 +289,10 @@ void InstrumentActor::invertMaskWorkspace() const {
 }
 
 /**
-* Returns the mask workspace relating to this instrument view as a
-* IMaskWorkspace.
-* Guarantees to return a valid pointer
-*/
+ * Returns the mask workspace relating to this instrument view as a
+ * IMaskWorkspace.
+ * Guarantees to return a valid pointer
+ */
 IMaskWorkspace_sptr InstrumentActor::getMaskWorkspace() const {
   if (!m_maskWorkspace) {
     initMaskHelper();
@@ -264,10 +301,10 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspace() const {
 }
 
 /**
-* Returns the mask workspace relating to this instrument view as a
-* IMaskWorkspace
-* if it exists or empty pointer if it doesn't.
-*/
+ * Returns the mask workspace relating to this instrument view as a
+ * IMaskWorkspace
+ * if it exists or empty pointer if it doesn't.
+ */
 IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
   if (!m_maskWorkspace)
     return IMaskWorkspace_sptr();
@@ -275,8 +312,8 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
 }
 
 /**
-* Apply mask stored in the helper mask workspace to the data workspace.
-*/
+ * Apply mask stored in the helper mask workspace to the data workspace.
+ */
 void InstrumentActor::applyMaskWorkspace() {
   auto wsName = getWorkspace()->getName();
   if (m_maskWorkspace) {
@@ -304,8 +341,8 @@ void InstrumentActor::applyMaskWorkspace() {
 }
 
 /**
-* Removes the mask workspace.
-*/
+ * Removes the mask workspace.
+ */
 void InstrumentActor::clearMasks() {
   bool needColorRecalc = false;
   if (m_maskWorkspace) {
@@ -357,30 +394,32 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
 /// Get a detector reference given a pick ID.
 const Mantid::Geometry::IDetector &
 InstrumentActor::getDetectorByPickID(size_t pickID) const {
-  return getDetectorByDetID(m_detIDs.at(pickID));
+  const auto &detectorInfo = getDetectorInfo();
+  return detectorInfo.detector(pickID);
 }
 
 /// Get a reference to a detector by a detector ID.
 const Mantid::Geometry::IDetector &
 InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
-  const auto &detectorInfo = getWorkspace()->detectorInfo();
+  const auto &detectorInfo = getDetectorInfo();
   auto detectorIndex = detectorInfo.indexOf(detID);
   return detectorInfo.detector(detectorIndex);
 }
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
-  if (pickID < m_detIDs.size()) {
-    return m_detIDs[pickID];
+  const auto &detInfo = getDetectorInfo();
+  if (pickID < detInfo.size()) {
+    return detInfo.detectorIDs()[pickID];
   }
   return -1;
 }
 
 /**
-* Get a component id of a picked component.
-*/
+ * Get a component id of a picked component.
+ */
 Mantid::Geometry::ComponentID
 InstrumentActor::getComponentID(size_t pickID) const {
-  size_t ndet = m_detIDs.size();
+  /*size_t ndet = m_detIDs.size();
   auto compID = Mantid::Geometry::ComponentID();
   if (pickID < ndet) {
     auto &det = getDetectorByPickID(m_detIDs[pickID]);
@@ -388,15 +427,17 @@ InstrumentActor::getComponentID(size_t pickID) const {
   } else if (pickID < ndet + m_nonDetIDs.size()) {
     compID = m_nonDetIDs[pickID - ndet];
   }
-  return compID;
+  return compID;*/
+  const auto &componentInfo = getComponentInfo();
+  return componentInfo.componentID(pickID)->getComponentID();
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
-*  @param id The detector id
-*  @returns  The workspace index containing data for this detector
-*  @throws Exception::NotFoundError If the detector is not represented in the
-* workspace
-*/
+ *  @param id The detector id
+ *  @returns  The workspace index containing data for this detector
+ *  @throws Exception::NotFoundError If the detector is not represented in the
+ * workspace
+ */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const {
   auto mapEntry = m_detid2index_map.find(id);
   if (mapEntry == m_detid2index_map.end()) {
@@ -407,13 +448,13 @@ size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const {
 }
 
 /**
-* Set an interval in the data workspace x-vector's units in which the data are
-* to be
-* integrated to calculate the detector colours.
-*
-* @param xmin :: The lower bound.
-* @param xmax :: The upper bound.
-*/
+ * Set an interval in the data workspace x-vector's units in which the data are
+ * to be
+ * integrated to calculate the detector colours.
+ *
+ * @param xmin :: The lower bound.
+ * @param xmax :: The upper bound.
+ */
 void InstrumentActor::setIntegrationRange(const double &xmin,
                                           const double &xmax) {
   setDataIntegrationRange(xmin, xmax);
@@ -421,9 +462,10 @@ void InstrumentActor::setIntegrationRange(const double &xmin,
 }
 
 /** Gives the total signal in the spectrum relating to the given detector
-*  @param id The detector id
-*  @return The signal, or -1 if the detector is not represented in the workspace
-*/
+ *  @param id The detector id
+ *  @return The signal, or -1 if the detector is not represented in the
+ * workspace
+ */
 double InstrumentActor::getIntegratedCounts(Mantid::detid_t id) const {
   try {
     size_t i = getWorkspaceIndex(id);
@@ -435,19 +477,19 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id) const {
 }
 
 /**
-* Sum counts in detectors for purposes of rough plotting against the units on
-* the x-axis.
-* Checks (approximately) if the workspace is ragged or not and uses the
-* appropriate summation
-* method.
-*
-* @param dets :: A list of detector IDs to sum.
-* @param x :: (output) Time of flight values (or whatever values the x axis has)
-* to plot against.
-* @param y :: (output) The sums of the counts for each bin.
-* @param size :: (optional input) Size of the output vectors. If not given it
-* will be determined automatically.
-*/
+ * Sum counts in detectors for purposes of rough plotting against the units on
+ * the x-axis.
+ * Checks (approximately) if the workspace is ragged or not and uses the
+ * appropriate summation
+ * method.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis
+ * has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ * @param size :: (optional input) Size of the output vectors. If not given it
+ * will be determined automatically.
+ */
 void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -465,15 +507,15 @@ void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x,
 }
 
 /**
-* Sum counts in detectors for purposes of rough plotting against the units on
-* the x-axis.
-* Assumes that all spectra share the x vector.
-*
-* @param dets :: A list of detector IDs to sum.
-* @param x :: (output) Time of flight values (or whatever values the x axis has)
-* to plot against.
-* @param y :: (output) The sums of the counts for each bin.
-*/
+ * Sum counts in detectors for purposes of rough plotting against the units on
+ * the x-axis.
+ * Assumes that all spectra share the x vector.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis
+ * has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ */
 void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
@@ -518,16 +560,16 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
 }
 
 /**
-* Sum counts in detectors for purposes of rough plotting against the units on
-* the x-axis.
-* Assumes that all spectra have different x vectors.
-*
-* @param dets :: A list of detector IDs to sum.
-* @param x :: (output) Time of flight values (or whatever values the x axis has)
-* to plot against.
-* @param y :: (output) The sums of the counts for each bin.
-* @param size :: (input) Size of the output vectors.
-*/
+ * Sum counts in detectors for purposes of rough plotting against the units on
+ * the x-axis.
+ * Assumes that all spectra have different x vectors.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis
+ * has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ * @param size :: (input) Size of the output vectors.
+ */
 void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
                                          std::vector<double> &x,
                                          std::vector<double> &y,
@@ -615,50 +657,77 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
 }
 
 /**
-* Recalculate the detector colors based on the integrated values in
-* m_specIntegrs and
-* the masking information in ....
-*/
+ * Recalculate the detector colors based on the integrated values in
+ * m_specIntegrs and
+ * the masking information in ....
+ */
 void InstrumentActor::resetColors() {
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue, m_DataMaxScaleValue);
-  m_colors.resize(m_specIntegrs.size());
-
   auto sharedWorkspace = getWorkspace();
+  const auto &componentInfo = sharedWorkspace->componentInfo();
+  const auto &detectorInfo = sharedWorkspace->detectorInfo();
   const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
+  auto color = m_colorMap.rgb(qwtInterval, 0);
+  m_colors.assign(componentInfo.size(),
+                  GLColor(qRed(color), qGreen(color), qBlue(color), 1));
 
-  IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
-
-  for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
-    size_t wi = size_t(iwi);
-    double integratedValue = m_specIntegrs[wi];
-    try {
-      // Find if the detector is masked
-      const auto &dets = sharedWorkspace->getSpectrum(wi).getDetectorIDs();
-      bool masked = false;
-
-      if (mask) {
-        masked = mask->isMasked(dets);
+  for (size_t wi = 0; wi < m_specIntegrs.size(); ++wi) {
+    const auto &specDef = spectrumInfo.spectrumDefinition(wi);
+    for (const auto &det : specDef) {
+      auto detIndex = det.first;
+      if (detectorInfo.isMasked(detIndex)) {
+        m_colors[detIndex] = m_maskedColor;
       } else {
-        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
+        auto integratedValue = m_specIntegrs[wi];
+        color = m_colorMap.rgb(qwtInterval, integratedValue);
+        m_colors[detIndex] = GLColor(
+            qRed(color), qGreen(color), qBlue(color),
+            static_cast<int>(255 * (integratedValue / m_DataMaxScaleValue)));
       }
-
-      if (masked) {
-        m_colors[wi] = m_maskedColor;
-      } else {
-        QRgb color = m_colorMap.rgb(qwtInterval, integratedValue);
-        m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
-      }
-    } catch (NotFoundError &) {
-      m_colors[wi] = m_failedColor;
-      continue;
     }
   }
-  if (m_scene.getNumberOfActors() > 0) {
+  // QwtDoubleInterval qwtInterval(m_DataMinScaleValue, m_DataMaxScaleValue);
+  // m_colors.resize(m_specIntegrs.size());
+
+  // auto sharedWorkspace = getWorkspace();
+  // const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
+
+  // IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
+
+  // for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
+  //  size_t wi = size_t(iwi);
+  //  double integratedValue = m_specIntegrs[wi];
+  //  try {
+  //    // Find if the detector is masked
+  //    const auto &dets = sharedWorkspace->getSpectrum(wi).getDetectorIDs();
+  //    bool masked = false;
+
+  //    if (mask) {
+  //      masked = mask->isMasked(dets);
+  //    } else {
+  //      masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
+  //    }
+
+  //    if (masked) {
+  //      m_colors[wi] = m_maskedColor;
+  //    } else {
+  //      QRgb color = m_colorMap.rgb(qwtInterval, integratedValue);
+  //      m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
+  //    }
+  //  } catch (NotFoundError &) {
+  //    m_colors[wi] = m_failedColor;
+  //    continue;
+  //  }
+  //}
+
+  setupColors();
+  invalidateDisplayLists();
+  /*if (m_scene.getNumberOfActors() > 0) {
     if (auto actor = dynamic_cast<CompAssemblyActor *>(m_scene.getActor(0))) {
       actor->setColors();
       invalidateDisplayLists();
     }
-  }
+  }*/
   emit colorMapChanged();
 }
 
@@ -668,8 +737,8 @@ void InstrumentActor::updateColors() {
 }
 
 /**
-* @param on :: True or false for on or off.
-*/
+ * @param on :: True or false for on or off.
+ */
 void InstrumentActor::showGuides(bool on) {
   auto visitor = SetVisibleNonDetectorVisitor(on);
   this->accept(visitor);
@@ -678,7 +747,7 @@ void InstrumentActor::showGuides(bool on) {
 
 GLColor InstrumentActor::getColor(Mantid::detid_t id) const {
   try {
-    size_t i = getWorkspaceIndex(id);
+    size_t i = getDetectorInfo().indexOf(id);
     return m_colors.at(i);
   } catch (NotFoundError &) {
     // Return the first color if the detector is not represented in the
@@ -687,12 +756,77 @@ GLColor InstrumentActor::getColor(Mantid::detid_t id) const {
   }
 }
 
-void InstrumentActor::draw(bool picking) const { m_scene.draw(picking); }
+void InstrumentActor::draw(bool picking) const {
+  if (std::none_of(m_isCompVisible.cbegin(), m_isCompVisible.cend(),
+                   [](bool visible) { return visible; }))
+    return;
 
+  OpenGLError::check("InstrumentActor::draw(0)");
+  size_t i = picking ? 1 : 0;
+  if (m_useDisplayList[i]) {
+    glCallList(m_displayListId[i]);
+  } else {
+    m_displayListId[i] = glGenLists(1);
+    m_useDisplayList[i] = true;
+    glNewList(m_displayListId[i],
+              GL_COMPILE); // Construct display list for object representation
+    doDraw(picking);
+    glEndList();
+    if (glGetError() == GL_OUT_OF_MEMORY) // Throw an exception
+      throw Mantid::Kernel::Exception::OpenGLError(
+          "OpenGL: Out of video memory");
+    glCallList(m_displayListId[i]);
+  }
+  OpenGLError::check("InstrumentActor::draw()");
+}
+
+void InstrumentActor::doDraw(bool picking) const {
+  const auto &componentInfo = getComponentInfo();
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    if (!componentInfo.isDetector(i) && !m_showGuides)
+      continue;
+
+    if (componentInfo.hasShape(i)) {
+      if (m_isCompVisible[i]) {
+        if (picking)
+          m_pickColors[i].paint();
+        else
+          m_colors[i].paint();
+        glPushMatrix();
+        //Translate
+        auto pos = componentInfo.position(i);
+        if(!pos.nullVector())
+          glTranslated(pos[0], pos[1], pos[2]);
+        
+        //Rotate
+        auto rot = componentInfo.rotation(i);
+        if (!rot.isNull()) {
+          double deg, ax0, ax1, ax2;
+          rot.getAngleAxis(deg, ax0, ax1, ax2);
+          glRotated(deg, ax0, ax1, ax2);
+        }
+
+        //Scale
+        auto scale = componentInfo.scaleFactor(i);
+        if(scale != Kernel::V3D(1, 1, 1))
+          glScaled(scale[0], scale[1], scale[2]);
+        
+        if (m_volumeRender) {
+          glEnable(GL_BLEND);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        
+        componentInfo.shape(i).draw();
+        glPopMatrix();
+      }
+    }
+  }
+  // m_scene.draw(picking);
+}
 /**
-* @param fname :: A color map file name.
-* @param reset_colors :: An option to reset the detector colors.
-*/
+ * @param fname :: A color map file name.
+ * @param reset_colors :: An option to reset the detector colors.
+ */
 void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
   m_colorMap.loadMap(fname);
   m_currentColorMapFilename = fname;
@@ -703,72 +837,89 @@ void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
 
 //------------------------------------------------------------------------------
 /** Add a detector ID to the pick list (m_detIDs)
-* The order of detids define the pickIDs for detectors.
-*
-* @param id :: detector ID to add.
-* @return pick ID of the added detector
-*/
+ * The order of detids define the pickIDs for detectors.
+ *
+ * @param id :: detector ID to add.
+ * @return pick ID of the added detector
+ */
 size_t InstrumentActor::pushBackDetid(Mantid::detid_t id) const {
-  m_detIDs.push_back(id);
-  return m_detIDs.size() - 1;
+ // m_detIDs.push_back(id);
+  return 0;//m_detIDs.size() - 1;
 }
 
 //------------------------------------------------------------------------------
 /** Add a non-detector component ID to the pick list (m_nonDetIDs)
-*
-* @param actor :: ObjComponentActor for the component added.
-* @param compID :: component ID to add.
-*/
+ *
+ * @param actor :: ObjComponentActor for the component added.
+ * @param compID :: component ID to add.
+ */
 void InstrumentActor::pushBackNonDetid(
     ObjComponentActor *actor, Mantid::Geometry::ComponentID compID) const {
-  m_nonDetActorsTemp.push_back(actor);
-  m_nonDetIDs.push_back(compID);
+  //m_nonDetActorsTemp.push_back(actor);
+  //m_nonDetIDs.push_back(compID);
+}
+
+void InstrumentActor::setupColors() {
+  const auto &componentInfo = getComponentInfo();
+  m_pickColors.resize(componentInfo.size());
+
+  for (size_t i = 0; i < componentInfo.size(); ++i) {
+    m_pickColors[i] = makePickColor(i);
+  }
 }
 
 //------------------------------------------------------------------------------
 /**
-* Set pick colors to non-detectors strored by calls to pushBackNonDetid().
-*/
+ * Set pick colors to non-detectors strored by calls to pushBackNonDetid().
+ */
 void InstrumentActor::setupPickColors() {
-  assert(m_nonDetActorsTemp.size() == m_nonDetIDs.size());
+  /*assert(m_nonDetActorsTemp.size() == m_nonDetIDs.size());
+  const auto &componentInfo = getComponentInfo();
   auto nDets = m_detIDs.size();
   for (size_t i = 0; i < m_nonDetActorsTemp.size(); ++i) {
     m_nonDetActorsTemp[i]->setPickColor(makePickColor(nDets + i));
   }
-  m_nonDetActorsTemp.clear();
+  m_nonDetActorsTemp.clear();*/
 }
 
 //------------------------------------------------------------------------------
 /** If needed, cache the detector positions for all detectors.
-* Call this BEFORE getDetPos().
-* Does nothing if the positions have already been cached.
-*/
+ * Call this BEFORE getDetPos().
+ * Does nothing if the positions have already been cached.
+ */
 void InstrumentActor::cacheDetPos() const {
-  if (m_detPos.size() != m_detIDs.size()) {
+  /*if (m_detPos.size() != m_detIDs.size()) {
     m_detPos.clear();
     for (size_t pickID = 0; pickID < m_detIDs.size(); pickID++) {
       auto &det = this->getDetectorByPickID(pickID);
       m_detPos.push_back(det.getPos());
     }
-  }
+  }*/
 }
 
 //------------------------------------------------------------------------------
 /** Get the cached detector position
-*
-* @param pickID :: pick Index maching the getDetector() calls;
-* @return the real-space position of the detector
-*/
-const Mantid::Kernel::V3D &InstrumentActor::getDetPos(size_t pickID) const {
-  if (pickID < m_detPos.size()) {
-    return m_detPos.at(pickID);
+ *
+ * @param pickID :: pick Index maching the getDetector() calls;
+ * @return the real-space position of the detector
+ */
+const Mantid::Kernel::V3D InstrumentActor::getDetPos(size_t pickID) const {
+  const auto &detInfo = getDetectorInfo();
+  if (pickID < detInfo.size()) {
+    return detInfo.position(pickID);
   }
   return m_defaultPos;
 }
 
+const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const
+{
+  const auto &detInfo = getDetectorInfo();
+  return detInfo.detectorIDs();
+}
+
 /**
-* @param type :: 0 - linear, 1 - log10.
-*/
+ * @param type :: 0 - linear, 1 - log10.
+ */
 void InstrumentActor::changeScaleType(int type) {
   m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(type));
   resetColors();
@@ -830,14 +981,16 @@ bool InstrumentActor::wholeRange() const {
          m_BinMaxValue == m_WkspBinMaxValue;
 }
 
+size_t InstrumentActor::ndetectors() const { return getDetectorInfo().size(); }
+
 /**
-* Set autoscaling of the y axis. If autoscaling is on the minValue() and
-* maxValue()
-* return the actual min and max values in the data. If autoscaling is off
-*  minValue() and maxValue() are fixed and do not change after changing the x
-* integration range.
-* @param on :: On or Off.
-*/
+ * Set autoscaling of the y axis. If autoscaling is on the minValue() and
+ * maxValue()
+ * return the actual min and max values in the data. If autoscaling is off
+ *  minValue() and maxValue() are fixed and do not change after changing the x
+ * integration range.
+ * @param on :: On or Off.
+ */
 void InstrumentActor::setAutoscaling(bool on) {
   m_autoscaling = on;
   if (on) {
@@ -848,10 +1001,15 @@ void InstrumentActor::setAutoscaling(bool on) {
   }
 }
 
+void InstrumentActor::showVolumeRender(bool on) {
+  m_volumeRender = on;
+  resetColors();
+}
+
 /**
-* Extracts the current applied mask to the main workspace
-* @returns the current applied mask to the main workspace
-*/
+ * Extracts the current applied mask to the main workspace
+ * @returns the current applied mask to the main workspace
+ */
 Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   const std::string maskName = "__InstrumentActor_MaskWorkspace";
   Mantid::API::IAlgorithm *alg =
@@ -869,8 +1027,8 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
 }
 
 /**
-* Initialize the helper mask workspace with the mask from the data workspace.
-*/
+ * Initialize the helper mask workspace with the mask from the data workspace.
+ */
 void InstrumentActor::initMaskHelper() const {
   if (m_maskWorkspace)
     return;
@@ -885,30 +1043,30 @@ void InstrumentActor::initMaskHelper() const {
 }
 
 /**
-* Checks if the actor has a mask workspace attached.
-*/
+ * Checks if the actor has a mask workspace attached.
+ */
 bool InstrumentActor::hasMaskWorkspace() const {
   return m_maskWorkspace != nullptr;
 }
 
 /**
-* Find a rotation from one orthonormal basis set (Xfrom,Yfrom,Zfrom) to
-* another orthonormal basis set (Xto,Yto,Zto). Both sets must be right-handed
-* (or same-handed, I didn't check). The method doesn't check the sets for
-* orthogonality
-* or normality. The result is a rotation quaternion such that:
-*   R.rotate(Xfrom) == Xto
-*   R.rotate(Yfrom) == Yto
-*   R.rotate(Zfrom) == Zto
-* @param Xfrom :: The X axis of the original basis set
-* @param Yfrom :: The Y axis of the original basis set
-* @param Zfrom :: The Z axis of the original basis set
-* @param Xto :: The X axis of the final basis set
-* @param Yto :: The Y axis of the final basis set
-* @param Zto :: The Z axis of the final basis set
-* @param R :: The output rotation as a quaternion
-* @param out :: Debug printout flag
-*/
+ * Find a rotation from one orthonormal basis set (Xfrom,Yfrom,Zfrom) to
+ * another orthonormal basis set (Xto,Yto,Zto). Both sets must be right-handed
+ * (or same-handed, I didn't check). The method doesn't check the sets for
+ * orthogonality
+ * or normality. The result is a rotation quaternion such that:
+ *   R.rotate(Xfrom) == Xto
+ *   R.rotate(Yfrom) == Yto
+ *   R.rotate(Zfrom) == Zto
+ * @param Xfrom :: The X axis of the original basis set
+ * @param Yfrom :: The Y axis of the original basis set
+ * @param Zfrom :: The Z axis of the original basis set
+ * @param Xto :: The X axis of the final basis set
+ * @param Yto :: The Y axis of the final basis set
+ * @param Zto :: The Z axis of the final basis set
+ * @param R :: The output rotation as a quaternion
+ * @param out :: Debug printout flag
+ */
 void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
                                     const Mantid::Kernel::V3D &Yfrom,
                                     const Mantid::Kernel::V3D &Zfrom,
@@ -994,15 +1152,15 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
 }
 
 /**
-* Calculate a rotation to look in a particular direction.
-*
-* @param eye :: A direction to look in
-* @param up :: A vector showing the 'up' direction after the rotation. It
-* doesn't have to be normal to eye
-*   just non-collinear. If up is collinear to eye the actual 'up' direction is
-* undefined.
-* @param R :: The result rotation.
-*/
+ * Calculate a rotation to look in a particular direction.
+ *
+ * @param eye :: A direction to look in
+ * @param up :: A vector showing the 'up' direction after the rotation. It
+ * doesn't have to be normal to eye
+ *   just non-collinear. If up is collinear to eye the actual 'up' direction is
+ * undefined.
+ * @param R :: The result rotation.
+ */
 void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
                                      const Mantid::Kernel::V3D &up,
                                      Mantid::Kernel::Quat &R) {
@@ -1039,11 +1197,11 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
 }
 
 /**
-* Find the offsets in the spectrum's x vector of the bounds of integration.
-* @param wi :: The works[ace index of the spectrum.
-* @param imin :: Index of the lower bound: x_min == x(wi)[imin]
-* @param imax :: Index of the upper bound: x_max == x(wi)[imax]
-*/
+ * Find the offsets in the spectrum's x vector of the bounds of integration.
+ * @param wi :: The works[ace index of the spectrum.
+ * @param imin :: Index of the lower bound: x_min == x(wi)[imin]
+ * @param imax :: Index of the upper bound: x_max == x(wi)[imax]
+ */
 void InstrumentActor::getBinMinMaxIndex(size_t wi, size_t &imin,
                                         size_t &imax) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -1078,8 +1236,8 @@ void InstrumentActor::getBinMinMaxIndex(size_t wi, size_t &imin,
 }
 
 /**
-* Set the minimum and the maximum data values on the color map scale.
-*/
+ * Set the minimum and the maximum data values on the color map scale.
+ */
 void InstrumentActor::setDataMinMaxRange(double vmin, double vmax) {
   if (vmin < m_DataMinValue) {
     vmin = m_DataMinValue;
@@ -1131,7 +1289,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
     // Now we need to convert to a vector where each entry is the sum for the
     // detector ID at that spot (in integrated_values).
-    for (size_t i = 0; i < m_specIntegrs.size(); i++) {
+    for (size_t i = 0; i < m_specIntegrs.size(); ++i) {
       // skip the monitors
       if (std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
           monitorIndices.end()) {
@@ -1245,11 +1403,11 @@ bool SetVisibleComponentVisitor::visit(StructuredDetectorActor *actor) {
 
 //-------------------------------------------------------------------------//
 /**
-* Visits an actor and if it is a "non-detector" sets its visibility.
-*
-* @param actor :: A visited actor.
-* @return always false to traverse all the instrument tree.
-*/
+ * Visits an actor and if it is a "non-detector" sets its visibility.
+ *
+ * @param actor :: A visited actor.
+ * @return always false to traverse all the instrument tree.
+ */
 bool SetVisibleNonDetectorVisitor::visit(GLActor *actor) {
   ComponentActor *comp = dynamic_cast<ComponentActor *>(actor);
   if (comp && comp->isNonDetector()) {
@@ -1304,5 +1462,24 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
   }
 }
 
-} // MantidWidgets
-} // MantidQt
+const Mantid::Geometry::ComponentInfo &
+InstrumentActor::getComponentInfo() const {
+  return getWorkspace()->componentInfo();
+}
+
+const Mantid::Geometry::DetectorInfo &InstrumentActor::getDetectorInfo() const {
+  return getWorkspace()->detectorInfo();
+}
+
+void InstrumentActor::invalidateDisplayLists() const {
+  for (size_t i = 0; i < 2; ++i) {
+    if (m_displayListId[i] != 0) {
+      glDeleteLists(m_displayListId[i], 1);
+      m_displayListId[i] = 0;
+      m_useDisplayList[i] = false;
+    }
+  }
+}
+
+} // namespace MantidWidgets
+} // namespace MantidQt

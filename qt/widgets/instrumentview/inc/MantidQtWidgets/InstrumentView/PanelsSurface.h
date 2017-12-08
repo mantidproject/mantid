@@ -59,10 +59,6 @@ protected:
 
   // Setup the projection axes
   void setupAxes();
-  // Setup the projection axes
-  void setupBasisAxes(const Mantid::Kernel::V3D &zaxis,
-                      Mantid::Kernel::V3D &xaxis,
-                      Mantid::Kernel::V3D &yaxis) const;
   // Find all flat banks of detectors.
   void findFlatBanks();
   // Add a flat bank
@@ -82,6 +78,7 @@ protected:
   // Add a structured detector
   void addStructuredDetector(Mantid::Geometry::ComponentID bankId);
   // Calculate bank rotation
+  void constructFromComponentInfo();
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos,
                                         Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
