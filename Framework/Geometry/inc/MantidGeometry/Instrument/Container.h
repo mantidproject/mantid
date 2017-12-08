@@ -62,9 +62,7 @@ public:
     return m_shape->calcValidType(Pt, uVec);
   }
   bool hasValidShape() const override { return m_shape->hasValidShape(); }
-  int setObject(const int ON, const std::string &Ln) override {
-    return m_shape->setObject(ON, Ln);
-  }
+
   IObject *clone() const override { return new Container(*this); }
 
   int getName() const override { return m_shape->getName(); }

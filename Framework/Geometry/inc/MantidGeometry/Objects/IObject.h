@@ -59,7 +59,6 @@ public:
   virtual int calcValidType(const Kernel::V3D &Pt,
                             const Kernel::V3D &uVec) const = 0;
   virtual bool hasValidShape() const = 0;
-  virtual int setObject(const int ON, const std::string &Ln) = 0;
   virtual IObject *clone() const = 0;
 
   virtual int getName() const = 0;

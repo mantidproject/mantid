@@ -90,7 +90,7 @@ public:
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
-  int setObject(const int ON, const std::string &Ln) override;
+  int setObject(const int ON, const std::string &Ln);
   int procString(const std::string &Line);
   int complementaryObject(const int Cnum,
                           std::string &Ln); ///< Process a complementary object
