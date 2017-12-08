@@ -40,70 +40,6 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 using OptionsMap = std::map<QString, QString>;
 
-/** Trim whitespace and quotes from the start/end of a string
- * @param option : the untrimmed value
- * @returns : the trimmed value
- * */
-QString trimWhitespaceAndQuotes(const QString &valueIn) {
-  // Trim whitespace
-  auto value = valueIn.trimmed();
-
-  // Trim quotes at the start/end
-  if (value.size() > 1 &&
-      ((value.startsWith("\"") && value.endsWith("\"")) ||
-       (value.startsWith("'") && value.endsWith("'")))) {
-    value.remove(0, 1);
-    value.remove(value.size() - 1, 1);
-  }
-
-  return value;
-}
-
-/** Add the given key/value pair into the given map, trimming unwanted
- * characters from the value
- * @param key : the key to use in the map
- * @param value : the value to use in the map
- * @param destMap : the map to add the values to
- * */
-void addOption(const QString &key, const QString &value, OptionsMap &destMap) {
-  auto const trimmedValue = trimWhitespaceAndQuotes(value);
-    
-  if (key.isEmpty() || trimmedValue.isEmpty())
-    throw std::runtime_error("Invalid option: " + key.toStdString() + "=" + value.toStdString());
-
-  destMap[key] = trimmedValue;
-}
-
-/** Inserts values from a source map into a destination map, trimming
- * values to remove any unwanted characters
- * @param sourceMap : the input map 
- * @param destMap : the output map
- */
-void parseOptionsFromMap(const OptionsMap &sourceMap, OptionsMap &destMap) {
-  for (auto const &keyValuePair: sourceMap) {
-    addOption(keyValuePair.first, keyValuePair.second, destMap);
-  }
-}
-
-/** Convert a key=value command-separated string into a map and add
- * the results into the given options map, trimming any unwanted
- * characters from the value.
- * @param options : the string to convert
- * @param optionsMap : the map to update
- */
-void parseOptionsFromString(const QString &options, OptionsMap &destMap) {
-  if (options.isEmpty())
-    return;
-
-  auto optionsVec = options.split(",");
-  optionsVec.removeAll("");
-
-  for (auto const &keyValueString : optionsVec) {
-    auto keyValuePair = keyValueString.split("=");
-    addOption(keyValuePair[0], keyValuePair[1], destMap);
-  }
-}
-
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
   if (!value.empty())
@@ -975,12 +911,12 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Create a map of property name : value from the global options,
   // options column and hidden options column. The last one takes
   // precedence if given multiple times.
-  const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
-  const auto hiddenOptions = data->back();
-  OptionsMap options;
-  parseOptionsFromMap(m_processingOptions, options);
-  parseOptionsFromString(userOptions, options);
-  parseOptionsFromString(hiddenOptions, options);
+  OptionsMap options = parseKeyValueMap(m_processingOptions);
+  const auto userOptions =
+      parseKeyValueQString(data->at(static_cast<int>(m_whitelist.size()) - 2));
+  options.insert(userOptions.begin(), userOptions.end());
+  const auto hiddenOptions = parseKeyValueQString(data->back());
+  options.insert(hiddenOptions.begin(), hiddenOptions.end());
 
   // Now set user-specified options from the columns (overrides any values
   // already set in the options map)
