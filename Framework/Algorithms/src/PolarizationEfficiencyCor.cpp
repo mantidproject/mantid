@@ -158,7 +158,7 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
   using namespace boost::math;
   WorkspaceMap outputs;
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
-  const size_t nHisto = inputs.mmWS->getNumberHistograms();
+  const size_t nHisto = inputs.ppWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &ppY = inputs.ppWS->y(wsIndex);
     const auto &ppE = inputs.ppWS->e(wsIndex);
