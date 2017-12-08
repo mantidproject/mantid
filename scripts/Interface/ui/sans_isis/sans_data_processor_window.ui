@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>897</height>
+    <height>898</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -129,6 +129,13 @@ QGroupBox::title {
                <widget class="QLineEdit" name="user_file_line_edit">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="manage_directories_button">
+                <property name="text">
+                 <string>Manage Directories</string>
                 </property>
                </widget>
               </item>
@@ -295,6 +302,19 @@ QGroupBox::title {
                    </item>
                    <item>
                     <layout class="QGridLayout" name="gridLayout">
+                     <item row="1" column="0">
+                      <widget class="QCheckBox" name="use_optimizations_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When optimizations are turned on then data is being stored in RAM and reused. The optimizations affect the raw data files and can reductions. Most of the time you will want these optimizations enabled. Disable the optimizations if you run a very long batch reduction where there might be the danger  that your RAM will max out.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Use Optimizations</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
                      <item row="0" column="0">
                       <widget class="QCheckBox" name="save_zero_error_free">
                        <property name="toolTip">
@@ -308,16 +328,10 @@ QGroupBox::title {
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="0">
-                      <widget class="QCheckBox" name="use_optimizations_checkbox">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When optimizations are turned on then data is being stored in RAM and reused. The optimizations affect the raw data files and can reductions. Most of the time you will want these optimizations enabled. Disable the optimizations if you run a very long batch reduction where there might be the danger  that your RAM will max out.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
+                     <item row="2" column="0">
+                      <widget class="QCheckBox" name="plot_results_checkbox">
                        <property name="text">
-                        <string>Use Optimizations</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
+                        <string>Plot Results</string>
                        </property>
                       </widget>
                      </item>
@@ -339,7 +353,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -1908,6 +1922,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="BeamCentre" name="beam_centre"/>
        </widget>
       </item>
      </layout>
@@ -1920,7 +1935,7 @@ QGroupBox::title {
      <x>0</x>
      <y>0</y>
      <width>1211</width>
-     <height>21</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -1948,6 +1963,12 @@ QGroupBox::title {
    <class>MaskingTable</class>
    <extends>QWidget</extends>
    <header>ui.sans_isis.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BeamCentre</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.beam_centre</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

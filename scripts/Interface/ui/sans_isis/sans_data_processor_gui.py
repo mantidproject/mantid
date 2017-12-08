@@ -59,6 +59,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_processing_finished(self):
             pass
 
+        @abstractmethod
+        def on_data_changed(self):
+            pass
+
+        @abstractmethod
+        def on_manage_directories(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -141,6 +149,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon = QtGui.QIcon(settings_icon_path)
+        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
@@ -184,6 +196,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        self.manage_directories_button.clicked.connect(self._on_manage_directories)
 
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
@@ -239,12 +253,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         if instrument_name:
             self._set_mantid_instrument(instrument_name)
-
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
+        self.data_processor_table.dataChanged.connect(self._data_changed)
 
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
 
@@ -259,6 +273,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Clean up
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
+
+    def _data_changed(self):
+        """
+        Clean up
+        """
+        self._call_settings_listeners(lambda listener: listener.on_data_changed())
 
     def _on_user_file_load(self):
         """
@@ -469,12 +489,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
+    def show_directory_manager(self):
+        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
                   self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
+
+    def _on_manage_directories(self):
+        self._call_settings_listeners(lambda listener: listener.on_manage_directories())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
@@ -590,6 +616,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @use_optimizations.setter
     def use_optimizations(self, value):
         self.use_optimizations_checkbox.setChecked(value)
+
+    @property
+    def plot_results(self):
+        return self.plot_results_checkbox.isChecked()
+
+    @plot_results.setter
+    def plot_results(self, value):
+        self.plot_results_checkbox.setChecked(value)
 
     @property
     def output_mode(self):

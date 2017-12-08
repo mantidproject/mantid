@@ -12,7 +12,6 @@
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::Geometry::Object_sptr;
 
 class CuboidGaugeVolumeAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -67,9 +66,9 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Define a sample shape
-    Object_sptr sampleShape =
+    auto sampleShape =
         ComponentCreationHelper::createCuboid(0.005, 0.003, 0.002);
-    testWS->mutableSample().setShape(*sampleShape);
+    testWS->mutableSample().setShape(sampleShape);
 
     Mantid::Algorithms::CuboidGaugeVolumeAbsorption abs;
     abs.initialize();
@@ -96,9 +95,8 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Define a sample shape
-    Object_sptr sampleShape =
-        ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
-    testWS->mutableSample().setShape(*sampleShape);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
+    testWS->mutableSample().setShape(sampleShape);
 
     TS_ASSERT_THROWS_NOTHING(
         atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));

@@ -9,7 +9,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -44,7 +44,7 @@ makeComponentIDMap(const boost::shared_ptr<
   return idMap;
 }
 
-boost::shared_ptr<Object> createCappedCylinder() {
+boost::shared_ptr<CSGObject> createCappedCylinder() {
   std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
   std::string C32 = "px 1.2";
   std::string C33 = "px -3.2";
@@ -66,7 +66,7 @@ boost::shared_ptr<Object> createCappedCylinder() {
   // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
   std::string ObjCapCylinder = "-31 -32 33";
 
-  auto retVal = boost::make_shared<Object>();
+  auto retVal = boost::make_shared<CSGObject>();
   retVal->setObject(21, ObjCapCylinder);
   retVal->populate(CylSurMap);
 
@@ -104,11 +104,12 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<Eigen::Quaterniond>>(1, rotation);
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
+  auto names = boost::make_shared<std::vector<std::string>>(1);
   auto isStructuredBank = boost::make_shared<std::vector<bool>>(1, false);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isStructuredBank, -1,
-      -1);
+      parentIndices, positions, rotations, scaleFactors, isStructuredBank,
+      names, -1, -1);
 }
 }
 
@@ -146,10 +147,12 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto names = boost::make_shared<std::vector<std::string>>(2);
     auto isRectBank = boost::make_shared<std::vector<bool>>(2);
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, scaleFactors, isRectBank, -1, -1);
+        parentIndices, positions, rotations, scaleFactors, isRectBank, names,
+        -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -158,9 +161,9 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
-    shapes->push_back(boost::make_shared<const Geometry::Object>());
-    shapes->push_back(boost::make_shared<const Geometry::Object>());
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -168,7 +171,7 @@ public:
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
 
-  void test_copy_construction() {
+  void test_partial_copy() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
@@ -177,21 +180,22 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo a(std::move(internalInfo), componentIds,
                     makeComponentIDMap(componentIds), shapes);
 
     // Make the copy
-    ComponentInfo b = a;
+    auto b = a.cloneWithoutDetectorInfo();
 
     // Compare sizes
-    TS_ASSERT_EQUALS(b.size(), a.size());
+    TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
-    TS_ASSERT_EQUALS(&b.shape(0), &a.shape(0));
+    TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
     // IDs are the same
-    TS_ASSERT_EQUALS(b.indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
+    TS_ASSERT(!b->hasDetectorInfo());
   }
 
   void test_has_shape() {
@@ -203,7 +207,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
@@ -211,7 +215,7 @@ public:
 
     TS_ASSERT(compInfo.hasShape(0));
     // Nullify the shape of the component
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     TS_ASSERT(!compInfo.hasShape(0));
     TS_ASSERT_THROWS(compInfo.solidAngle(0, V3D{1, 1, 1}),
                      Mantid::Kernel::Exception::NullPointerException &);
@@ -231,7 +235,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -247,7 +251,7 @@ public:
     observer = V3D{0, 0, 0};
     TS_ASSERT_DELTA(info.solidAngle(0, observer), 4 * M_PI, satol);
     // Nullify  the shape and retest solid angle
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     TS_ASSERT_THROWS(info.solidAngle(0, observer),
                      Mantid::Kernel::Exception::NullPointerException &);
   }
@@ -266,7 +270,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(createCappedCylinder());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
@@ -289,7 +293,7 @@ public:
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::Object>>>();
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
@@ -304,7 +308,7 @@ public:
                (Kernel::V3D{position[0] + radius, position[1] + radius,
                             position[2] + radius})).norm() < 1e-9);
     // Nullify shape and retest BoundingBox
-    shapes->at(0) = boost::shared_ptr<const Geometry::Object>(nullptr);
+    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
     TS_ASSERT(boundingBox.isNull());
   }
@@ -453,6 +457,61 @@ public:
     TS_ASSERT(componentInfo->isStructuredBank(bank2Index));
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
+  }
+
+  void test_scanning_non_bank_throws() {
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    const auto &componentInfo = std::get<0>(wrappers);
+    componentInfo->setScanInterval({0, 1});
+    std::pair<size_t, size_t> temporalSourceIndex(
+        componentInfo->source(), 0); // Source index with time component
+    TSM_ASSERT_THROWS(
+        "Source is NOT allowed to time-scan",
+        componentInfo->setPosition(temporalSourceIndex, V3D(0, 0, 0)),
+        std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source position set as time-constant allowed",
+        componentInfo->setPosition(componentInfo->source(), V3D(0, 0, 0)));
+    TSM_ASSERT_THROWS("Source is NOT allowed to time-scan",
+                      componentInfo->setRotation(temporalSourceIndex, Quat()),
+                      std::runtime_error &);
+    TSM_ASSERT_THROWS_NOTHING(
+        "Source rotation set as time-constant allowed",
+        componentInfo->setRotation(componentInfo->source(), Quat()));
+  }
+
+  void test_merge_sync_scan() {
+
+    const V3D sourcePos(-1, 0, 0);
+    const V3D samplePos(0, 0, 0);
+    const V3D detectorPos(11, 0, 0);
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        sourcePos, samplePos, detectorPos);
+
+    auto wrappers1 = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &infoScan1 = std::get<0>(wrappers1);
+
+    auto wrappers2 = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &infoScan2 = std::get<0>(wrappers2);
+
+    infoScan1->setScanInterval({0, 1});
+    infoScan2->setScanInterval({1, 2});
+    infoScan1->setPosition(0 /*detector index*/, V3D(0, 0, 0));
+
+    infoScan1->merge(*infoScan2);
+
+    TS_ASSERT_EQUALS(infoScan1->scanSize(),
+                     infoScan1->size() + infoScan2->size());
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 0}),
+                     V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 1}),
+                     detectorPos);
   }
 };
 

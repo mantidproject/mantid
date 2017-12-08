@@ -2096,7 +2096,6 @@ void FitPropertyBrowser::deleteTie() {
       Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(),
                                                    i);
       Mantid::API::IFunction *function = parameterRef.getLocalFunction();
-
       // Pick out parameters with the same name as the one we're tying from
       if (function->parameterName(
               static_cast<int>(parameterRef.getLocalIndex())) == parName) {
@@ -2113,7 +2112,7 @@ void FitPropertyBrowser::deleteTie() {
         }
       }
     }
-    if (functionNames.empty() || ithParameter < 0) {
+    if (functionNames.empty() && ithParameter < 0) {
       QMessageBox::information(this, "Mantid - information",
                                "Cannot find a parameter with this tie");
     } else {

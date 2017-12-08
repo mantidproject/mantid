@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -55,7 +55,7 @@ ComponentInfo::ComponentInfo(
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         componentIdToIndexMap,
-    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
         shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
@@ -73,13 +73,22 @@ ComponentInfo::ComponentInfo(
   }
 }
 
+/**
+ * Clone current instance but not the DetectorInfo non-owned parts
+ * @return unique pointer wrapped deep copy of ComponentInfo
+ */
+std::unique_ptr<Geometry::ComponentInfo>
+ComponentInfo::cloneWithoutDetectorInfo() const {
+  return std::unique_ptr<Geometry::ComponentInfo>(
+      new Geometry::ComponentInfo(*this));
+}
+
 /** Copy constructor. Use with EXTREME CARE.
  *
- * Public copy should not be used since proper links between DetectorInfo and
+ * Should not be public since proper links between DetectorInfo and
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
-    : m_componentInfo(
-          Kernel::make_unique<Beamline::ComponentInfo>(*other.m_componentInfo)),
+    : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()),
       m_componentIds(other.m_componentIds),
       m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes) {}
 
@@ -102,6 +111,10 @@ size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
 
+size_t ComponentInfo::indexOf(const std::string &name) const {
+  return m_componentInfo->indexOf(name);
+}
+
 bool ComponentInfo::isDetector(const size_t componentIndex) const {
   return m_componentInfo->isDetector(componentIndex);
 }
@@ -110,8 +123,18 @@ Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->position(componentIndex));
 }
 
+Kernel::V3D
+ComponentInfo::position(const std::pair<size_t, size_t> index) const {
+  return Kernel::toV3D(m_componentInfo->position(index));
+}
+
 Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo->rotation(componentIndex));
+}
+
+Kernel::Quat
+ComponentInfo::rotation(const std::pair<size_t, size_t> index) const {
+  return Kernel::toQuat(m_componentInfo->rotation(index));
 }
 
 Kernel::V3D ComponentInfo::relativePosition(const size_t componentIndex) const {
@@ -123,12 +146,26 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo->relativeRotation(componentIndex));
 }
 
+void ComponentInfo::setPosition(const std::pair<size_t, size_t> index,
+                                const Kernel::V3D &newPosition) {
+  m_componentInfo->setPosition(index, Kernel::toVector3d(newPosition));
+}
+
+void ComponentInfo::setRotation(const std::pair<size_t, size_t> index,
+                                const Kernel::Quat &newRotation) {
+  m_componentInfo->setRotation(index, Kernel::toQuaterniond(newRotation));
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return m_componentInfo->parent(componentIndex);
 }
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const {
   return m_componentInfo->hasParent(componentIndex);
+}
+
+bool ComponentInfo::hasDetectorInfo() const {
+  return m_componentInfo->hasDetectorInfo();
 }
 
 bool ComponentInfo::hasShape(const size_t componentIndex) const {
@@ -166,12 +203,16 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-const Object &ComponentInfo::shape(const size_t componentIndex) const {
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
   return *(*m_shapes)[componentIndex];
 }
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
+}
+
+std::string ComponentInfo::name(const size_t componentIndex) const {
+  return m_componentInfo->name(componentIndex);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex,
@@ -328,6 +369,17 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
   return m_componentInfo->isStructuredBank(componentIndex);
 }
+
+void ComponentInfo::setScanInterval(
+    const std::pair<int64_t, int64_t> &interval) {
+  m_componentInfo->setScanInterval(interval);
+}
+
+void ComponentInfo::merge(const ComponentInfo &other) {
+  m_componentInfo->merge(*other.m_componentInfo);
+}
+
+size_t ComponentInfo::scanSize() const { return m_componentInfo->scanSize(); }
 
 } // namespace Geometry
 } // namespace Mantid
