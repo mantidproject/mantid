@@ -203,7 +203,19 @@ and :ref:`algm-FFT` (right).
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[44], image.readY(0)[44]))
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[46], image.readY(0)[46]))
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[48], image.readY(0)[48]))
-
+   # check background is not nosiy
+   def getInt(originalX,originalY,xMin,xMax):
+      import numpy as np
+      yData=[]
+      xData=[]
+      for j in range(0,len(originalX)):
+          if originalX[j]>xMin and originalX[j]<xMax:
+              yData.append(originalY[j]**2)
+              xData.append(originalX[j])
+      return np.trapz(x=xData,y=np.sqrt(yData))
+   # Do not change these numbers - they test if noise has been added to the alg    
+   print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
+   print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
 Output:
 
 .. testoutput:: ExMUSR00022725
@@ -211,7 +223,8 @@ Output:
    Image at -1.359: 0.100
    Image at 0.000: 0.009
    Image at 1.359: 0.100
-
+   Negative background 0.006431
+   Positive background 0.006431
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
