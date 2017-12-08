@@ -1282,19 +1282,19 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
-  void testHasOrientedLattice()     {
+  void testHasOrientedLattice() {
     const std::string wsName = "InputWorkspace_testHasOrientedLattice";
     int nExperimentInfosToAdd = 3;
     MDHistoWorkspace_sptr ws =
-      MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
     TS_ASSERT_EQUALS(ws->hasOrientedLattice(), false);
 
-    //add one oriented lattice
+    // add one oriented lattice
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(latt);
     TS_ASSERT_EQUALS(ws->hasOrientedLattice(), true);
 
-    //add some more using multiple experiment infos
+    // add some more using multiple experiment infos
     for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i) {
       ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
       ws->addExperimentInfo(experimentInfo);
@@ -1302,14 +1302,16 @@ public:
       TS_ASSERT_EQUALS(ws->hasOrientedLattice(), true);
     }
 
-    //take them away one by one starting with the first, leave the last one
+    // take them away one by one starting with the first, leave the last one
     for (uint16_t i = 0; i < (nExperimentInfosToAdd - 1); ++i) {
       ws->getExperimentInfo(i)->mutableSample().clearOrientedLattice();
       TS_ASSERT_EQUALS(ws->hasOrientedLattice(), true);
     }
 
-    //remove the last one
-    ws->getExperimentInfo(nExperimentInfosToAdd-1)->mutableSample().clearOrientedLattice();
+    // remove the last one
+    ws->getExperimentInfo(nExperimentInfosToAdd - 1)
+        ->mutableSample()
+        .clearOrientedLattice();
     TS_ASSERT_EQUALS(ws->hasOrientedLattice(), false);
 
     delete latt;

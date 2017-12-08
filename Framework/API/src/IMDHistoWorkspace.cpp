@@ -17,7 +17,9 @@ namespace API {
 
 bool IMDHistoWorkspace::hasOrientedLattice() const {
   for (auto i = 0; i < MultipleExperimentInfos::getNumExperimentInfo(); i++) {
-    if (MultipleExperimentInfos::getExperimentInfo(i)->sample().hasOrientedLattice()) {
+    if (MultipleExperimentInfos::getExperimentInfo(i)
+            ->sample()
+            .hasOrientedLattice()) {
       return true;
     }
   }
