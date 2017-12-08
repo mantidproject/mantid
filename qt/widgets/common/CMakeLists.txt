@@ -82,6 +82,7 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/HintingLineEdit.cpp
+	src/IndirectFitPropertyBrowser.cpp
 	src/IndirectInstrumentConfig.cpp
 	src/InputController.cpp
 	src/InstrumentSelector.cpp
@@ -189,6 +190,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
+  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
