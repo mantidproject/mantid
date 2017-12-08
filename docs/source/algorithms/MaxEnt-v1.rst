@@ -177,7 +177,7 @@ Output:
    First  reconstructed coefficient: 0.847
    Second reconstructed coefficient: 0.846
    Third  reconstructed coefficient: 0.846
-   Fourth reconstructed coefficient: 0.897
+   Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
@@ -208,9 +208,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.096
-   Image at 0.000: 0.001
-   Image at 1.359: 0.096
+   Image at -1.359: 0.100
+   Image at 0.000: 0.009
+   Image at 1.359: 0.100
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -225,7 +225,7 @@ and its imaginary part (right).
    CropWorkspace(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    RemoveExpDecay(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884')
    Rebin(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', Params='0.016')
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, MaxIterations=2500)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, MaxIterations=2500, ChiTargetOverN=300.0/270.0)
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
@@ -241,11 +241,11 @@ Output:
 .. testoutput:: ExEMU00020884
 
    Image (real part) at -1.389: -0.063
-   Image (real part) at  0.000:  0.000
+   Image (real part) at  0.000:  0.035
    Image (real part) at  1.389: -0.063
-   Image (imaginary part) at -1.389: -0.286
+   Image (imaginary part) at -1.389: -0.277
    Image (imaginary part) at  0.000:  0.000
-   Image (imaginary part) at  1.389:  0.287
+   Image (imaginary part) at  1.389:  0.277
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
@@ -363,7 +363,8 @@ points can be increased by any integer factor, but note that this will slow down
 maxent iterations so that the algorithm is able to converge to a solution.
 
 An example script where the density of points is increased by a factor of 2 can be found below. Note that when a factor of 2 is used,
-the reconstructed data is twice the size of the original (experimental) data.
+the reconstructed data is twice the size of the original (experimental) data. Also shown is how ChiTargetOverN property may be varied away
+from the default 1.0; the dataset contains 270 data points and here set to be slightly higher at 300/270.
 
 .. testcode:: ExResolutionFactor
 
@@ -371,8 +372,8 @@ the reconstructed data is twice the size of the original (experimental) data.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1)
-   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=5000, ResolutionFactor=2)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1, ChiTargetOverN=300.0/270.0)
+   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=5000, ResolutionFactor=2, ChiTargetOverN=300.0/270.0)
 
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
@@ -381,8 +382,8 @@ Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at 0.000: 0.000 (ResolutionFactor=1)
-   Image at 0.000: 0.000 (ResolutionFactor=2)
+   Image at 0.000: 0.035 (ResolutionFactor=1)
+   Image at 0.000: 0.068 (ResolutionFactor=2)
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
