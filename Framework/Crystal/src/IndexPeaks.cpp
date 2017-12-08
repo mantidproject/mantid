@@ -93,7 +93,7 @@ void IndexPeaks::exec() {
     int run = run_numbers[run_index];
     for (size_t i = 0; i < n_peaks; i++) {
       if (peaks[i].getRunNumber() == run)
-        q_vectors.push_back(peaks[i].getQLabFrame());
+        q_vectors.push_back(peaks[i].getQSampleFrame());
     }
 
     Matrix<double> tempUB(UB);
@@ -102,7 +102,7 @@ void IndexPeaks::exec() {
     int original_indexed = 0;
     double original_error = 0;
     original_indexed = IndexingUtils::CalculateMillerIndices(
-        tempUB, q_vectors, tolerance, miller_indices, original_error);
+        UB, q_vectors, tolerance, miller_indices, original_error);
 
     IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded for
                                               // Optimize_UB to work
@@ -128,7 +128,7 @@ void IndexPeaks::exec() {
       }
 
       num_indexed = IndexingUtils::CalculateMillerIndices(
-          tempUB, q_vectors, tolerance, miller_indices, average_error);
+          UB, q_vectors, tolerance, miller_indices, average_error);
 
       IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded for
                                                 // Optimize_UB to work
@@ -146,7 +146,7 @@ void IndexPeaks::exec() {
     if (!round_hkls) // If user wants fractional hkls, recalculate them
     {
       num_indexed = IndexingUtils::CalculateMillerIndices(
-          tempUB, q_vectors, tolerance, miller_indices, average_error);
+          UB, q_vectors, tolerance, miller_indices, average_error);
     }
 
     total_indexed += num_indexed;
