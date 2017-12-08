@@ -2,20 +2,28 @@
 #define GRAVITYCORRECTION_H_
 
 #include "MantidAPI/Algorithm.h"
-//#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/IComponent.h"
 
 #include <boost/shared_ptr.hpp>
+#include <map>
+#include <string>
 #include <vector>
-
 
 namespace Mantid {
 // forward declarations
 namespace API {
-//class AlgorithmHistory;
+// class AlgorithmHistory;
 class Progess;
 class SpectrumInfo;
+}
+namespace Geometry {
+class DetectorInfo;
+}
+namespace Kernel {
+class V3D;
 }
 
 namespace Algorithms {
@@ -61,35 +69,49 @@ public:
 
 protected:
   /// Progress report & cancelling
-  std::unique_ptr<API::Progress> m_progress{nullptr};
+  std::unique_ptr<Mantid::API::Progress> m_progress{nullptr};
 
 private:
+  Mantid::Geometry::PointingAlong m_beamDirection;
+  Mantid::Geometry::PointingAlong m_upDirection;
+  Mantid::Geometry::PointingAlong m_horizontalDirection;
   std::string m_slit1Name;
   std::string m_slit2Name;
   Mantid::API::MatrixWorkspace_sptr m_ws;
-  Geometry::Instrument_const_sptr m_originalInstrument;
-  Geometry::Instrument_const_sptr m_virtualInstrument;
-  Mantid::Geometry::PointingAlong m_upDirection;
-  Mantid::Geometry::PointingAlong m_beamDirection;
-  Mantid::Geometry::PointingAlong m_horizontalDirection;
+  Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   std::map<double, size_t> m_finalAngles;
   /// Initialisation code
   void init() override;
   /// Parabola definition between source and sample
-  std::pair<double, double> parabola(const double k);
+  std::pair<double, double> parabola(const double k, size_t i);
   /// Retrieve the coordinate of an instrument component
-  double coordinate(const std::string componentName,
+  double coordinate(
+      const std::string componentName,
+      Mantid::Geometry::PointingAlong direction,
+      Mantid::Geometry::Instrument_const_sptr instrument = nullptr) const;
+  /// Retrieve the coodinate of a detector component
+  double coordinate(Mantid::Geometry::DetectorInfo &detectorInfo, size_t i,
                     Mantid::Geometry::PointingAlong direction) const;
+  /// Retrieve the coordinate of an instrument component
+  double coordinate(Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
+                    Mantid::Geometry::PointingAlong direction) const;
+  /// Modify the coordinate of a Vector V3D
+  void setCoordinate(Kernel::V3D &pos,
+                     Mantid::Geometry::PointingAlong direction,
+                     double value) const;
   /// Generalise instrument setup (origin, handedness, coordinate system)
   void virtualInstrument();
   /// Compute final angle
-  double finalAngle(const double k);
+  double finalAngle(const double k, size_t i);
   /// Ensure slits to exist and be correctly ordered
   void slitCheck();
   /// The corrected spectrum number for the initialSpectrumNumber
-  size_t spectrumNumber(const double angle, Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+  size_t spectrumNumber(const double angle,
+                        Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
   /// Tells if the corresponding spectrum will be considered for execution
   bool spectrumCheck(Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+  /// Parabola arc length
+  double parabolaArcLength(const double arg, double constant = 1.) const;
   /// Execution code
   void exec() override;
 };

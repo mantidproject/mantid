@@ -14,9 +14,12 @@ This algorithm performs a modification of time-of-flight values and their final 
 An initial computation of the final angle :math:`\theta_f` due to gravitation is required when the neutron flies from the source to the sample.
 For the path from the sample to the detector, gravitation plays a role which can be cancelled.
 Other properties of the :literal:`InputWorkspace` will be present in the :literal:`OutputWorkspace`.
+Both cases, reflection up and down, can be treated.
 Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS here: Gutfreund et. al. Towards generalized data reduction on a time-of-flight neutron reflectometer.
 Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`, an information will be logged.
-Finally, a workspace of corrected gravity contains a :literal:`SampleLog` entry called :literal:`GravityCorrected`.
+Please note, that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
+The instrument definition may only contain the position in beam direction and the height of the slits will be computed internally.
+The potential output workspace adds " cancelled gravitation " to its title.
 
 Requirements
 ------------
@@ -26,98 +29,117 @@ Requirements
 - The x-axis of the :literal:`InputWorkspace` must be in :red:`time-of-flight`.
 - Those time-of-flight values, :math:`t_{\mbox{tof}}`, are valid for a neutron travel distance from source to detector and do not take gravitation into account.
 - The instrument must consist of a :red:`source`, :red:`sample`, :red:`detector` and a collimeter with its :red:`slits` or two other known locations of the neutron flight path between source and sample position.
+  Please note that the slit position in beam direction is sufficiant, the horizontal position is supposed to be zero and the up position will be computed.
 - The instrument must be defined in :red:`units metre`.
+- The beam direction must be the axis direction of :literal:`X, Y` or :literal:`Z`, which is usually the case.
+- The algorithm did not already execute for the given :literal:`InputWorkspace`.
 
-Corrected time-of-flight axis
------------------------------
+Introduction
+------------
 
-All following images visualize a single neutron flight and its correction.
-The instrument will be moved virtually such that the sample centre is at position :math:`x_s` = 0 m, :math:`y_s` = 0 m for all following considerations.
-Thus, it corresponds to a single count in the workspace.
-The following two images shows schematically gravitational effects for a detector positioned normal to the beam direction.
+All following images visualize a single neutron flight and its correction which corresponds to a single count in the workspace.
+Please note that the images do not represent a real physical behaviour and serve only to describe the algorithm.
+For all following considerations, the sample centre is at position :math:`x_s` = 0 m, :math:`y_s` = 0 m.
+The beam direction is along the :math:`x` axis and the up direction along the :math:`y` axis.
+The neutron flies in beam direction and the horizontal axis does not play a role.
+In a first step, it is necessary to take correct final angles due to gravitation into account.
+Then, the time-of-flight axis will be updated accordingly.
+
+Corrected final angles
+----------------------
+
+The following image shows schematically gravitational effects for a detector positioned normal to the beam direction.
 
 .. figure:: /images/GravityCorrection1.png
    :align: center
 
 The orange line indicates the assumed neutron flight path which is present in the :literal:`InputWorkspace`.
-In a first step, it is necessary to take correct final angles due to gravitation into account.
-
-The y-coordinate of one slit, depending on the reflection up or down defined by the initial incident angle :math:`\theta_{i, 0}`, is
-
-.. math:: y_{s_1} = sign( \theta_{i, 0} ) x_{s_1} tan \left( \theta_{i, 0} \right).
-
 The following parabola describes the spatial position of the neutron travelling from source to the sample:
 
 .. math:: y = y_0 - k \left( x - x_0 \right)^2
 
-The neutron must travel via the slits :math:`s_{1}` and :math:`s_{2}` :
+The neutron must travel via the slits :math:`s_{1}` and :math:`s_{2}`:
 
 .. math:: x_0 = \frac{k(x_{s_1}^2 - x_{s_2}^2)+(y_{s_1}-y_{s_2})}{2k (x_{s_1}-x_{s_2})}
 
-.. math:: y_0 = y_{\mbox{s}_1} + k \left( x_{\mbox{s}_1} - x_0 \right)^2.
+.. math:: y_0 = y_{\mbox{s}_1} + k \left( x_{\mbox{s}_1} - x_0 \right)^2,
 
-The final angle :math:`\theta_f` can be computed by using the gradient of the parabola at sample center position :math:`x_s` = 0 m, :math:`y_s` = 0 m:
+where the y-coordinate of a slit, depending on the reflection up or down is defined by the initial, uncorrected, incident angle :math:`\theta_{f_{i}}` (orange in the above image), is
 
-.. math:: \theta_f =  atan \left( 2 k \sqrt{\frac{y_0}{k}} \right) = atan \left( -2 k x_{0} \right),
+.. math:: y_{s_1} = sign( {\theta_{f_{i}}} ) \ x_{s_1} \ tan \left( {\theta_{f_{i}}} \right).
 
-with :math:`k` being the characteristic inverse length
+The characteristic inverse length :math:`k` is given by
 
-.. math:: k = \frac{g}{2 v_N^2}.
+.. math:: k = \frac{g}{2 v_i^2}.
 
-Then, the neutron flight path can be modified in terms of cancelling effects due to gravitation for a distance between sample and detector.
+The velocity :math:`v_{i} = \frac{s_1 + s_2}{t_{\mbox{tof}}}` is the initial neutron velocity, taking the real flight path into account as described in `Parabola arc length`_ and the initial, not updated time-of-flight values.
 
-The neutron velocity is
-
-.. math:: v_{N} =  \sqrt{ v_{s}^2 \mbox{cos}(\theta_f)^2 + ( v_{s} \mbox{sin}(\theta_f) - gt )^2 }
-
-and the neutron arrives at detector position
-
-.. math:: x_{d} = v_{N} \mbox{cos}(\theta_f) t
-
-.. math:: y_{d} = v_{N} \mbox{sin}(\theta_f) t - \frac{1}{2} g t^2,
-
-where :math:`d` and :math:`s` refer to the detector and the sample, respectively.
-Neglecting gravitation, i.e. :math:`g_c = 0 \frac{\mbox{m}}{\mbox{s}^2}` gives
-
-.. math:: y_{d, g_{c}} = v_N \mbox{sin}(\theta_f) t
-
-with
-
-.. math:: v_N = \frac{x_{\mbox{detector}} - x_{\mbox{source}}}{t_{\mbox{tof}}}.
-
-A further generalization is required where the detector can have an arbitrary position as shown in the following image.
+The detector can have an arbitrary position as shown in the following image.
 
 .. figure:: /images/GravityCorrection3.png
    :align: center
 
-A detector analytical equation can be derived from known detector positions
+The corrected final angle :math:`\theta_f` shown in this image can be computed by using the gradient of the parabola at sample center position :math:`x_s` = 0 m, :math:`y_s` = 0 m:
 
-.. math:: y = y_{a} + m_{a} x.
+.. math:: \boxed{{\theta_f} =  sign( {\theta_{f_{i}}} ) \ atan \left( 2 k \sqrt{|\frac{y_0}{k}|} \right) =  sign( {\theta_{f_{i}}} ) \ atan \left( 2 k x_{0} \right)},
+
+Updating a final angle for a count can be achieved by moving the count to the spectrum of the detector or detector group of the new final angle.
+
+Corrected time-of-flight axis
+-----------------------------
+
+The neutron velocity is
+
+.. math:: v_{N} =  \sqrt{ v_{i}^2 \mbox{cos}({\theta_f})^2 + ( v_{i} \mbox{sin}({\theta_f}) - gt )^2 }
+
+and the neutron arrives at detector position
+
+.. math:: x_{d} = v_{N} \mbox{cos}({\theta_f}) t
+
+.. math:: y_{d} = v_{N} \mbox{sin}({\theta_f}) t - \frac{1}{2} g t^2.
 
 The corrected neutron flight path is given by
 
-.. math:: y = x \mbox{tan}(\theta_f).
+.. math:: y = x \mbox{tan}({\theta_f}).
 
-The neutron hits the detector at corrected position
+When neglecting gravitation :math:`g = 0 \frac{\mbox{m}}{\mbox{s}^2}`, the corrected time-of-flight values are given by
 
-.. math:: x_{d, c} = \frac{y_a}{\mbox{tan}(\theta_f) - m_a}
+.. math:: \boxed{t = \frac{x_{d}}{v_i \mbox{cos}(\theta_f)}},
 
-.. math:: y_{d, c} = x_{d, c} \mbox{tan}(\theta_f).
+where :math:`x_{d}` describes the detector :math:`x` position. Correspondingly, the corrected neutron count will be for detector position
 
-It hits the detector at time
+.. math:: x_{d} = v_i \mbox{cos}({\theta_f}) t
 
-.. math:: t_{d, i} = \frac{y_{d, i}}{v_N \mbox{sin}(\theta_f)}
+.. math:: y_{d} = v_i \mbox{sin}({\theta_f}) t.
 
-at position
+Parabola arc length
+-------------------
 
-.. math:: x_{d, i} = v_N \mbox{cos}(\theta_f) t_{d, i}
+The length :math:`s` of the parabola arc from source to sample
 
-.. math:: y_{d, i} = v_N \mbox{sin}(\theta_f) t_{d, i} - \frac{1}{2} g t_{d, i}^2.
+.. math:: s_1 = \int_{x_1}^{0} \sqrt(1 + \left( \frac{\partial y}{\partial x} \right)^2) dx
 
-All counts from detector position :math:`x_{d, i}, y_{d, i}` will be moved to position :math:`x_{d, c}, y_{d, c}`.
-The corresponding time-of-flight values are given by
+.. math:: s_1 = \int_{x_1}^{0} \sqrt(1 + \left( - 2 k \left( x - x_{0} \right) \right)
 
-.. math:: t = \frac{x_{d, c}}{v_N \mbox{cos} (\theta_f)}
+substituting :math:`2 k x = z` results in
+
+.. math:: s_1 = \frac{1}{2k} \int_{\frac{x_1}{2k}}^{0} \sqrt(1 + z^{2}) dz
+
+and with
+
+.. math:: \frac{\partial tan(z)}{\partial z} = 1 + tan^{2}(z) = \frac{1}{cos^{2}(z)}
+
+one can obtain finally
+
+.. math:: s_1 = -\frac{1}{4k} \left(x \sqrt(1+x_1^{2}) + ln | x + \sqrt(1 + x_1^{2}) | + constant \right).
+
+Equivalently, the solution of the more general form needed for calculating the length from sample to detector
+
+.. math:: s_2 = \int_{0}^{x_2} \sqrt(c + \left( \frac{\partial y_d}{\partial x} \right)^2) dx
+
+is
+
+.. math:: s_2 = \frac{1}{2} \left( x \sqrt(a+x_2^{2}) + a \ ln | \frac{x_2}{\sqrt{a}} + \sqrt(1 + \frac{x_2^{2}}{a}) | + constant \right).
 
 Usage
 -----
@@ -146,6 +168,8 @@ Output:
 
 .. testoutput:: General
     :options: +NORMALIZE_WHITESPACE
+
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ILL Figaro: workspace with instrument where the z axis is parallel and in direction to the beam.
 
