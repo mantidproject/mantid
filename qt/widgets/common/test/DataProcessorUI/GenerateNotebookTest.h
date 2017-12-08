@@ -136,7 +136,7 @@ public:
         std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
         PostprocessingStep("", reflPostprocessor(),
                            std::map<QString, QString>()),
-        std::map<QString, QString>(), "");
+        std::map<QString, QString>(), std::map<QString, QString>());
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
@@ -282,7 +282,7 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<QString, QString>(), ""));
+        reflProcessor(), std::map<QString, QString>(), std::map<QString, QString>()));
   }
 
   void testReduceRowString() {
@@ -297,7 +297,7 @@ public:
 
     auto output = reduceRowString(data, m_instrument, reflWhitelist(),
                                   reflPreprocessMap("TOF_"), reflProcessor(),
-                                  userPreProcessingOptions, "");
+                                  userPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -336,7 +336,7 @@ public:
 
     auto output =
         reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
-                        userPreProcessingOptions, "");
+                        userPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
         "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
@@ -372,7 +372,7 @@ public:
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
-                        reflProcessor(), emptyPreProcessingOptions, "");
+                        reflProcessor(), emptyPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
@@ -618,7 +618,8 @@ public:
     auto preprocessingOptions =
         std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
                                    {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto processingOptions =
+        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
     auto postprocessingStep = PostprocessingStep(
         postprocessingOptions, postProcessor, std::map<QString, QString>());
@@ -716,7 +717,8 @@ public:
     auto preprocessingOptions =
         std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
                                    {"Transmission Run(s)", "Property=Value"}};
-    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto processingOptions =
+        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
     auto postprocessingStep = PostprocessingStep(
         postprocessingOptions, postProcessor, std::map<QString, QString>());

@@ -195,9 +195,9 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
-  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(bool));
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, OptionsMap());
+  MOCK_CONST_METHOD0(getReductionOptions, OptionsMap());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setInstrumentName, void(const std::string &));
   void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
@@ -206,9 +206,9 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
@@ -228,8 +228,8 @@ public:
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
   MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
-  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
-  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getTransmissionOptions, OptionsMap(int));
+  MOCK_CONST_METHOD1(getReductionOptions, OptionsMap(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());

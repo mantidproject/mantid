@@ -383,19 +383,9 @@ private:
   // whether processing or not
   void expectUpdateViewState(MockDataProcessorView &mockDataProcessorView,
                              Cardinality numTimes, bool isProcessing) {
-    // Update menu items according to whether processing or not
-    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(isProcessing))
-        .Times(numTimes);
-
-    // These widgets are only enabled if not processing
-    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(!isProcessing))
-        .Times(numTimes);
-    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(!isProcessing))
-        .Times(numTimes);
-    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(!isProcessing))
-        .Times(numTimes);
-    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(!isProcessing))
-        .Times(numTimes);
+    if (isProcessing) {
+      EXPECT_CALL(mockDataProcessorView, resume()).Times(numTimes);
+    }
   }
 
   // Expect the view's widgets to be set in the paused state
@@ -435,13 +425,6 @@ private:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(numTimes)
         .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
-  }
-
-  void expectGetProperties(MockMainPresenter &mockMainPresenter,
-                           Cardinality numTimes) {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(numTimes)
-        .WillRepeatedly(Return(QString()));
   }
 
   void expectCallResume(MockMainPresenter &mockMainPresenter,
@@ -1121,7 +1104,6 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
@@ -1156,7 +1138,6 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     expectGetSelection(mockDataProcessorView, Exactly(0));
     expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(0));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectCallResume(mockMainPresenter, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));

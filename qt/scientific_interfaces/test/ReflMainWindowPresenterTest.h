@@ -37,11 +37,11 @@ public:
         &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
         &mockSettingsTabPresenter, &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(0, false))
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(0))
         .Times(Exactly(1));
     presenter.getTransmissionRuns(0);
 
-    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(1, false))
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(1))
         .Times(Exactly(1));
     presenter.getTransmissionRuns(1);
 
