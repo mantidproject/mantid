@@ -234,6 +234,51 @@ public:
     }
   }
 
+  void test_IdealCaseDirectBeamCorrections() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nBins{3};
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(OUTWS_NAME + std::string("_++")));
+    TS_ASSERT(ws)
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+    for (size_t i = 0; i != nHist; ++i) {
+      const auto &xs = ws->x(i);
+      const auto &ys = ws->y(i);
+      const auto &es = ws->e(i);
+      TS_ASSERT_EQUALS(ys.size(), nBins)
+      for (size_t j = 0; j != nBins; ++j) {
+        TS_ASSERT_EQUALS(xs[j], edges[j])
+        TS_ASSERT_EQUALS(ys[j], yVal)
+        TS_ASSERT_EQUALS(es[j], std::sqrt(yVal))
+      }
+    }
+  }
+
 private:
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     using namespace Mantid::API;
