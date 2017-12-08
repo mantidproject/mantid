@@ -62,7 +62,7 @@ private:
   double doubleFromRun(const std::string &entryName) const;
   std::vector<double> getXValues();
   void convertTofToWavelength();
-  double fitReflectometryPeak();
+  double reflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
@@ -72,11 +72,16 @@ private:
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
-  std::pair<double, double> detectorAndBraggAngles();
+  double detectorRotation();
   void placeDetector();
+  void placeSample();
   void placeSource();
-
-  double sampleDetectorDistance() const;
+  double collimationAngle() const;
+  double detectorAngle() const;
+  double offsetAngle(const double peakCentre, const double detectorCentre,
+                     const double detectorDistance) const;
+  double originDetectorDistance() const;
+  double sampleHorzontalOffset() const;
   double sourceSampleDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
@@ -88,16 +93,18 @@ private:
   // number of tubes (always 1) times number of pixels per tube
   size_t m_numberOfHistograms{0};
   double m_channelWidth{0.0};
-  std::string m_detectorDistance;
+  std::string m_detectorDistanceName;
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
-  double m_detectorDistanceValue{0.0};
+  double m_detectorAngle{0.0};
+  double m_detectorDistance{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
+  double m_sampleZOffset{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
 };
 
