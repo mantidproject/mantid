@@ -96,6 +96,6 @@ def do_a_fit(x, function, guess, target, atol=0.01):
                         model(x) * np.random.uniform(0.95, 1.05, len(x)),
                         np.ones(len(x)),
                         Nspec=1)
-    fit = Fit(FunctionWrapper('EISFDiffSphere', A=2.0, R=1.0), w)
+    fit = Fit(FunctionWrapper('EISFDiffSphere', **guess), w)
     otarget = OrderedDict(target)
     np.allclose([fit.Function[p] for p in otarget.keys()], otarget.values(), atol)

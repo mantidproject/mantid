@@ -20,12 +20,13 @@ class EISFDiffSphereTest(unittest.TestCase):
         status, output = check_output("EISFDiffSphere", input, expected,
                                       tolerance, A=1.0, R=3.5)
         if not status:
-            self.fail("Computed output " + str(output) + " from input " + str(input) +
-                      " is not equal to the expected output: " + str(expected))
+            msg = 'Computed output {} from input {} unequal to expected: {}'
+            self.fail(msg.format(*[str(a) for a in (output, input, expected)]))
 
     def test_do_fit(self):
         do_a_fit(np.arange(0.1, 2.2, 0.2), 'EISFDiffSphere',
-                 dict(A=2.0, R=1.0), dict(A=1.0, R=3.5), atol=0.01)
+                 guess=dict(A=2.0, R=1.0),
+                 target=dict(A=1.0, R=3.5), atol=0.01)
 
 
 if __name__ == '__main__':
