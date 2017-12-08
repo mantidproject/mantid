@@ -8,13 +8,11 @@
 #include "GLColor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
 #include "SampleActor.h"
 
 #include <boost/weak_ptr.hpp>
-#include <map>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -29,6 +27,8 @@ namespace Geometry {
 class IObjComponent;
 class Instrument;
 class IDetector;
+class ComponentInfo;
+class DetectorInfo;
 }
 }
 
@@ -62,9 +62,7 @@ public:
   void draw(bool picking = false) const override;
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const override {
-    m_scene.getBoundingBox(minBound, maxBound);
-  }
+                      Mantid::Kernel::V3D &maxBound) const override;
   /// Run visitors callback on each component
   bool accept(GLActorVisitor &visitor,
               VisitorAcceptRule rule = VisitAll) override;
@@ -79,6 +77,8 @@ public:
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
+  const Mantid::Geometry::ComponentInfo &getComponentInfo() const;
+  const Mantid::Geometry::DetectorInfo &getDetectorInfo() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   getMaskMatrixWorkspace() const;
@@ -114,6 +114,8 @@ public:
   /// Get colormap scale autoscaling status.
   bool autoscaling() const { return m_autoscaling; }
 
+  void showVolumeRender(bool on);
+
   /// Set the integration range.
   void setIntegrationRange(const double &xmin, const double &xmax);
   /// Get the minimum data value on the color map scale.
@@ -137,7 +139,7 @@ public:
   bool wholeRange() const;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const { return m_detIDs.size(); }
+  size_t ndetectors() const;// { return m_detIDs.size(); }
   /// Get a reference to a detector by a pick ID converted form a color in
   /// the pick image.
   const Mantid::Geometry::IDetector &getDetectorByPickID(size_t pickID) const;
@@ -152,9 +154,9 @@ public:
   void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
-  const Mantid::Kernel::V3D &getDetPos(size_t pickID) const;
+  const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
   /// Get a vector of IDs of all detectors in the instrument.
-  const std::vector<Mantid::detid_t> &getAllDetIDs() const { return m_detIDs; }
+  const std::vector<Mantid::detid_t> &getAllDetIDs() const;
   /// Get displayed color of a detector by its detector ID.
   GLColor getColor(Mantid::detid_t id) const;
   /// Get the workspace index of a detector by its detector ID.
@@ -172,7 +174,7 @@ public:
   void updateColors();
   /// Invalidate the OpenGL display lists to force full re-drawing of the
   /// instrument and creation of new lists.
-  void invalidateDisplayLists() const { m_scene.invalidateDisplayList(); }
+  void invalidateDisplayLists() const; //{ m_scene.invalidateDisplayList(); }
   /// Toggle display of the guide and other non-detector instrument components
   void showGuides(bool);
   /// Get the guide visibility status
@@ -204,6 +206,7 @@ signals:
   void colorMapChanged();
 
 private:
+  void doDraw(bool picking) const;
   void setUpWorkspace(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
       double scaleMin, double scaleMax);
@@ -225,7 +228,8 @@ private:
   size_t pushBackDetid(Mantid::detid_t) const;
   void pushBackNonDetid(ObjComponentActor *actor,
                         Mantid::Geometry::ComponentID compID) const;
-  void setupPickColors();
+  void setupColors();//TODO: Rename to setupPickColors
+  void setupPickColors();//TODO: Remove
 
   boost::shared_ptr<Mantid::API::IMaskWorkspace>
   getMaskWorkspaceIfExists() const;
@@ -258,6 +262,8 @@ private:
   bool m_autoscaling;
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
+  /// Flag to enable intensity based transparency.
+  bool m_volumeRender;
   /// Color map scale type: linear or log
   GraphOptions::ScaleType m_scaleType;
 
@@ -281,16 +287,23 @@ private:
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
 
-  /// Colors in order of workspace indexes
+  /// Colors in order of component info
   mutable std::vector<GLColor> m_colors;
   /// Colour of a masked detector
   GLColor m_maskedColor;
   /// Colour of a "failed" detector
   GLColor m_failedColor;
   /// The collection of actors for the instrument components
-  GLActorCollection m_scene;
+  //GLActorCollection m_scene;
 
   static double m_tolerance;
+  
+  std::vector<GLColor> m_pickColors;
+  std::vector<bool> m_isCompVisible;
+
+  //Two display lists for normal rendering and picking
+  mutable GLuint m_displayListId[2];
+  mutable bool m_useDisplayList[2];
 
   friend class ObjComponentActor;
   friend class ObjCompAssemblyActor;

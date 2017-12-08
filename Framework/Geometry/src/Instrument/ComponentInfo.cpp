@@ -193,7 +193,7 @@ size_t ComponentInfo::sample() const { return m_componentInfo->sample(); }
 
 double ComponentInfo::l1() const { return m_componentInfo->l1(); }
 
-size_t ComponentInfo::root() { return m_componentInfo->root(); }
+size_t ComponentInfo::root() const { return m_componentInfo->root(); }
 
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Kernel::V3D &newPosition) {

@@ -97,6 +97,7 @@
 
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
+#include <chrono>
 
 using namespace std;
 
@@ -2171,9 +2172,14 @@ void MantidUI::showMantidInstrument() {
 }
 
 void MantidUI::showMantidInstrumentSelected() {
+  auto start = std::chrono::system_clock::now();
   QString wsName = getSelectedWorkspaceName();
   if (!wsName.isEmpty())
     showMantidInstrument(wsName);
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - start;
+  g_log.information() << "Show instrument lasted: " << elapsed_seconds.count()
+                      << " seconds." << std::endl;
 }
 
 void MantidUI::mantidMenuAboutToShow() {

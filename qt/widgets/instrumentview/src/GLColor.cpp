@@ -24,11 +24,11 @@ GLColor::GLColor(float red, float green, float blue, float alpha) {
   m_rgba[3] = (unsigned char)(alpha * 255);
 }
 
-GLColor::GLColor(int r, int g, int b) {
+GLColor::GLColor(int r, int g, int b, int a) {
   m_rgba[0] = (unsigned char)r;
   m_rgba[1] = (unsigned char)g;
   m_rgba[2] = (unsigned char)b;
-  m_rgba[3] = 255;
+  m_rgba[3] = (unsigned char)a;
 }
 
 /**

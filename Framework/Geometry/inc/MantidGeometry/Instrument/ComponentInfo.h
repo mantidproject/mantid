@@ -131,7 +131,7 @@ public:
   const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
-  size_t root();
+  size_t root() const;
 
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);

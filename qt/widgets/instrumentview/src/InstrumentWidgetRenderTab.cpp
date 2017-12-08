@@ -141,6 +141,10 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
   connect(m_displayAxes, SIGNAL(toggled(bool)), this, SLOT(showAxes(bool)));
+  m_volumeRender = new QAction("VolumeRender", this);
+  m_volumeRender->setCheckable(true);
+  m_volumeRender->setChecked(false);
+  connect(m_volumeRender, SIGNAL(toggled(bool)), this, SLOT(showVolumeRender(bool)));
   m_displayDetectorsOnly = new QAction("Display Detectors Only", this);
   m_displayDetectorsOnly->setCheckable(true);
   m_displayDetectorsOnly->setChecked(true);
@@ -173,6 +177,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   displaySettingsMenu->addSeparator();
   displaySettingsMenu->addAction(m_displayAxes);
   displaySettingsMenu->addAction(m_displayDetectorsOnly);
+  displaySettingsMenu->addAction(m_volumeRender);
   displaySettingsMenu->addAction(m_wireframe);
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
@@ -441,6 +446,14 @@ void InstrumentWidgetRenderTab::showAxes(bool on) {
   m_displayAxes->blockSignals(true);
   m_displayAxes->setChecked(on);
   m_displayAxes->blockSignals(false);
+}
+
+void InstrumentWidgetRenderTab::showVolumeRender(bool on)
+{
+  m_instrWidget->getInstrumentActor().showVolumeRender(on);
+  m_volumeRender->blockSignals(true);
+  m_volumeRender->setChecked(on);
+  m_volumeRender->blockSignals(false);
 }
 
 /**
@@ -735,6 +748,7 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   tab.writeLine("AxesView") << mAxisCombo->currentIndex();
   tab.writeLine("AutoScaling") << m_autoscaling->isChecked();
   tab.writeLine("DisplayAxes") << m_displayAxes->isChecked();
+  tab.writeLine("VolumeRender") << m_volumeRender->isChecked();
   tab.writeLine("FlipView") << m_flipCheckBox->isChecked();
   tab.writeLine("DisplayDetectorsOnly") << m_displayDetectorsOnly->isChecked();
   tab.writeLine("DisplayWireframe") << m_wireframe->isChecked();
@@ -772,7 +786,7 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   tsv >> tabLines;
   API::TSVSerialiser tab(tabLines);
 
-  bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
+  bool autoScaling, displayAxes, volumeRender, flipView, displayDetectorsOnly,
       displayWireframe, displayLighting, useOpenGL, useUCorrection;
   int axesView;
 
@@ -782,6 +796,8 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   tab >> autoScaling;
   tab.selectLine("DisplayAxes");
   tab >> displayAxes;
+  tab.selectLine("VolumeRender");
+  tab >> volumeRender;
   tab.selectLine("FlipView");
   tab >> flipView;
   tab.selectLine("DisplayDetectorsOnly");
@@ -798,6 +814,7 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   mAxisCombo->setCurrentIndex(axesView);
   m_autoscaling->setChecked(autoScaling);
   m_displayAxes->setChecked(displayAxes);
+  m_volumeRender->setChecked(volumeRender);
   m_flipCheckBox->setChecked(flipView);
   m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
   m_wireframe->setChecked(displayWireframe);
