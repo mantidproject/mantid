@@ -99,7 +99,7 @@ std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
         "Either a component, such as a tube, must be specified "
         "to get the height axis, or the binning given explicitly.";
     result["ComponentForHeightAxis"] = message;
-    result["HeightBinning"] = message;
+    result["HeightAxis"] = message;
   }
 
   return result;
