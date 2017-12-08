@@ -1174,16 +1174,13 @@ public:
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
-    GroupList grouplist;
-    grouplist.insert(0);
-
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
-    // The user hits the "process" button with the first group selected
+    // The user hits the "process" button
     expectGetSelection(mockDataProcessorView, Exactly(0));
     expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
     expectGetProperties(mockMainPresenter, Exactly(0));
