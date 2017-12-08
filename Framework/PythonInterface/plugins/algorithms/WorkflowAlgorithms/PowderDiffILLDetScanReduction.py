@@ -59,7 +59,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[], validator=FloatArrayOrderedPairsValidator()),
                              doc='A comma separated list of minimum and maximum height range (in m)')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
 
@@ -79,29 +79,20 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         if (len(height_range_prop) == 2):
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
-        component_for_height_axis = ''
-        if instrument_name == 'D2B':
-            component_for_height_axis = 'tube_1'
-        elif instrument_name == 'D20':
-            component_for_height_axis = 'panel_1'
-
         output_workspaces = []
         if self.getPropertyValue('Output2D'):
             output2D = SumOverlappingTubes(InputWorkspaces=inputWS,
                                            OutputType='2D',
-                                           ComponentForHeightAxis=component_for_height_axis,
                                            HeightAxis=height_range)
             output_workspaces.append(output2D)
         if self.getPropertyValue('Output2DStraight'):
             output2Dstraight = SumOverlappingTubes(InputWorkspaces=inputWS,
                                                    OutputType='2DStraight',
-                                                   ComponentForHeightAxis=component_for_height_axis,
                                                    HeightAxis=height_range)
             output_workspaces.append(output2Dstraight)
         if self.getPropertyValue('Output1D'):
             output1D = SumOverlappingTubes(InputWorkspaces=inputWS,
                                            OutputType='1DStraight',
-                                           ComponentForHeightAxis=component_for_height_axis,
                                            HeightAxis=height_range)
             output_workspaces.append(output1D)
 
