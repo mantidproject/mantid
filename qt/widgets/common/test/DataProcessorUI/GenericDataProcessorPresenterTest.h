@@ -1223,9 +1223,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1275,9 +1272,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1328,9 +1322,6 @@ public:
     expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -1367,8 +1358,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1504,8 +1493,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -2970,9 +2957,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -3112,9 +3096,6 @@ public:
     // The user hits the "process" button with the first group selected
     expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
     expectGetOptions(mockMainPresenter, Exactly(1), "Params='-0.10'");
-    expectGetProperties(mockMainPresenter, Exactly(2));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspace was stitched with params = '-0.04'
