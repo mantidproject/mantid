@@ -513,14 +513,21 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
   const auto nHisto = inputs.pmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
+    auto &I01 = inputs.pmWS->mutableY(wsIndex);
     const auto &I10 = inputs.mpWS->y(wsIndex);
     const auto &I11 = inputs.mmWS->y(wsIndex);
-    const auto a = 2. * P1 - 1;
-    const auto b = P1 - P2;
-    const auto divisor = F1 * a - b;
-    const auto c = I00 - I10;
-    inputs.pmWS->mutableY(wsIndex) = F1 * I00 * a - (I11 + c) * b - F2 * c * (2. * P2 - 1) / divisor;
-    // The errors are left to zero.
+    for (size_t binIndex = 0; binIndex != I00.size(); ++binIndex) {
+      const auto f1 = F1[binIndex];
+      const auto f2 = F2[binIndex];
+      const auto p1 = P1[binIndex];
+      const auto p2 = P2[binIndex];
+      const auto i00 = I00[binIndex];
+      const auto i10 = I10[binIndex];
+      const auto i11 = I11[binIndex];
+      I01[binIndex] = (f1 * i00 * (-1. + 2. * p1) - (i00 - i10 + i11) * (p1 - p2) -
+                       f2 * (i00 - i10) * (-1. + 2. * p2)) / (-p1 + f1 * (-1. + 2. * p1) + p2);
+      // The errors are left to zero.
+    }
   }
 }
 
@@ -534,13 +541,20 @@ void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMa
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
     const auto &I01 = inputs.pmWS->y(wsIndex);
+    auto &I10 = inputs.mpWS->mutableY(wsIndex);
     const auto &I11 = inputs.mmWS->y(wsIndex);
-    const auto a = 2. * P2 - 1;
-    const auto b = P1 - P2;
-    const auto divisor = F2 * a + b;
-    const auto c = I01 - I00;
-    inputs.mpWS->mutableY(wsIndex) = F1 * c * (2. * P1 - 1) + (I11 - c) * b + F2 * I00 * a / divisor;
-    // The errors are left to zero.
+    for (size_t binIndex = 0; binIndex != I00.size(); ++binIndex) {
+      const auto f1 = F1[binIndex];
+      const auto f2 = F2[binIndex];
+      const auto p1 = P1[binIndex];
+      const auto p2 = P2[binIndex];
+      const auto i00 = I00[binIndex];
+      const auto i01 = I01[binIndex];
+      const auto i11 = I11[binIndex];
+      I10[binIndex] = (-f1 * (i00 - i01) * (-1. + 2. * p1) + (i00 - i01 + i11) * (p1 - p2) +
+                       f2 * i00 * (-1. + 2. * p2)) / (p1 - p2 + f2 * (-1. + 2. * p2));
+      // The errors are left to zero.
+    }
   }
 }
 } // namespace Algorithms
