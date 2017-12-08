@@ -74,8 +74,8 @@ if ( LIBRDKAFKA_FOUND )
     src/Kafka/private/Schema/flatbuffers/flatbuffers.h
     src/Kafka/private/Schema/df12_det_spec_map_generated.h
     src/Kafka/private/Schema/ev42_events_generated.h
-	src/Kafka/private/Schema/f142_logdata_generated.h
-	src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
+    src/Kafka/private/Schema/f142_logdata_generated.h
+    src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
     src/Kafka/private/Schema/is84_isis_events_generated.h
     src/Kafka/private/Schema/ba57_run_info_generated.h
   )
