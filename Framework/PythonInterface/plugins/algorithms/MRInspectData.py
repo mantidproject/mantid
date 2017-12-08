@@ -108,7 +108,9 @@ class MRInspectData(PythonAlgorithm):
                                       LogText=str(data_info.low_res_range[1]),
                                       LogType='Number', LogUnit='pixel')
 
+
 def _as_ints(a): return [int(a[0]), int(a[1])]
+
 
 class DataInfo(object):
     """
@@ -136,7 +138,7 @@ class DataInfo(object):
         self.low_res_range = [0,0]
         self.background = [0,0]
         self.huber_x_cut = huber_x_cut
-        
+
         # ROI information
         self.roi_peak = [0,0]
         self.roi_low_res = [0,0]
@@ -149,7 +151,7 @@ class DataInfo(object):
         self.forced_low_res_roi = _as_ints(low_res_roi)
         self.force_bck_roi = force_bck_roi
         self.forced_bck_roi = _as_ints(bck_roi)
-        
+
         # Peak found before fitting for the central position
         self.found_peak = [0,0]
         self.found_low_res = [0,0]
@@ -191,7 +193,7 @@ class DataInfo(object):
             sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
             source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
             source_detector_distance = source_sample_distance + sample_detector_distance
-            
+
             h = 6.626e-34  # m^2 kg s^-1
             m = 1.675e-27  # kg
             wl = run_object.getProperty('LambdaRequest').value[0]
@@ -200,7 +202,7 @@ class DataInfo(object):
             cst = source_detector_distance / h * m
             tof_min = cst * (wl + wl_offset * 60.0 / chopper_speed - 1.4 * 60.0 / chopper_speed) * 1e-4
             tof_max = cst * (wl + wl_offset * 60.0 / chopper_speed + 1.4 * 60.0 / chopper_speed) * 1e-4
-            
+
             self.tof_range = [tof_min, tof_max]
             return [tof_min, tof_max]
 
@@ -293,9 +295,9 @@ class DataInfo(object):
 
     def determine_peak_range(self, ws, specular=True, max_pixel=250):
         ws_summed = mantid.simpleapi.RefRoi(InputWorkspace=ws, IntegrateY=specular,
-                           NXPixel=self.n_x_pixel, NYPixel=self.n_y_pixel,
-                           ConvertToQ=False,
-                           OutputWorkspace="ws_summed")
+                                            NXPixel=self.n_x_pixel, NYPixel=self.n_y_pixel,
+                                            ConvertToQ=False,
+                                            OutputWorkspace="ws_summed")
 
         integrated = mantid.simpleapi.Integration(ws_summed)
         integrated = mantid.simpleapi.Transpose(integrated)
@@ -304,8 +306,8 @@ class DataInfo(object):
         y_values = integrated.readY(0)
         e_values = integrated.readE(0)
         ws_short = mantid.simpleapi.CreateWorkspace(DataX=x_values[self.peak_range_offset:max_pixel],
-                                   DataY=y_values[self.peak_range_offset:max_pixel],
-                                   DataE=e_values[self.peak_range_offset:max_pixel])
+                                                    DataY=y_values[self.peak_range_offset:max_pixel],
+                                                    DataE=e_values[self.peak_range_offset:max_pixel])
         try:
             specular_peak, low_res, _ = mantid.simpleapi.LRPeakSelection(InputWorkspace=ws_short)
         except:
@@ -336,7 +338,7 @@ class DataInfo(object):
 
         p0 = [np.max(signal_y), (peak[1]+peak[0])/2.0, (peak[1]-peak[0])/2.0, 0.0]
         err_y = np.sqrt(np.fabs(signal_y))
-        # Using bounds would be great but only available with scipy>=0.17. bounds=(0, np.inf), 
+        # Using bounds would be great but only available with scipy>=0.17. bounds=(0, np.inf)
         coeff, _ = curve_fit(gauss, signal_x, signal_y, sigma=err_y, p0=p0)
         peak_position = coeff[1]
         peak_width = math.fabs(3.0*coeff[2])
@@ -391,13 +393,13 @@ class DataInfo(object):
         logging.info("Run %s [%s]: Low-res found %s" % (self.run_number, self.cross_section, str(low_res)))
         self.found_low_res = low_res
         bck_range = None
-        
+
         # Process the ROI information
         self.process_roi(ws)
 
         # Keep track of whether we actually used the ROI
         self.use_roi_actual = False
-        
+
         if self.use_roi and not self.roi_peak == [0,0]:
             peak = copy.copy(self.roi_peak)
             if not self.roi_low_res == [0,0]:
@@ -446,11 +448,16 @@ class DataInfo(object):
                 #low_res = [5, self.n_x_pixel-5]
                 low_res = self.found_low_res
                 self.use_roi_actual = False
-                logging.warning("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" % (self.run_number, self.cross_section, peak, low_res))
-                logging.warning("Run %s [%s]: Peak position: %s  Peak width: %s" % (self.run_number, self.cross_section, peak_position, peak_width))
+                logging.warning("Run %s [%s]: Peak not in supplied range! Found peak: %s low: %s" % (self.run_number,
+                                                                                                     self.cross_section,
+                                                                                                     peak, low_res))
+                logging.warning("Run %s [%s]: Peak position: %s  Peak width: %s" % (self.run_number,
+                                                                                    self.cross_section,
+                                                                                    peak_position, peak_width))
             except:
                 logging.error(sys.exc_value)
-                logging.error("Run %s [%s]: Could not use Gaussian fit to determine peak position over whole detector" % (self.run_number, self.cross_section))
+                logging.error("Run %s [%s]: Gaussian fit failed to determine peak position" % (self.run_number,
+                                                                                               self.cross_section))
 
         # Update the specular peak range if needed
         if self.update_peak_range:
