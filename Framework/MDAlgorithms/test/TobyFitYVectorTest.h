@@ -108,9 +108,8 @@ private:
     expt->setModeratorModel(sourceDescr);
 
     // Sample size
-    Mantid::Geometry::Object_sptr sampleShape =
-        ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
-    expt->mutableSample().setShape(*sampleShape);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
+    expt->mutableSample().setShape(sampleShape);
 
     // OrientedLattice
     OrientedLattice *latticeRotation = new OrientedLattice;
@@ -139,8 +138,7 @@ private:
 
     ObjComponent *aperture = new ObjComponent("aperture");
     aperture->setPos(V3D(0.0, 0.0, -10.01));
-    Object_sptr shape =
-        ComponentCreationHelper::createCuboid(0.047, 0.047, 0.001);
+    auto shape = ComponentCreationHelper::createCuboid(0.047, 0.047, 0.001);
     aperture->setShape(shape);
     instrument->add(aperture);
 

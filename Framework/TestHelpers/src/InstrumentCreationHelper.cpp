@@ -20,7 +20,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
   const double pixelRadius(0.05);
-  Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
   const double detZPos(5.0);
@@ -49,7 +49,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   {
     Detector *monitor1 =
         new Detector("mon1", workspace.getAxis(1)->spectraNo(ndets),
-                     Object_sptr(), instrument.get());
+                     IObject_sptr(), instrument.get());
     monitor1->setPos(0.0, 0.0, -9.0);
     instrument->add(monitor1);
     instrument->markAsMonitor(monitor1);
@@ -57,7 +57,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
 
     Detector *monitor2 =
         new Detector("mon2", workspace.getAxis(1)->spectraNo(ndets) + 1,
-                     Object_sptr(), instrument.get());
+                     IObject_sptr(), instrument.get());
     monitor2->setPos(0.0, 0.0, -2.0);
     instrument->add(monitor2);
     instrument->markAsMonitor(monitor2);

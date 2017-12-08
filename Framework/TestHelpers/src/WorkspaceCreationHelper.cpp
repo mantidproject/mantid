@@ -258,7 +258,7 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     xmlShape += "<algebra val=\"shape\" /> ";
 
     ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
+    auto shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
       Detector *det = new Detector("det", detid_t(i + 1), shape, nullptr);
       det->setPos(i, i + 1, 1);

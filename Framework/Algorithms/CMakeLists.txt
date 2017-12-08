@@ -195,6 +195,7 @@ set ( SRC_FILES
 	src/ModeratorTzeroLinear.cpp
 	src/MonitorEfficiencyCorUser.cpp
 	src/MonteCarloAbsorption.cpp
+	src/MostLikelyMean.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
@@ -301,6 +302,7 @@ set ( SRC_FILES
 	src/StripVanadiumPeaks2.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
+	src/SumOverlappingTubes.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
@@ -528,6 +530,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
+	inc/MantidAlgorithms/MostLikelyMean.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
@@ -635,6 +638,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
+	inc/MantidAlgorithms/SumOverlappingTubes.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
@@ -865,6 +869,7 @@ set ( TEST_FILES
 	ModeratorTzeroTest.h
 	MonitorEfficiencyCorUserTest.h
 	MonteCarloAbsorptionTest.h
+	MostLikelyMeanTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
@@ -954,6 +959,7 @@ set ( TEST_FILES
 	StripVanadiumPeaksTest.h
 	SumEventsByLogValueTest.h
 	SumNeighboursTest.h
+	SumOverlappingTubesTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
