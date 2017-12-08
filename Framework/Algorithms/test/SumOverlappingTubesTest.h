@@ -642,6 +642,32 @@ public:
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }
+
+  void test_normal_operation_with_2d_straight_option_with_height_range() {
+    auto outWS = do_straight_option(false, true);
+
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), 5)
+    for (size_t i = 0; i < 5; ++i)
+      TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
+
+    double totalCounts = 0.0;
+    for (size_t i = 0; i < N_TUBES; ++i) {
+      auto counts = outWS->getSpectrum(0).y()[i];
+      // Tolerance on error is quite large, due to repeated rounding
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      totalCounts += counts;
+    }
+
+    TS_ASSERT_DELTA(totalCounts, 10.0, 1e-6)
+
+    // An analytic comparison is a little harder for this case, do a quick check
+    // of an arbitary value
+    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 2.0, 1e-6)
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */

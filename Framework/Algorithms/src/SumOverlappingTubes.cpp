@@ -65,8 +65,7 @@ void SumOverlappingTubes::init() {
       "the final y value. This can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
-      "workspaces. For the 1DStraight case only this can also be two numbers, "
-      "to give the range desired.");
+      "workspaces. This can also be two numbers to give the range desired.");
   declareProperty(
       make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
@@ -209,7 +208,8 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     throw std::runtime_error("No detector_for_height_axis parameter for this "
                              "instrument. Please enter a value for the "
                              "HeightAxis parameter.");
-  if (componentName.length() > 0 && heightBinning.empty()) {
+  if ((componentName.length() > 0 && heightBinning.empty()) ||
+      (m_outputType != "1DStraight" && heightBinning.size() == 2)) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
     const auto &ws = m_workspaceList.front();
@@ -221,8 +221,13 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     const auto &compAss = dynamic_cast<const ICompAssembly &>(*comp);
     std::vector<IComponent_const_sptr> children;
     compAss.getChildren(children, false);
-    for (const auto &thing : children)
-      m_heightAxis.push_back(thing->getPos().Y());
+    for (const auto &child : children) {
+      const auto posY = child->getPos().Y();
+      if (heightBinning.size() == 2 &&
+          (posY < heightBinning[0] || posY > heightBinning[1]))
+        continue;
+      m_heightAxis.push_back(child->getPos().Y());
+    }
   } else {
     if (heightBinning.size() != 3) {
       if (heightBinning.size() == 2 && m_outputType == "1DStraight") {
