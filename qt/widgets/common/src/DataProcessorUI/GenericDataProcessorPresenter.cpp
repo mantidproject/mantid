@@ -40,21 +40,67 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 using OptionsMap = std::map<QString, QString>;
 
+/** Trim whitespace and quotes from the start/end of a string
+ * @param option : the untrimmed value
+ * @returns : the trimmed value
+ * */
+QString trimWhitespaceAndQuotes(const QString &valueIn) {
+  // Trim whitespace
+  auto value = valueIn.trimmed();
+
+  // Trim quotes at the start/end
+  if (value.size() > 1 &&
+      ((value.startsWith("\"") && value.endsWith("\"")) ||
+       (value.startsWith("'") && value.endsWith("'")))) {
+    value.remove(0, 1);
+    value.remove(value.size() - 1, 1);
+  }
+
+  return value;
+}
+
+/** Add the given key/value pair into the given map, trimming unwanted
+ * characters from the value
+ * @param key : the key to use in the map
+ * @param value : the value to use in the map
+ * @param destMap : the map to add the values to
+ * */
+void addOption(const QString &key, const QString &value, OptionsMap &destMap) {
+  auto const trimmedValue = trimWhitespaceAndQuotes(value);
+    
+  if (key.isEmpty() || trimmedValue.isEmpty())
+    throw std::runtime_error("Invalid option: " + key.toStdString() + "=" + value.toStdString());
+
+  destMap[key] = trimmedValue;
+}
+
+/** Inserts values from a source map into a destination map, trimming
+ * values to remove any unwanted characters
+ * @param sourceMap : the input map 
+ * @param destMap : the output map
+ */
+void parseOptionsFromMap(const OptionsMap &sourceMap, OptionsMap &destMap) {
+  for (auto const &keyValuePair: sourceMap) {
+    addOption(keyValuePair.first, keyValuePair.second, destMap);
+  }
+}
+
 /** Convert a key=value command-separated string into a map and add
- * the results into the given optionsMap.
+ * the results into the given options map, trimming any unwanted
+ * characters from the value.
  * @param options : the string to convert
  * @param optionsMap : the map to update
  */
-void addStringOptionsToMap(const QString &options, OptionsMap &optionsMap) {
+void parseOptionsFromString(const QString &options, OptionsMap &destMap) {
   if (options.isEmpty())
     return;
 
   auto optionsVec = options.split(",");
+  optionsVec.removeAll("");
 
-  for (auto const &option : optionsVec) {
-    auto opt = option.split("=");
-    auto const key = opt[0];
-    optionsMap[key] = opt[1];
+  for (auto const &keyValueString : optionsVec) {
+    auto keyValuePair = keyValueString.split("=");
+    addOption(keyValuePair[0], keyValuePair[1], destMap);
   }
 }
 
@@ -99,11 +145,11 @@ QStringList parsePreprocessingInput(const QString &inputStr) {
   std::transform(properties.begin(), properties.end(), properties.begin(),
                  [](QString in) -> QString { return in.trimmed(); });
 
-  // Check if we have any empty strings
-  if (properties.contains(""))
-    throw std::runtime_error("Some of the runs are empty. This may be due to "
-                             "trailing separators or other invalid characters "
-                             "in the input.");
+  // Remove any empty strings
+  properties.removeAll("");
+
+  if (properties.isEmpty())
+    throw std::runtime_error("No runs given");
 
   return properties;
 }
@@ -715,7 +761,10 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
       if (!runNumbers.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = runNumbers.split("+", QString::SkipEmptyParts);
-        names.append(column.prefix() + value.join("_"));
+        // Remove empty strings
+        value.removeAll("");
+        if (!value.isEmpty())
+          names.append(column.prefix() + value.join("+"));
       }
     }
   } // Columns
@@ -928,9 +977,10 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // precedence if given multiple times.
   const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
   const auto hiddenOptions = data->back();
-  auto options = m_processingOptions;
-  addStringOptionsToMap(userOptions, options);
-  addStringOptionsToMap(hiddenOptions, options);
+  OptionsMap options;
+  parseOptionsFromMap(m_processingOptions, options);
+  parseOptionsFromString(userOptions, options);
+  parseOptionsFromString(hiddenOptions, options);
 
   // Now set user-specified options from the columns (overrides any values
   // already set in the options map)
