@@ -191,7 +191,7 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
     const auto &mmY = inputs.mmWS->y(wsIndex);
     const auto &mmE = inputs.mmWS->e(wsIndex);
     const auto &ppY = inputs.ppWS->y(wsIndex);
-    const auto &ppE = inputs.ppWS->y(wsIndex);
+    const auto &ppE = inputs.ppWS->e(wsIndex);
     auto &mmYOut = outputs.mmWS->mutableY(wsIndex);
     auto &mmEOut = outputs.mmWS->mutableE(wsIndex);
     auto &ppYOut = outputs.ppWS->mutableY(wsIndex);
