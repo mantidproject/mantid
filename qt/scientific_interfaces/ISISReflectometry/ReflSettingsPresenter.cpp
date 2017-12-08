@@ -129,10 +129,8 @@ OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
 
     // Add detector limits
     auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
+    if (!procInst.empty())
       options["ProcessingInstructions"] = QString::fromStdString(procInst);
-    }
   }
 
   return options;
@@ -154,38 +152,28 @@ OptionsMap ReflSettingsPresenter::getReductionOptions() const {
 
     // Add CRho
     auto crho = m_view->getCRho();
-    if (!crho.empty()) {
-      wrapWithQuotes(crho);
+    if (!crho.empty())
       options["CRho"] = QString::fromStdString(crho);
-    }
 
     // Add CAlpha
     auto calpha = m_view->getCAlpha();
-    if (!calpha.empty()) {
-      wrapWithQuotes(calpha);
+    if (!calpha.empty())
       options["CAlpha"] = QString::fromStdString(calpha);
-    }
 
     // Add CAp
     auto cap = m_view->getCAp();
-    if (!cap.empty()) {
-      wrapWithQuotes(cap);
+    if (!cap.empty())
       options["CAp"] = QString::fromStdString(cap);
-    }
 
     // Add CPp
     auto cpp = m_view->getCPp();
-    if (!cpp.empty()) {
-      wrapWithQuotes(cpp);
+    if (!cpp.empty())
       options["CPp"] = QString::fromStdString(cpp);
-    }
 
     // Add direct beam
     auto dbnr = m_view->getDirectBeam();
-    if (!dbnr.empty()) {
-      wrapWithQuotes(dbnr);
+    if (!dbnr.empty())
       options["RegionOfDirectBeam"] = QString::fromStdString(dbnr);
-    }
 
     // Add polarisation corrections
     auto polCorr = m_view->getPolarisationCorrections();
@@ -268,10 +256,8 @@ OptionsMap ReflSettingsPresenter::getReductionOptions() const {
 
     // Add detector limits
     auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
+    if (!procInst.empty())
       options["ProcessingInstructions"] = QString::fromStdString(procInst);
-    }
 
     // Add correction type
     auto correctionType = m_view->getDetectorCorrectionType();
@@ -356,16 +342,6 @@ void ReflSettingsPresenter::getExpDefaults() {
   }
 
   m_view->setExpDefaults(defaults);
-}
-
-/** Wraps string with quote marks if it does not already have them
-* @param str :: [input] The string to be wrapped
-*/
-void ReflSettingsPresenter::wrapWithQuotes(std::string &str) const {
-  if (str.front() != '\"')
-    str = "\"" + str;
-  if (str.back() != '\"')
-    str = str + "\"";
 }
 
 /** Fills instrument settings with default values
