@@ -4,6 +4,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
@@ -871,6 +873,37 @@ public:
     tp_splitter.joinAll();
     std::cout << "Finished Workspace splitting performance test, 4 threads in "
               << clock.elapsed() << " sec\n";
+  }
+
+  void testHasOrientedLattice() {
+    int nExperimentInfosToAdd = 3;
+    MDEventWorkspace<MDLeanEvent<3>, 3> ws;
+    TS_ASSERT_EQUALS(ws.hasOrientedLattice(), false);
+
+    //add one oriented lattice
+    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+    ws.getExperimentInfo(0)->mutableSample().setOrientedLattice(latt);
+    TS_ASSERT_EQUALS(ws.hasOrientedLattice(), true);
+
+    //add some more using multiple experiment infos
+    for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i) {
+      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      ws.addExperimentInfo(experimentInfo);
+      ws.getExperimentInfo(i)->mutableSample().setOrientedLattice(latt);
+      TS_ASSERT_EQUALS(ws.hasOrientedLattice(), true);
+    }
+
+    //take them away one by one starting with the first, leave the last one
+    for (uint16_t i = 0; i < (nExperimentInfosToAdd - 1); ++i) {
+      ws.getExperimentInfo(i)->mutableSample().clearOrientedLattice();
+      TS_ASSERT_EQUALS(ws.hasOrientedLattice(), true);
+    }
+
+    //remove the last one
+    ws.getExperimentInfo(nExperimentInfosToAdd - 1)->mutableSample().clearOrientedLattice();
+    TS_ASSERT_EQUALS(ws.hasOrientedLattice(), false);
+
+    delete latt;
   }
 };
 

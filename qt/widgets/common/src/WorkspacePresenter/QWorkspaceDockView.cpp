@@ -1081,7 +1081,7 @@ void QWorkspaceDockView::addSaveMenuOption(QString algorithmString,
   QAction *saveAction = new QAction(menuEntryName, this);
   saveAction->setData(QVariant(algorithmString));
 
-  // Connect the tigger slot to show algorithm dialog
+  // Connect the trigger slot to show algorithm dialog
   connect(saveAction, SIGNAL(triggered()), this,
           SLOT(handleShowSaveAlgorithm()));
 
