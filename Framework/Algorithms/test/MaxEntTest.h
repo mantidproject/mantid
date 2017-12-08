@@ -537,7 +537,7 @@ public:
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
       ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value+1.0;
+      ws->dataE(0)[i] = value + 1.0;
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
