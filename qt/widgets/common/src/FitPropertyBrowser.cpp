@@ -1,19 +1,19 @@
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/MultifitSetupDialog.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
-#include "MantidQtWidgets/Common/MultifitSetupDialog.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
@@ -26,25 +26,25 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <Poco/ActiveResult.h>
 
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QMenu>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QSettings>
 #include <QApplication>
 #include <QClipboard>
+#include <QGridLayout>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QTreeWidget>
 #include <QUrl>
+#include <QVBoxLayout>
 
 #include <algorithm>
 #include <iostream>
@@ -144,8 +144,8 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
 }
 
 /**
-* Initialise the fit property browser
-*/
+ * Initialise the fit property browser
+ */
 void FitPropertyBrowser::init() {
   QWidget *w = new QWidget(this);
 
@@ -259,24 +259,24 @@ void FitPropertyBrowser::init() {
 }
 
 /**
-* @brief Initialise the layout.
-* This initialization includes:
-*   1. SIGNALs/SLOTs when properties change.
-*   2. Action menus and associated SIGNALs/SLOTs.
-*   3. Initialize the CompositeFunction, the root from which to build the Model.
-*   4. Update the list of available functions
-* @param w widget parenting the action menus and the property tree browser
-*/
+ * @brief Initialise the layout.
+ * This initialization includes:
+ *   1. SIGNALs/SLOTs when properties change.
+ *   2. Action menus and associated SIGNALs/SLOTs.
+ *   3. Initialize the CompositeFunction, the root from which to build the
+ * Model. 4. Update the list of available functions
+ * @param w widget parenting the action menus and the property tree browser
+ */
 void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
 
 /**
-* @brief Initialise the layout for the fit button.
-* This initialization includes:
-*   1. SIGNALs/SLOTs when properties change.
-*   2. Actions and associated SIGNALs/SLOTs.
-* @param w widget parenting the action menus and the property tree browser
-* @return push botton for the fit menu
-*/
+ * @brief Initialise the layout for the fit button.
+ * This initialization includes:
+ *   1. SIGNALs/SLOTs when properties change.
+ *   2. Actions and associated SIGNALs/SLOTs.
+ * @param w widget parenting the action menus and the property tree browser
+ * @return push botton for the fit menu
+ */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   QPushButton *btnFit = new QPushButton("Fit");
   m_tip = new QLabel("", w);
@@ -291,13 +291,13 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 }
 
 /**
-* @brief Populate the fit button.
-* This initialization includes:
-*   1. SIGNALs/SLOTs when properties change.
-*   2. Actions and associated SIGNALs/SLOTs.
-* @param fitMapper the QMap to the fit mapper
-* @param fitMenu the QMenu for the fit button
-*/
+ * @brief Populate the fit button.
+ * This initialization includes:
+ *   1. SIGNALs/SLOTs when properties change.
+ *   2. Actions and associated SIGNALs/SLOTs.
+ * @param fitMapper the QMap to the fit mapper
+ * @param fitMenu the QMenu for the fit button
+ */
 void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
                                                QMenu *fitMenu) {
   // assert(fitmapper);
@@ -325,14 +325,14 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
   fitMenu->addSeparator();
 }
 /**
-* @brief Initialise the layout, except for the fit button in the menu bar.
-* This initialization includes:
-*   1. SIGNALs/SLOTs when properties change.
-*   2. Action menus and associated SIGNALs/SLOTs.
-*   3. Initialize the CompositeFunction, the root from which to build the Model.
-*   4. Update the list of available functions
-* @param w widget parenting the action menus and the property tree browser
-*/
+ * @brief Initialise the layout, except for the fit button in the menu bar.
+ * This initialization includes:
+ *   1. SIGNALs/SLOTs when properties change.
+ *   2. Action menus and associated SIGNALs/SLOTs.
+ *   3. Initialize the CompositeFunction, the root from which to build the
+ * Model. 4. Update the list of available functions
+ * @param w widget parenting the action menus and the property tree browser
+ */
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
   // to be able to change windows title from tread
@@ -489,7 +489,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   using Mantid::API::FunctionFactory;
   FunctionFactory::Instance().notificationCenter.addObserver(m_updateObserver);
   connect(this, SIGNAL(functionFactoryUpdateReceived()), this,
-    SLOT(populateFunctionNames()));
+          SLOT(populateFunctionNames()));
   FunctionFactory::Instance().enableNotifications();
 
   // Initial call, as function is not changed when it's created for the first
@@ -502,12 +502,12 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 }
 
 /**
-* @brief Create editors and assign them to the managers.
-* Associates a particular widget factory to each property manager. Thus, the
-* factory will automatically create widgets befitting to edit the properties
-* that we define.
-* @param w :: widget showing the properties tree and the actions buttons
-*/
+ * @brief Create editors and assign them to the managers.
+ * Associates a particular widget factory to each property manager. Thus, the
+ * factory will automatically create widgets befitting to edit the properties
+ * that we define.
+ * @param w :: widget showing the properties tree and the actions buttons
+ */
 void FitPropertyBrowser::createEditors(QWidget *w) {
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
@@ -643,6 +643,16 @@ PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
   PropertyHandler *h = getHandler()->addFunction(fnName);
   emit functionChanged();
   return h;
+}
+
+void FitPropertyBrowser::removeFunction(PropertyHandler *handler) {
+  if (handler) {
+    emit removePlotSignal(getHandler());
+    handler->removeFunction();
+    compositeFunction()->checkFunction();
+    emit functionRemoved();
+    emit functionChanged();
+  }
 }
 
 /** Slot. Called to add a new function
@@ -1013,13 +1023,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &) {
 void FitPropertyBrowser::deleteFunction() {
   QtBrowserItem *ci = m_browser->currentItem();
   PropertyHandler *h = getHandler()->findHandler(ci->property());
-  if (h) {
-    emit removePlotSignal(getHandler());
-    h->removeFunction();
-    compositeFunction()->checkFunction();
-    emit functionRemoved();
-    emit functionChanged();
-  }
+  removeFunction(h);
 }
 
 //***********************************************************************************//
@@ -1177,8 +1181,8 @@ std::string FitPropertyBrowser::costFunction() const {
 }
 
 /**
-  * Get the "ConvolveMembers" option
-  */
+ * Get the "ConvolveMembers" option
+ */
 bool FitPropertyBrowser::convolveMembers() const {
   return m_boolManager->value(m_convolveMembers);
 }
@@ -1601,8 +1605,8 @@ void FitPropertyBrowser::doFit(int maxIterations) {
 }
 
 /**
-  * Return the function that will be passed to Fit.
-  */
+ * Return the function that will be passed to Fit.
+ */
 Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const {
   Mantid::API::IFunction_sptr function;
   if (m_compositeFunction->nFunctions() > 1) {
@@ -1780,9 +1784,9 @@ void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
 }
 
 /** Check if the workspace can be used in the fit. The accepted types are
-  * MatrixWorkspaces same size
-  * @param ws :: The workspace
-  */
+ * MatrixWorkspaces same size
+ * @param ws :: The workspace
+ */
 bool FitPropertyBrowser::isWorkspaceValid(
     Mantid::API::Workspace_sptr ws) const {
   return (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) != 0 ||
@@ -2506,11 +2510,11 @@ void FitPropertyBrowser::refitAutoBackground() {
 }
 
 /**
-  * Remember a background function name to be used for creating auto-background
-  * @param aName :: A name of the auto-background. The may be followed by
+ * Remember a background function name to be used for creating auto-background
+ * @param aName :: A name of the auto-background. The may be followed by
  * function
-  * attributes as name=value pairs separated by spaces.
-  */
+ * attributes as name=value pairs separated by spaces.
+ */
 void FitPropertyBrowser::setAutoBackgroundName(const QString &aName) {
   try {
     QStringList nameList = aName.split(' ');
@@ -2712,8 +2716,8 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text) {
 }
 
 /**
-* Sets a new workspace
-*/
+ * Sets a new workspace
+ */
 void FitPropertyBrowser::workspaceChange(const QString &wsName) {
   if (m_guessOutputName) {
     if (isWorkspaceAGroup()) {
@@ -2735,8 +2739,8 @@ void FitPropertyBrowser::workspaceChange(const QString &wsName) {
 }
 
 /**
-* Returns the list of workspace names the fit property browser is working on
-*/
+ * Returns the list of workspace names the fit property browser is working on
+ */
 QStringList FitPropertyBrowser::getWorkspaceNames() { return m_workspaceNames; }
 
 /**
@@ -2769,8 +2773,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
-                   QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) +
+                   ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
@@ -3044,8 +3048,8 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
 }
 
 /**
-  * Do the fit.
-  */
+ * Do the fit.
+ */
 void FitPropertyBrowser::fit() {
   int maxIterations = m_intManager->value(m_maxIterations);
   doFit(maxIterations);
@@ -3215,5 +3219,5 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
     m_fitMenu->removeAction(fitAction);
   }
 }
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
