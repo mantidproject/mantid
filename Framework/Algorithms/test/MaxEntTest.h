@@ -156,9 +156,9 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->y(0).size(), 50);
-    TS_ASSERT_DELTA(data->y(0)[25], 0.2834934397, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.4609755518, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.6197408959, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.277, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.454, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.612, 0.001);
 
     // Test that the algorithm converged
     TS_ASSERT_EQUALS(chi->y(0).back(), 0);
@@ -192,9 +192,9 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->y(0)[25], 0.8925876575, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[26], 0.8230746292, 0.0001);
-    TS_ASSERT_DELTA(data->y(0)[27], 0.7205, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.893, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.824, 0.001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.721, 0.001);
     // Test that the algorithm converged
     TS_ASSERT_EQUALS(chi->y(0).back(), 0);
     TS_ASSERT_EQUALS(angle->y(0).back(), 0);
@@ -331,11 +331,10 @@ public:
     TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
-    TS_ASSERT_DELTA(image->y(0)[70], 5.89939, 0.0001);
-    // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->y(0)[71], 1.18050, 0.001);
-    TS_ASSERT_DELTA(image->y(1)[78], 0.148485, 0.0001);
-    TS_ASSERT_DELTA(image->y(1)[79], 1.10635, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[70], 6.829, 0.001);
+    TS_ASSERT_DELTA(image->y(0)[71], 1.314, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[78], 0.102, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[79], 0.448, 0.001);
   }
 
   void test_output_label() {
@@ -501,7 +500,7 @@ public:
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
       ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value;
+      ws->dataE(0)[i] = value + 1.0;
     }
     ws->dataX(0)[size] = static_cast<double>(size);
 
@@ -538,7 +537,7 @@ public:
       double value = static_cast<double>(i);
       ws->dataX(0)[i] = value;
       ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value;
+      ws->dataE(0)[i] = value+1.0;
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
