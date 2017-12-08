@@ -352,9 +352,9 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   if (!inputs.mpWS) {
-    solve01(fullInputs, efficiencies);
-  } else {
     solve10(fullInputs, efficiencies);
+  } else {
+    solve01(fullInputs, efficiencies);
   }
   return fullCorrections(fullInputs, efficiencies);
 }
