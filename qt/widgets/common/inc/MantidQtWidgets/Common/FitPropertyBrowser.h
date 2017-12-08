@@ -100,6 +100,9 @@ public:
   /// Create a new function
   PropertyHandler *addFunction(const std::string &fnName);
 
+  /// Removes the function held by the property handler
+  void removeFunction(PropertyHandler *handler);
+
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
     return m_compositeFunction;
