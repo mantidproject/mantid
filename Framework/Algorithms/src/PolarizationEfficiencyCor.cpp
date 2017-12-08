@@ -91,9 +91,9 @@ void PolarizationEfficiencyCor::exec() {
     break;
   case 2:
     if (analyzer) {
-      twoInputCorrections(inputs, efficiencies);
+      outputs = twoInputCorrections(inputs, efficiencies);
     } else {
-      analyzerlessCorrections(inputs, efficiencies);
+      outputs = analyzerlessCorrections(inputs, efficiencies);
     }
     break;
   case 3:
@@ -250,16 +250,16 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
   const auto &P1E = efficiencies.P1->e();
   const auto &P2 = efficiencies.P2->y();
   const auto &P2E = efficiencies.P2->e();
-  const auto nHisto = inputs.mpWS->getNumberHistograms();
+  const auto nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &I00 = inputs.ppWS->y(wsIndex);
     const auto &E00 = inputs.ppWS->e(wsIndex);
     const auto &I11 = inputs.mmWS->y(wsIndex);
     const auto &E11 = inputs.mmWS->e(wsIndex);
-    auto &I01 = inputs.pmWS->mutableY(wsIndex);
-    auto &E01 = inputs.pmWS->mutableE(wsIndex);
-    auto &I10 = inputs.mpWS->mutableY(wsIndex);
-    auto &E10 = inputs.mpWS->mutableE(wsIndex);
+    auto &I01 = fullInputs.pmWS->mutableY(wsIndex);
+    auto &E01 = fullInputs.pmWS->mutableE(wsIndex);
+    auto &I10 = fullInputs.mpWS->mutableY(wsIndex);
+    auto &E10 = fullInputs.mpWS->mutableE(wsIndex);
     for (size_t binIndex = 0; binIndex != I00.size(); ++binIndex) {
       const auto i00 = I00[binIndex];
       const auto i11 = I11[binIndex];
