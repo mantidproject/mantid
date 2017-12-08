@@ -41,14 +41,18 @@ namespace LiveData {
 */
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic);
+  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
+                       SubscribeAtOption subscribeOption);
   ~KafkaTopicSubscriber();
 
-  const std::string topic() const;
+  std::vector<std::string> topics() const;
 
   virtual void subscribe() override;
   virtual void subscribe(int64_t offset) override;
-  virtual void consumeMessage(std::string *payload) override;
+  virtual void consumeMessage(std::string *payload, int64_t &offset,
+                              int32_t &partition, std::string &topic) override;
+  virtual std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
@@ -59,14 +63,19 @@ public:
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
   std::string m_brokerAddr;
-  std::string m_topicName;
+  std::vector<std::string> m_topicNames;
+  SubscribeAtOption m_subscribeOption = SubscribeAtOption::OFFSET;
 
+  void subscribeAtTime(int64_t time);
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
                               int64_t confOffset) const;
 
-  void subscribeAtOffset(int64_t offset) const;
-  void checkTopicExists() const;
+  void subscribeAtOffset(int64_t offset);
+  void checkTopicsExist() const;
   void createConsumer();
+  int64_t getCurrentOffset(const std::string &topic, int partition);
+  std::vector<RdKafka::TopicPartition *> getTopicPartitions();
+  std::unique_ptr<RdKafka::Metadata> queryMetadata() const;
 };
 
 } // namespace LiveData

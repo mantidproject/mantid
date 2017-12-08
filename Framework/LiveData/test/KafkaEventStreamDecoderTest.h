@@ -60,7 +60,7 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -99,7 +99,7 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
@@ -137,7 +137,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -158,7 +158,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
@@ -176,7 +176,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -194,7 +194,7 @@ public:
     using namespace ISISKafkaTesting;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_))
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
@@ -256,9 +256,6 @@ private:
       const auto &sid = spec.getDetectorIDs();
       TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
     }
-    TS_ASSERT(eventWksp.run().hasProperty("SampleLog1"));
-    TS_ASSERT_DELTA(eventWksp.run().getLogAsSingleValue("SampleLog1"), 42.0,
-                    0.01);
   }
 
   void checkWorkspaceEventData(
