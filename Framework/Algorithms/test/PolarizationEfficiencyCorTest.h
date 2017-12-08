@@ -33,7 +33,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_exec() {
+  void test_IdealCaseFullCorrections() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
     using namespace Mantid::HistogramData;
@@ -44,40 +44,214 @@ public:
     const double yVal = 2.3;
     Counts counts{yVal, yVal, yVal};
     MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
-    MatrixWorkspace_sptr ws01 = WorkspaceFactory::Instance().create(ws00);
-    MatrixWorkspace_sptr ws10 = WorkspaceFactory::Instance().create(ws00);
-    MatrixWorkspace_sptr ws11 = WorkspaceFactory::Instance().create(ws00);
+    MatrixWorkspace_sptr ws01 = ws00->clone();
+    MatrixWorkspace_sptr ws10 = ws00->clone();
+    MatrixWorkspace_sptr ws11 = ws00->clone();
     WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
     inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
     inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
     inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
     inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    for (size_t i = 0; i != 4; ++i) {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
+      for (size_t j = 0; j != nHist; ++j) {
+        ws->mutableY(j) *= static_cast<double>(i + 1);
+        ws->mutableE(j) *= static_cast<double>(i + 1);
+      }
+    }
     auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
     PolarizationEfficiencyCor alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4);
-    MatrixWorkspace_sptr out00 = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-    TS_ASSERT(out00)
-    TS_ASSERT_EQUALS(out00->getNumberHistograms(), nHist)
-    for (size_t i = 0; i != nHist; ++i) {
-      const auto &xs = out00->x(i);
-      const auto &ys = out00->y(i);
-      const auto &es = out00->e(i);
-      TS_ASSERT_EQUALS(ys.size(), nBins)
-      for (size_t j = 0; j != nBins; ++j) {
-        TS_ASSERT_EQUALS(xs[j], edges[j])
-        TS_ASSERT_EQUALS(ys[j], yVal)
-        TS_ASSERT_EQUALS(es[j], std::sqrt(yVal))
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
+    const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
+    for (size_t i = 0; i != 4; ++i) {
+      const std::string wsName = OUTWS_NAME + std::string("_") + POL_DIRS[i];
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
+      TS_ASSERT(ws)
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+      for (size_t j = 0; j != nHist; ++j) {
+        const auto &xs = ws->x(j);
+        const auto &ys = ws->y(j);
+        const auto &es = ws->e(j);
+        TS_ASSERT_EQUALS(ys.size(), nBins)
+        for (size_t k = 0; k != nBins; ++k) {
+          TS_ASSERT_EQUALS(xs[k], edges[k])
+          TS_ASSERT_EQUALS(ys[k], yVal * static_cast<double>(i + 1))
+          TS_ASSERT_EQUALS(es[k], std::sqrt(yVal) * static_cast<double>(i + 1))
+        }
+      }
+    }
+  }
+
+  void test_IdealCaseThreeInputs10Missing() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nBins{3};
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws01 = ws00->clone();
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    for (size_t i = 0; i != 3; ++i) {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
+      for (size_t j = 0; j != nHist; ++j) {
+        ws->mutableY(j) *= static_cast<double>(i + 1);
+        ws->mutableE(j) *= static_cast<double>(i + 1);
+      }
+    }
+    auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00, 01, 11"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
+    const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
+    for (size_t i = 0; i != 4; ++i) {
+      const auto &dir = POL_DIRS[i];
+      const std::string wsName = OUTWS_NAME + std::string("_") + dir;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
+      TS_ASSERT(ws)
+      const double expected = [yVal, &dir]() {
+        if (dir == "++") {
+          return yVal;
+        } else if (dir == "--") {
+          return 3. * yVal;
+        } else {
+          return 2. * yVal;
+        }
+      }();
+      const double expectedError = [yVal, &dir]() {
+        if (dir == "++") {
+          return std::sqrt(yVal);
+        } else if (dir == "--") {
+          return 3. * std::sqrt(yVal);
+        } else if (dir == "+-"){
+          return 2. * std::sqrt(yVal);
+        } else {
+          return 0.;
+        }
+      }();
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+      for (size_t j = 0; j != nHist; ++j) {
+        const auto &xs = ws->x(j);
+        const auto &ys = ws->y(j);
+        const auto &es = ws->e(j);
+        TS_ASSERT_EQUALS(ys.size(), nBins)
+        for (size_t k = 0; k != nBins; ++k) {
+          TS_ASSERT_EQUALS(xs[k], edges[k])
+          TS_ASSERT_EQUALS(ys[k], expected)
+          TS_ASSERT_EQUALS(es[k], expectedError)
+        }
+      }
+    }
+  }
+
+  void test_IdealCaseThreeInputs01Missing() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nBins{3};
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws10 = ws00->clone();
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    for (size_t i = 0; i != 3; ++i) {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
+      for (size_t j = 0; j != nHist; ++j) {
+        ws->mutableY(j) *= static_cast<double>(i + 1);
+        ws->mutableE(j) *= static_cast<double>(i + 1);
+      }
+    }
+    auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00, 10, 11"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
+    const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
+    for (size_t i = 0; i != 4; ++i) {
+      const auto &dir = POL_DIRS[i];
+      const std::string wsName = OUTWS_NAME + std::string("_") + dir;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
+      TS_ASSERT(ws)
+      const double expected = [yVal, &dir]() {
+        if (dir == "++") {
+          return yVal;
+        } else if (dir == "--") {
+          return 3. * yVal;
+        } else {
+          return 2. * yVal;
+        }
+      }();
+      const double expectedError = [yVal, &dir]() {
+        if (dir == "++") {
+          return std::sqrt(yVal);
+        } else if (dir == "--") {
+          return 3. * std::sqrt(yVal);
+        } else if (dir == "-+"){
+          return 2. * std::sqrt(yVal);
+        } else {
+          return 0.;
+        }
+      }();
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
+      for (size_t j = 0; j != nHist; ++j) {
+        const auto &xs = ws->x(j);
+        const auto &ys = ws->y(j);
+        const auto &es = ws->e(j);
+        TS_ASSERT_EQUALS(ys.size(), nBins)
+        for (size_t k = 0; k != nBins; ++k) {
+          TS_ASSERT_EQUALS(xs[k], edges[k])
+          TS_ASSERT_EQUALS(ys[k], expected)
+          TS_ASSERT_EQUALS(es[k], expectedError)
+        }
       }
     }
   }
