@@ -71,9 +71,6 @@ class EISFDiffCylinder(IFunction1D):
         """
         radius = self.getParameterValue('R')
         length = self.getParameterValue('L')
-        # Return bad fit if radius or length really small.
-        if radius < self.min_param or length < self.min_param:
-            return np.zeros(len(xvals))
         x = np.asarray(xvals)  # Q values
         z = length * np.outer(x, self.cos_theta)
         z = np.where(0, 1e-9, z)  # prevent division by zero
