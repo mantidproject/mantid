@@ -470,10 +470,10 @@ private:
   }
 
   void expectGetWorkspace(MockDataProcessorView &mockDataProcessorView,
-                          Cardinality numTimes) {
+                          Cardinality numTimes, const char *workspaceName) {
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(numTimes)
-        .WillRepeatedly(Return("TestWorkspace"));
+        .WillRepeatedly(Return(workspaceName));
   }
 
   void expectAskUserWorkspaceName(MockDataProcessorView &mockDataProcessorView,
@@ -619,7 +619,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     expectAskUserWorkspaceName(mockDataProcessorView, Exactly(0),
@@ -638,7 +638,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // The user hits "save as" but cancels when choosing a name
@@ -670,7 +670,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -711,7 +711,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -755,7 +755,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -799,7 +799,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -840,7 +840,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -882,7 +882,7 @@ public:
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -930,7 +930,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -965,7 +965,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -1006,7 +1006,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -1047,7 +1047,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -1086,7 +1086,7 @@ public:
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1130,7 +1130,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1171,7 +1171,7 @@ public:
     presenter->skipProcessing();
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1211,7 +1211,7 @@ public:
         createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     ws->String(0, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1263,7 +1263,7 @@ public:
     ws->String(0, ScaleCol) = "";
     ws->String(1, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1311,7 +1311,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -1355,7 +1355,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1392,7 +1392,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -1417,7 +1417,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -1442,7 +1442,7 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -1495,7 +1495,7 @@ public:
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
 
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -1563,7 +1563,7 @@ public:
     // We should receive an error
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(1);
 
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -1580,7 +1580,7 @@ public:
 
     // Because we to open twice, get an error twice
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(2);
-    expectGetWorkspace(mockDataProcessorView, Exactly(2));
+    expectGetWorkspace(mockDataProcessorView, Exactly(2), "TestWorkspace");
 
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     ws->addColumn("str", "StitchGroup");
@@ -1809,11 +1809,11 @@ public:
 
     // the user does it again, but discards
     expectAskUserYesNo(mockDataProcessorView, Exactly(1), true);
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // the user does it one more time, and is not prompted
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
@@ -1939,7 +1939,7 @@ public:
 
         << ""; // Row 9
 
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -2072,7 +2072,7 @@ public:
         << "1"
         << ""; // Row 3
 
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList selection;
@@ -2158,7 +2158,7 @@ public:
         << "1"
         << ""; // Row 3
 
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
@@ -2183,7 +2183,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2245,7 +2245,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2291,7 +2291,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2325,7 +2325,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2364,7 +2364,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2405,7 +2405,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2461,7 +2461,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     const auto clipboard =
@@ -2512,7 +2512,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     RowList rowlist;
@@ -2577,7 +2577,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     const auto clipboard =
@@ -2714,7 +2714,7 @@ public:
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
 
     // We should be warned
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
@@ -2764,7 +2764,7 @@ public:
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     RowList rowlist;
     rowlist[0].insert(0);
     rowlist[0].insert(1);
@@ -2794,7 +2794,7 @@ public:
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -2823,7 +2823,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // Tidy up
@@ -2860,7 +2860,7 @@ public:
 
     createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
                                       presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // Tidy up
@@ -2901,7 +2901,7 @@ public:
 
     createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
                                       presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     // Tidy up
@@ -2958,7 +2958,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     GroupList grouplist;
@@ -2995,7 +2995,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
     createTOFWorkspace("IvsQ_binned_TOF_12345", "12345");
     createTOFWorkspace("IvsQ_binned_TOF_12346", "12346");
@@ -3034,7 +3034,7 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
     createTOFWorkspace("IvsQ_TOF_12345_TOF_12346");
 
@@ -3100,7 +3100,7 @@ public:
 
     // Open a table
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1));
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     createTOFWorkspace("12345", "12345");
