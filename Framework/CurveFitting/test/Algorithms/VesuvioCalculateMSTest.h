@@ -123,7 +123,7 @@ createFlatPlateSampleWS(const bool detShape = true,
                  << "</cuboid>";
   auto sampleShape =
       Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
-  testWS->mutableSample().setShape(*sampleShape);
+  testWS->mutableSample().setShape(sampleShape);
 
   return testWS;
 }

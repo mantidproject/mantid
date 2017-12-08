@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Tolerance.h"
 #include <list>
 
@@ -58,7 +58,7 @@ struct MANTID_GEOMETRY_DLL Link {
   * hit. (Default=NULL)
   */
   inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
-              const double totalDistance, const Object &obj,
+              const double totalDistance, const IObject &obj,
               const ComponentID compID = nullptr)
       : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
         distInsideObject(entryPoint.distance(exitPoint)), object(&obj),
@@ -78,7 +78,7 @@ struct MANTID_GEOMETRY_DLL Link {
   Kernel::V3D exitPoint;   ///< Exit point
   double distFromStart;    ///< Total distance from track beginning
   double distInsideObject; ///< Total distance covered inside object
-  const Object *object;    ///< The object that was intersected
+  const IObject *object;   ///< The object that was intersected
   ComponentID componentID; ///< ComponentID of the intersected component
                            //@}
 };
@@ -104,7 +104,8 @@ struct IntersectionPoint {
   * @param obj :: A reference to the object that was intersected
   */
   inline IntersectionPoint(const int flag, const Kernel::V3D &end,
-                           const double distFromStartOfTrack, const Object &obj,
+                           const double distFromStartOfTrack,
+                           const CSGObject &obj,
                            const ComponentID compID = nullptr)
       : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
         object(&obj), componentID(compID) {}
@@ -130,7 +131,7 @@ struct IntersectionPoint {
   int directionFlag;       ///< Directional flag
   Kernel::V3D endPoint;    ///< Point
   double distFromStart;    ///< Total distance from track begin
-  const Object *object;    ///< The object that was intersected
+  const CSGObject *object; ///< The object that was intersected
   ComponentID componentID; ///< Unique component ID
                            //@}
 };
@@ -153,10 +154,10 @@ public:
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
   /// Adds a point of intersection to the track
   void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
-                const Object &obj, const ComponentID compID = nullptr);
+                const CSGObject &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
-              const double distanceAlongTrack, const Object &obj,
+              const double distanceAlongTrack, const IObject &obj,
               const ComponentID compID = nullptr);
   /// Remove touching Links that have identical components
   void removeCojoins();

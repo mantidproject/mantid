@@ -80,9 +80,6 @@ public:
 
   void plotFitPeaksCurves();
 
-  void setRunNoItems(const std::vector<std::string> &runNumVector,
-                     bool multiRun);
-
 protected:
   void processStart();
   void processLoad();
@@ -97,7 +94,6 @@ protected:
 protected slots:
 
   void fittingFinished();
-  void fittingRunNoChanged();
 
 private:
   bool isDigit(const std::string &text) const;
@@ -105,24 +101,14 @@ private:
   void warnFileNotFound(const std::exception &ex);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const int runNumber, const size_t bank,
-                                       const std::string &expectedPeaks);
+  virtual void startAsyncFittingWorker(
+      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
+      const std::string &expectedPeaks);
 
   std::string getBaseNameFromStr(const std::string &filePath) const;
 
   void validateFittingInputs(const std::string &focusedRunNo,
                              const std::string &expectedPeaks);
-
-  // TODO make this const when the global is removed
-  bool findFilePathFromBaseName(const std::string &directoryToSearch,
-                                const std::string &baseFileNamesToFind,
-                                std::vector<std::string> &foundFullFilePath);
-
-  std::vector<std::string>
-  splitFittingDirectory(const std::string &selectedfPath);
-
-  std::vector<std::string> enableMultiRun(const std::string &firstRun,
-                                          const std::string &lastRun);
 
   void browsePeaksToFit();
 
@@ -134,33 +120,11 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  std::vector<std::string>
-  getAllBrowsedFilePaths(const std::string &inputFullPath,
-                         std::vector<std::string> &foundFullFilePaths);
-
-  std::vector<std::string> processMultiRun(const std::string &userInput);
-
-  std::vector<std::string>
-  processSingleRun(const std::string &userInputBasename);
-
-  std::vector<std::string> processFullPathInput(const Poco::Path &pocoFilePath);
-
-  static int g_fitting_runno_counter;
-
-  // name of the workspace with the focused ws being used for fitting
-  static const std::string g_focusedFittingWSName;
-
-  // input run number - used for output file name
-  std::vector<std::string> g_multi_run;
-
   // Holds the previous user input so we can short circuit further checks
   std::string m_previousInput;
 
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
-
-  // directories of all the run numbers when multi-run option
-  std::vector<std::string> g_multi_run_directories;
 
   QThread *m_workerThread;
 
@@ -181,6 +145,9 @@ private:
 
   /// Handle the user selecting a different run to plot
   void processSelectRun();
+
+  /// Whether the user is doing fitting on multiple runs
+  bool m_multiRunMode;
 };
 
 } // namespace CustomInterfaces

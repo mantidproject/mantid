@@ -198,7 +198,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
         "Parameters are out of order @ 0, should be A1");
   }
 
-  if (!fitStatus.compare("success")) {
+  if (fitStatus == "success") {
     const double A0 = result->getParameter(0);
 
     if (A0 < 0) {

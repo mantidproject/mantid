@@ -71,7 +71,7 @@ void SaveIsawPeaks::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName().compare("WISH") == 0)
+  if (inst->getName() == "WISH")
     bankPart = "WISHpanel";
 
   // Get all children
@@ -400,7 +400,7 @@ bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
   boost::shared_ptr<const Geometry::ICompAssembly> asmb =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
   asmb->getChildren(children, false);
-  if (children[0]->getName().compare("sixteenpack") == 0) {
+  if (children[0]->getName() == "sixteenpack") {
     asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     children.clear();
