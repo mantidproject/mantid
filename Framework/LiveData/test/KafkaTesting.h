@@ -75,7 +75,8 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
     UNUSED_ARG(topic);
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);
@@ -103,7 +104,8 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
     UNUSED_ARG(topic);
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);
@@ -179,7 +181,8 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
     UNUSED_ARG(topic);
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);
@@ -197,7 +200,8 @@ private:
 class FakeISISRunInfoStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-  explicit FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
+  explicit FakeISISRunInfoStreamSubscriber(int32_t nperiods)
+      : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
@@ -229,7 +233,8 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
     UNUSED_ARG(topic);
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);
@@ -275,7 +280,8 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
     UNUSED_ARG(topic);
     UNUSED_ARG(partition);
     UNUSED_ARG(offset);

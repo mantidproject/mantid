@@ -360,7 +360,8 @@ KafkaEventStreamDecoder::getStopOffsets(
   std::this_thread::sleep_for(MAX_LATENCY);
   stopOffsets = m_eventStream->getOffsetsForTimestamp(
       static_cast<int64_t>(stopTime / 1000000));
-  // Convert nanosecond precision from message to millisecond precision which Kafka offset query supports
+  // Convert nanosecond precision from message to millisecond precision which
+  // Kafka offset query supports
 
   // Set reachedEnd to false for each topic and partition
   for (auto keyValue : stopOffsets) {
@@ -434,8 +435,7 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     // Convert time from nanoseconds since 1 Jan 1970 to nanoseconds since 1 Jan
     // 1990 to create a Mantid timestamp
     const int64_t nanoseconds1970To1990 = 631152000000000000L;
-    auto time = Core::DateAndTime(seEvent->timestamp() -
-                                  nanoseconds1970To1990);
+    auto time = Core::DateAndTime(seEvent->timestamp() - nanoseconds1970To1990);
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
@@ -489,7 +489,6 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
                                       pulseTime));
   }
 }
-
 
 KafkaEventStreamDecoder::RunStartStruct
 KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {

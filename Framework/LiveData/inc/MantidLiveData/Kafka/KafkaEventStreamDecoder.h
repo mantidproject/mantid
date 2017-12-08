@@ -170,7 +170,7 @@ private:
 
   void checkIfAllStopOffsetsReached(
       const std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
-      
+
   // Callbacks
   CallbackFn m_cbIterationEnd;
   CallbackFn m_cbError;
