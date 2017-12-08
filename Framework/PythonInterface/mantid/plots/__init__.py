@@ -22,3 +22,65 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 # of the main package.
 
 from mantid.plots._functions import *
+from mantid.dataobjects import EventWorkspace,Workspace2D,MDHistoWorkspace
+
+import matplotlib.pyplot as plt
+from matplotlib.projections import register_projection
+import matplotlib.colors as colors
+import mantid
+import numpy as np
+
+def boundaries_from_points(input_array):
+    assert isinstance(input_array,np.ndarray),'Not a numpy array'
+    if len(input_array)==0:
+        raise ValueError('could not extend array with no elements')
+    if len(input_array)==1:
+        return np.array([input_array[0]-0.5,input_array[0]+0.5]) 
+    return np.concatenate(([(3*input_array[0]-input_array[1])/2],(input_array[1:]+input_array[:-1])/2,[(3*input_array[-1]-input_array[-2])/2]))
+
+def extract_data(ws):
+    ws_data=[]
+    ws_x=[]
+    ws_y=[]
+    nhist=ws.getNumberHistograms()
+    yvals=ws.getAxis(1).extractValues()
+    if len(yvals)==(nhist):
+        yvals=boundaries_from_points(yvals)
+    for index in range(nhist):
+        x=ws.readX(index)
+        intensity=ws.readY(index)
+        error=ws.readE(index)
+        if len(x)==len(intensity):
+            x=boundaries_from_points(x)
+        ws_data.append(intensity)
+        ws_x.append(x)
+        ws_y.append([yvals[index],yvals[index+1]])
+    return(ws_data,ws_x,ws_y)
+
+def mypcolormesh(ax,ws,**kwargs):
+    I,x,y=extract_data(ws)
+    mini=np.min([np.min(i) for i in I])
+    maxi=np.max([np.max(i) for i in I])
+    if 'vmin' in kwargs:
+        mini=kwargs['vmin']
+    if 'vmax' in kwargs:
+        maxi=kwargs['vmax']
+    if 'norm' not in kwargs:
+        kwargs['norm']=colors.Normalize(vmin=mini, vmax=maxi)
+    for inti,xi,yi in zip(I,x,y):
+        XX,YY=np.meshgrid(xi,yi,indexing='ij')
+        cm=ax.pcolormesh(XX,YY,inti.reshape(-1,1),**kwargs)
+    return cm
+    
+class MantidAxes(plt.Axes):
+    name='mantid'
+    def pcolormesh(self,*args,**kwargs):
+        if len(args)==1 and (isinstance(args[0],EventWorkspace) or isinstance(args[0],Workspace2D)):
+            return mypcolormesh(self,args[0],**kwargs)
+        else:
+            return plt.Axes.pcolormesh(self,*args,**kwargs)
+
+register_projection(MyAxes)
+
+
+

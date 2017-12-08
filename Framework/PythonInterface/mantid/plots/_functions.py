@@ -15,16 +15,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
+import mantid.api
+import mantid.dataobjects
 
-
-def _getWkspIndexDistAndLabel(workspace, kwargs):
+def _getWkspIndexDistAndLabel(workspace, **kwargs):
+    '''
+    Get workspace index, whether the workspace is a distribution, 
+    and label for the spectrum
+    
+    :param workspace: a Workspace2D or an EventWorkspace  
+    '''
     # get the special arguments out of kwargs
-    specNum = kwargs.get('specNum', None)
-    if 'specNum' in kwargs:
-        del kwargs['specNum']
-    wkspIndex = kwargs.get('wkspIndex', None)
-    if 'wkspIndex' in kwargs:
-        del kwargs['wkspIndex']
+    specNum = kwargs.pop('specNum', None)
+    wkspIndex = kwargs.pop('wkspIndex', None)
 
     # don't worry if there is only one spectrum
     if workspace.getNumberHistograms() == 1:
@@ -47,39 +50,44 @@ def _getWkspIndexDistAndLabel(workspace, kwargs):
     if 'label' not in kwargs:
         kwargs['label'] = 'spec {0}'.format(specNum)
 
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
 
     return (wkspIndex, distribution, kwargs)
 
 
-def _getDistribution(workspace, kwargs):
+def _getDistribution(workspace, **kwargs):
     '''Determine whether or not the data is a distribution. The value in
     the kwargs wins.'''
-    distribution = kwargs.get('distribution', None)
-    if 'distribution' in kwargs:
-        del kwargs['distribution']
+    distribution = kwargs.pop('distribution', workspace.isDistribution())
+    
+    return (bool(distribution), kwargs)
 
-    # fix up the distribution flag
-    if workspace.isHistogramData():
-        if distribution is None:
-            distribution = workspace.isDistribution()
-        else:
-            distribution = bool(distribution)
-
-    return (distribution, kwargs)
-
-
+def _getNormalization(mdworkspace, **kwargs):
+    normalization = kwargs.pop(normalization, mdworkspace.displayNormalizationHisto())
+    return (normalization,kwargs)
+    
 def getAxesLabels(workspace):
-    '''Return a tuple of ``(YUnit, <other units>)``'''
-    axes = [workspace.YUnit()]
-    for index in range(workspace.axes()):
-        axis = workspace.getAxis(index)
-        unit = axis.getUnit()
-        if len(str(unit.symbol())) > 0:
-            unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
-        else:
-            unit = unit.caption()
-        axes.append(unit)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        axes = ['Intensity']
+        dims = workspace.getNonIntegratedDimensions()
+        for d in dims:
+            axis_title = d.name.replace('DeltaE','$\Delta E$')
+            axis_unit = d.getUnits().replace('Angstrom^-1','$\AA^{-1}$')
+            axis_unit = axis_unit.replace('DeltaE','meV')
+            axis_unit = axis_unit.replace('Angstrom','$\AA$')
+            axis_unit = axis_unit.replace('MomentumTransfer','$\AA^{-1}$')
+            axes.append('{0} ({1})'.format(axis_title,axis_unit))
+    else:
+        '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
+        axes = [workspace.YUnit()] #TODO: deal with distribution
+        for index in range(workspace.axes()):
+            axis = workspace.getAxis(index)
+            unit = axis.getUnit()
+            if len(str(unit.symbol())) > 0:
+                unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
+            else:
+                unit = unit.caption()
+            axes.append(unit)
     return tuple(axes)
 
 def _setLabels1D(axes, workspace):
@@ -101,9 +109,8 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
 
     if withDy:
         dy = workspace.readE(wkspIndex)
-    # TODO should make extracting dx optional
     if withDx and workspace.getSpectrum(wkspIndex).hasDx():
-        dy = workspace.readDx(wkspIndex)
+        dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
         if not distribution:
@@ -113,6 +120,44 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         x = .5*(x[0:-1]+x[1:])
 
     return (x,y,dy,dx)
+
+def _dim2array(d,center=True):
+    """
+    Create a numpy array containing bin centers along the dimension d
+    input: d - IMDDimension
+    return: numpy array, from min+st/2 to max-st/2 with step st  
+    """
+    dmin=d.getMinimum()
+    dmax=d.getMaximum()
+    dstep=d.getX(1)-d.getX(0)
+    if center:
+        return numpy.arange(dmin+dstep/2,dmax,dstep)
+    else:
+        return numpy.linspace(dmin,dmax,d.getNBins()+1)
+
+
+def _getMDData(workspace,normalization,withError=False):
+    
+
+def _getContour(workspace, distribution):
+    x = workspace.extractX()
+    z = workspace.extractY()
+
+    if workspace.isHistogramData():
+        if not distribution:
+            z = z / (x[:,1:] - x[:,0:-1])
+        x = .5*(x[:,0:-1]+x[:,1:])
+
+    # y axis is held differently
+    y = workspace.getAxis(1).extractValues()
+    if len(y) == x.shape[0]+1:
+        y = .5*(y[0:-1]+y[1:])
+    y = numpy.tile(y, (x.shape[1], 1)).transpose()
+
+    return (x,y,z)
+
+
+
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -185,23 +230,6 @@ def scatter(axes, workspace, *args, **kwargs):
     return axes.scatter(x, y, *args, **kwargs)
 
 
-def _getContour(workspace, distribution):
-    x = workspace.extractX()
-    z = workspace.extractY()
-
-    if workspace.isHistogramData():
-        if not distribution:
-            z = z / (x[:,1:] - x[:,0:-1])
-        x = .5*(x[:,0:-1]+x[:,1:])
-
-    # y axis is held differently
-    y = workspace.getAxis(1).extractValues()
-    if len(y) == x.shape[0]+1:
-        y = .5*(y[0:-1]+y[1:])
-    y = numpy.tile(y, (x.shape[1], 1)).transpose()
-
-    return (x,y,z)
-
 
 def contour(axes, workspace, *args, **kwargs):
     '''
@@ -215,7 +243,7 @@ def contour(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -234,7 +262,7 @@ def contourf(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -252,7 +280,7 @@ def pcolor(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -270,7 +298,7 @@ def pcolorfast(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -288,7 +316,7 @@ def pcolormesh(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -307,7 +335,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tripcolor` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -327,7 +355,7 @@ def triplot(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.triplot` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -347,7 +375,7 @@ def tricontour(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
@@ -368,7 +396,7 @@ def tricontourf(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, kwargs)
+    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
     (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
 
