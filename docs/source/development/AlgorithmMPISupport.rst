@@ -462,6 +462,8 @@ CalculateTransmission             MasterOnly, Identical
 CloneWorkspace                    all
 CompressEvents                    all
 CompareWorkspace                  MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used
+ConvertToHistogram                all
+ConvertToPointData                all
 CreateSingleValuedWorkspace       Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
 CreateWorkspace                   all
 CropToComponent                   all
