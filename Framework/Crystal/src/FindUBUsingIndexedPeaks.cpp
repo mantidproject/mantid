@@ -19,10 +19,10 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   this->declareProperty("Tolerance", 0.1, mustBePositive,
                         "Indexing Tolerance (0.1)");
