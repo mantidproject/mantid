@@ -32,8 +32,8 @@ bool runMapContains(const int runNumber, const size_t bank,
 }
 
 template <typename T, size_t S>
-T getFromRunMap(const int runNumber, const size_t bank,
-                const RunMap<S, T> &map) {
+const T& getFromRunMap(const int runNumber, const size_t bank,
+                       const RunMap<S, T>& map) {
   if (bank < 1 || bank > map.size()) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
@@ -70,13 +70,13 @@ void EnggDiffFittingModel::addFitResults(
   addToRunMap(runNumber, bank, m_fitParamsMap, ws);
 }
 
-std::string
+const std::string&
 EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_wsFilenameMap);
 }
 
-Mantid::API::ITableWorkspace_sptr
+const Mantid::API::ITableWorkspace_sptr&
 EnggDiffFittingModel::getFitResults(const int runNumber,
                                     const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_fitParamsMap);
@@ -245,13 +245,13 @@ bool EnggDiffFittingModel::hasFittedPeaksForRun(const int runNumber,
          m_fittedPeaksMap[bank - 1].end();
 }
 
-Mantid::API::MatrixWorkspace_sptr
+const Mantid::API::MatrixWorkspace_sptr&
 EnggDiffFittingModel::getAlignedWorkspace(const int runNumber,
                                           const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_alignedWorkspaceMap);
 }
 
-Mantid::API::MatrixWorkspace_sptr
+const Mantid::API::MatrixWorkspace_sptr&
 EnggDiffFittingModel::getFittedPeaksWS(const int runNumber,
                                        const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_fittedPeaksMap);
@@ -429,7 +429,7 @@ void EnggDiffFittingModel::groupWorkspaces(
   groupAlg->execute();
 }
 
-API::MatrixWorkspace_sptr
+const API::MatrixWorkspace_sptr&
 EnggDiffFittingModel::getFocusedWorkspace(const int runNumber,
                                           const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_focusedWorkspaceMap);
