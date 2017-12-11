@@ -416,12 +416,12 @@ private:
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(numTimes)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(numTimes)
-        .WillOnce(Return(QString()));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(numTimes)
         .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
