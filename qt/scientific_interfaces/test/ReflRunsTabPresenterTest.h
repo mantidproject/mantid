@@ -120,7 +120,29 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getTransmissionRuns(group)).Times(1);
+    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1);
+    presenter.getPreprocessingOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_preprocessingOptionsAsString() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1);
     presenter.getPreprocessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -128,6 +150,28 @@ public:
   }
 
   void test_processingOptions() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getReductionOptions(group)).Times(1);
+    presenter.getProcessingOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_processingOptionsAsString() {
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
