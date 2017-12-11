@@ -46,7 +46,9 @@ add_subdirectory ( _plugins )
 add_subdirectory ( plots )
 
 # Create an overall target
-add_custom_target ( PythonInterface DEPENDS PythonInterface )
+add_custom_target ( PythonInterface DEPENDS PythonKernelModule
+  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
+  PythonCurveFittingModule PythonPlotsModule )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################
