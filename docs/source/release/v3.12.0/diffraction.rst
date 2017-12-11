@@ -52,6 +52,8 @@ Single Crystal Diffraction
 
 - :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB. 
 
+- SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
+
 
 Total Scattering
 ----------------
