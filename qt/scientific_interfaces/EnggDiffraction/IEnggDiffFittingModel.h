@@ -16,20 +16,20 @@ class IEnggDiffFittingModel {
 public:
   virtual ~IEnggDiffFittingModel() = default;
 
-  virtual const Mantid::API::MatrixWorkspace_sptr&
+  virtual Mantid::API::MatrixWorkspace_sptr
   getFocusedWorkspace(const int runNumber, const size_t bank) const = 0;
 
-  virtual const Mantid::API::MatrixWorkspace_sptr&
+  virtual Mantid::API::MatrixWorkspace_sptr
   getAlignedWorkspace(const int runNumber, const size_t bank) const = 0;
 
-  virtual const Mantid::API::MatrixWorkspace_sptr&
+  virtual Mantid::API::MatrixWorkspace_sptr
   getFittedPeaksWS(const int runNumber, const size_t bank) const = 0;
 
-  virtual const Mantid::API::ITableWorkspace_sptr&
+  virtual Mantid::API::ITableWorkspace_sptr
   getFitResults(const int runNumber, const size_t bank) const = 0;
 
-  virtual const std::string& getWorkspaceFilename(const int runNumber,
-                                                  const size_t bank) const = 0;
+  virtual std::string getWorkspaceFilename(const int runNumber,
+                                           const size_t bank) const = 0;
 
   virtual void removeRun(const int runNumber, const size_t bank) = 0;
 

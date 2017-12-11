@@ -18,20 +18,20 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingModel
     : public IEnggDiffFittingModel {
 
 public:
-  const Mantid::API::MatrixWorkspace_sptr&
+  Mantid::API::MatrixWorkspace_sptr
   getFocusedWorkspace(const int runNumber, const size_t bank) const override;
 
-  const Mantid::API::MatrixWorkspace_sptr&
+  Mantid::API::MatrixWorkspace_sptr
   getAlignedWorkspace(const int runNumber, const size_t bank) const override;
 
-  const Mantid::API::MatrixWorkspace_sptr&
+  Mantid::API::MatrixWorkspace_sptr
   getFittedPeaksWS(const int runNumber, const size_t bank) const override;
 
-  const Mantid::API::ITableWorkspace_sptr&
+  Mantid::API::ITableWorkspace_sptr
   getFitResults(const int runNumber, const size_t bank) const override;
 
-  const std::string &getWorkspaceFilename(const int runNumber,
-                                          const size_t bank) const override;
+  std::string getWorkspaceFilename(const int runNumber,
+                                   const size_t bank) const override;
 
   void removeRun(const int runNumber, const size_t bank) override;
 
