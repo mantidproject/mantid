@@ -68,7 +68,6 @@ void IndexPeaks::exec() {
   size_t n_peaks = ws->getNumberPeaks();
   int total_indexed = 0;
   double average_error;
-  double total_error = 0;
   double tolerance = this->getProperty("Tolerance");
 
   if (commonUB) {
@@ -86,7 +85,8 @@ void IndexPeaks::exec() {
     for (size_t i = 0; i < n_peaks; i++) {
       peaks[i].setHKL(miller_indices[i]);
     }
-  } else {
+//  } else {
+    double total_error = 0;
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
     for (size_t i = 0; i < n_peaks; i++) {
@@ -122,7 +122,7 @@ void IndexPeaks::exec() {
       int original_indexed = 0;
       double original_error = 0;
       original_indexed = IndexingUtils::CalculateMillerIndices(
-          UB, q_vectors, tolerance, miller_indices, original_error);
+          tempUB, q_vectors, tolerance, miller_indices, original_error);
 
       IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded for
                                                 // Optimize_UB to work
@@ -147,7 +147,7 @@ void IndexPeaks::exec() {
         }
 
         num_indexed = IndexingUtils::CalculateMillerIndices(
-            UB, q_vectors, tolerance, miller_indices, average_error);
+            tempUB, q_vectors, tolerance, miller_indices, average_error);
 
         IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded for
                                                   // Optimize_UB to work
@@ -165,7 +165,7 @@ void IndexPeaks::exec() {
       if (!round_hkls) // If user wants fractional hkls, recalculate them
       {
         num_indexed = IndexingUtils::CalculateMillerIndices(
-            UB, q_vectors, tolerance, miller_indices, average_error);
+            tempUB, q_vectors, tolerance, miller_indices, average_error);
       }
 
       total_indexed += num_indexed;
@@ -193,7 +193,7 @@ void IndexPeaks::exec() {
       average_error = total_error / total_indexed;
     else
       average_error = 0;
-  }
+ // }
 
   // tell the user how many were indexed overall and the overall average error
   g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
