@@ -1738,28 +1738,35 @@ void Algorithm::execNonMaster() {
   // If there is no output we can simply do nothing.
   if (m_pureOutputWorkspaceProps.empty())
     return;
-  // Does Algorithm have exactly one input and one output workspace property?
-  if (m_inputWorkspaceProps.size() == 1 &&
-      m_pureOutputWorkspaceProps.size() == 1) {
-    // Does the input workspace property point to an actual workspace?
-    if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
-      if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
-        const auto &wsProp = m_pureOutputWorkspaceProps.front();
-        // This is the reverse cast of what is done in
-        // cacheWorkspaceProperties(), so it should never fail.
-        const Property &prop = dynamic_cast<Property &>(*wsProp);
-        auto clone = ws->cloneEmpty();
-        // Currently we have not implemented a proper cloneEmpty() for all
-        // workspace types, in particular the abundance of Workspace2D subtypes,
-        // so we do a safety check here.
-        if (ws->storageMode() != clone->storageMode())
-          throw std::runtime_error(clone->id() +
-                                   "::cloneEmpty() did not return a workspace "
-                                   "with the correct storage mode. Make sure "
-                                   "cloneEmpty() sets the storage mode.");
-        setProperty(prop.name(), std::move(clone));
-        return;
-      }
+  if (m_pureOutputWorkspaceProps.size() == 1) {
+    // To create an output workspace we need at least one input workspace that
+    // provides the workspace type. Furthermore, all input workspaces must have
+    // the same storage mode since otherwise we have no strategy for propagating
+    // storage mode and workspace types.
+    if (m_inputWorkspaceProps.size() > 0 &&
+        std::all_of(m_inputWorkspaceProps.begin(), m_inputWorkspaceProps.end(),
+                    [](const IWorkspaceProperty *const prop) {
+                      const auto &ws = prop->getWorkspace();
+                      return ws &&
+                             ws->storageMode() ==
+                                 Parallel::StorageMode::MasterOnly;
+                    })) {
+      const auto &ws = m_inputWorkspaceProps.front()->getWorkspace();
+      const auto &wsProp = m_pureOutputWorkspaceProps.front();
+      // This is the reverse cast of what is done in
+      // cacheWorkspaceProperties(), so it should never fail.
+      const Property &prop = dynamic_cast<Property &>(*wsProp);
+      auto clone = ws->cloneEmpty();
+      // Currently we have not implemented a proper cloneEmpty() for all
+      // workspace types, in particular the abundance of Workspace2D subtypes,
+      // so we do a safety check here.
+      if (ws->storageMode() != clone->storageMode())
+        throw std::runtime_error(clone->id() +
+                                 "::cloneEmpty() did not return a workspace "
+                                 "with the correct storage mode. Make sure "
+                                 "cloneEmpty() sets the storage mode.");
+      setProperty(prop.name(), std::move(clone));
+      return;
     }
   }
   throw std::runtime_error(
