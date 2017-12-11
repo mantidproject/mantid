@@ -526,6 +526,7 @@ LoadSQW                           Identical               see ``IFileLoader``
 LoadSwans                         Identical               see ``IFileLoader``
 LoadTBL                           Identical               see ``IFileLoader``
 LoadTOFRawNexus                   Identical               see ``IFileLoader``
+Load                              all                     actual supported mode is dictated by underlying load algorithm, which depends on file type
 MaskBins                          all
 MaskDetectorsInShape              all
 MaskSpectra                       all
