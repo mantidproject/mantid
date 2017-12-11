@@ -237,8 +237,9 @@ void SetSampleMaterial::exec() {
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
-  auto shapeObject = expInfo->sample().getShape(); // copy
-  shapeObject.setMaterial(*mat);
+  auto shapeObject = boost::shared_ptr<Geometry::IObject>(
+      expInfo->sample().getShape().clone());
+  shapeObject->setMaterial(*mat);
   expInfo->mutableSample().setShape(shapeObject);
   g_log.information() << "Sample number density ";
   if (isEmpty(mat->numberDensity())) {

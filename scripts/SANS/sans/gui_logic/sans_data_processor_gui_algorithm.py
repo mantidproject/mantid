@@ -147,6 +147,13 @@ def create_properties(show_periods=True):
                                            default=False,
                                            prefix='',
                                            property_type=bool),
+                      algorithm_list_entry(column_name="",
+                                           algorithm_property="PlotResults",
+                                           description='If results should be plotted.',
+                                           show_value=False,
+                                           default=False,
+                                           prefix='',
+                                           property_type=bool),
                       algorithm_list_entry(column_name="OutputName",
                                            algorithm_property="OutputName",
                                            description='An optional custom output workspace name.',
@@ -175,7 +182,14 @@ def create_properties(show_periods=True):
                                            show_value=False,
                                            default=OutputMode.to_string(OutputMode.PublishToADS),
                                            prefix='',
-                                           property_type=bool)
+                                           property_type=bool),
+                      algorithm_list_entry(column_name="",
+                                           algorithm_property="OutputGraph",
+                                           description='The name of the graph to output to.',
+                                           show_value=False,
+                                           default='',
+                                           prefix='',
+                                           property_type=str)
                       ]
     else:
         properties = [algorithm_list_entry(column_name="SampleScatter",
@@ -227,6 +241,13 @@ def create_properties(show_periods=True):
                                            default=False,
                                            prefix='',
                                            property_type=bool),
+                      algorithm_list_entry(column_name="",
+                                           algorithm_property="PlotResults",
+                                           description='If results should be plotted.',
+                                           show_value=False,
+                                           default=False,
+                                           prefix='',
+                                           property_type=bool),
                       algorithm_list_entry(column_name="OutputName",
                                            algorithm_property="OutputName",
                                            description='An optional custom output workspace name.',
@@ -255,10 +276,23 @@ def create_properties(show_periods=True):
                                            show_value=False,
                                            default=OutputMode.to_string(OutputMode.PublishToADS),
                                            prefix='',
-                                           property_type=bool)
+                                           property_type=bool),
+                      algorithm_list_entry(column_name="",
+                                           algorithm_property="OutputGraph",
+                                           description='The name of the graph to output to.',
+                                           show_value=False,
+                                           default='',
+                                           prefix='',
+                                           property_type=str)
                       ]
     return properties
-
+algorithm_list_entry(column_name="",
+                                       algorithm_property="OutputGraph",
+                                       description='The name of the graph to output to.',
+                                       show_value=False,
+                                       default='',
+                                       prefix='',
+                                       property_type=str)
 
 def get_white_list(show_periods=True):
     return create_properties(show_periods=show_periods)
@@ -328,12 +362,14 @@ class SANSGuiDataProcessorAlgorithm(DataProcessorAlgorithm):
         # 2. Get the state for the index from the PropertyManagerDataService
         property_manager_service = PropertyManagerService()
         state = property_manager_service.get_single_state_from_pmds(index_to_retrieve=index)
-
         # 3. Get some global settings
         use_optimizations = self.getProperty("UseOptimizations").value
         output_mode_as_string = self.getProperty("OutputMode").value
         output_mode = OutputMode.from_string(output_mode_as_string)
+        plot_results = self.getProperty('PlotResults').value
+        output_graph = self.getProperty('OutputGraph').value
 
         # 3. Run the sans_batch script
         sans_batch = SANSBatchReduction()
-        sans_batch(states=state, use_optimizations=use_optimizations, output_mode=output_mode)
+        sans_batch(states=state, use_optimizations=use_optimizations, output_mode=output_mode, plot_results=plot_results
+                   , output_graph=output_graph)
