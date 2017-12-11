@@ -29,7 +29,7 @@ set VS_VERSION=14
 set SDK_VERSION=8.1
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64 %SDK_VERSION%
 set CM_GENERATOR=Visual Studio 14 2015 Win64
-set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Pre-processing steps on the workspace itself
