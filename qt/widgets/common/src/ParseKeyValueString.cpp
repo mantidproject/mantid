@@ -154,7 +154,7 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
    @throws std::runtime_error on an invalid input value
 */
 std::map<QString, QString>
-parseKeyValueMap(const std::map<QString, QString> sourceMap) {
+parseKeyValueMap(const std::map<QString, QString> &sourceMap) {
   std::map<QString, QString> kvp;
 
   for (const auto &it : sourceMap) {
