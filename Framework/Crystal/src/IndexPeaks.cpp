@@ -85,7 +85,7 @@ void IndexPeaks::exec() {
     for (size_t i = 0; i < n_peaks; i++) {
       peaks[i].setHKL(miller_indices[i]);
     }
-//  } else {
+    //  } else {
     double total_error = 0;
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
@@ -193,20 +193,20 @@ void IndexPeaks::exec() {
       average_error = total_error / total_indexed;
     else
       average_error = 0;
- // }
+    // }
 
-  // tell the user how many were indexed overall and the overall average error
-  g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
-                 << n_peaks << " with tolerance of " << tolerance << '\n';
-  g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                 << average_error << '\n';
+    // tell the user how many were indexed overall and the overall average error
+    g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
+                   << n_peaks << " with tolerance of " << tolerance << '\n';
+    g_log.notice() << "Average error in h,k,l for indexed peaks =  "
+                   << average_error << '\n';
 
-  // Save output properties
-  this->setProperty("NumIndexed", total_indexed);
-  this->setProperty("AverageError", average_error);
-  // Show the lattice parameters
-  g_log.notice() << o_lattice << "\n";
-}
+    // Save output properties
+    this->setProperty("NumIndexed", total_indexed);
+    this->setProperty("AverageError", average_error);
+    // Show the lattice parameters
+    g_log.notice() << o_lattice << "\n";
+  }
 
 } // namespace Mantid
 } // namespace Crystal
