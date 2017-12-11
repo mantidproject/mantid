@@ -60,10 +60,13 @@ QString PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
       auto const runNumbers = *runNumbersIt;
 
       if (!runNumbers.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with
-        // '1_2'
+        // we may have things like '1+2' which deal with multiple run numbers
+        // but we want to ignore empty values
         auto value = runNumbers.split("+", QString::SkipEmptyParts);
-        names.append(column.prefix() + value.join("_"));
+        // Remove empty strings
+        value.removeAll("");
+        if (!value.isEmpty())
+          names.append(column.prefix() + value.join("+"));
       }
     }
   } // Columns

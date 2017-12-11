@@ -695,7 +695,8 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
       auto const runNumbers = *runNumbersIt;
 
       if (!runNumbers.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with '1_2'
+        // we may have things like '1+2' which deal with multiple run numbers
+        // but we want to ignore empty values
         auto value = runNumbers.split("+", QString::SkipEmptyParts);
         // Remove empty strings
         value.removeAll("");
