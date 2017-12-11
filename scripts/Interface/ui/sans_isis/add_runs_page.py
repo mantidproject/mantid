@@ -22,6 +22,13 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def out_file_name(self):
         return self.fileNameEdit.text().encode('utf-8')
 
+    def set_out_file_directory(self, out_file_directory):
+        self.outFileDirectoryLabel.setText('Output Directory: {}'.format(out_file_directory))
+
+    def no_save_directory(self):
+        QtGui.QMessageBox.warning(self, "No Save Directory Set!",
+                                  "You must set the mantid output directory before suming files.")
+
     def set_out_file_name(self, out_file_name):
         self.fileNameEdit.setText(out_file_name)
 

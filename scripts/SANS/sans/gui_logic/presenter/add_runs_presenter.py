@@ -33,7 +33,7 @@ class AddRunsPagePresenter(object):
         # Therefore assumes that file names all have the same number of
         # leading zeroes since a shorter string is sorted after a longer one.
         names = [run.display_name() for run in run_selection]
-        return max(names) if names else ''
+        return (max(names) + '-add' if names else '').encode('utf-8')
 
     def _sum_base_file_name(self, run_selection):
         if self._use_generated_file_name:
@@ -59,12 +59,15 @@ class AddRunsPagePresenter(object):
     def _handle_out_file_changed(self):
         self._use_generated_file_name = False
 
+    def _output_directory_is_not_empty(self, settings):
+        return settings.save_directory() != ''
+
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
-        self._sum_runs(run_selection,
-                       self._default_instrument(),
-                       self._summation_settings_presenter.settings(),
-                       self._sum_base_file_name(run_selection))
-
-    def _default_instrument(self):
-        return ConfigService.getString("default.instrument")
+        settings = self._summation_settings_presenter.settings()
+        if self._output_directory_is_not_empty(settings):
+            self._sum_runs(run_selection,
+                           settings,
+                           self._sum_base_file_name(run_selection))
+        else:
+            self._view.no_save_directory()

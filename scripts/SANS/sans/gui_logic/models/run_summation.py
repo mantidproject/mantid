@@ -2,7 +2,7 @@ import SANSadd2
 
 
 class RunSummation(object):
-    def __call__(self, run_selection, instrument, settings, base_file_name):
+    def __call__(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_tuple(run_selection)
         binning = self._bin_settings_or_monitors(settings)
         additional_time_shifts = self._time_shifts_or_none(settings)
@@ -14,7 +14,7 @@ class RunSummation(object):
 
         SANSadd2.add_runs(
             run_selection,
-            instrument,
+            settings.instrument,
             lowMem=True,
             binning=binning,
             isOverlay=overlay_event_workspaces,

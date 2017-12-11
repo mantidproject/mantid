@@ -1,4 +1,5 @@
 from sans.gui_logic.models.binning_type import BinningType
+from mantid.kernel import ConfigService
 
 
 class OverlayEventWorkspaces(object):
@@ -77,6 +78,12 @@ class SummationSettings(object):
         self._save_as_event_data = SaveAsEventData()
         self._custom_binning = CustomBinning()
         self._settings = self._settings_from_type(initial_type)
+
+    def instrument(self):
+        return ConfigService.getString('default.instrument')
+
+    def save_directory(self):
+        return ConfigService.getString('defaultsave.directory')
 
     def set_histogram_binning_type(self, type):
         self._settings = self._settings_from_type(type)

@@ -81,7 +81,6 @@ class InitializationTest(AddRunsPagePresenterTestCase):
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
 
-
     def _make_presenter_with_child_presenters(self,
                                               run_selection,
                                               summation_settings):
@@ -166,9 +165,25 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         self._on_model_updated(fake_run_selection)
         self.view.sum.emit()
         run_summation.assert_called_with(fake_run_selection,
-                                         ConfigService.getString("default.instrument"),
                                          summation_settings_model,
-                                         '3')
+                                         '3-add')
+
+    def _summation_settings_with_save_directory(self, directory):
+        mock_summation_settings = \
+            mock.create_autospec(SummationSettings, spec_set=True)
+        mock_summation_settings.save_directory.return_value = ''
+        return mock_summation_settings
+
+    def test_shows_error_when_empty_default_directory(self):
+        summation_settings_model = self._summation_settings_with_save_directory('')
+        self.summation_settings_presenter.settings.return_value = summation_settings_model
+        self.presenter = self._make_presenter(
+            mock.Mock(),
+            self._just_use_run_selector_presenter(),
+            self._just_use_summation_settings_presenter())
+
+        self.view.sum.emit()
+        assert_called(self.view.no_save_directory)
 
 
 class BaseFileNameTest(SelectionMockingTestCase):
@@ -200,7 +215,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def _base_file_name_arg(self, run_summation_mock):
         first_call = 0
-        return run_summation_mock.call_args[first_call][3]
+        return run_summation_mock.call_args[first_call][2]
 
     def _retrieve_generated_name_for(self, run_paths):
         run_summation = mock.Mock()
@@ -212,7 +227,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def test_generates_correct_base_name(self):
         generated_name = self._retrieve_generated_name_for(['1', '2', '3'])
-        self.assertEqual('3', generated_name)
+        self.assertEqual('3-add', generated_name)
 
     def test_regenerates_correct_base_name_after_highest_removed(self):
         run_summation = mock.Mock()
@@ -220,7 +235,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self._update_selection_model(self._make_fake_runs(['4', '5', '6']))
         self._update_selection_model(self._make_fake_runs(['4', '5']))
         self.view.sum.emit()
-        self.assertEqual('5', self._base_file_name_arg(run_summation))
+        self.assertEqual('5-add', self._base_file_name_arg(run_summation))
 
     def test_correct_base_name_after_set_by_user(self):
         user_out_file_name = 'Output'
@@ -252,9 +267,9 @@ class BaseFileNameTest(SelectionMockingTestCase):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
         self._update_selection_model(self._make_fake_runs(['4', '6', '5']))
-        self.view.set_out_file_name.assert_called_with('6')
+        self.view.set_out_file_name.assert_called_with('6-add')
         self._update_selection_model(self._make_fake_runs(['5', '4']))
-        self.view.set_out_file_name.assert_called_with('5')
+        self.view.set_out_file_name.assert_called_with('5-add')
 
 
 class SumButtonTest(SelectionMockingTestCase):
