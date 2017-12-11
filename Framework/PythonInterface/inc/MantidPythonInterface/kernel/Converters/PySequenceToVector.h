@@ -79,14 +79,25 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
   inline const std::vector<DestElementType> operator()() {
     Py_ssize_t length = PySequence_Size(m_obj);
     std::vector<DestElementType> cvector(length);
-    if (length == 0)
-      return cvector;
-    ExtractCType<DestElementType> elementConverter;
-    for (Py_ssize_t i = 0; i < length; ++i) {
-      DestElementType element = elementConverter(PySequence_GetItem(m_obj, i));
-      cvector[i] = element;
-    }
+    fill(cvector);
     return cvector;
+  }
+
+  /**
+   * Fill a provided vector with values from the sequence
+   * @param A vector<DestElementType> to fill
+   */
+  inline void fill(std::vector<DestElementType> &dest) {
+    auto length = static_cast<size_t>(PySequence_Size(m_obj));
+    if (length != dest.size()) {
+      throw std::invalid_argument(
+          "Length mismatch between python list & C array. python=" +
+          std::to_string(length) + ", C=" + std::to_string(dest.size()));
+    }
+    ExtractCType<DestElementType> elementConverter;
+    for (size_t i = 0; i < length; ++i) {
+      dest[i] = elementConverter(PySequence_GetItem(m_obj, i));
+    }
   }
 
 private:

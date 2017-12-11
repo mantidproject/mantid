@@ -78,7 +78,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
                              const boost::python::object &values) {
   if (PyArray_Check(values.ptr())) {
-    NDArrayToVector<double> converter(values));
+    NDArrayToVector<double> converter(values);
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
     PySequenceToVector<double> converter(values);
@@ -124,7 +124,7 @@ void clearMonitorWorkspace(MatrixWorkspace &self) {
  * @param values :: A numpy array. The length must match the size of the
  */
 void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataX, wsIndex, values);
 }
 
@@ -135,7 +135,7 @@ void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataY, wsIndex, values);
 }
 
@@ -157,7 +157,7 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                       const NumPy::NdArray &values) {
+                       const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
 }
 

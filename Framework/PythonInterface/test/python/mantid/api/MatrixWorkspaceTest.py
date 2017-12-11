@@ -188,7 +188,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(np.array_equal(x_expected, x_extracted))
         self.assertTrue(np.array_equal(y_expected, y_extracted))
 
-    def xtest_setxy_accepts_python_list(self):
+    def test_setxy_accepts_python_list(self):
         nbins = 10
         nspec = 2
         xdata = list(range(nbins+1))
