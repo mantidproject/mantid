@@ -137,7 +137,7 @@ def _dim2array(d,center=True):
 
 
 def _getMDData(workspace,normalization,withError=False):
-    
+    pass
 
 def _getContour(workspace, distribution):
     x = workspace.extractX()

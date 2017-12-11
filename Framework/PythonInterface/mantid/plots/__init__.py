@@ -80,7 +80,7 @@ class MantidAxes(plt.Axes):
         else:
             return plt.Axes.pcolormesh(self,*args,**kwargs)
 
-register_projection(MyAxes)
+register_projection(MantidAxes)
 
 
 
