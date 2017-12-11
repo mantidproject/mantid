@@ -596,7 +596,7 @@
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN4</technique>
   </instrument>
 
   <instrument name="IN5">

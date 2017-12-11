@@ -102,8 +102,8 @@ set ( SRC_FILES
 	src/Math/Triple.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
+	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-	src/Objects/Object.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -266,8 +266,9 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
+	inc/MantidGeometry/Objects/CSGObject.h
+	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-	inc/MantidGeometry/Objects/Object.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -320,6 +321,7 @@ set ( TEST_FILES
 	ConventionalCellTest.h
 	ConvexPolygonIteratorTest.h
 	ConvexPolygonTest.h
+	CSGObjectTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h
@@ -362,7 +364,6 @@ set ( TEST_FILES
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
-	ObjectTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h

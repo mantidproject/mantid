@@ -173,7 +173,7 @@ ExtractMaskToTable::parseStringToVector(std::string liststr) {
 
   // Use ArrayProperty to parse the list
   ArrayProperty<int> detlist("i", liststr);
-  if (detlist.isValid().compare("")) {
+  if (!detlist.isValid().empty()) {
     stringstream errss;
     errss << "String '" << liststr
           << "' is unable to be converted to a list of detectors IDs. "
@@ -271,7 +271,7 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
     throw runtime_error(errmsg.str());
   }
   for (size_t i = 0; i < sourcecolnames.size(); ++i) {
-    if (sourcecolnames[i].compare(targetcolnames[i])) {
+    if (sourcecolnames[i] != targetcolnames[i]) {
       stringstream errss;
       errss << "Source and target have incompatible column name at column " << i
             << ". "

@@ -39,6 +39,7 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
+  PowderDiffILLReductionTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py

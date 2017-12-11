@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService
-
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
@@ -12,12 +11,18 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.state.data import StateData
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+    # this should happen when this is called from outside Mantidplot and only then,
+    # the result is that attempting to plot will raise an exception
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
-def single_reduction_for_batch(state, use_optimizations, output_mode):
+def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph):
     """
     Runs a single reduction.
 
@@ -58,6 +63,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode):
     single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
+
     # Perform the data reduction
     for reduction_package in reduction_packages:
         # -----------------------------------
@@ -88,7 +94,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode):
                                                                                "OutputWorkspaceHABCanCount")
         reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
                                                                               "OutputWorkspaceHABCanNorm")
-
+        if plot_results and mantidplot:
+            plot_workspace(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
@@ -118,6 +125,27 @@ def single_reduction_for_batch(state, use_optimizations, output_mode):
     # -----------------------------------------------------------------------
     if not use_optimizations:
         delete_optimization_workspaces(reduction_packages)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Function for plotting
+# ----------------------------------------------------------------------------------------------------------------------
+def plot_workspace(reduction_package, output_graph):
+    if reduction_package.reduction_mode == ISISReductionMode.All:
+        graph_handle = mantidplot.plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
+                                               window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle.activeLayer().logLogAxes()
+    elif reduction_package.reduction_mode == ISISReductionMode.HAB:
+        graph_handle = mantidplot.plotSpectrum(reduction_package.reduced_hab, 0, window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle.activeLayer().logLogAxes()
+    elif reduction_package.reduction_mode == ISISReductionMode.LAB:
+        graph_handle = mantidplot.plotSpectrum(reduction_package.reduced_lab, 0, window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle.activeLayer().logLogAxes()
+    elif reduction_package.reduction_mode == ISISReductionMode.Merged:
+        graph_handle = mantidplot.plotSpectrum([reduction_package.reduced_merged,
+                                                reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
+                                               window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle.activeLayer().logLogAxes()
 
 
 # ----------------------------------------------------------------------------------------------------------------------

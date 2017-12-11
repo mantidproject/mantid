@@ -1,4 +1,4 @@
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/OCGeometryHandler.h"
@@ -15,13 +15,13 @@ OCGeometryHandler::OCGeometryHandler(IObjComponent *comp)
   Renderer = new OCGeometryRenderer();
 }
 
-OCGeometryHandler::OCGeometryHandler(boost::shared_ptr<Object> obj)
+OCGeometryHandler::OCGeometryHandler(boost::shared_ptr<CSGObject> obj)
     : GeometryHandler(obj) {
   Triangulator = new OCGeometryGenerator(obj.get());
   Renderer = new OCGeometryRenderer();
 }
 
-OCGeometryHandler::OCGeometryHandler(Object *obj) : GeometryHandler(obj) {
+OCGeometryHandler::OCGeometryHandler(CSGObject *obj) : GeometryHandler(obj) {
   Triangulator = new OCGeometryGenerator(obj);
   Renderer = new OCGeometryRenderer();
 }
@@ -46,11 +46,11 @@ GeometryHandler *OCGeometryHandler::createInstance(IObjComponent *comp) {
 }
 
 GeometryHandler *
-OCGeometryHandler::createInstance(boost::shared_ptr<Object> obj) {
+OCGeometryHandler::createInstance(boost::shared_ptr<CSGObject> obj) {
   return new OCGeometryHandler(obj);
 }
 
-GeometryHandler *OCGeometryHandler::createInstance(Object *obj) {
+GeometryHandler *OCGeometryHandler::createInstance(CSGObject *obj) {
   return new OCGeometryHandler(obj);
 }
 

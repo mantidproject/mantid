@@ -246,8 +246,8 @@ protected:
   void initDraw() const override {}
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override {
-    return boost::shared_ptr<const Object>();
+  const boost::shared_ptr<const IObject> shape() const override {
+    return boost::shared_ptr<const IObject>();
   }
   /// Returns the material of the Object
   const Kernel::Material material() const override;

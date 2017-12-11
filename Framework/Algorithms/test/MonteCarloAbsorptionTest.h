@@ -37,12 +37,12 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
   namespace PhysicalConstants = Mantid::PhysicalConstants;
 
   // Define a sample shape
-  Object_sptr sampleShape =
+  auto sampleShape =
       ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
   // And a material
   sampleShape->setMaterial(
       Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-  ws->mutableSample().setShape(*sampleShape);
+  ws->mutableSample().setShape(sampleShape);
 
   if (environment == Environment::SamplePlusContainer) {
     const std::string id("container");
@@ -52,9 +52,9 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
     const V3D axis(0.0, 1.0, 0.0);
 
     ShapeFactory shapeMaker;
-    auto can = shapeMaker.createShape<Container>(
-        ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
-                                                   axis, id));
+    auto can = boost::make_shared<Container>(
+        shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
+            radius, height, baseCentre, axis, id)));
     can->setMaterial(Material("CanMaterial",
                               PhysicalConstants::getNeutronAtom(26, 0), 0.01));
     SampleEnvironment *env = new SampleEnvironment("can", can);

@@ -30,7 +30,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"

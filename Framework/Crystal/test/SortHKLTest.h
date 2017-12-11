@@ -16,6 +16,7 @@
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <Poco/File.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -49,8 +50,8 @@ public:
     double amu = 0.011;
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
                         static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
-    Object sampleShape;
-    sampleShape.setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
+    auto sampleShape = boost::make_shared<CSGObject>();
+    sampleShape->setMaterial(Material("SetInSaveHKLTest", neutron, 1.0));
     ws->mutableSample().setShape(sampleShape);
 
     API::Run &mrun = ws->mutableRun();

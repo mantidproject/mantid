@@ -9,9 +9,10 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
-class Object;
+class IObject;
 class SampleEnvironment;
 }
+
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
@@ -62,7 +63,7 @@ public:
                              double lambdaAfter) const;
 
 private:
-  const Geometry::Object &m_sample;
+  const boost::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
   const size_t m_maxScatterAttempts;

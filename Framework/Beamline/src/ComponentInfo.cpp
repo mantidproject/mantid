@@ -3,8 +3,11 @@
 #include "MantidKernel/make_cow.h"
 #include <boost/make_shared.hpp>
 #include <numeric>
+#include <algorithm>
 #include <utility>
 #include <vector>
+#include <sstream>
+#include <iterator>
 
 namespace Mantid {
 namespace Beamline {
@@ -39,8 +42,9 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    boost::shared_ptr<std::vector<bool>> isStructuredBank, int64_t sourceIndex,
-    int64_t sampleIndex)
+    boost::shared_ptr<std::vector<bool>> isStructuredBank,
+    boost::shared_ptr<const std::vector<std::string>> names,
+    int64_t sourceIndex, int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -50,6 +54,7 @@ ComponentInfo::ComponentInfo(
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_isStructuredBank(std::move(isStructuredBank)),
+      m_names(std::move(names)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex),
@@ -82,6 +87,10 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of rectangular bank flags as number of "
                                 "non-detector components");
+  }
+  if (m_names->size() != m_size) {
+    throw std::invalid_argument("ComponentInfo should be provided same number "
+                                "of names as number of components");
   }
 }
 
@@ -492,6 +501,21 @@ ComponentInfo::componentRangeInSubtree(const size_t index) const {
 
 Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];
+}
+
+std::string ComponentInfo::name(const size_t componentIndex) const {
+  return (*m_names)[componentIndex];
+}
+
+size_t ComponentInfo::indexOf(const std::string &name) const {
+  // Reverse iterate to hit top level components sooner
+  auto it = std::find(m_names->rbegin(), m_names->rend(), name);
+  if (it == m_names->rend()) {
+    std::stringstream buffer;
+    buffer << name << " does not exist";
+    throw std::invalid_argument(buffer.str());
+  }
+  return std::distance(m_names->begin(), it.base() - 1);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex,
