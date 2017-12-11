@@ -274,10 +274,7 @@ OptionsMap ReflSettingsPresenter::getReductionOptions() const {
 * @return :: the transmission runs string
 */
 std::string ReflSettingsPresenter::getTransmissionRuns() const {
-  if (m_view->experimentSettingsEnabled())
-    return m_view->getTransmissionRuns();
-
-  return std::string();
+  return m_view->getTransmissionRuns();
 }
 
 /** Returns global options for 'Stitch1DMany'
