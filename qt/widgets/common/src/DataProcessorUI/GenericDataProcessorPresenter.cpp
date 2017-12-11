@@ -832,16 +832,18 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
   return alg;
 }
 
-/** Preprocess the given property value if appropriate
+/** Preprocess the property value from the given column if
+ * preprocessing is applicable for this column (does nothing
+ * otherwise)
+ * @param columnName [input] :: the name of the column
+ * @param columnValue [inout] :: the value in the column
  */
-QString GenericDataProcessorPresenter::preprocessColumnValue(
-    const QString &columnName, const QString &columnValueIn) {
-
-  auto columnValue = columnValueIn;
+void GenericDataProcessorPresenter::preprocessColumnValue(
+    const QString &columnName, QString &columnValue) {
 
   // Check if preprocessing is required for this column
   if (!m_preprocessing.hasPreprocessing(columnName))
-    return columnValue;
+    return;
 
   auto preprocessor = m_preprocessing.m_map.at(columnName);
 
@@ -854,8 +856,26 @@ QString GenericDataProcessorPresenter::preprocessColumnValue(
   auto optionsMap = parseKeyValueString(globalOptionsForColumn.toStdString());
   auto runWS = prepareRunWorkspace(columnValue, preprocessor, optionsMap);
   columnValue = QString::fromStdString(runWS->getName());
+}
 
-  return columnValue;
+/** Perform preprocessing on algorithm property values where applicable
+ * @param options : the algorithm properties as a map of property name
+ * to value
+*/
+void GenericDataProcessorPresenter::preprocessOptionValues(
+    OptionsMap &options) {
+  // Loop through all columns (excluding the Options and Hidden options
+  // columns)
+  for (auto columnIt = m_whitelist.cbegin(); columnIt != m_whitelist.cend() - 2;
+       ++columnIt) {
+    auto column = *columnIt;
+    auto &propertyName = column.algorithmProperty();
+
+    // Check if the column has a value
+    if (options.find(propertyName) != options.end()) {
+      preprocessColumnValue(column.name(), options[propertyName]);
+    }
+  }
 }
 
 /** Some columns in the model should be updated with outputs
@@ -900,6 +920,98 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
   }
 }
 
+/** Update the given options with user-specified options from the
+ * given row. New options are only added if they do not already exist in the map
+ * and options are pre-processed where applicable.
+ * @param options : a map of property name to option value to update
+ * @param data : the row data to get option values from
+ */
+void GenericDataProcessorPresenter::addRowOptions(OptionsMap &options,
+                                                  RowData *data) {
+  // Loop through all columns (excluding the Options and Hidden options
+  // columns)
+  auto columnIt = m_whitelist.cbegin();
+  auto columnValueIt = data->constBegin();
+  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
+    auto column = *columnIt;
+    auto &propertyName = column.algorithmProperty();
+
+    // Skip if already set
+    if (options.find(propertyName) != options.end())
+      continue;
+
+    // Get the value from this column
+    auto columnValue = *columnValueIt;
+
+    // If no value, nothing to do
+    if (!columnValue.isEmpty())
+      options[propertyName] = columnValue;
+  }
+}
+
+/** Update the given options with user-specified options from the
+ * Options column. New options are only added if they do not already
+ * exist in the map.
+ * @param options : a map of property name to option value to update
+ */
+void GenericDataProcessorPresenter::addUserOptions(OptionsMap &options,
+                                                   RowData *data) {
+  auto userOptions =
+      parseKeyValueQString(data->at(static_cast<int>(m_whitelist.size()) - 2));
+  options.insert(userOptions.begin(), userOptions.end());
+}
+
+/** Update the given options with options from the Hidden Options
+ * column. New options are only added if they do not already
+ * exist in the map.
+ * @param options : a map of property name to option value to update
+ */
+void GenericDataProcessorPresenter::addHiddenOptions(OptionsMap &options,
+                                                     RowData *data) {
+  const auto hiddenOptions = parseKeyValueQString(data->back());
+  options.insert(hiddenOptions.begin(), hiddenOptions.end());
+}
+
+/** Update the given options with options from the global settings.
+ * New options are only added if they do not already exist in the map.
+ * @param options : a map of property name to option value to update
+ */
+void GenericDataProcessorPresenter::addGlobalOptions(OptionsMap &options) {
+  const auto globalOptions = parseKeyValueMap(m_processingOptions);
+  options.insert(globalOptions.begin(), globalOptions.end());
+}
+
+/** Update the given options with the output properties.
+ * New options are only added if they do not already exist in the map.
+ * @param options : a map of property name to option value to update
+ */
+void GenericDataProcessorPresenter::addOutputOptions(OptionsMap &options,
+                                                     RowData *data) {
+  // Set the properties for the output workspace names
+  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
+    options[m_processor.outputPropertyName(i)] =
+        getReducedWorkspaceName(*data, m_processor.prefix(i));
+  }
+}
+
+/** Create an algorithm with the given properties and execute it
+ * @param options : the options as a map of property name to value
+ * @throws std::runtime_error if reduction fails
+ * @returns : the algorithm
+ */
+IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
+    const OptionsMap &options) {
+  auto alg = createProcessingAlgorithm();
+
+  for (auto &kvp : options) {
+    setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
+  }
+
+  alg->execute();
+
+  return alg;
+}
+
 /** Reduce a row
  *
  * @param data :: [input] The data in this row as a vector where elements
@@ -908,57 +1020,17 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
-  // Create a map of property name : value from the global options,
-  // options column and hidden options column. The last one takes
-  // precedence if given multiple times.
-  OptionsMap options = parseKeyValueMap(m_processingOptions);
-  const auto userOptions =
-      parseKeyValueQString(data->at(static_cast<int>(m_whitelist.size()) - 2));
-  options.insert(userOptions.begin(), userOptions.end());
-  const auto hiddenOptions = parseKeyValueQString(data->back());
-  options.insert(hiddenOptions.begin(), hiddenOptions.end());
+  // Compile all of the options into a single map. Those added first
+  // here take precedence if an option is specified multiple times.
+  OptionsMap options;
+  addRowOptions(options, data);
+  addUserOptions(options, data);
+  addHiddenOptions(options, data);
+  addGlobalOptions(options);
+  addOutputOptions(options, data);
 
-  // Now set user-specified options from the columns (overrides any values
-  // already set in the options map)
-  auto columnIt = m_whitelist.cbegin();
-  auto columnValueIt = data->constBegin();
-  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
-    auto column = *columnIt;
-    auto &propertyName = column.algorithmProperty();
-
-    // Get the value from this column
-    auto columnValue = *columnValueIt;
-
-    // If empty, use the default which will already have been set in the
-    // options if there is one.
-    if (columnValue.isEmpty() || columnValue.isNull())
-      columnValue = options[propertyName];
-
-    // If no value, nothing to do
-    if (columnValue.isEmpty() || columnValue.isNull())
-      continue;
-
-    // Preprocess the value if necessary
-    columnValue = preprocessColumnValue(column.name(), columnValue);
-
-    // Update it in the options map
-    options[propertyName] = columnValue;
-  }
-
-  // Set the properties for the output workspace names
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    options[m_processor.outputPropertyName(i)] =
-        getReducedWorkspaceName(*data, m_processor.prefix(i));
-  }
-
-  // Create the algorithm, set the properties and execute it
-  auto alg = createProcessingAlgorithm();
-  for (auto &kvp : options) {
-    setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
-  }
-  alg->execute();
-
-  // Finally, update the model with results from the algorithm
+  preprocessOptionValues(options);
+  const auto alg = createAndRunAlgorithm(options);
   updateModelFromAlgorithm(alg, data);
 }
 

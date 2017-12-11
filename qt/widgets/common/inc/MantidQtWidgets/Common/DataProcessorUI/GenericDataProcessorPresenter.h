@@ -191,11 +191,24 @@ protected:
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
-  QString preprocessColumnValue(const QString &columnName,
-                                const QString &columnValueIn);
+  void preprocessColumnValue(const QString &columnName, QString &columnValue);
+  // Preprocess all option values where applicable
+  void preprocessOptionValues(OptionsMap &options);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);
+  // Get options from the individual columns
+  void addRowOptions(OptionsMap &options, RowData *data);
+  // Get options from the Options column
+  void addUserOptions(OptionsMap &options, RowData *data);
+  // Get options from the Hidden Options column
+  void addHiddenOptions(OptionsMap &options, RowData *data);
+  // Get global options
+  void addGlobalOptions(OptionsMap &options);
+  // Get output options
+  void addOutputOptions(OptionsMap &options, RowData *data);
+  // Create and execute the algorithm with the given properties
+  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
