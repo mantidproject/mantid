@@ -1038,19 +1038,24 @@ Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))
     return Parallel::ExecutionMode::Invalid;
-  auto lhs = storageModes.find("LHSWorkspace")->second;
-  auto rhs = storageModes.find("RHSWorkspace")->second;
+  auto lhs = storageModes.find(inputPropName1())->second;
+  auto rhs = storageModes.find(inputPropName2())->second;
   // Two identical modes is ok
   if (lhs == rhs)
     return getCorrespondingExecutionMode(storageModes.begin()->second);
   // Mode <X> times Cloned is ok if the cloned workspace is WorkspaceSingleValue
   if (rhs == Parallel::StorageMode::Cloned) {
-    API::MatrixWorkspace_const_sptr ws = getProperty("RHSWorkspace");
+    API::MatrixWorkspace_const_sptr ws = getProperty(inputPropName2());
     if (boost::dynamic_pointer_cast<const WorkspaceSingleValue>(ws))
       return getCorrespondingExecutionMode(lhs);
   }
   // Other options are not ok (e.g., MasterOnly times Distributed)
   return Parallel::ExecutionMode::Invalid;
+}
+
+void BinaryOperation::execNonMaster() {
+  API::MatrixWorkspace_const_sptr ws = getProperty(inputPropName1());
+  setProperty(outputPropName(), ws->cloneEmpty());
 }
 
 } // namespace Algorithms
