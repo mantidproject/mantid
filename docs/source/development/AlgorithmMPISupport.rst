@@ -476,6 +476,7 @@ FilterBadPulses                   all
 FilterByLogValue                  all
 FilterByTime                      all
 FilterEventsByLogValuePreNexus    Identical               see ``IFileLoader``
+FindDetectorsInShape              all
 Fit                               MasterOnly, Identical   see ``IFittingAlgorithm``
 IFileLoader                       Identical               implicitly adds support for many load-algorithms inheriting from this
 IFittingAlgorithm                 MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
@@ -526,6 +527,7 @@ LoadSwans                         Identical               see ``IFileLoader``
 LoadTBL                           Identical               see ``IFileLoader``
 LoadTOFRawNexus                   Identical               see ``IFileLoader``
 MaskBins                          all
+MaskDetectorsInShape              all
 MaskSpectra                       all
 Minus                             all                     see ``BinaryOperation``
 MoveInstrumentComponent           all

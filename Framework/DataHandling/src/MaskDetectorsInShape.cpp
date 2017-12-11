@@ -1,11 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/MaskDetectorsInShape.h"
+#include "MantidDataHandling/MaskSpectra.h"
 
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidIndexing/Conversion.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/IndexInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -70,10 +73,19 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
 }
 
 void MaskDetectorsInShape::runMaskDetectors(
-    API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds) {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors", 0.85, 1.0);
-  alg->setProperty<std::vector<int>>("DetectorList", detectorIds);
-  alg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
+    API::MatrixWorkspace_sptr workspace, const std::vector<int> &detectorIds) {
+  auto alg = createChildAlgorithm("MaskSpectra", 0.85, 1.0);
+  const auto &detInfo = workspace->detectorInfo();
+  std::vector<size_t> detectorIndices;
+  for (const auto id : detectorIds)
+    detectorIndices.push_back(detInfo.indexOf(id));
+  const auto &globalSpectrumIndices =
+      workspace->indexInfo().globalSpectrumIndicesFromDetectorIndices(
+          detectorIndices);
+  alg->setWorkspaceInputProperties(
+      "InputWorkspace", workspace, IndexType::WorkspaceIndex,
+      Indexing::castVector<int64_t>(globalSpectrumIndices));
+  alg->setProperty("OutputWorkspace", workspace);
   try {
     if (!alg->execute()) {
       throw std::runtime_error(
