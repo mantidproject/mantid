@@ -41,6 +41,7 @@ SpectrumView
 ------------
 
 - The SpectrumView is now available as a standalone widget in mantidpython. Below is a simple example of how the widget can be used in python.
+
 .. code-block:: python
    :emphasize-lines: 11,12
 
