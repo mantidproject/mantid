@@ -14,6 +14,7 @@
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
+using testing::ReturnRef;
 
 // Use this mocked presenter for tests that will start the focusing
 // workers/threads. Otherwise you'll run into trouble with issues like
@@ -196,7 +197,7 @@ public:
             boost::optional<std::string>("123_1"))));
     EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(ReturnRef(EMPTY));
 
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
@@ -239,6 +240,10 @@ public:
         .WillOnce(Return(
             std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
 
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+        .Times(1)
+        .WillOnce(ReturnRef(EMPTY));
+
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(0);
@@ -274,6 +279,10 @@ public:
         .Times(1)
         .WillOnce(Return(
             std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+        .Times(1)
+        .WillOnce(ReturnRef(EMPTY));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -595,6 +604,7 @@ private:
   const static std::string g_focusedRun;
   const static std::string g_focusedBankFile;
   const static std::string g_focusedFittingRunNo;
+  const static std::string EMPTY;
   EnggDiffCalibSettings m_basicCalibSettings;
 
   std::vector<std::string> m_ex_empty_run_num;
@@ -614,5 +624,7 @@ const std::string EnggDiffFittingPresenterTest::g_focusedBankFile =
 
 const std::string EnggDiffFittingPresenterTest::g_focusedFittingRunNo =
     "241391-241394";
+
+const std::string EnggDiffFittingPresenterTest::EMPTY = "";
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H

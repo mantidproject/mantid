@@ -30,8 +30,8 @@ public:
   Mantid::API::ITableWorkspace_sptr
   getFitResults(const int runNumber, const size_t bank) const override;
 
-  std::string getWorkspaceFilename(const int runNumber,
-                                   const size_t bank) const override;
+  const std::string &getWorkspaceFilename(const int runNumber,
+                                          const size_t bank) const override;
 
   void removeRun(const int runNumber, const size_t bank) override;
 

@@ -32,8 +32,8 @@ bool runMapContains(const int runNumber, const size_t bank,
 }
 
 template <typename T, size_t S>
-T getFromRunMap(const int runNumber, const size_t bank,
-                const RunMap<S, T> &map) {
+const T& getFromRunMap(const int runNumber, const size_t bank,
+                       const RunMap<S, T> &map) {
   if (bank < 1 || bank > map.size()) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
@@ -70,7 +70,7 @@ void EnggDiffFittingModel::addFitResults(
   addToRunMap(runNumber, bank, m_fitParamsMap, ws);
 }
 
-std::string
+const std::string&
 EnggDiffFittingModel::getWorkspaceFilename(const int runNumber,
                                            const size_t bank) const {
   return getFromRunMap(runNumber, bank, m_wsFilenameMap);
@@ -89,7 +89,7 @@ void removeFromRunMapAndADS(const int runNumber, const size_t bank,
                             RunMap<S, T> &map,
                             Mantid::API::AnalysisDataServiceImpl &ADS) {
   if (runMapContains(runNumber, bank, map)) {
-    const auto name = getFromRunMap(runNumber, bank, map)->getName();
+    const auto &name = getFromRunMap(runNumber, bank, map)->getName();
     map[bank - 1].erase(runNumber);
     if (ADS.doesExist(name)) {
       ADS.remove(name);
