@@ -18,23 +18,23 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("Tolerance", 0.15, mustBePositive,
+                                              Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int> >("NumIndexed", 0, Direction::Output),
       "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(make_unique<PropertyWithValue<double> >(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
@@ -85,7 +85,7 @@ void IndexPeaks::exec() {
     for (size_t i = 0; i < n_peaks; i++) {
       peaks[i].setHKL(miller_indices[i]);
     }
-    //  } else {
+  } else {
     double total_error = 0;
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
@@ -140,8 +140,9 @@ void IndexPeaks::exec() {
       {                              // which is usually sufficient
         try {
           IndexingUtils::Optimize_UB(tempUB, miller_indices, q_vectors);
-        } catch (...) // If there is any problem, such as too few
-        {             // independent peaks, just use the original UB
+        }
+        catch (...) // If there is any problem, such as too few
+        {           // independent peaks, just use the original UB
           tempUB = UB;
           done = true;
         }
@@ -193,20 +194,20 @@ void IndexPeaks::exec() {
       average_error = total_error / total_indexed;
     else
       average_error = 0;
-    // }
-
-    // tell the user how many were indexed overall and the overall average error
-    g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
-                   << n_peaks << " with tolerance of " << tolerance << '\n';
-    g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                   << average_error << '\n';
-
-    // Save output properties
-    this->setProperty("NumIndexed", total_indexed);
-    this->setProperty("AverageError", average_error);
-    // Show the lattice parameters
-    g_log.notice() << o_lattice << "\n";
   }
+
+  // tell the user how many were indexed overall and the overall average error
+  g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
+                 << n_peaks << " with tolerance of " << tolerance << '\n';
+  g_log.notice() << "Average error in h,k,l for indexed peaks =  "
+                 << average_error << '\n';
+
+  // Save output properties
+  this->setProperty("NumIndexed", total_indexed);
+  this->setProperty("AverageError", average_error);
+  // Show the lattice parameters
+  g_log.notice() << o_lattice << "\n";
+}
 
 } // namespace Mantid
 } // namespace Crystal
