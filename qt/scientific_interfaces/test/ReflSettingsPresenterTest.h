@@ -225,10 +225,6 @@ public:
     TS_ASSERT_EQUALS(options["DetectorCorrectionType"].toStdString(),
                      "VerticalShift");
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
-    AnalysisDataService::Instance().clear();
-
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
