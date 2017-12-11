@@ -2,6 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
@@ -152,6 +153,19 @@ void SpectrumView::renderWorkspace(
 
   m_spectrumDisplay.append(spectrumDisplay);
   m_ui->imageTabs->setCurrentIndex(tab);
+}
+
+/**
+ * Renders a new workspace on the spectrum viewer.
+ *
+ * @param wkName The name of the matrix workspace to render
+ */
+void SpectrumView::renderWorkspace(const QString &wsName) {
+  Mantid::API::MatrixWorkspace_const_sptr wksp =
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<const Mantid::API::MatrixWorkspace>(wsName.toStdString());
+
+  renderWorkspace(wksp);
 }
 
 /**
