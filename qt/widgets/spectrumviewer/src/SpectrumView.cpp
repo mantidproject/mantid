@@ -158,7 +158,7 @@ void SpectrumView::renderWorkspace(
 /**
  * Renders a new workspace on the spectrum viewer.
  *
- * @param wkName The name of the matrix workspace to render
+ * @param wsName The name of the matrix workspace to render
  */
 void SpectrumView::renderWorkspace(const QString &wsName) {
   Mantid::API::MatrixWorkspace_const_sptr wksp =

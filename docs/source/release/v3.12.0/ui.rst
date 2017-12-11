@@ -37,4 +37,26 @@ MultiDataset Fitting Interface
 - After a simultaneous fit the parameters are saved in a TableWorkspace made to simplify plotting their values against the datasets.
   The parameters are organised into columns and each row corresponds to a dataset.
 
+SpectrumView
+------------
+
+- The SpectrumView is now available as a standalone widget in mantidpython. Below is a simple example of how the widget can be used in python.
+.. code-block:: python
+   :emphasize-lines: 11,12
+
+   import PyQt4
+   import mantid.simpleapi as simpleapi
+   import mantidqtpython as mpy
+   import sys
+
+   SpectrumView = mpy.MantidQt.SpectrumView.SpectrumView
+   app = PyQt4.QtGui.QApplication(sys.argv)
+
+   wsOut = simpleapi.Load("/Path/to/multispectrum/dataset")
+
+   sv = SpectrumView()
+   sv.renderWorkspace("wsOut")
+   sv.show()
+   app.exec_()
+
 :ref:`Release 3.12.0 <v3.12.0>`
