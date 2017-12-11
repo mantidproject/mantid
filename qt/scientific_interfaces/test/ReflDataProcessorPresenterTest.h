@@ -166,12 +166,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("UniformEven"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -250,12 +250,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Uniform"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -345,12 +345,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -429,12 +429,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("LogValue"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -513,12 +513,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
@@ -574,12 +574,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptionsAsString())
+        .WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
