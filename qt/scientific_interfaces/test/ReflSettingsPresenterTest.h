@@ -87,20 +87,30 @@ public:
     EXPECT_CALL(mockView, getEndOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("12"));
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(Exactly(1))
+        .WillOnce(Return("INTER00013463,INTER00013464"));
 
     auto options = presenter.getTransmissionOptions();
-    TS_ASSERT_EQUALS(options.size(), 11);
-    TS_ASSERT_EQUALS(options["AnalysisMode"], "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(options["StartOverlap"], "10");
-    TS_ASSERT_EQUALS(options["EndOverlap"], "12");
-    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"], "4");
-    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"], "10");
-    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"], "12");
-    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"], "17");
-    TS_ASSERT_EQUALS(options["WavelengthMin"], "1");
-    TS_ASSERT_EQUALS(options["WavelengthMax"], "15");
-    TS_ASSERT_EQUALS(options["I0MonitorIndex"], "2");
-    TS_ASSERT_EQUALS(options["ProcessingInstructions"], "\"3,4\"");
+    TS_ASSERT_EQUALS(options.size(), 12);
+    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(options["StartOverlap"].toStdString(), "10");
+    TS_ASSERT_EQUALS(options["EndOverlap"].toStdString(), "12");
+    TS_ASSERT_EQUALS(options["FirstTransmissionRun"].toStdString(),
+                     "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"].toStdString(),
+                     "4");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"].toStdString(),
+                     "10");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"].toStdString(),
+                     "12");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"].toStdString(),
+                     "17");
+    TS_ASSERT_EQUALS(options["WavelengthMin"].toStdString(), "1");
+    TS_ASSERT_EQUALS(options["WavelengthMax"].toStdString(), "15");
+    TS_ASSERT_EQUALS(options["I0MonitorIndex"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["ProcessingInstructions"].toStdString(), "3,4");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -183,30 +193,37 @@ public:
         .WillOnce(Return("12"));
 
     auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(options.size(), 23);
-    TS_ASSERT_EQUALS(options["AnalysisMode"], "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(options["CRho"], "\"2.5,0.4,1.1\"");
-    TS_ASSERT_EQUALS(options["CAlpha"], "\"0.6,0.9,1.2\"");
-    TS_ASSERT_EQUALS(options["CAp"], "\"100.0,17.0,44.0\"");
-    TS_ASSERT_EQUALS(options["CPp"], "\"0.54,0.33,1.81\"");
-    TS_ASSERT_EQUALS(options["RegionOfDirectBeam"], "\"0,3\"");
-    TS_ASSERT_EQUALS(options["PolarizationAnalysis"], "PNR");
-    TS_ASSERT_EQUALS(options["ScaleFactor"], "2");
-    TS_ASSERT_EQUALS(options["MomentumTransferStep"], "-0.02");
-    TS_ASSERT_EQUALS(options["StartOverlap"], "10");
-    TS_ASSERT_EQUALS(options["EndOverlap"], "12");
-    TS_ASSERT_EQUALS(options["FirstTransmissionRun"], "INTER00013463");
-    TS_ASSERT_EQUALS(options["SecondTransmissionRun"], "INTER00013464");
-    TS_ASSERT_EQUALS(options["NormalizeByIntegratedMonitors"], "True");
-    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"], "4");
-    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"], "10");
-    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"], "12");
-    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"], "17");
-    TS_ASSERT_EQUALS(options["WavelengthMin"], "1");
-    TS_ASSERT_EQUALS(options["WavelengthMax"], "15");
-    TS_ASSERT_EQUALS(options["I0MonitorIndex"], "2");
-    TS_ASSERT_EQUALS(options["ProcessingInstructions"], "\"3,4\"");
-    TS_ASSERT_EQUALS(options["DetectorCorrectionType"], "VerticalShift");
+    TS_ASSERT_EQUALS(options.size(), 22);
+    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(options["CRho"].toStdString(), "2.5,0.4,1.1");
+    TS_ASSERT_EQUALS(options["CAlpha"].toStdString(), "0.6,0.9,1.2");
+    TS_ASSERT_EQUALS(options["CAp"].toStdString(), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(options["CPp"].toStdString(), "0.54,0.33,1.81");
+    TS_ASSERT_EQUALS(options["RegionOfDirectBeam"].toStdString(), "0,3");
+    TS_ASSERT_EQUALS(options["PolarizationAnalysis"].toStdString(), "PNR");
+    TS_ASSERT_EQUALS(options["ScaleFactor"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["MomentumTransferStep"].toStdString(), "-0.02");
+    TS_ASSERT_EQUALS(options["StartOverlap"].toStdString(), "10");
+    TS_ASSERT_EQUALS(options["EndOverlap"].toStdString(), "12");
+    TS_ASSERT_EQUALS(options["FirstTransmissionRun"].toStdString(),
+                     "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(options["NormalizeByIntegratedMonitors"].toStdString(),
+                     "True");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"].toStdString(),
+                     "4");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"].toStdString(),
+                     "10");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"].toStdString(),
+                     "12");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"].toStdString(),
+                     "17");
+    TS_ASSERT_EQUALS(options["WavelengthMin"].toStdString(), "1");
+    TS_ASSERT_EQUALS(options["WavelengthMax"].toStdString(), "15");
+    TS_ASSERT_EQUALS(options["I0MonitorIndex"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["ProcessingInstructions"].toStdString(), "3,4");
+    TS_ASSERT_EQUALS(options["DetectorCorrectionType"].toStdString(),
+                     "VerticalShift");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
