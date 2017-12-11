@@ -2,7 +2,7 @@
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -367,7 +367,7 @@ size_t ObjCompAssembly::registerContents(
  *  The shape can be either a box or a cylinder.
  *  @return The shape of the outline: "cylinder", "box", ...
  */
-boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
+boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   if (group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
   }
@@ -382,7 +382,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   int otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
-  boost::shared_ptr<const Object> obj = group.front()->shape();
+  boost::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Found ObjComponent without shape");
@@ -596,18 +596,18 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
   }
 
   if (!obj_str.str().empty()) {
-    boost::shared_ptr<Object> s = ShapeFactory().createShape(obj_str.str());
+    boost::shared_ptr<IObject> s = ShapeFactory().createShape(obj_str.str());
     setOutline(s);
     return s;
   }
-  return boost::shared_ptr<Object>();
+  return boost::shared_ptr<IObject>();
 }
 
 /**
  * Sets the outline shape for this assembly
  * @param obj :: The outline shape created previously fith createOutline()
  */
-void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj) {
+void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
   m_shape = obj;
 }
 

@@ -209,7 +209,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
-  if (fitStatus.compare("success"))
+  if (fitStatus != "success")
     return (1000.);
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
