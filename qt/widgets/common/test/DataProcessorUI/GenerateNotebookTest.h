@@ -282,7 +282,8 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<QString, QString>(), std::map<QString, QString>()));
+        reflProcessor(), std::map<QString, QString>(),
+        std::map<QString, QString>()));
   }
 
   void testReduceRowString() {
@@ -295,9 +296,10 @@ public:
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
-                                  reflPreprocessMap("TOF_"), reflProcessor(),
-                                  userPreProcessingOptions, std::map<QString, QString>());
+    auto output =
+        reduceRowString(data, m_instrument, reflWhitelist(),
+                        reflPreprocessMap("TOF_"), reflProcessor(),
+                        userPreProcessingOptions, std::map<QString, QString>());
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -372,7 +374,8 @@ public:
 
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
-                        reflProcessor(), emptyPreProcessingOptions, std::map<QString, QString>());
+                        reflProcessor(), emptyPreProcessingOptions,
+                        std::map<QString, QString>());
 
     const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "

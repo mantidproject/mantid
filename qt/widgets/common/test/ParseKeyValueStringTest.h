@@ -54,9 +54,13 @@ public:
   }
 
   void testParseKeyValueMap() {
-    std::map<QString, QString> inputMap = {
-        {"a", "1"},         {"b", "2.0"},   {"c", "3"},    {"d", "'1,2,3'"},
-        {"e", "\"4,5,6\""}, {"f", "1+1=2"}, {"g", "'\\''"}};
+    std::map<QString, QString> inputMap = {{"a", "1"},
+                                           {"b", "2.0"},
+                                           {"c", "3"},
+                                           {"d", "'1,2,3'"},
+                                           {"e", "\"4,5,6\""},
+                                           {"f", "1+1=2"},
+                                           {"g", "'\\''"}};
     std::map<QString, QString> kvp = parseKeyValueMap(inputMap);
 
     TS_ASSERT_EQUALS(kvp["a"].toStdString(), "1");

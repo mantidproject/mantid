@@ -37,8 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::map<QString, QString>
-    DLLExport parseKeyValueMap(const std::map<QString, QString> sourceMap);
+std::map<QString, QString> DLLExport
+parseKeyValueMap(const std::map<QString, QString> sourceMap);
 std::map<std::string, std::string> DLLExport
 parseKeyValueString(const std::string &str);
 std::map<QString, QString> DLLExport parseKeyValueQString(const QString &str);

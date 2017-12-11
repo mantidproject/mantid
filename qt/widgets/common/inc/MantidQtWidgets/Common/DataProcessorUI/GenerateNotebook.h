@@ -68,12 +68,13 @@ QString DLLExport getReducedWorkspaceName(const RowData &data,
                                           const WhiteList &whitelist,
                                           const QString &prefix = "");
 
-boost::tuple<QString, QString> DLLExport reduceRowString(
-    const RowData &data, const QString &instrument, const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const ProcessingAlgorithm &processor,
-    const std::map<QString, QString> &preprocessOoptionsMap,
-    const std::map<QString, QString> &processingOptions);
+boost::tuple<QString, QString> DLLExport
+reduceRowString(const RowData &data, const QString &instrument,
+                const WhiteList &whitelist,
+                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+                const ProcessingAlgorithm &processor,
+                const std::map<QString, QString> &preprocessOoptionsMap,
+                const std::map<QString, QString> &processingOptions);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
