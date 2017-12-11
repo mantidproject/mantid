@@ -262,6 +262,15 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
   }
 }
 
+void SpectrumView::selectData(int spectrumNumber, double dataVal) const {
+  auto index = m_ui->imageTabs->currentIndex();
+  auto y = static_cast<double>(spectrumNumber-1);
+  auto x = dataVal;
+  m_spectrumDisplay.at(index)->setHGraph(y);
+  m_spectrumDisplay.at(index)->setVGraph(x);
+  m_spectrumDisplay.at(index)->showInfoList(x, y);
+}
+
 /**
  * Check if mouse tracking should be "always on".
  */

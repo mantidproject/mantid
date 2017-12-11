@@ -75,6 +75,8 @@ public:
   QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
     return m_spectrumDisplay;
   }
+
+  void selectData(int spectrumNumber, double dataVal) const;
   bool isTrackingOn() const;
   /// Load the state of the spectrum viewer from a Mantid project file
   static API::IProjectSerialisable *loadFromProject(const std::string &lines,

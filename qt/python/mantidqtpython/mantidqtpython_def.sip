@@ -2484,6 +2484,14 @@ public:
         wsName The name of the workspace to be rendered.
 %End
 
+    void selectData(int spectrumNumber, double dataVal) const;
+%Docstring
+    Programmatically set horizontal and vertical graph data.
+
+    Args:
+        spectrumNumber SpectrumNumber in the workspace to be displayed.
+        dataVal Data value to be displayed (based on workspace units).
+%End
 private:
     SpectrumView(const MantidQt::SpectrumView::SpectrumView &);
 };
