@@ -977,8 +977,8 @@ void MantidEV::chooseCell_slot() {
     if (!getPositiveDouble(m_uiForm.IndexingTolerance_ledt, index_tolerance))
       return;
     getDouble(form, form_num);
-    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num,
-                                    allow_perm, index_tolerance)) {
+    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num, allow_perm,
+                                    index_tolerance)) {
       errorMessage("Failed to Select the Requested Form Number");
     }
   }

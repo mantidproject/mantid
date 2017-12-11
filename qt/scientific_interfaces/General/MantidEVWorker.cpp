@@ -700,7 +700,7 @@ bool MantidEVWorker::selectCellOfType(const std::string &peaks_ws_name,
  *  @return true if the SelectCellWithForm algorithm completes successfully.
  */
 bool MantidEVWorker::selectCellWithForm(const std::string &peaks_ws_name,
-                                        size_t form_num, bool allow_perm, 
+                                        size_t form_num, bool allow_perm,
                                         double tolerance) {
   if (!isPeaksWorkspace(peaks_ws_name))
     return false;
