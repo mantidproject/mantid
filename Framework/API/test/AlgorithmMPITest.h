@@ -370,7 +370,7 @@ void runNTo0(const Parallel::Communicator &comm) {
   }
 }
 
-void runNTo1StorageMode(const Parallel::Communicator &comm) {
+void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
@@ -386,34 +386,6 @@ void runNTo1StorageMode(const Parallel::Communicator &comm) {
       alg->setProperty("InputWorkspace1", in1->cloneEmpty());
       alg->setProperty("InputWorkspace2", in2->cloneEmpty());
     }
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-    // Preserving storage mode is actually not guaranteed, but this
-    // implementation does of FakeAlgNTo1StorageModeFailure does.
-    // For the dummy workspace on non-master ranks it is guarenteed by the
-    // current implementation of Algorithm::execNonMaster.
-    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-    TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
-  }
-}
-
-void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
-  for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
-        Parallel::StorageMode::MasterOnly}) {
-    auto in1 = boost::make_shared<FakeWorkspaceA>(storageMode);
-    auto in2 =
-        boost::make_shared<FakeWorkspaceB>(Parallel::StorageMode::Cloned);
-    in1->initialize(1, 2, 1);
-    in2->initialize(1, 2, 1);
-    auto alg = create<FakeAlgNTo1StorageModeFailure>(comm);
-    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      alg->setProperty("InputWorkspace1", in1);
-    } else {
-      alg->setProperty("InputWorkspace1", in1->cloneEmpty());
-    }
-    alg->setProperty("InputWorkspace2", in2);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
       TS_ASSERT_THROWS_NOTHING(alg->execute());
       TS_ASSERT(alg->isExecuted());
@@ -423,8 +395,6 @@ void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
       TS_ASSERT_EQUALS(out->storageMode(), storageMode);
       TS_ASSERT_EQUALS(out->id(), "FakeWorkspaceA");
     } else {
-      // Storage mode of inputs is mixed so an automatic setup of the ouput
-      // storage mode is not possible in MasterOnly execution.
       TS_ASSERT_THROWS_EQUALS(
           alg->execute(), const std::runtime_error &e, std::string(e.what()),
           "Attempt to run algorithm with Parallel::ExecutionMode::MasterOnly: "
@@ -522,8 +492,6 @@ public:
   void test1To1() { runParallel(run1To1); }
 
   void testNTo0() { runParallel(runNTo0); }
-
-  void testNTo1StorageMode() { runParallel(runNTo1StorageMode); }
 
   void testNTo1StorageModeFailure() { runParallel(runNTo1StorageModeFailure); }
 
