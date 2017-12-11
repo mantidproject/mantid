@@ -351,3 +351,14 @@ class FindDirectionEnum(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+# ------------------------------
+# Integrals for diagnostic tab
+# -------------------------------
+@string_convertible
+@serializable_enum("Det1Horizontal", "Det1Vertical", "Det1Time", "Det2Horizontal", "Det2Vertical", "Det2Time")
+class IntegralEnum(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass

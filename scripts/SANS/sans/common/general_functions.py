@@ -337,6 +337,96 @@ def is_part_of_reduced_output_workspace_group(state):
     return is_multi_period or is_sliced_reduction
 
 
+def parse_diagnostic_settings(string_to_parse):
+    """
+  This class parses a given string into  vector of vectors of numbers.
+  For example : 60,61+62,63-66,67:70,71-75:2  This gives a vector containing 8
+  vectors
+  as Vec[8] and Vec[0] is a vector containing 1 element 60
+  Vec[1] is a vector containing elements 61,62 Vec[2] is a vector containing
+  elements 63,64,65,66,
+  Vec[3] is a vector containing element 67,Vec[4] is a vector containing element
+  68,
+  Vec[5] is a vector containing element 69,Vec[6] is a vector containing element
+  70 ,
+  vec[7] is a vector containing element 71,73,75
+  """
+
+    def _does_match(compiled_regex, line):
+        return compiled_regex.match(line) is not None
+
+    def _extract_simple_range(line):
+        start, stop = line.split("-")
+        start = int(start)
+        stop = int(stop)
+        if start > stop:
+            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
+                             "value {1}. Make sure that this is not the case.")
+        return range(start, stop+1)
+
+    def _extract_simple_range_with_step_pattern(line):
+        start, stop = line.split("-")
+        start = int(start)
+        stop, step = stop.split(":")
+        stop = int(stop)
+        step = int(step)
+        if start > stop:
+            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
+                             "value {1}. Make sure that this is not the case.")
+        return range(start, stop+1, step)
+
+    def _extract_multiple_entry(line):
+        split_line = line.split(":")
+        start = int(split_line[0])
+        stop = int(split_line[1])
+        if start > stop:
+            raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
+                             "value {1}. Make sure that this is not the case.")
+
+        return range(start, stop + 1)
+
+    def _extract_number(line):
+        return [int(line[0])]
+
+    # Check if the input actually exists.
+    if not string_to_parse:
+        return None
+
+    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
+    single_number_pattern = re.compile("\\s*" + number + "\\s*")
+    simple_range_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
+
+    multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*")
+
+    simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
+
+    slice_settings = string_to_parse.split(',')
+    all_ranges = []
+    for slice_setting in slice_settings:
+        if _does_match(multiple_entry_pattern, slice_setting):
+            all_ranges += _extract_multiple_entry(slice_setting)
+        else:
+            integral = []
+            slice_additions = slice_setting.split('+')
+            for slice_addition in slice_additions:
+                slice_addition = slice_addition.replace(' ', '')
+                # We can have three scenarios
+                # 1. Simple Slice:     X-Y
+                # 2. Slice range :     X:Y:Z
+                # 3. Slice full range: >X or <X
+                if _does_match(simple_range_with_step_pattern, slice_addition):
+                    integral += _extract_simple_range_with_step_pattern(slice_addition)
+                elif _does_match(simple_range_pattern, slice_addition):
+                    integral += _extract_simple_range(slice_addition)
+                elif _does_match(single_number_pattern, slice_addition):
+                    integral += _extract_number(slice_addition)
+                else:
+                    raise ValueError("The provided event slice configuration {0} cannot be parsed because "
+                                     "of {1}".format(slice_settings, slice_setting))
+            all_ranges.append(integral)
+    return all_ranges
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 #  Functions for bins, ranges and slices
 # ----------------------------------------------------------------------------------------------------------------------
@@ -356,7 +446,6 @@ def parse_event_slice_setting(string_to_parse):
 
     It does not accept negative values.
     """
-
     def _does_match(compiled_regex, line):
         return compiled_regex.match(line) is not None
 

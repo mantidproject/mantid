@@ -2,6 +2,7 @@ from __future__ import (absolute_import)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
@@ -30,6 +31,10 @@ def create_mock_masking_table():
 
 def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
+    return view
+
+def create_mock_diagnostics_tab():
+    view = mock.create_autospec(DiagnosticsPage, spec_set=False)
     return view
 
 
