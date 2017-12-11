@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import os
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, \
     FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion, FloatBoundedValidator
@@ -103,17 +102,23 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
     def PyExec(self):
 
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=4)
+
         self._configure()
         temp_ws = self._hide('temp')
         joined_ws = self._hide('joined')
         mon_ws = self._hide('mon')
-        to_group = self._load()
-        GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=temp_ws)
 
+        self._progress.report('Loading the data')
+        LoadAndMerge(Filename=self.getPropertyValue('Run'),
+                     LoaderName='LoadILLDiffraction',
+                     OutputWorkspace=temp_ws)
+
+        self._progress.report('Normalising and merging')
         if self._normalise_option == 'Time':
-            for ws in to_group:
+            for ws in mtd[temp_ws]:
                 # normalise to time here, before joining, since the duration is in sample logs
-                duration = mtd[ws].getRun().getLogData('duration').value
+                duration = ws.getRun().getLogData('duration').value
                 Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
 
         try:
@@ -132,6 +137,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         DeleteWorkspace(mon_ws)
 
+        self._progress.report('Applying calibration or ROC if needed')
         if self._calibration_file:
             calib_ws = self._hide('calib')
             LoadNexusProcessed(Filename=self._calibration_file, OutputWorkspace=calib_ws)
@@ -157,6 +163,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             self.log().information('First positive 2theta at workspace index: ' + str(first_positive_theta))
             CropWorkspace(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, StartWorkspaceIndex=first_positive_theta)
 
+        self._progress.report('Treating the zero counting cells')
         self._find_zero_cells(joined_ws)
 
         if self._zero_counting_option == 'Crop':
@@ -178,41 +185,6 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
-
-    def _load(self):
-        """
-            Loads the list of runs
-            If sum is requested, MergeRuns is called
-            @return : the list of the loaded ws names
-        """
-        runs = self.getPropertyValue('Run')
-        to_group = []
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + runs.count('+') + 1)
-
-        for runs_list in runs.split(','):
-            runs_sum = runs_list.split('+')
-            if len(runs_sum) == 1:
-                runnumber = os.path.basename(runs_sum[0]).split('.')[0]
-                run = self._hide_run(runnumber)
-                LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run)
-                self._progress.report('Loaded run #' + runnumber)
-                to_group.append(run)
-            else:
-                for i, run in enumerate(runs_sum):
-                    runnumber = os.path.basename(run).split('.')[0]
-                    if i == 0:
-                        first = self._hide_run(runnumber + '_multiple')
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=first)
-                        self._progress.report('Loaded run #' + runnumber)
-                        to_group.append(first)
-                    else:
-                        run = self._hide_run(runnumber)
-                        LoadILLDiffraction(Filename=run, OutputWorkspace=run)
-                        self._progress.report('Loaded run #' + runnumber)
-                        MergeRuns(InputWorkspaces=[first, run], OutputWorkspace=first)
-                        DeleteWorkspace(Workspace=run)
-
-        return to_group
 
     def _configure(self):
         """

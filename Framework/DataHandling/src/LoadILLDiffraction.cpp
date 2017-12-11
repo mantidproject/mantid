@@ -124,6 +124,7 @@ void LoadILLDiffraction::exec() {
 
   m_filename = getPropertyValue("Filename");
 
+  m_scanVar.clear();
   progress.report("Loading the scanned variables");
   loadScanVars();
 
@@ -515,7 +516,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
   std::vector<double> scannedVariable;
 
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].property.compare(propertyName) == 0) {
+    if (m_scanVar[i].property == propertyName) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         scannedVariable.push_back(
             scan(static_cast<int>(i), static_cast<int>(j)));

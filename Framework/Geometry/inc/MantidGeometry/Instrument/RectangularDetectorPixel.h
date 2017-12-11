@@ -50,7 +50,7 @@ public:
   std::string type() const override { return "RectangularDetectorPixel"; }
 
   RectangularDetectorPixel(const std::string &name, int id,
-                           boost::shared_ptr<Object> shape, IComponent *parent,
+                           boost::shared_ptr<IObject> shape, IComponent *parent,
                            RectangularDetector *panel, size_t row, size_t col);
 
   RectangularDetectorPixel();

@@ -36,6 +36,15 @@ from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
+from ui.sans_isis.work_handler import WorkHandler
+
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+    # this should happen when this is called from outside Mantidplot and only then,
+    # the result is that attempting to plot will raise an exception
 
 
 class RunTabPresenter(object):
@@ -71,7 +80,8 @@ class RunTabPresenter(object):
 
         # Logger
         self.sans_logger = Logger("SANS")
-
+        # Name of grpah to output to
+        self.output_graph = 'SANS-Latest'
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
@@ -98,7 +108,7 @@ class RunTabPresenter(object):
         self._masking_table_presenter = MaskingTablePresenter(self)
 
         # Beam centre presenter
-        self._beam_centre_presenter = BeamCentrePresenter(self)
+        self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
     def __del__(self):
         self._delete_dummy_input_workspace()
@@ -274,6 +284,12 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
+
+            # 4. Create the graph if continuous output is specified
+            if mantidplot:
+                if self._view.plot_results and not mantidplot.graph(self.output_graph):
+                    mantidplot.newGraph(self.output_graph)
+
         except Exception as e:
             self._view.halt_process_flag()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
@@ -391,6 +407,15 @@ class RunTabPresenter(object):
         global_options += ","
         global_options += output_mode_selection
 
+        # Check if results should be plotted
+        plot_results_selection = "PlotResults=1" if self._view.plot_results else "PlotResults=0"
+        global_options += ","
+        global_options += plot_results_selection
+
+        # Get the name of the graph to output to
+        output_graph_selection = "OutputGraph={}".format(self.output_graph)
+        global_options += ","
+        global_options += output_graph_selection
         return global_options
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -548,10 +548,7 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
 
   // Log boundary
   string logboundary = getProperty("LogBoundary");
-  if (logboundary.compare("Centre"))
-    m_logAtCentre = true;
-  else
-    m_logAtCentre = false;
+  m_logAtCentre = bool(logboundary == "Centre");
 
   m_logTimeTolerance = getProperty("TimeTolerance");
 
