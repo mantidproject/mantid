@@ -181,100 +181,6 @@ Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane,
   }();
   return Mantid::Kernel::Quat(angle, axis);
 }
-
-/// A parameter bundle for the detector angle solver.
-struct EquationParams {
-  double tangentOfUserAngle;     ///< tan(BraggAngle)
-  double originDetectorDistance; ///< distance in meters.
-  double originSampleDistance;   ///< sample horizontal shift in meters.
-};
-
-/** The equation whose root gives the detector angle (at origin) for a
- *  given angle at the sample position.
- *  @param detectorAngle the argument in radians.
- *  @param params a pointer to an EquationParams struct.
- *  @return the value of the equation evaluated at detectorAngle.
- */
-double detectorAngleEquation(double detectorAngle, void *params) {
-  EquationParams *ps = static_cast<EquationParams *>(params);
-  return ps->originDetectorDistance *
-             (ps->tangentOfUserAngle * std::cos(detectorAngle) -
-              std::sin(detectorAngle)) +
-         ps->originSampleDistance * ps->tangentOfUserAngle;
-}
-
-/** The derivative of detectorAngleEquation. Useful for root finding
- *  algorithms.
- *  @param detectorAngle the argument in radians.
- *  @param params a pointer to an EquationParams struct.
- *  @return the derivative evaluated at detectorAngle.
- */
-double detectorAngleDerivative(double detectorAngle, void *params) {
-  EquationParams *ps = static_cast<EquationParams *>(params);
-  return -ps->originDetectorDistance *
-         (ps->tangentOfUserAngle * std::sin(detectorAngle) +
-          std::cos(detectorAngle));
-}
-
-/** Combined angle equation and its derivative. Useful for root finding
- *  algorithms.
- *  @param detectorAngle the argument in radians.
- *  @param params a pointer to an EquationParams struct.
- *  @param f an output variable for the equation's result.
- *  @param df an output variable for the derivative's result.
- */
-void detectorAngleEqAndDerivative(double detectorAngle, void *params, double *f,
-                                  double *df) {
-  EquationParams *ps = static_cast<EquationParams *>(params);
-  const double cosa = std::cos(detectorAngle);
-  const double sina = std::sin(detectorAngle);
-  *f = ps->originDetectorDistance *(ps->tangentOfUserAngle * cosa - sina) +
-       ps->originSampleDistance * ps->tangentOfUserAngle;
-  *df = -ps->originDetectorDistance *(ps->tangentOfUserAngle * sina + cosa);
-}
-
-/** Calculate the detector angle with respect to origin from a
- *  given userAngle when the sample is not in the origin.
- *  @param userAngle a requested angle, in degrees.
- *  @param originDetectorDistance a distance in meters.
- *  @param originSampleDistance a distance in meters.
- *  @return an angle around origin corresponding to userAngle.
- */
-double detectorAngleFromUserAngle(const double userAngle,
-                                  const double originDetectorDistance,
-                                  const double originSampleDistance) {
-  using Solver_uptr =
-      std::unique_ptr<gsl_root_fdfsolver, void (*)(gsl_root_fdfsolver *)>;
-  Solver_uptr solver{gsl_root_fdfsolver_alloc(gsl_root_fdfsolver_steffenson),
-                     gsl_root_fdfsolver_free};
-  EquationParams p{std::tan(inRad(userAngle)), originDetectorDistance,
-                   originSampleDistance};
-  gsl_function_fdf dF;
-  dF.f = detectorAngleEquation;
-  dF.df = detectorAngleDerivative;
-  dF.fdf = detectorAngleEqAndDerivative;
-  dF.params = &p;
-  double previous = inRad(userAngle);
-  gsl_root_fdfsolver_set(solver.get(), &dF, previous);
-  int iter{0};
-  while (iter < 100) {
-    auto status = gsl_root_fdfsolver_iterate(solver.get());
-    if (status != GSL_SUCCESS) {
-      throw std::runtime_error(
-          "Failed to solve the actual detector angle from BraggAngle");
-    }
-    const auto current = gsl_root_fdfsolver_root(solver.get());
-    status = gsl_root_test_delta(previous, current, 0., 1e-8);
-    if (status == GSL_SUCCESS) {
-      return inDeg(current);
-    }
-    previous = current;
-    ++iter;
-  }
-  throw std::logic_error("Too many iterations while solving actual detector "
-                         "angle form BraggAngle.");
-}
-
 } // anonymous namespace
 
 namespace Mantid {
@@ -373,11 +279,10 @@ void LoadILLReflectometry::exec() {
   root.close();
   firstEntry.close();
   // Move components as if the sample was at the origin (it usually is).
+  m_sampleZOffset = sampleHorizontalOffset();
   placeSource();
-  m_sampleZOffset = sampleHorzontalOffset();
   placeDetector();
   // When other components are in-place
-  placeSample();
   convertTofToWavelength();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -834,17 +739,7 @@ double LoadILLReflectometry::detectorRotation() {
       g_log.notice()
           << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
-    if (m_sampleZOffset != 0) {
-      // Sample is not in the origin; the detector angle (in spherical
-      // coordinates) need to be solved.
-      const auto originPixelDistance =
-          m_detectorDistance / std::cos(inRad(std::abs(offset)));
-      const auto realDetectorAngle = detectorAngleFromUserAngle(
-          2 * userAngle, originPixelDistance, std::abs(m_sampleZOffset));
-      return realDetectorAngle - offset;
-    } else {
-      return 2 * userAngle - offset;
-    }
+    return 2 * userAngle - offset;
   }
   if (!posTable) {
     if (deflection != 0) {
@@ -867,7 +762,7 @@ double LoadILLReflectometry::detectorRotation() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  m_detectorDistance = originDetectorDistance();
+  m_detectorDistance = sampleDetectorDistance();
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
   const auto detectorRotationAngle = detectorRotation();
@@ -886,16 +781,6 @@ void LoadILLReflectometry::placeDetector() {
   // apply a local rotation to stay perpendicular to the beam
   const auto rotation = detectorFaceRotation(rotPlane, detectorRotationAngle);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
-}
-
-/// Update sample position.
-void LoadILLReflectometry::placeSample() {
-  if (m_instrumentName != "Figaro") {
-    // Accept the sample position defined in the IDF.
-    return;
-  }
-  const V3D newPos{0.0, 0.0, m_sampleZOffset};
-  m_loader.moveComponent(m_localWorkspace, "sample_position", newPos);
 }
 
 /// Update source position.
@@ -941,15 +826,15 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
   return sign * inDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
-/** Return the origin to detector distance for the current instrument.
+/** Return the sample to detector distance for the current instrument.
  *  @return the distance in meters
  */
-double LoadILLReflectometry::originDetectorDistance() const {
+double LoadILLReflectometry::sampleDetectorDistance() const {
   if (m_instrumentName != "Figaro") {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
-  const double detectorRestZ =
-      inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double restZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
+  const double detectorRestZ = restZ - m_sampleZOffset;
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
@@ -965,7 +850,7 @@ double LoadILLReflectometry::originDetectorDistance() const {
 }
 
 /// Return the horizontal offset along the z axis.
-double LoadILLReflectometry::sampleHorzontalOffset() const {
+double LoadILLReflectometry::sampleHorizontalOffset() const {
   if (m_instrumentName != "Figaro") {
     return 0.;
   }
@@ -982,7 +867,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     return pairCentre - 0.5 * pairSeparation;
   } else if (m_instrumentName == "Figaro") {
-    return inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+    const double chopperDist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
+    return chopperDist + m_sampleZOffset;
   }
   std::ostringstream out;
   out << "sourceSampleDistance: unknown instrument " << m_instrumentName;

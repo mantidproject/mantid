@@ -239,10 +239,10 @@ public:
     const auto sourcePos = spectrumInfo.sourcePosition();
     TS_ASSERT_EQUALS(samplePos.X(), 0)
     TS_ASSERT_EQUALS(samplePos.Y(), 0)
-    TS_ASSERT_EQUALS(samplePos.Z(), sampleZOffset)
+    TS_ASSERT_EQUALS(samplePos.Z(), 0)
     TS_ASSERT_EQUALS(sourcePos.X(), 0)
     TS_ASSERT_EQUALS(sourcePos.Y(), 0)
-    TS_ASSERT_EQUALS(sourcePos.Z(), -chopperCentre)
+    TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
   }
 
   void testDetectorPositionAndRotationD17() {
@@ -276,7 +276,7 @@ public:
     const auto &spectrumInfo = output->spectrumInfo();
     const auto &run = output->run();
     const auto detectorRestZ =
-        run.getPropertyValueAsType<double>("DTR.value") * 1e-3;
+        run.getPropertyValueAsType<double>("DTR.value") * 1e-3 - run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") * 1e-3;
     const auto DH1Y = run.getPropertyValueAsType<double>("DH1.value") * 1e-3;
     const double DH1Z{1.135};
     const auto DH2Y = run.getPropertyValueAsType<double>("DH2.value") * 1e-3;
