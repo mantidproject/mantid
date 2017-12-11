@@ -286,13 +286,7 @@ def create_properties(show_periods=True):
                                            property_type=str)
                       ]
     return properties
-algorithm_list_entry(column_name="",
-                                       algorithm_property="OutputGraph",
-                                       description='The name of the graph to output to.',
-                                       show_value=False,
-                                       default='',
-                                       prefix='',
-                                       property_type=str)
+
 
 def get_white_list(show_periods=True):
     return create_properties(show_periods=show_periods)
