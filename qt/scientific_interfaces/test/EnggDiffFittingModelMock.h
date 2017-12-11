@@ -35,7 +35,8 @@ public:
                                                        const size_t bank));
 
   MOCK_CONST_METHOD2(getWorkspaceFilename,
-                     const std::string&(const int runNumber, const size_t bank));
+                     const std::string &(const int runNumber,
+                                         const size_t bank));
 
   MOCK_METHOD1(loadWorkspaces, void(const std::string &filenames));
 
