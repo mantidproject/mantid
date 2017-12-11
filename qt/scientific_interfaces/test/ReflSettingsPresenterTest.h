@@ -372,7 +372,7 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(2));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
