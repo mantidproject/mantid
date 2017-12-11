@@ -266,9 +266,16 @@ In that case the execution mode can simply be determined from the input workspac
 Here the helper ``Parallel::getCorrespondingExecutionMode`` is used to obtain the 'natural' execution mode from a storage mode, i.e., ``ExecutionMode::Identical`` for ``StorageMode::Cloned``, ``ExecutionMode::Distributed`` for ``StorageMode::Distributed``, and ``ExecutionMode::MasterOnly`` for ``StorageMode::MasterOnly``.
 More complex algorithms may require more complex decision mechanism, e.g., when there is more than one input workspace.
 
-For many algorithms the base class ``API::DistributedAlgorithm`` provides a sufficient default implementation of ``Algorithm::getParallelExecutionMode()``.
-MPI support can simply be enabled by inheriting from ``DistributedAlgorithm`` instead of from ``Algorithm``.
-Generally this works only for algorithms with a single input and a single output that either process only non-spectrum data or process all spectra independently.
+For many algorithms a sufficient default implementation of ``Algorithm::getParallelExecutionMode()`` is provided by one of the base classes ``API::SerialAlgorithm``, ``API::ParallelAlgorithm``, or ``API::DistributedAlgorithm``.
+MPI support can simply be enabled by inheriting from one of these instead of from ``Algorithm``.
+The level of thereby enabled MPI support is as follows:
+
+- ``API::SerialAlgorithm`` supports only ``ExecutionMode::MasterOnly``.
+- ``API::ParallelAlgorithm`` supports parallel execution, but not distributed execution, i.e., ``ExecutionMode::MasterOnly`` and  ``ExecutionMode::IdenticalOnly``.
+- ``API::DistributedAlgorithm`` supports distributed execution, i.e., ``ExecutionMode::MasterOnly``, ``ExecutionMode::IdenticalOnly``, and  ``ExecutionMode::Distributed``.
+
+In the latter two cases more than one execution mode is supported.
+Thus this usually works only for algorithms with a single input (and a single output) such that the execution mode can be uniquely derived from the storage mode of the input workpace.
 
 If none of the other virtual methods listed above is implemented, ``Algorithm`` will run the normal ``exec()`` method on all MPI ranks.
 The exception are non-master ranks if the execution mode is ``ExecutionMode::MasterOnly`` -- in that case creating a dummy workspace is attempted.
