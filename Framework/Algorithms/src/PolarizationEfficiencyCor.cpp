@@ -19,11 +19,18 @@ constexpr char *EFFICIENCIES{"Efficiencies"};
 constexpr char *INPUT_WS{"InputWorkspace"};
 constexpr char *OUTPUT_WS{"OutputWorkspace"};
 }
+
 namespace Flippers {
 constexpr char *OffOff{"00"};
 constexpr char *OffOn{"01"};
 constexpr char *OnOff{"10"};
 constexpr char *OnOn{"11"};
+}
+
+void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+  if (!ws) {
+    throw std::runtime_error("A workspace designated as " + tag + " is missing in inputs.");
+  }
 }
 }
 
@@ -83,7 +90,9 @@ void PolarizationEfficiencyCor::init() {
 void PolarizationEfficiencyCor::exec() {
   const bool analyzer = getProperty(Prop::ANALYZER);
   const auto inputs = mapInputsToDirections();
+  checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
+  checkConsistentX(inputs, efficiencies);
   WorkspaceMap outputs;
   switch (inputs.size()) {
   case 1:
@@ -104,6 +113,117 @@ void PolarizationEfficiencyCor::exec() {
   }
   setProperty(Prop::OUTPUT_WS, groupOutput(outputs));
 }
+
+std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
+  std::map<std::string, std::string> issues;
+  API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
+  const auto &factorAxis = factorWS->getAxis(1);
+  if (!factorAxis) {
+    issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
+  } else if (!factorAxis->isText()) {
+    issues[Prop::EFFICIENCIES] = "The vertical axis in the workspace is not text axis.";
+  } else if (factorWS->getNumberHistograms() < 4) {
+    issues[Prop::EFFICIENCIES] = "The workspace should contain at least 4 histograms.";
+  } else {
+    std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
+    for (size_t i = 0; i != factorAxis->length(); ++i) {
+      const auto label = factorAxis->label(i);
+      auto found = std::find(tags.begin(), tags.end(), label);
+      if (found != tags.cend()) {
+        std::swap(tags.back(), *found);
+        tags.pop_back();
+      }
+    }
+    if (!tags.empty()) {
+      issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() + " is missing from the workspace.";
+    }
+  }
+  API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
+  const std::vector<std::string> flippers = getProperty(Prop::FLIPPERS);
+  if (static_cast<size_t>(inGroup->getNumberOfEntries()) != flippers.size()) {
+    issues[Prop::FLIPPERS] = "The number of flipper configurations does not match the number of input workspaces";
+  } else {
+    std::vector<std::string> configurations{{Flippers::OffOff, Flippers::OffOn, Flippers::OnOff, Flippers::OnOn}};
+    for (const auto &c : flippers) {
+      const auto found = std::find(configurations.cbegin(), configurations.cend(), c);
+      if (found == configurations.cend()) {
+        issues[Prop::EFFICIENCIES] = "Unknown flipper configuration: " + *found + ". Use 00, 01, 10 or 11 only.";
+        break;
+      }
+    }
+  }
+  return issues;
+}
+
+void PolarizationEfficiencyCor::checkConsistentNumberHistograms(const WorkspaceMap &inputs) {
+  size_t nHist{0};
+  bool nHistValid{false};
+  // A local helper function to check the number of histograms.
+  auto checkNHist = [&nHist, &nHistValid](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+    if (nHistValid) {
+      if (nHist != ws->getNumberHistograms()) {
+        throw std::runtime_error("Number of histograms mismatch in " + tag);
+      }
+    } else {
+      nHist = ws->getNumberHistograms();
+      nHistValid = true;
+    }
+  };
+  if (inputs.mmWS) {
+    checkNHist(inputs.mmWS, Flippers::OffOff);
+  }
+  if (inputs.mpWS) {
+    checkNHist(inputs.mpWS, Flippers::OffOn);
+  }
+  if (inputs.pmWS) {
+    checkNHist(inputs.pmWS, Flippers::OnOff);
+  }
+  if (inputs.ppWS) {
+    checkNHist(inputs.ppWS, Flippers::OnOn);
+  }
+}
+
+void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
+  // Compare everything to F1 efficiency.
+  const auto &F1x = efficiencies.F1->x();
+  // A local helper function to check a HistogramX against F1.
+  auto checkX = [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
+    if (x.size() != F1x.size()) {
+      throw std::runtime_error("Mismatch of histogram lengths between F1 and " + tag + '.');
+    }
+    for (size_t i = 0; i != x.size(); ++i) {
+      if (x[i] != F1x[i]) {
+        throw std::runtime_error("Mismatch of X data between F1 and " + tag + '.');
+      }
+    }
+  };
+  const auto &F2x = efficiencies.F2->x();
+  checkX(F2x, "F2");
+  const auto &P1x = efficiencies.P1->x();
+  checkX(P1x, "P1");
+  const auto &P2x = efficiencies.P2->x();
+  checkX(P2x, "P2");
+  // A local helper function to check an input workspace against F1.
+  auto checkWS = [&F1x, &checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
+    const auto nHist = ws->getNumberHistograms();
+    for (size_t i = 0; i != nHist; ++i) {
+      checkX(ws->x(i), tag);
+    }
+  };
+  if (inputs.mmWS) {
+    checkWS(inputs.mmWS, Flippers::OffOff);
+  }
+  if (inputs.mpWS) {
+    checkWS(inputs.mpWS, Flippers::OffOn);
+  }
+  if (inputs.pmWS) {
+    checkWS(inputs.pmWS, Flippers::OnOff);
+  }
+  if (inputs.ppWS) {
+    checkWS(inputs.ppWS, Flippers::OnOn);
+  }
+}
+
 
 API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
@@ -134,7 +254,6 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceM
 }
 
 PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFactors() {
-  // TODO validate efficiencies.
   EfficiencyMap e;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
   const auto &vertAxis = factorWS->getAxis(1);
@@ -156,6 +275,7 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
+  checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap outputs;
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
   const size_t nHisto = inputs.ppWS->getNumberHistograms();
@@ -183,6 +303,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
+  checkInputExists(inputs.mmWS, Flippers::OnOn);
+  checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap outputs;
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
@@ -239,6 +361,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
+  checkInputExists(inputs.mmWS, Flippers::OnOn);
+  checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap fullInputs = inputs;
   fullInputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
   fullInputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
@@ -352,9 +476,13 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
+  checkInputExists(inputs.mmWS, Flippers::OnOn);
+  checkInputExists(inputs.ppWS, Flippers::OffOff);
   if (!inputs.mpWS) {
+    checkInputExists(inputs.pmWS, Flippers::OffOn);
     solve10(fullInputs, efficiencies);
   } else {
+    checkInputExists(inputs.mpWS, Flippers::OnOff);
     solve01(fullInputs, efficiencies);
   }
   return fullCorrections(fullInputs, efficiencies);
@@ -362,6 +490,10 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCor
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
+  checkInputExists(inputs.mmWS, Flippers::OnOn);
+  checkInputExists(inputs.mpWS, Flippers::OnOff);
+  checkInputExists(inputs.pmWS, Flippers::OffOn);
+  checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap outputs;
   // TODO check if history is retained with create().
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
@@ -480,7 +612,6 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
 
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections() {
   API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
-  // TODO: Validate dirs in validateInputs().
   const std::vector<std::string> flippers = getProperty(Prop::FLIPPERS);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {

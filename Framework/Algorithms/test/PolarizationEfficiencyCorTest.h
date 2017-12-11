@@ -279,6 +279,126 @@ public:
     }
   }
 
+  void test_FailureWhenEfficiencyHistogramIsMissing() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    Counts counts{0., 0., 0.};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    auto effWS = efficiencies(edges);
+    // Rename F1 to something else.
+    auto axis = make_unique<TextAxis>(4);
+    axis->setLabel(0, "__wrong_histogram_label");
+    axis->setLabel(1, "F2");
+    axis->setLabel(2, "P1");
+    axis->setLabel(3, "P2");
+    effWS->replaceAxis(1, axis.release());
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void test_FailureWhenEfficiencyXDataMismatches() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    Counts counts{0., 0., 0.};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(1, Histogram(edges, counts));
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    auto effWS = efficiencies(edges);
+    // Change a bin edge of one of the histograms.
+    auto &xs = effWS->mutableX(0);
+    xs[xs.size() / 2] *= 1.01;
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void test_FailureWhenNumberOfHistogramsInInputWorkspacesMismatch() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    Counts counts{0., 0., 0.};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws01 = ws00->clone();
+    MatrixWorkspace_sptr ws10 = create<Workspace2D>(nHist + 1, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws10));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void test_FailureWhenAnInputWorkspaceIsMissing() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    Counts counts{0., 0., 0.};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws01 = ws00->clone();
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws01));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    auto effWS = efficiencies(edges);
+    constexpr char *OUTWS_NAME{"output"};
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OUTWS_NAME))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT(!alg.isExecuted())
+  }
+
 private:
   Mantid::API::MatrixWorkspace_sptr efficiencies(const Mantid::HistogramData::BinEdges &edges) {
     using namespace Mantid::API;

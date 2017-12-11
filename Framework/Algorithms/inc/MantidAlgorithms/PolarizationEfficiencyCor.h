@@ -60,6 +60,9 @@ private:
 
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
+  void checkConsistentNumberHistograms(const WorkspaceMap &inputs);
+  void checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   EfficiencyMap efficiencyFactors();
   WorkspaceMap directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
