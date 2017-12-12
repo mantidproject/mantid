@@ -23,7 +23,7 @@ class FFTView(QtGui.QWidget):
         #make table
         self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
-        self.FFTTable.setRowCount(8)
+        self.FFTTable.setRowCount(9)
         self.FFTTable.setColumnCount(2)
         self.FFTTable.setColumnWidth(0,300)
         self.FFTTable.setColumnWidth(1,300)
@@ -53,13 +53,17 @@ class FFTView(QtGui.QWidget):
         table_utils.setRowName(self.FFTTable,5,"Use Raw data")
         self.Raw_box= table_utils.addCheckBoxToTable(self.FFTTable,True,5)
 
-        options=['x','y','z']
-        table_utils.setRowName(self.FFTTable,6,"Axis")
-        self.axis= table_utils.addComboToTable(self.FFTTable,6,options)
+        table_utils.setRowName(self.FFTTable,6,"First Good Data")
+        self.x0= table_utils.addDoubleToTable(self.FFTTable,0.0,6)
+        self.FFTTable.hideRow(6)
 
-        table_utils.setRowName(self.FFTTable,7,"Construct Phase Table")
-        self.phaseTable_box= table_utils.addCheckBoxToTable(self.FFTTable,True,7)
+        table_utils.setRowName(self.FFTTable,7,"Last Good Data")
+        self.xN= table_utils.addDoubleToTable(self.FFTTable,15.0,7)
         self.FFTTable.hideRow(7)
+
+        table_utils.setRowName(self.FFTTable,8,"Construct Phase Table")
+        self.phaseTable_box= table_utils.addCheckBoxToTable(self.FFTTable,True,8)
+        self.FFTTable.hideRow(8)
 
         self.FFTTable.resizeRowsToContents()
         #make advanced table options
@@ -149,6 +153,7 @@ class FFTView(QtGui.QWidget):
     def phaseQuadChanged(self):
         #show axis
         self.FFTTable.setRowHidden(6,self.getWS()!="PhaseQuad")
+        self.FFTTable.setRowHidden(7,self.getWS()!="PhaseQuad")
         #hide complex ws
         self.FFTTable.setRowHidden(2,self.getWS()=="PhaseQuad")
 
@@ -233,11 +238,14 @@ class FFTView(QtGui.QWidget):
     def getShiftBox(self):
         return self.shift_box
 
-    def getAxis(self):
-        return str( self.axis.currentText())
+    def getFirstGoodData(self):
+        return float(self.x0.text())
+
+    def getLastGoodData(self):
+        return (self.xN.text())
 
     def isNewPhaseTable(self):
         return self.phaseTable_box.checkState() == QtCore.Qt.Checked
 
     def isPhaseBoxShown(self):
-        return self.FFTTable.isRowHidden(7)
+        return self.FFTTable.isRowHidden(8)
