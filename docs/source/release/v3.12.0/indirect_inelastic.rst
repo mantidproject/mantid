@@ -15,8 +15,9 @@ Improved
 ########
 
 - :ref:`algm-ApplyPaalmanPingsCorrection` now accepts a corrections group containing only an :math:`A_{s,s}` and an :math:`A_{c,c}` workspace (produced by :ref:`algm-CalculateMonteCarloAbsorption`).
-- BASISReduction now permits the user to exclude a contiguous time segment from the reduction process.
-- BASISReduction option noMonitorNorm changed to MonitorNorm.
+- :ref:`BASISReduction  <algm-BASISReduction>` now permits the user to exclude a contiguous time segment from the reduction process.
+- :ref:`BASISReduction <algm-BASISReduction>` option *noMonitorNorm* changed to *MonitorNorm*.
+- :ref:`BASISReduction <algm-BASISReduction>` now contains log entry *asString* storing the options passed to to the algorithm.
 
 Vesuvio
 -------

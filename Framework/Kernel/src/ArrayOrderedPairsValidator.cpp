@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Kernel {
 
 /**
- * Create a clone of the current ArrayBoundedValidator.
+ * Create a clone of the current ArrayOrderedPairsValidator.
  * @return The cloned object.
  */
 template <typename TYPE>
