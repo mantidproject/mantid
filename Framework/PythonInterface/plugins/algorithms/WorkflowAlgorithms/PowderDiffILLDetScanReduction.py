@@ -1,16 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator
-from mantid.api import PythonAlgorithm, MultipleFileProperty, MatrixWorkspaceProperty
+from mantid.api import PythonAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty
 from mantid.simpleapi import *
 
 
 class PowderDiffILLDetScanReduction(PythonAlgorithm):
-    def _hide(self, name):
-        return '__' + self._out_name + '_' + name
-
-    def _hide_run(selfs, runnumber):
-        return '__' + runnumber
+    _progress = None
 
     def category(self):
         return "ILL\\Diffraction;Diffraction\\Reduction"
@@ -59,20 +55,20 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[], validator=FloatArrayOrderedPairsValidator()),
                              doc='A comma separated list of minimum and maximum height range (in m)')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                                                    direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
 
     def PyExec(self):
-
-        inputWS = self._load()
-        instrument_name = inputWS[0].getInstrument().getName()
+        input_workspaces = self._load()
+        instrument_name = input_workspaces[0].getInstrument().getName()
         supported_instruments = ['D2B', 'D20']
         if instrument_name not in supported_instruments:
             self.log.warning('Running for unspported instrument, use with caution. Supported instruments are: ' + str(supported_instruments))
 
+        self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
-            inputWS = NormaliseToMonitor(InputWorkspace=inputWS, MonitorID=0)
+            input_workspaces = NormaliseToMonitor(InputWorkspace=input_workspaces, MonitorID=0)
 
         height_range = ''
         height_range_prop = self.getProperty('HeightRange').value
@@ -80,24 +76,33 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
         output_workspaces = []
+        self._progress.report('Doing Output2D Option')
         if self.getPropertyValue('Output2D'):
-            output2D = SumOverlappingTubes(InputWorkspaces=inputWS,
+            output2D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='2D',
                                            HeightAxis=height_range)
             output_workspaces.append(output2D)
+
+        self._progress.report('Doing Output2DStraight Option')
         if self.getPropertyValue('Output2DStraight'):
-            output2Dstraight = SumOverlappingTubes(InputWorkspaces=inputWS,
+            output2Dstraight = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                                    OutputType='2DStraight',
                                                    HeightAxis=height_range)
             output_workspaces.append(output2Dstraight)
+
+        self._progress.report('Doing Output1D Option')
         if self.getPropertyValue('Output1D'):
-            output1D = SumOverlappingTubes(InputWorkspaces=inputWS,
+            output1D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='1DStraight',
                                            HeightAxis=height_range)
             output_workspaces.append(output1D)
+        DeleteWorkspace('input_workspaces')
 
         grouped_output_workspace = GroupWorkspaces(output_workspaces)
-        self.setProperty('OutputWorkspace', grouped_output_workspace)
+        output_workspace_name = self.getPropertyValue('OutputWorkspace')
+        RenameWorkspace(InputWorkspace=grouped_output_workspace, OutputWorkspace=output_workspace_name)
+        self.setProperty('OutputWorkspace', output_workspace_name)
+
 
     def _load(self):
         """
@@ -106,13 +111,37 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             @return : the list of the loaded ws names
         """
         runs = self.getPropertyValue('Run')
+        to_group = []
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + runs.count('+') + 4)
+
         data_type = 'Raw'
         if self.getPropertyValue('UsePreCalibratedData'):
             data_type = 'Calibrated'
 
-        ws = LoadILLDiffraction(Filename=runs, DataType=data_type)
+        for runs_list in runs.split(','):
+            runs_sum = runs_list.split('+')
+            if len(runs_sum) == 1:
+                run = os.path.basename(runs_sum[0]).split('.')[0]
+                LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run, DataType=data_type)
+                self._progress.report('Loaded run #' + run)
+                to_group.append(run)
+            else:
+                for i, run in enumerate(runs_sum):
+                    runnumber = os.path.basename(run).split('.')[0]
+                    output_ws_name = 'merged_runs'
+                    if i == 0:
+                        LoadILLDiffraction(Filename=run, OutputWorkspace=output_ws_name, DataType=data_type)
+                        self._progress.report('Loaded run #' + run)
+                        to_group.append(output_ws_name)
+                    else:
+                        run = runnumber
+                        LoadILLDiffraction(Filename=run, OutputWorkspace=run, DataType=data_type)
+                        self._progress.report('Loaded run #' + run)
+                        MergeRuns(InputWorkspaces=[output_ws_name, run], OutputWorkspace=output_ws_name)
+                        DeleteWorkspace(Workspace=run)
 
-        return GroupWorkspaces(ws)
+        return GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace='input_workspaces')
+
 
 # Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderDiffILLDetScanReduction)
