@@ -21,8 +21,9 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     return pearl_attenuated_ws
 
 
-def apply_vanadium_absorb_corrections(van_ws, run_details):
-    absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
+def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
+    if absorb_ws is None:
+        absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
 
     van_original_units = van_ws.getAxis(0).getUnit().unitID()
     absorb_units = absorb_ws.getAxis(0).getUnit().unitID()
@@ -48,9 +49,6 @@ def generate_out_name(run_number_string, long_mode_on, tt_mode):
 
 
 def generate_vanadium_absorb_corrections(van_ws):
-    raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
-
-    # TODO are these values applicable to all instruments
     shape_ws = mantid.CloneWorkspace(InputWorkspace=van_ws)
     mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')

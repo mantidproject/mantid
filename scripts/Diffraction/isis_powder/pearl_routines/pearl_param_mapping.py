@@ -21,6 +21,7 @@ attr_mapping = \
         ParamMapEntry(ext_name="file_ext",                     int_name="file_extension", optional=True),
         ParamMapEntry(ext_name="focused_cropping_values",      int_name="tof_cropping_values"),
         ParamMapEntry(ext_name="focus_mode",                   int_name="focus_mode", enum_class=PEARL_FOCUS_MODES),
+        ParamMapEntry(ext_name="generate_absorb_corrections",  int_name="gen_absorb"),
         ParamMapEntry(ext_name="get_det_offsets_d_ref",        int_name="d_reference"),
         ParamMapEntry(ext_name="get_det_offsets_step",         int_name="get_det_offsets_step"),
         ParamMapEntry(ext_name="get_det_offsets_x_min",        int_name="get_det_offsets_x_min"),
