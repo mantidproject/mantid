@@ -47,7 +47,7 @@ the interface will generate one and output the result as ``PhaseTable``. It is p
 possible to use a pre-existing ``PhaseTable``. **Note that the PhaseQuad option requires the data archieve to be in the search directory**. 
 
 The Calculate button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algortihms. The output workspace will be added to
-``FFTMuon``. 
+appropriate grouped workspace. 
 
 
 Maximum Entropy Method
