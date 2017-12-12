@@ -3208,13 +3208,14 @@ void MuonAnalysis::loadAllGroups(int state) {
 	}
 }
 void MuonAnalysis::loadAllPairs(int state) {
-	
+
 	Q_UNUSED(state);
 	if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
-		ItemType itemType = Group;
+		ItemType itemType = Pair;
 		PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
-		auto max = m_uiForm.frontGroupGroupPairComboBox->count();
-		for (int j = numGroups(); j < max; j++) {
+		auto max = numGroups() + numPairs();
+		for (int j = 0; j < numPairs(); j++) {
+			
 			addItem(itemType, j, plotType);
 		}
 	}
