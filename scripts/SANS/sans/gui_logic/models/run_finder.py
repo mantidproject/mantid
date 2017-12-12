@@ -26,7 +26,7 @@ class SummableRunFinder(object):
         return self._file_info_source.create_sans_file_information(file_path)
 
     def _display_name(self, file):
-        return str(file.get_run_number())
+        return file.get_run_number()
 
     def _is_event_mode(self, file):
         return file.is_event_mode()
