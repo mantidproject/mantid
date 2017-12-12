@@ -2,6 +2,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
@@ -200,6 +201,16 @@ bool AbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
+  const auto sampleWsName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula))
@@ -225,6 +236,17 @@ bool AbsorptionCorrections::validate() {
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
+
+    const auto containerWsName =
+        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerWsName);
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
 
     if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                  m_uiForm.leCanChemicalFormula)) {
@@ -268,8 +290,18 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
       dataName.toStdString());
 
   if (!sampleWs) {
-    g_log.warning() << "Failed to find workspace " << dataName.toStdString()
-                    << "\n";
+    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        dataName.toStdString());
+
+    if (wsg)
+      g_log.warning() << "Workspace Groups are currently not allowed.\n";
+    else
+      g_log.warning() << "Workspace " << dataName.toStdString()
+                      << " is not a MatrixWorkspace.\n";
+
+    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
+                        "entered into the Sample field.\n");
+    return;
   }
 
   auto instrument = sampleWs->getInstrument();
@@ -342,8 +374,8 @@ void AbsorptionCorrections::changeSampleDensityUnit(int index) {
 }
 
 /**
-* Handle changing of the container density unit
-*/
+ * Handle changing of the container density unit
+ */
 void AbsorptionCorrections::changeCanDensityUnit(int index) {
 
   if (index == 0) {

@@ -64,6 +64,22 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
 
+  // Check if supplied workspace is a MatrixWorkspace
+  if (!m_ppSampleWS) {
+    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        dataName.toStdString());
+    // Specialized error message for workspace group
+    if (wsg)
+      g_log.warning() << "Workspace Groups are currently not allowed.\n";
+    else
+      g_log.warning() << "Workspace " << dataName.toStdString()
+                      << " is not a MatrixWorkspace.\n";
+
+    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
+                        "entered into the Sample field.\n");
+    return;
+  }
+
   // Plot the curve
   plotInPreview("Sample", m_ppSampleWS, Qt::black);
   m_uiForm.spPreviewSpec->setMaximum(
@@ -83,6 +99,23 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   // get Workspace
   m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
+
+  // Check if supplied workspace is a MatrixWorkspace
+  if (!m_ppContainerWS) {
+    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        dataName.toStdString());
+    // Specialized error message for WorkspaceGroup
+    if (wsg)
+      g_log.warning() << "Workspace Groups are currently not allowed.\n";
+    else
+      g_log.warning() << "Workspace " << dataName.toStdString()
+                      << " is not a MatrixWorkspace.\n";
+
+    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
+                        "entered into the Sample field.\n");
+    return;
+  }
+
   // Clone for use in plotting and alg
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
@@ -420,20 +453,39 @@ bool ApplyAbsorptionCorrections::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
-  MatrixWorkspace_sptr sampleWs;
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsName = sampleName.toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
   if (useCan) {
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
+    const auto container = m_uiForm.dsContainer->getCurrentDataName();
+    const auto containerName = container.toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerName);
+
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerName)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
     // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
-    QString sampleType =
-        sample.right(sample.length() - sample.lastIndexOf("_"));
-    QString container = m_uiForm.dsContainer->getCurrentDataName();
     QString containerType =
         container.right(container.length() - container.lastIndexOf("_"));
+    QString sampleType =
+        sampleName.right(sampleName.length() - sampleName.lastIndexOf("_"));
 
     g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
     g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
