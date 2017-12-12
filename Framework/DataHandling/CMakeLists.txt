@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/DataBlock.cpp
 	src/DataBlockComposite.cpp
 	src/DataBlockGenerator.cpp
+	src/DefaultEventLoader.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
 	src/LoadBBY.cpp
+	src/LoadBankFromDiskTask.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -43,6 +45,7 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
+	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
@@ -50,8 +53,9 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-        src/LoadILLDiffraction.cpp
+	src/LoadILLDiffraction.cpp
 	src/LoadILLIndirect2.cpp
+	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
@@ -93,8 +97,8 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadSINQFocus.cpp
 	src/LoadSESANS.cpp
+	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
@@ -114,6 +118,7 @@ set ( SRC_FILES
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
 	src/PDLoadCharacterizations.cpp
+	src/ParallelEventLoader.cpp
 	src/PatchBBY.cpp
 	src/ProcessBankData.cpp
 	src/RawFileInfo.cpp
@@ -186,6 +191,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DataBlock.h
 	inc/MantidDataHandling/DataBlockComposite.h
 	inc/MantidDataHandling/DataBlockGenerator.h
+	inc/MantidDataHandling/DefaultEventLoader.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -207,6 +213,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadBBY.h
+	inc/MantidDataHandling/LoadBankFromDiskTask.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -217,6 +224,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
+	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
@@ -224,8 +232,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-        inc/MantidDataHandling/LoadILLDiffraction.h
+	inc/MantidDataHandling/LoadILLDiffraction.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
+	inc/MantidDataHandling/LoadILLPolarizationFactors.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
@@ -284,6 +293,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
+	inc/MantidDataHandling/ParallelEventLoader.h
 	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/ProcessBankData.h
 	inc/MantidDataHandling/RawFileInfo.h
@@ -386,6 +396,7 @@ set ( TEST_FILES
 	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
+	LoadEventNexusIndexSetupTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadFITSTest.h
@@ -394,7 +405,8 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLDiffractionTest.h
-        LoadILLIndirect2Test.h
+	LoadILLIndirect2Test.h
+	LoadILLPolarizationFactorsTest.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadILLTOF2Test.h
@@ -522,7 +534,8 @@ enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
-                        COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING")
+  COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING"
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

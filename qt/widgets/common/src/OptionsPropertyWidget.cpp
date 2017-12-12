@@ -1,10 +1,9 @@
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
 #include "MantidKernel/System.h"
-#include <QtGui>
-#include <QLabel>
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include <qcombobox.h>
+#include <QComboBox>
+#include <QLabel>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

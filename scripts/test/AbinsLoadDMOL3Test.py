@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadDMOL3Test(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadDMOL3Test(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadDMOL3"])

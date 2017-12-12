@@ -2,8 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 
 
@@ -31,7 +29,7 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_can_set_the_options_column_model(self):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                            "", "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
                                             "WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
         options_column_model = table_index_model.options_column_model
         options = options_column_model.get_options()
@@ -40,9 +38,22 @@ class TableModelTest(unittest.TestCase):
         self.assertTrue(options["WavelengthMax"] == 3.)
 
     def test_that_raises_for_missing_equal(self):
-        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "",
+        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", "",
                 "WavelengthMin=1, WavelengthMax=3, NotRegister2"]
         self.assertRaises(ValueError,  TableIndexModel, *args)
+
+    def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
+        table_model = TableModel()
+        args = [0]
+        self.assertRaises(IndexError, table_model.get_row_user_file, *args)
+
+    def test_that_can_retrieve_user_file_from_table_index_model(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "User_file_name")
+        table_model.add_table_entry(2, table_index_model)
+        user_file = table_model.get_row_user_file(2)
+        self.assertEqual(user_file,"User_file_name")
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
@@ -70,6 +81,7 @@ class TableModelTest(unittest.TestCase):
     def _user_file_wrapper(value):
         table_model = TableModel()
         table_model.user_file = value
+
 
 if __name__ == '__main__':
     unittest.main()

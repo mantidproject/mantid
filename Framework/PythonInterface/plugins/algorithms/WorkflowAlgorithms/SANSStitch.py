@@ -7,6 +7,8 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Property
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
     EnabledWhenProperty, PropertyCriterion
 import numpy as np
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.constants import EMPTY_NAME
 
 
 class Mode(object):
@@ -79,6 +81,21 @@ class SANSStitch(DataProcessorAlgorithm):
 
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
+
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
+                             doc = 'Optional minimum q for fit')
+
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
+                             doc = 'Optional maximum q for fit')
+
+        self.declareProperty('MergeMask', defaultValue = False, direction = Direction.Input,
+                             doc='Controls whether the user has manually specified the merge region')
+
+        self.declareProperty('MergeMin', defaultValue=0.0, direction=Direction.Input,
+                             doc='The minimum of the merge region in q')
+
+        self.declareProperty('MergeMax', defaultValue=1000.0, direction=Direction.Input,
+                             doc='The maximum of the merge region in q')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
@@ -206,29 +223,81 @@ class SANSStitch(DataProcessorAlgorithm):
             end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
-    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):
+    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max):
         fit_alg = self.createChildAlgorithm("SANSFitShiftScale")
         fit_alg.setProperty("HABWorkspace", q_high_angle)
         fit_alg.setProperty("LABWorkspace", q_low_angle)
         fit_alg.setProperty("Mode", self.getProperty('Mode').value)
         fit_alg.setProperty("ScaleFactor", scale_factor)
         fit_alg.setProperty("ShiftFactor", shift_factor)
+        fit_alg.setProperty("FitMin", fit_min)
+        fit_alg.setProperty("FitMax", fit_max)
         fit_alg.execute()
         scale_factor_fit = fit_alg.getProperty("OutScaleFactor").value
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
         return  scale_factor_fit, shift_factor_fit
 
+    def _check_bins(self, merge_min, merge_max, cF, cR):
+        if cF.binIndexOf(merge_min) == cR.binIndexOf(merge_max):
+            return cF.readX(0)[cR.binIndexOf(merge_max) + 1]
+        else:
+            return merge_max
+
+    def _apply_user_mask_ranges(self, cF, cR, nR, nF, merge_min, merge_max):
+        if merge_min < min(cF.dataX(0)):
+            merge_min = min(cF.dataX(0))
+        if merge_max > max(cR.dataX(0)):
+            merge_max = max(cR.dataX(0))
+        merge_max = self._check_bins(merge_min, merge_max, cF, cR)
+
+        mask_name = "MaskBins"
+        mask_options = {"InputWorkspace": cF}
+        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+
+        mask_alg.setProperty("InputWorkspace", cF)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", min(cF.dataX(0)))
+        mask_alg.setProperty("XMax", merge_min)
+        mask_alg.execute()
+        cF = mask_alg.getProperty("OutputWorkspace").value
+
+        mask_alg.setProperty("InputWorkspace", nF)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", min(nF.dataX(0)))
+        mask_alg.setProperty("XMax", merge_min)
+        mask_alg.execute()
+        nF = mask_alg.getProperty("OutputWorkspace").value
+
+        mask_alg.setProperty("InputWorkspace", cR)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", merge_max)
+        mask_alg.setProperty("XMax", max(cR.dataX(0)))
+        mask_alg.execute()
+        cR = mask_alg.getProperty("OutputWorkspace").value
+
+        mask_alg.setProperty("InputWorkspace", nR)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", merge_max)
+        mask_alg.setProperty("XMax", max(nR.dataX(0)))
+        mask_alg.execute()
+        nR = mask_alg.getProperty("OutputWorkspace").value
+        return cR, cF, nR, nF
+
     def PyExec(self):
         enum_map = self._make_mode_map()
-
         mode = enum_map[self.getProperty('Mode').value]
+        merge_mask = self.getProperty('MergeMask').value
+        merge_min = self.getProperty('MergeMin').value
+        merge_max = self.getProperty('MergeMax').value
 
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
         nF = self.getProperty('HABNormSample').value
         nR = self.getProperty('LABNormSample').value
+
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
+
         if self.getProperty('ProcessCan').value:
             cF_can = self.getProperty('HABCountsCan').value
             cR_can = self.getProperty('LABCountsCan').value
@@ -247,10 +316,12 @@ class SANSStitch(DataProcessorAlgorithm):
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
 
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
-                                                       scale_factor, shift_factor)
+                                                       scale_factor, shift_factor, fit_min, fit_max)
 
         min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
         max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
@@ -261,6 +332,9 @@ class SANSStitch(DataProcessorAlgorithm):
         nF = self._crop_to_x_range(nF, min_q, max_q)
         nR = self._crop_to_x_range(nR, min_q, max_q)
 
+        if merge_mask:
+            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
+
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
                                             shift_factor=shift_factor)
@@ -270,6 +344,10 @@ class SANSStitch(DataProcessorAlgorithm):
             cR_can = self._crop_to_x_range(cR_can, min_q, max_q)
             nF_can = self._crop_to_x_range(nF_can, min_q, max_q)
             nR_can = self._crop_to_x_range(nR_can, min_q, max_q)
+
+            if merge_mask:
+                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min,
+                                                                              merge_max)
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,

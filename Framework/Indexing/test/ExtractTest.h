@@ -5,6 +5,7 @@
 
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid;
@@ -26,6 +27,23 @@ public:
     source.setSpectrumDefinitions(specDefs);
     std::vector<size_t> indices{{0, 2}};
     auto result = extract(source, indices);
+    TS_ASSERT_EQUALS(result.size(), 2);
+    TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(result.spectrumNumber(1), 3);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[0]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[2]);
+  }
+
+  void test_extract_SpectrumIndexSet() {
+    IndexInfo source({1, 2, 3});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(10);
+    specDefs[1].add(20);
+    specDefs[2].add(30);
+    source.setSpectrumDefinitions(specDefs);
+    std::vector<SpectrumNumber> indices{{1, 3}};
+    const auto indexSet = source.makeIndexSet(indices);
+    auto result = extract(source, indexSet);
     TS_ASSERT_EQUALS(result.size(), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 3);

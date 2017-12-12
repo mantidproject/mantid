@@ -1,11 +1,11 @@
- set ( SRC_FILES
+set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
-        src/DropEventHelper.cpp
+	src/DropEventHelper.cpp
 	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -15,15 +15,11 @@
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
-	src/MantidColorMap.cpp
 	src/MantidDesktopServices.cpp
 	src/MantidDialog.cpp
 	src/MantidHelpInterface.cpp
-	src/MantidQwtIMDWorkspaceData.cpp
-	src/MantidQwtWorkspaceData.cpp
 	src/MantidWidget.cpp
 	src/MdConstants.cpp
-	src/MdPlottingCmapsProvider.cpp
 	src/MdSettings.cpp
 	src/Message.cpp
 	src/NonOrthogonal.cpp
@@ -31,31 +27,24 @@
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
 	src/PlotAxis.cpp
-	src/PowerScaleEngine.cpp
+	src/PluginLibraries.cpp
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-        src/QwtHelper.cpp
-	src/QwtRasterDataMD.cpp
-	src/QwtRasterDataMDNonOrthogonal.cpp
-	src/QwtWorkspaceBinData.cpp
-	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
-	src/ScaleEngine.cpp
 	src/ScriptRepositoryView.cpp
 	src/SelectionNotificationService.cpp
 	src/SignalBlocker.cpp
-	src/SignalRange.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
 	src/TSVSerialiser.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WidgetScrollbarDecorator.cpp
-    src/WindowIcons.cpp
+	src/WindowIcons.cpp
 	src/WorkspaceObserver.cpp
 	src/WorkspaceIcons.cpp
 	src/AlgorithmSelectorWidget.cpp
@@ -63,7 +52,6 @@
 	src/CatalogSearch.cpp
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
-	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
@@ -74,7 +62,10 @@
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
+    src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+    src/DataProcessorUI/Column.cpp
+    src/DataProcessorUI/ConstColumnIterator.cpp
 	src/ParseKeyValueString.cpp
 	src/ParseNumerics.cpp
 	src/DataProcessorUI/QOneLevelTreeModel.cpp
@@ -84,9 +75,7 @@
 	src/DataProcessorUI/VectorString.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
-	src/DisplayCurveFit.cpp
 	src/DoubleSpinBox.cpp
-	src/ErrorCurve.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
@@ -99,7 +88,6 @@
 	src/LineEditWithClear.cpp
 	src/LogValueSelector.cpp
 	src/MWDiag.cpp
-	src/MWView.cpp
 	src/MantidHelpWindow.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
@@ -109,16 +97,12 @@
 	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/MuonFunctionBrowser.cpp
-	src/PeakPicker.cpp
 	src/PeriodicTableWidget.cpp
-	src/PreviewPlot.cpp
 	src/ProcessingAlgoWidget.cpp
-    src/ProjectSavePresenter.cpp
-    src/ProjectSaveModel.cpp
+  src/ProjectSavePresenter.cpp
+  src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
-	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
-	src/SafeQwtPlot.cpp
 	src/SaveWorkspaces.cpp
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
@@ -146,7 +130,7 @@
 	src/QtPropertyBrowser/DoubleDialogEditor.cpp
 	src/QtPropertyBrowser/DoubleEditorFactory.cpp
 	src/QtPropertyBrowser/FilenameDialogEditor.cpp
-    src/QtPropertyBrowser/FormulaDialogEditor.cpp
+  src/QtPropertyBrowser/FormulaDialogEditor.cpp
 	src/QtPropertyBrowser/ParameterPropertyManager.cpp
 	src/QtPropertyBrowser/StringDialogEditor.cpp
 	src/QtPropertyBrowser/StringEditorFactory.cpp
@@ -183,7 +167,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
-  inc/MantidQtWidgets/Common/ColorBarWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
@@ -194,11 +177,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/DiagResults.h
-  inc/MantidQtWidgets/Common/DisplayCurveFit.h
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FindDialog.h
@@ -220,17 +200,12 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/MWDiag.h
-  inc/MantidQtWidgets/Common/MWView.h
-  inc/MantidQtWidgets/Common/PeakPicker.h
   inc/MantidQtWidgets/Common/PeriodicTableWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
-  inc/MantidQtWidgets/Common/PreviewPlot.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
   inc/MantidQtWidgets/Common/pythonCalc.h
-  inc/MantidQtWidgets/Common/RangeSelector.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
-  inc/MantidQtWidgets/Common/SafeQwtPlot.h
   inc/MantidQtWidgets/Common/SaveWorkspaces.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
@@ -253,6 +228,14 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
+  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -271,34 +254,23 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/InterfaceFactory.h
 	inc/MantidQtWidgets/Common/InterfaceManager.h
 	inc/MantidQtWidgets/Common/IProjectSerialisable.h
-	inc/MantidQtWidgets/Common/MantidColorMap.h
 	inc/MantidQtWidgets/Common/MantidDesktopServices.h
-	inc/MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h
-	inc/MantidQtWidgets/Common/MantidQwtWorkspaceData.h
 	inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
 	inc/MantidQtWidgets/Common/MdConstants.h
-	inc/MantidQtWidgets/Common/MdPlottingCmapsProvider.h
 	inc/MantidQtWidgets/Common/MdSettings.h
 	inc/MantidQtWidgets/Common/NonOrthogonal.h
 	inc/MantidQtWidgets/Common/pixmaps.h
 	inc/MantidQtWidgets/Common/PlotAxis.h
-	inc/MantidQtWidgets/Common/PowerScaleEngine.h
+	inc/MantidQtWidgets/Common/PluginLibraries.h
 	inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
-	inc/MantidQtWidgets/Common/QwtHelper.h
-	inc/MantidQtWidgets/Common/QwtRasterDataMD.h
-	inc/MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h
-	inc/MantidQtWidgets/Common/QwtWorkspaceBinData.h
-	inc/MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h
-	inc/MantidQtWidgets/Common/ScaleEngine.h
+	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
-	inc/MantidQtWidgets/Common/SignalRange.h
 	inc/MantidQtWidgets/Common/TSVSerialiser.h
-	inc/MantidQtWidgets/Common/qwt_compat.h
 	inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
 	inc/MantidQtWidgets/Common/WindowIcons.h
 	inc/MantidQtWidgets/Common/WorkspaceIcons.h
@@ -338,6 +310,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
@@ -347,7 +321,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
-	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -386,9 +359,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
 
@@ -403,12 +374,9 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
   inc/MantidQtWidgets/Common/CatalogSearch.ui
   inc/MantidQtWidgets/Common/CatalogSelector.ui
-  inc/MantidQtWidgets/Common/ColorBarWidget.ui
-  inc/MantidQtWidgets/Common/DisplayCurveFit.ui
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.ui
   inc/MantidQtWidgets/Common/LogValueSelector.ui
   inc/MantidQtWidgets/Common/MWDiag.ui
-  inc/MantidQtWidgets/Common/MWView.ui
   inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
@@ -419,184 +387,152 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/SlitCalculator.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
   inc/MantidQtWidgets/Common/PeriodicTableWidget.ui
-  inc/MantidQtWidgets/Common/PreviewPlot.ui
   inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
+
+# Temporary workaround to remove stale ui_* header files after they
+# were moved to a separate library. They cause build problems if they're not
+# deleted
+set ( OLD_UI_HEADERS
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_MWView.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
+)
+foreach (_header ${OLD_UI_HEADERS})
+  file (REMOVE ${_header})
+endforeach()
 
 # Python unit tests
 set ( TEST_PY_FILES
   test/MWRunFilesTest.py
 )
 
-set( TEST_FILES
-   BatchAlgorithmRunnerTest.h
-   FileDialogHandlerTest.h
-   InterfaceManagerTest.h
-   MantidColorMapTest.h
-   NonOrthogonalTest.h
-   PlotAxisTest.h
-   QwtWorkspaceBinDataTest.h
-   QwtWorkspaceSpectrumDataTest.h
-   SelectionNotificationServiceTest.h
-   SignalRangeTest.h
-   SignalBlockerTest.h
-   AlgorithmHintStrategyTest.h
-   TrackedActionTest.h
-   DataProcessorUI/CommandsTest.h
-   DataProcessorUI/GenerateNotebookTest.h
-   DataProcessorUI/OneLevelTreeManagerTest.h
-   DataProcessorUI/PostprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessMapTest.h
-   DataProcessorUI/ProcessingAlgorithmBaseTest.h
-   DataProcessorUI/ProcessingAlgorithmTest.h
-   DataProcessorUI/TwoLevelTreeManagerTest.h
-   DataProcessorUI/WhiteListTest.h
-   DataProcessorUI/GenericDataProcessorPresenterTest.h
-   ParseKeyValueStringTest.h
-   DataProcessorUI/QOneLevelTreeModelTest.h
-   DataProcessorUI/QTwoLevelTreeModelTest.h
-   ProjectSaveModelTest.h
-   ProjectSavePresenterTest.h
-   WorkspacePresenter/ADSAdapterTest.h
-   WorkspacePresenter/WorkspacePresenterTest.h
+set ( TARGET_LIBRARIES
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS}
+  ${POCO_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${PYTHON_LIBRARIES}
 )
-# moc'd files will end up in build directory, so add to include path
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
-# Need to use a string of calls to the qt4_generate_moc macro
-# instead of qt4_wrap_cpp because the latter produces files with
-# a cxx suffix when QtPropertyBrowser requires cpp
-
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-)
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qtpropertymanager.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-)
-qt4_generate_moc (
-  src/QtPropertyBrowser/qttreepropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-)
-
-set (
-  QTPROPERTYBROWSER_HEADERS_ONLY_MOC
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc
-  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc
-  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc
-)
-
-set_source_files_properties (
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  PROPERTIES
-    HEADER_FILE_ONLY true
-)
-
-qt4_generate_moc (
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
-
-set (
-  QTPROPERTYBROWSER_HEADERS_MOC
-  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp
-)
-
-set (
-  QTPROPERTYBROWSER_MOC
-  ${QTPROPERTYBROWSER_HEADERS_MOC}
-  ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
-  ${EXTRA_MOCS}
-)
-
-find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
-include(${QT_USE_FILE})
-
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-set ( ALL_SRC
-  ${SRC_FILES}
-  ${MOCCED_FILES}
-  ${QTPROPERTYBROWSER_MOC}
-  ${QTPROPERTYBROWSER_SRCS}
-  ${QTPROPERTYBROWSER_RESOURCES})
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
-
-if(MAKE_VATES AND ParaView_FOUND)
-  include( ${PARAVIEW_USE_FILE} )
-endif()
-
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
-add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
-
-# Python includes
-include_directories ( ${PYTHON_INCLUDE_PATH})
-if(MAKE_VATES AND ParaView_FOUND)
-  include_directories (SYSTEM ${PARAVIEW_INCLUDE_DIRS})
-endif()
-# Use a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidQtWidgets/Common/PrecompiledHeader.h ALL_SRC )
-add_library ( MantidQtWidgetsCommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-set_target_properties ( MantidQtWidgetsCommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
-
-# Add support for OSX system libraries if this is an OSX machine
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
- SET( APPLE_SYSTEM_LIBRARIES "-framework CoreFoundation")
+  list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
 
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsCommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
-endif ()
+###########################################################################
+# Target
+###########################################################################
+if ( ENABLE_WORKBENCH )
+  # Additional components for this module
+  find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
+    REQUIRED )
+  # Prefer WebEngineWidgets over WebkitWidgets
+  unset ( Qt5_FOUND )
+  find_package ( Qt5 COMPONENTS WebEngineWidgets QUIET )
+  if ( Qt5_FOUND )
+    set ( _webwidgets_tgt Qt5::WebEngineWidgets )
+  else ()
+    find_package ( Qt5 COMPONENTS WebKitWidgets QUIET )
+    if ( Qt5_FOUND )
+      set ( _webwidgets_tgt Qt5::WebKitWidgets )
+      set ( _webengine_def USE_QTWEBKIT )
+    else ()
+      message ( FATAL_ERROR "Unable to find suitable module for web widgets. Tried: WebEnginewidgets, WebKitWidgets" )
+    endif ()
+  endif ()
 
-target_link_libraries ( MantidQtWidgetsCommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-  ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
-  ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
-  ${APPLE_SYSTEM_LIBRARIES}
+  find_package ( QScintillaQt5 REQUIRED )
+endif()
+
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS
+    IN_MANTIDQT_COMMON
+    QSCINTILLA_DLL
+  QT4_DEFS
+    USE_QTWEBKIT
+  QT5_DEFS
+    ${_webengine_def}
+  INCLUDE_DIRS
+    inc
+    ${PYTHON_INCLUDE_PATH}
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::QtHelp
+    Qt4::QtOpenGL
+    Qt4::QtNetwork
+    Qt4::QtWebKit
+    Qt4::Qscintilla
+  QT5_LINK_LIBS
+    Qt5::Concurrent
+    Qt5::Help
+    Qt5::Network
+    Qt5::PrintSupport
+    ${_webwidgets_tgt}
+    Qt5::Qscintilla
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Libraries
 )
 
-if(MAKE_VATES AND ParaView_FOUND)
-  target_link_libraries (MantidQtWidgetsCommon LINK_PRIVATE
-  vtkPVServerManagerRendering
-  ${vtkjsoncpp_LIBRARIES}
-  )
-endif()
+###########################################################################
+# Testing
+###########################################################################
+set( TEST_FILES
+  test/BatchAlgorithmRunnerTest.h
+  test/FileDialogHandlerTest.h
+  test/InterfaceManagerTest.h
+  test/NonOrthogonalTest.h
+  test/PlotAxisTest.h
+  test/SelectionNotificationServiceTest.h
+  test/SignalBlockerTest.h
+  test/AlgorithmHintStrategyTest.h
+  test/TrackedActionTest.h
+  test/DataProcessorUI/CommandsTest.h
+  test/DataProcessorUI/GenerateNotebookTest.h
+  test/DataProcessorUI/OneLevelTreeManagerTest.h
+  test/DataProcessorUI/PostprocessingAlgorithmTest.h
+  test/DataProcessorUI/PreprocessingAlgorithmTest.h
+  test/DataProcessorUI/PreprocessMapTest.h
+  test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
+  test/DataProcessorUI/ProcessingAlgorithmTest.h
+  test/DataProcessorUI/TwoLevelTreeManagerTest.h
+  test/DataProcessorUI/WhiteListTest.h
+  test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+  test/ParseKeyValueStringTest.h
+  test/DataProcessorUI/QOneLevelTreeModelTest.h
+  test/DataProcessorUI/QTwoLevelTreeModelTest.h
+  test/ProjectSaveModelTest.h
+  test/ProjectSavePresenterTest.h
+  test/WorkspacePresenter/ADSAdapterTest.h
+  test/WorkspacePresenter/WorkspacePresenterTest.h
+)
+
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+    DataObjects
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
+)
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt
@@ -608,26 +544,8 @@ endif()
 if ( WIN32 )
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
-  add_custom_command ( TARGET MantidQtWidgetsCommon POST_BUILD
+  add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
 endif()
-
-###########################################################################
-# Testing
-###########################################################################
-
-add_subdirectory ( test )
-
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsCommon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
-
-set ( TEST_FILES
-	ScriptRepositoryViewTest.h
-)

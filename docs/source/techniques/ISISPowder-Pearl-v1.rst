@@ -55,6 +55,7 @@ The following methods can be executed on a PEARL object:
 
 - :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
 - :ref:`focus_pearl_isis-powder-diffraction-ref`
+- :ref:`create_cal_pearl_isis-powder-diffraction-ref`
 
 For information on creating a PEARL object see:
 :ref:`creating_pearl_object-isis-powder-diffraction-ref`
@@ -110,10 +111,11 @@ The following parameter is required if
 
 - :ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
 
-The following parameter may also be optionally set:
+The following parameters may also be optionally set:
 
 - :ref:`file_ext_pearl_isis-powder-diffraction-ref`
-
+- :ref:`suffix_pearl_isis-powder-diffraction-ref`
+  
 Example
 =======
 
@@ -130,6 +132,32 @@ Example
                       attenuation_file_path=attenuation_path,
                       run_number="100-110", tt_mode="tt88",
                       vanadium_normalisation=True)
+
+.. _create_cal_pearl_isis-powder-diffraction-ref:
+
+create_cal
+^^^^^^^^^^
+The *create_cal* method creates the offset calibration file for PEARL
+scripts. The following parameters are required:
+
+- :ref:`calibration_mapping_file_pearl_isis-powder-diffraction-ref`
+- :ref:`focus_mode_pearl_isis-powder-diffraction-ref`
+- :ref:`long_mode_pearl_isis-powder-diffraction-ref`
+- :ref:`run_number_pearl_isis-powder-diffraction-ref`
+
+Example
+=======
+
+.. code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+  
+  pearl_example.create_cal(run_number=95671, 
+                           tt_mode="tt70",
+                           long_mode=True,
+                           calibration_mapping_file=cal_mapping_file)
+
 
 .. _calibration_mapping_pearl_isis-powder-diffraction-ref:
 
@@ -462,7 +490,8 @@ Example Input:
 run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
-:ref:`focus_pearl_isis-powder-diffraction-ref` method.
+:ref:`focus_pearl_isis-powder-diffraction-ref` and
+:ref:`create_cal_pearl_isis-powder-diffraction-ref` methods.
 
 This parameter accepts a single value or a range
 of values with the following syntax:
@@ -489,6 +518,21 @@ Example Input:
   pearl_example.focus(run_number="1, 3, 5-7", ...)
   # Or just a single run
   pearl_example.focus(run_number=100, ...)
+
+.. _suffix_pearl_isis-powder-diffraction-ref:
+
+suffix
+^^^^^^
+*Optional*
+
+This parameter specifies a suffix to append the names of output files
+during a focus.
+
+Example Input:
+
+.. code-block:: python
+
+  pearl_example.focus(suffix="-corr", ...)
 
 .. _tt_mode_pearl_isis-powder-diffraction-ref:
 
@@ -573,6 +617,104 @@ requires the user to restart Mantid for the new values to take effect.
 Please read :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
 before proceeding to change values within the advanced configuration file.
 
+.. _create_cal_rebin_1_params_pearl_isis-powder-diffraction-ref:
+
+create_cal_rebin_1_params
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The rebin parameters to use in the first rebin operation in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  # Long mode OFF:
+        create_cal_rebin_1_params: "100,-0.0006,19950"
+	
+  # Long mode ON:
+        create_cal_rebin_1_params: "20300,-0.0006,39990"
+
+	
+.. _create_cal_rebin_2_params_pearl_isis-powder-diffraction-ref:
+
+create_cal_rebin_2_params
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The rebin parameters to use in the second rebin operation in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  create_cal_rebin_2_params: "1.8,0.002,2.1"
+
+
+.. _cross_corr_reference_spectra_pearl_isis-powder-diffraction-ref:
+
+cross_corr_reference_spectra
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The Workspace Index of the spectra to correlate all other spectra
+against in the cross-correlation step of
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_reference_spectra: 20
+
+  
+.. _cross_corr_ws_index_max_pearl_isis-powder-diffraction-ref:
+
+cross_corr_ws_index_max
+^^^^^^^^^^^^^^^^^^^^^^^
+The workspace index of the last member of the range of spectra to
+cross-correlate against in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_ws_index_max: 1063
+
+  
+.. _cross_corr_ws_index_min_pearl_isis-powder-diffraction-ref:
+
+cross_corr_ws_index_min
+^^^^^^^^^^^^^^^^^^^^^^^
+The workspace index of the first member of the range of spectra to
+cross-correlate against in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_ws_index_min: 9
+
+  
+.. _cros_cor_x_max_pearl_isis-powder-diffraction-ref:
+
+cross_cor_x_max
+^^^^^^^^^^^^^^^
+The ending point of the region to be cross correlated in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_x_max: 2.1
+
+
+.. _cros_corr_x_min_pearl_isis-powder-diffraction-ref:
+
+cross_cor_x_min
+^^^^^^^^^^^^^^^
+The starting point of the region to be cross correlated in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  cross_corr_x_min: 1.8
+
+
 .. _focused_cropping_values_pearl_isis-powder-diffraction-ref:
 
 focused_cropping_values
@@ -629,6 +771,58 @@ On PEARL this is set to the following TOF windows:
         (20300, 39990)   # Bank 14
       ]
 
+
+.. _get_det_offsets_d_ref_pearl_isis-powder-diffraction-ref:
+
+get_det_offsets_d_ref
+^^^^^^^^^^^^^^^^^^^^^
+Center of reference peak in d-space for GetDetectorOffsets in
+:ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this is
+set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_d_ref: 1.912795
+
+
+.. _get_det_offsets_step_pearl_isis-powder-diffraction-ref:
+
+get_det_offsets_step
+^^^^^^^^^^^^^^^^^^^^
+Step size used to bin d-spacing data in GetDetectorOffsets when
+running :ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL
+this is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_step: 0.002
+
+
+.. _get_det_offsets_x_max_pearl_isis-powder-diffraction-ref:
+
+get_det_offsets_x_max
+^^^^^^^^^^^^^^^^^^^^^
+Maximum of CrossCorrelation data to search for peak, usually negative,
+in :ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this
+is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_x_max: -200
+
+  
+.. _get_det_offsets_x_min_pearl_isis-powder-diffraction-ref:
+
+get_det_offsets_x_min
+^^^^^^^^^^^^^^^^^^^^^
+Minimum of CrossCorrelation data to search for peak, usually negative,
+in :ref:`create_cal_pearl_isis-powder-diffraction-ref`. On PEARL this
+is set to the following:
+
+.. code-block:: python
+
+  get_det_offsets_x_min: -200
+		
 
 .. _monitor_lambda_crop_range_pearl_isis-powder-diffraction-ref:
 

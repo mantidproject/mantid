@@ -107,7 +107,7 @@ void ConvertCWPDMDToSpectra::exec() {
 
   // output unit: make a map for wavelength
   std::map<int, double> map_runWavelength;
-  if (outputunit.compare("2theta")) {
+  if (outputunit != "2theta") {
     // set up runid and wavelength  map
     std::string wavelengthpropertyname =
         getProperty("NeutornWaveLengthPropertyName");

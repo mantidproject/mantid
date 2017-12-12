@@ -11,6 +11,9 @@ set( UI_FILES
   UBSelectPeaksDialog.ui
   AddUBPeaksDialog.ui
   PeakIntegrationSpreadSheet.ui
+  httpserversetup.ui
+  preprocess_window.ui
+  peak_integration_info.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)

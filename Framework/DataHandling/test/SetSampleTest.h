@@ -6,7 +6,7 @@
 #include "MantidDataHandling/SetSample.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -90,7 +90,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
     sampleShape->setID("mysample");
-    inputWS->mutableSample().setShape(*sampleShape);
+    inputWS->mutableSample().setShape(sampleShape);
 
     auto alg = createAlgorithm(inputWS);
     alg->setProperty("Material", createMaterialProps());
@@ -113,7 +113,7 @@ public:
     sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
     sampleShape->setMaterial(alum);
-    inputWS->mutableSample().setShape(*sampleShape);
+    inputWS->mutableSample().setShape(sampleShape);
 
     auto alg = createAlgorithm(inputWS);
     alg->setProperty("Geometry", createGenericGeometryProps());
@@ -121,7 +121,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // New shape
-    TS_ASSERT_DELTA(0.02, getSphereRadius(inputWS->sample().getShape()), 1e-08);
+    auto &sphere = dynamic_cast<const Mantid::Geometry::CSGObject &>(
+        inputWS->sample().getShape());
+    TS_ASSERT_DELTA(0.02, getSphereRadius(sphere), 1e-08);
     // Old material
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("Al", material.name());
@@ -192,7 +194,10 @@ public:
     // New shape
     // radius was 0.1 in <samplegeometry> set in constructor now 0.4
     // from createOverrideGeometryProps
-    TS_ASSERT_DELTA(0.4, getSphereRadius(sampleShape), 1e-08);
+    TS_ASSERT_DELTA(
+        0.4, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                 sampleShape)),
+        1e-08);
   }
 
   void test_Setting_Geometry_As_FlatPlate() {
@@ -554,7 +559,7 @@ private:
     return props;
   }
 
-  double getSphereRadius(const Mantid::Geometry::Object &shape) {
+  double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
     using Mantid::Geometry::SurfPoint;
     using Mantid::Geometry::Sphere;
     auto topRule = shape.topRule();
