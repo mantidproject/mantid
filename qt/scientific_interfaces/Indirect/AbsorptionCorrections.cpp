@@ -2,7 +2,6 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
@@ -290,17 +289,7 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
       dataName.toStdString());
 
   if (!sampleWs) {
-    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        dataName.toStdString());
-
-    if (wsg)
-      g_log.warning() << "Workspace Groups are currently not allowed.\n";
-    else
-      g_log.warning() << "Workspace " << dataName.toStdString()
-                      << " is not a MatrixWorkspace.\n";
-
-    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
-                        "entered into the Sample field.\n");
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
     return;
   }
 

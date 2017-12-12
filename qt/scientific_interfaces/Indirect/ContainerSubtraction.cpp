@@ -160,9 +160,9 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
-  m_csSampleWS = convertToHistogram(m_csSampleWS);
   // Get new workspace
   if (m_csSampleWS) {
+    m_csSampleWS = convertToHistogram(m_csSampleWS);
     m_uiForm.spPreviewSpec->setMaximum(
         static_cast<int>(m_csSampleWS->getNumberHistograms()) - 1);
 
@@ -175,6 +175,8 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 
     m_uiForm.spShift->setMinimum(min);
     m_uiForm.spShift->setMaximum(max);
+  } else {
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
   }
 }
 
@@ -196,6 +198,9 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Plot new container
   plotInPreview("Container", m_csContainerWS, Qt::red);
 }
+
+void ContainerSubtraction::handleIncorrectWorkspaceType(
+    const std::string &workspaceName) {}
 
 /**
  * Handles Container curve in the miniplot when scale or shift is updated

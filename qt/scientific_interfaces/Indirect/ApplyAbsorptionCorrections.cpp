@@ -66,17 +66,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppSampleWS) {
-    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        dataName.toStdString());
-    // Specialized error message for workspace group
-    if (wsg)
-      g_log.warning() << "Workspace Groups are currently not allowed.\n";
-    else
-      g_log.warning() << "Workspace " << dataName.toStdString()
-                      << " is not a MatrixWorkspace.\n";
-
-    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
-                        "entered into the Sample field.\n");
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
     return;
   }
 
@@ -102,17 +92,7 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppContainerWS) {
-    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        dataName.toStdString());
-    // Specialized error message for WorkspaceGroup
-    if (wsg)
-      g_log.warning() << "Workspace Groups are currently not allowed.\n";
-    else
-      g_log.warning() << "Workspace " << dataName.toStdString()
-                      << " is not a MatrixWorkspace.\n";
-
-    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
-                        "entered into the Sample field.\n");
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
     return;
   }
 

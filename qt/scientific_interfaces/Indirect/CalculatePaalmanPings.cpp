@@ -391,17 +391,7 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
       wsName.toStdString());
 
   if (!ws) {
-    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        wsName.toStdString());
-
-    if (wsg)
-      g_log.warning() << "Workspace Groups are currently not allowed.\n";
-    else
-      g_log.warning() << "Workspace " << wsName.toStdString()
-                      << " is not a MatrixWorkspace.\n";
-
-    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
-                        "entered into the Sample field.\n");
+    displayInvalidWorkspaceTypeError(wsName.toStdString(), g_log);
     return;
   }
 
