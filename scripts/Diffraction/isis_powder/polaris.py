@@ -128,5 +128,8 @@ class Polaris(AbstractInst):
         return output
 
     def _switch_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "mode"):
+            mode = self._inst_settings.mode
+
         self._inst_settings.update_attributes(advanced_config=polaris_advanced_config.get_mode_specific_dict(mode),
                                               suppress_warnings=True)
