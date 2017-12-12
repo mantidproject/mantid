@@ -1,5 +1,4 @@
 from mantid import ConfigService
-from sans.gui_logic.models.run_file import RunFile
 
 
 class RunSelectorPresenter(object):
@@ -41,7 +40,7 @@ class RunSelectorPresenter(object):
         self._refresh()
 
     def _parse_runs_from_input(self, input):
-        return self._run_finder.find_all_from_query(input.replace(':', '-'))
+        return self._run_finder.find_all_from_query(input.encode('utf-8').replace(':', '-'))
 
     def _handle_add_items(self):
         input = self.view.run_list()
@@ -67,7 +66,8 @@ class RunSelectorPresenter(object):
 
     def _handle_browse(self):
         search_directories = ConfigService.Instance().getDataSearchDirs()
-        files = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
-                                           search_directories)
-        self._add_runs(RunFile(file) for file in files)
+        file_paths = self.view.show_file_picker(RunSelectorPresenter.file_extensions,
+                                                search_directories)
+        self._add_runs(self._run_finder.find_from_file_path(file_path.encode('utf-8'))
+                       for file_path in file_paths)
         self._refresh()

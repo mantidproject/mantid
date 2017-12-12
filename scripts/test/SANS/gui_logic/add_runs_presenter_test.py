@@ -1,10 +1,9 @@
 import unittest
 import sys
-from mantid import ConfigService
 from ui.sans_isis.add_runs_page import AddRunsPage
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.run_file import RunFile
+from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.binning_type import BinningType
 from sans.gui_logic.models.summation_settings import SummationSettings
@@ -64,13 +63,13 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _make_mock_run_summation(self):
         return mock.create_autospec(RunSummation, spec_set=True)
 
-    def _make_run_file(self, path):
-        return RunFile(path)
+    def _make_fake_run(self, path):
+        return SummableRunFile(path, path, False)
 
     def _make_fake_runs(self, run_paths):
         fake_selection = self._make_mock_run_selection()
         fake_selection.__iter__.return_value = \
-            [RunFile(path) for path in run_paths]
+            [self._make_fake_run(path) for path in run_paths]
         return fake_selection
 
 
@@ -199,12 +198,6 @@ class BaseFileNameTest(SelectionMockingTestCase):
             self._just_use_summation_settings_presenter(),
             self.view,
             None)
-
-    def _make_fake_runs(self, run_paths):
-        fake_selection = self._make_mock_run_selection()
-        fake_selection.__iter__.return_value = \
-            [RunFile(path) for path in run_paths]
-        return fake_selection
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)

@@ -23,12 +23,13 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
+from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
 
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.run_finder import RunFinder
+from sans.gui_logic.models.run_finder import SummationRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
 
@@ -40,12 +41,20 @@ DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
 
 
-def _make_run_selector(run_selector_view, on_selection_change, parent_view):
-    return RunSelectorPresenter('Runs To Sum',
-                                RunSelection(on_selection_change),
-                                RunFinder(),
-                                run_selector_view,
-                                parent_view)
+class RunSelectorPresenterFactory(object):
+    def __init__(self, title, run_finder):
+        self._title = title
+        self._run_finder = run_finder
+
+    def __call__(self,
+                 run_selector_view,
+                 on_selection_change,
+                 parent_view):
+        return RunSelectorPresenter(self._title,
+                                    RunSelection(on_selection_change),
+                                    self._run_finder,
+                                    run_selector_view,
+                                    parent_view)
 
 
 def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
@@ -157,7 +166,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _setup_add_runs_page(self):
         self.add_runs_presenter = AddRunsPagePresenter(RunSummation(),
-                                                       _make_run_selector,
+                                                       RunSelectorPresenterFactory('Runs To Sum',
+                                                                                   SummationRunFinder(SANSFileInformationFactory())),
                                                        _make_run_summation_settings_presenter,
                                                        self.add_runs_page, self)
 

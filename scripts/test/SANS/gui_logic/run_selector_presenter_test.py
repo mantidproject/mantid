@@ -3,7 +3,7 @@ import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import RunFinder
-from sans.gui_logic.models.run_file import RunFile
+from sans.gui_logic.models.run_file import SummableRunFile
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
@@ -48,7 +48,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.run_finder.find_all_from_query.assert_called_with(run_query)
 
     def _make_fake_run_model(self, run_name):
-        return RunFile('/home/{}'.format(run_name))
+        return SummableRunFile('/home/{}'.format(run_name), run_name, is_event_mode=True)
 
     def test_adds_search_results_to_model_when_add_run_pressed(self):
         run_name = '1'
