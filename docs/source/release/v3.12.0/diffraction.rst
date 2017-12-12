@@ -14,7 +14,10 @@ Powder Diffraction
 - :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` has been amended to write the metadata (e.g. temperature) value in the header, in the form of the Fullprof readable keyword.
 
 - Some new functionality for POLARIS in the ISIS Powder scripts. Adjusted some default parameters and output unsplined vanadium workspace by default
-- ISIS_Powder scripts for PEARL now support creation of grouping .cal files from ceria run(s)
+- New features in ISIS Powder scripts for PEARL:
+
+  + Scripts now support creation of grouping .cal files from ceria run(s)
+  + Absorption corrections enabled for all samples, not just vanadium
 - 'suffix' parameter added for output filenames from all ISIS_Powder instruments
 - The ``CalibrationFile`` is now optional in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`. In this case time focussing will use :ref:`ConvertUnits <algm-ConvertUnits>` and the instrument geometry. Care must be taken to supply a ``GroupingFile`` otherwise all of the spectra will be kept separate.
 - :ref:`SaveGSS <algm-SaveGSS>` is relaxed to accept non-TOF point data workspaces as well.
