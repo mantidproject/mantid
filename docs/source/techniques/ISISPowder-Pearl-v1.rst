@@ -772,6 +772,17 @@ On PEARL this is set to the following TOF windows:
       ]
 
 
+.. _gen_absorb_pearl_isis-powder-diffraction-ref:
+
+generate_absorb_corrections
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates whether to generate the absorption corrections, instead of
+reading them from a file. On PEARL this is set to the following:
+
+.. code-block:: python
+
+  generate_absorb_corrections: False
+
 .. _get_det_offsets_d_ref_pearl_isis-powder-diffraction-ref:
 
 get_det_offsets_d_ref
