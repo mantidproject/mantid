@@ -31,6 +31,7 @@ Improved
 
 Bugfixes
 ########
+- Previously, running a script which only applied a single correction (e.g. container subtraction), would produce an error 'f0.Scaling', this has now been fixed.
 
 Data Analysis Interfaces
 ------------------------
