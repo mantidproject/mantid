@@ -74,33 +74,33 @@ public:
     TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 8192);
     auto sum_total = 0.0;
     for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
-		sum_total += outputItem1->y(i)[0];
-	sum_total *= 1.0e22;
+      sum_total += outputItem1->y(i)[0];
+    sum_total *= 1.0e22;
     TS_ASSERT_DELTA(sum_total, 107163.7851, 0.0001);
-	//
-	//
-	MatrixWorkspace_sptr outputItem2 =
-		AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EventData" +
-			postfix + "_1");
-	TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 8192);
-	auto sum_single = 0.0;
-	for (size_t i = 0; i < outputItem2->getNumberHistograms(); i++)
-		sum_single += outputItem2->y(i)[0];
-	sum_single *= 1.0e22;
-	TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
-	//
-	//
-	MatrixWorkspace_sptr outputItem3 =
-		AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EventData" +
-			postfix + "_2");
-	TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 8192);
-	auto sum_multiple = 0.0;
-	for (size_t i = 0; i < outputItem3->getNumberHistograms(); i++)
-		sum_multiple += outputItem3->y(i)[0];
-	sum_multiple *= 1.0e22;
-	TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
+    //
+    //
+    MatrixWorkspace_sptr outputItem2 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "EventData" + postfix + "_1");
+    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 8192);
+    auto sum_single = 0.0;
+    for (size_t i = 0; i < outputItem2->getNumberHistograms(); i++)
+      sum_single += outputItem2->y(i)[0];
+    sum_single *= 1.0e22;
+    TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
+    //
+    //
+    MatrixWorkspace_sptr outputItem3 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "EventData" + postfix + "_2");
+    TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 8192);
+    auto sum_multiple = 0.0;
+    for (size_t i = 0; i < outputItem3->getNumberHistograms(); i++)
+      sum_multiple += outputItem3->y(i)[0];
+    sum_multiple *= 1.0e22;
+    TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
 
-	TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
+    TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
     //
     //
     MatrixWorkspace_sptr outputItem4 =

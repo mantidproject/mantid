@@ -237,11 +237,11 @@ void LoadMcStas::readEventData(
   double longestTOF(0.0);
 
   const size_t numEventEntries = eventEntries.size();
-  std::vector<EventWorkspace_sptr> allEventWS = { eventWS };
+  std::vector<EventWorkspace_sptr> allEventWS = {eventWS};
   if (numEventEntries > 1) {
-	for (int i = 1; i <= numEventEntries; i++) {
-	  allEventWS.push_back(eventWS->clone());
-	}
+    for (int i = 1; i <= numEventEntries; i++) {
+      allEventWS.push_back(eventWS->clone());
+    }
   }
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
   auto eventWSIndex = 1; // Starts at the first non-sum workspace
@@ -351,19 +351,22 @@ void LoadMcStas::readEventData(
         // Originally this was coded so the error squared is 1 it should be
         // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
         // introduced flag to allow old usage
-		auto weightedEvent = WeightedEvent();
-		if (errorBarsSetTo1) {
-			weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
-		} else {
-			weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in],
-				data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
-		}
-		allEventWS[0]->getSpectrum(workspaceIndex) += weightedEvent;
-		if(numEventEntries > 1){
-			allEventWS[eventWSIndex]->getSpectrum(workspaceIndex) += weightedEvent;
-		}
+        auto weightedEvent = WeightedEvent();
+        if (errorBarsSetTo1) {
+          weightedEvent = WeightedEvent(detector_time, pulse_time,
+                                        data[numberOfDataColumn * in], 1.0);
+        } else {
+          weightedEvent = WeightedEvent(
+              detector_time, pulse_time, data[numberOfDataColumn * in],
+              data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
+        }
+        allEventWS[0]->getSpectrum(workspaceIndex) += weightedEvent;
+        if (numEventEntries > 1) {
+          allEventWS[eventWSIndex]->getSpectrum(workspaceIndex) +=
+              weightedEvent;
+        }
       }
-	  eventWSIndex++;
+      eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
     // nxFile.getData(data);
@@ -377,26 +380,26 @@ void LoadMcStas::readEventData(
   // sense to
   // increase this number for better initial visual effect
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  
+
   auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
   for (auto i = 0; i < allEventWS.size(); i++) {
-	  auto ws = allEventWS[i];
-	  ws->setAllX(axis);
-	  std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
-	  if (i > 0) {
-		nameUserSee += std::string("_") + std::to_string(i);
-	  }
-	  std::string extraProperty =
-		  "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-	  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-		  extraProperty, nameUserSee, Direction::Output));
-	  setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
-	  m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-								  // unique
-	  outputGroup->addWorkspace(ws);
+    auto ws = allEventWS[i];
+    ws->setAllX(axis);
+    std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
+    if (i > 0) {
+      nameUserSee += std::string("_") + std::to_string(i);
+    }
+    std::string extraProperty =
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, nameUserSee, Direction::Output));
+    setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
+    m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
+                                // unique
+    outputGroup->addWorkspace(ws);
   }
 }
 
