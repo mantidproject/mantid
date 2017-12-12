@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
-import math
 
 import mantid.simpleapi as mantid
 
@@ -110,22 +109,21 @@ class FFTModel(object):
         alg=mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         alg.initialize()
         alg.setChild(True)
-        
+
         alg.setProperty("FirstGoodData",inputs["FirstGoodData"])
         alg.setProperty("LastGoodData",inputs["LastGoodData"])
-        
+
         alg.setProperty("InputWorkspace","MuonAnalysis")
         alg.setProperty("DetectorTable","PhaseTable")
         alg.setProperty("DataFitted","fits")
         alg.execute()
         mantid.AnalysisDataService.addOrReplace("PhaseTable",alg.getProperty("DetectorTable").value)
 
-
     def PhaseQuad(self):
         """
         do the phaseQuad algorithm
         groups data into a single set
-         """
+        """
         phaseQuad=mantid.AlgorithmManager.create("PhaseQuad")
         phaseQuad.initialize()
         phaseQuad.setChild(False)
