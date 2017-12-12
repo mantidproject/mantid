@@ -23,6 +23,16 @@ inline PyArrayObject *rawArray(const NdArray &obj) {
 // -----------------------------------------------------------------------------
 // NdArray - public methods
 // -----------------------------------------------------------------------------
+
+/**
+ * Check if a python object points to an array type object
+ * @param obj A pointer to an arbitrary python object
+ * @returns True if the underlying object is an ndarray, false otherwise
+ */
+bool NdArray::check(const boost::python::api::object &obj) {
+  return PyArray_Check(obj.ptr());
+}
+
 /**
  * Construction from a plain object. Assumes the array is actually a
  * a numpy array

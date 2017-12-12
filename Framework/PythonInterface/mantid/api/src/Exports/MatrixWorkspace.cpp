@@ -77,7 +77,7 @@ GCC_DIAG_ON(conversion)
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
                              const boost::python::object &values) {
-  if (PyArray_Check(values.ptr())) {
+  if (NumPy::NdArray::check(values)) {
     NDArrayToVector<double> converter(values);
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
