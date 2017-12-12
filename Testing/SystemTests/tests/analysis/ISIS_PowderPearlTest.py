@@ -122,6 +122,30 @@ class FocusTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
+class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
+
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.focus_results = run_focus_with_absorb_corrections()
+
+    def validate(self):
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
 class CreateCalTest(stresstesting.MantidStressTest):
 
     calibration_results = None
@@ -187,6 +211,13 @@ def run_focus():
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
                              perform_attenuation=True, attenuation_file_path=attenuation_path)
+
+
+def run_focus_with_absorb_corrections():
+    run_number = 98507
+    inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
+    return inst_object.focus(run_number=run_number, vanadium_normalisation=False, perform_attenuation=False,
+                             do_absorb_corrections=True)
 
 
 def setup_mantid_paths():
