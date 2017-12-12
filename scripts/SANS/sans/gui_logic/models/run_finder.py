@@ -2,7 +2,7 @@ from mantid import FileFinder
 from sans.gui_logic.models.run_file import SummableRunFile
 
 
-class SummationRunFinder(object):
+class SummableRunFinder(object):
     def __init__(self, file_info_source):
         self._file_info_source = file_info_source
 

@@ -22,8 +22,9 @@ class RunSelection(object):
         del self._runs[:]
         self._on_change(self)
 
-    def has_any_event_data(self):
-        return any(run.is_event_data() for run in self._runs)
-
     def __iter__(self):
         return self._runs.__iter__()
+
+
+def has_any_event_data(selection):
+    return any(run.is_event_data() for run in selection)

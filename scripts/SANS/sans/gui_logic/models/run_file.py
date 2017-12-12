@@ -1,7 +1,6 @@
 class SummableRunFile(object):
-    def __init__(self, path, display_name, is_event_mode):
+    def __init__(self, path, run_number, is_event_mode):
         self._path = path
-        self._display_name = display_name
         self._is_event_mode = is_event_mode
 
     def is_event_data(self):

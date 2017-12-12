@@ -2,7 +2,7 @@ import unittest
 import sys
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.run_finder import RunFinder
+from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.run_file import SummableRunFile
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
@@ -34,7 +34,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         return mock.create_autospec(RunSelection)
 
     def _make_mock_finder(self):
-        return mock.create_autospec(RunFinder)
+        return mock.create_autospec(SummableRunFinder)
 
     def _make_presenter(self, run_selection, run_finder, view):
         return RunSelectorPresenter('some_title', run_selection, run_finder, view, None)

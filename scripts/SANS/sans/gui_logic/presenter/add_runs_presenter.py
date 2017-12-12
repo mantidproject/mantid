@@ -1,4 +1,4 @@
-from mantid import ConfigService
+from sans.gui_logic.models.run_selection import has_any_event_data
 
 
 class AddRunsPagePresenter(object):
@@ -42,16 +42,23 @@ class AddRunsPagePresenter(object):
             return self._view.out_file_name()
 
     def _refresh_view(self, run_selection):
-        self.update_output_filename(run_selection)
+        self._update_output_filename(run_selection)
+        self._update_histogram_binning(run_selection)
         if run_selection.has_any_runs():
             self._view.enable_sum()
         else:
             self._view.disable_sum()
 
-    def update_output_filename(self, run_selection):
+    def _update_output_filename(self, run_selection):
         self._generated_output_file_name = self._make_base_file_name_from_selection(run_selection)
         if self._use_generated_file_name:
             self._view.set_out_file_name(self._generated_output_file_name)
+
+    def _update_histogram_binning(self, run_selection):
+        if has_any_event_data(run_selection):
+            self._view.enable_summation_settings()
+        else:
+            self._view.disable_summation_settings()
 
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)

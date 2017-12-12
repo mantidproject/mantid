@@ -41,5 +41,11 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def disable_sum(self):
         self.sumButton.setEnabled(False)
 
+    def enable_summation_settings(self):
+        self.summation_settings_view().setEnabled(True)
+
+    def disable_summation_settings(self):
+        self.summation_settings_view().setEnabled(False)
+
     def setupUi(self, other):
         ui_add_runs_page.Ui_AddRunsPage.setupUi(self, other)

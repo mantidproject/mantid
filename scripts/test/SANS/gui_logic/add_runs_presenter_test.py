@@ -55,22 +55,22 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
-    def _make_mock_run_selection(self):
+    def _make_mock_run_selection(self, iterable):
         mock_runs = mock.create_autospec(RunSelection, spec_set=True)
-        mock_runs.__iter__.return_value = []
+        mock_runs.__iter__.return_value = list(iterable)
         return mock_runs
 
     def _make_mock_run_summation(self):
         return mock.create_autospec(RunSummation, spec_set=True)
 
-    def _make_fake_run(self, path):
-        return SummableRunFile(path, path, False)
+    def _make_fake_run(self, path, is_event_data=False):
+        return SummableRunFile(path, path, is_event_data)
 
-    def _make_fake_runs(self, run_paths):
-        fake_selection = self._make_mock_run_selection()
-        fake_selection.__iter__.return_value = \
-            [self._make_fake_run(path) for path in run_paths]
-        return fake_selection
+    def _make_fake_histogram_run(self, path):
+        return self._make_fake_run(path, path, False)
+
+    def _make_fake_event_run(self, path):
+        return self._make_fake_run(path, path, True)
 
 
 class InitializationTest(AddRunsPagePresenterTestCase):
@@ -131,6 +131,56 @@ class SelectionMockingTestCase(AddRunsPagePresenterTestCase):
         self.run_selector_presenter.run_selection.return_value = new_selection
         self._on_model_updated(new_selection)
 
+    def _make_mock_run_selection_from_paths(self, paths):
+        return self._make_mock_run_selection(self._make_fake_run(path) for path in paths)
+
+
+class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
+    def setUp(self):
+        self.setUpMockChildPresenters()
+        self._view = self._make_mock_view()
+        self._event_run = self._make_fake_event_run()
+        self._histogram_run = self._make_fake_histogram_run()
+        self._make_presenter()
+
+    def _make_fake_event_run(self):
+        run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run.is_event_data.return_value = True
+        return run
+
+    def _make_fake_histogram_run(self):
+        run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run.is_event_data.return_value = False
+        return run
+
+    def _just_use_summation_settings_presenter(self):
+        return self._just_use(self.summation_settings_presenter)
+
+    def _make_presenter(self):
+        return AddRunsPagePresenter(mock.Mock(),
+                                    self._capture_on_change_callback(self.run_selector_presenter),
+                                    self._just_use_summation_settings_presenter(),
+                                    self._view,
+                                    None)
+
+    def test_disables_summation_settings_when_no_event_data(self):
+        runs = self._make_mock_run_selection([self._histogram_run,
+                                              self._histogram_run])
+        self._on_model_updated(runs)
+        assert_called(self._view.disable_summation_settings)
+
+    def test_enables_summation_settings_when_event_data(self):
+        runs = self._make_mock_run_selection([self._event_run,
+                                              self._event_run])
+        self._on_model_updated(runs)
+        assert_called(self._view.enable_summation_settings)
+
+    def test_enables_summation_settings_when_event_and_histogram_data(self):
+        runs = self._make_mock_run_selection([self._histogram_run,
+                                              self._event_run])
+        self._on_model_updated(runs)
+        assert_called(self._view.enable_summation_settings)
+
 
 class SummationConfigurationTest(SelectionMockingTestCase):
     def setUp(self):
@@ -150,6 +200,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self.summation_settings_presenter)
 
+
     def test_passes_correct_config_when_summation_requested(self):
         run_summation = mock.Mock()
         self.presenter = self._make_presenter(
@@ -157,7 +208,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
             self._capture_on_change_callback(self.run_selector_presenter),
             self._just_use_summation_settings_presenter())
 
-        fake_run_selection = self._make_fake_runs(['3'])
+        fake_run_selection = self._make_mock_run_selection_from_paths(['3'])
         self.run_selector_presenter.run_selection.return_value = fake_run_selection
         summation_settings_model = SummationSettings(BinningType.SaveAsEventData)
         self.summation_settings_presenter.settings.return_value = summation_settings_model
@@ -213,7 +264,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def _retrieve_generated_name_for(self, run_paths):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
-        fake_run_selection = self._make_fake_runs(run_paths)
+        fake_run_selection = self._make_mock_run_selection_from_paths(run_paths)
         self._update_selection_model(fake_run_selection)
         self.view.sum.emit()
         return self._base_file_name_arg(run_summation)
@@ -225,8 +276,8 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def test_regenerates_correct_base_name_after_highest_removed(self):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_fake_runs(['4', '5', '6']))
-        self._update_selection_model(self._make_fake_runs(['4', '5']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
         self.view.sum.emit()
         self.assertEqual('5-add', self._base_file_name_arg(run_summation))
 
@@ -234,7 +285,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
         user_out_file_name = 'Output'
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_fake_runs(['4', '5', '6']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
 
         self.view.out_file_name.return_value = user_out_file_name
         self.view.outFileChanged.emit()
@@ -245,13 +296,13 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def test_base_name_not_reset_after_set_by_user(self):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_fake_runs(['4', '5', '6']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
 
         user_out_file_name = 'Output'
         self.view.out_file_name.return_value = user_out_file_name
         self.view.outFileChanged.emit()
 
-        self._update_selection_model(self._make_fake_runs(['4', '5']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
         self.view.sum.emit()
         self.assertEqual(user_out_file_name,
                          self._base_file_name_arg(run_summation))
@@ -259,9 +310,9 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def test_sets_name_in_view_after_selection_update(self):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_fake_runs(['4', '6', '5']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '6', '5']))
         self.view.set_out_file_name.assert_called_with('6-add')
-        self._update_selection_model(self._make_fake_runs(['5', '4']))
+        self._update_selection_model(self._make_mock_run_selection_from_paths(['5', '4']))
         self.view.set_out_file_name.assert_called_with('5-add')
 
 
@@ -281,13 +332,13 @@ class SumButtonTest(SelectionMockingTestCase):
             None)
 
     def test_enables_sum_button_when_row_added(self):
-        fake_run_selection = self._make_fake_runs(['5'])
+        fake_run_selection = self._make_mock_run_selection_from_paths(['5'])
         fake_run_selection.has_any_runs.return_value = True
         self._update_selection_model(fake_run_selection)
         assert_called(self.view.enable_sum)
 
     def test_disables_sum_button_when_no_rows(self):
-        fake_run_selection = self._make_fake_runs(['5'])
+        fake_run_selection = self._make_mock_run_selection_from_paths(['5'])
         fake_run_selection.has_any_runs.return_value = True
         self._update_selection_model(fake_run_selection)
         fake_run_selection.has_any_runs.return_value = False
