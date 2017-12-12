@@ -30,13 +30,6 @@ import matplotlib.colors as colors
 import mantid
 import numpy as np
 
-def boundaries_from_points(input_array):
-    assert isinstance(input_array,np.ndarray),'Not a numpy array'
-    if len(input_array)==0:
-        raise ValueError('could not extend array with no elements')
-    if len(input_array)==1:
-        return np.array([input_array[0]-0.5,input_array[0]+0.5]) 
-    return np.concatenate(([(3*input_array[0]-input_array[1])/2],(input_array[1:]+input_array[:-1])/2,[(3*input_array[-1]-input_array[-2])/2]))
 
 def extract_data(ws):
     ws_data=[]

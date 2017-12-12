@@ -15,6 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import numpy
+import mantid.kernel
 import mantid.api
 import mantid.dataobjects
 
@@ -58,13 +59,14 @@ def _getWkspIndexDistAndLabel(workspace, **kwargs):
 def _getDistribution(workspace, **kwargs):
     '''Determine whether or not the data is a distribution. The value in
     the kwargs wins.'''
-    distribution = kwargs.pop('distribution', workspace.isDistribution())
-    
+    distribution = kwargs.pop('distribution', workspace.isDistribution())    
     return (bool(distribution), kwargs)
+
 
 def _getNormalization(mdworkspace, **kwargs):
     normalization = kwargs.pop(normalization, mdworkspace.displayNormalizationHisto())
     return (normalization,kwargs)
+
     
 def getAxesLabels(workspace):
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -90,15 +92,18 @@ def getAxesLabels(workspace):
             axes.append(unit)
     return tuple(axes)
 
+
 def _setLabels1D(axes, workspace):
     labels = getAxesLabels(workspace)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[0])
 
+
 def _setLabels2D(axes, workspace):
     labels = getAxesLabels(workspace)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
+
 
 def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
     '''Extract a single spectrum and process the data into a frequency'''
@@ -113,13 +118,14 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if not distribution:
+        if (not distribution) and (mantid.kernel.config['graph1d.autodistribution']=='On'):
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
-        x = .5*(x[0:-1]+x[1:])
+        x = points_from_boundaries(x)
 
     return (x,y,dy,dx)
+
 
 def _dim2array(d,center=True):
     """
@@ -136,9 +142,46 @@ def _dim2array(d,center=True):
         return numpy.linspace(dmin,dmax,d.getNBins()+1)
 
 
-def _getMDData(workspace,normalization,withError=False):
-    pass
+def boundaries_from_points(input_array):
+    assert isinstance(input_array,np.ndarray),'Not a numpy array'
+    if len(input_array)==0:
+        raise ValueError('could not extend array with no elements')
+    if len(input_array)==1:
+        return np.array([input_array[0]-0.5,input_array[0]+0.5]) 
+    return np.concatenate(([(3*input_array[0]-input_array[1])/2],(input_array[1:]+input_array[:-1])/2,[(3*input_array[-1]-input_array[-2])/2]))
 
+    
+def points_from_boundaries(input_array):
+    assert isinstance(input_array,np.ndarray),'Not a numpy array'
+    if len(input_array)<2:
+        raise ValueError('could not get centers from less than two boundaries')
+    return (.5*(input_array[0:-1]+input_array[1:])
+
+
+def _getMDData(workspace,normalization,withError=False):
+    dims=workspace.getNonIntegratedDimensions()
+    dimarrays=[dim2array(d) for d in dims]
+    #get data
+    data=workspace.getSignalArray()*1.
+    if NumEvNorm:
+        nev=workspace.getNumEventsArray()
+        data/=nev
+    err=None
+    if withError:
+        err2=workspace.getErrorSquaredArray()*1.
+        if NumEvNorm:
+            err2/=(nev*nev)
+        err=np.sqrt(err2)
+    return (data,err,dimarrays)
+
+
+def _getMDData1D(workspace,normalization):
+    data,err,coordinate=_getMDData(workspace,normalization,withError=True)
+    assert len(coordinate)==1, 'The workspace is not 1D'
+    coordinate=points_from_boundaries(coordinate[0])
+    return (coordinate,data,err)
+    
+   
 def _getContour(workspace, distribution):
     x = workspace.extractX()
     z = workspace.extractY()
