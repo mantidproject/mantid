@@ -19,13 +19,11 @@ public:
   /// Initialise the layout.
   void init() override;
 
-  Mantid::API::IFunction_sptr backgroundFunction();
-
-  Mantid::API::IFunction_sptr modelFunction();
-
   void addCustomFunctionGroup(const QString &groupName,
                               std::vector<std::string> functionNames,
                               CustomGroupMode mode = CustomGroupMode::COMBOBOX);
+
+  void updateParameterValues(QHash<QString, double> parameterValues);
 
 protected slots:
   void enumChanged(QtProperty *prop) override;
@@ -33,7 +31,7 @@ protected slots:
   void boolChanged(QtProperty *prop) override;
 
 private:
-  QtBrowserItem addCustomFunctionGroupToComboBox(const QString &groupName);
+  void addCustomFunctionGroupToComboBox(const QString &groupName);
 
   void addCustomFunctions(QtProperty *prop, const QString &groupName);
 

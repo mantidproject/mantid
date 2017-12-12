@@ -166,16 +166,16 @@ void IndirectFitPropertyBrowser::init() {
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
-Mantid::API::IFunction_sptr IndirectFitPropertyBrowser::backgroundFunction() {
-  return m_backgroundHandler->function();
-}
+void IndirectFitPropertyBrowser::updateParameterValues(
+    QHash<QString, double> parameterValues) {
+  const auto &function = getHandler()->function().get();
 
-Mantid::API::IFunction_sptr IndirectFitPropertyBrowser::modelFunction() {
-  removeFunction(m_backgroundHandler);
-  const auto model = getFittingFunction();
-  const auto backgroundName = enumValue(m_backgroundSelection).toStdString();
-  m_backgroundHandler = addFunction(backgroundName);
-  return model;
+  for (const auto &parameterName : parameterValues.keys()) {
+    function->setParameter(parameterName.toStdString(),
+                           parameterValues[parameterName]);
+  }
+  getHandler()->updateParameters();
+  emit parameterChanged(function);
 }
 
 void IndirectFitPropertyBrowser::addCustomFunctionGroup(
@@ -191,7 +191,7 @@ void IndirectFitPropertyBrowser::addCustomFunctionGroup(
   m_groupToFunctionList[groupName] = functionNames;
 }
 
-QtBrowserItem IndirectFitPropertyBrowser::addCustomFunctionGroupToComboBox(
+void IndirectFitPropertyBrowser::addCustomFunctionGroupToComboBox(
     const QString &groupName) {
   if (!m_functionsInComboBox) {
     m_functionsInComboBox = m_enumManager->addProperty("Function Group");
