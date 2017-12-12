@@ -110,10 +110,8 @@ bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
 
   // Check valid inputs
-  const bool samValid =
-      uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  const bool canValid =
-      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
   // Check sample is a matrix workspace
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
