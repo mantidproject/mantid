@@ -33,6 +33,7 @@ Algorithms
 - :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
+- :ref:`LoadMcStas <algm-LoadMcStas>` now loads event data in separate workspaces (single scattering, multiple scattering) as well as all scattering.
 
 Core Functionality
 ------------------
