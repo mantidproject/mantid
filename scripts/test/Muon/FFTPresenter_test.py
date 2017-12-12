@@ -35,7 +35,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.view.getFFTRePhase=mock.Mock()
         self.view.getFFTImPhase=mock.Mock()
         self.view.getWS=mock.Mock(return_value="MUSR00023456")
-        self.view.getAxis=mock.Mock(return_value="x")
+        self.view.getFirstGoodData=mock.Mock(return_value=0.1)
+        self.view.getLastGoodData=mock.Mock(return_value=15.)
         self.view.getImBoxRow=mock.Mock(return_value=3)
         self.view.getShiftBoxRow=mock.Mock(return_value=5)
         self.view.isRaw=mock.Mock(return_value=True)
@@ -87,7 +88,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNotRawAndIm(self):
@@ -100,7 +102,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonRawAndIm(self):
@@ -113,7 +116,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==3)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonRawAndNoIm(self):
@@ -126,7 +130,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==2)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftNotRawAndNoIm(self):
@@ -139,7 +144,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==1)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftNotRawAndIm(self):
@@ -152,7 +158,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==1)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftRawAndIm(self):
@@ -165,7 +172,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==1)
         assert(self.view.addRaw.call_count==3)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftRawAndNoIm(self):
@@ -178,7 +186,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==1)
         assert(self.view.addRaw.call_count==2)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==0)
+        assert(self.view.getFirstGoodData.call_count==0)
+        assert(self.view.getLastGoodData.call_count==0)
         assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonPhaseQuad(self):
@@ -190,7 +199,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==1)
+        assert(self.view.getFirstGoodData.call_count==1)
+        assert(self.view.getLastGoodData.call_count==1)
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==0)
@@ -205,7 +215,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==1)
+        assert(self.view.getFirstGoodData.call_count==1)
+        assert(self.view.getLastGoodData.call_count==1)
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==1)
@@ -221,7 +232,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==1)
+        assert(self.view.getFirstGoodData.call_count==1)
+        assert(self.view.getLastGoodData.call_count==1)
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==0)
@@ -237,7 +249,8 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addFFTShift.call_count==0)
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
-        assert(self.view.getAxis.call_count==1)
+        assert(self.view.getFirstGoodData.call_count==1)
+        assert(self.view.getLastGoodData.call_count==1)
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==1)

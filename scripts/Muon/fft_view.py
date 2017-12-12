@@ -54,7 +54,7 @@ class FFTView(QtGui.QWidget):
         self.Raw_box= table_utils.addCheckBoxToTable(self.FFTTable,True,5)
 
         table_utils.setRowName(self.FFTTable,6,"First Good Data")
-        self.x0= table_utils.addDoubleToTable(self.FFTTable,0.0,6)
+        self.x0= table_utils.addDoubleToTable(self.FFTTable,0.1,6)
         self.FFTTable.hideRow(6)
 
         table_utils.setRowName(self.FFTTable,7,"Last Good Data")
@@ -142,7 +142,7 @@ class FFTView(QtGui.QWidget):
         self.button.setEnabled(False)
 
     def setPhaseBox(self):
-        self.FFTTable.setRowHidden(7,self.getWS()!="PhaseQuad")
+        self.FFTTable.setRowHidden(8,self.getWS()!="PhaseQuad")
 
     def changed(self,box,row ):
         self.FFTTable.setRowHidden(row,box.checkState() == QtCore.Qt.Checked)
