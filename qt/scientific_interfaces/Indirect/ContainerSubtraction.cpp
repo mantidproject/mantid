@@ -115,6 +115,30 @@ bool ContainerSubtraction::validate() {
   const bool canValid =
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
+  // Check sample is a matrix workspace
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsName = sampleName.toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
+
+  // Check container is a matrix workspace
+  const auto containerName = m_uiForm.dsContainer->getCurrentDataName();
+  const auto containerWsName = containerName.toStdString();
+  bool containerExists =
+      AnalysisDataService::Instance().doesExist(containerWsName);
+
+  if (containerExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          containerWsName)) {
+    uiv.addErrorMessage(
+        "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+  }
+
   if (samValid && canValid) {
     // Check Sample is of same type as container
     const auto containerType = m_csContainerWS->YUnit();
@@ -192,11 +216,16 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
-  m_csContainerWS = convertToHistogram(m_csContainerWS);
-  m_transformedContainerWS = m_csContainerWS;
 
-  // Plot new container
-  plotInPreview("Container", m_csContainerWS, Qt::red);
+  if (m_csContainerWS) {
+    m_csContainerWS = convertToHistogram(m_csContainerWS);
+    m_transformedContainerWS = m_csContainerWS;
+
+    // Plot new container
+    plotInPreview("Container", m_csContainerWS, Qt::red);
+  } else {
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+  }
 }
 
 /**
