@@ -1656,11 +1656,7 @@ void FitPropertyBrowser::showFitResultStatus(const QString &status) {
   if (status != "success") {
     color = "red";
   }
-  if (text == "cannot reach the specified tolerance in F") {
-    text = "Changes in function value are too small";
-  } else if (text == "cannot reach the specified tolerance in X") {
-    text = "Changes in parameter value are too small";
-  }
+
   m_status->setText(
       QString("Status: <span style='color:%2'>%1</span>").arg(text, color));
   m_status->show();
