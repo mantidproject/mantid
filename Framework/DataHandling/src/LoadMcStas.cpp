@@ -237,7 +237,14 @@ void LoadMcStas::readEventData(
   double longestTOF(0.0);
 
   const size_t numEventEntries = eventEntries.size();
+  std::vector<EventWorkspace_sptr> allEventWS = { eventWS };
+  if (numEventEntries > 1) {
+	for (int i = 1; i <= numEventEntries; i++) {
+	  allEventWS.push_back(eventWS->clone());
+	}
+  }
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
+  auto eventWSIndex = 1; // Starts at the first non-sum workspace
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
@@ -315,7 +322,7 @@ void LoadMcStas::readEventData(
 
       // populate workspace with McStas events
       const detid2index_map detIDtoWSindex_map =
-          eventWS->getDetectorIDToWorkspaceIndexMap(true);
+          allEventWS[0]->getDetectorIDToWorkspaceIndexMap(true);
 
       progEntries.report("read event data into workspace");
       for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
@@ -344,15 +351,19 @@ void LoadMcStas::readEventData(
         // Originally this was coded so the error squared is 1 it should be
         // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
         // introduced flag to allow old usage
-        if (errorBarsSetTo1) {
-          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
-              detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
-        } else {
-          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
-              detector_time, pulse_time, data[numberOfDataColumn * in],
-              data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
-        }
+		auto weightedEvent = WeightedEvent();
+		if (errorBarsSetTo1) {
+			weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
+		} else {
+			weightedEvent = WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn * in],
+				data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
+		}
+		allEventWS[0]->getSpectrum(workspaceIndex) += weightedEvent;
+		if(numEventEntries > 1){
+			allEventWS[eventWSIndex]->getSpectrum(workspaceIndex) += weightedEvent;
+		}
       }
+	  eventWSIndex++;
     } // end reading over number of blocks of an event dataset
 
     // nxFile.getData(data);
@@ -365,22 +376,28 @@ void LoadMcStas::readEventData(
   // 2 bins is the standard. However for McStas simulation data it may make
   // sense to
   // increase this number for better initial visual effect
+  std::string nameOfGroupWS = getProperty("OutputWorkspace");
+  
   auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
-  eventWS->setAllX(axis);
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  std::string nameOfGroupWS = getProperty("OutputWorkspace");
-  std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
-  std::string extraProperty =
-      "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-      extraProperty, nameUserSee, Direction::Output));
-  setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
-  m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
-                              // unique
-
-  outputGroup->addWorkspace(eventWS);
+  for (auto i = 0; i < allEventWS.size(); i++) {
+	  auto ws = allEventWS[i];
+	  ws->setAllX(axis);
+	  std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
+	  if (i > 0) {
+		nameUserSee += std::string("_") + std::to_string(i);
+	  }
+	  std::string extraProperty =
+		  "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+	  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+		  extraProperty, nameUserSee, Direction::Output));
+	  setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
+	  m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
+								  // unique
+	  outputGroup->addWorkspace(ws);
+  }
 }
 
 /**
