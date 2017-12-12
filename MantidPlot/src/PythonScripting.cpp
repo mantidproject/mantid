@@ -61,7 +61,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PythonScripting");
 
 bool checkAndPrintError() {
-  if(PyErr_Occurred()) {
+  if (PyErr_Occurred()) {
     PyErr_Print();
     return true;
   }
@@ -166,7 +166,7 @@ bool PythonScripting::start() {
   m_math = PyDict_New();
   // Keep a hold of the sys dictionary for accessing stdout/stderr
   PyObject *sysmod = PyImport_ImportModule("sys");
-  if(checkAndPrintError()) {
+  if (checkAndPrintError()) {
     finalize();
     return false;
   }
@@ -182,7 +182,7 @@ bool PythonScripting::start() {
 
   // Custom setup for sip/PyQt4 before import _qti
   setupSip();
-  if(checkAndPrintError()) {
+  if (checkAndPrintError()) {
     finalize();
     return false;
   }
