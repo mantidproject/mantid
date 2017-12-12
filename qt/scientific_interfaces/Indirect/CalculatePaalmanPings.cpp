@@ -245,6 +245,19 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
       uiv.addErrorMessage(
           "Sample and can workspaces must contain the same type of data.");
 
+    if (!AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            sampleWsName.toStdString())) {
+      uiv.addErrorMessage(
+          "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
+    if (m_uiForm.ckUseCan &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsName.toStdString())) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
     // Shape validation
 
     const auto shape = m_uiForm.cbSampleShape->currentIndex();
@@ -373,12 +386,16 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
     auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
         wsName.toStdString());
 
-    g_log.warning() << "Invalid workspace loaded, ensure a MatrixWorkspace is "
-                       "entered into the Sample field.\n";
-
     if (wsg)
       g_log.warning() << "Workspace Groups are currently not allowed.\n";
-    m_uiForm.dsSample->setLabelText("");
+    else
+      g_log.warning() << "Workspace " << wsName.toStdString()
+                      << " is not a MatrixWorkspace.\n";
+
+    emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
+                        "entered into the Sample field.\n");
+
+    m_uiForm.dsSample->setUserInput("");
     return;
   }
 
@@ -419,8 +436,6 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
       wsName.toStdString());
 
   if (!ws) {
-    g_log.warning() << "Failed to find workspace " << wsName.toStdString()
-                    << '\n';
     return;
   }
 
@@ -434,7 +449,7 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   const auto beamWidth =
       getInstrumentParameter(instrument, "Workflow.beam-width");
-  
+
   if (beamWidth) {
     m_uiForm.spCylBeamWidth->setValue(beamWidth.get());
     m_uiForm.spAnnBeamWidth->setValue(beamWidth.get());
