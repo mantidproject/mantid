@@ -22,15 +22,15 @@ Usage
 
   ws = CreateWorkspace(OutputWorkspace='ws', DataX='1,1', DataY='2,2', NSpec=2)
   masked = MaskSpectra(InputWorkspace=ws, InputWorkspaceIndexType='WorkspaceIndex', InputWorkspaceIndexSet='1')
-  print(ws.readY(0), masked.readY(0))
-  print(ws.readY(1), masked.readY(1))
+  print(ws.readY(0)[0], masked.readY(0)[0])
+  print(ws.readY(1)[0], masked.readY(1)[0])
 
 Output:
 
 .. testoutput:: MaskSpectraExample
 
-  (array([ 2.]), array([ 2.]))
-  (array([ 2.]), array([ 0.]))
+  (2.0, 2.0)
+  (2.0, 0.0)
 
 .. categories::
 
