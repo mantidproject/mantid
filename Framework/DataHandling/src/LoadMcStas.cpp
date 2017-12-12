@@ -239,7 +239,7 @@ void LoadMcStas::readEventData(
   const size_t numEventEntries = eventEntries.size();
   std::vector<EventWorkspace_sptr> allEventWS = {eventWS};
   if (numEventEntries > 1) {
-    for (int i = 1; i <= numEventEntries; i++) {
+    for (size_t i = 1; i <= numEventEntries; i++) {
       allEventWS.push_back(eventWS->clone());
     }
   }
@@ -385,7 +385,7 @@ void LoadMcStas::readEventData(
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  for (auto i = 0; i < allEventWS.size(); i++) {
+  for (size_t i = 0; i < allEventWS.size(); i++) {
     auto ws = allEventWS[i];
     ws->setAllX(axis);
     std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
