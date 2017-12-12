@@ -199,9 +199,6 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   plotInPreview("Container", m_csContainerWS, Qt::red);
 }
 
-void ContainerSubtraction::handleIncorrectWorkspaceType(
-    const std::string &workspaceName) {}
-
 /**
  * Handles Container curve in the miniplot when scale or shift is updated
  */
