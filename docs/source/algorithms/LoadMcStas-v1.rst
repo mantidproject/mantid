@@ -104,7 +104,7 @@ Usage
    print("Number of histograms in event data: {}".format(eventData.getNumberHistograms()))
    print("Name of event data: {}".format(eventData.getName()))
 
-   someHistogramData = ws[2]
+   someHistogramData = ws[4]
    print("Number of histograms in hist data: {}".format(someHistogramData.getNumberHistograms()))
    print("Name of hist data: {}".format(someHistogramData.getName()))
 
@@ -112,7 +112,7 @@ Output:
 
 .. testoutput:: ExLoadMcStas
 
-   Number of entries in group: 5
+   Number of entries in group: 7
    Number of histograms in event data: 8192
    Name of event data: EventData_ws
    Number of histograms in hist data: 1
