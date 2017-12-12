@@ -3218,7 +3218,6 @@ void MuonAnalysis::loadAllPairs(int state) {
   if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
     ItemType itemType = Pair;
     PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
-    auto max = numGroups() + numPairs();
     for (int j = 0; j < numPairs(); j++) {
 
       addItem(itemType, j, plotType);
