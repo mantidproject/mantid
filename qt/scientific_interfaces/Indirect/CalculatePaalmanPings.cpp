@@ -191,6 +191,17 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsNameStr = sampleWsName.toStdString();
+  bool sampleExists =
+      AnalysisDataService::Instance().doesExist(sampleWsNameStr);
+
+  if (sampleExists &&
+      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsNameStr)) {
+    uiv.addErrorMessage(
+        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
   // Validate chemical formula
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
@@ -230,11 +241,21 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
       uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
     }
 
+    const auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    const auto containerWsNameStr = containerWsName.toStdString();
+    bool containerExists =
+        AnalysisDataService::Instance().doesExist(containerWsNameStr);
+
+    if (containerExists &&
+        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            containerWsNameStr)) {
+      uiv.addErrorMessage(
+          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
     // Ensure sample and container are the same kind of data
-    auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
     const auto sampleType = sampleWsName.right(sampleWsName.length() -
                                                sampleWsName.lastIndexOf("_"));
-    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
     const auto containerType = containerWsName.right(
         containerWsName.length() - containerWsName.lastIndexOf("_"));
 
@@ -244,19 +265,6 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     if (containerType != sampleType)
       uiv.addErrorMessage(
           "Sample and can workspaces must contain the same type of data.");
-
-    if (!AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            sampleWsName.toStdString())) {
-      uiv.addErrorMessage(
-          "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-    }
-
-    if (m_uiForm.ckUseCan &&
-        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerWsName.toStdString())) {
-      uiv.addErrorMessage(
-          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-    }
 
     // Shape validation
 
@@ -394,8 +402,6 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
 
     emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
                         "entered into the Sample field.\n");
-
-    m_uiForm.dsSample->setUserInput("");
     return;
   }
 
