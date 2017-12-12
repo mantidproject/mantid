@@ -404,6 +404,31 @@ void MuonAnalysis::plotSelectedGroupPair() {
   plotItem(itemType, tableRow, plotType);
 }
 
+std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
+	PlotType plotType) {
+	AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+
+
+	// Create workspace and a raw (unbinned) version of it
+	auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+	auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+
+	// Find names for new workspaces
+	const std::string wsName =
+		getNewAnalysisWSName(itemType, tableRow, plotType);
+	const std::string wsRawName = wsName + "_Raw";
+
+	// Make sure they end up in the ADS
+	ads.addOrReplace(wsName, ws);
+	ads.addOrReplace(wsRawName, wsRaw);
+
+	// Make sure they are grouped
+	std::vector<std::string> wsNames = { wsName, wsRawName };
+	MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+	return wsName;
+
+}
+
 /**
  * Creates workspace for specified group/pair and plots it;
  * @param itemType :: Whether it's a group or pair
@@ -415,26 +440,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
   m_updating = true;
   m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
-
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-
-  try {
-    // Create workspace and a raw (unbinned) version of it
-    auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-    auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
-
-    // Find names for new workspaces
-    const std::string wsName =
-        getNewAnalysisWSName(itemType, tableRow, plotType);
-    const std::string wsRawName = wsName + "_Raw";
-
-    // Make sure they end up in the ADS
-    ads.addOrReplace(wsName, ws);
-    ads.addOrReplace(wsRawName, wsRaw);
-
-    // Make sure they are grouped
-    std::vector<std::string> wsNames = {wsName, wsRawName};
-    MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+  try{
+  auto wsName = addItem(itemType, tableRow, plotType);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -446,7 +453,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
     QMessageBox::critical(this, "MuonAnalysis - Error",
                           "Unable to plot the item. Check log for details.");
   }
-
+  loadAllGroups();
+  loadAllPairs();
   m_updating = false;
 }
 
@@ -1519,6 +1527,8 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     currentI = 0;
   }
   setGroupsAndPairs();
+  loadAllGroups();
+  loadAllPairs();
   if (updateIndexAndPlot) {
     setGroupOrPairIndexToPlot(currentI);
     plotCurrentGroupAndPairs();
@@ -2118,6 +2128,7 @@ double MuonAnalysis::finishTime() const {
  * Load auto saved values
  */
 void MuonAnalysis::loadAutoSavedValues(const QString &group) {
+
   QSettings prevInstrumentValues;
   prevInstrumentValues.beginGroup(group + "instrument");
   QString instrumentName =
@@ -2189,6 +2200,7 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+
 }
 /**
 * Handle "groups" selected/deselected
@@ -2620,6 +2632,10 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(loadAllGroupChanged(int)), this,
+	  SLOT(loadAllGroups(int))); 
+  connect(m_optionTab, SIGNAL(loadAllPairsChanged(int)), this,
+		  SLOT(loadAllPairs(int)));
 }
 
 /**
@@ -3176,6 +3192,32 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+}
+/**
+* Called when the "enable multiple fitting" checkbox is changed (settings tab.)
+* Forward this to the fit function presenter.
+*/
+void MuonAnalysis::loadAllGroups(int state) {
+	Q_UNUSED(state);
+	if (m_uiForm.loadAllGroupsCheckBox->isChecked()) {
+		ItemType itemType = Group;
+		PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+		for (int j = 0; j < numGroups(); j++) {
+			addItem(itemType, j, plotType);
+		}
+	}
+}
+void MuonAnalysis::loadAllPairs(int state) {
+	
+	Q_UNUSED(state);
+	if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
+		ItemType itemType = Group;
+		PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+		auto max = m_uiForm.frontGroupGroupPairComboBox->count();
+		for (int j = numGroups(); j < max; j++) {
+			addItem(itemType, j, plotType);
+		}
+	}
 }
 /**
  * Update the fit data presenter with current overwrite setting
