@@ -3,13 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 
 from mantid.kernel import Logger
-from ui.sans_isis.diagnosics_page import DiagnosticsPage
+from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.enums import IntegralEnum
-from sans.gui_logic.models.diagnostics_page_model import run integral
+from sans.common.enums import IntegralEnum, DetectorType
 
 class DiagnosticsPagePresenter(object):
-    class ConcreteDiagnosticsPagePresenter(DiagnosticsPage.DiagnosticsPageListener):
+    class ConcreteDiagnosticsPageListener(DiagnosticsPage.DiagnosticsPageListener):
         def __init__(self, presenter):
             self._presenter = presenter
 
@@ -58,7 +57,7 @@ class DiagnosticsPagePresenter(object):
             self._view = view
 
             # Set up run listener
-            listener = DiagnosticsPagePresenter.ConcreteDiagnosticsPagePresenter(self)
+            listener = DiagnosticsPagePresenter.ConcreteDiagnosticsPageListener(self)
             self._view.add_listener(listener)
 
     def on_det1_horizontal_clicked(self):
@@ -67,7 +66,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det1_horizontal_mask
         range = self._view.det1_horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det1Horizontal)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Horizontal,
+                                   DetectorType.LAB)
 
     def on_det2_horizontal_clicked(self):
         file = self._view.run_input
@@ -75,7 +75,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det2_horizontal_mask
         range = self._view.det2_horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det2Horizontal)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Horizontal,
+                                   DetectorType.HAB)
 
     def on_det1_vertical_clicked(self):
         file = self._view.run_input
@@ -83,7 +84,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det1_vertical_mask
         range = self._view.det1_vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det1Vertical)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Vertical,
+                                   DetectorType.LAB)
 
     def on_det2_vertical_clicked(self):
         file = self._view.run_input
@@ -91,7 +93,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det2_vertical_mask
         range = self._view.det2_vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det2Vertical)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Vertical,
+                                   DetectorType.HAB)
 
     def on_det1_time_clicked(self):
         file = self._view.run_input
@@ -99,7 +102,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det1_time_mask
         range = self._view.det1_time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det1Time)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Time,
+                                   DetectorType.LAB)
 
     def on_det2_time_clicked(self):
         file = self._view.run_input
@@ -107,7 +111,8 @@ class DiagnosticsPagePresenter(object):
         mask = self._view.det2_time_mask
         range = self._view.det2_time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Det2Time)
+        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Time,
+                                   DetectorType.HAB)
 
     def on_processing_finished_integral(self, result):
         pass

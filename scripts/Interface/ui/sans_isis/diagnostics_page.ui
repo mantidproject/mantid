@@ -71,7 +71,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="detector_1_vertical_integral_button">
+       <widget class="QPushButton" name="detector_1_vertical_button">
         <property name="text">
          <string>Vertical Integral</string>
         </property>
@@ -112,7 +112,7 @@
        <widget class="QLineEdit" name="det1_horizontal_range_line_edit"/>
       </item>
       <item row="2" column="0">
-       <widget class="QPushButton" name="detector_1_time_integral_button">
+       <widget class="QPushButton" name="detector_1_time_button">
         <property name="text">
          <string>Time Integral</string>
         </property>
@@ -129,7 +129,7 @@
        <widget class="QLineEdit" name="det1_time_range_line_edit"/>
       </item>
       <item row="2" column="3">
-       <widget class="QCheckBox" name="det_1_time_mask_checkbox">
+       <widget class="QCheckBox" name="det1_time_mask_checkbox">
         <property name="text">
          <string>Apply Pixel Mask</string>
         </property>
@@ -145,7 +145,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="2" column="3">
-       <widget class="QCheckBox" name="det_2_time_mask_checkbox">
+       <widget class="QCheckBox" name="det2_time_mask_checkbox">
         <property name="text">
          <string>Apply Pixel Mask</string>
         </property>
@@ -173,7 +173,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QPushButton" name="detector_2_time_integral_button">
+       <widget class="QPushButton" name="detector_2_time_button">
         <property name="text">
          <string>Time Integral</string>
         </property>
@@ -203,7 +203,7 @@
        <widget class="QLineEdit" name="det2_time_range_line_edit"/>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="detector_2_vertical_integral_button">
+       <widget class="QPushButton" name="detector_2_vertical_button">
         <property name="text">
          <string>Vertical Integral</string>
         </property>

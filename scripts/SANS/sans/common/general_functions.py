@@ -362,7 +362,7 @@ def parse_diagnostic_settings(string_to_parse):
         if start > stop:
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.")
-        return range(start, stop+1)
+        return [start, stop]
 
     def _extract_simple_range_with_step_pattern(line):
         start, stop = line.split("-")
@@ -382,11 +382,13 @@ def parse_diagnostic_settings(string_to_parse):
         if start > stop:
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.")
-
-        return range(start, stop + 1)
+        result = []
+        for entry in range(start, stop + 1):
+            result.append([entry, entry])
+        return result
 
     def _extract_number(line):
-        return [int(line[0])]
+        return [int(line[0]), int(line[0])]
 
     # Check if the input actually exists.
     if not string_to_parse:

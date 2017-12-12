@@ -38,6 +38,8 @@ from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.work_handler import WorkHandler
+from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
+from sans.gui_logic.models.diagnostics_page_model import run_integral
 
 try:
     import mantidplot
@@ -110,6 +112,9 @@ class RunTabPresenter(object):
         # Beam centre presenter
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel)
 
+        # Workspace Diagnostic page presenter
+        self.workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral)
+
     def __del__(self):
         self._delete_dummy_input_workspace()
 
@@ -170,6 +175,9 @@ class RunTabPresenter(object):
 
             # Set the appropriate view for the beam centre presenter
             self._beam_centre_presenter.set_view(self._view.beam_centre)
+
+            # Set the appropriate view for the diagnostic page
+            self.workspace_diagnostic_presenter.set_view(self._view.diagnostic_page)
 
     def on_user_file_load(self):
         """

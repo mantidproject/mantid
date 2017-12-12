@@ -16,7 +16,7 @@ except AttributeError:
 
 
 class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
-    class DiagnosticTabListener(with_metaclass(ABCMeta, object)):
+    class DiagnosticsPageListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
         """
@@ -53,8 +53,9 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.setupUi(self)
 
         # Hook up signal and slots
-        self.connect_signals()
         self._diagnostics_page_listeners = []
+        self.connect_signals()
+
 
         # Attach validators
         self._attach_validators()
@@ -76,7 +77,7 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         pass
 
     def add_listener(self, listener):
-        if not isinstance(listener, DiagnosticsPage.DiagnosticTabListener):
+        if not isinstance(listener, DiagnosticsPage.DiagnosticsPageListener):
             raise ValueError("The listener ist not of type DiagnosticTabListener but rather {}".format(type(listener)))
         self._diagnostics_page_listeners.append(listener)
 
@@ -89,19 +90,30 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
 
     def connect_signals(self):
         self.browse_button.clicked.connect(self._on_browse_clicked)
-        self.detector_1_horizontal_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det1_horizontal_clicked))
-        self.detector_1_vertical_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det1_vertical_clicked))
-        self.detector_1_time_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det1_time_clicked))
-        self.detector_2_horizontal_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det2_horizontal_clicked))
-        self.detector_2_vertical_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det2_vertical_clicked))
-        self.detector_2_time_button.clicked.connect(
-            self._call_settings_listeners(lambda listener: listener.on_det2_time_clicked))
+        self.detector_1_horizontal_button.clicked.connect(self.on_det1_horizontal_clicked)
+        self.detector_1_vertical_button.clicked.connect(self.on_det1_vertical_clicked)
+        self.detector_1_time_button.clicked.connect(self.on_det1_time_clicked)
+        self.detector_2_horizontal_button.clicked.connect(self.on_det2_horizontal_clicked)
+        self.detector_2_vertical_button.clicked.connect(self.on_det2_vertical_clicked)
+        self.detector_2_time_button.clicked.connect(self.on_det2_time_clicked)
 
+    def on_det1_horizontal_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_horizontal_clicked())
+
+    def on_det1_vertical_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_vertical_clicked())
+
+    def on_det1_time_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det1_time_clicked())
+
+    def on_det2_horizontal_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_horizontal_clicked())
+
+    def on_det2_vertical_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_vertical_clicked())
+
+    def on_det2_time_clicked(self):
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_det2_time_clicked())
 
     def _on_browse_clicked(self):
         """
@@ -112,7 +124,7 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
                   self.get_file_path)
 
         # Notify presenters
-        self._call_settings_listeners(lambda listener: listener.on_browse_clicked())
+        self._call_diagnostics_page_listeners(lambda listener: listener.on_browse_clicked())
 
     def get_file_path(self):
         return str(self.run_input_line_edit.text())
@@ -201,12 +213,12 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.det1_vertical_mask_check_box.setChecked(value)
 
     @property
-    def det_1_time_mask(self):
-        return self.det_1_time_mask_checkbox.isChecked()
+    def det1_time_mask(self):
+        return self.det1_time_mask_checkbox.isChecked()
 
-    @det_1_time_mask.setter
-    def det_1_time_mask(self, value):
-        self.det_1_time_mask_checkbox.setChecked(value)
+    @det1_time_mask.setter
+    def det1_time_mask(self, value):
+        self.det1_time_mask_checkbox.setChecked(value)
 
     @property
     def det2_horizontal_mask(self):
@@ -225,12 +237,12 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.det2_vertical_mask_check_box.setChecked(value)
 
     @property
-    def det_2_time_mask(self):
-        return self.det_2_time_mask_checkbox.isChecked()
+    def det2_time_mask(self):
+        return self.det2_time_mask_checkbox.isChecked()
 
-    @det_2_time_mask.setter
-    def det_2_time_mask(self, value):
-        self.det_2_time_mask_checkbox.setChecked(value)
+    @det2_time_mask.setter
+    def det2_time_mask(self, value):
+        self.det2_time_mask_checkbox.setChecked(value)
 
 
 
