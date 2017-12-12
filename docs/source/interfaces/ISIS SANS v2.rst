@@ -187,7 +187,7 @@ Save As Event Data
 """"""""""""""""""
 
 If this option is chosen, the output file will contain event data. The output is not an event
-workspace but rather a group workspace which contains two child event workspaces one for the
+workspace but rather a group workspace, which contains two child event workspaces, one for the
 added event data and one for the added monitor data.
 
 With **'Overlay Event Workspaces' Disabled** the event data from the files is added using the event
@@ -203,7 +203,7 @@ Timestamps of the events and of the logs are not changed as indicated in the ima
 With **'Overlay Event Workspaces' Enabled** and **no Additional Time Shifts** specified, the event data of
 the different files is shifted on top of each other.
 
-In the case of two workspaces the time difference between them it is determined by the difference
+In the case of two workspaces the time difference between them is determined by the difference
 between their first entry in the proton charge log. This time difference is then applied to all
 timestamps of the second workspace. The second workspace is essentially laid on the first. The same
 principle applies if more than two workspaces are involved as this is a pairwise operation. The
@@ -219,9 +219,10 @@ Note that the underlying mechanism for time shifting is provided by the
 :doc:`ChangeTimeZero Algorithm <../algorithms/ChangeTimeZero-v1>`. Using this option will result in a
 change to the history of the underlying data.
 
-With **'Overlay Event Workspaces' Enabled** you can specify **Additional Time Shifts**. To add *N* files
-one needs to provide exactly *N-1* comma-separated time shifts. The shifts need to be specified in
-seconds.
+With **'Overlay Event Workspaces' Enabled** you can specify **Additional Time Shifts**.
+Additional time shifts are specified as a comma separated list of numbers where each shift is the
+time to shift by in seconds. The list should contain exactly *N-1* entries where *N* is the number of
+runs to be summed.
 
 Similar to the case above the workspaces are overlaid. This specified time shift is in addition to
 the actual overlay operation. A positive time shift will shift the second workspace into the future,
