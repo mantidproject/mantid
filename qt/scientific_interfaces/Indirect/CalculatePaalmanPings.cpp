@@ -5,15 +5,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
+#include <QDoubleValidator>
 #include <QLineEdit>
 #include <QList>
-#include <QValidator>
-#include <QDoubleValidator>
 #include <QRegExpValidator>
+#include <QValidator>
 
 using namespace Mantid::API;
 
@@ -369,6 +369,18 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
 
+  if (!ws) {
+    auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        wsName.toStdString());
+
+    g_log.warning() << "Invalid workspace loaded, ensure a MatrixWorkspace is "
+                       "entered into the Sample field.\n";
+
+    if (wsg)
+      g_log.warning() << "Workspace Groups are currently not allowed.\n";
+    m_uiForm.dsSample->setLabelText("");
+  }
+
   try {
     m_uiForm.doubleEfixed->setValue(getEFixed(ws));
   } catch (std::runtime_error &) {
@@ -413,25 +425,49 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   auto instrument = ws->getInstrument();
 
-  const std::string beamWidthParamName = "Workflow.beam-width";
-  if (instrument->hasParameter(beamWidthParamName)) {
-    const auto beamWidth = QString::fromStdString(
-        instrument->getStringParameter(beamWidthParamName)[0]);
-    const auto beamWidthValue = beamWidth.toDouble();
-
-    m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
-    m_uiForm.spAnnBeamWidth->setValue(beamWidthValue);
+  if (!instrument) {
+    g_log.warning() << "Failed to find instrument parameters in the workspace "
+                    << wsName.toStdString() << '\n';
+    return;
   }
 
-  const std::string beamHeightParamName = "Workflow.beam-height";
-  if (instrument->hasParameter(beamHeightParamName)) {
-    const auto beamHeight = QString::fromStdString(
-        instrument->getStringParameter(beamHeightParamName)[0]);
-    const auto beamHeightValue = beamHeight.toDouble();
-
-    m_uiForm.spCylBeamHeight->setValue(beamHeightValue);
-    m_uiForm.spAnnBeamHeight->setValue(beamHeightValue);
+  const auto beamWidth =
+      getInstrumentParameter(instrument, "Workflow.beam-width");
+  
+  if (beamWidth) {
+    m_uiForm.spCylBeamWidth->setValue(beamWidth.get());
+    m_uiForm.spAnnBeamWidth->setValue(beamWidth.get());
   }
+
+  const auto beamHeight =
+      getInstrumentParameter(instrument, "Workflow.beam-height");
+
+  if (beamHeight) {
+    m_uiForm.spCylBeamHeight->setValue(beamHeight.get());
+    m_uiForm.spAnnBeamHeight->setValue(beamHeight.get());
+  }
+}
+
+/**
+ * Attempt to extract an instrument double parameter from a specified
+ * instrument.
+ *
+ * @param instrument    The instrument to extract the parameter from.
+ * @param parameterName The name of the parameter to extract.
+ *
+ * @return              The extracted parameter if it is found, else
+ *                      boost::none.
+ */
+boost::optional<double> CalculatePaalmanPings::getInstrumentParameter(
+    Mantid::Geometry::Instrument_const_sptr instrument,
+    const std::string &parameterName) {
+
+  if (instrument->hasParameter(parameterName)) {
+    const auto parameterValue = QString::fromStdString(
+        instrument->getStringParameter(parameterName)[0]);
+    return parameterValue.toDouble();
+  }
+  return boost::none;
 }
 
 /**
