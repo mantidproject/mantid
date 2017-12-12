@@ -243,9 +243,7 @@ V3D &V3D::operator/=(const double D) {
   Negation
  * @return a vector with same magnitude but in opposite direction
  */
-V3D V3D::operator-() const noexcept {
-  return V3D(-x, -y, -z);
-}
+V3D V3D::operator-() const noexcept { return V3D(-x, -y, -z); }
 
 /**
   Equals operator with tolerance factor

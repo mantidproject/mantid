@@ -83,9 +83,7 @@ V2D &V2D::operator*=(const double factor) {
 * Negate and return
 * @returns A new negated V2D object
 */
-V2D V2D::operator-() const noexcept {
-  return V2D{-m_x, -m_y};
-}
+V2D V2D::operator-() const noexcept { return V2D{-m_x, -m_y}; }
 
 /**
  * Equality operator including a tolerance

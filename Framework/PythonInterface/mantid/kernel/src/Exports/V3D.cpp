@@ -108,10 +108,13 @@ void export_V3D() {
       .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(),
            (arg("self"), arg("other")))
-      .def("__sub__", static_cast<V3D (V3D::*) (const V3D &) const>(&V3D::operator-), (arg("left"), arg("right")))
+      .def("__sub__",
+           static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-),
+           (arg("left"), arg("right")))
       .def("__isub__", &V3D::operator-=, return_self<>(),
            (arg("self"), arg("other")))
-      .def("__neg__",  static_cast<V3D (V3D::*) () const>(&V3D::operator-), (arg("self")))
+      .def("__neg__", static_cast<V3D (V3D::*)() const>(&V3D::operator-),
+           (arg("self")))
       .def("__len__", &getV3DLength, (arg("self")),
            "Returns the length of the vector for list-like interface. Always "
            "returns 3.")
