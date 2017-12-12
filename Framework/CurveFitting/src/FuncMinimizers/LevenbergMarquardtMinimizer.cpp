@@ -113,13 +113,12 @@ bool LevenbergMarquardtMinimizer::iterate(size_t) {
   }
 
   if (retVal && retVal != GSL_CONTINUE) {
-	  m_errorString = gsl_strerror(retVal);
-	  if (m_errorString == "cannot reach the specified tolerance in F") {
-		  m_errorString = "Changes in function value are too small";
-	  }
-	  else if (m_errorString == "cannot reach the specified tolerance in X") {
-		  m_errorString = "Changes in parameter value are too small";
-	  }
+    m_errorString = gsl_strerror(retVal);
+    if (m_errorString == "cannot reach the specified tolerance in F") {
+      m_errorString = "Changes in function value are too small";
+    } else if (m_errorString == "cannot reach the specified tolerance in X") {
+      m_errorString = "Changes in parameter value are too small";
+    }
     return false;
   }
 
