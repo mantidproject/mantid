@@ -26,6 +26,7 @@ Powder Diffraction
 - ISIS Powder scripts for HRPD now support extra TOF windows 10-50 and 180-280
 - After calling create_vanadium and focus in ISIS Powder scripts on POLARIS, the output workspaces always contain the sample material if it is set using set_sample_material. (To view the sample material, right click the workspace and click 'Sample Material...')
 - It is now possible to set beam parameters (height and width) using instrument_object.set_beam_parameters(height=123, width=456).
+- The ``mode`` parameter for POLARIS in ISIS Powder now behaves as described in the documentation - it persists through function calls and is case insensitive
 
 Engineering Diffraction
 -----------------------
