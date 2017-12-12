@@ -135,9 +135,9 @@ void MuonAnalysisOptionTab::initLayout() {
   connect(m_uiForm.chkEnableMultiFit, SIGNAL(stateChanged(int)), this,
           SIGNAL(multiFitStateChanged(int)));
   connect(m_uiForm.loadAllGroupsCheckBox, SIGNAL(stateChanged(int)), this,
-	  SIGNAL(loadAllGroupChanged(int)));
+          SIGNAL(loadAllGroupChanged(int)));
   connect(m_uiForm.loadAllPairsCheckBox, SIGNAL(stateChanged(int)), this,
-	  SIGNAL(loadAllPairsChanged(int)));
+          SIGNAL(loadAllPairsChanged(int)));
 }
 
 /**

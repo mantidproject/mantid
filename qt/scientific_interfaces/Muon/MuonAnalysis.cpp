@@ -410,28 +410,25 @@ void MuonAnalysis::plotSelectedGroupPair() {
 * @param plotType :: What kind of plot we want to analyse
 */
 std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
-	PlotType plotType) {
-	AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+                                  PlotType plotType) {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
+  // Create workspace and a raw (unbinned) version of it
+  auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+  auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
-	// Create workspace and a raw (unbinned) version of it
-	auto ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-	auto wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+  // Find names for new workspaces
+  const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
+  const std::string wsRawName = wsName + "_Raw";
 
-	// Find names for new workspaces
-	const std::string wsName =
-		getNewAnalysisWSName(itemType, tableRow, plotType);
-	const std::string wsRawName = wsName + "_Raw";
+  // Make sure they end up in the ADS
+  ads.addOrReplace(wsName, ws);
+  ads.addOrReplace(wsRawName, wsRaw);
 
-	// Make sure they end up in the ADS
-	ads.addOrReplace(wsName, ws);
-	ads.addOrReplace(wsRawName, wsRaw);
-
-	// Make sure they are grouped
-	std::vector<std::string> wsNames = { wsName, wsRawName };
-	MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
-	return wsName;
-
+  // Make sure they are grouped
+  std::vector<std::string> wsNames = {wsName, wsRawName};
+  MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
+  return wsName;
 }
 
 /**
@@ -445,8 +442,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
   m_updating = true;
   m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
-  try{
-  auto wsName = addItem(itemType, tableRow, plotType);
+  try {
+    auto wsName = addItem(itemType, tableRow, plotType);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -2205,7 +2202,6 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-
 }
 /**
 * Handle "groups" selected/deselected
@@ -2638,9 +2634,9 @@ void MuonAnalysis::connectAutoUpdate() {
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
   connect(m_optionTab, SIGNAL(loadAllGroupChanged(int)), this,
-	  SLOT(loadAllGroups(int))); 
+          SLOT(loadAllGroups(int)));
   connect(m_optionTab, SIGNAL(loadAllPairsChanged(int)), this,
-		  SLOT(loadAllPairs(int)));
+          SLOT(loadAllPairs(int)));
 }
 
 /**
@@ -3203,14 +3199,14 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
 * @param state :: [input] (not used) Setting of combo box
 */
 void MuonAnalysis::loadAllGroups(int state) {
-	Q_UNUSED(state);
-	if (m_uiForm.loadAllGroupsCheckBox->isChecked()) {
-		ItemType itemType = Group;
-		PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
-		for (int j = 0; j < numGroups(); j++) {
-			addItem(itemType, j, plotType);
-		}
-	}
+  Q_UNUSED(state);
+  if (m_uiForm.loadAllGroupsCheckBox->isChecked()) {
+    ItemType itemType = Group;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    for (int j = 0; j < numGroups(); j++) {
+      addItem(itemType, j, plotType);
+    }
+  }
 }
 /**
 * Load all of the pairs if the all pairs tickbox is ticked
@@ -3218,16 +3214,16 @@ void MuonAnalysis::loadAllGroups(int state) {
 */
 void MuonAnalysis::loadAllPairs(int state) {
 
-	Q_UNUSED(state);
-	if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
-		ItemType itemType = Pair;
-		PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
-		auto max = numGroups() + numPairs();
-		for (int j = 0; j < numPairs(); j++) {
-			
-			addItem(itemType, j, plotType);
-		}
-	}
+  Q_UNUSED(state);
+  if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
+    ItemType itemType = Pair;
+    PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+    auto max = numGroups() + numPairs();
+    for (int j = 0; j < numPairs(); j++) {
+
+      addItem(itemType, j, plotType);
+    }
+  }
 }
 /**
  * Update the fit data presenter with current overwrite setting
