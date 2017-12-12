@@ -795,8 +795,8 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
 
   // Get fit status and chi^2
   std::string fitStatus = fit->getProperty("OutputStatus");
-  bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
-                        (fitStatus.find("tolerance") < fitStatus.size());
+  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
+                        (fitStatus.find("small") < fitStatus.size());
   if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
