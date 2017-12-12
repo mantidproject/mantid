@@ -653,7 +653,7 @@ void ConvolutionFitSequential::extractMembers(
 
   // Check whether a delta function member was a member in
   // the convolution fitting.
-  if (delta.compare("true") == 0) {
+  if (delta == "true") {
     members.push_back("Delta");
   }
 

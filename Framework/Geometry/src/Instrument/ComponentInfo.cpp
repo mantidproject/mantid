@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -55,7 +55,7 @@ ComponentInfo::ComponentInfo(
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         componentIdToIndexMap,
-    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
         shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
@@ -203,7 +203,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-const Object &ComponentInfo::shape(const size_t componentIndex) const {
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
   return *(*m_shapes)[componentIndex];
 }
 

@@ -43,7 +43,7 @@ namespace Geometry {
 
    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class Object;
+class CSGObject;
 class MANTID_GEOMETRY_DLL vtkGeometryCacheWriter {
 private:
   Poco::XML::Document *mDoc; ///< The XML document
@@ -56,7 +56,7 @@ private:
 public:
   vtkGeometryCacheWriter(std::string); ///< Constructor
   ~vtkGeometryCacheWriter();           ///< Destructor
-  void addObject(Object *obj);
+  void addObject(CSGObject *obj);
   void write(); ///< Write the XML to a file
 };
 

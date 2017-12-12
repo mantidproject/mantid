@@ -24,7 +24,7 @@ class MatrixWorkspace;
 namespace Geometry {
 class CompAssembly;
 class Component;
-class Object;
+class CSGObject;
 class ObjComponent;
 class Instrument;
 }

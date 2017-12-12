@@ -26,7 +26,7 @@ public:
     auto fakeWS = boost::make_shared<WorkspaceTester>();
     // Add a sample shape
     auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
-    fakeWS->mutableSample().setShape(*sphere);
+    fakeWS->mutableSample().setShape(sphere);
 
     auto sampleValidator = boost::make_shared<SampleShapeValidator>();
     TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS), "");
