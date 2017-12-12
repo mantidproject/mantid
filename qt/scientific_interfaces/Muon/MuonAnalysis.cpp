@@ -403,7 +403,12 @@ void MuonAnalysis::plotSelectedGroupPair() {
 
   plotItem(itemType, tableRow, plotType);
 }
-
+/**
+* Creates workspace for specified group/pair and adds it to the ADS;
+* @param itemType :: Whether it's a group or pair
+* @param tableRow :: Row in the group/pair table which contains the item
+* @param plotType :: What kind of plot we want to analyse
+*/
 std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 	PlotType plotType) {
 	AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
@@ -3194,8 +3199,8 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
-* Called when the "enable multiple fitting" checkbox is changed (settings tab.)
-* Forward this to the fit function presenter.
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
 */
 void MuonAnalysis::loadAllGroups(int state) {
 	Q_UNUSED(state);
@@ -3207,6 +3212,10 @@ void MuonAnalysis::loadAllGroups(int state) {
 		}
 	}
 }
+/**
+* Load all of the pairs if the all pairs tickbox is ticked
+* @param state :: [input] (not used) Setting of combo box
+*/
 void MuonAnalysis::loadAllPairs(int state) {
 
 	Q_UNUSED(state);

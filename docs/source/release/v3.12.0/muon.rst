@@ -13,6 +13,7 @@ MuSR Changes
 Interfaces
 ----------
 - Added a cancel button to the MaxEnt widget in Frequency Domain Analysis.
+- Added checkboxes for "add all pairs" and "add all groups" to the settings tab. 
 
 Bug Fixes
 ---------
