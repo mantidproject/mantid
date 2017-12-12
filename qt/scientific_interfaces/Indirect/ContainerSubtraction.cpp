@@ -131,7 +131,6 @@ bool ContainerSubtraction::validate() {
   const auto containerWsName = containerName.toStdString();
   bool containerExists =
       AnalysisDataService::Instance().doesExist(containerWsName);
-
   if (containerExists &&
       !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           containerWsName)) {
@@ -139,7 +138,7 @@ bool ContainerSubtraction::validate() {
         "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
   }
 
-  if (samValid && canValid) {
+  if (m_csSampleWS && m_csContainerWS) {
     // Check Sample is of same type as container
     const auto containerType = m_csContainerWS->YUnit();
     const auto sampleType = m_csSampleWS->YUnit();
