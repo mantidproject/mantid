@@ -379,6 +379,7 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
     if (wsg)
       g_log.warning() << "Workspace Groups are currently not allowed.\n";
     m_uiForm.dsSample->setLabelText("");
+    return;
   }
 
   try {
