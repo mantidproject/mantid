@@ -23,6 +23,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
