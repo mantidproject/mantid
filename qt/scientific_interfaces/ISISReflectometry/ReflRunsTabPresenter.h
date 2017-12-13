@@ -124,8 +124,7 @@ private:
   void changeInstrument();
   /// Convert an options map to a string
   QString convertMapToString(
-      const MantidWidgets::DataProcessor::OptionsMap &optionsMap)
-      const;
+      const MantidWidgets::DataProcessor::OptionsMap &optionsMap) const;
 };
 }
 }
