@@ -4,12 +4,13 @@ import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
+
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService, WorkspaceFactory)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
-
 import numpy as np
+from six.moves import range
 
 class MatrixWorkspaceTest(unittest.TestCase):
 
@@ -178,7 +179,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         xdata = np.arange(nbins+1)
         ydata = np.arange(nbins)
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
-        for i in xrange(nspec):
+        for i in range(nspec):
             ws.setX(i, xdata)
             ws.setY(i, ydata)
 
@@ -194,7 +195,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         xdata = list(range(nbins+1))
         ydata = list(range(nbins))
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins+1, YLength=nbins)
-        for i in xrange(nspec):
+        for i in range(nspec):
             ws.setX(i, xdata)
             ws.setY(i, ydata)
 
