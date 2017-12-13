@@ -5,22 +5,22 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/LibraryManager.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -87,12 +87,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
               "curvefitting.autoBackground"))),
       m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
       m_shouldBeNormalised(false) {
-  // Make sure plugins are loaded
-  std::string libpath =
-      Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
-  if (!libpath.empty()) {
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-  }
+  Mantid::API::FrameworkManager::Instance().loadPlugins();
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
   // loaded
