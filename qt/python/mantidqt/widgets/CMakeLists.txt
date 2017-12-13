@@ -3,6 +3,7 @@ include ( SipQtTargetFunctions )
 set ( COMMON_INC_DIR ../../../widgets/common/inc )
 set ( HEADER_DEPENDS
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Message.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/MessageDisplay.h
 )
@@ -23,7 +24,7 @@ mtd_add_sip_module (
     Qt5::Widgets
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonAPIModule
+    API
     Kernel
   FOLDER Qt5
 )
