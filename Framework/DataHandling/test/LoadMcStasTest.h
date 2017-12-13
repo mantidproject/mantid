@@ -80,54 +80,55 @@ public:
     //
     //
     MatrixWorkspace_sptr outputItem2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "k01_events_dat_list_p_x_y_n_id_t");
-    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 8192);
-    auto sum_single = 0.0;
-    for (size_t i = 0; i < outputItem2->getNumberHistograms(); i++)
-      sum_single += outputItem2->y(i)[0];
-    sum_single *= 1.0e22;
-    TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" +
+                                                                    postfix);
+    TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputItem2->getNPoints(), 1000);
     //
     //
     MatrixWorkspace_sptr outputItem3 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "k02_events_dat_list_p_x_y_n_id_t");
-    TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 8192);
-    auto sum_multiple = 0.0;
-    for (size_t i = 0; i < outputItem3->getNumberHistograms(); i++)
-      sum_multiple += outputItem3->y(i)[0];
-    sum_multiple *= 1.0e22;
-    TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
-
-    TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" +
+                                                                    postfix);
+    TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 128);
     //
     //
     MatrixWorkspace_sptr outputItem4 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" +
-                                                                    postfix);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "psd2_av.dat" + postfix);
     TS_ASSERT_EQUALS(outputItem4->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputItem4->getNPoints(), 1000);
+    TS_ASSERT_EQUALS(outputItem4->getNPoints(), 100);
     //
     //
     MatrixWorkspace_sptr outputItem5 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" +
-                                                                    postfix);
-    TS_ASSERT_EQUALS(outputItem5->getNumberHistograms(), 128);
-    //
-    //
-    MatrixWorkspace_sptr outputItem6 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "psd2_av.dat" + postfix);
-    TS_ASSERT_EQUALS(outputItem6->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputItem6->getNPoints(), 100);
-    //
-    //
-    MatrixWorkspace_sptr outputItem7 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2.dat" +
                                                                     postfix);
-    TS_ASSERT_EQUALS(outputItem7->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outputItem7->getNPoints(), 100);
+    TS_ASSERT_EQUALS(outputItem5->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputItem5->getNPoints(), 100);
+	//
+	//
+	MatrixWorkspace_sptr outputItem6 =
+		AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+			"k01_events_dat_list_p_x_y_n_id_t");
+	TS_ASSERT_EQUALS(outputItem6->getNumberHistograms(), 8192);
+	auto sum_single = 0.0;
+	for (size_t i = 0; i < outputItem6->getNumberHistograms(); i++)
+		sum_single += outputItem6->y(i)[0];
+	sum_single *= 1.0e22;
+	TS_ASSERT_DELTA(sum_single, 107141.3295, 0.0001);
+	//
+	//
+	MatrixWorkspace_sptr outputItem7 =
+		AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+			"k02_events_dat_list_p_x_y_n_id_t");
+	TS_ASSERT_EQUALS(outputItem7->getNumberHistograms(), 8192);
+	auto sum_multiple = 0.0;
+	for (size_t i = 0; i < outputItem7->getNumberHistograms(); i++)
+		sum_multiple += outputItem7->y(i)[0];
+	sum_multiple *= 1.0e22;
+	TS_ASSERT_DELTA(sum_multiple, 22.4558, 0.0001);
+
+	TS_ASSERT_DELTA(sum_total, (sum_single + sum_multiple), 0.0001);
+
   } // testExec()
 
 private:
