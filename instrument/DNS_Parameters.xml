@@ -52,6 +52,11 @@
                         <value val="sqrt(e/25.3)" />
                 </parameter>
 
+                <!-- name of the sample log to store monitor counts. Algorithm: MonitorEfficiencyCorUser -->
+                <parameter name="monitor_counts_log" type="string">
+                        <value val="mon_sum" />
+                </parameter>
+
                 <!-- Distance [m] between sample and equatorial line of the detector. Mandatory
                      if you want to correct the flight paths. Also used by the loader to estimate EPP. -->
                 <parameter name="l2" type="string">

@@ -479,11 +479,11 @@ void SaveGSASInstrumentFile::initConstants(
   m_configuration = setupInstrumentConstants(profmap);
 
   /*
-  if (m_instrument.compare("PG3") == 0)
+  if (m_instrument == "PG3")
   {
     m_configuration = setupPG3Constants(chopperfrequency);
   }
-  else if (m_instrument.compare("NOM") == 0)
+  else if (m_instrument == "NOM")
   {
     m_configuration = setupNOMConstants(chopperfrequency);
   }
@@ -509,7 +509,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   // Check
   vector<string> colnames = ws->getColumnNames();
-  if (colnames[0].compare("Name"))
+  if (colnames[0] != "Name")
     throw runtime_error("The first column must be Name");
 
   // Parse
@@ -517,7 +517,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     TableRow tmprow = ws->getRow(irow);
     string parname;
     tmprow >> parname;
-    if (parname.compare("BANK")) {
+    if (parname != "BANK") {
       for (size_t icol = 0; icol < numbanks; ++icol) {
         double tmpdbl;
         tmprow >> tmpdbl;
@@ -1093,6 +1093,7 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   }
 
   loadfpirf->setProperty("Filename", irffilename);
+  loadfpirf->setProperty("OutputTableWorkspace", "outputTableWorkspace");
 
   loadfpirf->execute();
   if (!loadfpirf->isExecuted())

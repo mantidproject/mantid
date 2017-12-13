@@ -206,8 +206,11 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    if isinstance(run_numbers, list):
-        run_numbers = run_numbers[0]
+
+    if not run_numbers:
+        raise RuntimeError("Attempted to load empty set of workspaces. Please input at least one valid run number")
+
+    run_numbers = run_numbers[0]
 
     return run_numbers
 
@@ -544,3 +547,34 @@ def _run_number_generator(processed_string):
         return number_generator.value.tolist()
     except RuntimeError:
         raise ValueError("Could not generate run numbers from this input: " + processed_string)
+
+
+def generate_sample_geometry(sample_details):
+    """
+    Generates the expected input for sample geometry using the SampleDetails class
+    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
+    :return: A map of the sample geometry
+    """
+    return {'Shape': 'Cylinder',
+            'Height': sample_details.height(),
+            'Radius': sample_details.radius(),
+            'Center': sample_details.center()}
+
+
+def generate_sample_material(sample_details):
+    """
+    Generates the expected input for sample material using the SampleDetails class
+    :param sample_details: Instance of SampleDetails containing details about sample geometry and material
+    :return: A map of the sample material
+    """
+    material = sample_details.material_object
+    # See SetSampleMaterial for documentation on this dictionary
+    material_json = {'ChemicalFormula': material.chemical_formula}
+    if material.number_density:
+        material_json["SampleNumberDensity"] = material.number_density
+    if material.absorption_cross_section:
+        material_json["AttenuationXSection"] = material.absorption_cross_section
+    if material.scattering_cross_section:
+        material_json["ScatteringXSection"] = material.scattering_cross_section
+
+    return material_json

@@ -202,7 +202,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (instr->getName().compare("WISH") == 0)
+  if (instr->getName() == "WISH")
     bankPart = "WISHpanel";
   // Get all children
   std::vector<IComponent_const_sptr> comps;

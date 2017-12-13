@@ -36,13 +36,13 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
   // Define a source and sample position
   // Define a source component
   Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
-      "moderator", Mantid::Geometry::Object_sptr(), testInst.get());
+      "moderator", Mantid::Geometry::IObject_sptr(), testInst.get());
   source->setPos(Mantid::Kernel::V3D(0, 0.0, -15.));
   testInst->add(source);
   testInst->markAsSource(source);
   // Define a sample as a simple sphere
   Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
-      "samplePos", Mantid::Geometry::Object_sptr(), testInst.get());
+      "samplePos", Mantid::Geometry::IObject_sptr(), testInst.get());
   testInst->setPos(0.0, 0.0, 0.0);
   testInst->add(sample);
   testInst->markAsSamplePos(sample);

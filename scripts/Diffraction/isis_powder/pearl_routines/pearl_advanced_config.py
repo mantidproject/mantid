@@ -9,14 +9,15 @@ general_params = {
     "spline_coefficient": 60,
 
     "file_names": {
-        "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
-        "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
-        "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
-        "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
+         "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
+         "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
+         "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
+         "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
     },
 }
 
 long_mode_off_params = {
+    "create_cal_rebin_1_params": "100,-0.0006,19950",
     "monitor_lambda_crop_range": (0.03, 6.00),
     "monitor_integration_range": (0.6, 5.0),
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
@@ -41,6 +42,7 @@ long_mode_off_params = {
 }
 
 long_mode_on_params = {
+    "create_cal_rebin_1_params": "20300,-0.0006,39990",
     "monitor_lambda_crop_range": (5.9, 12.0),
     "monitor_integration_range": (6, 10),
     # raw_data_tof_cropping needs to be have smaller/larger values than the bank TOF cropping values or
@@ -65,6 +67,22 @@ long_mode_on_params = {
     ]
 }
 
+calibration_params = {
+    "create_cal_rebin_2_params": "1.8,0.002,2.1",
+    "create_cal_cross_correlate_params": {
+        "cross_corr_reference_spectra": 20,
+        "cross_corr_ws_index_min": 9,
+        "cross_corr_ws_index_max": 1063,
+        "cross_corr_x_min": 1.8,
+        "cross_corr_x_max": 2.1
+    },
+    "create_cal_get_detector_offsets_params": {
+        "get_det_offsets_step": 0.002,
+        "get_det_offsets_x_min": -200,
+        "get_det_offsets_x_max": 200,
+        "get_det_offsets_d_ref": 1.912795
+    }
+}
 
 variable_help = {
     "long_mode_<on/off>_params": {
@@ -100,6 +118,22 @@ variable_help = {
                                       "workspace. This is used to normalise the workspace current.",
         "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
                               "a vanadium calibration."
+    },
+
+    "calibration_params": {
+        "create_cal_rebin_1_params": "The parameters for the first rebin step used to create a calibration file",
+        "create_cal_rebin_2_params": "The parameters for the second rebin step used to create a calibration file",
+        "cross_corr_reference_spectra": "The Workspace Index of the spectra to correlate all other spectra against",
+        "cross_corr_ws_index_min": "The workspace index of the first member of the range of spectra to cross-correlate "
+                                   "against",
+        "cross_corr_ws_index_max": "The workspace index of the last member of the range of spectra to cross-correlate "
+                                   "against",
+        "cross_corr_x_min": "The starting point of the region to be cross correlated",
+        "cross_corr_x_max": "The ending point of the region to be cross correlated",
+        "get_det_offsets_step": "Step size used to bin d-spacing data in GetDetectorOffsets",
+        "get_det_offsets_x_min": "Minimum of CrossCorrelation data to search for peak, usually negative",
+        "get_det_offsets_x_max": "Maximum of CrossCorrelation data to search for peak, usually positive",
+        "get_det_offsets_d_ref": "Center of reference peak in d-space"
     }
 }
 
@@ -107,6 +141,7 @@ variable_help = {
 def get_all_adv_variables(is_long_mode_on=False):
     long_mode_params = long_mode_on_params if is_long_mode_on else long_mode_off_params
     advanced_config_dict = {}
+    advanced_config_dict.update(calibration_params)
     advanced_config_dict.update(general_params)
     advanced_config_dict.update(long_mode_params)
     return advanced_config_dict
