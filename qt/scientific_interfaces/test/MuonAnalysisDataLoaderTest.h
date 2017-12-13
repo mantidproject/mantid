@@ -264,9 +264,14 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
     const auto &data = outputWS->y(0);
-    TS_ASSERT_EQUALS(data.size(), 617);
+    TS_ASSERT_EQUALS(data.size(), 2000);
+    auto xData = outputWS->x(0);
+    auto offset = std::distance(xData.begin(),
+                                std::lower_bound(xData.begin(), xData.end(),
+                                                 options.timeLimits.first)) +
+                  1;
     for (size_t i = 0; i < expectedOutput.size(); i++) {
-      TS_ASSERT_DELTA(data[i], expectedOutput[i], 1e-6);
+      TS_ASSERT_DELTA(data[i + offset], expectedOutput[i], 1e-6);
     }
   }
 
