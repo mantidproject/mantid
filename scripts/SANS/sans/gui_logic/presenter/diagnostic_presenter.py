@@ -6,6 +6,8 @@ from mantid.kernel import Logger
 from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.enums import IntegralEnum, DetectorType
+from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 
 class DiagnosticsPagePresenter(object):
     class ConcreteDiagnosticsPageListener(DiagnosticsPage.DiagnosticsPageListener):
@@ -63,56 +65,74 @@ class DiagnosticsPagePresenter(object):
     def on_det1_horizontal_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det1_horizontal_mask
         range = self._view.det1_horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Horizontal,
-                                   DetectorType.LAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Horizontal,
+                                   DetectorType.LAB, state)
 
     def on_det2_horizontal_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det2_horizontal_mask
         range = self._view.det2_horizontal_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Horizontal,
-                                   DetectorType.HAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Horizontal,
+                                   DetectorType.HAB, state)
 
     def on_det1_vertical_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det1_vertical_mask
         range = self._view.det1_vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Vertical,
-                                   DetectorType.LAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Vertical,
+                                   DetectorType.LAB, state)
 
     def on_det2_vertical_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det2_vertical_mask
         range = self._view.det2_vertical_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Vertical,
-                                   DetectorType.HAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Vertical,
+                                   DetectorType.HAB, state)
 
     def on_det1_time_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det1_time_mask
         range = self._view.det1_time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Time,
-                                   DetectorType.LAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Time,
+                                   DetectorType.LAB, state)
 
     def on_det2_time_clicked(self):
         file = self._view.run_input
         period = self._view.period
+        state = self.create_state(file, period)
         mask = self._view.det2_time_mask
         range = self._view.det2_time_range
         listener = DiagnosticsPagePresenter.IntegralListener(self)
-        self._work_handler.process(listener, self.run_integral, file, period, range, mask, IntegralEnum.Time,
-                                   DetectorType.HAB)
+        self._work_handler.process(listener, self.run_integral, range, mask, IntegralEnum.Time,
+                                   DetectorType.HAB, state)
+
+    def create_state(self, file, period):
+        table_row = TableIndexModel(0, file, period, '', '', '', '', '', '', '', '', '', '')
+        table = TableModel()
+        table.add_table_entry(0, table_row)
+        state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
+
+        gui_state_director = GuiStateDirector(table, state_model_with_view_update, self._parent_presenter._facility)
+
+        state = gui_state_director.create_state(0)
+
+        return state
 
     def on_processing_finished_integral(self, result):
         pass
