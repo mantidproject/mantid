@@ -29,17 +29,15 @@ inline PyArrayObject *rawArray(const NdArray &obj) {
  * @param obj A pointer to an arbitrary python object
  * @returns True if the underlying object is an ndarray, false otherwise
  */
-bool NdArray::check(const boost::python::api::object &obj) {
-  return PyArray_Check(obj.ptr());
-}
+bool NdArray::check(const object &obj) { return PyArray_Check(obj.ptr()); }
 
 /**
  * Construction from a plain object. Assumes the array is actually a
  * a numpy array
  * @param obj A wrapper around a Python object pointing to a numpy array
  */
-NdArray::NdArray(const boost::python::api::object &obj)
-    : object(boost::python::detail::borrowed_reference(obj.ptr())) {}
+NdArray::NdArray(const object &obj)
+    : object(detail::borrowed_reference(obj.ptr())) {}
 
 /**
  * @return Return the shape of the array

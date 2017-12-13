@@ -50,7 +50,7 @@ template <typename CType> struct ExtractCType {
  */
 template <> struct ExtractCType<std::string> {
   /**
-   * Uses boost lexical cast to convert the type to a string
+   * Forces a Python string conversion before calling extract
    * @param value A pointer to the Python object
    * @return The value as a C type
    */
@@ -85,7 +85,7 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
 
   /**
    * Fill a provided vector with values from the sequence
-   * @param A vector<DestElementType> to fill
+   * @param dest A vector<DestElementType> to fill
    */
   inline void fill(std::vector<DestElementType> &dest) {
     auto length = static_cast<size_t>(PySequence_Size(m_obj));

@@ -121,7 +121,8 @@ const typename NDArrayToVector<DestElementType>::TypedVector
 }
 
 /**
- * @dest A pre-sized container that will receive the values from the array.
+ * @param dest A pre-sized container that will receive the values from the
+ * array.
  * It's size is checked against the array size.
  */
 template <typename DestElementType>
