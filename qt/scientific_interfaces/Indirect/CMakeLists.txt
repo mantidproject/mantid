@@ -19,6 +19,7 @@ set ( SRC_FILES
 	IndirectDataReduction.cpp
 	IndirectDataReductionTab.cpp
 	IndirectDiffractionReduction.cpp
+	IndirectFitAnalysisTab.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
@@ -65,6 +66,7 @@ set ( INC_FILES
 	IndirectDataReduction.h
 	IndirectDataReductionTab.h
 	IndirectDiffractionReduction.h
+	IndirectFitAnalysisTab.h
 	IndirectLoadILL.h
 	IndirectMolDyn.h
 	IndirectMoments.h
@@ -105,6 +107,7 @@ set ( MOC_FILES
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
+	IndirectFitAnalysisTab.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -194,8 +197,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt4
 )
-
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesIndirectQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()

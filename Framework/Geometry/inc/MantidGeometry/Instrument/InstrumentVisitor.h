@@ -24,7 +24,7 @@ class IComponent;
 class IDetector;
 class IObjComponent;
 class Instrument;
-class Object;
+class IObject;
 class ParameterMap;
 class RectangularDetector;
 
@@ -124,17 +124,20 @@ private:
   int64_t m_sampleIndex = -1;
 
   /// Null shared (empty shape)
-  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
+  boost::shared_ptr<const Mantid::Geometry::IObject> m_nullShape;
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
   boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
+
+  /// Component names
+  boost::shared_ptr<std::vector<std::string>> m_names;
 
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);

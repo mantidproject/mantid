@@ -47,19 +47,6 @@ def findQScintilla2(lib_dir)
     end
 end
 
-# Find the qt folder. This is different depending on
-# what tap you're using in homebrew
-def findQtFolder()
-    if Dir.exist?("/usr/local/opt/qt@4")
-        return '/usr/local/opt/qt@4'
-    elsif Dir.exist?("/usr/local/opt/qt")
-        return '/usr/local/opt/qt'
-    else
-        p 'Could not find the qt folder'
-        exit 1
-    end
-end
-
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 ParaView_dir = Pathname.new("@ParaView_DIR@")
@@ -159,12 +146,13 @@ if( "@MAKE_VATES@" == "ON" )
 
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
+  `cp #{ParaView_dir}/lib/libNonOrthogonalSource.dylib plugins/paraview/qt4/`
   vatesfiles = ["Contents/MacOS/MantidPlot",
                 "Contents/MacOS/libMantidQtWidgetsCommonQt4.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
                 "plugins/libMantidVatesAlgorithms.dylib",
-                "plugins/qt4/libMantidVatesSimpleGuiViewWidgets.dylib"]
-  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/*.dylib"]
+                "plugins/qt4/libMantidVatesSimpleGuiViewWidgetsQt4.dylib"]
+  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/qt4/*.dylib"]
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -196,7 +184,7 @@ if( "@MAKE_VATES@" == "ON" )
     break if issues_found == 0
   end
   #fix libNonOrthogonalSource.dylib
-  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/libNonOrthogonalSource.dylib`
+  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/qt4/libNonOrthogonalSource.dylib`
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
@@ -240,13 +228,6 @@ if( "@MAKE_VATES@" == "ON" )
   list.each do |filename|
     Qt_Executables << " -executable=#{filename}"
    end
-end
-
-qt_folder = findQtFolder()
-if not Dir.exist?("#{qt_folder}/plugins")
-    p "Cannot find the Qt4 plugins folder"
-    p "You probably need to simlink the plugins folder in #{qt_folder}/lib/qt/plugins to #{qt_folder}/plugins"
-    exit 1
 end
 
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
@@ -304,7 +285,7 @@ end
 pyqt4_patterns = ["**/PyQt4/*.so"]
 change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
 
-QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"#{qt_folder}/lib")
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"/usr/local/opt/qt@4/lib")
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"

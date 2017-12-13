@@ -106,7 +106,7 @@ void ReadGroupsFromFile::exec() {
 
   // Determine whether the user wants to see unselected detectors or not
   const std::string su = getProperty("ShowUnselected");
-  bool showunselected = (!su.compare("True"));
+  bool showunselected = bool(su == "True");
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {

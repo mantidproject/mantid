@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffractionPresenter.cpp
@@ -9,12 +10,14 @@ set ( SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
 	EnggDiffCalibSettings.h
+	EnggDiffFittingModel.h
 	EnggDiffFittingPresWorker.h
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	IEnggDiffFittingModel.h
 	IEnggDiffFittingPresenter.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
@@ -67,7 +70,3 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
     @loader_path/../../plugins/qt4
 )
 
-if ( MSVC_IDE )
-#  # Add to the 'ScientificInterfaces' group in VS
-  set_property ( TARGET MantidScientificInterfacesEnggDiffractionQt4 PROPERTY FOLDER "ScientificInterfaces" )
-endif()

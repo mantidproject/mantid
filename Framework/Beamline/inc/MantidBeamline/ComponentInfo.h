@@ -9,6 +9,7 @@
 #include <utility>
 #include <cstddef>
 #include <Eigen/Geometry>
+#include <string>
 
 namespace Mantid {
 namespace Beamline {
@@ -54,13 +55,33 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
   Mantid::Kernel::cow_ptr<std::vector<bool>> m_isStructuredBank;
+  boost::shared_ptr<const std::vector<std::string>> m_names;
 
   const size_t m_size = 0;
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
-
-  void failIfScanning() const;
+  size_t m_scanCounts = 1;
+  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
+      nullptr};
+  /// For (component index, time index) -> linear index conversions
+  Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  /// For linear index -> (detector index, time index) conversions
+  Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
+  void failIfDetectorInfoScanning() const;
+  size_t linearIndex(const std::pair<size_t, size_t> &index) const;
+  void initScanIntervals();
+  void checkNoTimeDependence() const;
+  std::vector<bool> buildMergeIndicesSync(const ComponentInfo &other) const;
+  void checkSizes(const ComponentInfo &other) const;
+  void initIndices();
+  void checkIdenticalIntervals(const ComponentInfo &other,
+                               const size_t linearIndexOther,
+                               const size_t linearIndexThis) const;
+  void checkSpecialIndices(size_t componentIndex) const;
+  size_t nonDetectorSize() const;
+  /// Copy constructor is private because of the way DetectorInfo stored
+  ComponentInfo(const ComponentInfo &) = default;
 
 public:
   ComponentInfo();
@@ -77,8 +98,12 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
                 boost::shared_ptr<std::vector<bool>> isStructuredBank,
+                boost::shared_ptr<const std::vector<std::string>> names,
                 int64_t sourceIndex, int64_t sampleIndex);
-
+  /// Copy assignment not permitted because of the way DetectorInfo stored
+  ComponentInfo &operator=(const ComponentInfo &other) = delete;
+  /// Clone method
+  std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
   size_t size() const;
@@ -90,12 +115,18 @@ public:
   }
 
   Eigen::Vector3d position(const size_t componentIndex) const;
+  Eigen::Vector3d position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
+  Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
   Eigen::Vector3d relativePosition(const size_t componentIndex) const;
   Eigen::Quaterniond relativeRotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex,
                    const Eigen::Vector3d &newPosition);
+  void setPosition(const std::pair<size_t, size_t> index,
+                   const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex,
+                   const Eigen::Quaterniond &newRotation);
+  void setRotation(const std::pair<size_t, size_t> index,
                    const Eigen::Quaterniond &newRotation);
 
   size_t parent(const size_t componentIndex) const;
@@ -110,10 +141,20 @@ public:
   size_t sample() const;
   size_t root() const;
   double l1() const;
+  std::string name(const size_t componentIndex) const;
+  size_t indexOf(const std::string &name) const;
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Eigen::Vector3d &scaleFactor);
   bool isStructuredBank(const size_t componentIndex) const;
+
+  size_t scanCount(const size_t index) const;
+  size_t scanSize() const;
+  bool isScanning() const;
+  std::pair<int64_t, int64_t>
+  scanInterval(const std::pair<size_t, size_t> &index) const;
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  void merge(const ComponentInfo &other);
 
   class Range {
   private:
@@ -138,6 +179,14 @@ public:
 
   Range detectorRangeInSubtree(const size_t index) const;
   Range componentRangeInSubtree(const size_t index) const;
+
+private:
+  void doSetPosition(const std::pair<size_t, size_t> &index,
+                     const Eigen::Vector3d &newPosition,
+                     const ComponentInfo::Range &detectorRange);
+  void doSetRotation(const std::pair<size_t, size_t> &index,
+                     const Eigen::Quaterniond &newRotation,
+                     const ComponentInfo::Range &detectorRange);
 };
 } // namespace Beamline
 } // namespace Mantid

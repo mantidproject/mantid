@@ -116,6 +116,7 @@ The following parameters may optionally be passed:
 
 - :ref:`mode_hrpd_isis-powder-diffraction-ref`
 - :ref:`sample_empty_hrpd_isis-powder-diffraction-ref`
+- :ref:`suffix_hrpd_isis-powder-diffraction-ref`
   
 If :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref` is set to
 **True** the following parameter is required in addition to the above:
@@ -304,25 +305,6 @@ Example Input:
   # In this example assume we mean a cycle with run numbers 100-200
   hrpd_example.create_vanadium(first_cycle_run_no=100, ...)
 
-.. _mode_hrpd_isis-powder-diffraction-ref:
-
-mode
-^^^^
-*Optional*
-
-Indicates the coupling mode of the runs in
-:ref:`create_vanadium_hrpd_isis-powder-diffraction-ref` and
-:ref:`focus_hrpd_isis-powder-diffraction-ref`.
-
-Accepted values are **coupled** and **decoupled**. By default this is
-set to **coupled**, but may be overridden as required,
-
-.. code-block:: python
-
-  hrpd_example.create_vanadium(mode="coupled", ...)
-  # Or
-  hrpd_example.focus(mode="decoupled", ...)
-
 .. _multiple_scattering_hrpd_isis-powder-diffraction-ref:
 
 multiple_scattering
@@ -436,7 +418,22 @@ Example Input:
 
   # Scale sample empty to 90% of original
   hrpd_example.focus(sample_empty_scale=0.9, ...)
-  
+
+.. _suffix_hrpd_isis-powder-diffraction-ref:
+
+suffix
+^^^^^^
+*Optional*
+
+This parameter specifies a suffix to append the names of output files
+during a focus.
+
+Example Input:
+
+.. code-block:: python
+
+  hrpd_example.focus(suffix="-corr", ...)
+
 .. _user_name_hrpd_isis-powder-diffraction-ref:
 
 user_name
@@ -529,6 +526,13 @@ On HRPD this is set to the following:
 
 .. code-block:: python
 
+  # window = "10-50"
+  focused_cropping_values = [
+        (1.2e4, 4.99e4),  # Bank 1
+        (1.2e4, 4.99e4),  # Bank 2
+        (1.2e4, 4.99e4),  # Bank 3
+  ]
+
   # window = "10-110"
   focused_cropping_values = [
         (1e4, 1.1e5),    # Bank 1
@@ -549,7 +553,14 @@ On HRPD this is set to the following:
         (9.6e4, 2.18e5),  # Bank 2
         (1e5, 2.11e5)     # Bank 3
   ]
-  
+
+  # window = "180-280"
+  focused_cropping_values = [
+        (1.86e5, 2.8e5),   # Bank 1
+        (1.8e5, 2.798e5),  # Bank 2
+        (1.9e5, 2.795e5),  # Bank 3
+  ]
+
 .. _grouping_file_name_hrpd_isis-powder-diffraction-ref:
   
 grouping_file_name
@@ -566,6 +577,22 @@ On HRPD this is set to the following:
 ..  code-block:: python
 		 
   grouping_file_name = "hrpd_new_072_01_corr.cal"
+
+.. _mode_hrpd_isis-powder-diffraction-ref:
+
+mode
+^^^^
+Indicates the coupling mode of the runs in
+:ref:`create_vanadium_hrpd_isis-powder-diffraction-ref` and
+:ref:`focus_hrpd_isis-powder-diffraction-ref`.
+
+Accepted values are **coupled** and **decoupled**.
+
+On HRPD this is set to the following:
+
+.. code-block:: python
+
+  mode = "coupled"
 
 spline_coefficient
 ^^^^^^^^^^^^^^^^^^
@@ -592,6 +619,9 @@ On HRPD this is set to the following:
 
 .. code-block:: python
 
+  # window = "10-50"
+  vanadium_tof_cropping = (1.1e4, 5e4)
+
   # window = "10-110"
   vanadium_tof_cropping = (1e4, 1.2e5)
 
@@ -600,6 +630,9 @@ On HRPD this is set to the following:
 
   # window = "100-200"
   vanadium_tof_cropping = (1e5, 2.15e5)
+
+  # window = "180-280"
+  vanadium_tof_cropping = (1.8e5, 2.8e5)
 
 Vanadium Sample details
 ^^^^^^^^^^^^^^^^^^^^^^^

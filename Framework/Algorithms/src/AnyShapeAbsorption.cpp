@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -43,16 +43,19 @@ std::string AnyShapeAbsorption::sampleXML() {
 void AnyShapeAbsorption::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
-  Object integrationVolume = *m_sampleObject;
+  auto integrationVolume =
+      boost::shared_ptr<const IObject>(m_sampleObject->clone());
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     integrationVolume = constructGaugeVolume();
   }
 
-  // Construct the trial set of elements from the object's bounding box
-  const double big(10.0); // Seems like bounding box code searches inwards, 10m
-                          // should be enough!
-  double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
-  integrationVolume.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  auto bbox = integrationVolume->getBoundingBox();
+  double minX = bbox.xMin();
+  double maxX = bbox.xMax();
+  double minY = bbox.yMin();
+  double maxY = bbox.yMax();
+  double minZ = bbox.zMin();
+  double maxZ = bbox.zMax();
   assert(maxX > minX);
   assert(maxY > minY);
   assert(maxZ > minZ);
@@ -92,7 +95,7 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
         // Set the current position in the sample in Cartesian coordinates.
         const V3D currentPosition(x, y, z);
         // Check if the current point is within the object. If not, skip.
-        if (integrationVolume.isValid(currentPosition)) {
+        if (integrationVolume->isValid(currentPosition)) {
           // Create track for distance in sample before scattering point
           Track incoming(currentPosition, m_beamDirection * -1.0);
           // We have an issue where occasionally, even though a point is within
@@ -120,22 +123,17 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
                    YSliceThickness * ZSliceThickness;
 }
 
-Geometry::Object AnyShapeAbsorption::constructGaugeVolume() {
+boost::shared_ptr<const Geometry::IObject>
+AnyShapeAbsorption::constructGaugeVolume() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 
   // Retrieve and create the gauge volume shape
-  boost::shared_ptr<const Geometry::Object> volume = ShapeFactory().createShape(
-      m_inputWS->run().getProperty("GaugeVolume")->value());
-  // Although DefineGaugeVolume algorithm will have checked validity of XML, do
-  // so again here
-  if (!(volume->topRule()) && volume->getSurfacePtr().empty()) {
-    g_log.error("Invalid gauge volume definition. Unable to construct "
-                "integration volume.");
-    throw std::invalid_argument("Invalid gauge volume definition.");
-  }
+  boost::shared_ptr<const Geometry::IObject> volume =
+      ShapeFactory().createShape(
+          m_inputWS->run().getProperty("GaugeVolume")->value());
 
-  return *volume;
+  return volume;
 }
 
 } // namespace Algorithms
