@@ -1,13 +1,13 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_cow.h"
-#include <boost/make_shared.hpp>
-#include <numeric>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <iterator>
+#include <numeric>
+#include <sstream>
 #include <utility>
 #include <vector>
-#include <sstream>
-#include <iterator>
 
 namespace Mantid {
 namespace Beamline {
@@ -23,8 +23,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
     throw std::runtime_error(
         "ComponentInfo: cannot set scan interval with start >= end");
 }
-}
-}
+} // namespace
+} // namespace
 
 ComponentInfo::ComponentInfo()
     : m_assemblySortedDetectorIndices(
@@ -503,7 +503,7 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];
 }
 
-std::string ComponentInfo::name(const size_t componentIndex) const {
+const std::string &ComponentInfo::name(const size_t componentIndex) const {
   return (*m_names)[componentIndex];
 }
 

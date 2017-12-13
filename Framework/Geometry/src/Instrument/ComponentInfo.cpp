@@ -1,16 +1,16 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
-#include <exception>
-#include <string>
 #include <Eigen/Geometry>
-#include <stack>
+#include <exception>
 #include <iterator>
+#include <stack>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -40,7 +40,7 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point,
                                         compInfo.position(componentIndex),
                                     compInfo, componentIndex));
 }
-}
+} // namespace
 
 /**
  * Constructor.
@@ -211,7 +211,7 @@ Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
 }
 
-std::string ComponentInfo::name(const size_t componentIndex) const {
+const std::string &ComponentInfo::name(const size_t componentIndex) const {
   return m_componentInfo->name(componentIndex);
 }
 

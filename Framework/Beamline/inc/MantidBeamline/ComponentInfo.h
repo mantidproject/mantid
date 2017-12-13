@@ -3,13 +3,13 @@
 
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/iterator/reverse_iterator.hpp>
-#include <vector>
-#include <utility>
-#include <cstddef>
 #include <Eigen/Geometry>
+#include <boost/iterator/reverse_iterator.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstddef>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -141,7 +141,7 @@ public:
   size_t sample() const;
   size_t root() const;
   double l1() const;
-  std::string name(const size_t componentIndex) const;
+  const std::string &name(const size_t componentIndex) const;
   size_t indexOf(const std::string &name) const;
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,

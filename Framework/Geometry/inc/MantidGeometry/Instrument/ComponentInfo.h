@@ -3,21 +3,21 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include <boost/shared_ptr.hpp>
 #include <unordered_map>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 
 namespace Kernel {
 class Quat;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class IComponent;
 class IObject;
-}
+} // namespace Geometry
 
 namespace Beamline {
 class ComponentInfo;
@@ -75,8 +75,9 @@ public:
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-      boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
-                                                 size_t>> componentIdToIndexMap,
+      boost::shared_ptr<
+          const std::unordered_map<Geometry::IComponent *, size_t>>
+          componentIdToIndexMap,
       boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
           shapes);
   ~ComponentInfo();
@@ -112,7 +113,7 @@ public:
   size_t sample() const;
   double l1() const;
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
-  std::string name(const size_t componentIndex) const;
+  const std::string &name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
   size_t root();
