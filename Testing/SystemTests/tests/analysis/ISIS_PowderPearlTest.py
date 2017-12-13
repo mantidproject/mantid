@@ -209,7 +209,7 @@ def run_focus():
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
-    return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
+    return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
                              perform_attenuation=True, attenuation_file_path=attenuation_path)
 
 
