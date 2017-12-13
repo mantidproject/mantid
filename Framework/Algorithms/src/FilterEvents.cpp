@@ -393,7 +393,7 @@ void FilterEvents::processAlgorithmProperties() {
 
   m_toGroupWS = this->getProperty("GroupWorkspaces");
 
-  if (m_toGroupWS && m_outputWSNameBase.compare(m_eventWS->getName()) == 0) {
+  if (m_toGroupWS && (m_outputWSNameBase == m_eventWS->getName())) {
     std::stringstream errss;
     errss << "It is not allowed to group output workspaces into the same name "
              "(i..e, OutputWorkspaceBaseName = " << m_outputWSNameBase
@@ -540,9 +540,7 @@ void FilterEvents::copyNoneSplitLogs(
   bool exclude_listed_logs = getProperty("ExcludeSpecifiedLogs");
   std::vector<std::string> tsp_logs = getProperty("TimeSeriesPropertyLogs");
   // convert to set
-  std::set<std::string> tsp_logs_set;
-  for (auto iter = tsp_logs.begin(); iter != tsp_logs.end(); ++iter)
-    tsp_logs_set.insert(*iter);
+  std::set<std::string> tsp_logs_set(tsp_logs.begin(), tsp_logs.end());
 
   std::set<std::string>::iterator set_iter;
   // initialize
@@ -551,9 +549,8 @@ void FilterEvents::copyNoneSplitLogs(
   bool_tsp_name_vector.clear();
 
   std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
-  for (size_t i = 0; i < prop_vector.size(); ++i) {
+  for (auto *prop_i : prop_vector) {
     // get property
-    Property *prop_i = prop_vector[i];
     std::string name_i = prop_i->name();
 
     // cast to different type of TimeSeriesProperties
@@ -659,21 +656,18 @@ void FilterEvents::splitTimeSeriesLogs(
     ++max_target_index;
 
   // deal with integer time series property
-  for (size_t i = 0; i < int_tsp_vector.size(); ++i) {
-    splitTimeSeriesProperty(int_tsp_vector[i], split_datetime_vec,
-                            max_target_index);
+  for (const auto &int_tsp : int_tsp_vector) {
+    splitTimeSeriesProperty(int_tsp, split_datetime_vec, max_target_index);
   }
 
   // split double time series property
-  for (size_t i = 0; i < dbl_tsp_vector.size(); ++i) {
-    splitTimeSeriesProperty(dbl_tsp_vector[i], split_datetime_vec,
-                            max_target_index);
+  for (const auto &dbl_tsp : dbl_tsp_vector) {
+    splitTimeSeriesProperty(dbl_tsp, split_datetime_vec, max_target_index);
   }
 
   // deal with bool time series property
-  for (size_t i_bool = 0; i_bool < bool_tsp_vector.size(); ++i_bool) {
-    splitTimeSeriesProperty(bool_tsp_vector[i_bool], split_datetime_vec,
-                            max_target_index);
+  for (const auto &bool_tsp : bool_tsp_vector) {
+    splitTimeSeriesProperty(bool_tsp, split_datetime_vec, max_target_index);
   }
 
   // integrate proton charge

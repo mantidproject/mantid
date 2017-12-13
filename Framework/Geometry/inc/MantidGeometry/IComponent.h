@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 
 #include <map>
@@ -21,7 +22,6 @@ class Quat;
 
 namespace Geometry {
 class IComponent;
-class BoundingBox;
 class ParameterMap;
 
 /// Define a type for a unique component identifier.

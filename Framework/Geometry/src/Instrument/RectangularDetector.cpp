@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
@@ -367,7 +367,7 @@ V3D RectangularDetector::getRelativePosAtXY(int x, int y) const {
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
  *
  */
-void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
+void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
                                      int xpixels, double xstart, double xstep,
                                      int ypixels, double ystart, double ystep,
                                      int idstart, bool idfillbyfirst_y,
@@ -701,7 +701,7 @@ void RectangularDetector::initDraw() const {
 
 //-------------------------------------------------------------------------------------------------
 /// Returns the shape of the Object
-const boost::shared_ptr<const Object> RectangularDetector::shape() const {
+const boost::shared_ptr<const IObject> RectangularDetector::shape() const {
   // --- Create a cuboid shape for your pixels ----
   double szX = m_xpixels;
   double szY = m_ypixels;
@@ -720,7 +720,7 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const {
 
   std::string xmlCuboidShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
-  boost::shared_ptr<Geometry::Object> cuboidShape =
+  boost::shared_ptr<Geometry::IObject> cuboidShape =
       shapeCreator.createShape(xmlCuboidShape);
 
   return cuboidShape;

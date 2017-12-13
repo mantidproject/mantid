@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -31,13 +32,14 @@ class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
 /**
-\class Object
-\brief Global object for object
+\class CSGObject
+\brief Constructive Solid Geometry object
 \version 1.0
 \date July 2007
 \author S. Ansell
 
-An object is a collection of Rules and surface objects
+A Constructive Solid Geometry (CSG) object, implemented
+as a collection of Rules and surface objects
 
 Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -60,33 +62,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL Object {
+class MANTID_GEOMETRY_DLL CSGObject : public IObject {
 public:
   /// Default constructor
-  Object();
+  CSGObject();
   /// Constructor providing shape xml.
-  Object(const std::string &shapeXML);
+  CSGObject(const std::string &shapeXML);
   /// Copy constructor
-  Object(const Object &);
+  CSGObject(const CSGObject &);
   /// Assignment operator
-  Object &operator=(const Object &);
+  CSGObject &operator=(const CSGObject &);
   /// Destructor
-  virtual ~Object();
+  virtual ~CSGObject();
+  /// Clone
+  IObject *clone() const override { return new CSGObject(*this); }
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) { m_id = id; }
-  inline const std::string &id() const { return m_id; }
+  void setID(const std::string &id) override { m_id = id; }
+  const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) { ObjNum = nx; } ///< Set Name
-  int getName() const { return ObjNum; }      ///< Get Name
+  void setName(const int nx) override { ObjNum = nx; } ///< Set Name
+  int getName() const override { return ObjNum; }      ///< Get Name
 
-  void setMaterial(const Kernel::Material &material);
-  const Kernel::Material material() const;
+  void setMaterial(const Kernel::Material &material) override;
+  const Kernel::Material material() const override;
 
   /// Return whether this object has a valid shape
-  bool hasValidShape() const;
-  int setObject(const int ON, const std::string &Ln);
+  bool hasValidShape() const override;
+  int setObject(const int ON, const std::string &Ln) override;
   int procString(const std::string &Line);
   int complementaryObject(const int Cnum,
                           std::string &Ln); ///< Process a complementary object
@@ -99,37 +103,41 @@ public:
   int substituteSurf(const int SurfN, const int NsurfN,
                      const boost::shared_ptr<Surface> &SPtr);
   void makeComplement();
-  void convertComplement(const std::map<int, Object> &);
+  void convertComplement(const std::map<int, CSGObject> &);
 
   virtual void print() const;
   void printTree() const;
 
-  bool isValid(const Kernel::V3D &) const; ///< Check if a point is valid
+  bool
+  isValid(const Kernel::V3D &) const override; ///< Check if a point is valid
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
-  bool isOnSide(const Kernel::V3D &) const;
-  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
+  bool isOnSide(const Kernel::V3D &) const override;
+  int calcValidType(const Kernel::V3D &Pt,
+                    const Kernel::V3D &uVec) const override;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
-  const std::vector<const Surface *> &getSurfacePtr() const { return SurList; }
+  const std::vector<const Surface *> &getSurfacePtr() const {
+    return m_SurList;
+  }
   /// Get the list of surfaces
-  std::vector<const Surface *> &getSurfacePtr() { return SurList; }
+  std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
 
   std::string cellCompStr() const;
-  std::string cellStr(const std::map<int, Object> &) const;
+  std::string cellStr(const std::map<int, CSGObject> &) const;
 
   std::string str() const;
   void write(std::ostream &) const; ///< MCNPX output
 
   // INTERSECTION
-  int interceptSurface(Geometry::Track &) const;
+  int interceptSurface(Geometry::Track &) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
-  double solidAngle(const Kernel::V3D &observer) const;
+  double solidAngle(const Kernel::V3D &observer) const override;
   // Solid angle with a scaling of the object
   double solidAngle(const Kernel::V3D &observer,
-                    const Kernel::V3D &scaleFactor) const;
+                    const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
   double triangleSolidAngle(const Kernel::V3D &observer) const;
   // Solid angle via triangulation with scaling factor for object size
@@ -139,15 +147,15 @@ public:
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
   /// Calculates the volume of this object.
-  double volume() const;
+  double volume() const override;
 
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin) const;
+                      double &ymin, double &zmin) const override;
 
   /// Return cached value of axis-aligned bounding box
-  const BoundingBox &getBoundingBox() const;
+  const BoundingBox &getBoundingBox() const override;
   /// Define axis-aligned bounding box
   void defineBoundingBox(const double &xMax, const double &yMax,
                          const double &zMax, const double &xMin,
@@ -155,32 +163,34 @@ public:
   /// Set a null bounding box for this object
   void setNullBoundingBox();
   // find internal point to object
-  int getPointInObject(Kernel::V3D &point) const;
+  int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const;
+                                    const size_t) const override;
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                     const BoundingBox &activeRegion,
-                                    const size_t) const;
+                                    const size_t) const override;
 
   // Rendering member functions
-  void draw() const;
+  void draw() const override;
   // Initialize Drawing
-  void initDraw() const;
+  void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler();
+  boost::shared_ptr<GeometryHandler> getGeometryHandler() override;
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(
+      boost::shared_ptr<vtkGeometryCacheWriter>) override;
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(
+      boost::shared_ptr<vtkGeometryCacheReader>) override;
   void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const;
+                     double &myradius, double &myheight) const override;
   /// Getter for the shape xml
-  std::string getShapeXML() const;
+  std::string getShapeXML() const override;
 
 private:
   int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
@@ -237,7 +247,7 @@ private:
   /// Creation number
   int ObjNum;
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> handle;
+  boost::shared_ptr<GeometryHandler> m_handler;
   friend class CacheGeometryHandler;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
@@ -259,14 +269,9 @@ private:
   std::unique_ptr<Kernel::Material> m_material;
 
 protected:
-  std::vector<const Surface *>
-      SurList; ///< Full surfaces (make a map including complementary object ?)
+  std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
+  /// including complementary object ?)
 };
-
-/// Typdef for a shared pointer
-typedef boost::shared_ptr<Object> Object_sptr;
-/// Typdef for a shared pointer to a const object
-typedef boost::shared_ptr<const Object> Object_const_sptr;
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
