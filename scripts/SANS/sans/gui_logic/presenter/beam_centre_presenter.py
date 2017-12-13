@@ -156,7 +156,8 @@ def find_beam_centre(state, beam_centre_model):
                                tolerance=beam_centre_model.tolerance,
                                find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
     else:
-        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max, max_iter=beam_centre_model.max_iterations,
-                           x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
-                           find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
+        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
+                               max_iter=beam_centre_model.max_iterations, x_start=beam_centre_model.lab_pos_1,
+                               y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
+                               find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
     return centre

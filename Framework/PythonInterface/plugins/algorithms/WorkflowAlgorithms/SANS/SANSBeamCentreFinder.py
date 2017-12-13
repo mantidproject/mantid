@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
 from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm, create_managed_non_child_algorithm
+from sans.common.general_functions import create_child_algorithm
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
 from sans.algorithm_detail.crop_helper import get_component_name
@@ -189,7 +189,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR) + "  SY=" + str(residueTB))
                 if mantidplot:
-                    graph_handle = self._plot_quartiles(output_workspaces)
+                    self._plot_quartiles(output_workspaces)
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR > resLR_old:
