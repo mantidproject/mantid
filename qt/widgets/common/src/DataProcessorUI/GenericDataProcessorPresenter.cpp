@@ -17,6 +17,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
@@ -38,8 +39,6 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-using OptionsMap = std::map<QString, QString>;
-
 void setAlgorithmProperty(IAlgorithm *const alg, std::string const &name,
                           std::string const &value) {
   if (!value.empty())

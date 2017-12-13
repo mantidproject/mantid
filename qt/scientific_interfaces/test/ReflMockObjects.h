@@ -18,6 +18,7 @@
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;

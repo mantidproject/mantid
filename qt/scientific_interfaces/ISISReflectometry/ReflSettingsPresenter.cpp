@@ -14,6 +14,7 @@ namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::Geometry;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** Constructor
 * @param view :: The view we are handling

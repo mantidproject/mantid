@@ -52,9 +52,11 @@ public:
   /// Returns values passed for 'Transmission run(s)'
   std::string getTransmissionRuns() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  OptionsMap getTransmissionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  OptionsMap getReductionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
 

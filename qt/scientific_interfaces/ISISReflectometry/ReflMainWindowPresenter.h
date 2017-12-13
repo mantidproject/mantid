@@ -57,9 +57,11 @@ public:
   /// Returns values passed for 'Transmission run(s)'
   std::string getTransmissionRuns(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  OptionsMap getTransmissionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  OptionsMap getReductionOptions(int group) const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions(int group) const override;
   /// Returns time-slicing values

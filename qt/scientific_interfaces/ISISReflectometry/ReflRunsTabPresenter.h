@@ -70,9 +70,11 @@ public:
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  OptionsMap getPreprocessingOptions() const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getPreprocessingOptions() const override;
   QString getPreprocessingOptionsAsString() const override;
-  OptionsMap getProcessingOptions() const override;
+  MantidWidgets::DataProcessor::OptionsMap
+  getProcessingOptions() const override;
   QString getProcessingOptionsAsString() const override;
   QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
@@ -121,7 +123,9 @@ private:
   /// change the instrument
   void changeInstrument();
   /// Convert an options map to a string
-  QString convertMapToString(const OptionsMap &optionsMap) const;
+  QString convertMapToString(
+      const MantidWidgets::DataProcessor::OptionsMap &optionsMap)
+      const;
 };
 }
 }

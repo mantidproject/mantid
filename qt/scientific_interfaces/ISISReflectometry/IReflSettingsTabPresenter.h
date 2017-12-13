@@ -1,14 +1,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H
 
-#include <QString>
-#include <map>
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-using OptionsMap = std::map<QString, QString>;
 
 class IReflMainWindowPresenter;
 
@@ -43,9 +41,11 @@ public:
   virtual ~IReflSettingsTabPresenter(){};
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;
-  virtual OptionsMap getTransmissionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsMap
+  getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual OptionsMap getReductionOptions(int group) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsMap
+  getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
   /// Set current instrument name

@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 
 #include <QSet>
 #include <QString>
@@ -10,8 +11,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-
-using OptionsMap = std::map<QString, QString>;
 
 /** @class DataProcessorMainPresenter
 

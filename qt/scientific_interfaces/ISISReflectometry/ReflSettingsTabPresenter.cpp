@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

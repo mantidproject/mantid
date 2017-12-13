@@ -1,14 +1,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
-#include <QString>
-#include <map>
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-using OptionsMap = std::map<QString, QString>;
 
 class IReflMainWindowPresenter;
 
@@ -43,9 +41,11 @@ public:
   virtual ~IReflSettingsPresenter(){};
   /// Pre-processing
   virtual std::string getTransmissionRuns() const = 0;
-  virtual OptionsMap getTransmissionOptions() const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsMap
+  getTransmissionOptions() const = 0;
   /// Processing
-  virtual OptionsMap getReductionOptions() const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsMap
+  getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
 

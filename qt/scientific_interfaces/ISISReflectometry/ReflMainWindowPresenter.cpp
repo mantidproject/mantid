@@ -5,6 +5,8 @@
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

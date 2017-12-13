@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
@@ -48,8 +49,7 @@ GenerateNotebook::GenerateNotebook(
     QString name, QString instrument, WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
-    std::map<QString, QString> preprocessingOptionsMap,
-    std::map<QString, QString> processingOptions)
+    OptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
       m_whitelist(std::move(whitelist)),
       m_preprocessMap(std::move(preprocessMap)),
@@ -398,8 +398,8 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const std::map<QString, QString> &preprocessingOptionsMap,
-                const std::map<QString, QString> &processingOptions) {
+                const OptionsMap &preprocessingOptionsMap,
+                const OptionsMap &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");

@@ -7,11 +7,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
@@ -40,7 +41,6 @@ class GenericDataProcessorPresenterThread;
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;
 using GroupQueue = std::queue<std::pair<int, RowQueue>>;
-using OptionsMap = std::map<QString, QString>;
 
 /** @class GenericDataProcessorPresenter
 
