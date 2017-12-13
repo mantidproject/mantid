@@ -169,6 +169,7 @@ and the reconstructed image, i.e. Fourier transform (right).
    print("Third  reconstructed coefficient: {:.3f}".format(data.readY(0)[20]))
    print("Fourth reconstructed coefficient: {:.3f}".format(data.readY(0)[12]))
    print("Fifth  reconstructed coefficient: {:.3f}".format(data.readY(0)[14]))
+   print "Number of iterations: "+str( len(evolAngle.readX(0)))
 
 Output:
 
@@ -179,6 +180,7 @@ Output:
    Third  reconstructed coefficient: 0.846
    Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
+   Number of iterations: 3541
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -216,6 +218,7 @@ and :ref:`algm-FFT` (right).
    # Do not change these numbers - they test if noise has been added to the alg    
    print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
    print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
+   print "Number of iterations: "+str( len(evolAngle.readX(0)))
    
 Output:
 
@@ -226,6 +229,7 @@ Output:
    Image at 1.359: 0.100
    Negative background 0.006431
    Positive background 0.006431
+   Number of iterations: 22
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
@@ -249,6 +253,7 @@ and its imaginary part (right).
    print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(1)[129], image.readY(1)[129]))
    print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[135], image.readY(1)[135]))
    print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[141], image.readY(1)[141]))
+   print "Number of iterations: "+str( len(evolAngle.readX(0)))
 
 Output:
 
@@ -260,6 +265,8 @@ Output:
    Image (imaginary part) at -1.389: -0.277
    Image (imaginary part) at  0.000:  0.000
    Image (imaginary part) at  1.389:  0.277
+   Number of iterations: 33
+
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
@@ -292,6 +299,7 @@ the original and reconstructed data (left), and the reconstructed image (right).
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[104], image.readY(0)[104]))
+   print "Number of iterations: "+str( len(evolAngle.readX(0)))
 
 Output:
 
@@ -300,6 +308,7 @@ Output:
    Image (real part) at 0.318: 0.000
    Image (real part) at 0.477: 5.862
    Image (real part) at 0.637: 0.000
+   Number of iterations: 20000
 
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
@@ -344,7 +353,9 @@ image in order to obtain smooth results).
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
-
+   print "Number of iterations: "+str( len(evolAngle.readX(0)))
+   print "Number of iterations: "+str( len(evolAngleP.readX(0)))
+   
 Output:
 
 .. testoutput:: ExRealPosImage
@@ -352,6 +363,8 @@ Output:
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
    Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
    Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Number of iterations: 20000
+   Number of iterations: 11
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -391,6 +404,8 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
 
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
+   print "Number of iterations: "+str( len(evolAngle1.readX(0)))
+   print "Number of iterations: "+str( len(evolAngle2.readX(0)))
 
 Output:
 
@@ -398,6 +413,8 @@ Output:
 
    Image at 0.000: 0.035 (ResolutionFactor=1)
    Image at 0.000: 0.068 (ResolutionFactor=2)
+   Number of iterations: 33
+   Number of iterations: 20
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
