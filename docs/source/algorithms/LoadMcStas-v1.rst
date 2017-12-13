@@ -104,9 +104,10 @@ Usage
    print("Number of histograms in event data: {}".format(eventData.getNumberHistograms()))
    print("Name of event data: {}".format(eventData.getName()))
 
-   someHistogramData = ws[4]
+   someHistogramData = ws[2]
    print("Number of histograms in hist data: {}".format(someHistogramData.getNumberHistograms()))
    print("Name of hist data: {}".format(someHistogramData.getName()))
+
 
 Output:
 
@@ -117,6 +118,47 @@ Output:
    Name of event data: EventData_ws
    Number of histograms in hist data: 1
    Name of hist data: Edet.dat_ws
+
+
+.. testcode:: CheckEqualScattering
+
+   # Load the data into tuple
+   ws = LoadMcStas('mcstas_event_hist.h5')
+
+   # Calculate total of all scattering
+   all_scattering_event_ws = ws[1]
+   total_all = 0
+   for i in range(all_scattering_event_ws.getNumberHistograms()):
+    total_all += all_scattering_event_ws.readY(i)[0]
+   print("The sum of all scattering spectra: {0:.4e}".format(total_all))
+
+   # Calculate total of single scatter
+   single_scatter_event_ws = ws[5]
+   total_single = 0
+   for i in range(single_scatter_event_ws.getNumberHistograms()):
+    total_single += single_scatter_event_ws.readY(i)[0]
+   print("The sum of all single scattering spectra: {0:.4e}".format(total_single))
+
+   # Calculate total of multiple scatter
+   multiple_scatter_event_ws = ws[6]
+   total_multiple = 0
+   for i in range(multiple_scatter_event_ws.getNumberHistograms()):
+    total_multiple += multiple_scatter_event_ws.readY(i)[0]
+   print("The sum of all multiple scattering spectra: {0:.4e}".format(total_multiple))
+
+   # Check equality
+   sum_of_scattering = total_multiple + total_single
+   # This is equal to the sum of all scattering spectra (ws[1])
+   print("Sum of single and multiple scattering workspaces: {0:.4e}".format(total_single + total_multiple))
+
+Output:
+
+.. testoutput:: CheckEqualScattering
+
+   The sum of all scattering spectra: 1.071638e-17
+   The sum of all single scattering spectra: 1.071413e-17
+   The sum of all multiple scattering spectra: 2.245576e-21
+   Sum of single and multiple scattering workspaces: 1.071638e-17
 
 .. categories::
 
