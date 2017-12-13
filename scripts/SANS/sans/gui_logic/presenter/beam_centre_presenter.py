@@ -92,8 +92,6 @@ class BeamCentrePresenter(object):
         # Run the task
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
-        state_copy.convert_to_q.q_min = self._beam_centre_model.q_min
-        state_copy.convert_to_q.q_max = self._beam_centre_model.q_max
 
         self._work_handler.process(listener, find_beam_centre, state_copy, self._beam_centre_model)
 
@@ -132,8 +130,6 @@ def find_beam_centre(state, beam_centre_model):
     :param beam_centre_model: An instance of the BeamCentreModel class.
     :returns: The centre position found.
     """
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     centre_finder = SANSCentreFinder()
     find_direction = None
     if beam_centre_model.up_down and beam_centre_model.left_right:
@@ -142,6 +138,11 @@ def find_beam_centre(state, beam_centre_model):
         find_direction = FindDirectionEnum.Left_Right
     elif beam_centre_model.left_right:
         find_direction = FindDirectionEnum.Up_Down
+
+    if beam_centre_model.q_min:
+        state.convert_to_q.q_min = beam_centre_model.q_min
+    if beam_centre_model.q_max:
+        state.convert_to_q.q_max = beam_centre_model.q_max
 
     if beam_centre_model.COM:
         centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
