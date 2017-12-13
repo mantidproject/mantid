@@ -138,6 +138,9 @@ void LoadMcStas::exec() {
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
 
+	outputGroup->addWorkspace(m_scaterringWS[0]);
+	outputGroup->addWorkspace(m_scaterringWS[1]);
+
     setProperty("OutputWorkspace", outputGroup);
   }
 } // LoadMcStas::exec()
@@ -398,8 +401,10 @@ void LoadMcStas::readEventData(
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
     m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                                 // unique
-    outputGroup->addWorkspace(ws);
   }
+  outputGroup->addWorkspace(allEventWS[0].first);
+  m_scaterringWS.push_back(allEventWS[1].first);
+  m_scaterringWS.push_back(allEventWS[2].first);
 }
 
 /**
