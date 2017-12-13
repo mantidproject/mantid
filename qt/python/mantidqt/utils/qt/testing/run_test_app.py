@@ -36,60 +36,9 @@ from __future__ import absolute_import, print_function
 import sys
 import traceback
 
-from qtpy.QtCore import Qt, QTimer, QPoint
-from qtpy.QtGui import QContextMenuEvent
-from qtpy.QtWidgets import QApplication, QAction
+from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
-
-
-class Tester(object):
-
-    def __init__(self, widget):
-        self.widget = widget
-        self.input_text = None
-        self.timer = None
-
-    def __call__(self):
-        widget = self.widget
-        items = widget.tree.findItems('Squares v.1', Qt.MatchExactly | Qt.MatchRecursive)
-        print(items)
-        widget.tree.setCurrentItem(items[0])
-        print(widget.get_selected_algorithm())
-        event = QContextMenuEvent(QContextMenuEvent.Mouse, QPoint())
-        QApplication.postEvent(widget.search_box, event)
-
-        # self.widget.close()
-
-    def idle(self):
-        modal_widget = QApplication.activeModalWidget()
-        if modal_widget is not None:
-            modal_widget.setTextValue('Hello')
-            modal_widget.accept()
-        pop_up = QApplication.activePopupWidget()
-        if pop_up is not None:
-            print(pop_up)
-            for action in pop_up.children():
-                if isinstance(action, QAction):
-                    print(action.text())
-                    if action.text() == '&Paste	Ctrl+V':
-                        action.activate(QAction.Trigger)
-            pop_up.close()
-
-    def start(self):
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.idle)
-        self.timer.start()
-        QTimer.singleShot(0, self)
-
-
-def monitor_modals():
-    modal_widget = QApplication.activeModalWidget()
-    if modal_widget is not None:
-        print(modal_widget)
-    pop_up = QApplication.activePopupWidget()
-    if pop_up is not None:
-        print(pop_up)
 
 
 def split_qualified_name(qualified_name):
@@ -128,13 +77,6 @@ def open_in_window(widget_name, script):
 
     if script is not None:
         run_script(script, w)
-
-    # tester = Tester(w)
-    # tester.start()
-
-    # timer = QTimer()
-    # timer.timeout.connect(monitor_modals)
-    # timer.start()
 
     sys.exit(app.exec_())
 
