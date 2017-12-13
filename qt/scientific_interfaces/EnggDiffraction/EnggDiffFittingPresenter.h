@@ -87,6 +87,7 @@ protected:
   void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
+  void processRemoveRun();
 
   /// clean shut down of model, view, etc.
   void cleanup();
