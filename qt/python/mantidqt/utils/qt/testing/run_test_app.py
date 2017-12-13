@@ -32,11 +32,14 @@ If specified the script is imported and run after the widget is created.
 
 """
 from __future__ import absolute_import, print_function
+
 import sys
 import traceback
+
 from qtpy.QtCore import Qt, QTimer, QPoint
 from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import QApplication, QAction
+
 from mantidqt.utils.qt.plugins import setup_library_paths
 
 

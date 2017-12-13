@@ -17,7 +17,9 @@
 """A selection of utility functions related to testing of Qt-based GUI elements.
 """
 from __future__ import absolute_import
+
 import types
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
 
