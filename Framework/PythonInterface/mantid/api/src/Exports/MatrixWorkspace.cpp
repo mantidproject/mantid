@@ -82,7 +82,7 @@ void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
     PySequenceToVector<double> converter(values);
-    converter.fill((self.*accessor)(wsIndex));
+    converter.copyTo((self.*accessor)(wsIndex));
   }
 }
 
