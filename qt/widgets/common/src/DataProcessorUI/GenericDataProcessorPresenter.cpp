@@ -53,7 +53,7 @@ void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
 
 void setAlgorithmProperty(IAlgorithm *const alg, QString const &name,
                           QString const &value) {
-  if (!value.isNull() && !value.isEmpty())
+  if (!value.isEmpty())
     setAlgorithmProperty(alg, name.toStdString(), value.toStdString());
 }
 
