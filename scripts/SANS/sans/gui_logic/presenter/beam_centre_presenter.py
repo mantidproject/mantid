@@ -5,7 +5,6 @@ import copy
 from mantid.kernel import Logger
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
-from sans.sans_batch import SANSCentreFinder
 from sans.common.enums import FindDirectionEnum
 
 
@@ -28,13 +27,13 @@ class BeamCentrePresenter(object):
         def on_processing_error(self, error):
             self._presenter.on_processing_error_centre_finder(error)
 
-    def __init__(self, parent_presenter, WorkHandler, BeamCentreModel):
+    def __init__(self, parent_presenter, WorkHandler, BeamCentreModel, SANSCentreFinder):
         super(BeamCentrePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
         self._logger = Logger("SANS")
-        self._beam_centre_model = BeamCentreModel()
+        self._beam_centre_model = BeamCentreModel(SANSCentreFinder)
 
     def set_view(self, view):
         if view:
@@ -93,7 +92,7 @@ class BeamCentrePresenter(object):
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
 
-        self._work_handler.process(listener, find_beam_centre, state_copy, self._beam_centre_model)
+        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, state_copy)
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
@@ -120,45 +119,3 @@ class BeamCentrePresenter(object):
         attribute = getattr(state_model, attribute_name)
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
-
-
-def find_beam_centre(state, beam_centre_model):
-    """
-    This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
-
-    :param state: A SANS state object
-    :param beam_centre_model: An instance of the BeamCentreModel class.
-    :returns: The centre position found.
-    """
-    centre_finder = SANSCentreFinder()
-    find_direction = None
-    if beam_centre_model.up_down and beam_centre_model.left_right:
-        find_direction = FindDirectionEnum.All
-    elif beam_centre_model.up_down:
-        find_direction = FindDirectionEnum.Left_Right
-    elif beam_centre_model.left_right:
-        find_direction = FindDirectionEnum.Up_Down
-
-    if beam_centre_model.q_min:
-        state.convert_to_q.q_min = beam_centre_model.q_min
-    if beam_centre_model.q_max:
-        state.convert_to_q.q_max = beam_centre_model.q_max
-
-    if beam_centre_model.COM:
-        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
-                               max_iter=beam_centre_model.max_iterations,
-                               x_start=beam_centre_model.lab_pos_1, y_start=beam_centre_model.lab_pos_2,
-                               tolerance=beam_centre_model.tolerance,
-                               find_direction=find_direction, reduction_method=False)
-
-        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
-                               max_iter=beam_centre_model.max_iterations,
-                               x_start=centre['pos1'], y_start=centre['pos2'],
-                               tolerance=beam_centre_model.tolerance,
-                               find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
-    else:
-        centre = centre_finder(state, r_min=beam_centre_model.r_min, r_max=beam_centre_model.r_max,
-                               max_iter=beam_centre_model.max_iterations, x_start=beam_centre_model.lab_pos_1,
-                               y_start=beam_centre_model.lab_pos_2, tolerance=beam_centre_model.tolerance,
-                               find_direction=find_direction, reduction_method=True, verbose=beam_centre_model.verbose)
-    return centre

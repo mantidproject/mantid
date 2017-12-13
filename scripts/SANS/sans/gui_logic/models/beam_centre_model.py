@@ -1,10 +1,11 @@
-from sans.common.enums import (SANSInstrument)
+from sans.common.enums import (SANSInstrument, FindDirectionEnum)
 
 
 class BeamCentreModel(object):
-    def __init__(self):
+    def __init__(self, SANSCentreFinder):
         super(BeamCentreModel, self).__init__()
         self.reset_to_defaults_for_instrument()
+        self.SANSCentreFinder = SANSCentreFinder
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -38,6 +39,49 @@ class BeamCentreModel(object):
         self.scale_2 = 1000
         if instrument == SANSInstrument.LARMOR:
             self.scale_1 = 1.0
+
+    def find_beam_centre(self, state):
+        """
+        This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
+
+        :param state: A SANS state object
+        :param beam_centre_model: An instance of the BeamCentreModel class.
+        :returns: The centre position found.
+        """
+        centre_finder = self.SANSCentreFinder()
+        find_direction = None
+        if self.up_down and self.left_right:
+            find_direction = FindDirectionEnum.All
+        elif self.up_down:
+            find_direction = FindDirectionEnum.Left_Right
+        elif self.left_right:
+            find_direction = FindDirectionEnum.Up_Down
+
+        if self.q_min:
+            state.convert_to_q.q_min = self.q_min
+        if self.q_max:
+            state.convert_to_q.q_max = self.q_max
+
+        if self.COM:
+            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
+                                   max_iter=self.max_iterations,
+                                   x_start=self.lab_pos_1, y_start=self.lab_pos_2,
+                                   tolerance=self.tolerance,
+                                   find_direction=find_direction, reduction_method=False)
+
+            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
+                                   max_iter=self.max_iterations,
+                                   x_start=centre['pos1'], y_start=centre['pos2'],
+                                   tolerance=self.tolerance,
+                                   find_direction=find_direction, reduction_method=True,
+                                   verbose=self.verbose)
+        else:
+            centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
+                                   max_iter=self.max_iterations, x_start=self.lab_pos_1,
+                                   y_start=self.lab_pos_2, tolerance=self.tolerance,
+                                   find_direction=find_direction, reduction_method=True,
+                                   verbose=self.verbose)
+        return centre
 
     @property
     def max_iterations(self):
