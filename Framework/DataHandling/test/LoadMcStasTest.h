@@ -81,7 +81,7 @@ public:
     //
     MatrixWorkspace_sptr outputItem2 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "EventData" + postfix + "_1");
+            "k01_events_dat_list_p_x_y_n_id_t");
     TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 8192);
     auto sum_single = 0.0;
     for (size_t i = 0; i < outputItem2->getNumberHistograms(); i++)
@@ -92,7 +92,7 @@ public:
     //
     MatrixWorkspace_sptr outputItem3 =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "EventData" + postfix + "_2");
+            "k02_events_dat_list_p_x_y_n_id_t");
     TS_ASSERT_EQUALS(outputItem3->getNumberHistograms(), 8192);
     auto sum_multiple = 0.0;
     for (size_t i = 0; i < outputItem3->getNumberHistograms(); i++)
