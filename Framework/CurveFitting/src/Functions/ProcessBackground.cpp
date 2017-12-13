@@ -621,11 +621,11 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   // a) Status
   std::string fitStatus = fit->getProperty("OutputStatus");
   bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
-	  (fitStatus.find("small") < fitStatus.size());
+                        (fitStatus.find("small") < fitStatus.size());
   if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
-    throw std::runtime_error("Bad Fit "+fitStatus);
+    throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   // b) check that chi2 got better
@@ -800,7 +800,7 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
   if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
-    throw std::runtime_error("Bad Fit "+fitStatus);
+    throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   const double chi2 = fit->getProperty("OutputChi2overDoF");

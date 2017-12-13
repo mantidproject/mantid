@@ -23,10 +23,10 @@ namespace {
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
 
 bool cannotReachSpecifiedToleranceInF(int errorCode) {
-	return errorCode == GSL_ETOLF;
+  return errorCode == GSL_ETOLF;
 }
 bool cannotReachSpecifiedToleranceInX(int errorCode) {
-	return errorCode == GSL_ETOLX;
+  return errorCode == GSL_ETOLX;
 }
 }
 
