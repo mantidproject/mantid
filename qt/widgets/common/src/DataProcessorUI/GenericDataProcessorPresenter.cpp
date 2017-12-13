@@ -954,6 +954,7 @@ void GenericDataProcessorPresenter::addRowOptions(OptionsMap &options,
  * Options column. New options are only added if they do not already
  * exist in the map.
  * @param options : a map of property name to option value to update
+ * @param data : the data for this row
  */
 void GenericDataProcessorPresenter::addUserOptions(OptionsMap &options,
                                                    RowData *data) {
@@ -966,6 +967,7 @@ void GenericDataProcessorPresenter::addUserOptions(OptionsMap &options,
  * column. New options are only added if they do not already
  * exist in the map.
  * @param options : a map of property name to option value to update
+ * @param data : the data for this row
  */
 void GenericDataProcessorPresenter::addHiddenOptions(OptionsMap &options,
                                                      RowData *data) {
@@ -985,6 +987,7 @@ void GenericDataProcessorPresenter::addGlobalOptions(OptionsMap &options) {
 /** Update the given options with the output properties.
  * New options are only added if they do not already exist in the map.
  * @param options : a map of property name to option value to update
+ * @param data : the data for this row
  */
 void GenericDataProcessorPresenter::addOutputOptions(OptionsMap &options,
                                                      RowData *data) {

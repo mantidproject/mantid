@@ -37,7 +37,6 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
 /** Returns values passed for 'Transmission run(s)'
 *
 * @param group :: The group from which to get the values
-* @param loadRuns :: If true, will try to load transmission runs as well
 * @return :: Values passed for 'Transmission run(s)'
 */
 std::string ReflSettingsTabPresenter::getTransmissionRuns(int group) const {

@@ -34,7 +34,8 @@ void trimQuotes(QString &value, const char quote, const char escape) {
 }
 
 /** Trim whitespace and quotes from the start/end of a string
- * @param value: the value to trim
+ * @param valueIn: the value to trim
+ * @returns : the trimmed value
  * */
 QString trimWhitespaceAndQuotes(const QString &valueIn) {
   // Trim whitespace
@@ -56,6 +57,7 @@ QString trimWhitespaceAndQuotes(const QString &valueIn) {
    into a map of key/value pairs
    @param str The input string
    @throws std::runtime_error on an invalid input string
+   @returns : a map of key/value pairs as strings
 */
 std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
   /*
@@ -103,8 +105,9 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
 /**
    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
    into a map of key/value pairs
-   @param str The input string
+   @param qstr The input string
    @throws std::runtime_error on an invalid input string
+   @returns : a map of key/value pairs as QStrings
 */
 std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
   /*
