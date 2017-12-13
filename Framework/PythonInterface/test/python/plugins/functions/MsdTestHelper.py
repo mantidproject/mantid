@@ -98,4 +98,5 @@ def do_a_fit(x, function, guess, target, atol=0.01):
                         Nspec=1)
     fit = Fit(FunctionWrapper('EISFDiffSphere', **guess), w)
     otarget = OrderedDict(target)
-    np.allclose([fit.Function[p] for p in otarget.keys()], otarget.values(), atol)
+    np.allclose(np.asarray([fit.Function[p] for p in otarget.keys()]),
+                np.asarray(otarget.values()), atol)
