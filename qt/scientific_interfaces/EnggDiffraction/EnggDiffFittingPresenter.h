@@ -88,6 +88,7 @@ protected:
   void processShutDown();
   void processLogMsg();
   void processUpdatePlotFitPeaks();
+  void processRemoveRun();
 
   /// clean shut down of model, view, etc.
   void cleanup();

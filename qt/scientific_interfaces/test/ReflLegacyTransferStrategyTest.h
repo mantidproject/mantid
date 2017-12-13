@@ -106,7 +106,6 @@ public:
   void testThetaExtraction() {
     SearchResultMap input;
     input["1234"] = SearchResult("fictitious run on gold", "");
-    input["1235"] = SearchResult("fictitious run on silver in 3.14 theta", "");
     input["1236"] = SearchResult("fictitious run on bronze th=2.17", "");
     input["1237"] =
         SearchResult("fictitious run on platinum th:1.23 and pH=12", "");
@@ -117,11 +116,6 @@ public:
     expectedRow[ReflTableSchema::RUNS] = "1234";
     expectedRow[ReflTableSchema::ANGLE] = "";
     expectedRow[ReflTableSchema::GROUP] = "fictitious run on gold";
-    expected.push_back(expectedRow);
-
-    expectedRow[ReflTableSchema::RUNS] = "1235";
-    expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
@@ -151,9 +145,9 @@ public:
   void testComplexExtraction() {
     SearchResultMap input;
     input["1230"] = SearchResult("fictitious run on gold", "");
-    input["1231"] = SearchResult("fictitious run on silver in 3.14 theta", "");
-    input["1232"] = SearchResult("fictitious run on silver in 3.14 theta", "");
-    input["1233"] = SearchResult("fictitious run on silver in 2.17 theta", "");
+    input["1231"] = SearchResult("fictitious run on silver th=3.14", "");
+    input["1232"] = SearchResult("fictitious run on silver th=3.14", "");
+    input["1233"] = SearchResult("fictitious run on silver th=2.17", "");
     input["1234"] = SearchResult("fictitious run on bronze th=2.17", "");
     input["1235"] = SearchResult("fictitious run on bronze th=1.23", "");
     input["1236"] =
@@ -170,12 +164,12 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1231+1232";
     expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1233";
     expectedRow[ReflTableSchema::ANGLE] = "2.17";
-    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1234";

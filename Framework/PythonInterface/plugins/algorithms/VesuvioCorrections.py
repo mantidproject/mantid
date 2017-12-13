@@ -454,7 +454,11 @@ class VesuvioCorrections(VesuvioBase):
             raise RuntimeError('No workspace for given correction')
 
         params_dict = TableWorkspaceDictionaryFacade(params_ws)
-        scale_param_name = 'f%d.Scaling' % index
+
+        if len(corrections) > 1:
+            scale_param_name = 'f%d.Scaling' % index
+        else:
+            scale_param_name = 'Scaling'
 
         return params_dict[scale_param_name]
 

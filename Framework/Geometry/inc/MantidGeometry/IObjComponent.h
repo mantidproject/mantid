@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 namespace Mantid {
 
@@ -12,7 +13,7 @@ class Material;
 
 namespace Geometry {
 class Track;
-class Object;
+class IObject;
 class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes
@@ -95,7 +96,7 @@ public:
   virtual void initDraw() const = 0;
 
   /// Returns the shape of the Object
-  virtual const boost::shared_ptr<const Object> shape() const = 0;
+  virtual const boost::shared_ptr<const IObject> shape() const = 0;
   /// Returns the material of the Object
   virtual const Kernel::Material material() const = 0;
 

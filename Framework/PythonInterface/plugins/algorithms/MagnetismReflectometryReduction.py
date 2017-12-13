@@ -5,6 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
+import functools
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -195,7 +196,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                     # Allow for a file name or file path as input
                     data_file = FileFinder.findRuns(item)[0]
                 file_list.append(data_file)
-            runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
+            runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
             entry_name = self.getProperty("EntryName").value
             ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
                                            OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
