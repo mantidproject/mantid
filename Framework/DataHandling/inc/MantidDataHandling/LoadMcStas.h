@@ -67,7 +67,6 @@ private:
   // Holds the single and multiple scattering event data to be added at
   // end of the groupworkspace
   std::vector<API::IEventWorkspace_sptr> m_scaterringWS = {};
-
 };
 
 } // namespace DataHandling

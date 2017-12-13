@@ -138,8 +138,8 @@ void LoadMcStas::exec() {
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
 
-	outputGroup->addWorkspace(m_scaterringWS[0]);
-	outputGroup->addWorkspace(m_scaterringWS[1]);
+    outputGroup->addWorkspace(m_scaterringWS[0]);
+    outputGroup->addWorkspace(m_scaterringWS[1]);
 
     setProperty("OutputWorkspace", outputGroup);
   }
@@ -242,10 +242,11 @@ void LoadMcStas::readEventData(
   const size_t numEventEntries = eventEntries.size();
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
   const auto eventDataTotalName = std::string("EventData_") + nameOfGroupWS;
-  std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = { {eventWS, eventDataTotalName} };
+  std::vector<std::pair<EventWorkspace_sptr, std::string>> allEventWS = {
+      {eventWS, eventDataTotalName}};
   if (numEventEntries > 1) {
     for (size_t i = 1; i <= numEventEntries; i++) {
-		allEventWS.push_back({ eventWS->clone(), "partial_event_data_worksapce"});
+      allEventWS.push_back({eventWS->clone(), "partial_event_data_worksapce"});
     }
   }
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
@@ -254,7 +255,7 @@ void LoadMcStas::readEventData(
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
 
-	allEventWS[eventWSIndex].second = dataName;
+    allEventWS[eventWSIndex].second = dataName;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
