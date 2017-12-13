@@ -38,3 +38,15 @@ class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
+
+
+class MRInspectionTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        nxs_data = LoadEventNexus(Filename="REF_M_24949",
+                                  NXentryName="entry-Off_Off",
+                                  OutputWorkspace="r_24949")
+        MRInspectData(Workspace=nxs_data)
+
+    def validate(self):
+        # Simple test to verify that we flagged the data correctly
+        return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"

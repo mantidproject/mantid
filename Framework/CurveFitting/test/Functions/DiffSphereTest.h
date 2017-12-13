@@ -502,7 +502,7 @@ private:
     inst->markAsSamplePos(sample);
 
     // Add a detector
-    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
         0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
     Detector *det =
         new Detector("pixel-1", 1, pixelShape,

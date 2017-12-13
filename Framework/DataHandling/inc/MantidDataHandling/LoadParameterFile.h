@@ -18,7 +18,7 @@ class V3D;
 namespace Geometry {
 class CompAssembly;
 class Component;
-class Object;
+class CSGObject;
 class ObjComponent;
 class Instrument;
 }
