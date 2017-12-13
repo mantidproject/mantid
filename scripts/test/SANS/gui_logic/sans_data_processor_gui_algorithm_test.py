@@ -2,11 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-
 from sans.gui_logic.sans_data_processor_gui_algorithm import (create_properties, create_option_column_properties,
                                                               get_gui_algorithm_name, get_white_list, get_black_list)
-from sans.common.enums import (SANSFacility, OutputMode)
+from sans.common.enums import (SANSFacility)
 
 
 class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
@@ -19,7 +17,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_the_properties_with_periods_can_be_provided(self):
         props = create_properties()
-        self.assertEqual(len(props), 17)
+        self.assertEqual(len(props), 19)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleScatterPeriod", "column_name": "ssp"},
@@ -34,10 +32,12 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "CanDirect", "column_name": "CanDirect"},
                     {"algorithm_property": "CanDirectPeriod", "column_name": "cdp"},
                     {"algorithm_property": "UseOptimizations", "column_name": ""},
+                    {"algorithm_property": "PlotResults", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
                     {"algorithm_property": "UserFile", "column_name": "User File"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
-                    {"algorithm_property": "OutputMode", "column_name": ""}]
+                    {"algorithm_property": "OutputMode", "column_name": ""},
+                    {"algorithm_property": "OutputGraph", "column_name": ""}]
 
         for index, element in enumerate(props):
             self.assertEqual(element.algorithm_property, expected[index]["algorithm_property"])
@@ -45,7 +45,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_the_properties_without_periods_can_be_provided(self):
         props = create_properties(show_periods=False)
-        self.assertEqual(len(props), 11)
+        self.assertEqual(len(props), 13)
 
         expected = [{"algorithm_property": "SampleScatter", "column_name": "SampleScatter"},
                     {"algorithm_property": "SampleTransmission", "column_name": "SampleTrans"},
@@ -54,10 +54,12 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
                     {"algorithm_property": "CanTransmission", "column_name": "CanTrans"},
                     {"algorithm_property": "CanDirect", "column_name": "CanDirect"},
                     {"algorithm_property": "UseOptimizations", "column_name": ""},
+                    {"algorithm_property": "PlotResults", "column_name": ""},
                     {"algorithm_property": "OutputName", "column_name": "OutputName"},
                     {"algorithm_property": "UserFile", "column_name": "User File"},
                     {"algorithm_property": "RowIndex", "column_name": ""},
-                    {"algorithm_property": "OutputMode", "column_name": ""}]
+                    {"algorithm_property": "OutputMode", "column_name": ""},
+                    {"algorithm_property": "OutputGraph", "column_name": ""}]
 
         for index, element in enumerate(props):
             self.assertEqual(element.algorithm_property, expected[index]["algorithm_property"])
@@ -73,7 +75,7 @@ class SANSGuiDataProcessorAlgorithmTest(unittest.TestCase):
 
     def test_that_white_list_contains_all_properties(self):
         white_list = get_white_list()
-        self.assertEqual(len(white_list), 17)
+        self.assertEqual(len(white_list), 19)
 
     def test_that_black_list_contains_input_and_output_ws(self):
         black_list = get_black_list()
