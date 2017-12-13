@@ -48,17 +48,17 @@ def generate_out_name(run_number_string, long_mode_on, tt_mode):
     return output_name
 
 
-def generate_vanadium_absorb_corrections(van_ws):
+def generate_vanadium_absorb_corrections(van_ws, output_filename):
     shape_ws = mantid.CloneWorkspace(InputWorkspace=van_ws)
+    shape_ws = mantid.ConvertUnits(InputWorkspace=shape_ws, OutputWorkspace=shape_ws, Target="Wavelength")
     mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')
 
-    calibration_full_paths = None
     absorb_ws = \
         mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
                                     ScatteringXSection="5.1", SampleNumberDensity="0.072",
                                     NumberOfWavelengthPoints="25", ElementSize="0.05")
-    mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
+    mantid.SaveNexus(Filename=output_filename,
                      InputWorkspace=absorb_ws, Append=False)
     common.remove_intermediate_workspace(shape_ws)
     return absorb_ws
