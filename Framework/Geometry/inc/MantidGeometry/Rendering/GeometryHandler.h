@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Geometry {
 class IObjComponent;
 class ObjComponent;
-class Object;
+class CSGObject;
 
 /**
    \class GeometryHandler
@@ -49,14 +49,14 @@ private:
 
 protected:
   IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
-  Object *Obj;            ///< Object that uses this geometry handler
+  CSGObject *Obj;         ///< Object that uses this geometry handler
   bool boolTriangulated;  ///< state of the geometry triangulation
   bool
       boolIsInitialized; ///< state of the geometry initialization for rendering
 public:
-  GeometryHandler(IObjComponent *comp);           ///< Constructor
-  GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
-  GeometryHandler(Object *obj);                   ///<Constructor
+  GeometryHandler(IObjComponent *comp);              ///< Constructor
+  GeometryHandler(boost::shared_ptr<CSGObject> obj); ///<Constructor
+  GeometryHandler(CSGObject *obj);                   ///<Constructor
   virtual boost::shared_ptr<GeometryHandler>
   clone() const = 0; ///< Virtual copy constructor
   virtual ~GeometryHandler();
@@ -66,11 +66,12 @@ public:
   /// geometry
   /// handler for
   /// ObjComponent
-  virtual GeometryHandler *
-      createInstance(boost::shared_ptr<Object>) = 0; ///< Create an instance of
+  virtual GeometryHandler *createInstance(
+      boost::shared_ptr<CSGObject>) = 0; ///< Create an instance of
   /// concrete geometry
   /// handler for Object
-  virtual GeometryHandler *createInstance(Object *) = 0; ///< Create an instance
+  virtual GeometryHandler *
+  createInstance(CSGObject *) = 0; ///< Create an instance
   /// of concrete geometry
   /// handler for Object
   virtual void Triangulate() = 0; ///< Triangulate the Object

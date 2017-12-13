@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <QtOpenGL>
 #include <QMessageBox>
@@ -21,7 +21,7 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::DepthBuffer | QGL::NoAlphaChannel |
                           QGL::SampleBuffers),
                 parent),
-      m_display_object(boost::shared_ptr<Mantid::Geometry::Object>()),
+      m_display_object(boost::shared_ptr<Mantid::Geometry::CSGObject>()),
       m_x_rot(0.0), m_y_rot(0.0), m_z_rot(0.0), m_scale_factor(1.0) {
   setAutoFillBackground(false);
   m_bb_widths[0] = 0.0;
@@ -43,42 +43,19 @@ MantidGLWidget::~MantidGLWidget() { makeCurrent(); }
  * @param object :: A pointer to the Mantid::Geometry::Object
  */
 void MantidGLWidget::setDisplayObject(
-    boost::shared_ptr<Mantid::Geometry::Object> object) {
+    boost::shared_ptr<Mantid::Geometry::IObject> object) {
   m_display_object = object;
   m_x_rot = 0.0;
   m_y_rot = 0.0;
   m_z_rot = 0.0;
 
-  // Calculate a scale factor from the objects bounding box
-  // The bounding box function seems to require maxima to be set for each of
-  // the numbers or else it returns rubbish
-  // I'll set them to big numbers here
-  const double bb_large(1e10);
-  double bbox[6] = {bb_large,  bb_large,  bb_large,
-                    -bb_large, -bb_large, -bb_large};
-  m_display_object->getBoundingBox(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4],
-                                   bbox[5]);
+  auto boundingBox = m_display_object->getBoundingBox();
+  double bbox[6] = {boundingBox.xMax(), boundingBox.yMax(), boundingBox.zMax(),
+                    boundingBox.xMin(), boundingBox.yMin(), boundingBox.zMin()};
 
-  // The abs function kept casting my doubles to integers, hence the next two
-  // lines
-  // double max_bb = bbox[0];
-  // if( max_bb < 0. ) max_bb *=-1;
-  // for( int i = 1; i < 6; ++i )
-  //{
-  //  double d = bbox[i];
-  //  if( d < 0. ) d *= -1.;
-  //  if( d > max_bb && d < 1e10)
-  //  {
-  //    max_bb = d;
-  //  }
-  //}
-  //  m_min_bb *= 2.0; m_max_bb *= 2.0;
-  // std::cerr << "\n";
   // Calculate the widths and save for resize events
   for (int i = 0; i < 3; ++i) {
 
-    // std::cerr << "Bounding box max:" << bbox[i] << "  min: " << bbox[i+3] <<
-    // "\n";
     m_bb_widths[i] = 1.1 * (bbox[i] - bbox[i + 3]);
     if (m_bb_widths[i] < 0.0)
       m_bb_widths[i] *= -1.0;
@@ -90,9 +67,6 @@ void MantidGLWidget::setDisplayObject(
     if (m_bb_centres[i] < 0.0)
       m_bb_centres[i] *= -1.0;
   }
-
-  //  std::cerr << "centres: " << m_bb_centres[0] << " " << m_bb_centres[1] << "
-  //  " << m_bb_centres[2] << "\n";
 
   GLdouble aspect_ratio((GLdouble) this->width() / (GLdouble) this->height());
   setOrthoProjectionMatrix(aspect_ratio);
@@ -144,7 +118,7 @@ void MantidGLWidget::initializeGL() {
  */
 void MantidGLWidget::paintGL() {
   // Nothing to draw
-  if (m_display_object == boost::shared_ptr<Mantid::Geometry::Object>())
+  if (m_display_object == boost::shared_ptr<Mantid::Geometry::CSGObject>())
     return;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

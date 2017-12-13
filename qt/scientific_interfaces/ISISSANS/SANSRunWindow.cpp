@@ -610,6 +610,10 @@ void SANSRunWindow::connectAnalysDetSignals() {
           SLOT(updateFrontDetQrange(int)));
   updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->checkState());
 
+  connect(m_uiForm.mergeQRangeOnOff, SIGNAL(stateChanged(int)), this,
+          SLOT(updateMergeQRange(int)));
+  updateMergeQRange(m_uiForm.mergeQRangeOnOff->checkState());
+
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this,
           SLOT(prepareFlood(int)));
   connect(m_uiForm.enableFrontFlood_ck, SIGNAL(stateChanged(int)), this,
@@ -2347,6 +2351,17 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
 
   exec_reduce += "i.SetFrontDetRescaleShift(" + fdArguments + ")\n";
 
+  // Set the merge q range
+  QString mergeArguments = "";
+  if (m_uiForm.mergeQRangeOnOff->isChecked() &&
+      !m_uiForm.mergeQMin->text().isEmpty() &&
+      !m_uiForm.mergeQMax->text().isEmpty()) {
+    mergeArguments += "q_min=" + m_uiForm.mergeQMin->text().trimmed();
+    mergeArguments += ", q_max=" + m_uiForm.mergeQMax->text().trimmed();
+  }
+
+  exec_reduce += "i.SetMergeQRange(" + mergeArguments + ")\n";
+
   // Gravity correction
   exec_reduce += "i.Gravity(";
   if (m_uiForm.gravity_check->isChecked()) {
@@ -2431,7 +2446,6 @@ QString SANSRunWindow::readSampleObjectGUIChanges() {
  */
 void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
-
   // Make sure that all settings are valid
   if (!areSettingsValid(type)) {
     return;
@@ -3349,6 +3363,23 @@ void SANSRunWindow::updateFrontDetQrange(int state) {
     m_uiForm.frontDetQmax->setEnabled(false);
     runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
                             "FRONT').rescaleAndShift.qRangeUserSelected=False");
+  }
+}
+
+/**Respond to the Merge Q range check box.
+ * @param state :: equal to Qt::Checked or not
+ */
+void SANSRunWindow::updateMergeQRange(int state) {
+  if (state == Qt::Checked) {
+    m_uiForm.mergeQMax->setEnabled(true);
+    m_uiForm.mergeQMin->setEnabled(true);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=True");
+  } else {
+    m_uiForm.mergeQMax->setEnabled(false);
+    m_uiForm.mergeQMin->setEnabled(false);
+    runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('"
+                            "FRONT').mergeRange.merge_range=False");
   }
 }
 

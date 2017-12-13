@@ -135,8 +135,6 @@ void IqtFit::setup() {
           SLOT(specMinChanged(int)));
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
-  connect(m_uiForm.ckPlotGuess, SIGNAL(toggled(bool)), this,
-          SLOT(updateGuessPlot()));
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(updateCurrentPlotOption(QString)));
 
