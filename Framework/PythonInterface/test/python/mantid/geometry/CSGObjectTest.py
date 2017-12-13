@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.geometry import BoundingBox, Object
+from mantid.geometry import BoundingBox, CSGObject
 
-class ObjectTest(unittest.TestCase):
+class CSGObjectTest(unittest.TestCase):
 
     _testws = None
 
@@ -17,7 +17,7 @@ class ObjectTest(unittest.TestCase):
         inst = self._testws.getInstrument()
         pixel = inst.getComponentByName("pixel")
         shape = pixel.shape()
-        self.assertTrue(isinstance(shape, Object))
+        self.assertTrue(isinstance(shape, CSGObject))
         xml = pixel.shape().getShapeXML()
         self.assertTrue('radius val="0.0127"' in xml)
 

@@ -89,9 +89,9 @@ public:
 
   std::vector<std::string> logMsgs() const override { return m_logMsgs; }
 
-  void setFittingRunNo(const std::string &path) override;
+  void setFocusedFileNames(const std::string &paths) override;
 
-  std::string getFittingRunNo() const override;
+  std::string getFocusedFileNames() const override;
 
   void enableFitAllButton(bool enable) const override;
 
@@ -101,9 +101,12 @@ public:
 
   int getFittingListWidgetCurrentRow() const override;
 
-  std::string getFittingListWidgetCurrentValue() const override;
+  boost::optional<std::string>
+  getFittingListWidgetCurrentValue() const override;
 
   bool listWidgetHasSelectedRow() const override;
+
+  void updateFittingListWidget(const std::vector<std::string> &rows) override;
 
   void setFittingListWidgetCurrentRow(int idx) const override;
 
@@ -176,15 +179,13 @@ private slots:
   void loadClicked();
   void fitClicked();
   void fitAllClicked();
-  void FittingRunNo();
   void addClicked();
   void browseClicked();
   void saveClicked();
   void plotSeparateWindow();
   void showToolTipHelp();
-  void setBankDir(int idx);
-  void listViewFittingRun();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
+  void removeRunClicked();
 
 private:
   /// Setup the interface (tab UI)

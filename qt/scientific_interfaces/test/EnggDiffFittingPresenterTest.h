@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 
+#include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
@@ -14,6 +14,7 @@
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
+using testing::ReturnRef;
 
 // Use this mocked presenter for tests that will start the focusing
 // workers/threads. Otherwise you'll run into trouble with issues like
@@ -33,8 +34,12 @@ public:
 
 private:
   // not async at all
-  void startAsyncFittingWorker(const int runNumber, const size_t bank,
-                               const std::string &ExpectedPeaks) override {
+  void startAsyncFittingWorker(
+      const std::vector<std::pair<int, size_t>> &runNumberBankPairs,
+      const std::string &ExpectedPeaks) override {
+    assert(runNumberBankPairs.size() == 1);
+    const auto runNumber = runNumberBankPairs[0].first;
+    const auto bank = runNumberBankPairs[0].second;
     doFitting(runNumber, bank, ExpectedPeaks);
     fittingFinished();
   }
@@ -105,7 +110,7 @@ public:
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getFocusedFileNames()).Times(1).WillOnce(Return(""));
 
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -131,9 +136,9 @@ public:
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -157,9 +162,9 @@ public:
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
     // inputs from user
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return(false));
+        .WillOnce(Return(boost::none));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -186,15 +191,13 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    EXPECT_CALL(mockView, listWidgetHasSelectedRow())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
-        .WillOnce(Return("123_1"));
+        .WillOnce(Return(boost::optional<std::string>(
+            boost::optional<std::string>("123_1"))));
     EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(testing::_, testing::_))
         .Times(1)
-        .WillOnce(Return(""));
+        .WillOnce(ReturnRef(EMPTY));
 
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
@@ -219,197 +222,31 @@ public:
         testing::Mock::VerifyAndClearExpectations(mockModel_ptr))
   }
 
-  // Fitting test begin here
-  void test_fitting_runno_valid_single_run() {
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    // inputs from user
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillRepeatedly(Return(std::string(g_focusedBankFile)));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-
-    // should not get to the point where the status is updated
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-
-    // No errors/0 warnings. There will be no errors or warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-  }
-
-  void test_fitting_runno_invalid_run() {
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    // inputs from user - invalid run given this can't be numerical
-    // only as that has the chance of matching a file so use a prefix
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(std::string("ENGINX1")));
-
-    // should not get to the point where the status is updated
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-
-    // No errors/1 warnings. There will be an warning for invalid run number
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-  }
-
-  void test_fitting_with_blank_input() {
-    testing::StrictMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(std::string("")));
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-
-    testing::Mock::VerifyAndClearExpectations(&mockView);
-  }
-
-  void test_fitting_file_not_found_with_multiple_runs() {
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-    // 23931-23934
-    std::vector<std::string> RunNumDir;
-    RunNumDir.emplace_back("241391");
-    RunNumDir.emplace_back("241392");
-    RunNumDir.emplace_back("241393");
-    RunNumDir.emplace_back("241394");
-
-    // empty vector
-    std::vector<std::string> splittedFileVec;
-
-    // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(g_focusedFittingRunNo));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-
-    // SplitFittingDir()
-
-    // could possibly feature to create unique path
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
-
-    // should not get to the point where the status is updated
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-
-    // No errors/1 warnings. The warning will be produced because there
-    // is no focus output directory within the settings tab
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-  }
-
-  void diable_test_fitting_runno_single_run() {
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    // focus directory need to be set for this in the settings
-
-    // 23931-23934
-    std::vector<std::string> RunNumDir;
-    RunNumDir.emplace_back("241391");
-
-    // empty vector
-    std::vector<std::string> splittedFileVec;
-
-    // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(2)
-        .WillRepeatedly(Return("241391"));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec())
-        .Times(1)
-        .WillOnce(Return(RunNumDir));
-
-    EXPECT_CALL(mockView, getFittingMultiRunMode())
-        .Times(1)
-        .WillOnce(Return(false));
-
-    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(1);
-
-    EXPECT_CALL(mockView, addRunNoItem(testing::_)).Times(1);
-
-    EXPECT_CALL(mockView, addBankItem(testing::_)).Times(1);
-
-    EXPECT_CALL(mockView, focusingDir()).Times(0);
-
-    // should not get to the point where the status is updated
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-
-    // No errors/0 warnings.
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-  }
-
-  void test_fitting_runno_browsed_run_add_run_item() {
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-    // Tests the browse directory file
-    std::vector<std::string> RunNumDir;
-    RunNumDir.emplace_back("241395");
-
-    std::vector<std::string> splittedFileVec;
-    splittedFileVec.emplace_back("ENGINX");
-    splittedFileVec.emplace_back("241395");
-    splittedFileVec.emplace_back("focused");
-    splittedFileVec.emplace_back("bank");
-    splittedFileVec.emplace_back("1");
-
-    // inputs from user - given multiple run
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(g_focusedBankFile));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-
-    EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
-
-    EXPECT_CALL(mockView, setFittingRunNumVec(testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, addBankItem(testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, setBankIdComboBox(testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, addRunNoItem(testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, setFittingListWidgetCurrentRow(testing::_)).Times(0);
-
-    EXPECT_CALL(mockView, focusingDir()).Times(0);
-
-    // No errors/1 warnings. File entered is not found
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
-
-    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
-  }
-
   // Fit All Peaks test begin here
   void test_fit_all_runno_valid_single_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
 
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
+
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+        .Times(1)
+        .WillOnce(Return(
+            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+        .Times(1)
+        .WillOnce(ReturnRef(EMPTY));
+
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
-    EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(1);
+    EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(0);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -425,15 +262,27 @@ public:
   // This would test the fitting tab with invalid expected peaks but should only
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
-    return; // EARLY RETURN, AS FIT ALL IS NOT YET ENABLED
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
+
+    EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
     // inputs from user
     EXPECT_CALL(mockView, getExpectedPeaksInput())
         .Times(1)
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
+
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+        .Times(1)
+        .WillOnce(Return(
+            std::vector<std::pair<int, size_t>>({std::make_pair(123, 1)})));
+
+    EXPECT_CALL(*mockModel_ptr, getWorkspaceFilename(123, 1))
+        .Times(1)
+        .WillOnce(ReturnRef(EMPTY));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -442,7 +291,7 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
-    pres.notify(IEnggDiffFittingPresenter::FitPeaks);
+    pres.notify(IEnggDiffFittingPresenter::FitAllPeaks);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
@@ -698,7 +547,7 @@ public:
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
-    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
     EXPECT_CALL(mockView, focusingDir()).Times(0);
 
@@ -718,6 +567,33 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
+  void test_removeRun() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    auto mockModel = Mantid::Kernel::make_unique<
+        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto *mockModel_ptr = mockModel.get();
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
+        &mockView, std::move(mockModel), nullptr, nullptr);
+
+    EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
+        .Times(1)
+        .WillOnce(Return(boost::optional<std::string>("123_1")));
+    EXPECT_CALL(*mockModel_ptr, removeRun(123, 1));
+    EXPECT_CALL(*mockModel_ptr, getRunNumbersAndBankIDs())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::pair<int, size_t>>(
+            {std::make_pair(123, 2), std::make_pair(456, 1)})));
+    EXPECT_CALL(mockView, updateFittingListWidget(
+                              std::vector<std::string>({"123_2", "456_1"})));
+
+    pres.notify(IEnggDiffFittingPresenter::removeRun);
+
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
 private:
   std::unique_ptr<testing::NiceMock<MockEnggDiffFittingView>> m_view;
   std::unique_ptr<MantidQt::CustomInterfaces::EnggDiffFittingPresenter>
@@ -728,6 +604,7 @@ private:
   const static std::string g_focusedRun;
   const static std::string g_focusedBankFile;
   const static std::string g_focusedFittingRunNo;
+  const static std::string EMPTY;
   EnggDiffCalibSettings m_basicCalibSettings;
 
   std::vector<std::string> m_ex_empty_run_num;
@@ -747,5 +624,7 @@ const std::string EnggDiffFittingPresenterTest::g_focusedBankFile =
 
 const std::string EnggDiffFittingPresenterTest::g_focusedFittingRunNo =
     "241391-241394";
+
+const std::string EnggDiffFittingPresenterTest::EMPTY = "";
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H

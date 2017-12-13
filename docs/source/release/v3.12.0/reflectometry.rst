@@ -15,5 +15,6 @@ Reflectometry Changes
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface.
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and
   :ref:`algm-ReflectometryReductionOneAuto`
+- The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
 
 :ref:`Release 3.12.0 <v3.12.0>`

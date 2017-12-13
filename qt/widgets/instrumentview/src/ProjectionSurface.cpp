@@ -9,7 +9,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
 #include <QRgb>
