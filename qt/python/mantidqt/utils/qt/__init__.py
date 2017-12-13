@@ -21,6 +21,7 @@ from __future__ import absolute_import
 # stdlib modules
 import importlib
 import os
+from contextlib import contextmanager
 
 # 3rd-party modules
 from qtpy import QT_VERSION
@@ -98,3 +99,18 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
             action.setShortcutContext(shortcut_context)
 
     return action
+
+
+@contextmanager
+def block_signals(widget):
+    """
+    A context manager that helps to block widget's signals temporarily. Usage:
+
+        with block_signals(widget):
+            widget.do_actions_that_emit_signals()
+
+    :param widget: A Qt widget signals from which should be blocked.
+    """
+    widget.blockSignals(True)
+    yield
+    widget.blockSignals(False)
