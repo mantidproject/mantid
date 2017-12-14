@@ -19,12 +19,13 @@ import mantid.kernel
 import mantid.api
 import mantid.dataobjects
 
+
 def _getWkspIndexDistAndLabel(workspace, **kwargs):
     '''
-    Get workspace index, whether the workspace is a distribution, 
+    Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
-    
-    :param workspace: a Workspace2D or an EventWorkspace  
+
+    :param workspace: a Workspace2D or an EventWorkspace
     '''
     # get the special arguments out of kwargs
     specNum = kwargs.pop('specNum', None)
@@ -59,15 +60,15 @@ def _getWkspIndexDistAndLabel(workspace, **kwargs):
 def _getDistribution(workspace, **kwargs):
     '''Determine whether or not the data is a distribution. The value in
     the kwargs wins.'''
-    distribution = kwargs.pop('distribution', workspace.isDistribution())    
+    distribution = kwargs.pop('distribution', workspace.isDistribution())
     return (bool(distribution), kwargs)
 
 
 def _getNormalization(mdworkspace, **kwargs):
-    normalization = kwargs.pop(normalization, mdworkspace.displayNormalizationHisto())
+    normalization = kwargs.pop('normalization', mdworkspace.displayNormalizationHisto())
     return (normalization,kwargs)
 
-    
+
 def getAxesLabels(workspace):
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         axes = ['Intensity']
@@ -127,19 +128,15 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     return (x,y,dy,dx)
 
 
-def _dim2array(d,center=True):
+def _dim2array(d):
     """
     Create a numpy array containing bin centers along the dimension d
     input: d - IMDDimension
-    return: numpy array, from min+st/2 to max-st/2 with step st  
+    returns: bin boundaries for dimension d
     """
     dmin=d.getMinimum()
     dmax=d.getMaximum()
-    dstep=d.getX(1)-d.getX(0)
-    if center:
-        return numpy.arange(dmin+dstep/2,dmax,dstep)
-    else:
-        return numpy.linspace(dmin,dmax,d.getNBins()+1)
+    return numpy.linspace(dmin,dmax,d.getNBins()+1)
 
 
 def boundaries_from_points(input_array):
@@ -147,41 +144,56 @@ def boundaries_from_points(input_array):
     if len(input_array)==0:
         raise ValueError('could not extend array with no elements')
     if len(input_array)==1:
-        return np.array([input_array[0]-0.5,input_array[0]+0.5]) 
-    return np.concatenate(([(3*input_array[0]-input_array[1])/2],(input_array[1:]+input_array[:-1])/2,[(3*input_array[-1]-input_array[-2])/2]))
+        return np.array([input_array[0]-0.5,input_array[0]+0.5])
+    return np.concatenate(([(3*input_array[0]-input_array[1])*0.5],
+                           (input_array[1:]+input_array[:-1])*0.5,
+                           [(3*input_array[-1]-input_array[-2])*0.5]))
 
     
 def points_from_boundaries(input_array):
     assert isinstance(input_array,np.ndarray),'Not a numpy array'
     if len(input_array)<2:
         raise ValueError('could not get centers from less than two boundaries')
-    return (.5*(input_array[0:-1]+input_array[1:])
+    return (.5*(input_array[0:-1]+input_array[1:]))
 
 
 def _getMDData(workspace,normalization,withError=False):
     dims=workspace.getNonIntegratedDimensions()
-    dimarrays=[dim2array(d) for d in dims]
+    dimarrays=[_dim2array(d) for d in dims]
     #get data
     data=workspace.getSignalArray()*1.
-    if NumEvNorm:
+    if normalization==mantid.api.MDNormalization.NumEventsNormalization:
         nev=workspace.getNumEventsArray()
         data/=nev
     err=None
     if withError:
         err2=workspace.getErrorSquaredArray()*1.
-        if NumEvNorm:
+        if normalization==mantid.api.MDNormalization.NumEventsNormalization:
             err2/=(nev*nev)
         err=np.sqrt(err2)
-    return (data,err,dimarrays)
+    return (dimarrays,data.squeeze(),err.squeeze())
 
 
 def _getMDData1D(workspace,normalization):
-    data,err,coordinate=_getMDData(workspace,normalization,withError=True)
+    coordinate,data,err=_getMDData(workspace,normalization,withError=True)
     assert len(coordinate)==1, 'The workspace is not 1D'
     coordinate=points_from_boundaries(coordinate[0])
     return (coordinate,data,err)
-    
-   
+
+
+def _getMDData2D_bin_bounds(workspace,normalization,withError=False):
+    coordinate,data,err=_getMDData(workspace,normalization,withError)
+    assert len(coordinate)==2, 'The workspace is not 2D'
+    return (coordinate,data,err)
+
+def _getMDData2D_bin_centers(workspace,normalization,withError=False):
+    coordinate,data,err=_getMDData2D_bin_bounds(workspace,normalization,withError)
+    coordinate[0]=points_from_boundaries(coordinate[0])
+    coordinate[1]=points_from_boundaries(coordinate[1])
+    return (coordinate,data,err)
+
+
+
 def _getContour(workspace, distribution):
     x = workspace.extractX()
     z = workspace.extractY()
