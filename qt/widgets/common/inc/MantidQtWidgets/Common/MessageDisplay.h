@@ -48,8 +48,8 @@ public:
 public:
   /// Default constructor with optional parent
   MessageDisplay(QWidget *parent = nullptr);
-  MessageDisplay(const MessageDisplay&) = delete;
-  MessageDisplay& operator=(const MessageDisplay&) = delete;
+  MessageDisplay(const MessageDisplay &) = delete;
+  MessageDisplay &operator=(const MessageDisplay &) = delete;
   /// Destructor
   ~MessageDisplay() override;
 
