@@ -119,27 +119,36 @@ Output:
    Number of histograms in hist data: 1
    Name of hist data: Edet.dat_ws
 
+**Example - Comparing event data entries in a McStas Nexus file:**
+
+The mcstas_event_hist.h5 McStas Nexus file contains two event data entries:
+named k01_events_dat_list_p_x_y_n_id_t and k02_events_dat_list_p_x_y_n_id_t, one
+from each of two detector banks of the instrument simulated. These are loaded
+individually into separate workspaces. In addition, this algorithm returns the
+workspace EventData_ws, which contains the sum of all event data entries in the
+McStas Nexus file. In the example below shown how tests that the algorithm has
+done is correctly.
 
 .. testcode:: CheckEqualScattering
 
     # Load the data into tuple
     ws = LoadMcStas('mcstas_event_hist.h5')
 
-    # Calculate total of all scattering
+    # Calculate total of all event data entries
     all_scattering_event_ws = mtd['EventData_ws']
     total_all = 0
     for i in range(all_scattering_event_ws.getNumberHistograms()):
       total_all += all_scattering_event_ws.readY(i)[0]
     print("The sum of all scattering spectra: {0:.6e}".format(total_all))
 
-    # Calculate total of single scatter
+    # Calculate total scattering from the 'k01' detector bank
     single_scatter_event_ws = mtd['k01_events_dat_list_p_x_y_n_id_t']
     total_single = 0
     for i in range(single_scatter_event_ws.getNumberHistograms()):
       total_single += single_scatter_event_ws.readY(i)[0]
     print("The sum of all single scattering spectra: {0:.6e}".format(total_single))
 
-    # Calculate total of multiple scatter
+    # Calculate total scattering from the 'k02' detector bank
     multiple_scatter_event_ws = mtd['k02_events_dat_list_p_x_y_n_id_t']
     total_multiple = 0
     for i in range(multiple_scatter_event_ws.getNumberHistograms()):
