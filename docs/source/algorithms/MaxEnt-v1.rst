@@ -169,7 +169,7 @@ and the reconstructed image, i.e. Fourier transform (right).
    print("Third  reconstructed coefficient: {:.3f}".format(data.readY(0)[20]))
    print("Fourth reconstructed coefficient: {:.3f}".format(data.readY(0)[12]))
    print("Fifth  reconstructed coefficient: {:.3f}".format(data.readY(0)[14]))
-   print "Number of iterations: "+str( len(evolAngle.readX(0)))
+   print("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
@@ -218,7 +218,7 @@ and :ref:`algm-FFT` (right).
    # Do not change these numbers - they test if noise has been added to the alg    
    print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
    print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
-   print "Number of iterations: "+str( len(evolAngle.readX(0)))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
    
 Output:
 
@@ -253,7 +253,7 @@ and its imaginary part (right).
    print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(1)[129], image.readY(1)[129]))
    print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[135], image.readY(1)[135]))
    print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[141], image.readY(1)[141]))
-   print "Number of iterations: "+str( len(evolAngle.readX(0)))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
@@ -299,7 +299,7 @@ the original and reconstructed data (left), and the reconstructed image (right).
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[104], image.readY(0)[104]))
-   print "Number of iterations: "+str( len(evolAngle.readX(0)))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
@@ -353,8 +353,8 @@ image in order to obtain smooth results).
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
-   print "Number of iterations: "+str( len(evolAngle.readX(0)))
-   print "Number of iterations: "+str( len(evolAngleP.readX(0)))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngleP.readX(0))))
    
 Output:
 
@@ -404,8 +404,8 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
 
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
-   print "Number of iterations: "+str( len(evolAngle1.readX(0)))
-   print "Number of iterations: "+str( len(evolAngle2.readX(0)))
+   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle2.readX(0))))
 
 Output:
 
