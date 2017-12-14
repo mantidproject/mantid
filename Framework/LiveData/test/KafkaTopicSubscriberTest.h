@@ -30,35 +30,6 @@ public:
 
     TS_ASSERT_EQUALS(topic, subscriber->topics()[0]);
   }
-
-  void xtest_Unknown_Topic_Throws_Error() {
-    using Mantid::LiveData::KafkaTopicSubscriber;
-    using Mantid::LiveData::SubscribeAtOption;
-    std::string broker("sakura"), topic("__NOT_A_TOPIC_LETS_NOT_FIND_THIS");
-
-    // This won't connect yet
-    std::vector<std::string> topics = {topic};
-    auto subscriber = Mantid::Kernel::make_unique<KafkaTopicSubscriber>(
-        broker, topics, SubscribeAtOption::LATEST);
-
-    TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Failure cases
-  // ---------------------------------------------------------------------------
-  void xtest_BadHost_Throws_Error() {
-    using Mantid::LiveData::KafkaTopicSubscriber;
-    using Mantid::LiveData::SubscribeAtOption;
-    std::string broker("badhost"), topic("topic");
-
-    // This won't connect yet
-    std::vector<std::string> topics = {topic};
-    auto subscriber = Mantid::Kernel::make_unique<KafkaTopicSubscriber>(
-        broker, topics, SubscribeAtOption::LATEST);
-
-    TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
-  }
 };
 
 #endif /* MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_ */
