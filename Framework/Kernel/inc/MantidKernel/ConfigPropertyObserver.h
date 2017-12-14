@@ -6,8 +6,8 @@
 
 namespace Mantid {
 namespace Kernel {
-/** @class The ConfigPropertyObserver provides a simpler way to observe
-   ConfigService notifications.
+/** The ConfigObserver is used to observe changes to the value of a single
+   configuration property based on notifications sent from the ConfigService.
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
    Ridge National Laboratory & European Spallation Source

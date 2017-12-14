@@ -6,11 +6,11 @@
 
 namespace Mantid {
 namespace Kernel {
-/** @class The ConfigObserver provides a simpler way to observe
-   ConfigService notifications.
+/** The ConfigObserver is used to observe changes in the configuration based
+  on notifications sent from the ConfigService.
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
+    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
