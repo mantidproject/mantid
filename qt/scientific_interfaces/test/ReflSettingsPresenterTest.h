@@ -190,7 +190,7 @@ public:
         .WillOnce(Return("12"));
 
     auto options = presenter.getReductionOptions();
-    TS_ASSERT_EQUALS(options.size(), 22);
+    TS_ASSERT_EQUALS(options.size(), 21);
     TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
                      "MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(options["CRho"].toStdString(), "2.5,0.4,1.1");

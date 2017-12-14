@@ -59,11 +59,11 @@ public:
         &mockSettingsPresenter, &mockSaveTabPresenter);
 
     EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(0))
-        .Times(Exactly(1));
+        .Times(Exactly(1)).WillOnce(Return(OptionsMap()));
     presenter.getTransmissionOptions(0);
 
     EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(1))
-        .Times(Exactly(1));
+        .Times(Exactly(1)).WillOnce(Return(OptionsMap()));
     presenter.getTransmissionOptions(1);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
@@ -80,11 +80,11 @@ public:
         &mockSettingsPresenter, &mockSaveTabPresenter);
 
     EXPECT_CALL(mockSettingsPresenter, getReductionOptions(0))
-        .Times(Exactly(1));
+        .Times(Exactly(1)).WillOnce(Return(OptionsMap()));
     presenter.getReductionOptions(0);
 
     EXPECT_CALL(mockSettingsPresenter, getReductionOptions(1))
-        .Times(Exactly(1));
+        .Times(Exactly(1)).WillOnce(Return(OptionsMap()));
     presenter.getReductionOptions(1);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
