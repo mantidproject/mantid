@@ -1,6 +1,7 @@
 #ifndef MANTID_GEOMETRY_COMPONENTINFO_H_
 #define MANTID_GEOMETRY_COMPONENTINFO_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/shared_ptr.hpp>
@@ -31,7 +32,7 @@ class Instrument;
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
-
+isRectBank
   This file is part of Mantid.
 
   Mantid is free software; you can redistribute it and/or modify
@@ -127,7 +128,7 @@ public:
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
-  bool isStructuredBank(const size_t componentIndex) const;
+  Beamline::ComponentType componentFlag(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
   size_t scanSize() const;

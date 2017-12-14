@@ -3,23 +3,23 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <Eigen/Geometry>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -33,8 +33,9 @@ namespace {
 */
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
-makeComponentIDMap(const boost::shared_ptr<
-    const std::vector<Mantid::Geometry::ComponentID>> &componentIds) {
+makeComponentIDMap(
+    const boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
+        &componentIds) {
   auto idMap = boost::make_shared<
       std::unordered_map<Mantid::Geometry::ComponentID, size_t>>();
 
@@ -105,13 +106,15 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   auto scaleFactors =
       boost::make_shared<std::vector<Eigen::Vector3d>>(1, scaleFactor);
   auto names = boost::make_shared<std::vector<std::string>>(1);
-  auto isStructuredBank = boost::make_shared<std::vector<bool>>(1, false);
+  using Mantid::Beamline::ComponentType;
+  auto isStructuredBank =
+      boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
       parentIndices, positions, rotations, scaleFactors, isStructuredBank,
       names, -1, -1);
 }
-}
+} // namespace
 
 class ComponentInfoTest : public CxxTest::TestSuite {
 public:
@@ -122,8 +125,9 @@ public:
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
   void test_indexOf() {
-    auto detectorIndices = boost::make_shared<
-        std::vector<size_t>>(); // No detectors in this example
+    auto detectorIndices =
+        boost::make_shared<std::vector<size_t>>(); // No detectors in this
+                                                   // example
     auto detectorRanges =
         boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
     detectorRanges->push_back(
@@ -148,7 +152,9 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto names = boost::make_shared<std::vector<std::string>>(2);
-    auto isRectBank = boost::make_shared<std::vector<bool>>(2);
+    using Mantid::Beamline::ComponentType;
+    auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
+        2, ComponentType::Generic);
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
         parentIndices, positions, rotations, scaleFactors, isRectBank, names,
@@ -303,10 +309,12 @@ public:
 
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{position[0] - radius, position[1] - radius,
-                            position[2] - radius})).norm() < 1e-9);
+                            position[2] - radius}))
+                  .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{position[0] + radius, position[1] + radius,
-                            position[2] + radius})).norm() < 1e-9);
+                            position[2] + radius}))
+                  .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
     shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
     boundingBox = componentInfo.boundingBox(0);
@@ -332,10 +340,12 @@ public:
     auto boundingBox = componentInfo->boundingBox(0 /*detector index*/);
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{detectorPos[0] - radius, detectorPos[1] - radius,
-                            detectorPos[2] - radius})).norm() < 1e-9);
+                            detectorPos[2] - radius}))
+                  .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
-                            detectorPos[2] + radius})).norm() < 1e-9);
+                            detectorPos[2] + radius}))
+                  .norm() < 1e-9);
 
     // Check bounding box of root (instrument)
     boundingBox = componentInfo->boundingBox(componentInfo->root() /*Root*/);
@@ -344,11 +354,13 @@ public:
     // instrument 2.0).
     TS_ASSERT((boundingBox.minPoint() -
                (Kernel::V3D{samplePos[0] - radius, samplePos[1] - radius,
-                            samplePos[2] - radius})).norm() < 1e-9);
+                            samplePos[2] - radius}))
+                  .norm() < 1e-9);
     // max is the detector
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{detectorPos[0] + radius, detectorPos[1] + radius,
-                            detectorPos[2] + radius})).norm() < 1e-9);
+                            detectorPos[2] + radius}))
+                  .norm() < 1e-9);
   }
 
   void test_boundingBox_around_rectangular_bank() {
@@ -365,7 +377,7 @@ public:
     // Check bounding box of root (instrument)
     auto boundingBoxRoot =
         componentInfo->boundingBox(componentInfo->root() /*Root*/
-                                   );
+        );
     // min Z in the sample
     auto boundingBoxSample =
         componentInfo->boundingBox(componentInfo->sample());
@@ -374,7 +386,9 @@ public:
 
     // max is the Rectangular bank
     auto bankIndex = componentInfo->root() - 3;
-    TS_ASSERT(componentInfo->isStructuredBank(bankIndex));
+    using Mantid::Beamline::ComponentType;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(bankIndex),
+                     ComponentType::Rectangular);
     auto boundingBoxBank = componentInfo->boundingBox(bankIndex);
     TS_ASSERT((boundingBoxRoot.maxPoint() - boundingBoxBank.maxPoint()).norm() <
               1e-9);
@@ -447,14 +461,17 @@ public:
     // Check bank1 represents max point in y
     const size_t bank1Index = componentInfo->root() - 4 - 10;
     auto boundingBoxBank1 = componentInfo->boundingBox(bank1Index);
-    TS_ASSERT(componentInfo->isStructuredBank(bank1Index));
+    using Mantid::Beamline::ComponentType;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(bank1Index),
+                     ComponentType::Rectangular);
     TS_ASSERT_DELTA(boundingBoxRoot.maxPoint().Y(),
                     boundingBoxBank1.maxPoint().Y(), 1e-9);
 
     // Check bank2 represents min point in y
     const size_t bank2Index = componentInfo->root() - 1;
     auto boundingBoxBank2 = componentInfo->boundingBox(bank2Index);
-    TS_ASSERT(componentInfo->isStructuredBank(bank2Index));
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(bank2Index),
+                     ComponentType::Rectangular);
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
   }

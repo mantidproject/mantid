@@ -1,6 +1,7 @@
 #ifndef MANTID_BEAMLINE_COMPONENTINFO_H_
 #define MANTID_BEAMLINE_COMPONENTINFO_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
@@ -54,7 +55,7 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
-  Mantid::Kernel::cow_ptr<std::vector<bool>> m_isStructuredBank;
+  Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentTypeFlag;
   boost::shared_ptr<const std::vector<std::string>> m_names;
 
   const size_t m_size = 0;
@@ -97,7 +98,7 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-                boost::shared_ptr<std::vector<bool>> isStructuredBank,
+                boost::shared_ptr<std::vector<ComponentType>> isStructuredBank,
                 boost::shared_ptr<const std::vector<std::string>> names,
                 int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
@@ -146,7 +147,7 @@ public:
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Eigen::Vector3d &scaleFactor);
-  bool isStructuredBank(const size_t componentIndex) const;
+  ComponentType componentFlag(const size_t componentIndex) const;
 
   size_t scanCount(const size_t index) const;
   size_t scanSize() const;

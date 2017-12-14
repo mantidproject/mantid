@@ -8,8 +8,8 @@
 #include <Eigen/Geometry>
 #include <boost/make_shared.hpp>
 #include <numeric>
-#include <tuple>
 #include <string>
+#include <tuple>
 
 using namespace Mantid::Beamline;
 
@@ -61,7 +61,8 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
 
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -136,7 +137,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   // Component names
   auto names = boost::make_shared<StrVec>(5);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
 
   auto compInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -201,7 +203,8 @@ makeTreeExample() {
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
   // Rectangular bank flag
-  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+  auto isRectangularBank =
+      boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
 
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -281,7 +284,7 @@ public:
     auto rotations = boost::make_shared<RotVec>();
     auto scaleFactors = boost::make_shared<PosVec>(3);
     auto names = boost::make_shared<StrVec>(3);
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>();
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>();
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
                                 parentIndices, positions, rotations,
@@ -318,7 +321,8 @@ public:
 
     auto scaleFactors = boost::make_shared<PosVec>();
     auto names = boost::make_shared<StrVec>();
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
+        2, ComponentType::Generic);
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, positions, rotations,
@@ -357,7 +361,8 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
-    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+    auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
+        2, ComponentType::Generic);
 
     TS_ASSERT_THROWS(
         ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree,
@@ -630,8 +635,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex)
-                   .isApprox(compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex).isApprox(
+                   compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -715,8 +720,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex)
-            .angularDistance(info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex).angularDistance(
+            info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 

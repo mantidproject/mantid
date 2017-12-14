@@ -3,21 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include <set>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
+#include <set>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -31,7 +30,7 @@ makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
   return boost::make_shared<const Instrument>(
       baseInstrument, boost::make_shared<ParameterMap>());
 }
-}
+} // namespace
 
 class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -197,9 +196,10 @@ public:
         "Should contain the sample id", 1,
         componentIds.count(visitee->getComponentByName("some-surface-holder")
                                ->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")
-                                             ->getComponentID()));
+    TSM_ASSERT_EQUALS(
+        "Should contain the source id", 1,
+        componentIds.count(
+            visitee->getComponentByName("source")->getComponentID()));
 
     auto detectorComponentId =
         visitee->getComponentByName("point-detector")->getComponentID();
@@ -292,7 +292,7 @@ public:
   }
 
   void test_visitation_of_rectangular_detector() {
-
+    using Mantid::Beamline::ComponentType;
     // Need confidence that this works properly for RectangularDetectors
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -310,14 +310,17 @@ public:
 
     const size_t bankIndex = compInfo->indexOf(
         instrument->getComponentByName("bank1")->getComponentID());
-    TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
-    TS_ASSERT(!compInfo->isStructuredBank(
-        compInfo->source())); // Source is not a rectangular bank
-    TS_ASSERT(!compInfo->isStructuredBank(
-        0)); //  A detector is never a bank, let alone a detector
+    TS_ASSERT(compInfo->componentFlag(bankIndex) ==
+              ComponentType::Rectangular); // Bank is rectangular
+    TS_ASSERT(compInfo->componentFlag(compInfo->source()) ==
+              ComponentType::Generic); // Source is not a rectangular bank
+    TS_ASSERT_EQUALS(compInfo->componentFlag(0),
+                     ComponentType::Detector); //  A detector is never a bank,
+                                               //  let alone a detector
   }
 
   void test_visitation_of_non_rectangular_detectors() {
+    using Mantid::Beamline::ComponentType;
 
     auto instrument =
         ComponentCreationHelper::createTestInstrumentCylindrical(1 /*n banks*/);
@@ -328,7 +331,7 @@ public:
 
     // Nothing should be marked as a rectangular bank
     for (size_t index = 0; index < compInfo->size(); ++index) {
-      TS_ASSERT(!compInfo->isStructuredBank(index));
+      TS_ASSERT(compInfo->componentFlag(index) != ComponentType::Rectangular);
     }
   }
 

@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -315,7 +316,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     const size_t index = *compIterator;
     if (hasSource() && index == source()) {
       ++compIterator;
-    } else if (isStructuredBank(index)) {
+    } else if (componentFlag(index) == Beamline::ComponentType::Rectangular) {
       auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
       // nSubComponents, subtract off self hence -1. nSubComponents = number of
       // horizontal columns.
@@ -366,8 +367,9 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   return absoluteBB;
 }
 
-bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
-  return m_componentInfo->isStructuredBank(componentIndex);
+Beamline::ComponentType
+ComponentInfo::componentFlag(const size_t componentIndex) const {
+  return m_componentInfo->componentFlag(componentIndex);
 }
 
 void ComponentInfo::setScanInterval(

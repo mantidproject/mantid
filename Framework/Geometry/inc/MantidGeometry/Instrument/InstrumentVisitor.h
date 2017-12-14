@@ -1,21 +1,22 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 #define MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include <Eigen/Geometry>
+#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
-#include <boost/shared_ptr.hpp>
-#include <Eigen/Geometry>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
 class ComponentInfo;
 class DetectorInfo;
-}
+} // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
@@ -128,13 +129,14 @@ private:
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>>
+      m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
-  boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
+  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentTypeFlag;
 
   /// Component names
   boost::shared_ptr<std::vector<std::string>> m_names;
