@@ -361,8 +361,8 @@ KafkaEventStreamDecoder::getStopOffsets(
   std::this_thread::sleep_for(MAX_LATENCY);
   stopOffsets = m_eventStream->getOffsetsForTimestamp(
       static_cast<int64_t>(stopTime / 1000000));
-  // Convert nanosecond precision from message to millisecond precision which
-  // Kafka offset query supports
+  // /1000000 to convert nanosecond precision from message to millisecond
+  // precision which Kafka offset query supports
 
   // Set reachedEnd to false for each topic and partition
   for (auto keyValue : stopOffsets) {

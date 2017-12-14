@@ -153,23 +153,15 @@ class FakeISISEventSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   explicit FakeISISEventSubscriber(int32_t nperiods)
-      : m_nperiods(nperiods), m_nextPeriod(0), m_callNumber(0) {}
+      : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *message, int64_t &offset, int32_t &partition,
                       std::string &topic) override {
     assert(message);
 
-    // Return an event message on the first call and a sample environment log
-    // message on any subsequent calls
-    if (m_callNumber == 0) {
-      fakeReceiveAnEventMessage(message, m_nextPeriod);
-      m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
-    } else {
-      fakeReceiveASampleEnvMessage(message);
-    }
-
-    m_callNumber++;
+    fakeReceiveAnEventMessage(message, m_nextPeriod);
+    m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
 
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
@@ -191,7 +183,38 @@ public:
 private:
   const int32_t m_nperiods;
   int32_t m_nextPeriod;
-  int32_t m_callNumber; // number of times consumeMessage has been called
+};
+
+// -----------------------------------------------------------------------------
+// Fake event stream to provide sample environment data
+// -----------------------------------------------------------------------------
+class FakeSampleEnvironmentSubscriber
+  : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(message);
+
+    fakeReceiveASampleEnvMessage(message);
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+      std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
 };
 
 // -----------------------------------------------------------------------------

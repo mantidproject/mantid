@@ -142,7 +142,7 @@ public:
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISEventSubscriber(1)))
+        .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
@@ -294,15 +294,15 @@ private:
   void checkWorkspaceEventData(
       const Mantid::DataObjects::EventWorkspace &eventWksp) {
     // A timer-based test and each message contains 6 events so the total should
-    // be divisible by 6
+    // be divisible by 6, but not be 0
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
+    TS_ASSERT(eventWksp.getNumberEvents() != 0);
   }
 
   void checkWorkspaceLogData(Mantid::DataObjects::EventWorkspace &eventWksp) {
-    // We should find a sample log with this name
-    // Mantid::Kernel::Property *log = nullptr;
     Mantid::Kernel::TimeSeriesProperty<int32_t> *log = nullptr;
     auto run = eventWksp.mutableRun();
+    // We should find a sample log with this name
     TS_ASSERT_THROWS_NOTHING(
         log = run.getTimeSeriesProperty<int32_t>("fake source"));
     if (log) {
