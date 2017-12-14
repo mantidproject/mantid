@@ -105,7 +105,7 @@ struct IntersectionPoint {
   */
   inline IntersectionPoint(const int flag, const Kernel::V3D &end,
                            const double distFromStartOfTrack,
-                           const CSGObject &obj,
+                           const IObject &obj,
                            const ComponentID compID = nullptr)
       : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
         object(&obj), componentID(compID) {}
@@ -131,7 +131,7 @@ struct IntersectionPoint {
   int directionFlag;       ///< Directional flag
   Kernel::V3D endPoint;    ///< Point
   double distFromStart;    ///< Total distance from track begin
-  const CSGObject *object; ///< The object that was intersected
+  const IObject *object; ///< The object that was intersected
   ComponentID componentID; ///< Unique component ID
                            //@}
 };
