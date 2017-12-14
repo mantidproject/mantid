@@ -53,23 +53,27 @@ const double THRESHOLD = 1E-6;
 
 // removes zeros from converged results
  
-MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws, const size_t maxIt, const size_t nspec,const::std::string yLabel) {
-        return ws;
+MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws, const size_t maxIt,const::std::string yLabel) {
+
+ 	ws->setYUnitLabel(yLabel);
+        try{
+            ws->getAxis(0)->unit()=UnitFactory::Instance().create("Number of Iterations");
+       }catch(Exception::NotFoundError &){
+          ws->getAxis(0)->unit()=UnitFactory::Instance().create("Label");
+          Unit_sptr unit = ws->getAxis(0)->unit();
+          boost::shared_ptr<Units::Label> label= boost::dynamic_pointer_cast<Units::Label>(unit);
+          label->setLabel("Number of Iterations", "");
+       }
+
         if(maxIt == ws->readY(0).size()){
               return ws;
         }
-
+        const size_t nspec = ws->getNumberHistograms();
 	MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(ws, nspec, maxIt, maxIt);	
-	outWS->setYUnitLabel(yLabel);
-	Unit_sptr unit = outWS->getAxis(0)->unit();
-	boost::shared_ptr<Units::Label> label =
-		boost::dynamic_pointer_cast<Units::Label>(unit);
-	label->setLabel("Number of iterations","");
-
-	for (size_t spec = 0; spec < nspec; spec++) {	
+        for (size_t spec = 0; spec < nspec; spec++) {	
 		outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
-	//    auto Data = ws->readY(spec);
-	//	outWS->setCounts(spec, std::move(std::vector<double>(Data.begin(), Data.begin() + maxIt)));
+	        auto Data = ws->readY(spec);
+		outWS->setCounts(spec, std::move(std::vector<double>(Data.begin(), Data.begin() + maxIt)));
 	}
 	return outWS;
 }
@@ -425,8 +429,8 @@ void MaxEnt::exec() {
   } // Next spectrum
   //add 1 to maxIt to account for starting at 0
   maxIt++;
-  setProperty("EvolChi", removeZeros(outEvolChi,maxIt,nspec,"Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, maxIt, nspec, "Maximum Angle"));
+  setProperty("EvolChi", removeZeros(outEvolChi,maxIt,"Chi squared"));
+  setProperty("EvolAngle", removeZeros(outEvolTest, maxIt, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
