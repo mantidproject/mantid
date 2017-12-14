@@ -96,7 +96,9 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_0, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(0);
     EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(0);
     presenter.getTransmissionOptions(0);
@@ -105,7 +107,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
     EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(0);
-    EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_1, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(0);
     presenter.getTransmissionOptions(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
@@ -114,7 +118,9 @@ public:
 
     EXPECT_CALL(presenter_0, getTransmissionOptions()).Times(0);
     EXPECT_CALL(presenter_1, getTransmissionOptions()).Times(0);
-    EXPECT_CALL(presenter_2, getTransmissionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_2, getTransmissionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getTransmissionOptions(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
@@ -133,7 +139,9 @@ public:
 
     ReflSettingsTabPresenter presenter(settingsPresenters);
 
-    EXPECT_CALL(presenter_0, getReductionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_0, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(presenter_1, getReductionOptions()).Times(0);
     EXPECT_CALL(presenter_2, getReductionOptions()).Times(0);
     presenter.getReductionOptions(0);
@@ -142,7 +150,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
 
     EXPECT_CALL(presenter_0, getReductionOptions()).Times(0);
-    EXPECT_CALL(presenter_1, getReductionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_1, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     EXPECT_CALL(presenter_2, getReductionOptions()).Times(0);
     presenter.getReductionOptions(1);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
@@ -151,7 +161,9 @@ public:
 
     EXPECT_CALL(presenter_0, getReductionOptions()).Times(0);
     EXPECT_CALL(presenter_1, getReductionOptions()).Times(0);
-    EXPECT_CALL(presenter_2, getReductionOptions()).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(presenter_2, getReductionOptions())
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getReductionOptions(2);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));

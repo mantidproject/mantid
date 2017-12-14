@@ -120,7 +120,9 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group))
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getPreprocessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -142,7 +144,9 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group))
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getPreprocessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -164,7 +168,9 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getReductionOptions(group)).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getReductionOptions(group))
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getProcessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -186,7 +192,9 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getReductionOptions(group)).Times(1).WillOnce(Return(OptionsMap()));
+    EXPECT_CALL(mockMainPresenter, getReductionOptions(group))
+        .Times(1)
+        .WillOnce(Return(OptionsMap()));
     presenter.getProcessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
