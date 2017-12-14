@@ -295,6 +295,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             EVENT_MESSAGE_ID.c_str())) {
       eventDataFromMessage(buffer);
+      m_cbIterationEnd();
+      continue;
     }
 
     // Check if we have a sample environment log message
@@ -302,22 +304,28 @@ void KafkaEventStreamDecoder::captureImplExcept() {
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             SAMPLE_MESSAGE_ID.c_str())) {
       sampleDataFromMessage(buffer);
+      m_cbIterationEnd();
+      continue;
     }
 
-    // Check if we have a runMessage if we don't already have run stop
-    // information
-    if (!checkOffsets && flatbuffers::BufferHasIdentifier(
+    // Check if we have a runMessage
+    if (flatbuffers::BufferHasIdentifier(
                              reinterpret_cast<const uint8_t *>(buffer.c_str()),
                              RUN_MESSAGE_ID.c_str())) {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-      if (runMsg->info_type_type() == InfoTypes_RunStop) {
+      if (!checkOffsets && runMsg->info_type_type() == InfoTypes_RunStop) {
         auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
         auto stopTime = runStopMsg->stop_time();
         g_log.debug() << "Received an end-of-run message with stop time = "
                       << stopTime << std::endl;
         stopOffsets =
             getStopOffsets(stopOffsets, reachedEnd, stopTime, checkOffsets);
+      } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
+        auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
+        m_runNumber = runStartMsg->run_number();
+        auto runStartTime = static_cast<time_t>(runStartMsg->start_time() / 1000000000);
+        m_runStart.set_from_time_t(runStartTime);
       }
     }
     m_cbIterationEnd();
