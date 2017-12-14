@@ -5,7 +5,6 @@ import copy
 from mantid.kernel import Logger
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.enums import FindDirectionEnum
 
 
 class BeamCentrePresenter(object):

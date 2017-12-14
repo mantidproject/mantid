@@ -7,6 +7,7 @@ from sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, M
                                                          WavRangeReduction, DefaultTrans, SetCentre,
                                                          UseCompatibilityMode, FindBeamCentre)
 
+
 class LOQCentreNoGrav(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)

@@ -184,9 +184,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                     self._rename_and_group_workspaces(j, output_workspaces)
 
             residueLR.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
-                                                  sample_quartiles[MaskingQuadrant.Right]))
+                                                       sample_quartiles[MaskingQuadrant.Right]))
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
-                                                  sample_quartiles[MaskingQuadrant.Bottom]))
+                                                       sample_quartiles[MaskingQuadrant.Bottom]))
             if(j == 0):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
