@@ -19,8 +19,13 @@ from __future__ import (absolute_import, division, print_function,
 
 import unittest
 
-from qtpy.QtCore import QObject, Qt
+from qtpy.QtCore import QObject, Qt, Slot
 from qtpy.QtWidgets import QAction, QApplication, QMenu, QToolBar
+try:
+    from qtpy.QtCore import SIGNAL
+    NEW_STYLE_SIGNAL = False
+except ImportError:
+    NEW_STYLE_SIGNAL = True
 
 from mantidqt.utils.qt import add_actions, create_action
 
@@ -50,11 +55,15 @@ class CreateActionTest(unittest.TestCase):
 
     def test_supplied_triggered_callback_attaches_to_triggered_signal(self):
         class Receiver(QObject):
+            @Slot()
             def test_slot(self):
                 pass
         recv = Receiver()
         action = create_action(None, "Test Action", on_triggered=recv.test_slot)
-        self.assertEqual(1, action.receivers(action.triggered))
+        if NEW_STYLE_SIGNAL:
+            self.assertEqual(1, action.receivers(action.triggered))
+        else:
+            self.assertEqual(1, action.receivers(SIGNAL("triggered()")))
 
     def test_shortcut_is_set_if_given(self):
         action = create_action(None, "Test Action", shortcut="Ctrl+S")
