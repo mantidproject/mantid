@@ -29,13 +29,58 @@ MockObserver<Callback> makeMockObserver(Callback callback) {
 
 class ConfigServiceObserverTest : public CxxTest::TestSuite {
 public:
-  void testRecievesCallbackForOutputDirectoryChange() {
-    auto called = false;
-    auto observer = makeMockObserver(
-        [&called](const std::string &name, const std::string &newValue,
-                  const std::string &prevValue) -> void { called = true; });
-    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
-    TS_ASSERT(called);
+  void setUp() override {
+    m_searchDirectories =
+        ConfigService::Instance().getString("datasearch.directories");
+    m_defaultSaveDirectory =
+        ConfigService::Instance().getString("defaultsave.directory");
   }
+
+  void tearDown() override {
+    ConfigService::Instance().setString("datasearch.directories",
+                                        m_searchDirectories);
+    ConfigService::Instance().setString("defaultsave.directory",
+                                        m_defaultSaveDirectory);
+  }
+
+  void testRecievesCallbackForOutputDirectoryChange() {
+    auto call_count = 0;
+    auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
+    auto observer = makeMockObserver(
+        [&call_count](const std::string &name, const std::string &newValue,
+                      const std::string &prevValue) -> void { call_count++; });
+    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
+    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
+  }
+
+  void testCopysObserverOnCopyConstruction() {
+    auto call_count = 0;
+    auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
+    auto observer = makeMockObserver(
+        [&call_count](const std::string &name, const std::string &newValue,
+                      const std::string &prevValue) -> void {
+          call_count++;
+        });
+    auto copyOfObserver = observer;
+    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
+    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED * 2, call_count);
+  }
+
+  void testMovesObserverOnMoveConstruction() {
+    auto call_count = 0;
+    auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
+    auto observer = makeMockObserver(
+        [&call_count](const std::string &name, const std::string &newValue,
+                      const std::string &prevValue) -> void {
+          call_count++;
+        });
+    auto movedObserver = std::move(observer);
+    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
+    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
+  }
+
+private:
+  std::string m_searchDirectories;
+  std::string m_defaultSaveDirectory;
 };
 #endif // MANTID_CONFIGSERVICEOBSERVERTEST_H_

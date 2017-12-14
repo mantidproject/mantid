@@ -33,10 +33,15 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ConfigServiceObserver {
 public:
   ConfigServiceObserver();
+  ConfigServiceObserver(const ConfigServiceObserver& other);
+  ConfigServiceObserver(ConfigServiceObserver&& other) noexcept;
+  ConfigServiceObserver& operator=(const ConfigServiceObserver& other);
+  ConfigServiceObserver& operator=(ConfigServiceObserver&& other) noexcept;
+  virtual ~ConfigServiceObserver() noexcept;
+
   void notifyValueChanged(const std::string &name, const std::string &newValue,
                           const std::string &prevValue);
   void notifyValueChanged(ConfigValChangeNotification_ptr notification);
-  virtual ~ConfigServiceObserver() = default;
 protected:
   virtual void onValueChanged(const std::string &name,
                               const std::string &newValue,

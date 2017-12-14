@@ -9,6 +9,8 @@ set ( TEST_PY_FILES
   BoundedValidatorTest.py
   CompositeValidatorTest.py
   ConfigServiceTest.py
+  ConfigServiceObserverTest.py
+  ConfigPropertyObserverTest.py
   DateAndTimeTest.py
   DeltaEModeTest.py
   EnabledWhenPropertyTest.py

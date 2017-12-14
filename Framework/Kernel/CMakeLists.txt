@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
 	src/ConfigServiceObserver.cpp
+	src/ConfigPropertyObserver.cpp
 	src/DateAndTime.cpp
 	src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
@@ -164,6 +165,7 @@ set ( INC_FILES
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigServiceObserver.h
+	inc/MantidKernel/ConfigPropertyObserver.h
   inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
@@ -337,6 +339,7 @@ set ( TEST_FILES
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
 	ConfigServiceObserverTest.h
+	ConfigPropertyObserverTest.h
 	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeHelpersTest.h
