@@ -419,17 +419,11 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
  */
 Mantid::Geometry::ComponentID
 InstrumentActor::getComponentID(size_t pickID) const {
-  /*size_t ndet = m_detIDs.size();
   auto compID = Mantid::Geometry::ComponentID();
-  if (pickID < ndet) {
-    auto &det = getDetectorByPickID(m_detIDs[pickID]);
-    compID = det.getComponentID();
-  } else if (pickID < ndet + m_nonDetIDs.size()) {
-    compID = m_nonDetIDs[pickID - ndet];
-  }
-  return compID;*/
   const auto &componentInfo = getComponentInfo();
-  return componentInfo.componentID(pickID)->getComponentID();
+  if (pickID < componentInfo.size())
+    compID = componentInfo.componentID(pickID)->getComponentID();
+  return compID;
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
@@ -816,7 +810,7 @@ void InstrumentActor::doDraw(bool picking) const {
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
         
-        componentInfo.shape(i).draw();
+        componentInfo.shape(i)->draw();
         glPopMatrix();
       }
     }

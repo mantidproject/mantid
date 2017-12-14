@@ -41,6 +41,7 @@ set ( SRC_FILES
 	src/StructuredDetectorActor.cpp
 	src/UCorrectionDialog.cpp
 	src/UnwrappedCylinder.cpp
+	src/UnwrappedDetector.cpp
 	src/UnwrappedSphere.cpp
 	src/UnwrappedSurface.cpp
 	src/Viewport.cpp
@@ -116,6 +117,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/StructuredDetectorActor.h
 	inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.h
 	inc/MantidQtWidgets/InstrumentView/UnwrappedCylinder.h
+	inc/MantidQtWidgets/InstrumentView/UnwrappedDetector.h
 	inc/MantidQtWidgets/InstrumentView/UnwrappedSphere.h
 	inc/MantidQtWidgets/InstrumentView/UnwrappedSurface.h
 	inc/MantidQtWidgets/InstrumentView/Viewport.h

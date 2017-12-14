@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"

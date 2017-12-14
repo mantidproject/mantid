@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidGeometry/IDetector.h"
 #include <cmath>
 
