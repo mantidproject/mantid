@@ -39,6 +39,7 @@ Core Functionality
 
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
+- The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom. 
 - Condition to check if a property is enabled when serializing.
 
 Performance
