@@ -138,7 +138,7 @@ protected:
   std::size_t m_numberOfSpectra{
       0};                     ///< The number of spectra in the input workspace
   bool m_distribution{false}; ///< Whether input is a distribution. Only applies
-                              ///to histogram workspaces.
+  /// to histogram workspaces.
   bool m_inputEvents{
       false}; ///< Flag indicating whether input workspace is an EventWorkspace
   Kernel::Unit_const_sptr m_inputUnit; ///< The unit of the input workspace
