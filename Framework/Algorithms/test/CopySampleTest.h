@@ -13,7 +13,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidDataObjects/MDEvent.h"
@@ -43,16 +43,17 @@ public:
     auto canShape = ComponentCreationHelper::cappedCylinderXML(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
     SampleEnvironment *kit = new SampleEnvironment(
-        envName, ShapeFactory().createShape<Container>(canShape));
+        envName,
+        boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
     delete latt;
-    Object_sptr shape_sptr = ComponentCreationHelper::createCappedCylinder(
+    auto shape_sptr = ComponentCreationHelper::createCappedCylinder(
         0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     shape_sptr->setMaterial(Material(
         "vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-    sample.setShape(*shape_sptr);
+    sample.setShape(shape_sptr);
     return sample;
   }
 

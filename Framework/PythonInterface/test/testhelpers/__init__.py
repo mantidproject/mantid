@@ -58,8 +58,7 @@ def create_algorithm(name, **kwargs):
     if 'rethrow' in kwargs:
         alg.setRethrows(True)
         del kwargs['rethrow']
-    for key, value in iteritems(kwargs):
-        alg.setProperty(key, value)
+    alg.setProperties(kwargs)
     return alg
 
 

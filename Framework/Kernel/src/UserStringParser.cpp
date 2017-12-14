@@ -170,7 +170,7 @@ bool UserStringParser::isValidStepSeparator(
       step_separator = input.substr(index - 1, 1);
     }
     // step values must be preceded by colon ':'
-    return (!step_separator.compare(":"));
+    return (step_separator == ":");
   }
   return true;
 }

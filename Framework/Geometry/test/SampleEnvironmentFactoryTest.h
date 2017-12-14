@@ -7,6 +7,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
 
+#include <boost/make_shared.hpp>
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Geometry::SampleEnvironmentFactory;
@@ -91,11 +92,11 @@ private:
       using namespace Mantid::Kernel;
 
       ShapeFactory factory;
-      auto small = factory.createShape<Container>(
-          ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1"));
+      auto small = boost::make_shared<Container>(factory.createShape(
+          ComponentCreationHelper::sphereXML(0.004, V3D(), "sp-1")));
       small->setID("8mm");
-      auto large = factory.createShape<Container>(
-          ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2"));
+      auto large = boost::make_shared<Container>(factory.createShape(
+          ComponentCreationHelper::sphereXML(0.005, V3D(), "sp-2")));
       large->setID("10mm");
 
       // Prepare a sample environment spec

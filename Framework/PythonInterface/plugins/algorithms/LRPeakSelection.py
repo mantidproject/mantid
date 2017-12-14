@@ -140,12 +140,16 @@ class PeakFinderDerivation(object):
         _std_deviation_counts_firstderi = self.std_deviation_counts_firstderi
 
         px_offset = 0
-        while abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
+        while int(_deri_min_pixel_value - px_offset) < len(_counts) \
+                and int(_deri_min_pixel_value - px_offset) > 0 \
+                and abs(_counts[int(_deri_min_pixel_value - px_offset)]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_min_final_value = _pixel[int(_deri_min_pixel_value - px_offset)]
 
         px_offset = 0
-        while abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
+        while int(round(_deri_max_pixel_value + px_offset)) < len(_counts)-1 \
+                and int(round(_deri_max_pixel_value + px_offset)) >= 0 \
+                and abs(_counts[int(round(_deri_max_pixel_value + px_offset))]) > _std_deviation_counts_firstderi:
             px_offset += 1
         _peak_max_final_value = _pixel[int(round(_deri_max_pixel_value + px_offset))]
 
@@ -235,17 +239,16 @@ class LRPeakSelection(PythonAlgorithm):
         # Get the full range
         pf = PeakFinderDerivation(workspace, back_offset=0)
         [left_max, right_min] = pf.low_res
-
         # Process left-end data
         pf.ydata = workspace.dataY(0)[0: left_max]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
-        left_clocking = pf.calculate_low_res_range()[0]
+        left_clocking = pf.low_resolution_range()[0]
 
         pf.ydata = workspace.dataY(0)[right_min: -1]
         pf.xdata = np.arange(len(pf.ydata))
         pf.compute()
-        right_clocking = pf.calculate_low_res_range()[1]
+        right_clocking = pf.low_resolution_range()[1]+right_min
 
         return [left_clocking, right_clocking]
 

@@ -116,8 +116,7 @@ public:
   }
 
   void testFullConstructor() {
-    boost::shared_ptr<Geometry::Object> cuboidShape =
-        ComponentCreationHelper::createCuboid(0.5);
+    auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 
     StructuredDetector *det = new StructuredDetector("MyStructuredDetector");
     det->setPos(1000., 2000., 3000.);
@@ -155,8 +154,7 @@ public:
   }
 
   void testIncorrectVertexArraySize() {
-    boost::shared_ptr<Geometry::Object> cuboidShape =
-        ComponentCreationHelper::createCuboid(0.5);
+    auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 
     StructuredDetector *det = new StructuredDetector("MyStructuredDetector");
     det->setPos(1000., 2000., 3000.);
