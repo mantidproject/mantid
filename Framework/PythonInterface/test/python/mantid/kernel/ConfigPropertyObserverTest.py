@@ -8,7 +8,7 @@ else:
     import mock
 
 
-class ConfigServiceObserverTest(unittest.TestCase):
+class ConfigObserverTest(unittest.TestCase):
     def setUp(self):
         self.config = ConfigService.Instance()
         self._search_directories = self.config.getString("datasearch.directories")

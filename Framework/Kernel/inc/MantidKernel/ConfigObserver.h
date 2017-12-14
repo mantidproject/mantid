@@ -1,12 +1,12 @@
-#ifndef MANTID_KERNEL_CONFIGSERVICEOBSERVER_H_
-#define MANTID_KERNEL_CONFIGSERVICEOBSERVER_H_
+#ifndef MANTID_KERNEL_CONFIGOBSERVER_H_
+#define MANTID_KERNEL_CONFIGOBSERVER_H_
 #include "ConfigService.h"
 #include "Poco/NObserver.h"
 #include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
-/** @class The ConfigServiceObserver provides a simpler way to observe
+/** @class The ConfigObserver provides a simpler way to observe
    ConfigService notifications.
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
@@ -30,14 +30,14 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL ConfigServiceObserver {
+class MANTID_KERNEL_DLL ConfigObserver {
 public:
-  ConfigServiceObserver();
-  ConfigServiceObserver(const ConfigServiceObserver& other);
-  ConfigServiceObserver(ConfigServiceObserver&& other) noexcept;
-  ConfigServiceObserver& operator=(const ConfigServiceObserver& other);
-  ConfigServiceObserver& operator=(ConfigServiceObserver&& other) noexcept;
-  virtual ~ConfigServiceObserver() noexcept;
+  ConfigObserver();
+  ConfigObserver(const ConfigObserver& other);
+  ConfigObserver(ConfigObserver&& other) noexcept;
+  ConfigObserver& operator=(const ConfigObserver& other);
+  ConfigObserver& operator=(ConfigObserver&& other) noexcept;
+  virtual ~ConfigObserver() noexcept;
 
   void notifyValueChanged(const std::string &name, const std::string &newValue,
                           const std::string &prevValue);
@@ -48,10 +48,10 @@ protected:
                               const std::string &prevValue);
 
 private:
-  Poco::NObserver<ConfigServiceObserver,
+  Poco::NObserver<ConfigObserver,
                   Mantid::Kernel::ConfigValChangeNotification>
       m_valueChangeListener;
 };
 }
 }
-#endif /*MANTID_KERNEL_CONFIGSERVICEOBSERVER_H_*/
+#endif /*MANTID_KERNEL_CONFIGOBSERVER_H_*/

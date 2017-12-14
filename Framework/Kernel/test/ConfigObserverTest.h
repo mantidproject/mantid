@@ -1,14 +1,15 @@
-#ifndef MANTID_CONFIGSERVICEOBSERVERTEST_H_
-#define MANTID_CONFIGSERVICEOBSERVERTEST_H_
+#ifndef MANTID_CONFIGOBSERVERTEST_H_
+#define MANTID_CONFIGOBSERVERTEST_H_
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ConfigServiceObserver.h"
+#include "MantidKernel/ConfigObserver.h"
+#include "MantidKernel/System.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
-template <typename Callback> class MockObserver : ConfigServiceObserver {
+template <typename Callback> class MockObserver : ConfigObserver {
 public:
   MockObserver(Callback callback) : m_callback(callback) {}
 
@@ -27,7 +28,7 @@ MockObserver<Callback> makeMockObserver(Callback callback) {
   return MockObserver<Callback>(callback);
 }
 
-class ConfigServiceObserverTest : public CxxTest::TestSuite {
+class ConfigObserverTest : public CxxTest::TestSuite {
 public:
   void setUp() override {
     m_searchDirectories =
@@ -48,7 +49,12 @@ public:
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
     auto observer = makeMockObserver(
         [&call_count](const std::string &name, const std::string &newValue,
-                      const std::string &prevValue) -> void { call_count++; });
+                      const std::string &prevValue) -> void {
+          UNUSED_ARG(name);
+          UNUSED_ARG(newValue);
+          UNUSED_ARG(prevValue);
+          call_count++;
+        });
     ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
   }
@@ -59,6 +65,9 @@ public:
     auto observer = makeMockObserver(
         [&call_count](const std::string &name, const std::string &newValue,
                       const std::string &prevValue) -> void {
+          UNUSED_ARG(name);
+          UNUSED_ARG(newValue);
+          UNUSED_ARG(prevValue);
           call_count++;
         });
     auto copyOfObserver = observer;
@@ -72,6 +81,9 @@ public:
     auto observer = makeMockObserver(
         [&call_count](const std::string &name, const std::string &newValue,
                       const std::string &prevValue) -> void {
+          UNUSED_ARG(name);
+          UNUSED_ARG(newValue);
+          UNUSED_ARG(prevValue);
           call_count++;
         });
     auto movedObserver = std::move(observer);

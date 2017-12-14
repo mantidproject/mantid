@@ -1,5 +1,5 @@
-#ifndef MANTID_CONFIGSERVICEOBSERVERTEST_H_
-#define MANTID_CONFIGSERVICEOBSERVERTEST_H_
+#ifndef MANTID_CONFIGPROPERTYOBSERVERTEST_H_
+#define MANTID_CONFIGPROPERTYOBSERVERTEST_H_
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
@@ -52,9 +52,14 @@ public:
   void testRecievesCallbackForSearchDirectoryChange() {
     auto call_count = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
-    auto observer = makeMockObserver("datasearch.directories",
-        [&call_count](const std::string &newValue, const std::string &prevValue)
-            -> void { call_count++; });
+    auto observer =
+        makeMockObserver("datasearch.directories",
+                         [&call_count](const std::string &newValue,
+                                       const std::string &prevValue) -> void {
+                           UNUSED_ARG(newValue);
+                           UNUSED_ARG(prevValue);
+                           call_count++;
+                         });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
   }
@@ -62,24 +67,37 @@ public:
   void testRecievesCallbackForOutputDirectoryChangeOnly() {
     auto call_count = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
-    auto observer = makeMockObserver("datasearch.directories",
-        [&call_count](const std::string &newValue, const std::string &prevValue)
-            -> void { call_count++; });
+    auto observer =
+        makeMockObserver("datasearch.directories",
+                         [&call_count](const std::string &newValue,
+                                       const std::string &prevValue) -> void {
+                           UNUSED_ARG(newValue);
+                           UNUSED_ARG(prevValue);
+                           call_count++;
+                         });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
   }
 
   void testMultipleObserversForDifferentProperties() {
     auto callCountA = 0;
-    auto observerA = makeMockObserver(
-        "datasearch.directories",
-        [&callCountA](const std::string &newValue, const std::string &prevValue)
-            -> void { callCountA++; });
+    auto observerA =
+        makeMockObserver("datasearch.directories",
+                         [&callCountA](const std::string &newValue,
+                                       const std::string &prevValue) -> void {
+                           UNUSED_ARG(newValue);
+                           UNUSED_ARG(prevValue);
+                           callCountA++;
+                         });
     auto callCountB = 0;
-    auto observerB = makeMockObserver(
-        "algorithms.retained",
-        [&callCountB](const std::string &newValue, const std::string &prevValue)
-            -> void { callCountB++; });
+    auto observerB =
+        makeMockObserver("algorithms.retained",
+                         [&callCountB](const std::string &newValue,
+                                       const std::string &prevValue) -> void {
+                           UNUSED_ARG(newValue);
+                           UNUSED_ARG(prevValue);
+                           callCountB++;
+                         });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     ConfigService::Instance().setString("algorithms.retained", "40");
@@ -93,4 +111,4 @@ private:
   std::string m_defaultSaveDirectory;
   std::string m_retainedAlgorithms;
 };
-#endif // MANTID_CONFIGSERVICEOBSERVERTEST_H_
+#endif // MANTID_CONFIGPROPERTYOBSERVERTEST_H_

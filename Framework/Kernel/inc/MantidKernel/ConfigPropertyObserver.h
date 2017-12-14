@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_CONFIGPROPERTYOBSERVER_H_
 #define MANTID_KERNEL_CONFIGPROPERTYOBSERVER_H_
 #include "ConfigService.h"
-#include "ConfigServiceObserver.h"
+#include "ConfigObserver.h"
 #include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
@@ -30,7 +30,7 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL ConfigPropertyObserver : ConfigServiceObserver {
+class MANTID_KERNEL_DLL ConfigPropertyObserver : ConfigObserver {
 public:
   ConfigPropertyObserver(std::string propertyName);
   virtual ~ConfigPropertyObserver() = default;

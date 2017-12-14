@@ -13,7 +13,7 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/ConfigServiceObserver.cpp
+	src/ConfigObserver.cpp
 	src/ConfigPropertyObserver.cpp
 	src/DateAndTime.cpp
 	src/DataItem.cpp
@@ -164,7 +164,7 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
-	inc/MantidKernel/ConfigServiceObserver.h
+	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
   inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
@@ -338,7 +338,7 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
-	ConfigServiceObserverTest.h
+	ConfigObserverTest.h
 	ConfigPropertyObserverTest.h
 	CowPtrTest.h
 	DataServiceTest.h
