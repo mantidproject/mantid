@@ -148,11 +148,8 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    startCapturing(*decoder, 1);
     Workspace_sptr workspace;
-    TSM_ASSERT("Decoder's data buffers should be created now",
-               decoder->hasData());
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
