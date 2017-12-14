@@ -1,5 +1,5 @@
-#ifndef MANTID_TESTOBJECT__
-#define MANTID_TESTOBJECT__
+#ifndef MANTID_TESTCSGOBJECT__
+#define MANTID_TESTCSGOBJECT__
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
@@ -1552,4 +1552,4 @@ private:
   IObject_sptr shell;
 };
 
-#endif // MANTID_TESTOBJECT__
+#endif // MANTID_TESTCSGOBJECT__
