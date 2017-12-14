@@ -109,6 +109,26 @@ ComponentInfo::componentsInSubtree(size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
+ComponentInfo::StructuredPanel
+ComponentInfo::structuredPanel(const size_t componentIndex) const {
+  StructuredPanel corners;
+  auto innerRangeComp =
+      m_componentInfo->componentRangeInSubtree(componentIndex);
+  // nSubComponents, subtract off self hence -1. nSubComponents = number of
+  // horizontal columns.
+  corners.nX = innerRangeComp.end() - innerRangeComp.begin() - 1;
+  auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
+  auto nSubDetectors =
+      std::distance(innerRangeDet.begin(), innerRangeDet.end());
+  corners.nY = nSubDetectors / corners.nX;
+
+  corners.bottomLeft = *innerRangeDet.begin();
+  corners.topRight = corners.bottomLeft + nSubDetectors - 1;
+  corners.topLeft = corners.bottomLeft + (corners.nY - 1);
+  corners.bottomRight = corners.topRight - (corners.nY - 1);
+  return corners;
+}
+
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
@@ -206,8 +226,9 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-const IObject &ComponentInfo::shape(const size_t componentIndex) const {
-  return *(*m_shapes)[componentIndex];
+boost::shared_ptr<const IObject>
+ComponentInfo::shape(const size_t componentIndex) const {
+  return (*m_shapes)[componentIndex];
 }
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
@@ -234,11 +255,11 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
       toShapeFrame(observer, *m_componentInfo, componentIndex);
   const Kernel::V3D scaleFactor = this->scaleFactor(componentIndex);
   if ((scaleFactor - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
-    return shape(componentIndex).solidAngle(relativeObserver);
+    return shape(componentIndex)->solidAngle(relativeObserver);
   else {
     // This function will scale the object shape when calculating the solid
     // angle.
-    return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
+    return shape(componentIndex)->solidAngle(relativeObserver, scaleFactor);
   }
 }
 
@@ -374,7 +395,7 @@ ComponentInfo::componentBoundingBox(const size_t index,
     return BoundingBox(); // Return null bounding box
   }
   const auto &s = this->shape(index);
-  BoundingBox absoluteBB = s.getBoundingBox();
+  BoundingBox absoluteBB = s->getBoundingBox();
 
   // modify in place for speed
   const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);

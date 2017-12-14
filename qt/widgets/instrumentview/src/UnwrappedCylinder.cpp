@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
 #include "MantidGeometry/IDetector.h"
 

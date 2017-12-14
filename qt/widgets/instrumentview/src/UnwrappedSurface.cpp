@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
@@ -6,73 +7,24 @@
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 
-#include <QRgb>
-#include <QSet>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QApplication>
-#include <QMessageBox>
 #include <QTransform>
 
 #include <cfloat>
 #include <limits>
 #include <cmath>
-#include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
 
 namespace MantidQt {
 namespace MantidWidgets {
-
-UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(0) {
-  color[0] = 0;
-  color[1] = 0;
-  color[2] = 0;
-}
-
-UnwrappedDetector::UnwrappedDetector(const unsigned char *c,
-                                     const IDetector &det)
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(det.getID()),
-      position(det.getPos()), rotation(det.getRotation()), shape(det.shape()),
-      scaleFactor(det.getScaleFactor()) {
-  color[0] = *c;
-  color[1] = *(c + 1);
-  color[2] = *(c + 2);
-}
-
-/** Copy constructor */
-UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) {
-  this->operator=(other);
-}
-
-/** Assignment operator */
-UnwrappedDetector &UnwrappedDetector::
-operator=(const UnwrappedDetector &other) {
-  color[0] = other.color[0];
-  color[1] = other.color[1];
-  color[2] = other.color[2];
-  u = other.u;
-  v = other.v;
-  width = other.width;
-  height = other.height;
-  uscale = other.uscale;
-  vscale = other.vscale;
-  detID = other.detID;
-  position = other.position;
-  rotation = other.rotation;
-  shape = other.shape;
-  scaleFactor = other.scaleFactor;
-  return *this;
-}
-
-/** Check if the object is valid*/
-bool UnwrappedDetector::isValid() const { return static_cast<bool>(shape); }
-
 /**
 * Constructor.
 * @param rootActor :: The instrument actor.
