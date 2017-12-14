@@ -52,8 +52,12 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 const double THRESHOLD = 1E-6;
 
 // removes zeros from converged results
-
+ 
 MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws, const size_t maxIt, const size_t nspec,const::std::string yLabel) {
+        return ws;
+        if(maxIt == ws->readY(0).size()){
+              return ws;
+        }
 
 	MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(ws, nspec, maxIt, maxIt);	
 	outWS->setYUnitLabel(yLabel);
@@ -64,8 +68,8 @@ MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws, const size_t ma
 
 	for (size_t spec = 0; spec < nspec; spec++) {	
 		outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
-	    auto Data = ws->readY(spec);
-		outWS->setCounts(spec, std::move(std::vector<double>(Data.begin(), Data.begin() + maxIt)));
+	//    auto Data = ws->readY(spec);
+	//	outWS->setCounts(spec, std::move(std::vector<double>(Data.begin(), Data.begin() + maxIt)));
 	}
 	return outWS;
 }
