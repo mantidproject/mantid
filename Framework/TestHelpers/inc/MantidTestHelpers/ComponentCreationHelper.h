@@ -10,7 +10,7 @@
 #ifndef COMPONENTCREATIONHELPER_H_
 #define COMPONENTCREATIONHELPER_H_
 
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -71,7 +71,7 @@ std::string cappedCylinderXML(double radius, double height,
 /**
  * Create a capped cylinder object
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
@@ -83,14 +83,14 @@ std::string sphereXML(double radius, const Mantid::Kernel::V3D &centre,
 /**
  * Create a sphere object
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createSphere(double radius,
              const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D(),
              const std::string &id = "sp-1");
 /** Create a cuboid shape for your pixels */
-Mantid::Geometry::Object_sptr createCuboid(double x_side_length,
-                                           double y_side_length = -1.0,
-                                           double z_side_length = -1.0);
+Mantid::Geometry::IObject_sptr createCuboid(double x_side_length,
+                                            double y_side_length = -1.0,
+                                            double z_side_length = -1.0);
 /**
 * Create a component assembly at the origin made up of 4 cylindrical detectors
 */
@@ -104,7 +104,7 @@ Mantid::Geometry::ObjComponent *createSingleObjectComponent();
  * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and
  * r2
  */
-Mantid::Geometry::Object_sptr
+Mantid::Geometry::IObject_sptr
 createHollowShell(double innerRadius, double outerRadius,
                   const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 /**
@@ -196,6 +196,11 @@ sansInstrument(const Mantid::Kernel::V3D &sourcePos,
                const Mantid::Kernel::V3D &samplePos,
                const Mantid::Kernel::V3D &trolley1Pos,
                const Mantid::Kernel::V3D &trolley2Pos);
+
+Mantid::Geometry::Instrument_sptr
+createInstrumentWithPSDTubes(const size_t nTubes = 3,
+                             const size_t nPixelsPerTube = 50,
+                             const bool mirrorTubes = false);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

@@ -1,5 +1,5 @@
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -57,7 +57,7 @@ namespace {
 Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
-GeometryTriangulator::GeometryTriangulator(const Object *obj)
+GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
     : m_isTriangulated(false), m_nFaces(0), m_nPoints(0) {
   m_obj = obj;
 #ifdef ENABLE_OPENCASCADE

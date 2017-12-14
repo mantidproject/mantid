@@ -1,6 +1,6 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/Renderer.h"
 #include <boost/make_shared.hpp>
@@ -10,12 +10,12 @@ namespace Geometry {
 GeometryHandler::GeometryHandler(IObjComponent *comp)
     : m_renderer(new detail::Renderer()), m_objComp(comp) {}
 
-GeometryHandler::GeometryHandler(boost::shared_ptr<Object> obj)
+GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
     : m_renderer(new detail::Renderer()),
       m_triangulator(new detail::GeometryTriangulator(obj.get())),
       m_obj(obj.get()) {}
 
-GeometryHandler::GeometryHandler(Object *obj)
+GeometryHandler::GeometryHandler(CSGObject *obj)
     : m_renderer(new detail::Renderer()),
       m_triangulator(new detail::GeometryTriangulator(obj)), m_obj(obj) {}
 

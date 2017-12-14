@@ -9,7 +9,7 @@ class TopoDS_Shape;
 
 namespace Mantid {
 namespace Geometry {
-class Object;
+class CSGObject;
 
 namespace detail {
 /** GeometryTriangulator : Triangulates object surfaces. May or may not use
@@ -43,11 +43,11 @@ private:
   size_t m_nPoints;
   std::vector<double> m_points; ///< double array or points
   std::vector<int> m_faces;     ///< Integer array of faces
-  const Object *m_obj;          ///< Input Object
+  const CSGObject *m_obj;          ///< Input Object
   void checkTriangulated();
 
 public:
-  GeometryTriangulator(const Object *obj);
+  GeometryTriangulator(const CSGObject *obj);
   ~GeometryTriangulator();
   void triangulate();
   void setGeometryCache(size_t nPoints, size_t nFaces,

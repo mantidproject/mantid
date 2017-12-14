@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_COMPONENTINFO_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -14,9 +15,8 @@ class V3D;
 }
 
 namespace Geometry {
-class BoundingBox;
 class IComponent;
-class Object;
+class IObject;
 }
 
 namespace Beamline {
@@ -61,11 +61,14 @@ private:
       m_compIDToIndex;
 
   /// Shapes for each component
-  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+  boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
       m_shapes;
 
   BoundingBox componentBoundingBox(const size_t index,
                                    const BoundingBox *reference) const;
+
+  /// Private copy constructor. Do not make public.
+  ComponentInfo(const ComponentInfo &other);
 
 public:
   ComponentInfo(
@@ -74,24 +77,33 @@ public:
           componentIds,
       boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
                                                  size_t>> componentIdToIndexMap,
-      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+      boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
           shapes);
-  ComponentInfo(const ComponentInfo &other);
   ~ComponentInfo();
-
+  /// Copy assignment is not possible for ComponentInfo
+  ComponentInfo &operator=(const ComponentInfo &) = delete;
+  std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
+  size_t indexOf(const std::string &name) const;
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> index) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> index) const;
   Kernel::V3D relativePosition(const size_t componentIndex) const;
   Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
+  void setPosition(const std::pair<size_t, size_t> index,
+                   const Kernel::V3D &newPosition);
+  void setRotation(const std::pair<size_t, size_t> index,
+                   const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
+  bool hasDetectorInfo() const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   bool hasSource() const;
@@ -100,6 +112,7 @@ public:
   size_t sample() const;
   double l1() const;
   Kernel::V3D scaleFactor(const size_t componentIndex) const;
+  std::string name(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Kernel::V3D &scaleFactor);
   size_t root();
@@ -108,12 +121,15 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
   bool hasShape(const size_t componentIndex) const;
-  const Geometry::Object &shape(const size_t componentIndex) const;
+  const Geometry::IObject &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
   bool isStructuredBank(const size_t componentIndex) const;
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  void merge(const ComponentInfo &other);
+  size_t scanSize() const;
   friend class Instrument;
 };
 
