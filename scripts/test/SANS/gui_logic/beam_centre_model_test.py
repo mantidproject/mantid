@@ -13,7 +13,9 @@ else:
 
 class BeamCentreModelTest(unittest.TestCase):
     def setUp(self):
-        self.SANSCentreFinder = mock.MagicMock()
+        self.result = {'pos1':300, 'pos2':-300}
+        self.centre_finder_instance = mock.MagicMock(return_value = self.result)
+        self.SANSCentreFinder = mock.MagicMock(return_value = self.centre_finder_instance)
         self.beam_centre_model = BeamCentreModel(self.SANSCentreFinder)
 
     def test_that_model_initialises_with_correct_values(self):
@@ -74,26 +76,26 @@ class BeamCentreModelTest(unittest.TestCase):
 
         self.beam_centre_model.find_beam_centre(state)
 
-        self.SANSCentreFinder.return_value.assert_called_with(state, r_min=self.beam_centre_model.r_min,
-                                                                   r_max=self.beam_centre_model.r_max,
-                                                                   max_iter= self.beam_centre_model.max_iterations,
-                                                                   x_start=self.beam_centre_model.lab_pos_1,
-                                                                   y_start=self.beam_centre_model.lab_pos_2,
-                                                                   tolerance=self.beam_centre_model.tolerance,
-                                                                   find_direction=FindDirectionEnum.All,
-                                                                   reduction_method=True,
-                                                                   verbose=False)
+        self.assertEqual(self.SANSCentreFinder.return_value.call_count, 2)
 
         self.SANSCentreFinder.return_value.assert_called_with(state, r_min=self.beam_centre_model.r_min,
                                                               r_max=self.beam_centre_model.r_max,
-                                                              max_iter=self.beam_centre_model.max_iterations,
-                                                              x_start=self.beam_centre_model.lab_pos_1,
-                                                              y_start=self.beam_centre_model.lab_pos_2,
+                                                              max_iter= self.beam_centre_model.max_iterations,
+                                                              x_start=self.result['pos1'],
+                                                              y_start=self.result['pos2'],
                                                               tolerance=self.beam_centre_model.tolerance,
                                                               find_direction=FindDirectionEnum.All,
-                                                              reduction_method=False)
+                                                              reduction_method=True,
+                                                              verbose=False)
 
-        self.assertEqual(self.SANSCentreFinder.return_value.call_count, 2)
+        self.SANSCentreFinder.return_value.assert_any_call(state, r_min=self.beam_centre_model.r_min,
+                                                           r_max=self.beam_centre_model.r_max,
+                                                           max_iter=self.beam_centre_model.max_iterations,
+                                                           x_start=self.beam_centre_model.lab_pos_1,
+                                                           y_start=self.beam_centre_model.lab_pos_2,
+                                                           tolerance=self.beam_centre_model.tolerance,
+                                                           find_direction=FindDirectionEnum.All,
+                                                           reduction_method=False)
 
 
 if __name__ == '__main__':
