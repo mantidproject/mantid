@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -55,7 +55,7 @@ ComponentInfo::ComponentInfo(
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         componentIdToIndexMap,
-    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
+    boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
         shapes)
     : m_componentInfo(std::move(componentInfo)),
       m_componentIds(std::move(componentIds)),
@@ -109,6 +109,10 @@ size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
+}
+
+size_t ComponentInfo::indexOf(const std::string &name) const {
+  return m_componentInfo->indexOf(name);
 }
 
 bool ComponentInfo::isDetector(const size_t componentIndex) const {
@@ -199,12 +203,16 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                Kernel::toQuaterniond(newRotation));
 }
 
-const Object &ComponentInfo::shape(const size_t componentIndex) const {
+const IObject &ComponentInfo::shape(const size_t componentIndex) const {
   return *(*m_shapes)[componentIndex];
 }
 
 Kernel::V3D ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo->scaleFactor(componentIndex));
+}
+
+std::string ComponentInfo::name(const size_t componentIndex) const {
+  return m_componentInfo->name(componentIndex);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex,

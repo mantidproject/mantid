@@ -48,8 +48,6 @@ public:
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
-  /// Return direct beam
-  std::string getDirectBeam() const override;
   /// Return transmission runs
   std::string getTransmissionRuns() const override;
   /// Return start overlap for transmission runs

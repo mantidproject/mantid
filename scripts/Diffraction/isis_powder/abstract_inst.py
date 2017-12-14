@@ -23,6 +23,7 @@ class AbstractInst(object):
         self._inst_prefix = inst_prefix
         self._output_dir = output_dir
         self._is_vanadium = None
+        self._beam_parameters = None
 
     @property
     def calibration_dir(self):
@@ -59,6 +60,25 @@ class AbstractInst(object):
         self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
                            instrument=self, absorb=do_absorb_corrections, sample_details=sample_details)
+
+    def set_beam_parameters(self, height, width):
+        """
+        Set the height and width of the beam. Currently only supports rectangular (or square) beam shapes.
+        Implementation should be common across all instruments so no need for overriding in instrument classes.
+        :param height: Height of the beam (mm).
+        :param width: Width of the beam (mm).
+        :return:
+        """
+        try:
+            height = float(height)
+            width = float(width)
+        except ValueError:
+                raise ValueError("Beam height and width must be numbers.")
+        if height <= 0 or width <= 0:
+            raise ValueError("Beam height and width must be more than 0.")
+        else:
+            self._beam_parameters = {'height': height,
+                                     'width': width}
 
     # Mandatory overrides
 
@@ -218,6 +238,8 @@ class AbstractInst(object):
         # Prepend the file extension used if it was set, this groups the files nicely in the file browser
         # Also remove the dot at the start so we don't make hidden files in *nix systems
         file_name = run_details.file_extension[1:] + file_name if run_details.file_extension else file_name
+        file_name += run_details.output_suffix if run_details.output_suffix is not None else ""
+
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))

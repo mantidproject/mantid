@@ -218,6 +218,17 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
     _printMessage('#Set front detector rescale/shift values')
 
 
+def SetMergeQRange(q_min=None, q_max=None):
+    """
+        Stores property about the detector which is used to specify merge range.
+        @param qMin: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+        @param qMax: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+    """
+    ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
+        getDetector('FRONT')._MergeRange(q_max, q_min)
+    _printMessage('#Set merge range values')
+
+
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
@@ -415,7 +426,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
-
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
     # check if fit is required.
     fitRequired = False
@@ -446,8 +456,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # the merged workspace
     if merge_flag:
         ReductionSingleton().to_Q.outputParts = True
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
     # do reduce rear bank data
     if reduce_rear_flag:
         ReductionSingleton().instrument.setDetector('rear')
@@ -488,8 +497,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         retWSname_front, front_slices = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
-    import pydevd
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     # This section provides a the REAR -- FRONT fitting and a stitched workspace.
     # If merge_flag is selected we use SANSStitch and get the fitting for free
     # If fitRequired is selected, then we explicity call the SANSFitScale algorithm
@@ -501,7 +508,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 slices.append(merge_workspace)
             ReductionSingleton().setSliceIndex(0)
             group_name = _common_substring(slices[0], slices[1])
-
             if group_name[-2] == "_":
                 group_name = group_name[:-2]
             _group_workspaces(slices, group_name)
@@ -594,6 +600,7 @@ def _merge_workspaces(retWSname_front, rAnds):
 
     # Get fit paramters
     scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
+    merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
     kwargs_stitch = {"HABCountsSample": Cf,
                      "HABNormSample": Nf,
@@ -603,7 +610,8 @@ def _merge_workspaces(retWSname_front, rAnds):
                      "Mode": fit_mode,
                      "ScaleFactor": scale_factor,
                      "ShiftFactor": shift_factor,
-                     "OutputWorkspace": retWSname_merged}
+                     "OutputWorkspace": retWSname_merged,
+                     "MergeMask": merge_range.q_merge_range}
     if consider_can:
         kwargs_can = {"HABCountsCan": Cf_can,
                       "HABNormCan": Nf_can,
@@ -616,6 +624,14 @@ def _merge_workspaces(retWSname_front, rAnds):
         q_range_stitch = {"FitMin": fit_min,
                           "FitMax": fit_max}
         kwargs_stitch.update(q_range_stitch)
+
+    if merge_range.q_merge_range:
+        if merge_range.q_min:
+            q_range_options = {"MergeMin": merge_range.q_min}
+            kwargs_stitch.update(q_range_options)
+        if merge_range.q_max:
+            q_range_options = {"MergeMax": merge_range.q_max}
+            kwargs_stitch.update(q_range_options)
 
     alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
     alg_stitch.execute()
@@ -1104,7 +1120,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     """
     COORD1STEP = ReductionSingleton().inst.cen_find_step
     COORD2STEP = ReductionSingleton().inst.cen_find_step2
-
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
     coord1_scale_factor = XSF

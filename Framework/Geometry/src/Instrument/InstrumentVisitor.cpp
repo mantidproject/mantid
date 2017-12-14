@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -80,13 +80,15 @@ InstrumentVisitor::InstrumentVisitor(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
-      m_nullShape(boost::make_shared<const Object>()),
-      m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
-          m_orderedDetectorIds->size(), m_nullShape)),
+      m_nullShape(boost::make_shared<const CSGObject>()),
+      m_shapes(
+          boost::make_shared<std::vector<boost::shared_ptr<const IObject>>>(
+              m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
-      m_isStructuredBank(boost::make_shared<std::vector<bool>>()) {
-
+      m_isStructuredBank(boost::make_shared<std::vector<bool>>()),
+      m_names(boost::make_shared<std::vector<std::string>>(
+          m_orderedDetectorIds->size())) {
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
   }
@@ -109,7 +111,6 @@ InstrumentVisitor::InstrumentVisitor(
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
   m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
-  m_shapes->reserve(nDetectors);                        // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
@@ -160,6 +161,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_shapes->emplace_back(m_nullShape);
   m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
+  m_names->emplace_back(assembly.getName());
   clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
 }
@@ -194,6 +196,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_shapes->emplace_back(m_nullShape);
   m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
+  m_names->emplace_back(component.getName());
   clearLegacyParameters(m_pmap, component);
   return componentIndex;
 }
@@ -261,6 +264,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   if (m_instrument->isMonitorViaIndex(detectorIndex)) {
     m_monitorIndices->push_back(detectorIndex);
   }
+  (*m_names)[detectorIndex] = detector.getName();
   clearLegacyParameters(m_pmap, detector);
 
   /* Note that positions and rotations for detectors are currently
@@ -314,7 +318,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_isStructuredBank, m_sourceIndex, m_sampleIndex);
+      m_isStructuredBank, m_names, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

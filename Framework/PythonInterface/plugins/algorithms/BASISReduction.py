@@ -2,6 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
+import json
 
 import mantid.simpleapi as sapi
 from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
@@ -61,9 +62,10 @@ class BASISReduction(PythonAlgorithm):
     def __init__(self):
         PythonAlgorithm.__init__(self)
         self._normalizeToFirst = False
+        self._as_json = None
 
         # properties related to monitor
-        self._noMonNorm = None
+        self._MonNorm = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -85,26 +87,26 @@ class BASISReduction(PythonAlgorithm):
         self._nxspe_offset = 0.0
 
     def category(self):
-        return "Inelastic\\Reduction"
+        return 'Inelastic\\Reduction'
 
     def name(self):
-        return "BASISReduction"
+        return 'BASISReduction'
 
     def version(self):
         return 1
 
     def summary(self):
-        return "Multiple-file BASIS reduction for its two reflections."
+        return 'Multiple-file BASIS reduction for its two reflections.'
 
     def PyInit(self):
-        self._short_inst = "BSS"
-        self._long_inst = "BASIS"
-        self._extension = "_event.nxs"
+        self._short_inst = 'BSS'
+        self._long_inst = 'BASIS'
+        self._extension = '_event.nxs'
 
-        self.declareProperty("RunNumbers", "", "Sample run numbers")
-        self.declareProperty("DoIndividual", False, "Do each run individually")
-        self.declareProperty("NoMonitorNorm", False,
-                             "Stop monitor normalization")
+        self.declareProperty('RunNumbers', '', 'Sample run numbers')
+        self.declareProperty('DoIndividual', False, 'Do each run individually')
+        self.declareProperty('MonitorNorm', True,
+                             'Normalization with wavelength-dependent monitor counts')
         self.declareProperty('ExcludeTimeSegment', '',
                              'Exclude a contigous time segment; '+
                              'Examples: "71546:0-60" filter run 71546 from '+
@@ -118,56 +120,56 @@ class BASISReduction(PythonAlgorithm):
                              'to intensity of spectrum with lowest Q?')
 
         # Properties affected by the reflection selected
-        titleReflection = "Reflection Selector"
+        titleReflection = 'Reflection Selector'
         available_reflections = sorted(REFLECTIONS_DICT.keys())
-        default_reflection = REFLECTIONS_DICT["silicon111"]
-        self.declareProperty("ReflectionType", default_reflection["name"],
+        default_reflection = REFLECTIONS_DICT['silicon111']
+        self.declareProperty('ReflectionType', default_reflection['name'],
                              StringListValidator(available_reflections),
-                             "Analyzer. Documentation lists typical \
-                             associated property values.")
-        self.setPropertyGroup("ReflectionType", titleReflection)
-        self.declareProperty(FloatArrayProperty("EnergyBins",
-                                                default_reflection["energy_bins"],
+                             'Analyzer. Documentation lists typical \
+                             associated property values.')
+        self.setPropertyGroup('ReflectionType', titleReflection)
+        self.declareProperty(FloatArrayProperty('EnergyBins',
+                                                default_reflection['energy_bins'],
                                                 direction=Direction.Input),
-                             "Energy transfer binning scheme (in ueV)")
-        self.setPropertyGroup("EnergyBins", titleReflection)
-        self.declareProperty(FloatArrayProperty("MomentumTransferBins",
-                                                default_reflection["q_bins"],
+                             'Energy transfer binning scheme (in ueV)')
+        self.setPropertyGroup('EnergyBins', titleReflection)
+        self.declareProperty(FloatArrayProperty('MomentumTransferBins',
+                                                default_reflection['q_bins'],
                                                 direction=Direction.Input),
-                             "Momentum transfer binning scheme")
-        self.setPropertyGroup("MomentumTransferBins", titleReflection)
-        self.declareProperty(FileProperty(name="MaskFile", defaultValue='',
+                             'Momentum transfer binning scheme')
+        self.setPropertyGroup('MomentumTransferBins', titleReflection)
+        self.declareProperty(FileProperty(name='MaskFile', defaultValue='',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
-                             "See documentation for latest mask files.")
-        self.setPropertyGroup("MaskFile", titleReflection)
+                             'See documentation for latest mask files.')
+        self.setPropertyGroup('MaskFile', titleReflection)
 
         # Properties setting the division by vanadium
-        titleDivideByVanadium = "Normalization by Vanadium"
-        self.declareProperty("DivideByVanadium", False, direction=Direction.Input,
-                             doc="Do we normalize by the vanadium intensity?")
-        self.setPropertyGroup("DivideByVanadium", titleDivideByVanadium)
-        ifDivideByVanadium = EnabledWhenProperty("DivideByVanadium",
+        titleDivideByVanadium = 'Normalization by Vanadium'
+        self.declareProperty('DivideByVanadium', False, direction=Direction.Input,
+                             doc='Do we normalize by the vanadium intensity?')
+        self.setPropertyGroup('DivideByVanadium', titleDivideByVanadium)
+        ifDivideByVanadium = EnabledWhenProperty('DivideByVanadium',
                                                  PropertyCriterion.IsNotDefault)
 
-        normalization_types = ["by Q slice", "by detector ID"]
-        self.declareProperty("NormalizationType", "by Q slice",
+        normalization_types = ['by Q slice', 'by detector ID']
+        self.declareProperty('NormalizationType', 'by Q slice',
                              StringListValidator(normalization_types),
-                             "Select a Vanadium normalization")
-        self.setPropertySettings("NormalizationType", ifDivideByVanadium)
-        self.setPropertyGroup("NormalizationType", titleDivideByVanadium)
+                             'Select a Vanadium normalization')
+        self.setPropertySettings('NormalizationType', ifDivideByVanadium)
+        self.setPropertyGroup('NormalizationType', titleDivideByVanadium)
 
-        self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
-        self.setPropertySettings("NormRunNumbers", ifDivideByVanadium)
-        self.setPropertyGroup("NormRunNumbers", titleDivideByVanadium)
+        self.declareProperty('NormRunNumbers', '', 'Normalization run numbers')
+        self.setPropertySettings('NormRunNumbers', ifDivideByVanadium)
+        self.setPropertyGroup('NormRunNumbers', titleDivideByVanadium)
         arrVal = FloatArrayLengthValidator(2)
-        self.declareProperty(FloatArrayProperty("NormWavelengthRange",
+        self.declareProperty(FloatArrayProperty('NormWavelengthRange',
                                                 DEFAULT_RANGE,
                                                 arrVal,
                                                 direction=Direction.Input),
-                             "Wavelength range for normalization")
-        self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
-        self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
+                             'Wavelength range for normalization')
+        self.setPropertySettings('NormWavelengthRange', ifDivideByVanadium)
+        self.setPropertyGroup('NormWavelengthRange', titleDivideByVanadium)
 
         # Properties setting the saving of NSXPE file
         title_nxspe= 'Save to NXSPE'
@@ -188,32 +190,32 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertyGroup('PsiOffset', title_nxspe)
 
         # Aditional output properties
-        titleAddionalOutput = "Additional Output"
-        self.declareProperty("OutputSusceptibility", False,
+        titleAddionalOutput = 'Additional Output'
+        self.declareProperty('OutputSusceptibility', False,
                              direction=Direction.Input,
-                             doc="Output dynamic susceptibility (Xqw)")
-        self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
+                             doc='Output dynamic susceptibility (Xqw)')
+        self.setPropertyGroup('OutputSusceptibility', titleAddionalOutput)
 
     #pylint: disable=too-many-branches
     def PyExec(self):
-        config['default.facility'] = "SNS"
+        config['default.facility'] = 'SNS'
         config['default.instrument'] = self._long_inst
         self._reflection =\
-            REFLECTIONS_DICT[self.getProperty("ReflectionType").value]
-        self._doIndiv = self.getProperty("DoIndividual").value
+            REFLECTIONS_DICT[self.getProperty('ReflectionType').value]
+        self._doIndiv = self.getProperty('DoIndividual').value
         # micro-eV to mili-eV
-        self._etBins = 1.E-03 * self.getProperty("EnergyBins").value
-        self._qBins = self.getProperty("MomentumTransferBins").value
+        self._etBins = 1.E-03 * self.getProperty('EnergyBins').value
+        self._qBins = self.getProperty('MomentumTransferBins').value
         self._qBins[0] -= self._qBins[1]/2.0  # leftmost bin boundary
         self._qBins[2] += self._qBins[1]/2.0  # rightmost bin boundary
-        self._noMonNorm = self.getProperty("NoMonitorNorm").value
-        self._maskFile = self.getProperty("MaskFile").value
-        maskfile = self.getProperty("MaskFile").value
+        self._MonNorm = self.getProperty('MonitorNorm').value
+        self._maskFile = self.getProperty('MaskFile').value
+        maskfile = self.getProperty('MaskFile').value
         self._maskFile = maskfile if maskfile else\
-            pjoin(DEFAULT_MASK_GROUP_DIR, self._reflection["mask_file"])
-        self._groupDetOpt = self.getProperty("GroupDetectors").value
-        self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
-        self._doNorm = self.getProperty("DivideByVanadium").value
+            pjoin(DEFAULT_MASK_GROUP_DIR, self._reflection['mask_file'])
+        self._groupDetOpt = self.getProperty('GroupDetectors').value
+        self._normalizeToFirst = self.getProperty('NormalizeToFirst').value
+        self._doNorm = self.getProperty('DivideByVanadium').value
 
         # retrieve properties pertaining to saving to NXSPE file
         self._nsxpe_do = self.getProperty('SaveNXSPE').value
@@ -323,6 +325,7 @@ class BASISReduction(PythonAlgorithm):
             # Q-values back to vertical axis
             sapi.Transpose(InputWorkspace=self._samSqwWs,
                            OutputWorkspace=self._samSqwWs)
+            self.serialize_in_log(self._samSqwWs)  # store the call
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun, False) +\
@@ -348,6 +351,7 @@ class BASISReduction(PythonAlgorithm):
                                   OutputWorkspace=samXqsWs,
                                   Target="DeltaE_inFrequency",
                                   Emode="Indirect")
+                self.serialize_in_log(samXqsWs)
                 susceptibility_filename = processed_filename.replace("sqw", "Xqw")
                 sapi.SaveNexus(Filename=susceptibility_filename,
                                InputWorkspace=samXqsWs)
@@ -428,7 +432,7 @@ class BASISReduction(PythonAlgorithm):
             if str(run)+':' in self.getProperty("ExcludeTimeSegment").value:
                 self._filterEvents(str(run), ws_name)
 
-            if not self._noMonNorm:
+            if self._MonNorm:
                 sapi.LoadNexusMonitors(Filename=run_file,
                                        OutputWorkspace=mon_ws_name)
 
@@ -437,7 +441,7 @@ class BASISReduction(PythonAlgorithm):
                           RHSWorkspace=ws_name,
                           OutputWorkspace=sam_ws)
                 sapi.DeleteWorkspace(ws_name)
-            if mon_ws != mon_ws_name and not self._noMonNorm:
+            if mon_ws != mon_ws_name and self._MonNorm:
                 sapi.Plus(LHSWorkspace=mon_ws,
                           RHSWorkspace=mon_ws_name,
                           OutputWorkspace=mon_ws)
@@ -456,7 +460,7 @@ class BASISReduction(PythonAlgorithm):
                           Target='Wavelength',
                           EMode='Indirect')
 
-        if not self._noMonNorm:
+        if self._MonNorm:
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
@@ -492,7 +496,7 @@ class BASISReduction(PythonAlgorithm):
         self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
         self._calibData(wsName, wsName_mon)
         if not self._debugMode:
-            if not self._noMonNorm:
+            if self._MonNorm:
                 sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
@@ -622,6 +626,33 @@ class BASISReduction(PythonAlgorithm):
                 sapi.RenameWorkspace(InputWorkspace='splitted_0',
                                      OutputWorkspace=ws_name)
                 break
+
+    def serialize_in_log(self, ws_name):
+        r"""Save the serialization of the algorithm in the logs.
+
+        Parameters
+        ----------
+        ws_name: str
+            Name of the workspace from which to retrieve and modify the logs
+        """
+        def jsonify(value):
+            r"""Cast non-standard objects to their closest standard
+            representation to enable JSON serialiation"""
+            if isinstance(value, np.ndarray):
+                return value.tolist()
+            return value
+        if self._as_json is None:
+            self._as_json = json.loads(str(self))
+            # Force serialization of the following properties even if having
+            # their default values
+            forced = {name: jsonify(self.getProperty(name).value)
+                      for name in ('DoIndividual', 'MonitorNorm',
+                                   'NormalizeToFirst', 'ReflectionType',
+                                   'EnergyBins', 'MomentumTransferBins',
+                                   'MaskFile', 'DivideByVanadium')}
+            self._as_json['properties'].update(forced)
+        r = mtd[ws_name].mutableRun()
+        r.addProperty('asString', json.dumps(self._as_json), True)
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
