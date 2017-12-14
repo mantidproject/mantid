@@ -37,7 +37,8 @@ if ( ENABLE_WORKBENCH )
   set ( PYTHON_TEST_FILES
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
-  )
+    mantidqt/widgets/test/test_messagedisplay.py
+ )
 
   # Tests
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
