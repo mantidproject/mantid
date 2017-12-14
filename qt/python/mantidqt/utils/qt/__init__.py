@@ -19,8 +19,9 @@
 from __future__ import absolute_import
 
 # stdlib modules
-import importlib
-import os
+from contextlib import contextmanager
+from importlib import import_module
+import os.path as osp
 
 # 3rd-party modules
 from qtpy import QT_VERSION
@@ -46,9 +47,9 @@ def import_qtlib(modulename, package, attr=None):
     :return: Either the module object if no attribute is specified of the requested attribute
     """
     try:
-        lib = importlib.import_module('.' + modulename + LIB_SUFFIX, package)
+        lib = import_module('.' + modulename + LIB_SUFFIX, package)
     except ImportError:
-        lib = importlib.import_module(modulename + LIB_SUFFIX)
+        lib = import_module(modulename + LIB_SUFFIX)
     if attr:
         return getattr(lib, attr)
     else:
@@ -70,11 +71,22 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     :return: A new instance of the form class if baseinstance is given, otherwise
     return the form class
     """
-    filepath = os.path.join(os.path.dirname(caller_filename), ui_relfilename)
+    filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
     if baseinstance:
         return loadUi(filepath, baseinstance=baseinstance)
     else:
         return loadUiType(filepath)
+
+
+@contextmanager
+def widget_updates_disabled(widget):
+    """Context manager that disables widget updates for the duration of the context
+    and reenables them at the end
+    :param widget: A widget object to use as context
+    """
+    widget.setUpdatesEnabled(False)
+    yield
+    widget.setUpdatesEnabled(True)
 
 
 def create_action(parent, text, on_triggered=None, shortcut=None,

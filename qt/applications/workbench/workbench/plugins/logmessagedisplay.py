@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 
 from mantidqt.widgets.messagedisplay import MessageDisplay
+from qtpy.QtWidgets import QHBoxLayout
 
 from workbench.plugins.base import PluginWidget
 
@@ -24,7 +25,19 @@ from workbench.plugins.base import PluginWidget
 class LogMessageDisplay(PluginWidget):
 
     def __init__(self, parent):
-        PluginWidget.__init__(parent)
+        PluginWidget.__init__(self, parent)
+
+        # layout
+        self.display = MessageDisplay(parent)
+        layout = QHBoxLayout()
+        layout.addWidget(self.display)
+        self.setLayout(layout)
+
+        self.setWindowTitle(self.get_plugin_title())
+
+    def get_plugin_title(self):
+        return "Messages"
 
     def register_plugin(self):
-        self.main.addDockWidget(self)
+        self.display.attachLoggingChannel()
+        self.main.add_dockwidget(self)

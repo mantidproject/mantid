@@ -28,7 +28,7 @@ class PluginWidget(QWidget):
     FEATURES = QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetFloatable
 
     def __init__(self, main_window):
-        QWidget.__init__(main_window)
+        QWidget.__init__(self, main_window)
 
         self.main = main_window
 

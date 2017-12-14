@@ -45,7 +45,7 @@ from qtpy.QtCore import (QByteArray, QCoreApplication, QEventLoop,
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDockWidget, QMainWindow,
                             QSplashScreen)  # noqa
-from mantidqt.utils.qt import load_ui, plugins  # noqa
+from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -88,7 +88,6 @@ SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft |
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
-
 # -----------------------------------------------------------------------------
 # Utilities/Widgets
 # -----------------------------------------------------------------------------
@@ -115,6 +114,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Mantid Workbench")
 
         # -- instance attributes --
+        self.window_size = None
+        self.window_position = None
+        self.maximized_flag = None
         # widgets
         self.messagedisplay = None
 
@@ -137,9 +139,17 @@ class MainWindow(QMainWindow):
         self.set_splash("Loading message display")
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
+        self.messagedisplay.register_plugin()
 
         self.setup_layout()
 
+    def set_splash(self, msg=None):
+        if not self.splash:
+            return
+        if msg:
+            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
+                                    QColor(Qt.black))
+        QApplication.processEvents(QEventLoop.AllEvents)
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
@@ -154,27 +164,24 @@ class MainWindow(QMainWindow):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
 
+    def add_dockwidget(self, plugin):
+        """Create a dockwidget around a plugin and add the dock to window"""
+        dockwidget, location = plugin.create_dockwidget()
+        self.addDockWidget(location, dockwidget)
+
     def setup_layout(self):
-        settings = self.load_window_settings('window/')
-        hexstate = settings[0]
+        window_settings = self.load_window_settings('window/')
+        hexstate = window_settings[0]
         if hexstate is None:
-            self.setup_for_first_run()
+            self.setup_for_first_run(window_settings)
+        else:
+            self.set_window_settings(*window_settings)
 
-        self.set_window_settings(*settings)
-
-    def setup_for_first_run(self):
+    def setup_for_first_run(self, window_settings):
         """Assume this is a first run of the application and set layouts
         accordingly"""
         self.setWindowState(Qt.WindowMaximized)
-        self.setup_default_layouts()
-
-    def set_splash(self, msg=None):
-        if not self.splash:
-            return
-        if msg:
-            self.splash.showMessage(msg, Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute,
-                                    QColor(Qt.black))
-        QApplication.processEvents(QEventLoop.AllEvents)
+        self.setup_default_layouts(window_settings)
 
     def load_window_settings(self, prefix, section='main'):
         """Load window layout settings from userconfig-based configuration
@@ -221,34 +228,39 @@ class MainWindow(QMainWindow):
                             is_maximized, is_fullscreen):
         """Set window settings
         Symetric to the 'get_window_settings' accessor"""
-        self.setUpdatesEnabled(False)
-        self.window_size = QSize(window_size[0], window_size[1])  # width,height
-        self.window_position = QPoint(pos[0], pos[1])  # x,y
-        self.setWindowState(Qt.WindowNoState)
-        self.resize(self.window_size)
-        self.move(self.window_position)
+        with widget_updates_disabled(self):
+            self.window_size = QSize(window_size[0], window_size[1])  # width,height
+            self.window_position = QPoint(pos[0], pos[1])  # x,y
+            self.setWindowState(Qt.WindowNoState)
+            self.resize(self.window_size)
+            self.move(self.window_position)
 
-        # Window layout
-        if hexstate:
-            self.restoreState(QByteArray().fromHex(
-                str(hexstate).encode('utf-8')))
-            # QDockWidget objects are not painted if restored as floating
-            # windows, so we must dock them before showing the mainwindow.
-            for widget in self.children():
-                if isinstance(widget, QDockWidget) and widget.isFloating():
-                    self.floating_dockwidgets.append(widget)
-                    widget.setFloating(False)
+            # Window layout
+            if hexstate:
+                self.restoreState(QByteArray().fromHex(
+                    str(hexstate).encode('utf-8')))
+                # QDockWidget objects are not painted if restored as floating
+                # windows, so we must dock them before showing the mainwindow.
+                for widget in self.children():
+                    if isinstance(widget, QDockWidget) and widget.isFloating():
+                        self.floating_dockwidgets.append(widget)
+                        widget.setFloating(False)
 
-        # Is fullscreen?
-        if is_fullscreen:
-            self.setWindowState(Qt.WindowFullScreen)
+            # Is fullscreen?
+            if is_fullscreen:
+                self.setWindowState(Qt.WindowFullScreen)
 
-        # Is maximized?
-        if is_fullscreen:
-            self.maximized_flag = is_maximized
-        elif is_maximized:
-            self.setWindowState(Qt.WindowMaximized)
-        self.setUpdatesEnabled(True)
+            # Is maximized?
+            if is_fullscreen:
+                self.maximized_flag = is_maximized
+            elif is_maximized:
+                self.setWindowState(Qt.WindowMaximized)
+
+    def setup_default_layouts(self, window_settings):
+        """Set or reset the layouts of the child widgets"""
+        self.set_window_settings(*window_settings)
+        with widget_updates_disabled(self):
+            pass
 
     def save_current_window_settings(self, prefix, section='main'):
         """Save current window settings with *prefix* in
@@ -290,10 +302,10 @@ def start_workbench(app):
     main_window = MainWindow()
     main_window.setup()
 
-    # preloaded_packages = ('mantid', 'matplotlib')
-    # for name in preloaded_packages:
-    #     main_window.set_splash('Preloading ' + name)
-    #     importlib.import_module('mantid')
+    preloaded_packages = ('mantid', 'matplotlib')
+    for name in preloaded_packages:
+        main_window.set_splash('Preloading ' + name)
+        importlib.import_module('mantid')
 
     main_window.show()
     if main_window.splash:
