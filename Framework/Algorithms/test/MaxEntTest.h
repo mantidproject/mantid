@@ -196,7 +196,7 @@ public:
     TS_ASSERT_DELTA(data->y(0)[26], 0.824, 0.001);
     TS_ASSERT_DELTA(data->y(0)[27], 0.721, 0.001);
     // Test that the algorithm converged
-    TS_ASSERT_DELTA(chi->y(0).back(), 0.999, 0.001);
+    TS_ASSERT_DELTA(chi->y(0).back(), 1.000, 0.001);
     TS_ASSERT_DELTA(angle->y(0).back(), 0.001, 0.001);
     // seg faults after these tests.....
   }
