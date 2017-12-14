@@ -34,7 +34,7 @@ class MANTID_KERNEL_DLL ConfigPropertyObserver : ConfigObserver {
 public:
   ConfigPropertyObserver(std::string propertyName);
   virtual ~ConfigPropertyObserver() = default;
-  
+
 protected:
   void onValueChanged(const std::string &name, const std::string &newValue,
                       const std::string &prevValue) override;

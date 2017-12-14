@@ -20,14 +20,15 @@ public:
   }
 
   void default_onPropertyValueChanged(const std::string &newValue,
-                              const std::string &prevValue) {
+                                      const std::string &prevValue) {
     return this->ConfigPropertyObserver::onPropertyValueChanged(newValue,
                                                                 prevValue);
   }
 };
 
 void export_ConfigPropertyObserver() {
-  class_<ConfigPropertyObserverWrapper, boost::noncopyable>("ConfigPropertyObserver", init<std::string>())
+  class_<ConfigPropertyObserverWrapper, boost::noncopyable>(
+      "ConfigPropertyObserver", init<std::string>())
       .def(init<std::string>())
       .def("onPropertyValueChanged",
            &ConfigPropertyObserverWrapper::onPropertyValueChanged,

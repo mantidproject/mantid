@@ -33,23 +33,23 @@ namespace Kernel {
 class MANTID_KERNEL_DLL ConfigObserver {
 public:
   ConfigObserver();
-  ConfigObserver(const ConfigObserver& other);
-  ConfigObserver(ConfigObserver&& other) noexcept;
-  ConfigObserver& operator=(const ConfigObserver& other);
-  ConfigObserver& operator=(ConfigObserver&& other) noexcept;
+  ConfigObserver(const ConfigObserver &other);
+  ConfigObserver(ConfigObserver &&other) noexcept;
+  ConfigObserver &operator=(const ConfigObserver &other);
+  ConfigObserver &operator=(ConfigObserver &&other) noexcept;
   virtual ~ConfigObserver() noexcept;
 
   void notifyValueChanged(const std::string &name, const std::string &newValue,
                           const std::string &prevValue);
   void notifyValueChanged(ConfigValChangeNotification_ptr notification);
+
 protected:
   virtual void onValueChanged(const std::string &name,
                               const std::string &newValue,
                               const std::string &prevValue);
 
 private:
-  Poco::NObserver<ConfigObserver,
-                  Mantid::Kernel::ConfigValChangeNotification>
+  Poco::NObserver<ConfigObserver, Mantid::Kernel::ConfigValChangeNotification>
       m_valueChangeListener;
 };
 }

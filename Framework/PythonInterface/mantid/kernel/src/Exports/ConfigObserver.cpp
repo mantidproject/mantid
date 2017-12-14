@@ -6,7 +6,7 @@ using namespace boost::python;
 using Mantid::Kernel::ConfigObserver;
 
 class ConfigObserverWrapper : public ConfigObserver,
-                                     public wrapper<ConfigObserver> {
+                              public wrapper<ConfigObserver> {
 public:
   using ConfigObserver::ConfigObserver;
   using ConfigObserver::notifyValueChanged;
@@ -23,14 +23,12 @@ public:
   void default_onValueChanged(const std::string &name,
                               const std::string &newValue,
                               const std::string &prevValue) {
-    return this->ConfigObserver::onValueChanged(name, newValue,
-                                                       prevValue);
+    return this->ConfigObserver::onValueChanged(name, newValue, prevValue);
   }
 };
 
 void export_ConfigObserver() {
-  class_<ConfigObserverWrapper, boost::noncopyable>(
-      "ConfigObserver")
+  class_<ConfigObserverWrapper, boost::noncopyable>("ConfigObserver")
       .def("onValueChanged", &ConfigObserverWrapper::onValueChanged,
            &ConfigObserverWrapper::default_onValueChanged);
 }
