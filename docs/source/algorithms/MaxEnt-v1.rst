@@ -180,7 +180,7 @@ Output:
    Third  reconstructed coefficient: 0.846
    Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
-   Number of iterations: 3541
+   Number of iterations: 3495
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
