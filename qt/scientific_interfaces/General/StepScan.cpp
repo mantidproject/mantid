@@ -548,11 +548,11 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
 
   Json::Value root;
   Json::Reader reader;
-  bool parsingSuccessful = reader.parse( stepScanProperties.c_str(), root );
-  if (!parsingSuccessful){
-      throw std::runtime_error("Parsing parameters failed for StepScan.");
+  bool parsingSuccessful = reader.parse(stepScanProperties.c_str(), root);
+  if (!parsingSuccessful) {
+    throw std::runtime_error("Parsing parameters failed for StepScan.");
   }
-  std::string ssp=root.get("properties","").toStyledString();
+  std::string ssp = root.get("properties", "").toStyledString();
 
   IAlgorithm_sptr startLiveData =
       AlgorithmManager::Instance().create("StartLiveData");
