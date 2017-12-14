@@ -129,3 +129,6 @@ def select_item_in_combo_box(combo_box, item_text):
     """
     i = combo_box.findText(item_text)
     combo_box.setCurrentIndex(i)
+
+
+from .modal_tester import ModalTester
