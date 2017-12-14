@@ -16,7 +16,7 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
-#include <jsoncpp/json/reader.h>
+#include <json/reader.h>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
