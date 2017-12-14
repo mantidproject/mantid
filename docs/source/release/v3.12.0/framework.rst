@@ -40,6 +40,7 @@ Core Functionality
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
 - Condition to check if a property is enabled when serializing.
+- Added new classes ``ConfigObserver`` for listening for changes to any configuration property and ``ConfigPropertyObserver`` for listening to changes to an individual config property of interest.
 
 Performance
 -----------
@@ -54,6 +55,7 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
+- The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
 
 Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
 
