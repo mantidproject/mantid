@@ -171,7 +171,6 @@ OptionsMap ReflSettingsPresenter::getReductionOptions() const {
     if (!cpp.empty())
       options["CPp"] = QString::fromStdString(cpp);
 
-
     // Add polarisation corrections
     auto polCorr = m_view->getPolarisationCorrections();
     if (!polCorr.empty())
