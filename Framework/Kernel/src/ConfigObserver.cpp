@@ -43,10 +43,6 @@ void ConfigObserver::notifyValueChanged(const std::string &name,
   onValueChanged(name, newValue, prevValue);
 }
 
-void ConfigObserver::onValueChanged(const std::string &name,
-                                    const std::string &newValue,
-                                    const std::string &prevValue) {}
-
 void ConfigObserver::notifyValueChanged(
     ConfigValChangeNotification_ptr notification) {
   notifyValueChanged(notification->key(), notification->curValue(),

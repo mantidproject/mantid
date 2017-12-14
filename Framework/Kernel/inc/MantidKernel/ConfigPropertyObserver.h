@@ -40,7 +40,7 @@ protected:
                       const std::string &prevValue) override;
 
   virtual void onPropertyValueChanged(const std::string &newValue,
-                                      const std::string &prevValue);
+                                      const std::string &prevValue) = 0;
 
 private:
   std::string m_propertyName;

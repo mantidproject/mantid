@@ -46,7 +46,7 @@ public:
 protected:
   virtual void onValueChanged(const std::string &name,
                               const std::string &newValue,
-                              const std::string &prevValue);
+                              const std::string &prevValue) = 0;
 
 private:
   Poco::NObserver<ConfigObserver, Mantid::Kernel::ConfigValChangeNotification>
