@@ -264,6 +264,31 @@ public:
     TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
   }
 
+  void testFindPointInCube()
+    /**
+    Test find point in cube
+    */
+  {
+    auto geom_obj = createCube(1.0);
+    // initial guess in object
+    Kernel::V3D pt;
+    TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
+    TS_ASSERT_LESS_THAN(0.0, pt.X());
+    TS_ASSERT_LESS_THAN(pt.X(),1.0);
+    TS_ASSERT_LESS_THAN(0.0, pt.Y());
+    TS_ASSERT_LESS_THAN(pt.Y(), 1.0);    
+    TS_ASSERT_LESS_THAN(0.0, pt.Z());
+    TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
+  }
+
+  void testVolumeOfCube() {
+    double size = 3.7;
+    auto geom_obj = createCube(size);
+    TS_ASSERT_DELTA(geom_obj->volume(), size*size*size, 1e-6)
+  }
+
+  
+
 private:
 
   boost::shared_ptr<MeshObject> createCube(double size) {
