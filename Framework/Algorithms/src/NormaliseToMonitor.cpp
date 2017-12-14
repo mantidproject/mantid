@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -104,26 +105,21 @@ bool MonIDPropChanger::monitorIdReader(
   if (!pInstr)
     return false;
 
-  std::vector<detid_t> mon = pInstr->getMonitors();
-  if (mon.empty()) {
-    if (iExistingAllowedValues.empty()) {
-      return false;
-    } else {
-      iExistingAllowedValues.clear();
-      return true;
-    }
-  }
   // are these monitors really there?
   // got the index of correspondent spectra.
   // Only check if number of histograms is small, else this takes too long!
-  std::vector<size_t> indexList;
-  if (inputWS->getNumberHistograms() < 100000) {
-    indexList = inputWS->getIndicesFromDetectorIDs(mon);
-  } else {
-    indexList = std::vector<size_t>(mon.begin(), mon.end());
+  std::vector<detid_t> realMonitorIDList = pInstr->getMonitors();
+  const auto &specInfo = inputWS->spectrumInfo();
+  std::set<detid_t> ids;
+  size_t i = 0;
+  while (i < specInfo.size() && ids.size() < realMonitorIDList.size()) {
+    if (specInfo.isMonitor(i))
+      ids.insert(specInfo.detector(i).getID());
+    ++i;
   }
+  realMonitorIDList = std::vector<detid_t>(ids.begin(), ids.end());
 
-  if (indexList.empty()) {
+  if (realMonitorIDList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
     } else {
@@ -131,25 +127,21 @@ bool MonIDPropChanger::monitorIdReader(
       return true;
     }
   }
-  // index list can be less or equal to the mon list size (some monitors do
-  // not have spectra)
-  size_t mon_count =
-      (mon.size() < indexList.size()) ? mon.size() : indexList.size();
-  mon.resize(mon_count);
 
   // are known values the same as the values we have just identified?
-  if (iExistingAllowedValues.size() != mon.size()) {
+  if (iExistingAllowedValues.size() != realMonitorIDList.size()) {
     iExistingAllowedValues.clear();
-    iExistingAllowedValues.assign(mon.begin(), mon.end());
+    iExistingAllowedValues.assign(realMonitorIDList.begin(),
+                                  realMonitorIDList.end());
     return true;
   }
   // the monitor list has the same size as before. Is it equivalent to the
   // existing one?
   bool values_redefined = false;
-  for (size_t i = 0; i < mon.size(); i++) {
-    if (iExistingAllowedValues[i] != mon[i]) {
+  for (size_t i = 0; i < realMonitorIDList.size(); i++) {
+    if (iExistingAllowedValues[i] != realMonitorIDList[i]) {
       values_redefined = true;
-      iExistingAllowedValues[i] = mon[i];
+      iExistingAllowedValues[i] = realMonitorIDList[i];
     }
   }
   return values_redefined;
