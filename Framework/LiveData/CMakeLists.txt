@@ -54,7 +54,7 @@ set ( TEST_FILES
 	StartLiveDataTest.h
 )
 
-find_package ( LibRDKafka 0.11 REQUIRED )
+find_package ( LibRDKafka 0.11 )
 if ( LIBRDKAFKA_FOUND )
   set ( SRC_FILES
     ${SRC_FILES}

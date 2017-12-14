@@ -4,6 +4,10 @@
 #
 #     find_package(LibRDKafka)
 #
+# A minimum required version can also be specified, for example:
+#
+#     find_package(LibRDKafka 0.11.1)
+#
 # Variables used by this module, they can change the default behaviour and need
 # to be set before calling find_package:
 #
