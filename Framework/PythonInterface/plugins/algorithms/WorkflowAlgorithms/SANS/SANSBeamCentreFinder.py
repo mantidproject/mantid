@@ -157,8 +157,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             position_1_step = 0.0
         centre1 = x_start
         centre2 = y_start
-        resLR_old = 0.0
-        resTB_old = 0.0
+        residueLR = []
+        residueTB = []
+        centre_1_hold = x_start
+        centre_2_hold = y_start
         for j in range(0, max_iterations + 1):
             if(j != 0):
                 centre1 += position_1_step
@@ -181,25 +183,30 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
 
-            residueLR = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
-                                                  sample_quartiles[MaskingQuadrant.Right])
-            residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
-                                                  sample_quartiles[MaskingQuadrant.Bottom])
+            residueLR.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
+                                                  sample_quartiles[MaskingQuadrant.Right]))
+            residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
+                                                  sample_quartiles[MaskingQuadrant.Bottom]))
             if(j == 0):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR) + "  SY=" + str(residueTB))
+                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
                 if mantidplot:
                     self._plot_quartiles(output_workspaces)
+
             else:
                 # have we stepped across the y-axis that goes through the beam center?
-                if residueLR > resLR_old:
+                if residueLR[j] > residueLR[j-1]:
                     # yes with stepped across the middle, reverse direction and half the step size
                     position_1_step = - position_1_step / 2
-                if residueTB > resTB_old:
+                if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
-                              + str(residueLR) + "  SY=" + str(residueTB))
+                              + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
+
+                if residueLR[j]+residueTB[j] < residueLR[j-1]+residueTB[j-1]:
+                    centre_1_hold = centre1
+                    centre_2_hold = centre2
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
@@ -209,13 +216,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if j == max_iterations:
                 logger.notice("Out of iterations, new coordinates may not be the best")
 
-            resLR_old = residueLR
-            resTB_old = residueTB
+        self.setProperty("Centre1", centre_1_hold)
+        self.setProperty("Centre2", centre_2_hold)
 
-        self.setProperty("Centre1", centre1)
-        self.setProperty("Centre2", centre2)
-
-        logger.notice("Centre coordinates updated: [{}, {}]".format(centre1*self.scale_1, centre2*self.scale_2))
+        logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
 
     def _rename_and_group_workspaces(self, index, output_workspaces):
         to_group = []
