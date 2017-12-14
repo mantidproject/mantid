@@ -189,7 +189,7 @@ private:
 // Fake event stream to provide sample environment data
 // -----------------------------------------------------------------------------
 class FakeSampleEnvironmentSubscriber
-  : public Mantid::LiveData::IKafkaStreamSubscriber {
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
@@ -207,7 +207,7 @@ public:
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
-      std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
