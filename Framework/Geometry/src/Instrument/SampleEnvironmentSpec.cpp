@@ -60,7 +60,7 @@ void SampleEnvironmentSpec::addContainer(const Container_const_sptr &can) {
  * Add a non-can component to the specification
  * @param component A pointer to a Object
  */
-void SampleEnvironmentSpec::addComponent(const Object_const_sptr &component) {
+void SampleEnvironmentSpec::addComponent(const IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
 

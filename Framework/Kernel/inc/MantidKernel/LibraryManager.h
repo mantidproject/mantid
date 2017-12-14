@@ -48,7 +48,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_KERNEL_DLL LibraryManagerImpl {
 public:
   enum LoadLibraries { Recursive, NonRecursive };
-  int openLibraries(const std::string &, LoadLibraries loadingBehaviour,
+  int openLibraries(const std::string &libpath, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
   LibraryManagerImpl(const LibraryManagerImpl &) = delete;
   LibraryManagerImpl &operator=(const LibraryManagerImpl &) = delete;
@@ -63,7 +63,7 @@ private:
 
   /// Load libraries from the given Poco::File path
   /// Private so Poco::File doesn't leak to the public interface
-  int openLibraries(const Poco::File &, LoadLibraries loadingBehaviour,
+  int openLibraries(const Poco::File &libpath, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
   /// Check if the library should be loaded
   bool shouldBeLoaded(const std::string &filename,

@@ -18,12 +18,12 @@ Logger g_log("LibraryManager");
 
 /// Constructor
 LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
-  g_log.debug() << "LibraryManager created.\n";
+  g_log.debug("LibraryManager created.");
 }
 
 /**
  * Opens suitable DLLs on a given path.
- *  @param filePath The filepath to the directory where the libraries are.
+ *  @param filepath The filepath to the directory where the libraries are.
  *  @param loadingBehaviour Control how libraries are searched for
  *  @param excludes If not empty then each string is considered as a substring
  * to search within each library to be opened. If the substring is found then
@@ -31,17 +31,17 @@ LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
  *  @return The number of libraries opened.
  */
 int LibraryManagerImpl::openLibraries(
-    const std::string &filePath, LoadLibraries loadingBehaviour,
+    const std::string &filepath, LoadLibraries loadingBehaviour,
     const std::vector<std::string> &excludes) {
-  g_log.debug() << "Opening all libraries in " << filePath << "\n";
+  g_log.debug("Opening all libraries in " + filepath + "\n");
   try {
-    return openLibraries(Poco::File(filePath), loadingBehaviour, excludes);
+    return openLibraries(Poco::File(filepath), loadingBehaviour, excludes);
   } catch (std::exception &exc) {
     g_log.debug() << "Error occurred while opening libraries: " << exc.what()
                   << "\n";
     return 0;
   } catch (...) {
-    g_log.error() << "An unknown error occurred while opening libraries.";
+    g_log.error("An unknown error occurred while opening libraries.");
     return 0;
   }
 }
@@ -51,7 +51,7 @@ int LibraryManagerImpl::openLibraries(
 //-------------------------------------------------------------------------
 /**
  * Opens suitable DLLs on a given path.
- *  @param filePath A Poco::File object pointing to a directory where the
+ *  @param libpath A Poco::File object pointing to a directory where the
  * libraries are.
  *  @param loadingBehaviour Control how libraries are searched for
  *  @param excludes If not empty then each string is considered as a substring
@@ -60,14 +60,14 @@ int LibraryManagerImpl::openLibraries(
  *  @return The number of libraries opened.
  */
 int LibraryManagerImpl::openLibraries(
-    const Poco::File &libPath,
+    const Poco::File &libpath,
     LibraryManagerImpl::LoadLibraries loadingBehaviour,
     const std::vector<std::string> &excludes) {
   int libCount(0);
-  if (libPath.exists() && libPath.isDirectory()) {
+  if (libpath.exists() && libpath.isDirectory()) {
     // Iterate over the available files
     Poco::DirectoryIterator end_itr;
-    for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr) {
+    for (Poco::DirectoryIterator itr(libpath); itr != end_itr; ++itr) {
       const Poco::File &item = *itr;
       if (item.isFile()) {
         if (shouldBeLoaded(itr.path().getFileName(), excludes))
@@ -80,7 +80,7 @@ int LibraryManagerImpl::openLibraries(
       }
     }
   } else {
-    g_log.error("In OpenAllLibraries: " + libPath.path() +
+    g_log.error("In OpenAllLibraries: " + libpath.path() +
                 " must be a directory.");
   }
   return libCount;

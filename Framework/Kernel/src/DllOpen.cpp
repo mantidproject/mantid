@@ -1,20 +1,12 @@
-/*
- If the OS is Windows then LoadLibrary, GetProcAddress and FreeLibrary are used.
- Some casting to HINSTANCE is required.
- Shared library name is of the form *.dll.
+#include "MantidKernel/DllOpen.h"
+#include "MantidKernel/Logger.h"
 
- If the OS is Linux then dlopen, dlsym and dlclose are used.
- Shared library name is of the form lib*.so.
-*/
 #if _WIN32
 #define _WIN32_WINNT 0x0510
 #include <windows.h>
 #else
 #include <dlfcn.h>
 #endif /* _WIN32 */
-
-#include "MantidKernel/DllOpen.h"
-#include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -37,11 +29,11 @@ const std::string LIB_SUFFIX = ".dll";
 
 /**
  * Does the file have the expected form for this platform
- * @param fileName The file name of the library
+ * @param filename The file name of the library
  * @return True if it matches the expected format, false otherwise
  */
-const std::string DllOpen::isValidFilename(const std::string &filename) {
-  return boost::ends_with(fileName, LIB_SUFFIX);
+bool DllOpen::isValidFilename(const std::string &filename) {
+  return boost::ends_with(filename, LIB_SUFFIX);
 }
 
 /* Opens the Windows .dll file.
@@ -92,7 +84,7 @@ const std::string LIB_SUFFIX = ".dylib";
 
 /**
  * Does the file have the expected form for this platform
- * @param fileName The file name of the library
+ * @param filename The file name of the library
  * @return True if it matches the expected format, false otherwise
  */
 bool DllOpen::isValidFilename(const std::string &filename) {
