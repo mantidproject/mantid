@@ -169,7 +169,8 @@ private:
       uint64_t stopTime, bool &checkOffsets) const;
 
   void checkIfAllStopOffsetsReached(
-      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+      bool &checkOffsets);
 
   // Callbacks
   CallbackFn m_cbIterationEnd;

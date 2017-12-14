@@ -285,7 +285,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
                       << " stopOffset: "
                       << stopOffsets[topicName][static_cast<size_t>(partition)]
                       << std::endl;
-        checkIfAllStopOffsetsReached(reachedEnd);
+        checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       }
     }
 
@@ -332,7 +332,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
  * offset reached
  */
 void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
-    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+    bool &checkOffsets) {
 
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
                   [](std::pair<std::string, std::vector<bool>> kv) {
@@ -348,6 +349,7 @@ void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
     // "Stop" or "Rename" run transition option.
     m_extractWaiting = true;
     m_extractedEndRunData = false;
+    checkOffsets = false;
     g_log.debug() << "Reached end of run in data stream." << std::endl;
   }
 }
@@ -357,6 +359,8 @@ KafkaEventStreamDecoder::getStopOffsets(
     std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
     std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
     uint64_t stopTime, bool &checkOffsets) const {
+  reachedEnd.clear();
+  stopOffsets.clear();
   // Wait for max latency so that we don't miss any late messages
   std::this_thread::sleep_for(MAX_LATENCY);
   stopOffsets = m_eventStream->getOffsetsForTimestamp(
