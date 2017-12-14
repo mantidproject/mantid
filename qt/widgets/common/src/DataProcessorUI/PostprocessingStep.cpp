@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -60,13 +61,9 @@ QString PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
       auto const runNumbers = *runNumbersIt;
 
       if (!runNumbers.isEmpty()) {
-        // we may have things like '1+2' which deal with multiple run numbers
-        // but we want to ignore empty values
-        auto value = runNumbers.split("+", QString::SkipEmptyParts);
-        // Remove empty strings
-        value.removeAll("");
-        if (!value.isEmpty())
-          names.append(column.prefix() + value.join("+"));
+        auto values = preprocessingStringToList(runNumbers);
+        if (!values.isEmpty())
+          names.append(preprocessingListToString(values, column.prefix()));
       }
     }
   } // Columns

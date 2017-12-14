@@ -8,9 +8,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /** Trim matching start/end quotes from the given string
- * @param value : string to trim
- * @param quote : the quote mark to look for
- * @param escape : the character that escapes quotes
+ *
+ * @param value [inout] : string to trim
+ * @param quote [in] : the quote mark to look for
+ * @param escape [in] : the character that escapes quotes
  */
 void trimQuotes(QString &value, const char quote, const char escape) {
 
@@ -33,13 +34,17 @@ void trimQuotes(QString &value, const char quote, const char escape) {
   }
 }
 
-/** Trim whitespace and quotes from the start/end of a string
- * @param valueIn: the value to trim
- * @returns : the trimmed value
+/** Trim whitespace and quotes from the start/end of a string.
+ * Edits the value in-place.
+ *
+ * @param value [inout]: the value to trim
  * */
-QString trimWhitespaceAndQuotes(const QString &valueIn) {
+void trimWhitespaceAndQuotes(QString &value) {
+  // Remember original value
+  const auto valueIn = value;
+
   // Trim whitespace
-  QString value = valueIn.trimmed();
+  value = value.trimmed();
 
   // Trim double/single quotes
   trimQuotes(value, '"', '\\');
@@ -47,9 +52,19 @@ QString trimWhitespaceAndQuotes(const QString &valueIn) {
 
   // If trimming was done, recurse to remove any nested quotes/whitespace
   if (value.size() > 0 && value != valueIn)
-    value = trimWhitespaceAndQuotes(value);
+    trimWhitespaceAndQuotes(value);
+}
 
-  return value;
+/** Trim whitespace and quotes from the start/end for all strings in the
+ * given list, and subsequently remove any empty strings from the list.
+ * Edits the list in-place.
+ * @param values : the list of values to trim
+ */
+void trimWhitespaceQuotesAndEmptyValues(QStringList &values) {
+  for (auto &value : values)
+    trimWhitespaceAndQuotes(value);
+
+  values.removeAll("");
 }
 
 /**
@@ -161,8 +176,10 @@ parseKeyValueMap(const std::map<QString, QString> &sourceMap) {
   std::map<QString, QString> kvp;
 
   for (const auto &it : sourceMap) {
-    auto key = trimWhitespaceAndQuotes(it.first);
-    auto value = trimWhitespaceAndQuotes(it.second);
+    auto key = it.first;
+    auto value = it.second;
+    trimWhitespaceAndQuotes(key);
+    trimWhitespaceAndQuotes(value);
 
     // Trim escape characters
     key.remove("\\");

@@ -1,10 +1,8 @@
-#ifndef MANTIDQTMANTIDWIDGETS_PARSEKEYVALUESTRING_H
-#define MANTIDQTMANTIDWIDGETS_PARSEKEYVALUESTRING_H
+#ifndef MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H
+#define MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H
 
-/** parseKeyValueString
-
-Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
-into a map of key/value pairs.
+/** Utilities for finding the output name of reduced workspaces based
+on the reduction algorithm's input values and preprocessing settings
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,22 +29,25 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidKernel/System.h"
 
 #include <QString>
-#include <map>
-#include <string>
+#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
-std::map<QString, QString> DLLExport
-parseKeyValueMap(const std::map<QString, QString> &sourceMap);
-std::map<std::string, std::string> DLLExport
-parseKeyValueString(const std::string &str);
-std::map<QString, QString> DLLExport parseKeyValueQString(const QString &str);
-// Trim leading/trailing whitespace and quotes from a string
-void trimWhitespaceAndQuotes(const QString &valueIn);
-// Trim whitespace, quotes and empty values from a string list
-void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
+class WhiteList;
+
+// Create list of trimmed values from a string
+QStringList preprocessingStringToList(const QString &inputStr);
+// Create string of trimmed values from a list of values
+QString preprocessingListToString(const QStringList &values,
+                                  const QString prefix = QString());
+// Returns the name of the reduced workspace for a given row
+QString DLLExport getReducedWorkspaceName(const QStringList &data,
+                                          const WhiteList &whitelist,
+                                          const QString prefix = QString());
 }
 }
+}
 
-#endif // MANTIDQTMANTIDWIDGETS_PARSEKEYVALUESTRING_H
+#endif // MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H

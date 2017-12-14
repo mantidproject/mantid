@@ -20,6 +20,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
@@ -63,30 +64,6 @@ bool workspaceExists(QString const &workspaceName) {
 
 void removeWorkspace(QString const &workspaceName) {
   AnalysisDataService::Instance().remove(workspaceName.toStdString());
-}
-
-/** Parses individual runs from the preprocessing input string
-@param inputStr : the input string. Multiple runs may be separated by '+' or ','
-@return : a list of strings for individual properties
- */
-QStringList parsePreprocessingInput(const QString &inputStr) {
-
-  auto properties = inputStr.split(QRegExp("[+,]"));
-
-  if (properties.isEmpty())
-    throw std::runtime_error("No runs given");
-
-  // Remove leading/trailing whitespace from each run
-  std::transform(properties.begin(), properties.end(), properties.begin(),
-                 [](QString in) -> QString { return in.trimmed(); });
-
-  // Remove any empty strings
-  properties.removeAll("");
-
-  if (properties.isEmpty())
-    throw std::runtime_error("No runs given");
-
-  return properties;
 }
 }
 
@@ -596,13 +573,17 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
-  auto runs = parsePreprocessingInput(runStr);
+  auto runs = preprocessingStringToList(runStr);
+
+  if (runs.isEmpty())
+    throw std::runtime_error("No runs given");
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
     return getRun(runs[0], instrument, preprocessor.prefix());
 
-  auto const outputName = preprocessor.prefix() + runs.join("_");
+  auto const outputName =
+      preprocessingListToString(runs, preprocessor.prefix());
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS tidy,
   * but that doesn't preserve history nicely, so we'll just take care of tidying
@@ -668,46 +649,8 @@ Returns the name of the reduced workspace for a given row
 QString
 GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
                                                        const QString &prefix) {
-  if (data.size() != static_cast<int>(m_whitelist.size()))
-    throw std::invalid_argument("Can't find reduced workspace name");
-
-  /* This method calculates, for a given row, the name of the output
-  * (processed)
-  * workspace. This is done using the white list, which contains information
-  * about the columns that should be included to create the ws name. In
-  * Reflectometry for example, we want to include values in the 'Run(s)' and
-  * 'Transmission Run(s)' columns. We may also use a prefix associated with
-  * the column when specified. Finally, to construct the ws name we may also
-  * use a 'global' prefix associated with the processing algorithm (for
-  * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
-  * this method */
-
-  // Temporary vector of strings to construct the name
-  QStringList names;
-
-  auto columnIt = m_whitelist.cbegin();
-  auto runNumbersIt = data.constBegin();
-  for (; columnIt != m_whitelist.cend(); ++columnIt, ++runNumbersIt) {
-    auto column = *columnIt;
-    // Do we want to use this column to generate the name of the output ws?
-    if (column.isShown()) {
-      auto const runNumbers = *runNumbersIt;
-
-      if (!runNumbers.isEmpty()) {
-        // we may have things like '1+2' which deal with multiple run numbers
-        // but we want to ignore empty values
-        auto value = runNumbers.split("+", QString::SkipEmptyParts);
-        // Remove empty strings
-        value.removeAll("");
-        if (!value.isEmpty())
-          names.append(column.prefix() + value.join("+"));
-      }
-    }
-  } // Columns
-
-  auto wsname = prefix;
-  wsname += names.join("_");
-  return wsname;
+  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
+      data, m_whitelist, prefix);
 }
 
 /**

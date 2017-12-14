@@ -65,10 +65,6 @@ QString DLLExport plotsString(const QStringList &output_ws,
                               const QString &stitched_wsStr,
                               const ProcessingAlgorithm &processor);
 
-QString DLLExport getReducedWorkspaceName(const RowData &data,
-                                          const WhiteList &whitelist,
-                                          const QString &prefix = "");
-
 boost::tuple<QString, QString> DLLExport
 reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,

@@ -62,6 +62,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
 	src/DataProcessorUI/TwoLevelTreeManager.cpp
 	src/DataProcessorUI/WhiteList.cpp
+        src/DataProcessorUI/WorkspaceNameUtils.cpp
     src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
     src/DataProcessorUI/Column.cpp
@@ -319,6 +320,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
+        inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
