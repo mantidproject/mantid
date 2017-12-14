@@ -28,6 +28,8 @@ Algorithms
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` now supports non-constant bins.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
 - :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
+- :ref:`MostLikelyMean <algm-MostLikelyMean>` is a new algorithm that computes the mean of the given array, that has the least distance from the rest of the elements.
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` is a new algorithm that can load and merge multiple runs.
 - :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
@@ -37,6 +39,8 @@ Core Functionality
 
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
+- Condition to check if a property is enabled when serializing.
+- Added new classes ``ConfigObserver`` for listening for changes to any configuration property and ``ConfigPropertyObserver`` for listening to changes to an individual config property of interest.
 
 Performance
 -----------
@@ -51,5 +55,15 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
+- The previously mentioned ``ConfigObserver`` and ``ConfigPropertyObserver`` classes are also exposed to python.
+
+Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
+
+.. code-block:: python
+
+   from mantid.simpleapi import Segfault
+   import json
+   props = json.loads('{"DryRun":true}')
+   Segfault(**props)
 
 :ref:`Release 3.12.0 <v3.12.0>`

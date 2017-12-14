@@ -348,7 +348,7 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
       // material
       const auto mat = workspace->sample().getMaterial();
       shapeObject->setMaterial(mat);
-      workspace->mutableSample().setShape(*shapeObject);
+      workspace->mutableSample().setShape(shapeObject);
     } else {
       throw std::runtime_error("The can does not define the sample shape. "
                                "Please either provide a 'Shape' argument "

@@ -29,25 +29,14 @@ MaxentTransformFourier::imageToData(const std::vector<double> &image) {
     throw std::invalid_argument("Cannot transform to data space");
   }
 
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = complexImage[i];
-  }
-
   /* Backward FT */
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_inverse(result.get(), 1, n / 2, wavetable, workspace);
+  gsl_fft_complex_inverse(complexImage.data(), 1, n / 2, wavetable, workspace);
   gsl_fft_complex_wavetable_free(wavetable);
   gsl_fft_complex_workspace_free(workspace);
 
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return m_dataSpace->fromComplex(output);
+  return m_dataSpace->fromComplex(complexImage);
 }
 
 /**
@@ -69,26 +58,14 @@ MaxentTransformFourier::dataToImage(const std::vector<double> &data) {
     throw std::invalid_argument("Cannot transform to image space");
   }
 
-  /* Prepare the data */
-  boost::shared_array<double> result(new double[n]);
-  for (size_t i = 0; i < n; i++) {
-    result[i] = complexData[i];
-  }
-
   /*  Fourier transofrm */
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(n / 2);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(n / 2);
-  gsl_fft_complex_forward(result.get(), 1, n / 2, wavetable, workspace);
+  gsl_fft_complex_forward(complexData.data(), 1, n / 2, wavetable, workspace);
   gsl_fft_complex_wavetable_free(wavetable);
   gsl_fft_complex_workspace_free(workspace);
 
-  /* Get the data */
-  std::vector<double> output(n);
-  for (size_t i = 0; i < n; i++) {
-    output[i] = result[i];
-  }
-
-  return m_imageSpace->fromComplex(output);
+  return m_imageSpace->fromComplex(complexData);
 }
 
 } // namespace Algorithms

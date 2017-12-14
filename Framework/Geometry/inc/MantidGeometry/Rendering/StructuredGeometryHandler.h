@@ -7,8 +7,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Logger.h"
 
@@ -44,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class ObjComponent;
-class Object;
+class CSGObject;
 class MANTID_GEOMETRY_DLL StructuredGeometryHandler : public GeometryHandler {
 private:
   static Kernel::Logger &PLog; ///< The official logger
@@ -61,9 +59,9 @@ public:
   StructuredGeometryHandler *createInstance(
       IObjComponent *) override; ///< Create an instance of concrete geometry
                                  /// handler for ObjComponent
-  StructuredGeometryHandler *createInstance(boost::shared_ptr<Object>)
+  StructuredGeometryHandler *createInstance(boost::shared_ptr<CSGObject>)
       override; ///< Create an instance of concrete geometry handler for Object
-  GeometryHandler *createInstance(Object *)
+  GeometryHandler *createInstance(CSGObject *)
       override; ///< Create an instance of concrete geometry handler for Object
   void Triangulate() override; ///< Triangulate the Object
   void Render() override;      ///< Render Object or ObjComponent
