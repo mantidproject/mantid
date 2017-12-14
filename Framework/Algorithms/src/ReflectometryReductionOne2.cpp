@@ -383,9 +383,6 @@ void ReflectometryReductionOne2::init() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  // Properties for direct beam normalization
-  initDirectBeamProperties();
-
   // Init properties for monitors
   initMonitorProperties();
   // Normalization by integrated monitors
@@ -423,9 +420,6 @@ ReflectometryReductionOne2::validateInputs() {
 
   const auto wavelength = validateWavelengthRanges();
   results.insert(wavelength.begin(), wavelength.end());
-
-  const auto directBeam = validateDirectBeamProperties();
-  results.insert(directBeam.begin(), directBeam.end());
 
   const auto transmission = validateTransmissionProperties();
   results.insert(transmission.begin(), transmission.end());
@@ -591,8 +585,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising input workspace by monitors\n");
-      result = directBeamCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
       result = monitorCorrection(result);
       outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
@@ -620,9 +612,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     findWavelengthMinMax(result);
     if (m_normaliseMonitors) {
       g_log.debug("Normalising output workspace by monitors\n");
-      result = directBeamCorrection(result);
-      outputDebugWorkspace(result, wsName, "_norm_db", debug, step);
-
       result = monitorCorrection(result);
       outputDebugWorkspace(result, wsName, "_norm_monitor", debug, step);
     }
@@ -668,62 +657,6 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   }
 
   return IvsLam;
-}
-
-/** Creates a direct beam workspace in wavelength from an input workspace in
-* TOF. This method should only be called if RegionOfDirectBeam is provided.
-*
-* @param inputWS :: the input workspace in TOF
-* @return :: the direct beam workspace in wavelength
-*/
-MatrixWorkspace_sptr
-ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
-
-  std::vector<int> directBeamRegion = getProperty("RegionOfDirectBeam");
-  // Sum over the direct beam.
-  const std::string processingCommands = std::to_string(directBeamRegion[0]) +
-                                         "-" +
-                                         std::to_string(directBeamRegion[1]);
-
-  auto groupDirectBeamAlg = this->createChildAlgorithm("GroupDetectors");
-  groupDirectBeamAlg->initialize();
-  groupDirectBeamAlg->setProperty("GroupingPattern", processingCommands);
-  groupDirectBeamAlg->setProperty("InputWorkspace", inputWS);
-  groupDirectBeamAlg->execute();
-  MatrixWorkspace_sptr directBeamWS =
-      groupDirectBeamAlg->getProperty("OutputWorkspace");
-
-  directBeamWS = convertToWavelength(directBeamWS);
-
-  return directBeamWS;
-}
-
-/**
-* Normalize the workspace by the direct beam (optional)
-*
-* @param detectorWS : workspace in wavelength which is to be normalized
-* @return : corrected workspace
-*/
-MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
-    MatrixWorkspace_sptr detectorWS) {
-
-  MatrixWorkspace_sptr normalized = detectorWS;
-  Property *directBeamProperty = getProperty("RegionOfDirectBeam");
-  if (!directBeamProperty->isDefault()) {
-    auto directBeam = makeDirectBeamWS(m_runWS);
-
-    // Rebin the direct beam workspace to be the same as the input.
-    auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
-    rebinToWorkspaceAlg->initialize();
-    rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
-    rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", directBeam);
-    rebinToWorkspaceAlg->execute();
-    directBeam = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-
-    normalized = divide(detectorWS, directBeam);
-  }
-
-  return normalized;
 }
 
 /**

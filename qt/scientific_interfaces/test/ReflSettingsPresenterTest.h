@@ -140,9 +140,6 @@ public:
     EXPECT_CALL(mockView, getCPp())
         .Times(Exactly(1))
         .WillOnce(Return("0.54,0.33,1.81"));
-    EXPECT_CALL(mockView, getDirectBeam())
-        .Times(Exactly(1))
-        .WillOnce(Return("0,3"));
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
@@ -200,7 +197,6 @@ public:
     TS_ASSERT_EQUALS(options["CAlpha"].toStdString(), "0.6,0.9,1.2");
     TS_ASSERT_EQUALS(options["CAp"].toStdString(), "100.0,17.0,44.0");
     TS_ASSERT_EQUALS(options["CPp"].toStdString(), "0.54,0.33,1.81");
-    TS_ASSERT_EQUALS(options["RegionOfDirectBeam"].toStdString(), "0,3");
     TS_ASSERT_EQUALS(options["PolarizationAnalysis"].toStdString(), "PNR");
     TS_ASSERT_EQUALS(options["ScaleFactor"].toStdString(), "2");
     TS_ASSERT_EQUALS(options["MomentumTransferStep"].toStdString(), "-0.02");
@@ -366,7 +362,6 @@ public:
     EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
     EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getDirectBeam()).Times(Exactly(1));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
     EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
