@@ -226,6 +226,72 @@ public:
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.3, 2.0, 0.9)), false);
   }
 
+  void testIsOnSideOctahedron() {
+    IObject_sptr geom_obj = createOctahedron();
+    // inside
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 0.0, 0.0)), false); // centre
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.2, 0.2)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.2, 0.5, -0.2)), false);
+    // on face
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.3, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, -0.5, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.4, -0.4, -0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.4, 0.3, 0.3)), true);
+    // on edge
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, -0.5, -0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.7, 0.0, 0.3)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.7, 0.0, -0.3)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.8, 0.2, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.8, 0.2, 0.0)), true);
+    // on vertex
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.0, 0.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-1.0, 0.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 1.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, -1.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 0.0, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 0.0, -1.0)), true);
+    // out side
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.35, 0.35, 0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.35, -0.35, -0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.35, 0.35, 0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.35, 0.35, -0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(2.0, 2.0, 0.0)), false);
+  }
+
+  void testIsValidOctahedron() {
+    IObject_sptr geom_obj = createOctahedron();
+    // inside
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 0.0, 0.0)), true); // centre
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.2, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.2, 0.5, -0.2)), true);
+    // on face
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.3, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, -0.5, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.4, -0.4, -0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.4, 0.3, 0.3)), true);
+    // on edge
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, -0.5, -0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.7, 0.0, 0.3)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.7, 0.0, -0.3)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.8, 0.2, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.8, 0.2, 0.0)), true);
+    // on vertex
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.0, 0.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-1.0, 0.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 1.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, -1.0, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 0.0, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 0.0, -1.0)), true);
+    // out side
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.35, 0.35, 0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.35, -0.35, -0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.35, 0.35, 0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.35, 0.35, -0.35)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(2.0, 2.0, 0.0)), false);
+  }
+
   void testIsOnSideLShape() {
     IObject_sptr geom_obj = createLShape();
     // inside
@@ -301,9 +367,32 @@ public:
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, 1, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(-1, -1, 0)), -1);
 
-    // not quite on the normal
+    // not on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), 1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), -1);
+  }
+
+  void testCalcValidOctahedron() {
+    auto geom_obj = createOctahedron();
+    // entry or exit on the normal
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(1, 1, 1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(-1, -1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(1, 1, 1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.2, -0.3, -0.5), V3D(-1, -1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(1, 1, -1)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.2, -0.3), V3D(-1, -1, 1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(1, 1, -1)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-0.5, -0.2, 0.3), V3D(-1, -1, 1)), -1);
+
+    // glancing blow on edge
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(1, 0, 0)), 0);
+    // entry or exit at edge
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, -0.5, 0.5), V3D(0, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.5, 0.5), V3D(0, 1, 0)), -1);
+
+    // not on the normal
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, 0.3, 0.5), V3D(0, 1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.2, -0.3, 0.5), V3D(0, 1, 0)), 1);
   }
 
   void testCalcValidTypeLShape() {
@@ -323,7 +412,7 @@ public:
     // glancing blow on edge from inside
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.0, 0.5), V3D(1, -1, 0)), 0);
 
-    // not quite on the normal
+    // not on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
   }
@@ -340,6 +429,20 @@ public:
     TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
     TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
     TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
+  }
+
+  void testGetBoundingBoxForOctahedron() {
+    auto geom_obj = createLShape();
+    const double tolerance(1e-10);
+
+    const BoundingBox &bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox.xMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(), -1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(), -1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(), -1.0, tolerance);
   }
 
   void testGetBoundingBoxForLShape() {
@@ -384,6 +487,17 @@ public:
     IObject_sptr geom_obj = createCube(4.0);
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
 
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptOctahedronX() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.2, 0.2), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-0.6, 0.2, 0.2), V3D(0.6, 0.2, 0.2), 10.6, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
@@ -436,12 +550,8 @@ public:
   }
 
   void testFindPointInCube()
-    /**
-    Test find point in cube
-    */
   {
     auto geom_obj = createCube(1.0);
-    // initial guess in object
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
     TS_ASSERT_LESS_THAN(0.0, pt.X());
@@ -452,13 +562,16 @@ public:
     TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
   }
 
+  void testFindPointInOctahedron()
+  {
+    auto geom_obj = createOctahedron();
+    Kernel::V3D pt;
+    TS_ASSERT_LESS_THAN(abs(pt.X()) + abs(pt.Y()) + abs(pt.Z()), 1.0)
+  }
+
   void testFindPointInLShape()
-    /**
-    Test find point in cube
-    */
   {
     auto geom_obj = createLShape();
-    // initial guess in object
     Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
     TS_ASSERT_LESS_THAN(0.0, pt.X());
@@ -474,6 +587,11 @@ public:
     double size = 3.7;
     auto geom_obj = createCube(size);
     TS_ASSERT_DELTA(geom_obj->volume(), size*size*size, 1e-6)
+  }
+
+  void testVolumeOfOctahedron() {
+    auto geom_obj = createOctahedron();
+    TS_ASSERT_DELTA(geom_obj->volume(), 4.0/3.0, 1e-6)
   }
 
   void testVolumeOfLShape() {
@@ -494,6 +612,15 @@ private:
     */
     boost::shared_ptr<MeshObject> retVal =
     boost::shared_ptr<MeshObject>(new MeshObject);
+    return retVal;
+  }
+
+  boost::shared_ptr<MeshObject> createOctahedron() {
+    /**
+    * Create octahedron with vertices on the axes at -1 & +1.
+    */
+    boost::shared_ptr<MeshObject> retVal =
+      boost::shared_ptr<MeshObject>(new MeshObject);
     return retVal;
   }
 
