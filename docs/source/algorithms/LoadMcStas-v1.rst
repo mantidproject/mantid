@@ -127,8 +127,8 @@ named k01_events_dat_list_p_x_y_n_id_t and k02_events_dat_list_p_x_y_n_id_t, one
 from each of two detector banks of the instrument simulated. These are loaded
 individually into separate workspaces. In addition, this algorithm returns the
 workspace EventData_ws, which contains the sum of all event data entries in the
-McStas Nexus file. In the example below shown how tests that the algorithm has
-done is correctly.
+McStas Nexus file. The example below performs a test to show that the summation
+of the workspaces has been executed correctly.
 
 .. testcode:: CheckEqualScattering
 
