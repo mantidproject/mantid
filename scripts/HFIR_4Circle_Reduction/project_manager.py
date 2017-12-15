@@ -16,6 +16,7 @@ class ProjectManager(object):
         Initialization
         :param mode:  (1) import (2) export
         """
+        assert isinstance(project_file_path, str), 'To-save project path {0} must be a string.'.format(project_file_path)
         self._mode = mode
 
         self._projectPath = project_file_path

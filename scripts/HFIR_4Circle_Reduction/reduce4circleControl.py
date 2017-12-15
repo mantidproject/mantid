@@ -1655,6 +1655,9 @@ class CWSCDReductionControl(object):
         :return:
         """
         # no record is found. it should not happen!
+        if self._preprocessedInfoDict is None:
+            print ('[DB...BAT] There is NO pre-processed data.')
+            return False
         if scan_number not in self._preprocessedInfoDict:
             print ('[DB...BAT] Scan {0} is not in pre-processed scan information dictionary. keys are '
                    '{1}'.format(scan_number, self._preprocessedInfoDict.keys()))
