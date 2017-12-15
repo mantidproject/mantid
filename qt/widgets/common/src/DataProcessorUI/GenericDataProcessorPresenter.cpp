@@ -275,7 +275,6 @@ void GenericDataProcessorPresenter::acceptViews(
   observeRename();
   observeADSClear();
   observeAfterReplace();
-  m_view->setTableList(m_workspaceList);
 
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
@@ -289,8 +288,9 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // The view should currently be in the paused state
-  m_view->pause();
+  // Update enabled/disabled states on the view (processing is not yet in
+  // progress)
+  updateWidgetEnabledState(false);
 }
 
 bool GenericDataProcessorPresenter::areOptionsUpdated() {
@@ -1277,7 +1277,6 @@ void GenericDataProcessorPresenter::addHandle(
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1286,7 +1285,6 @@ Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.remove(QString::fromStdString(name));
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1295,7 +1293,6 @@ Handle ADS clear events
 */
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
-  m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
@@ -1312,7 +1309,6 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   if (m_workspaceList.contains(qOldName)) {
     m_workspaceList.remove(qOldName);
     m_workspaceList.insert(qNewName);
-    m_view->setTableList(m_workspaceList);
     m_mainPresenter->notifyADSChanged(m_workspaceList);
   }
 }
@@ -1329,8 +1325,6 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, static_cast<int>(m_whitelist.size())))
     m_workspaceList.insert(qName);
-
-  m_view->setTableList(m_workspaceList);
 }
 
 /** Expands the current selection */
@@ -1555,9 +1549,24 @@ void GenericDataProcessorPresenter::addCommands() {
 Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
+void GenericDataProcessorPresenter::updateWidgetEnabledState(
+    const bool isProcessing) const {
+  m_view->updateMenuEnabledState(isProcessing);
+
+  m_view->setProcessButtonEnabled(!isProcessing);
+  m_view->setInstrumentComboEnabled(!isProcessing);
+  m_view->setTreeEnabled(!isProcessing);
+  m_view->setOutputNotebookEnabled(!isProcessing);
+}
+
+/**
+Pauses reduction. If currently reducing runs, this does not take effect until
+the current thread for reducing a row or group has finished
+*/
 void GenericDataProcessorPresenter::pause() {
 
-  m_view->pause();
+  updateWidgetEnabledState(false);
+
   m_mainPresenter->pause();
 
   m_pauseReduction = true;
@@ -1567,7 +1576,7 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  m_view->resume();
+  updateWidgetEnabledState(true);
   m_mainPresenter->resume();
 
   m_pauseReduction = false;
@@ -1604,7 +1613,7 @@ GenericDataProcessorPresenter::publishCommands() {
 
   // "Open Table" needs the list of "child" commands, i.e. the list of
   // available workspaces in the ADS
-  commands.at(0)->setChild(getTableList());
+  commands.at(0)->setChildren(getTableList());
 
   return commands;
 }

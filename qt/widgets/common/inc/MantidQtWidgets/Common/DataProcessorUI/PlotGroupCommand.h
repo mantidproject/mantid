@@ -49,6 +49,7 @@ public:
                    "produced by any groups any selected runs are in");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }
