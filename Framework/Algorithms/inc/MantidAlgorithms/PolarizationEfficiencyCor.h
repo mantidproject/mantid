@@ -43,6 +43,7 @@ public:
   const std::string summary() const override;
 
 private:
+  /// A convenience set of workspaces corresponding flipper configurations.
   struct WorkspaceMap {
     API::MatrixWorkspace_sptr mmWS{nullptr};
     API::MatrixWorkspace_sptr mpWS{nullptr};
@@ -51,6 +52,7 @@ private:
     size_t size() const noexcept;
   };
 
+  /// A convenience set of efficiency factors.
   struct EfficiencyMap {
     const API::ISpectrum *P1{nullptr};
     const API::ISpectrum *P2{nullptr};

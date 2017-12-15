@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 
 namespace {
+/// Property names.
 namespace Prop {
 constexpr char *FLIPPERS{"Flippers"};
 constexpr char *EFFICIENCIES{"Efficiencies"};
@@ -19,6 +20,7 @@ constexpr char *INPUT_WS{"InputWorkspace"};
 constexpr char *OUTPUT_WS{"OutputWorkspace"};
 }
 
+/// Flipper configurations.
 namespace Flippers {
 static const std::string Off{"0"};
 static const std::string OffOff{"00"};
@@ -28,12 +30,22 @@ static const std::string OnOff{"10"};
 static const std::string OnOn{"11"};
 }
 
+/**
+ * Parse a flipper configuration string.
+ * @param setupString a configuration string
+ * @return a vector of individual configurations
+ */
 std::vector<std::string> parseFlipperSetup(const std::string &setupString) {
   using Mantid::Kernel::StringTokenizer;
   StringTokenizer tokens{setupString, ",", StringTokenizer::TOK_TRIM};
   return std::vector<std::string>{tokens.begin(), tokens.end()};
 }
 
+/**
+ * Throw if given ws is nullptr.
+ * @param ws a workspace to check
+ * @param tag a flipper configuration for the error message
+ */
 void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &tag) {
   if (!ws) {
     throw std::runtime_error("A workspace designated as " + tag + " is missing in inputs.");
@@ -65,6 +77,10 @@ const std::string PolarizationEfficiencyCor::summary() const {
   return "Corrects a group of polarization analysis workspaces for polarizer and analyzer efficiencies.";
 }
 
+/**
+ * Count the non-nullptr workspaces
+ * @return the count on non-nullptr workspaces.
+ */
 size_t PolarizationEfficiencyCor::WorkspaceMap::size() const noexcept {
   return (mmWS ? 1 : 0) + (mpWS ? 1 : 0) + (pmWS ? 1 : 0) + (ppWS ? 1 : 0);
 }
@@ -127,6 +143,10 @@ void PolarizationEfficiencyCor::exec() {
   setProperty(Prop::OUTPUT_WS, groupOutput(outputs));
 }
 
+/**
+ * Validate the algorithm's input properties.
+ * @return a map from property names to discovered issues
+ */
 std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
@@ -160,6 +180,10 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
   return issues;
 }
 
+/**
+ * Check that all workspaces in inputs have the same number of histograms.
+ * @param inputs a set of workspaces to check
+ */
 void PolarizationEfficiencyCor::checkConsistentNumberHistograms(const WorkspaceMap &inputs) {
   size_t nHist{0};
   bool nHistValid{false};
@@ -188,6 +212,11 @@ void PolarizationEfficiencyCor::checkConsistentNumberHistograms(const WorkspaceM
   }
 }
 
+/**
+ * Check that all workspaces and efficicencies have the same X data.
+ * @param inputs a set of workspaces to check
+ * @param efficiencies efficiencies to check
+ */
 void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
@@ -229,7 +258,13 @@ void PolarizationEfficiencyCor::checkConsistentX(const WorkspaceMap &inputs, con
   }
 }
 
-
+/**
+ * Make a workspace group out of the given set of workspaces.
+ * The workspaces will be published in the ADS, their names appended by
+ * appropriate suffices.
+ * @param outputs a set of workspaces to group
+ * @return a group workspace
+ */
 API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceMap &outputs) {
   const std::string outWSName = getProperty(Prop::OUTPUT_WS);
   std::vector<std::string> names;
@@ -258,6 +293,10 @@ API::WorkspaceGroup_sptr PolarizationEfficiencyCor::groupOutput(const WorkspaceM
   return outWS;
 }
 
+/**
+ * Make a convenience access object to the efficiency factors.
+ * @return an EfficiencyMap object
+ */
 PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFactors() {
   EfficiencyMap e;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
@@ -278,9 +317,16 @@ PolarizationEfficiencyCor::EfficiencyMap PolarizationEfficiencyCor::efficiencyFa
   return e;
 }
 
+/**
+ * Correct a direct beam measurement for non-ideal instrument effects.
+ * Only the non-analyzer, polarizer flipper off case is considered here.
+ * @param inputs a set of workspaces to correct
+ * @param efficiencies a set of efficiency factors
+ * @return set of corrected workspaces
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.ppWS, Flippers::OffOff);
+  checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
   const size_t nHisto = inputs.ppWS->getNumberHistograms();
@@ -306,10 +352,18 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::directBeamCor
   return outputs;
 }
 
+/**
+ * Correct for non-ideal instrument effects.
+ * Deals with the case when the data was taken without the analyzer:
+ * only the polarizer flipper is used.
+ * @param inputs a set of workspaces to correct
+ * @param efficiencies a set of efficiency factors
+ * @return a set of corrected workspaces
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
-  checkInputExists(inputs.mmWS, Flippers::OnOn);
-  checkInputExists(inputs.ppWS, Flippers::OffOff);
+  checkInputExists(inputs.mmWS, Flippers::On);
+  checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
   outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
   outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
@@ -364,6 +418,15 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
   return outputs;
 }
 
+/**
+ * Correct for non-ideal instrument effects.
+ * Only 00 and 11 flipper configurations need to be provided;
+ * the missing 01 and 10 data is solved from the assumption that
+ * in the corrected data, R01 = R10 = 0.
+ * @param inputs a set of workspaces to correct
+ * @param efficiencies a set of efficiency factors
+ * @return a set of corrected workspaces
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -485,6 +548,15 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
   return fullCorrections(fullInputs, efficiencies);
 }
 
+/**
+ * Correct for non-ideal instrument effects.
+ * Needs the 00 and 11 flipper configurations as well as either 01 or 10.
+ * The missing intensity (01 or 10) is solved from the assumption
+ * that the corrected R01 = R10.
+ * @param inputs a set of workspaces to correct
+ * @param efficiencies a set of efficiency factors
+ * @return a set of corrected workspaces
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   WorkspaceMap fullInputs = inputs;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -499,6 +571,14 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::threeInputCor
   return fullCorrections(fullInputs, efficiencies);
 }
 
+/**
+ * Correct for non-ideal instrument effects.
+ * Perform full polarization corrections. All flipper configurations
+ * (00, 01, 10 and 11) are needed for this.
+ * @param inputs a set of workspaces to correct
+ * @param efficiencies a set of efficiency factors
+ * @return a set of corrected workspaces
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace boost::math;
   checkInputExists(inputs.mmWS, Flippers::OnOn);
@@ -621,6 +701,11 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
   return outputs;
 }
 
+/**
+ * Make a set of workspaces to correct from input properties.
+ * @param flippers a vector of flipper configurations
+ * @return a set of workspaces to correct
+ */
 PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections(const std::vector<std::string> &flippers) {
   API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
   WorkspaceMap inputs;
@@ -645,6 +730,12 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
   return inputs;
 }
 
+/**
+ * Solve in-place the 01 flipper configuration from the assumption that
+ * for the corrected intensities, R01 = R10.
+ * @param inputs a set of input workspaces
+ * @param efficiencies a set of efficiency factors
+ */
 void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   using namespace Mantid::DataObjects;
   inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
@@ -673,6 +764,12 @@ void PolarizationEfficiencyCor::solve01(WorkspaceMap &inputs, const EfficiencyMa
   }
 }
 
+/**
+ * Solve in-place the 10 flipper configuration from the assumption that
+ * for the corrected intensities R01 = R10.
+ * @param inputs a set of input workspaces
+ * @param efficiencies a set of efficiency factors
+ */
 void PolarizationEfficiencyCor::solve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
   inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
