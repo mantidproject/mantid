@@ -355,9 +355,10 @@ public:
     std::cout << boost::get<1>(output).toStdString() << std::endl;
 
     // Check the names of the reduced workspaces
-    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(), "IvsQ_binned_1000+1001_angle_0.5, "
-                                            "IvsQ_1000+1001_angle_0.5, "
-                                            "IvsLam_1000+1001_angle_0.5");
+    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(),
+                     "IvsQ_binned_1000+1001_angle_0.5, "
+                     "IvsQ_1000+1001_angle_0.5, "
+                     "IvsLam_1000+1001_angle_0.5");
 
     // Check the python code
     assertContainsMatchingLines(result, boost::get<0>(output));
