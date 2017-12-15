@@ -22,8 +22,9 @@ public:
   void writeSettings(QSettings *storage);
 
 private:
-  // Not constructible
+  // Not constructible or copyable
   Configurable();
+  Configurable(const Configurable&);
 };
 
 class MessageDisplay : QWidget, Configurable {
