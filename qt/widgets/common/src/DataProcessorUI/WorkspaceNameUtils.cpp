@@ -33,6 +33,7 @@ QString preprocessingListToString(const QStringList &values,
 /**
 Returns the name of the reduced workspace for a given row
 @param data :: [input] The data for this row
+@param whitelist :: [input] The list of columns
 @param prefix : A prefix to be appended to the generated ws name
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
