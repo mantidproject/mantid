@@ -26,6 +26,8 @@ from HFIR_4Circle_Reduction import FindUBUtility
 from HFIR_4Circle_Reduction import message_dialog
 from HFIR_4Circle_Reduction import PreprocessWindow
 from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
+import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
+
 
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
@@ -450,7 +452,7 @@ class MainWindow(QtGui.QMainWindow):
             err_msg = 'At least 3 peaks must be selected to refine UB matrix.' \
                       'Now it is only %d selected.' % len(row_index_list)
             self.pop_one_button_dialog(err_msg)
-            return
+            return None
 
         # loop over all peaks for peak information
         peak_info_list = list()
@@ -471,7 +473,12 @@ class MainWindow(QtGui.QMainWindow):
                 spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
                 peak_info.set_hkl_np_array(numpy.array(spice_hkl))
             else:
-                calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                try:
+                    calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                except RuntimeError as run_err:
+                    errmsg = '[ERROR] Failed to get calculated HKL from UB calcualtion table due to {0}'.format(run_err)
+                    self.pop_one_button_dialog(errmsg)
+                    return None
                 peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
             # END-IF-ELSE
 
@@ -563,10 +570,10 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.save_project(project_file_name, ui_dict)
 
         # show user the message that the saving process is over
-        information = 'Project has been saved to {0}\n'.format(project_file_name),
+        information = 'Project has been saved to {0}\n'.format(project_file_name)
         information += 'Including dictionary keys: {0}'.format(ui_dict)
         self.pop_one_button_dialog(information)
-        print('[INFO]\n{0}'.format(information))
+        # print('[INFO]\n{0}'.format(information))
 
         return
 
@@ -925,7 +932,8 @@ class MainWindow(QtGui.QMainWindow):
         # preprocess directory
         if len(pre_process_dir) == 0:
             # user does not specify
-            self._myControl.pre_processed_dir = None
+            pass
+        # It is not allowed to set pre-processed dir to None: self._myControl.pre_processed_dir = None
         elif os.path.exists(pre_process_dir):
             # user specifies a valid directory
             self._myControl.pre_processed_dir = pre_process_dir
@@ -2011,6 +2019,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
+        if peak_info_list is None:
+            return
 
         # Refine UB matrix
         try:
@@ -2031,6 +2041,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False, is_spice=False)
+        if peak_info_list is None:
+            return
 
         # Refine UB matrix
         try:
@@ -2139,6 +2151,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # get peak information list
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
+        if peak_info_list is None:
+            return
 
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
@@ -2167,8 +2181,6 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix by calling FFT method
         :return:
         """
-        import refineubfftsetup
-
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
         if dlg.exec_():
             # Do stuff with values
@@ -2185,6 +2197,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list(zero_hkl=True)
+        if peak_info_list is None:
+            return
         assert isinstance(peak_info_list, list), \
             'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
         assert len(peak_info_list) >= 3, \
@@ -3350,7 +3364,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Setup
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
-        save_dict['lineEdit_url'] = str(self.ui.lineEdit_url.text())
         save_dict['lineEdit_workDir'] = str(self.ui.lineEdit_workDir.text())
 
         # Experiment
