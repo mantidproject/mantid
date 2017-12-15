@@ -501,8 +501,7 @@ private:
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockDataProcessorView,
-                  askUserString(_, _, QString("Workspace")))
-          .Times(numTimes);
+                  askUserString(_, _, QString("Workspace"))).Times(numTimes);
     } else {
       EXPECT_CALL(mockDataProcessorView,
                   askUserString(_, _, QString("Workspace")))
