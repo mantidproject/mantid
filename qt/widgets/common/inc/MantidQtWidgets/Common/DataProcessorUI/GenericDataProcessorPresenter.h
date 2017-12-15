@@ -338,6 +338,7 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+  void updateWidgetEnabledState(const bool isProcessing) const;
 
   // Check if run has been processed
   bool isProcessed(int position) const;

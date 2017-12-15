@@ -20,6 +20,7 @@ from __future__ import absolute_import
 
 # stdlib modules
 import os
+from contextlib import contextmanager
 
 # 3rd-party modules
 from qtpy.uic import loadUi
@@ -39,3 +40,18 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     """
     filepath = os.path.join(os.path.dirname(caller_filename), ui_relfilename)
     return loadUi(filepath, baseinstance=baseinstance)
+
+
+@contextmanager
+def block_signals(widget):
+    """
+    A context manager that helps to block widget's signals temporarily. Usage:
+
+        with block_signals(widget):
+            widget.do_actions_that_emit_signals()
+
+    :param widget: A Qt widget signals from which should be blocked.
+    """
+    widget.blockSignals(True)
+    yield
+    widget.blockSignals(False)

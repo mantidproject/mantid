@@ -399,6 +399,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
 
   UNUSED_ARG(workspaceList);
   pushCommands();
+  m_view->updateMenuEnabledState(
+      m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
 /** Convert an options map to a comma-separated list of key=value pairs
@@ -485,25 +487,31 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable all 'process' buttons and disable the 'pause' button
-* when data reduction is paused
-*/
-void ReflRunsTabPresenter::pause() const {
+/** Tells the view to update the enabled/disabled state of all relevant widgets
+ * based on whether processing is in progress or not.
+ * @param isProcessing :: true if processing is in progress
+ *
+ */
+void ReflRunsTabPresenter::updateWidgetEnabledState(
+    const bool isProcessing) const {
+  // Update the menus
+  m_view->updateMenuEnabledState(isProcessing);
 
-  m_view->setRowActionEnabled(0, true);
-  m_view->setAutoreduceButtonEnabled(true);
-  m_view->setRowActionEnabled(1, false);
+  // Update specific buttons
+  m_view->setAutoreduceButtonEnabled(!isProcessing);
+  m_view->setTransferButtonEnabled(!isProcessing);
+  m_view->setInstrumentComboEnabled(!isProcessing);
 }
 
-/** Tells view to disable the 'process' button and enable the 'pause' button
-* when data reduction is resumed
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is not in progress
 */
-void ReflRunsTabPresenter::resume() const {
+void ReflRunsTabPresenter::pause() const { updateWidgetEnabledState(false); }
 
-  m_view->setRowActionEnabled(0, false);
-  m_view->setAutoreduceButtonEnabled(false);
-  m_view->setRowActionEnabled(1, true);
-}
+/** Tells view to update the enabled/disabled state of all relevant widgets
+ * based on the fact that processing is in progress
+*/
+void ReflRunsTabPresenter::resume() const { updateWidgetEnabledState(true); }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
 * either the search number, transfer method or instrument has changed

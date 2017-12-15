@@ -383,9 +383,19 @@ private:
   // whether processing or not
   void expectUpdateViewState(MockDataProcessorView &mockDataProcessorView,
                              Cardinality numTimes, bool isProcessing) {
-    if (isProcessing) {
-      EXPECT_CALL(mockDataProcessorView, resume()).Times(numTimes);
-    }
+    // Update menu items according to whether processing or not
+    EXPECT_CALL(mockDataProcessorView, updateMenuEnabledState(isProcessing))
+        .Times(numTimes);
+
+    // These widgets are only enabled if not processing
+    EXPECT_CALL(mockDataProcessorView, setProcessButtonEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setInstrumentComboEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setTreeEnabled(!isProcessing))
+        .Times(numTimes);
+    EXPECT_CALL(mockDataProcessorView, setOutputNotebookEnabled(!isProcessing))
+        .Times(numTimes);
   }
 
   // Expect the view's widgets to be set in the paused state
@@ -425,6 +435,13 @@ private:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(numTimes)
         .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
+  }
+
+  void expectGetProperties(MockMainPresenter &mockMainPresenter,
+                           Cardinality numTimes) {
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(numTimes)
+        .WillRepeatedly(Return(QString()));
   }
 
   void expectCallResume(MockMainPresenter &mockMainPresenter,
@@ -1099,13 +1116,30 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // The user hits the "process" button with the first group selected
-    expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
-    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
-    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
-    expectCallResume(mockMainPresenter, Exactly(1));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillOnce(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return(QString("Params = \"0.1\"")));
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspaces);
@@ -1132,14 +1166,22 @@ public:
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
 
-    // The user hits the "process" button
-    expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(0));
-    expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
-    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
-    expectCallResume(mockMainPresenter, Exactly(0));
-    expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    // We should not receive any errors
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     removeWorkspacesFromADS(m_defaultWorkspaces);
