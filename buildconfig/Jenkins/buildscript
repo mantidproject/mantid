@@ -30,12 +30,22 @@ fi
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
+export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
-cmake --version
+# we use cmake3 on rhel because cmake is too old
+if [ $(command -v cmake3) ]; then
+    CMAKE_EXE=cmake3
+    CPACK_EXE=cpack3
+    CTEST_EXE=ctest3
+else
+    CMAKE_EXE=cmake
+    CPACK_EXE=cpack
+    CTEST_EXE=ctest
+fi
+$CMAKE_EXE --version
 
 ###############################################################################
 # Check job requirements from the name and changes
@@ -244,13 +254,13 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ON_RHEL6 "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . -- -j ${BUILD_THREADS}
+  ${COVERITY_DIR}/cov-build --dir cov-int ${CMAKE_EXE} --build . -- -j ${BUILD_THREADS}
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
@@ -267,8 +277,8 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
-$SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "${CMAKE_EXE} --build . -- -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target AllTests -- -j$BUILD_THREADS"
 
 ###############################################################################
 # static analysis builds stop here
@@ -284,7 +294,7 @@ fi
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
+$SCL_ON_RHEL6 "$CTEST_EXE -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
 # Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
@@ -295,7 +305,7 @@ if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
   if [ -d $BUILD_DIR/docs/doctrees ]; then
     rm -rf $BUILD_DIR/docs/doctrees/*
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-test"
+  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-test"
 fi
 
 ###############################################################################
@@ -308,18 +318,18 @@ if [[ ${BUILDPKG} == true ]]; then
   if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
-  $SCL_ON_RHEL6 "cpack"
+  $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-qthelp"
+  $SCL_ON_RHEL6 "${CPACK_EXE}"
 
   # Source tarball on clean build (arbitrarily choose rhel7)
   # Also, parcel up the documentation into a tar file that is easier to move around
   # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
   # has set the GIT_COMMIT environment variable
   if [[ ${CLEANBUILD} == true && ${ON_RHEL7} == true ]]; then
-    $SCL_ON_RHEL6 "cmake --build . --target docs-html"
+    $SCL_ON_RHEL6 "${CMAKE_EXE} --build . --target docs-html"
     tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' --exclude="MantidProject.q*" docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
-    $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
+    $SCL_ON_RHEL6 "${CPACK_EXE} --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
 fi
 

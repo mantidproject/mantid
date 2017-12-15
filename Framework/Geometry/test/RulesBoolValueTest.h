@@ -9,7 +9,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"

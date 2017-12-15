@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -80,9 +80,10 @@ InstrumentVisitor::InstrumentVisitor(
           m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
-      m_nullShape(boost::make_shared<const Object>()),
-      m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
-          m_orderedDetectorIds->size(), m_nullShape)),
+      m_nullShape(boost::make_shared<const CSGObject>()),
+      m_shapes(
+          boost::make_shared<std::vector<boost::shared_ptr<const IObject>>>(
+              m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
       m_isStructuredBank(boost::make_shared<std::vector<bool>>()),

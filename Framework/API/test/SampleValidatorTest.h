@@ -36,7 +36,7 @@ public:
     Mantid::Kernel::Material material(
         "stuff", Mantid::PhysicalConstants::NeutronAtom(), 10);
     sphere->setMaterial(material);
-    ws->mutableSample().setShape(*sphere);
+    ws->mutableSample().setShape(sphere);
 
     SampleValidator validator;
     TS_ASSERT_EQUALS(validator.checkValidity(ws), "");

@@ -8,7 +8,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 
@@ -296,7 +296,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<Object> createCappedCylinder() {
+  boost::shared_ptr<CSGObject> createCappedCylinder() {
     std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
     std::string C32 = "px 1.2";
     std::string C33 = "px -3.2";
@@ -318,14 +318,14 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    auto retVal = boost::make_shared<Object>();
+    auto retVal = boost::make_shared<CSGObject>();
     retVal->setObject(21, ObjCapCylinder);
     retVal->populate(CylSurMap);
 
     return retVal;
   }
 
-  boost::shared_ptr<Object> createCuboid(std::vector<std::string> &planes) {
+  boost::shared_ptr<CSGObject> createCuboid(std::vector<std::string> &planes) {
     std::string C1 = planes[0];
     std::string C2 = planes[1];
     std::string C3 = planes[2];
@@ -359,7 +359,7 @@ private:
     // using surface ids:  1-6
     std::string ObjCube = "1 -2 3 -4 5 -6";
 
-    boost::shared_ptr<Object> retVal = boost::make_shared<Object>();
+    boost::shared_ptr<CSGObject> retVal = boost::make_shared<CSGObject>();
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 

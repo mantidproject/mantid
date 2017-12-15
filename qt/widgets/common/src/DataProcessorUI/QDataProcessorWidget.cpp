@@ -152,7 +152,8 @@ void QDataProcessorWidget::addActions(
   // Add actions to context menu
   m_contextMenu = new QMenu(this);
   for (const auto &command : m_commands) {
-    m_contextMenu->addAction(command->getAction());
+    if (command->hasAction())
+      m_contextMenu->addAction(command->getAction());
   }
 
   // Add a whats this button
@@ -188,6 +189,9 @@ void QDataProcessorWidget::showTable(
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(rowDataUpdated(const QModelIndex &, const QModelIndex &)));
+  connect(m_model.get(),
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+          SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)));
   connect(m_model.get(), SIGNAL(rowsInserted(const QModelIndex &, int, int)),
           this, SLOT(rowsUpdated(const QModelIndex &, int, int)));
   connect(m_model.get(), SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
@@ -196,30 +200,6 @@ void QDataProcessorWidget::showTable(
 
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
-}
-
-/**
-Set the list of tables the user is offered to open
-@param tables : the names of the tables in the ADS
-*/
-void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
-  ui.menuOpenTable->clear();
-  for (auto it = tables.begin(); it != tables.end(); ++it) {
-    QAction *openTable = ui.menuOpenTable->addAction(*it);
-    openTable->setIcon(QIcon("://worksheet.png"));
-
-    // Map this action to the table name
-    m_openMap->setMapping(openTable, *it);
-    // When repeated corrections happen the QMessageBox from openTable()
-    // method in ReflMainViewPresenter will be called multiple times
-    // when 'no' is clicked.
-    // ConnectionType = UniqueConnection ensures that
-    // each object has only one of these signals.
-    connect(openTable, SIGNAL(triggered()), m_openMap, SLOT(map()),
-            Qt::UniqueConnection);
-    connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
-            Qt::UniqueConnection);
-  }
 }
 
 /** This slot is used to update the instrument*/
@@ -322,33 +302,53 @@ Select all rows/groups
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
-Handle interface when data reduction paused
+* Update menu items to be enabled/disabled according to whether processing
+* is in progress or not
+* @param isProcessing :: true if processing is in progress
 */
-void QDataProcessorWidget::pause() {
-
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
-
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(false);
-  m_contextMenu->actions()[1]->setEnabled(false);
+void QDataProcessorWidget::updateMenuEnabledState(const bool isProcessing) {
+  for (const auto &command : m_commands) {
+    command->updateEnabledState(isProcessing);
+  }
 }
 
 /**
-Handle interface when data reduction resumed
+* Sets the "Process" button to be enabled or disabled
+* @param enabled :: true if it should be enabled
 */
-void QDataProcessorWidget::resume() {
+void QDataProcessorWidget::setProcessButtonEnabled(const bool enabled) {
+  ui.buttonProcess->setEnabled(enabled);
+}
 
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(false);
-  m_contextMenu->actions()[0]->setEnabled(false);
-  ui.buttonProcess->setEnabled(false);
+/**
+* Sets the "Instrument" combo to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setInstrumentComboEnabled(const bool enabled) {
+  ui.comboProcessInstrument->setEnabled(enabled);
+}
 
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(true);
-  m_contextMenu->actions()[1]->setEnabled(true);
+/**
+* Sets the table/tree widget to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
+  // Remember the original edit triggers so that we can revert
+  // back to them when re-enabling
+  static const auto editTriggers = ui.viewTable->editTriggers();
+
+  if (enabled)
+    ui.viewTable->setEditTriggers(editTriggers);
+  else
+    ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+/**
+* Sets the "Output Notebook" widget to be enabled or disabled
+* @param enabled :: true if it should be enabled
+*/
+void QDataProcessorWidget::setOutputNotebookEnabled(const bool enabled) {
+  ui.checkEnableNotebook->setEnabled(enabled);
 }
 
 /**
