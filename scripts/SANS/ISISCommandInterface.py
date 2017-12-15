@@ -571,6 +571,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     return retWSname
 
+
 def _merge_workspaces(retWSname_front, rAnds):
     # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
     retWSname_merged = retWSname_front
@@ -672,6 +673,7 @@ def _merge_workspaces(retWSname_front, rAnds):
 
     return retWSname
 
+
 def _common_substring(val1, val2):
     l = []
     for i in range(len(val1)):
@@ -680,9 +682,11 @@ def _common_substring(val1, val2):
         else:
             return ''.join(l)
 
+
 def _group_workspaces(list_of_values, outputname):
     allnames = ','.join(list_of_values)
     GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
 
 def _WavRangeReduction(name_suffix=None):
     """
