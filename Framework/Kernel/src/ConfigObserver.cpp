@@ -14,21 +14,8 @@ ConfigObserver::ConfigObserver(const ConfigObserver &other)
   ConfigService::Instance().addObserver(m_valueChangeListener);
 }
 
-ConfigObserver::ConfigObserver(ConfigObserver &&other) noexcept
-    : m_valueChangeListener(other.m_valueChangeListener) {
-  ConfigService::Instance().removeObserver(other.m_valueChangeListener);
-  ConfigService::Instance().addObserver(m_valueChangeListener);
-}
-
 ConfigObserver &ConfigObserver::operator=(const ConfigObserver &other) {
   m_valueChangeListener = other.m_valueChangeListener;
-  ConfigService::Instance().addObserver(m_valueChangeListener);
-  return *this;
-}
-
-ConfigObserver &ConfigObserver::operator=(ConfigObserver &&other) noexcept {
-  m_valueChangeListener = other.m_valueChangeListener;
-  ConfigService::Instance().removeObserver(other.m_valueChangeListener);
   ConfigService::Instance().addObserver(m_valueChangeListener);
   return *this;
 }

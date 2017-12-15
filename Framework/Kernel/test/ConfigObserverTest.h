@@ -74,23 +74,6 @@ public:
     ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED * 2, call_count);
   }
-
-  void testMovesObserverOnMoveConstruction() {
-    auto call_count = 0;
-    auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
-    auto observer = makeMockObserver(
-        [&call_count](const std::string &name, const std::string &newValue,
-                      const std::string &prevValue) -> void {
-          UNUSED_ARG(name);
-          UNUSED_ARG(newValue);
-          UNUSED_ARG(prevValue);
-          call_count++;
-        });
-    auto movedObserver = std::move(observer);
-    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
-    TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, call_count);
-  }
-
 private:
   std::string m_searchDirectories;
   std::string m_defaultSaveDirectory;
