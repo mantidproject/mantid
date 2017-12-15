@@ -422,7 +422,7 @@ Output:
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
 a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 
-.. code-block:: python
+.. testcode:: ExResolutionFactor2
 
    Load(Filename=r'EMU00020884.nxs', OutputWorkspace='ws')
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
@@ -432,6 +432,20 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
    evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=25000, ResolutionFactor=10)
    evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=50000, ResolutionFactor=20)
    evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=75000, ResolutionFactor=40)
+
+   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle10.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle20.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle40.readX(0))))
+
+Output:
+
+.. testoutput:: ExResolutionFactor2
+
+   Number of iterations: 41
+   Number of iterations: 20
+   Number of iterations: 24
+   Number of iterations: 32
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
