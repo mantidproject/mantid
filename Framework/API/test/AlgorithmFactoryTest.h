@@ -163,12 +163,12 @@ public:
 
   void testGetDescriptors() {
     AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
-    std::vector<Algorithm_descriptor> descriptors;
+    std::vector<AlgorithmDescriptor> descriptors;
     TS_ASSERT_THROWS_NOTHING(
         descriptors = AlgorithmFactory::Instance().getDescriptors(true));
 
     size_t noOfAlgs = descriptors.size();
-    std::vector<Algorithm_descriptor>::const_iterator descItr =
+    std::vector<AlgorithmDescriptor>::const_iterator descItr =
         descriptors.begin();
     bool foundAlg = false;
     while (descItr != descriptors.end() && !foundAlg) {

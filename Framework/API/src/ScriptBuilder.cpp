@@ -186,7 +186,7 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     //...or only specify algorithm versions when they're not the newest version
     bool oldVersion = false;
 
-    std::vector<Algorithm_descriptor> descriptors =
+    std::vector<AlgorithmDescriptor> descriptors =
         AlgorithmFactory::Instance().getDescriptors();
     for (auto &descriptor : descriptors) {
       // If a newer version of this algorithm exists, then this must be an old

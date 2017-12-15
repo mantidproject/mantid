@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 class QwtData;
 
@@ -51,11 +52,12 @@ public:
   virtual ~IEnggDiffFittingView() = default;
 
   /**
-   * returns directory of the file name to preform fitting on
+   * Get value of the input files text box
    *
-   * @return directory as std::string
+   * @return (hopefully) comma-separated list of focused files to load for
+   * fitting
    */
-  virtual std::string getFittingRunNo() const = 0;
+  virtual std::string getFocusedFileNames() const = 0;
 
   /**
    * A list of dSpacing values to be translated into TOF
@@ -153,9 +155,16 @@ public:
   virtual int getFittingListWidgetCurrentRow() const = 0;
 
   /**
+  * Update the fitting list widget with a list of workspace run and bank numbers
+  */
+  virtual void
+  updateFittingListWidget(const std::vector<std::string> &rows) = 0;
+
+  /**
   * @return The text on the current selected row of the list widget
   */
-  virtual std::string getFittingListWidgetCurrentValue() const = 0;
+  virtual boost::optional<std::string>
+  getFittingListWidgetCurrentValue() const = 0;
 
   /**
   * @return Whether the list widget currently has an item selected
@@ -170,11 +179,11 @@ public:
   virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
 
   /**
-   * sets the fitting run number according to path
+   * Set value of the text box for input filenames
    *
-   * @param path of the selected focused run file
+   * @param path Comma-separated list of files to add
    */
-  virtual void setFittingRunNo(const std::string &path) = 0;
+  virtual void setFocusedFileNames(const std::string &path) = 0;
 
   /**
    * gets the global vector in view containing focused file directory

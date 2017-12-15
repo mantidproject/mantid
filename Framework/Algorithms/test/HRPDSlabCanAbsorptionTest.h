@@ -11,7 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
@@ -42,14 +42,14 @@ public:
     // Define a source and sample position
     // Define a source component
     ObjComponent *source =
-        new ObjComponent("moderator", Object_sptr(), testInst.get());
+        new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0.0, 0.0, -95.0));
     testInst->add(source);
     testInst->markAsSource(source);
 
     // Define a sample as a simple sphere
     ObjComponent *sample =
-        new ObjComponent("samplePos", Object_sptr(), testInst.get());
+        new ObjComponent("samplePos", IObject_sptr(), testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
