@@ -205,8 +205,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00, 11"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Analyzer", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0, 1"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -255,7 +254,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -435,6 +434,45 @@ public:
     }
   }
 
+  void test_TwoInputsWithoutAnalyzer() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nHist{2};
+    constexpr size_t nBins{3};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws11));
+    for (size_t i = 0; i != 2; ++i) {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS->getItem(i));
+      for (size_t j = 0; j != nHist; ++j) {
+        ws->mutableY(j) *= static_cast<double>(i + 1);
+        ws->mutableE(j) *= static_cast<double>(i + 1);
+      }
+    }
+    auto effWS = efficiencies(edges);
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0, 1"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+  }
+
   void test_FailureWhenEfficiencyHistogramIsMissing() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
@@ -461,7 +499,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
     TS_ASSERT(!alg.isExecuted())
   }
@@ -488,7 +526,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "00"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
     TS_ASSERT(!alg.isExecuted())
   }

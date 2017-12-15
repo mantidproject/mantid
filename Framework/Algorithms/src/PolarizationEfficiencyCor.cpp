@@ -5,15 +5,14 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/math/special_functions/pow.hpp>
 #include <Eigen/Dense>
 
 namespace {
 namespace Prop {
-constexpr char *ANALYZER{"Analyzer"};
 constexpr char *FLIPPERS{"Flippers"};
 constexpr char *EFFICIENCIES{"Efficiencies"};
 constexpr char *INPUT_WS{"InputWorkspace"};
@@ -21,10 +20,18 @@ constexpr char *OUTPUT_WS{"OutputWorkspace"};
 }
 
 namespace Flippers {
-constexpr char *OffOff{"00"};
-constexpr char *OffOn{"01"};
-constexpr char *OnOff{"10"};
-constexpr char *OnOn{"11"};
+static const std::string Off{"0"};
+static const std::string OffOff{"00"};
+static const std::string OffOn{"01"};
+static const std::string On{"1"};
+static const std::string OnOff{"10"};
+static const std::string OnOn{"11"};
+}
+
+std::vector<std::string> parseFlipperSetup(const std::string &setupString) {
+  using Mantid::Kernel::StringTokenizer;
+  StringTokenizer tokens{setupString, ",", StringTokenizer::TOK_TRIM};
+  return std::vector<std::string>{tokens.begin(), tokens.end()};
 }
 
 void checkInputExists(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &tag) {
@@ -70,10 +77,15 @@ void PolarizationEfficiencyCor::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::INPUT_WS, "",
                                                              Kernel::Direction::Input),
       "A group of workspaces to be corrected.");
-  const std::vector<std::string> defaultFlippers{{Flippers::OffOff, Flippers::OffOn, Flippers::OnOff, Flippers::OnOn}};
-  declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(Prop::FLIPPERS, defaultFlippers, boost::make_shared<Kernel::ArrayLengthValidator<std::string>>(1, 4)),
-        "A list of flipper configurations (accepted values: 00, 01, 10 and 11) corresponding to each input workspace.");
+  const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
+  const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
+  const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
+  const std::string directBeam = Flippers::Off;
+  const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
+  declareProperty(Prop::FLIPPERS, full, boost::make_shared<Kernel::ListValidator<std::string>>(setups),
+        "Flipper configurations of the input workspaces.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "",
                                                              Kernel::Direction::Output),
@@ -81,15 +93,16 @@ void PolarizationEfficiencyCor::init() {
   declareProperty(
         Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
         "A workspace containing the efficiency factors P1, P2, F1 and F2 as histograms");
-  declareProperty(Prop::ANALYZER, true, "True if analyzer was used during the experiment, false otherwise.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PolarizationEfficiencyCor::exec() {
-  const bool analyzer = getProperty(Prop::ANALYZER);
-  const auto inputs = mapInputsToDirections();
+  const std::string flipperProperty = getProperty(Prop::FLIPPERS);
+  const auto flippers = parseFlipperSetup(flipperProperty);
+  const bool analyzer = flippers.front() != "0" && flippers.back() != "1";
+  const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
   checkConsistentX(inputs, efficiencies);
@@ -139,18 +152,10 @@ std::map<std::string, std::string> PolarizationEfficiencyCor::validateInputs() {
     }
   }
   API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
-  const std::vector<std::string> flippers = getProperty(Prop::FLIPPERS);
+  const std::string flipperProperty = getProperty(Prop::FLIPPERS);
+  const auto flippers = parseFlipperSetup(flipperProperty);
   if (static_cast<size_t>(inGroup->getNumberOfEntries()) != flippers.size()) {
     issues[Prop::FLIPPERS] = "The number of flipper configurations does not match the number of input workspaces";
-  } else {
-    std::vector<std::string> configurations{{Flippers::OffOff, Flippers::OffOn, Flippers::OnOff, Flippers::OnOn}};
-    for (const auto &c : flippers) {
-      const auto found = std::find(configurations.cbegin(), configurations.cend(), c);
-      if (found == configurations.cend()) {
-        issues[Prop::EFFICIENCIES] = "Unknown flipper configuration: " + *found + ". Use 00, 01, 10 or 11 only.";
-        break;
-      }
-    }
   }
   return issues;
 }
@@ -616,9 +621,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::fullCorrectio
   return outputs;
 }
 
-PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections() {
+PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDirections(const std::vector<std::string> &flippers) {
   API::WorkspaceGroup_const_sptr inGroup = getProperty(Prop::INPUT_WS);
-  const std::vector<std::string> flippers = getProperty(Prop::FLIPPERS);
   WorkspaceMap inputs;
   for (size_t i = 0; i < flippers.size(); ++i) {
     auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(inGroup->getItem(i));
@@ -626,13 +630,13 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::mapInputsToDi
       throw std::runtime_error("One of the input workspaces doesn't seem to be a MatrixWorkspace.");
     }
     const auto &f = flippers[i];
-    if (f == Flippers::OnOn) {
+    if (f == Flippers::OnOn || f == Flippers::On) {
       inputs.mmWS = ws;
     } else if (f == Flippers::OnOff) {
       inputs.mpWS = ws;
     } else if (f == Flippers::OffOn) {
       inputs.pmWS = ws;
-    } else if (f == Flippers::OffOff) {
+    } else if (f == Flippers::OffOff || f == Flippers::Off) {
       inputs.ppWS = ws;
     } else {
       throw std::runtime_error(std::string{"Unknown entry in "} + Prop::FLIPPERS);
