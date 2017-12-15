@@ -9,13 +9,14 @@ EISFDiffSphereAlkyl
 Description
 -----------
 
+.. image:: ../images/EISFDiffSphereAlkyl_1.png
+   :scale: 50 %
+
 This fitting function models the elastic incoherent intensity of a linear
 polycarbon chain (alkyl) where the local diffusion of each unit in the chain
 is modeled as undergoing continuous diffusion but confined to a spherical
 volume whose radius varies from a minimal value :math:`r` to a maximum
 value :math:`R` [1]_.
-
-.. image:: ../images/EISFDiffSphereAlkyl_1.jpg
 
 .. math::
 
