@@ -51,8 +51,12 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 // A threshold for small singular values
 const double THRESHOLD = 1E-6;
 
-// removes zeros from converged results
-
+/** removes zeros from converged results
+* @param ws :: [input] The input workspace with zeros
+* @param maxIt :: [input] The max number of iteration this alg used
+* @param yLabel :: [input] y-label to use for returned ws
+* @return : ws cut down in lenght to maxIt
+*/
 MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
                                  const size_t maxIt,
                                  const ::std::string yLabel) {
@@ -346,7 +350,7 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  size_t maxIt = 0;
+  size_t maxIt = 0;  // used to determine max iterations used by alg
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
 
