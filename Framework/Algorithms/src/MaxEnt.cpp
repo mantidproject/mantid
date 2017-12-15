@@ -350,7 +350,7 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  size_t maxIt = 0;  // used to determine max iterations used by alg
+  size_t maxIt = 0; // used to determine max iterations used by alg
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
 
