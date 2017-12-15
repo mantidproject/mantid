@@ -98,14 +98,14 @@ Usage
    ws = LoadMcStas('mcstas_event_hist.h5')
 
    # workspace group is first entry in tuple
-   group = ws[0]
+   group = mtd['ws']
    print("Number of entries in group: {}".format(group.getNumberOfEntries()))
 
-   eventData = ws[1]
+   eventData = mtd['EventData_ws']
    print("Number of histograms in event data: {}".format(eventData.getNumberHistograms()))
    print("Name of event data: {}".format(eventData.getName()))
 
-   someHistogramData = ws[2]
+   someHistogramData = mtd['Edet.dat_ws']
    print("Number of histograms in hist data: {}".format(someHistogramData.getNumberHistograms()))
    print("Name of hist data: {}".format(someHistogramData.getName()))
 
@@ -120,37 +120,46 @@ Output:
    Number of histograms in hist data: 1
    Name of hist data: Edet.dat_ws
 
+**Example - Comparing event data entries in a McStas Nexus file:**
+
+The mcstas_event_hist.h5 McStas Nexus file contains two event data entries:
+named k01_events_dat_list_p_x_y_n_id_t and k02_events_dat_list_p_x_y_n_id_t, one
+from each of two detector banks of the instrument simulated. These are loaded
+individually into separate workspaces. In addition, this algorithm returns the
+workspace EventData_ws, which contains the sum of all event data entries in the
+McStas Nexus file. In the example below shown how tests that the algorithm has
+done is correctly.
 
 .. testcode:: CheckEqualScattering
 
-   # Load the data into tuple
-   ws = LoadMcStas('mcstas_event_hist.h5')
+    # Load the data into tuple
+    ws = LoadMcStas('mcstas_event_hist.h5')
 
-   # Calculate total of all scattering
-   all_scattering_event_ws = ws[1]
-   total_all = 0
-   for i in range(all_scattering_event_ws.getNumberHistograms()):
-    total_all += all_scattering_event_ws.readY(i)[0]
-   print("The sum of all scattering spectra: {0:.4e}".format(total_all))
+    # Calculate total of all event data entries
+    all_scattering_event_ws = mtd['EventData_ws']
+    total_all = 0
+    for i in range(all_scattering_event_ws.getNumberHistograms()):
+      total_all += all_scattering_event_ws.readY(i)[0]
+    print("The sum of all scattering spectra: {0:.6e}".format(total_all))
 
-   # Calculate total of single scatter
-   single_scatter_event_ws = ws[5]
-   total_single = 0
-   for i in range(single_scatter_event_ws.getNumberHistograms()):
-    total_single += single_scatter_event_ws.readY(i)[0]
-   print("The sum of all single scattering spectra: {0:.4e}".format(total_single))
+    # Calculate total scattering from the 'k01' detector bank
+    single_scatter_event_ws = mtd['k01_events_dat_list_p_x_y_n_id_t']
+    total_single = 0
+    for i in range(single_scatter_event_ws.getNumberHistograms()):
+      total_single += single_scatter_event_ws.readY(i)[0]
+    print("The sum of all single scattering spectra: {0:.6e}".format(total_single))
 
-   # Calculate total of multiple scatter
-   multiple_scatter_event_ws = ws[6]
-   total_multiple = 0
-   for i in range(multiple_scatter_event_ws.getNumberHistograms()):
-    total_multiple += multiple_scatter_event_ws.readY(i)[0]
-   print("The sum of all multiple scattering spectra: {0:.4e}".format(total_multiple))
+    # Calculate total scattering from the 'k02' detector bank
+    multiple_scatter_event_ws = mtd['k02_events_dat_list_p_x_y_n_id_t']
+    total_multiple = 0
+    for i in range(multiple_scatter_event_ws.getNumberHistograms()):
+      total_multiple += multiple_scatter_event_ws.readY(i)[0]
+    print("The sum of all multiple scattering spectra: {0:.6e}".format(total_multiple))
 
-   # Check equality
-   sum_of_scattering = total_multiple + total_single
-   # This is equal to the sum of all scattering spectra (ws[1])
-   print("Sum of single and multiple scattering workspaces: {0:.4e}".format(total_single + total_multiple))
+    # Check equality
+    sum_of_scattering = total_multiple + total_single
+    # This is equal to the sum of all scattering spectra
+    print("Sum of single and multiple scattering workspaces: {0:.6e}".format(total_single + total_multiple))
 
 Output:
 
