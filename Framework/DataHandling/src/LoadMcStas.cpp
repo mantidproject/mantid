@@ -137,9 +137,10 @@ void LoadMcStas::exec() {
     nxFile
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
-
-    outputGroup->addWorkspace(m_scaterringWS[0]);
-    outputGroup->addWorkspace(m_scaterringWS[1]);
+	
+	for (auto i = 0; i < m_scaterringWS.size(); i++) {
+	  outputGroup->addWorkspace(m_scaterringWS[i]);
+	}
 
     setProperty("OutputWorkspace", outputGroup);
   }
@@ -255,7 +256,7 @@ void LoadMcStas::readEventData(
     const std::string &dataName = eventEntry.first;
     const std::string &dataType = eventEntry.second;
 
-    allEventWS[eventWSIndex].second = dataName;
+    allEventWS[eventWSIndex].second = dataName + std::string("_") + nameOfGroupWS;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
