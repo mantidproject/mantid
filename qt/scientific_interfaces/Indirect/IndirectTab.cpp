@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -11,7 +12,9 @@
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <QMessageBox>
+
 #include <boost/algorithm/string/find.hpp>
+#include <boost/pointer_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -454,39 +457,6 @@ void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
 }
 
 /*
- * Updates the values of the function parameters for the function with the
- * specified name, in the parameters table.
- *
- * @param functionName  The name of the function whose parameters to update in
- *                      the parameters table.
- * @param prefix        The prefixes of the names of the parameters, to be used
- *                      to find the correct parameter in the specified parameter
- *                      values map.
- * @param paramNames    The names of the function parameters to update.
- * @param paramValues   The updated parameter values stored in a map from the
- *                      name of the function parameter (preceded by prefix) to
- *                      the updated value of that parameter.
- * @param startOffset   The start offset, if set to N, the first N parameters
- *                      won't be updated.
- * @param endOffset     The end offset, if set to N, the last N parameters won't
- *                      be updated.
- */
-void IndirectTab::updateProperties(const QString &functionName,
-                                   const QString &prefix,
-                                   const QStringList &paramNames,
-                                   const QMap<QString, double> &paramValues,
-                                   int startOffset, int endOffset) {
-
-  for (auto it = paramNames.begin() + startOffset;
-       it != paramNames.end() - endOffset; ++it) {
-    const QString functionParam = functionName + "." + *it;
-    const QString paramValue = prefix + *it;
-    double value = paramValues[paramValue];
-    m_dblManager->setValue(m_properties[functionParam], value);
-  }
-}
-
-/*
  * Extracts the row at the specified index in the specified table workspace, as
  *a map
  * from the column name to the value in that column in the extracted row.
@@ -825,6 +795,21 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
     columnValues[spectraIndices[i]] = column->toDouble(i);
   }
   return columnValues;
+}
+
+QHash<QString, size_t> IndirectTab::extractAxisLabels(
+    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const size_t &axisIndex) const {
+  Axis *axis = workspace->getAxis(axisIndex);
+  if (!axis->isText())
+    return QHash<QString, size_t>();
+
+  TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  QHash<QString, size_t> labels;
+
+  for (size_t i = 0; i < textAxis->length(); ++i)
+    labels[QString::fromStdString(textAxis->label(i))] = i;
+  return labels;
 }
 
 /*

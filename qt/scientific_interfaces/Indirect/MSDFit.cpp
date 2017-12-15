@@ -19,27 +19,29 @@ Mantid::Kernel::Logger g_log("MSDFit");
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-MSDFit::MSDFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_msdTree(nullptr), m_parameterValues(),
-      m_parameterToProperty() {
+MSDFit::MSDFit(QWidget *parent) : IndirectFitAnalysisTab(parent) {
   m_uiForm.setupUi(parent);
+  m_msdTree = m_propertyTree;
 }
 
 void MSDFit::setup() {
   // Tree Browser
-  m_msdTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_msdTree);
 
   m_msdTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
+  m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
   m_properties["StartX"] = m_dblManager->addProperty("StartX");
   m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
   m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
+  m_properties["FitRange"]->addSubProperty(m_properties["StartX"]);
+  m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
+  m_msdTree->addProperty(m_properties["FitRange"]);
 
-  m_properties["Gaussian"] = createModel("MsdGauss", {"Height", "MSD"});
-  m_properties["Peters"] = createModel("MsdPeters", {"Height", "MSD", "Beta"});
-  m_properties["Yi"] = createModel("MsdYi", {"Height", "MSD", "Sigma"});
+  m_properties["Gaussian"] = createFunctionProperty("Gaussian");
+  m_properties["Peters"] = createFunctionProperty("Peters");
+  m_properties["Yi"] = createFunctionProperty("Yi");
 
   auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
   m_dblManager->setValue(m_properties["StartX"],
@@ -65,8 +67,11 @@ void MSDFit::setup() {
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
+
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot()));
+          SLOT(updatePreviewPlots()));
+  connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updatePreviewPlots()));
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(plotGuess()));
@@ -91,26 +96,21 @@ void MSDFit::run() {
     return;
 
   // Set the result workspace for Python script export
-  auto model = m_uiForm.cbModelInput->currentText();
+  const auto model = m_uiForm.cbModelInput->currentText();
+  setFitFunctions({model});
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
 
-  int specMin = m_uiForm.spSpectraMin->value();
-  int specMax = m_uiForm.spSpectraMax->value();
+  const int specMin = m_uiForm.spSpectraMin->value();
+  const int specMax = m_uiForm.spSpectraMax->value();
 
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
       model.toStdString() + "_msd";
-  m_parameterToProperty =
-      createParameterToPropertyMap(m_properties[model]->propertyName());
 
-  IAlgorithm_sptr msdAlg =
+  auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
-  m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(msdAlg);
 }
 
 void MSDFit::singleFit() {
@@ -118,23 +118,18 @@ void MSDFit::singleFit() {
     return;
 
   // Set the result workspace for Python script export
-  auto model = m_uiForm.cbModelInput->currentText();
+  const auto model = m_uiForm.cbModelInput->currentText();
+  setFitFunctions({model});
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
   int fitSpec = m_uiForm.spPlotSpectrum->value();
 
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(fitSpec) + "_" + model.toStdString() + "_msd";
-  m_parameterToProperty =
-      createParameterToPropertyMap(m_properties[model]->propertyName());
 
-  IAlgorithm_sptr msdAlg =
+  auto msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
-  m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
+  runFitAlgorithm(msdAlg);
 }
 
 /*
@@ -200,29 +195,42 @@ void MSDFit::loadSettings(const QSettings &settings) {
  * @param error If the algorithm chain failed
  */
 void MSDFit::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
-
   if (error)
     return;
 
-  m_parameterValues = IndirectTab::extractParametersFromTable(
-      m_pythonExportWsName + "_Parameters",
-      m_parameterToProperty.keys().toSet(), minimumSpectrum(),
-      maximumSpectrum());
-  updateProperties(m_uiForm.spPlotSpectrum->value());
-  updatePlot();
-
+  IndirectFitAnalysisTab::fitAlgorithmComplete(m_pythonExportWsName +
+                                               "_Parameters");
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void MSDFit::updatePlot() {
+void MSDFit::updatePreviewPlots() {
   const auto groupName = m_pythonExportWsName + "_Workspaces";
-  IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
-                                      m_uiForm.ppPlotBottom);
+  IndirectFitAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
+                                     m_uiForm.ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
+}
+
+void MSDFit::disablePlotGuess() {
+  m_uiForm.ckPlotGuess->setEnabled(false);
+  disconnect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+             SLOT(plotGuess()));
+  disconnect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+             SLOT(plotGuess()));
+  disconnect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
+             SLOT(plotGuess()));
+}
+
+void MSDFit::enablePlotGuess() {
+  m_uiForm.ckPlotGuess->setEnabled(true);
+  connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(plotGuess()));
+  connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
+          SLOT(plotGuess()));
+  connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(plotGuess()));
+  plotGuess();
 }
 
 void MSDFit::plotGuess() {
@@ -250,21 +258,14 @@ IFunction_sptr MSDFit::createFunction(const QString &modelName) {
  * @param wsName Name of new workspace loaded
  */
 void MSDFit::newDataLoaded(const QString wsName) {
-  auto workspace =
-      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          wsName.toStdString());
-
+  m_pythonExportWsName = "";
+  IndirectFitAnalysisTab::newInputDataLoaded(wsName);
+  auto const &workspace = inputWorkspace();
   int maxWsIndex = 0;
 
   if (workspace) {
     maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
   }
-
-  setInputWorkspace(workspace);
-  setPreviewPlotWorkspace(workspace);
-  m_parameterValues.clear();
-  m_parameterToProperty.clear();
-  m_pythonExportWsName = "";
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -276,8 +277,6 @@ void MSDFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setMaximum(maxWsIndex);
   m_uiForm.spSpectraMax->setMinimum(0);
   m_uiForm.spSpectraMax->setValue(maxWsIndex);
-
-  updatePlot();
 }
 
 /**
@@ -319,36 +318,8 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMaximum(val);
 }
 
-/*
- * Creates a property representing a model with the specified name,
- * and which takes the specified parameters.
- *
- * @param modelName       The name of the model.
- * @param modelParameters The parameters taken by the model.
- * @return                The created property, which represents the
- *                        model in the property table.
- */
-QtProperty *MSDFit::createModel(const QString &modelName,
-                                const std::vector<QString> &modelParameters) {
-  QtProperty *expGroup = m_grpManager->addProperty(modelName);
-
-  for (auto &modelParam : modelParameters) {
-    QString paramName = modelName + "." + modelParam;
-    m_properties[paramName] = m_dblManager->addProperty(modelParam);
-    m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
-    expGroup->addSubProperty(m_properties[paramName]);
-  }
-
-  return expGroup;
-}
-
 void MSDFit::modelSelection(int selected) {
-  auto model = m_uiForm.cbModelInput->itemText(selected);
-  m_msdTree->clear();
-
-  m_msdTree->addProperty(m_properties["StartX"]);
-  m_msdTree->addProperty(m_properties["EndX"]);
-  m_msdTree->addProperty(m_properties[model]);
+  const auto model = m_uiForm.cbModelInput->itemText(selected);
 
   if (!m_pythonExportWsName.empty()) {
     auto idx = m_pythonExportWsName.rfind("_");
@@ -359,30 +330,7 @@ void MSDFit::modelSelection(int selected) {
   }
 
   m_uiForm.ckPlotGuess->setChecked(false);
-  updatePlot();
-}
-
-/*
- * Creates a map from the names of the specified model's parameters,
- * to the name of the property in the property table, associated with
- * this parameter.
- *
- * @param model The model whose parameters to create a map from.
- * @return      A map from the model parameter names to the names
- *              of their associated properties in the property table.
- */
-QHash<QString, QString>
-MSDFit::createParameterToPropertyMap(const QString &model) {
-  QHash<QString, QString> parameterToProperty;
-  parameterToProperty["Height"] = model + ".Height";
-  parameterToProperty["MSD"] = model + ".MSD";
-
-  if (model == "Peters")
-    parameterToProperty["Beta"] = model + ".Beta";
-  else if (model == "Yi") {
-    parameterToProperty["Sigma"] = model + ".Sigma";
-  }
-  return parameterToProperty;
+  setPropertyFunctions({model});
 }
 
 /*
@@ -401,62 +349,31 @@ std::string MSDFit::modelToAlgorithmProperty(const QString &model) {
   else if (model == "Yi")
     return "Yi";
   else
-    return "";
-}
-
-/*
- * Updates the property table using the parameter results for the
- * specified spectrum.
- *
- * @param specNo  The spectrum number of the parameters to update
- *                the property table with.
- */
-void MSDFit::updateProperties(int specNo) {
-  size_t index = boost::numeric_cast<size_t>(specNo);
-  auto parameterNames = m_parameterValues.keys();
-
-  if (parameterNames.isEmpty()) {
-    return;
-  }
-
-  // Check whether parameter values exist for the specified spectrum number
-  if (m_parameterValues[parameterNames[0]].contains(index)) {
-
-    for (auto &paramName : parameterNames) {
-      auto propertyName = m_parameterToProperty[paramName];
-      m_dblManager->setValue(m_properties[propertyName],
-                             m_parameterValues[paramName][index]);
-    }
-  }
+    return model.toStdString();
 }
 
 /**
  * Handles saving of workspace
  */
 void MSDFit::saveClicked() {
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatchAsync();
+  IndirectFitAnalysisTab::saveResult(m_pythonExportWsName);
 }
 
 /**
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  auto wsName = m_pythonExportWsName + "_Workspaces";
-  if (checkADSForPlotSaveWorkspace(wsName, true)) {
-    // Get the workspace
-    auto groupWs =
-        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            wsName);
-    auto groupWsNames = groupWs->getNames();
+  IndirectFitAnalysisTab::plotResult(m_pythonExportWsName + "_Workspaces",
+                                     "All");
+}
 
-    if (groupWsNames.size() != 1)
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
-    else
-      plotSpectrum(QString::fromStdString(wsName), 0, 2);
-  }
+IFunction_sptr MSDFit::getFunction(const QString &functionName) const {
+  if (functionName.startsWith("Msd"))
+    return IndirectFitAnalysisTab::getFunction(functionName);
+  if (functionName == "Gaussian")
+    return IndirectFitAnalysisTab::getFunction("MsdGauss");
+  else
+    return IndirectFitAnalysisTab::getFunction("Msd" + functionName);
 }
 
 } // namespace IDA
