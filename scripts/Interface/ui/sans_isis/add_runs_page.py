@@ -23,7 +23,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return self.fileNameEdit.text().encode('utf-8')
 
     def set_out_file_directory(self, out_file_directory):
-        self.outFileDirectoryLabel.setText('Output Directory: {}'.format(out_file_directory))
+        self.outputDirectoryLabel.setText("Output Directory: {}".format(out_file_directory))
 
     def no_save_directory(self):
         QtGui.QMessageBox.warning(self, "No Save Directory Set!",

@@ -1,4 +1,13 @@
 from sans.gui_logic.models.run_selection import has_any_event_data
+from mantid.kernel import ConfigService, ConfigPropertyObserver
+
+
+class OutputDirectoryObserver(ConfigPropertyObserver):
+    def __init__(self):
+        super(OutputDirectoryObserver, self).__init__("defaultsave.directory")
+
+    def onPropertyValueChanged(self, old_value, new_value):
+        pass
 
 
 class AddRunsPagePresenter(object):
@@ -19,6 +28,7 @@ class AddRunsPagePresenter(object):
                                          view)
 
         self._connect_to_view(view)
+        self._output_directory_observer = OutputDirectoryObserver()
 
     def _init_views(self, view, parent_view):
         self._view = view
@@ -27,6 +37,7 @@ class AddRunsPagePresenter(object):
     def _connect_to_view(self, view):
         view.sum.connect(self._handle_sum)
         view.outFileChanged.connect(self._handle_out_file_changed)
+        self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
     def _make_base_file_name_from_selection(self, run_selection):
         # Aims to use the run with the highest run number.
@@ -68,6 +79,9 @@ class AddRunsPagePresenter(object):
 
     def _output_directory_is_not_empty(self, settings):
         return settings.save_directory() != ''
+
+    def _handle_output_directory_changed(self, new_directory):
+        self._view.set_out_file_directory(new_directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
