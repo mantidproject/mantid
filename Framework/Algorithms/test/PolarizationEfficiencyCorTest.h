@@ -471,6 +471,94 @@ public:
     WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+    const double F1 = effWS->y(0).front();
+    const double F1e = effWS->e(0).front();
+    const double P1 = effWS->y(2).front();
+    const double P1e = effWS->e(2).front();
+    const Eigen::Vector2d y{ws00->y(0).front(), ws11->y(0).front()};
+    const auto expected = correctionWithoutAnalyzer(y, F1, P1);
+    const Eigen::Vector2d e{ws00->e(0).front(), ws11->e(0).front()};
+    const auto expectedError = errorWithoutAnalyzer(y, e, F1, F1e, P1, P1e);
+    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
+    MatrixWorkspace_sptr mmWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_--")));
+    TS_ASSERT(ppWS)
+    TS_ASSERT(mmWS)
+    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
+    TS_ASSERT_EQUALS(mmWS->getNumberHistograms(), nHist)
+    for (size_t j = 0; j != nHist; ++j) {
+      const auto &ppX = ppWS->x(j);
+      const auto &ppY = ppWS->y(j);
+      const auto &ppE = ppWS->e(j);
+      const auto &mmX = mmWS->x(j);
+      const auto &mmY = mmWS->y(j);
+      const auto &mmE = mmWS->e(j);
+      TS_ASSERT_EQUALS(ppY.size(), nBins)
+      TS_ASSERT_EQUALS(mmY.size(), nBins)
+      for (size_t k = 0; k != nBins; ++k) {
+        TS_ASSERT_EQUALS(ppX[k], edges[k])
+        TS_ASSERT_EQUALS(mmX[k], edges[k])
+        TS_ASSERT_DELTA(ppY[k], expected[0], 1e-12)
+        TS_ASSERT_DELTA(mmY[k], expected[1], 1e-12)
+        TS_ASSERT_DELTA(ppE[k], expectedError[0], 1e-12)
+        TS_ASSERT_DELTA(mmE[k], expectedError[1], 1e-12)
+      }
+    }
+  }
+
+  void test_directBeamOnlyInput() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nHist{2};
+    constexpr size_t nBins{3};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    WorkspaceGroup_sptr inputWS = boost::make_shared<WorkspaceGroup>();
+    inputWS->addWorkspace(boost::dynamic_pointer_cast<Workspace>(ws00));
+    auto effWS = efficiencies(edges);
+    PolarizationEfficiencyCor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Flippers", "0"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 1)
+    const auto P1 = effWS->y(2).front();
+    const auto P1e = effWS->e(2).front();
+    const auto P2 = effWS->y(3).front();
+    const auto P2e = effWS->e(3).front();
+    const double y{ws00->y(0).front()};
+    const auto inverted = 1. / (1. - P2 - P1 + 2. * P1 * P2);
+    const auto expected = inverted * y;
+    const double e{ws00->e(0).front()};
+    const auto errorP1 = P1e * y * (2. * P1 - 1.) * inverted * inverted;
+    const auto errorP2 = P2e * y * (2. * P2 - 1.) * inverted * inverted;
+    const auto errorY = e * e * inverted * inverted;
+    const auto expectedError = std::sqrt(errorP1 * errorP1 + errorP2 * errorP2 + errorY);
+    MatrixWorkspace_sptr ppWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(m_outputWSName + std::string("_++")));
+    TS_ASSERT(ppWS)
+    TS_ASSERT_EQUALS(ppWS->getNumberHistograms(), nHist)
+    for (size_t j = 0; j != nHist; ++j) {
+      const auto &ppX = ppWS->x(j);
+      const auto &ppY = ppWS->y(j);
+      const auto &ppE = ppWS->e(j);
+      TS_ASSERT_EQUALS(ppY.size(), nBins)
+      for (size_t k = 0; k != nBins; ++k) {
+        TS_ASSERT_EQUALS(ppX[k], edges[k])
+        TS_ASSERT_DELTA(ppY[k], expected, 1e-12)
+        TS_ASSERT_DELTA(ppE[k], expectedError, 1e-12)
+      }
+    }
   }
 
   void test_FailureWhenEfficiencyHistogramIsMissing() {
@@ -940,6 +1028,43 @@ private:
     const auto inverted = (P2 * P1 * F2 * F1).array();
     const auto yError = ((inverted * inverted).matrix() * (e.array() * e.array()).matrix()).array();
     return (p2Error * p2Error + p1Error * p1Error + f2Error * f2Error + f1Error * f1Error + yError).sqrt().matrix();
+  }
+
+  Eigen::Vector2d correctionWithoutAnalyzer(const Eigen::Vector2d &y, const double f1, const double p1) {
+    Eigen::Matrix2d F1;
+    F1 << f1, 0.,
+          f1 - 1., 1.;
+    F1 *= 1. / f1;
+    Eigen::Matrix2d P1;
+    P1 << p1 - 1., p1,
+          p1, p1 - 1.;
+    P1 *= 1. / (2. * p1 - 1.);
+    const auto inverted = P1 * F1;
+    return static_cast<Eigen::Vector2d>(inverted * y);
+  }
+
+  Eigen::Vector2d errorWithoutAnalyzer(const Eigen::Vector2d &y, const Eigen::Vector2d &e, const double f1, const double f1e, const double p1, const double p1e) {
+    Eigen::Matrix2d F1;
+    F1 << f1, 0,
+          f1 - 1., 1.;
+    F1 *= 1. / f1;
+    Eigen::Matrix2d dF1;
+    dF1 << 0., 0.,
+           1., -1.;
+    dF1 *= f1e / (f1 * f1);
+    Eigen::Matrix2d P1;
+    P1 << p1 - 1., p1,
+          p1, p1 - 1.;
+    P1 *= 1. / (2. * p1 - 1.);
+    Eigen::Matrix2d dP1;
+    dP1 << 1., -1.,
+           -1., 1.;
+    dP1 *= p1e / ((2. * p1 - 1.) * (2. * p1 - 1.));
+    const auto p1Error = (dP1 * F1 * y).array();
+    const auto f1Error = (P1 * dF1 * y).array();
+    const auto inverted = (P1 * F1).array();
+    const auto yError = ((inverted * inverted).matrix() * (e.array() * e.array()).matrix()).array();
+    return (p1Error * p1Error + f1Error * f1Error + yError).sqrt().matrix();
   }
 
   void solveMissingIntensity(const Mantid::API::MatrixWorkspace_sptr &ppWS, Mantid::API::MatrixWorkspace_sptr &pmWS, Mantid::API::MatrixWorkspace_sptr &mpWS, const Mantid::API::MatrixWorkspace_sptr &mmWS, const Mantid::API::MatrixWorkspace_sptr &effWS) {

@@ -351,8 +351,8 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::analyzerlessC
       P1Em <<  elemE2, -elemE2,
               -elemE2,  elemE2;
       const Eigen::Vector2d errors(ppE[binIndex], mmE[binIndex]);
-      const auto e1 = (F1Em * P1m * intensities).array();
-      const auto e2 = (F1m * P1Em * intensities).array();
+      const auto e1 = (P1Em * F1m * intensities).array();
+      const auto e2 = (P1m * F1Em * intensities).array();
       const auto sqPFProduct = (PFProduct.array() * PFProduct.array()).matrix();
       const auto sqErrors = (errors.array() * errors.array()).matrix();
       const auto e3 = (sqPFProduct * sqErrors).array();
