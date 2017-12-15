@@ -261,7 +261,8 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("ProcessingInstructions=" + procInst);
     }
 
-    auto correctDetectors = asAlgorithmPropertyBool(m_view->detectorCorrectionEnabled());
+    auto correctDetectors =
+        asAlgorithmPropertyBool(m_view->detectorCorrectionEnabled());
     options.push_back("CorrectDetectors=" + correctDetectors);
 
     // Add correction type

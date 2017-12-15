@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include <iostream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -280,6 +281,7 @@ void ReflectometryReductionOneAuto2::exec() {
 
   if (correctDetectors) {
     inputWS = correctDetectorPositions(instructions, inputWS, 2 * theta);
+    std::cout << "IM HERE!!!" << theta << std::endl;
   }
 
   // Optional properties
