@@ -177,7 +177,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.3, 2.0, 0.9)), false);
   }
 
-  void testIsValidCappedCylinder() {
+  void testIsValidCube() {
     IObject_sptr geom_obj = createCube(1.0);
     // inside
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 0.5)), true); // centre
@@ -226,6 +226,62 @@ public:
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.3, 2.0, 0.9)), false);
   }
 
+  void testIsOnSideLShape() {
+    IObject_sptr geom_obj = createLShape();
+    // inside
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 0.5)), false); 
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.5, 0.5, 0.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 1.5, 0.5)), false);
+    // on front and back
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.5, 0.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 1.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.5, 0.5, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 1.5, 1.0)), true);
+    // on sides
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.0, 0.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.0, 1.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(2.0, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 2.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.5, 1.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.0, 1.5, 0.5)), true);
+    // out side
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.5, 1.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(2.0, 2.0, 0.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(2.0, 2.0, 0.0)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.1, 1.1, 0.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.1, 1.1, 1.0)), false);
+  }
+
+  void testIsValidLShape() {
+    IObject_sptr geom_obj = createLShape();
+    // inside
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.5, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 1.5, 0.5)), true);
+    // on front and back
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.5, 0.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 1.5, 0.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.5, 0.5, 1.0)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 1.5, 1.0)), true);
+    // on sides
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.0, 0.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.0, 1.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(2.0, 0.5, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 2.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.5, 1.0, 0.5)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.0, 1.5, 0.5)), true);
+    // out side
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.5, 1.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(2.0, 2.0, 0.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(2.0, 2.0, 0.0)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.1, 1.1, 0.5)), false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.1, 1.1, 1.0)), false);
+  }
+
   void testCalcValidTypeCube() {
     auto geom_obj = createCube(1.0);
     // entry or exit on the normal
@@ -250,6 +306,28 @@ public:
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 0.5, 0.5), V3D(0.5, 0.5, 0)), -1);
   }
 
+  void testCalcValidTypeLShape() {
+    auto geom_obj = createLShape();
+    // entry or exit on the normal
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 1.5, 0.5), V3D(-1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(1, 0, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, 1, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 2.0, 0.5), V3D(0, -1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, 1, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.5, 0.0, 0.5), V3D(0, -1, 0)),-1);
+
+    // glancing blow on edge
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0.0, 0.0, 0.5), V3D(1, -1, 0)), 0);
+    // glancing blow on edge from inside
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.0, 0.5), V3D(1, -1, 0)), 0);
+
+    // not quite on the normal
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(0.5, 0.5, 0)), -1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.0, 1.5, 0.5), V3D(-0.5, 0.5, 0)), 1);
+  }
+
   void testGetBoundingBoxForCube() {
     auto geom_obj = createCube(4.1);
     const double tolerance(1e-10);
@@ -262,6 +340,62 @@ public:
     TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
     TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
     TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
+  }
+
+  void testInterceptCubeX() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-10, 1, 1), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0, 1, 1), V3D(4, 1, 1), 14.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptCubeXY() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-8, -6, 1), V3D(0.8, 0.6, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0, 0, 1), V3D(4, 3, 1), 15.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptCubeMiss() {
+    std::vector<Link>
+      expectedResults; // left empty as there are no expected results
+    IObject_sptr geom_obj = createCube(4.0);
+    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void checkTrackIntercept(Track &track,
+    const std::vector<Link> &expectedResults) {
+    int index = 0;
+    for (Track::LType::const_iterator it = track.cbegin(); it != track.cend();
+      ++it) {
+      TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart,
+        1e-6);
+      TS_ASSERT_DELTA(it->distInsideObject,
+        expectedResults[index].distInsideObject, 1e-6);
+      TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+      TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
+      TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
+      ++index;
+    }
+    TS_ASSERT_EQUALS(index, static_cast<int>(expectedResults.size()));
+  }
+
+
+  void checkTrackIntercept(IObject_sptr obj, Track &track,
+    const std::vector<Link> &expectedResults) {
+    int unitCount = obj->interceptSurface(track);
+    TS_ASSERT_EQUALS(unitCount, expectedResults.size());
+    checkTrackIntercept(track, expectedResults);
   }
 
   void testFindPointInCube()
@@ -292,9 +426,23 @@ public:
 private:
 
   boost::shared_ptr<MeshObject> createCube(double size) {
-
+    /**
+    * Create cube of side length size with vertex at origin,
+    * parellel to axes and non-negative vertex coordinates.
+    */
     boost::shared_ptr<MeshObject> retVal =
     boost::shared_ptr<MeshObject>(new MeshObject);
+    return retVal;
+  }
+
+  boost::shared_ptr<MeshObject> createLShape() {
+    /**
+    * Create an L shape with vertices at
+    * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+    *  where Z = 0 or 1.
+    */
+    boost::shared_ptr<MeshObject> retVal =
+      boost::shared_ptr<MeshObject>(new MeshObject);
     return retVal;
   }
 
