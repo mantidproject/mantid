@@ -415,46 +415,54 @@ private:
                           Cardinality numTimes, RowList rowlist = RowList(),
                           GroupList grouplist = GroupList()) {
 
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(numTimes)
-        .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(numTimes)
-        .WillRepeatedly(Return(grouplist));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(numTimes);
+      EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+          .Times(numTimes)
+          .WillRepeatedly(Return(rowlist));
+      EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+          .Times(numTimes)
+          .WillRepeatedly(Return(grouplist));
+    }
   }
 
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(numTimes)
-        .WillOnce(Return(OptionsMap()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(numTimes)
-        .WillOnce(Return(OptionsMap()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
-        .Times(numTimes)
-        .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
-  }
-
-  void expectGetProperties(MockMainPresenter &mockMainPresenter,
-                           Cardinality numTimes) {
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(numTimes)
-        .WillRepeatedly(Return(QString()));
-  }
-
-  void expectCallResume(MockMainPresenter &mockMainPresenter,
-                        Cardinality numTimes) {
-    EXPECT_CALL(mockMainPresenter, resume()).Times(numTimes);
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+          .Times(numTimes)
+          .WillOnce(Return(OptionsMap()));
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+          .Times(numTimes)
+          .WillOnce(Return(OptionsMap()));
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+          .Times(numTimes)
+          .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
+    }
   }
 
   void expectNotebookIsDisabled(MockDataProcessorView &mockDataProcessorView,
                                 Cardinality numTimes) {
     // Call to check whether the notebook is enabled
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(numTimes)
-        .WillRepeatedly(Return(false));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+          .Times(numTimes)
+          .WillRepeatedly(Return(false));
+    }
+
     // Result is false, so never request the path
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(Exactly(0));
   }
@@ -462,35 +470,58 @@ private:
   void expectNotebookIsEnabled(MockDataProcessorView &mockDataProcessorView,
                                Cardinality numTimes) {
     // Call to check whether the notebook is enabled
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(numTimes)
-        .WillRepeatedly(Return(true));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+          .Times(numTimes)
+          .WillRepeatedly(Return(true));
+    }
+
     // Result is false, so never request the path
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(numTimes);
   }
 
   void expectGetWorkspace(MockDataProcessorView &mockDataProcessorView,
                           Cardinality numTimes, const char *workspaceName) {
-    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-        .Times(numTimes)
-        .WillRepeatedly(Return(workspaceName));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen()).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+          .Times(numTimes)
+          .WillRepeatedly(Return(workspaceName));
+    }
   }
 
   void expectAskUserWorkspaceName(MockDataProcessorView &mockDataProcessorView,
                                   Cardinality numTimes,
                                   const char *workspaceName = "") {
-    EXPECT_CALL(mockDataProcessorView,
-                askUserString(_, _, QString("Workspace")))
-        .Times(numTimes)
-        .WillOnce(Return(workspaceName));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView,
+                  askUserString(_, _, QString("Workspace")))
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView,
+                  askUserString(_, _, QString("Workspace")))
+          .Times(numTimes)
+          .WillOnce(Return(workspaceName));
+    }
   }
 
   void expectAskUserYesNo(MockDataProcessorView &mockDataProcessorView,
                           Cardinality numTimes, const bool answer = false) {
 
-    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
-        .Times(numTimes)
-        .WillOnce(Return(answer));
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
+          .Times(numTimes)
+          .WillOnce(Return(answer));
+    }
   }
 
   void expectNoWarningsOrErrors(MockDataProcessorView &mockDataProcessorView) {
@@ -1116,30 +1147,12 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // The user hits the "process" button with the first group selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
-        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-        .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-        .Times(2)
-        .WillRepeatedly(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(1)
-        .WillOnce(Return(QString()));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(1)
-        .WillOnce(Return(QString("Params = \"0.1\"")));
-    EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
-    EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(1)
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
+    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspaces);
@@ -1166,22 +1179,13 @@ public:
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
 
-    // We should not receive any errors
-    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
-
-    // The user hits the "process" button with the first group selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
-    EXPECT_CALL(mockMainPresenter, resume()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
-    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
-
-    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    // The user hits the "process" button
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectGetOptions(mockMainPresenter, Exactly(0), "Params = \"0.1\"");
+    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
+    expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     removeWorkspacesFromADS(m_defaultWorkspaces);
