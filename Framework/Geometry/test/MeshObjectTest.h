@@ -342,6 +342,20 @@ public:
     TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
   }
 
+  void testGetBoundingBoxForLShape() {
+    auto geom_obj = createLShape();
+    const double tolerance(1e-10);
+
+    const BoundingBox &bbox = geom_obj->getBoundingBox();
+
+    TS_ASSERT_DELTA(bbox.xMax(), 2.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMax(), 2.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMax(), 1.0, tolerance);
+    TS_ASSERT_DELTA(bbox.xMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.yMin(), 0.0, tolerance);
+    TS_ASSERT_DELTA(bbox.zMin(), 0.0, tolerance);
+  }
+
   void testInterceptCubeX() {
     std::vector<Link> expectedResults;
     IObject_sptr geom_obj = createCube(4.0);
@@ -369,6 +383,29 @@ public:
       expectedResults; // left empty as there are no expected results
     IObject_sptr geom_obj = createCube(4.0);
     Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptLShapeTwoPass() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createLShape();
+    Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(0.5, 2, 0.5), V3D(1, 1.5, 0.5), 1.414, *geom_obj));
+    expectedResults.push_back(
+      Link(V3D(1.5, 1, 0.5), V3D(2, 0.5, 0.5), 2.828, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptLShapeMiss() {
+    std::vector<Link>
+      expectedResults; // left empty as there are no expected results
+    IObject_sptr geom_obj = createLShape();
+    // Passes through convex hull of L-Shape
+    Track track(V3D(1.1, 1.1, -1), V3D(0, 0, 1));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -415,10 +452,35 @@ public:
     TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
   }
 
+  void testFindPointInLShape()
+    /**
+    Test find point in cube
+    */
+  {
+    auto geom_obj = createLShape();
+    // initial guess in object
+    Kernel::V3D pt;
+    TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt), 1);
+    TS_ASSERT_LESS_THAN(0.0, pt.X());
+    TS_ASSERT_LESS_THAN(pt.X(), 2.0);
+    TS_ASSERT_LESS_THAN(0.0, pt.Y());
+    TS_ASSERT_LESS_THAN(pt.Y(), 2.0);
+    TS_ASSERT_LESS_THAN(0.0, pt.Z());
+    TS_ASSERT_LESS_THAN(pt.Z(), 1.0);
+    TS_ASSERT(pt.X() < 1.0 || pt.Y() < 1.0)
+  }
+
   void testVolumeOfCube() {
     double size = 3.7;
     auto geom_obj = createCube(size);
     TS_ASSERT_DELTA(geom_obj->volume(), size*size*size, 1e-6)
+  }
+
+  void testVolumeOfLShape() {
+    auto geom_obj = createLShape();
+    TS_ASSERT_DELTA(geom_obj->volume(), 3.0, 1e-6)
+    // 3.5 is the volume of the convex hull
+    // 4.0 is the volume of the bounding box
   }
 
   
