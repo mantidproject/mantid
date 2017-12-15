@@ -34,7 +34,8 @@ The output workspace will contain one workspace for each group of
 class ``NXdata`` in the input NeXus file, which is not of name ``"content_nxs"`` 
 found in a group of class ``NXDetector`` of name ``"Data"``.
 The name of the workspace is the same as the name of the group, 
-but with ``__mcstas_event_hist`` added to the end.
+but with with the name of the outputworkspace, as specified in the algorithm properties,
+added to the end.
 
 +----------------------------------+------------------------------------------+---------------------------------------+
 | Description of Data              | Found in Nexus file (within 'run')       | Placed in Workspace (Workspace2D)     |
