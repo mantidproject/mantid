@@ -106,20 +106,23 @@ bool MonIDPropChanger::monitorIdReader(
     return false;
 
   // are these monitors really there?
-  // got the index of correspondent spectra.
-  // Only check if number of histograms is small, else this takes too long!
-  std::vector<detid_t> realMonitorIDList = pInstr->getMonitors();
-  const auto &specInfo = inputWS->spectrumInfo();
-  std::set<detid_t> ids;
-  size_t i = 0;
-  while (i < specInfo.size() && ids.size() < realMonitorIDList.size()) {
-    if (specInfo.isMonitor(i))
-      ids.insert(specInfo.detector(i).getID());
-    ++i;
+  std::vector<detid_t> monitorIDList = pInstr->getMonitors();
+  {
+    const auto &specInfo = inputWS->spectrumInfo();
+    std::set<detid_t> idsInWorkspace;
+    size_t i = 0;
+    // Loop over spectra, but finish early if we find everything
+    while (i < specInfo.size() &&
+           idsInWorkspace.size() < monitorIDList.size()) {
+      if (specInfo.isMonitor(i))
+        idsInWorkspace.insert(specInfo.detector(i).getID());
+      ++i;
+    }
+    monitorIDList =
+        std::vector<detid_t>(idsInWorkspace.begin(), idsInWorkspace.end());
   }
-  realMonitorIDList = std::vector<detid_t>(ids.begin(), ids.end());
 
-  if (realMonitorIDList.empty()) {
+  if (monitorIDList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
     } else {
@@ -129,19 +132,18 @@ bool MonIDPropChanger::monitorIdReader(
   }
 
   // are known values the same as the values we have just identified?
-  if (iExistingAllowedValues.size() != realMonitorIDList.size()) {
+  if (iExistingAllowedValues.size() != monitorIDList.size()) {
     iExistingAllowedValues.clear();
-    iExistingAllowedValues.assign(realMonitorIDList.begin(),
-                                  realMonitorIDList.end());
+    iExistingAllowedValues.assign(monitorIDList.begin(), monitorIDList.end());
     return true;
   }
   // the monitor list has the same size as before. Is it equivalent to the
   // existing one?
   bool values_redefined = false;
-  for (size_t i = 0; i < realMonitorIDList.size(); i++) {
-    if (iExistingAllowedValues[i] != realMonitorIDList[i]) {
+  for (size_t i = 0; i < monitorIDList.size(); i++) {
+    if (iExistingAllowedValues[i] != monitorIDList[i]) {
       values_redefined = true;
-      iExistingAllowedValues[i] = realMonitorIDList[i];
+      iExistingAllowedValues[i] = monitorIDList[i];
     }
   }
   return values_redefined;
@@ -193,14 +195,15 @@ void NormaliseToMonitor::init() {
                   Direction::InOut);
 
   // Or take monitor ID to identify the spectrum one wish to use or
-  declareProperty("MonitorID", -1,
-                  "The MonitorID (pixel ID), which defines the monitor's data "
-                  "within the InputWorkspace. Will be overridden by the values "
-                  "correspondent to MonitorSpectrum field if one is provided "
-                  "in the field above.\n"
-                  "If workspace do not have monitors, the MonitorID can refer "
-                  "to empty data and the field then can accepts any MonitorID "
-                  "within the InputWorkspace.");
+  declareProperty(
+      "MonitorID", -1,
+      "The MonitorID (detector ID), which defines the monitor's data "
+      "within the InputWorkspace. Will be overridden by the values "
+      "correspondent to MonitorSpectrum field if one is provided "
+      "in the field above.\n"
+      "If workspace do not have monitors, the MonitorID can refer "
+      "to empty data and the field then can accepts any MonitorID "
+      "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
   setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
                                        "InputWorkspace", "MonitorSpectrum",
