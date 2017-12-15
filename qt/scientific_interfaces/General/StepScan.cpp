@@ -554,7 +554,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
     throw std::runtime_error("Parsing parameters failed for StepScan.");
   }
   Json::Value &prop = root["properties"];
-  if (prop.type() == Json::nullValue) {
+  if (prop.isNull()) {
     throw std::runtime_error("Parsing parameters failed for StepScan.");
   }
   std::string ssp = prop.toStyledString();
