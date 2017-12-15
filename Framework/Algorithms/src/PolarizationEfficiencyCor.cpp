@@ -446,11 +446,17 @@ PolarizationEfficiencyCor::WorkspaceMap PolarizationEfficiencyCor::twoInputCorre
       // Derivatives of the above with respect to i00, i11, f1, etc.
       const auto mpdi00 = (-pow<2>(f1) * f2 * pow<2>(b) * c + f1 * f2 * pow<2>(b) * c + f2 * p1 * a) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c));
       const auto mpdi11 = -((f1 * b * d * p2) / (f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c)));
-      const auto mpdf1 = (f2 * i11 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-         f1 * i00 * (-1. + 2. * p1) * (-f2 * pow<2>(1. - 2. * p2) +
-            pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) / (f2 * p1 * (-1. + p1 + 2. * p2 -
-            2. * p1 * p2) +
-         f1 * (-1. + 2. * p1) * (-(-1 + p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
+      const auto mpdf1 = -(((-1. + 2. * p1) * ((1. - p2) * p2 +
+                                         f2 * (-1. + p1 + p2) * (-1. + 2. * p2)) * (-pow<2>(f1) * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) +
+                                         f2 * i00 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
+                                         f1 * (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
+                                            f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2)))) / pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 -
+                                          2. * p1 * p2) +
+                                       f1 * (-1. + 2. * p1) * ((1. - p2) * p2 +
+                                          f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) + (-2. * f1 * f2 * i00 * pow<2>(1. - 2. * p1) * (-1. + 2. * p2) + (-1. + 2. * p1) * (-i11 * (-1. + p2) * p2 +
+                                        f2 * i00 * (-1. + 2. * p1) * (-1. + 2. * p2))) / (f2 * p1 * (-1. + p1 + 2. * p2 -
+                                        2. * p1 * p2) +
+                                     f1 * (-1. + 2. * p1) * ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
       const auto mpdf2 = -(((f1 * b * (p1 + d) * c + p1 * a) * (-pow<2>(f1) * f2 * i00 * pow<2>(b) * c + f2 * i00 * p1 * a + f1 * b * (-i11 * d * p2 + f2 * i00 * b * c))) /
                          pow<2>(f2 * p1 * a + f1 * b * (-d * p2 + f2 * (p1 + d) * c))) +
           (-pow<2>(f1) * i00 * pow<2>(b) * c + f1 * i00 * pow<2>(b) * c + i00 * p1 * a) /
