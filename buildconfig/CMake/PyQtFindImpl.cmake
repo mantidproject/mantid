@@ -16,6 +16,7 @@
 # PYQT${major_version}_SIP_DIR - The directory holding the PyQt .sip files.
 #
 # PYQT${major_version}_SIP_FLAGS - The SIP flags used to build PyQt.
+#
 function (find_pyqt major_version)
   if (PYQT${major_version}_VERSION)
     # Already in cache, be silent

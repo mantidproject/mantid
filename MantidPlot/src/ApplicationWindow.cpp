@@ -363,10 +363,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   addDockWidget(Qt::TopDockWidgetArea, logWindow);
 
   using MantidQt::MantidWidgets::MessageDisplay;
-  using MantidQt::API::Message;
+  using MantidQt::MantidWidgets::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
-  resultsLog =
-      new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+  resultsLog = new MessageDisplay(logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow,
           SLOT(show()));
@@ -378,6 +377,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
 
   ConfigService::Instance();          // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
+  // Read settings early so that the log level is set before the framework
+  // starts
+  resultsLog->readSettings(settings);
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
 #ifdef MAKE_VATES
@@ -4704,7 +4706,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
     return true;
 
   if (m_bad_script_envs.contains(lang)) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     writeToLogWindow(
         Message("Previous initialization of " + lang + " failed, cannot retry.",
                 Message::Priority::PRIO_ERROR));
@@ -4819,12 +4821,6 @@ void ApplicationWindow::readSettings() {
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime", 15).toInt();
-  // set logging level to the last saved level
-  int lastLoggingLevel =
-      settings.value("/LastLoggingLevel",
-                     Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
-  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
-
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type =
       (WindowType)settings.value("/InitWindow", NoWindow).toInt();
@@ -5346,9 +5342,11 @@ void ApplicationWindow::saveSettings() {
                       //"ProIndependent", "MantidPlot");
 #endif
 
-  /* ---------------- group General --------------- */
-  settings.beginGroup("/General");
+  // Root level is named "General" by Qt
+  resultsLog->writeSettings(&settings);
 
+  // Our named group General, displayed as %General in the file
+  settings.beginGroup("/General");
   settings.beginGroup("/ApplicationGeometry");
   d_app_rect = QRect(this->pos(), this->size());
   if (this->isMaximized())
@@ -5368,9 +5366,6 @@ void ApplicationWindow::saveSettings() {
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
-  // save current logger level from the root logger ""
-  int lastLoggingLevel = Mantid::Kernel::Logger("").getLevel();
-  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
 
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
@@ -7976,7 +7971,7 @@ void ApplicationWindow::showResults(bool ok) {
       text = currentFolder()->logInfo();
     else
       text = "Sorry, there are no results to display!";
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(text, Message::Priority::PRIO_INFORMATION));
   }
   logWindow->setVisible(ok);
@@ -7986,7 +7981,7 @@ void ApplicationWindow::showResults(const QString &s, bool ok) {
   currentFolder()->appendLogInfo(s);
   QString logInfo = currentFolder()->logInfo();
   if (!logInfo.isEmpty()) {
-    using MantidQt::API::Message;
+    using MantidQt::MantidWidgets::Message;
     resultsLog->replace(Message(logInfo, Message::Priority::PRIO_INFORMATION));
   }
   showResults(ok);
@@ -16052,7 +16047,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow *usr_win,
  * @param message :: A string containing the message
  * @param error :: A boolean indicating if this is an error
  */
-void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message &msg) {
+void ApplicationWindow::writeToLogWindow(
+    const MantidQt::MantidWidgets::Message &msg) {
   resultsLog->append(msg);
 }
 
