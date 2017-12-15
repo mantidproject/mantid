@@ -34,9 +34,7 @@ class MANTID_KERNEL_DLL ConfigObserver {
 public:
   ConfigObserver();
   ConfigObserver(const ConfigObserver &other);
-  ConfigObserver(ConfigObserver &&other) noexcept;
   ConfigObserver &operator=(const ConfigObserver &other);
-  ConfigObserver &operator=(ConfigObserver &&other) noexcept;
   virtual ~ConfigObserver() noexcept;
 
   void notifyValueChanged(const std::string &name, const std::string &newValue,
