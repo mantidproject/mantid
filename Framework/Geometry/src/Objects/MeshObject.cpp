@@ -95,8 +95,8 @@ const Kernel::Material MeshObject::material() const {
 
 /**
 * Returns whether this object has a valid shape
-* @returns True if the surface list is populated and there is a
-* defined TopRule, false otherwise.
+* @returns True if the entire MeshObject may enclose
+* one or more volumes.
 */
 bool MeshObject::hasValidShape() const {
   return false;
@@ -105,7 +105,7 @@ bool MeshObject::hasValidShape() const {
 
 
 /**
-* Determines is Pt is within the object or on the surface
+* Determines whether Pt is within the object or on the surface
 * @param Pt :: Point to be tested
 * @returns 1 if true and 0 if false
 */
@@ -114,20 +114,7 @@ bool MeshObject::isValid(const Kernel::V3D &Pt) const {
 }
 
 /**
-* - (a) Uses the Surface list to check those surface
-* that the point is on.
-* - (b) Creates a list of normals to the touching surfaces
-* - (c) Checks if normals and "normal pair bisection vector" are contary.
-* If any are found to be so the the point is
-* on a surface.
-* - (d) Return 1 / 0 depending on test (c)
-
-* \todo This needs to be completed to deal with apex points
-* In the case of a apex (e.g. top of a pyramid) you need
-* to interate over all clusters of points on the Snorm
-* ie. sum of 2, sum of 3 sum of 4. etc. to be certain
-* to get a correct normal test.
-
+* Determines wither Pt is on the surface.
 * @param Pt :: Point to check
 * @returns 1 if the point is on the surface
 */
@@ -187,11 +174,7 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
 }
 
 /**
-* Find soild angle of object wrt the observer. This interface routine calls
-* either
-* getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of
-* triangles
-* in the discete surface representation.
+* Find solid angle of object wrt the observer. 
 * @param observer :: point to measure solid angle from
 * @return :: estimate of solid angle of object. Accuracy depends on object
 * shape.
@@ -205,8 +188,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 * Find solid angle of object wrt the observer with a scaleFactor for the object.
 * @param observer :: point to measure solid angle from
 * @param scaleFactor :: V3D giving scaling of the object
-* @return :: estimate of solid angle of object. Accuracy depends on
-* triangulation quality.
+* @return :: estimate of solid angle of object.
 */
 double MeshObject::solidAngle(const Kernel::V3D &observer,
                              const Kernel::V3D &scaleFactor) const
@@ -216,8 +198,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
 }
 
 /**
- * For simple shapes, the volume is calculated exactly. For more
- * complex cases, we fall back to Monte Carlo.
+ * Calculate volume. May be approximate for a complicated shape.
  * @return The volume.
  */
 double MeshObject::volume() const {
@@ -242,8 +223,7 @@ const BoundingBox &MeshObject::getBoundingBox() const {
 /**
  * Attempts to calculate bounding box using vertex array.
  *
- * Stores result in bounding box cache if successful. Will only work for shapes
- * that have handlers capable of providing a vertex mesh.
+ * Stores result in bounding box cache if successful.
  *
  */
 void MeshObject::calcBoundingBoxByVertices() {

@@ -128,6 +128,13 @@ public:
     // when available.
   }
 
+  void testHasValidShape() {
+    auto empty_obj = new MeshObject();
+    auto geom_obj = createCube(1.0);
+    TS_ASSERT(!empty_obj->hasValidShape() );
+    TS_ASSERT(geom_obj->hasValidShape());
+  }
+
   void testIsOnSideCube() {
     IObject_sptr geom_obj = createCube(1.0);
     // inside
