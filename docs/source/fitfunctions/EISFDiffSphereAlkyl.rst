@@ -15,6 +15,8 @@ is modeled as undergoing continuous diffusion but confined to a spherical
 volume whose radius varies from a minimal value :math:`r` to a maximum
 value :math:`R` [1]_.
 
+.. image:: ../images/EISFDiffSphereAlkyl_1.jpg
+
 .. math::
 
    R_i = (R -r) * (i/M) + r

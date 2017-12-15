@@ -18,7 +18,8 @@ def is_registered(function_name):
     try:
         FunctionFactory.createFunction(function_name)
     except RuntimeError as exc:
-        return False, 'Could not create {} function: {}'.format(function, str(exc))
+        return False, 'Could not create {} function: {}'.format(function_name,
+                                                                str(exc))
     return True, ""
 
 
