@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
-    <height>603</height>
+    <width>1055</width>
+    <height>621</height>
    </rect>
   </property>
   <property name="font">
@@ -461,7 +461,7 @@
       <item>
        <widget class="QPushButton" name="getInstDefaultsButton">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
