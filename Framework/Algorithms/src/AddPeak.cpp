@@ -55,7 +55,8 @@ void AddPeak::exec() {
   double phi = det.getPhi();
 
   // In the inelastic convention, Q = ki - kf.
-  // qSign later in algorithm will change to kf - ki for Crystallography Convention
+  // qSign later in algorithm will change to kf - ki for Crystallography
+  // Convention
   double Qx = -sin(theta2) * cos(phi);
   double Qy = -sin(theta2) * sin(phi);
   double Qz = 1.0 - cos(theta2);
@@ -97,7 +98,8 @@ void AddPeak::exec() {
     tof = xdata[0];
   }
 
-  std::string m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
+  std::string m_qConvention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   double qSign = 1.0;
   if (m_qConvention == "Crystallography") {
     qSign = -1.0;
