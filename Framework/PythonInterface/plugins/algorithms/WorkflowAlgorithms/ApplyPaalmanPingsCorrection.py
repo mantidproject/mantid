@@ -277,7 +277,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Container scaled by %f' % self._can_scale_factor)
             return scaled_container
         else:
-            return shifted_container
+            return self._convert_units_wavelength(shifted_container)
 
     def _get_correction_factor_workspace(self, factor_type):
         """
