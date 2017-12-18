@@ -27,7 +27,6 @@ Bug fixes
 #########
 
 - Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
-- Fixed a bug where parameters were not getting passed through to CreateTransmissionWorkspaceAuto.
 
 
 Algorithms
