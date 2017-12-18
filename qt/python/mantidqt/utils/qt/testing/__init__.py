@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# flake8: noqa
 """A selection of utility functions related to testing of Qt-based GUI elements.
 """
 from __future__ import absolute_import
@@ -22,6 +23,8 @@ import types
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
+
+from .modal_tester import ModalTester
 
 
 def gui_test(test):
@@ -129,6 +132,3 @@ def select_item_in_combo_box(combo_box, item_text):
     """
     i = combo_box.findText(item_text)
     combo_box.setCurrentIndex(i)
-
-
-from .modal_tester import ModalTester

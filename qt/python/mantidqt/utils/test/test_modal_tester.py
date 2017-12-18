@@ -90,6 +90,7 @@ class TestModalTester(unittest.TestCase):
     def test_exception_in_creator(self):
         def create():
             raise RuntimeError('')
+
         def testing_function(widget):
             pass
         with patch('traceback.print_exc') as print_exc:
