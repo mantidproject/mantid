@@ -2773,17 +2773,8 @@ public:
   void testWorkspaceNamesNoTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-
     auto presenter = makeDefaultPresenter();
-
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-
-    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
 
     QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
     QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
@@ -2814,14 +2805,6 @@ public:
 
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-
     QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
                         "0.04",  "1",   "",      ""};
     QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
@@ -2843,6 +2826,31 @@ public:
     //     "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
     // TS_ASSERT_EQUALS(presenter->getPostprocessedWorkspaceName(group),
     //                 "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
+  void testWorkspaceNamesWithMultipleTrans() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    auto presenter = makeDefaultPresenter();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    // Test transmission run list separated by both comma and plus symbol
+    QStringList row0 = {
+        "12345", "0.5", "11115,11116", "0.1", "0.3", "0.04", "1", "", ""};
+    QStringList row1 = {
+        "12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""};
+
+    // Test the names of the reduced workspaces
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
+                     "prefix_1_TOF_12345_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1, "prefix_2_"),
+                     "prefix_2_TOF_12346_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0),
+                     "TOF_12345_TRANS_11115+11116");
+    TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
+                     "TOF_12346_TRANS_11115+11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
