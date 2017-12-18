@@ -786,22 +786,25 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
     boost::trim(InstrName);
     boost::algorithm::to_lower(InstrName);
     size_t len = InstrName.size();
+    /// input property contains name of instrument definition file rather than
+    /// instrument name itself
+    bool IDF_provided{false};
     // Check if the name ends up with .xml which means that idf file name
     // is provided rather then an instrument name.
     if (len > 4) {
       if (InstrName.compare(len - 4, len, ".xml") == 0) {
-        m_IDF_provided = true;
+        IDF_provided = true;
       } else {
-        m_IDF_provided = false;
+        IDF_provided = false;
       }
     } else {
-      m_IDF_provided = false;
+      IDF_provided = false;
     }
     try {
       auto inst = inputWS->getInstrument();
       std::string Name = inst->getName();
       boost::algorithm::to_lower(Name);
-      if (Name != InstrName && !m_IDF_provided) {
+      if (Name != InstrName && !IDF_provided) {
         result["RefWorkspace"] =
             "If both reference workspace and instrument name are defined, "
             "workspace has to have the instrument with the same name\n"
