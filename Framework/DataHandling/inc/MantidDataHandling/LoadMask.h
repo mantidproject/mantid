@@ -7,6 +7,9 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+
 namespace Poco {
 namespace XML {
 class Document;
@@ -46,8 +49,6 @@ namespace DataHandling {
 */
 class DLLExport LoadMask : public API::Algorithm {
 public:
-  ~LoadMask() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };
   /// Summary of algorithms purpose
@@ -103,7 +104,7 @@ private:
   /// optional source workspace, containing spectra-detector mapping
   API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
-  Poco::XML::Document *m_pDoc{nullptr};
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Root element of the parsed XML
   Poco::XML::Element *m_pRootElem{nullptr};
 

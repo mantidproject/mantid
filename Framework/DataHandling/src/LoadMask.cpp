@@ -18,7 +18,6 @@
 #include <sstream>
 #include <map>
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
@@ -265,22 +264,6 @@ namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadMask)
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMask::~LoadMask() {
-  // note Poco::XML::Document and Poco::XML::Element declare their constructors
-  // as protected
-  if (m_pDoc)
-    m_pDoc->release();
-  // note that m_pRootElem does not need a release(), and that can
-  // actually cause a double free corruption, as
-  // Poco::DOM::Document::documentElement() does not require a
-  // release(). So just to be explicit that they're gone:
-  m_pDoc = nullptr;
-  m_pRootElem = nullptr;
-}
 
 /// Initialise the properties
 void LoadMask::init() {
