@@ -1,14 +1,15 @@
 import unittest
 
-from qtpy.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton
+from qtpy.QtWidgets import QWidget, QLineEdit
 
 from mantid.api import PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty
 from mantid.simpleapi import AlgorithmManager, AlgorithmFactory
 from mantidqt.utils.qt.plugins import setup_library_paths
-from mantidqt.utils.qt.testing import gui_test, gui_test_case
+from mantidqt.utils.qt.testing import gui_test_case
 
 from _widgetscoreqt5 import AlgorithmDialog, GenericDialog, InterfaceManager
+
 
 setup_library_paths()
 
