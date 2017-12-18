@@ -241,7 +241,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.2, 0.5, -0.2)), false);
     // on face
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, 0.3, 0.2)), true);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, -0.5, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.5, -0.3, 0.2)), true);
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0.4, -0.4, -0.2)), true);
     TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-0.4, 0.3, 0.3)), true);
     // on edge
@@ -274,7 +274,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.2, 0.5, -0.2)), true);
     // on face
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, 0.3, 0.2)), true);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, -0.5, 0.2)), true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.5, -0.3, 0.2)), true);
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0.4, -0.4, -0.2)), true);
     TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-0.4, 0.3, 0.3)), true);
     // on edge
