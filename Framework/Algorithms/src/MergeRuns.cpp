@@ -33,42 +33,6 @@ using namespace Geometry;
 using namespace DataObjects;
 using namespace RunCombinationOptions;
 
-namespace {
-/*
- * Here we build up the correct time indexes for the workspace being added. If
- *the scan times for the addee workspace and output workspace are the same this
- *builds the same indexing as the workspace had before. Otherwise, the correct
- *time indexes are set here.
- */
-std::vector<SpectrumDefinition>
-buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
-                   const DetectorInfo &addeeDetInfo,
-                   const DetectorInfo &outDetInfo,
-                   const DetectorInfo &newOutDetInfo) {
-  std::vector<SpectrumDefinition> newAddeeSpecDefs;
-
-  for (auto &specDef : addeeSpecDefs) {
-    for (auto &index : specDef) {
-      SpectrumDefinition newSpecDef;
-      if (addeeDetInfo.scanInterval(index) == outDetInfo.scanInterval(index)) {
-        newSpecDef.add(index.first, index.second);
-      } else {
-        // Find the correct time index for this entry
-        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
-          if (addeeDetInfo.scanInterval(index) ==
-              newOutDetInfo.scanInterval({index.first, i})) {
-            newSpecDef.add(index.first, i);
-          }
-        }
-      }
-      newAddeeSpecDefs.push_back(newSpecDef);
-    }
-  }
-
-  return newAddeeSpecDefs;
-}
-}
-
 /// Initialisation method
 void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
@@ -703,6 +667,41 @@ void MergeRuns::fillHistory() {
     copyHistoryFromInputWorkspaces<std::list<MatrixWorkspace_sptr>>(
         m_inMatrixWS);
   }
+}
+
+/*
+ * Here we build up the correct time indexes for the workspace being added. If
+ *the scan times for the addee workspace and output workspace are the same this
+ *builds the same indexing as the workspace had before. Otherwise, the correct
+ *time indexes are set here.
+ */
+std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
+    const std::vector<SpectrumDefinition> &addeeSpecDefs,
+    const DetectorInfo &addeeDetInfo, const DetectorInfo &outDetInfo,
+    const DetectorInfo &newOutDetInfo) {
+  std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
+    for (auto &index : addeeSpecDefs[i]) {
+      SpectrumDefinition newSpecDef;
+      const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
+      if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeScanInterval ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
+        }
+      }
+      newAddeeSpecDefs[i] = newSpecDef;
+    }
+  }
+
+  return newAddeeSpecDefs;
 }
 
 } // namespace Algorithm
