@@ -513,6 +513,11 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
         chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
         chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
+        if (chop1Phase > 360.) {
+          // This is an ugly workaround for pre-2018 D17 files which have
+          // chopper 1 phase and chopper 2 speed swapped.
+          std::swap(chop1Phase, chop2Speed);
+        }
       } else if (m_instrumentName == "Figaro") {
         chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
