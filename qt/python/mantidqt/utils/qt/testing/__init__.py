@@ -18,7 +18,7 @@
 """
 from __future__ import absolute_import
 
-from inspect import getmembers, isfunction, ismethod
+from inspect import isfunction, ismethod
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
