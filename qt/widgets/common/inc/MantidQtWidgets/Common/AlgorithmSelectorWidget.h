@@ -136,7 +136,7 @@ protected:
   void keyPressEvent(QKeyEvent *e) override;
 
 private:
-  typedef std::vector<Mantid::API::Algorithm_descriptor> AlgNamesType;
+  typedef std::vector<Mantid::API::AlgorithmDescriptor> AlgNamesType;
   void addAliases(AlgNamesType &algNamesList);
   QString stripAlias(const QString &text) const;
 };

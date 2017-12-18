@@ -51,6 +51,7 @@ public:
                    "selected run belongs");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

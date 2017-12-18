@@ -132,9 +132,6 @@ public:
     EXPECT_CALL(mockView, getCPp())
         .Times(Exactly(1))
         .WillOnce(Return("0.54,0.33,1.81"));
-    EXPECT_CALL(mockView, getDirectBeam())
-        .Times(Exactly(1))
-        .WillOnce(Return("0,3"));
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
@@ -187,30 +184,29 @@ public:
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 23);
+    TS_ASSERT_EQUALS(optionsVec.size(), 22);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
     TS_ASSERT_EQUALS(optionsVec[3], "CAp=\"100.0,17.0,44.0\"");
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
-    TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
-    TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[7], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[8], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[9], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[10], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[11], "FirstTransmissionRun=INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[12], "SecondTransmissionRun=INTER00013464");
-    TS_ASSERT_EQUALS(optionsVec[13], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[15], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[17], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[19], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[20], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[21], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[22], "DetectorCorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(optionsVec[5], "PolarizationAnalysis=PNR");
+    TS_ASSERT_EQUALS(optionsVec[6], "ScaleFactor=2");
+    TS_ASSERT_EQUALS(optionsVec[7], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
+    TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
+    TS_ASSERT_EQUALS(optionsVec[10], "FirstTransmissionRun=INTER00013463");
+    TS_ASSERT_EQUALS(optionsVec[11], "SecondTransmissionRun=INTER00013464");
+    TS_ASSERT_EQUALS(optionsVec[12], "NormalizeByIntegratedMonitors=True");
+    TS_ASSERT_EQUALS(optionsVec[13], "MonitorIntegrationWavelengthMin=4");
+    TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMax=10");
+    TS_ASSERT_EQUALS(optionsVec[15], "MonitorBackgroundWavelengthMin=12");
+    TS_ASSERT_EQUALS(optionsVec[16], "MonitorBackgroundWavelengthMax=17");
+    TS_ASSERT_EQUALS(optionsVec[17], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
+    TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[21], "DetectorCorrectionType=VerticalShift");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
@@ -357,7 +353,6 @@ public:
     EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
     EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getDirectBeam()).Times(Exactly(1));
     EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
     EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
