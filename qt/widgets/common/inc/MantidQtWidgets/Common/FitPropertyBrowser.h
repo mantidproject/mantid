@@ -1,22 +1,22 @@
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/AlgorithmObserver.h"
 #include "DllOption.h"
+#include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <QDockWidget>
 #include <QHash>
 #include <QList>
 #include <QMap>
 
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /* Forward declarations */
 
@@ -617,7 +617,7 @@ private:
   friend class SequentialFitDialog;
 };
 
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*FITPROPERTYBROWSER_H_*/

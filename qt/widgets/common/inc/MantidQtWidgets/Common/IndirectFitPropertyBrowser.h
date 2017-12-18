@@ -3,6 +3,8 @@
 
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
+#include <QSet>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
