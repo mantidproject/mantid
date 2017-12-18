@@ -35,11 +35,11 @@ if ( ENABLE_WORKBENCH )
 
   # ctest targets
   set ( PYTHON_TEST_FILES
-    mantidqt/test/algorithmselector_test.py
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
+    mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_messagedisplay.py
- )
+  )
 
   # Tests
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
