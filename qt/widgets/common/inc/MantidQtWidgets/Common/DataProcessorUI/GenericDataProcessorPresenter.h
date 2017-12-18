@@ -191,22 +191,27 @@ protected:
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
-  void preprocessColumnValue(const QString &columnName, QString &columnValue);
+  void preprocessColumnValue(const QString &columnName, QString &columnValue,
+                             RowData *data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(OptionsMap &options);
+  void preprocessOptionValues(OptionsMap &options, RowData *data);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);
   // Get options from the individual columns
-  void addRowOptions(OptionsMap &options, RowData *data);
+  void addRowOptions(OptionsMap &options, RowData *data,
+                     const bool allowInsertions = true);
   // Get options from the Options column
-  void addUserOptions(OptionsMap &options, RowData *data);
+  void addUserOptions(OptionsMap &options, RowData *data,
+                      const bool allowInsertions = true);
   // Get options from the Hidden Options column
-  void addHiddenOptions(OptionsMap &options, RowData *data);
+  void addHiddenOptions(OptionsMap &options, RowData *data,
+                        const bool allowInsertions = true);
   // Get global options
-  void addGlobalOptions(OptionsMap &options);
+  void addGlobalOptions(OptionsMap &options, const bool allowInsertions = true);
   // Get output options
-  void addOutputOptions(OptionsMap &options, RowData *data);
+  void addOutputOptions(OptionsMap &options, RowData *data,
+                        const bool allowInsertions = true);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
@@ -278,7 +283,7 @@ private:
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
-                      const std::map<std::string, std::string> &optionsMap);
+                      const OptionsMap &optionsMap);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
