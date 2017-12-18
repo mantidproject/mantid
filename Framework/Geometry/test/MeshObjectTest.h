@@ -692,9 +692,7 @@ private:
     * Create cube of side length size with vertex at origin,
     * parellel to axes and non-negative vertex coordinates.
     */
-    boost::shared_ptr<MeshObject> retVal =
-    boost::shared_ptr<MeshObject>(new MeshObject);
-    return retVal;
+    return createCube( size, V3D(0.5*size, 0.5*size, 0.5*size));
   }
 
   boost::shared_ptr<MeshObject> createOctahedron() {
