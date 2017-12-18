@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -1179,5 +1180,84 @@ private:
   }
 };
 
+class PolarizationEfficiencyCorTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    using namespace Mantid::API;
+    auto loadWS = AlgorithmManager::Instance().createUnmanaged("LoadILLReflectometry");
+    loadWS->setChild(true);
+    loadWS->initialize();
+    loadWS->setProperty("Filename", "ILL/D17/317370.nxs");
+    loadWS->setProperty("OutputWorkspace", "output");
+    loadWS->setProperty("XUnit", "TimeOfFlight");
+    loadWS->execute();
+    m_ws00 = loadWS->getProperty("OutputWorkspace");
+    auto groupDetectors = AlgorithmManager::Instance().createUnmanaged("GroupDetectors");
+    groupDetectors->setChild(true);
+    groupDetectors->initialize();
+    groupDetectors->setProperty("InputWorkspace", m_ws00);
+    groupDetectors->setProperty("OutputWorkspace", "output");
+    groupDetectors->setPropertyValue("WorkspaceIndexList", "201, 202, 203");
+    groupDetectors->execute();
+    m_ws00 = groupDetectors->getProperty("OutputWorkspace");
+    auto convertUnits = AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
+    convertUnits->setChild(true);
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", m_ws00);
+    convertUnits->setProperty("OutputWorkspace", "output");
+    convertUnits->setProperty("Target", "Wavelength");
+    convertUnits->execute();
+    m_ws00 = convertUnits->getProperty("OutputWorkspace");
+    auto crop = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
+    crop->setChild(true);
+    crop->initialize();
+    crop->setProperty("InputWorkspace", m_ws00);
+    crop->setProperty("OutputWorkspace", "output");
+    crop->setProperty("XMin", 0.);
+    crop->execute();
+    m_ws00 = crop->getProperty("OutputWorkspace");
+    m_ws01 = m_ws00->clone();
+    m_ws11 = m_ws00->clone();
+    m_group = boost::make_shared<WorkspaceGroup>();
+    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws00));
+    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws01));
+    m_group->addWorkspace(boost::dynamic_pointer_cast<Workspace>(m_ws11));
+    auto loadEff = AlgorithmManager::Instance().createUnmanaged("LoadILLPolarizationFactors");
+    loadEff->setChild(true);
+    loadEff->initialize();
+    loadEff->setProperty("Filename", "ILL/D17/PolarizationFactors.txt");
+    loadEff->setProperty("OutputWorkspace", "output");
+    loadEff->setProperty("WavelengthReference", m_ws00);
+    loadEff->execute();
+    m_effWS = loadEff->getProperty("OutputWorkspace");
+  }
+
+  void tearDown() override {
+    using namespace Mantid::API;
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_Performance() {
+    using namespace Mantid::API;
+    for (int i = 0; i < 10000; ++i) {
+      PolarizationEfficiencyCor correction;
+      correction.setChild(true);
+      correction.setRethrows(true);
+      correction.initialize();
+      correction.setProperty("InputWorkspace", m_group);
+      correction.setProperty("OutputWorkspace", "output");
+      correction.setProperty("Flippers", "00, 01, 11");
+      correction.setProperty("Efficiencies", m_effWS);
+      correction.execute();
+    }
+  }
+
+private:
+  Mantid::API::MatrixWorkspace_sptr m_effWS;
+  Mantid::API::WorkspaceGroup_sptr m_group;
+  Mantid::API::MatrixWorkspace_sptr m_ws00;
+  Mantid::API::MatrixWorkspace_sptr m_ws01;
+  Mantid::API::MatrixWorkspace_sptr m_ws11;
+};
 
 #endif /* MANTID_ALGORITHMS_POLARIZATIONEFFICIENCYCORTEST_H_ */
