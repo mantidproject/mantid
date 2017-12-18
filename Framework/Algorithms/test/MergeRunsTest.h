@@ -1741,7 +1741,7 @@ public:
 
   MergeRunsTestPerformance() {}
 
-  void test_merge_detector_scan_workspaces() {
+  void setUp() {
     for (size_t i = 0; i < 10; ++i) {
       // Create a D2B type workspace
       const auto &ws = WorkspaceCreationHelper::
@@ -1751,18 +1751,24 @@ public:
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
     }
 
-    Mantid::Algorithms::MergeRuns mergeRuns;
-    mergeRuns.initialize();
-    mergeRuns.setPropertyValue("InputWorkspaces",
-                               "a0, a1, a2, a3, a4, a5, a6, a7, a8, a9");
-    mergeRuns.setPropertyValue("OutputWorkspace", "outputWS");
-    mergeRuns.execute();
+    m_mergeRuns.initialize();
+    m_mergeRuns.setPropertyValue("InputWorkspaces",
+                                 "a0, a1, a2, a3, a4, a5, a6, a7, a8, a9");
+    m_mergeRuns.setPropertyValue("OutputWorkspace", "outputWS");
+  }
+
+  void test_merge_detector_scan_workspaces() { m_mergeRuns.execute(); }
+
+  void tearDown() {
     for (size_t i = 0; i < 10; ++i) {
       std::string wsName = "a" + std::to_string(i);
       AnalysisDataService::Instance().remove(wsName);
     }
     AnalysisDataService::Instance().remove("outputWS");
   }
+
+private:
+  Mantid::Algorithms::MergeRuns m_mergeRuns;
 };
 
 #endif /*MERGERUNSTEST_H_*/
