@@ -97,6 +97,8 @@ private:
                               const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);
 
+  void reset();
+
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name

@@ -296,6 +296,8 @@ void LoadMask::init() {
 /** Main execution body of this algorithm
   */
 void LoadMask::exec() {
+  reset();
+
   // 1. Load Instrument and create output Mask workspace
   const std::string instrumentname = getProperty("Instrument");
   m_sourceMapWS = getProperty("RefWorkspace");
@@ -813,6 +815,15 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
   }
 
   return result;
+}
+
+void LoadMask::reset() {
+  // LoadMask instance may be reused, need to clear buffers.
+  m_maskDetID.clear();
+  m_unMaskDetID.clear();
+  m_maskSpecID.clear();
+  m_maskCompIdSingle.clear();
+  m_uMaskCompIdSingle.clear();
 }
 
 } // namespace Mantid
