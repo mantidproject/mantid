@@ -79,3 +79,61 @@ class GenericDialog: AlgorithmDialog {
 public:
   GenericDialog(QWidget *parent = nullptr);
 };
+
+
+class UserSubWindow: QMainWindow {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+%End
+private:
+  UserSubWindow();
+  UserSubWindow(const UserSubWindow&);
+};
+
+
+class VatesViewerInterface: QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
+%End
+private:
+  VatesViewerInterface();
+  VatesViewerInterface(const VatesViewerInterface&);
+};
+
+
+class MantidHelpInterface: QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
+%End
+private:
+  MantidHelpInterface();
+  MantidHelpInterface(const MantidHelpInterface&);
+};
+
+
+class InterfaceManager {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+%End
+public:
+  InterfaceManager();
+  AlgorithmDialog *createDialogFromName(
+      const QString &algorithmName, const int version = -1,
+      QWidget *parent = nullptr, bool forScript = false,
+      const QHash<QString, QString> &presetValues = QHash<QString, QString>(),
+      const QString &optionalMsg = QString(),
+      const QStringList &enabled = QStringList(),
+      const QStringList &disabled = QStringList());
+  UserSubWindow *createSubWindow(const QString &interface_name,
+                                 QWidget *parent = nullptr);
+  VatesViewerInterface *createVatesSimpleGui() const;
+  MantidHelpInterface *createHelpWindow() const;
+  void showHelpPage(const QString &url = QString());
+  void showWikiPage(const QString &page = QString());
+  void showAlgorithmHelp(const QString &name, const int version = -1);
+  void showConceptHelp(const QString &name);
+  void showFitFunctionHelp(const QString &name = QString());
+  void showCustomInterfaceHelp(const QString &name);
+  QStringList getUserSubWindowKeys() const;
+  static bool hasVatesLibraries();
+};
