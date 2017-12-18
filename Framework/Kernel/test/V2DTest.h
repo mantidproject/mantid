@@ -114,7 +114,7 @@ public:
   }
 
   void test_Negate_Works_With_Special_Values() {
-    const V2D p1(1. / 0., 0. / 0.);
+    const V2D p1(INFINITY, std::nan(""));
     const V2D p2 = -p1;
     TS_ASSERT_EQUALS(p2.X(), -INFINITY);
     TS_ASSERT(std::isnan(p2.Y()));

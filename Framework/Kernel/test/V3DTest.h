@@ -153,7 +153,7 @@ public:
     TS_ASSERT_EQUALS(b.Z(), 3.0)
   }
   void testNegationSpecialValues() {
-    a(0. / 0., -1. / 0., 1. / 0.);
+    a(std::nan(""), -INFINITY, INFINITY);
     b = -a;
     TS_ASSERT(std::isnan(b.X()));
     TS_ASSERT_EQUALS(b.Y(), INFINITY)
