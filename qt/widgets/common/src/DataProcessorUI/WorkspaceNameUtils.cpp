@@ -5,6 +5,8 @@
 
 #include <QString>
 #include <QStringList>
+#include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,8 +19,18 @@ namespace DataProcessor {
  * @return : a list of strings for the individual values
  */
 QStringList preprocessingStringToList(const QString &inputStr) {
-  auto values = inputStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
-  trimWhitespaceQuotesAndEmptyValues(values);
+  QStringList values;
+
+  // split on comma or plus symbol
+  auto str = inputStr.toStdString();
+  boost::tokenizer<boost::escaped_list_separator<char>> tok(
+      str, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+
+  for (const auto &it : tok) {
+    if (!it.empty())
+      values.append(QString::fromStdString(it));
+  }
+
   return values;
 }
 

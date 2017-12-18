@@ -163,36 +163,5 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
   }
   return kvp;
 }
-
-/**
-   Parses a map into another map, trimming unwanted characters from the
-   values
-   @param sourceMap The input map
-   @returns : the output map
-   @throws std::runtime_error on an invalid input value
-*/
-std::map<QString, QString>
-parseKeyValueMap(const std::map<QString, QString> &sourceMap) {
-  std::map<QString, QString> kvp;
-
-  for (const auto &it : sourceMap) {
-    auto key = it.first;
-    auto value = it.second;
-    trimWhitespaceAndQuotes(key);
-    trimWhitespaceAndQuotes(value);
-
-    // Trim escape characters
-    key.remove("\\");
-    value.remove("\\");
-
-    if (key.isEmpty() || value.isEmpty())
-      throw std::runtime_error("Invalid key value pair, '" + key.toStdString() +
-                               "=" + value.toStdString() + "'");
-
-    kvp[key] = value;
-  }
-
-  return kvp;
-}
 }
 }

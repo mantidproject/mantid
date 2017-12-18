@@ -922,7 +922,7 @@ void GenericDataProcessorPresenter::addHiddenOptions(OptionsMap &options,
  * @param options : a map of property name to option value to update
  */
 void GenericDataProcessorPresenter::addGlobalOptions(OptionsMap &options) {
-  const auto globalOptions = parseKeyValueMap(m_processingOptions);
+  const auto globalOptions = m_processingOptions;
   options.insert(globalOptions.begin(), globalOptions.end());
 }
 
