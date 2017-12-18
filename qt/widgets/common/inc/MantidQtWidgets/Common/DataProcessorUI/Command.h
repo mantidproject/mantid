@@ -37,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class Command {
 public:
-  Command() : m_child(){};
+  Command() : m_children(){};
   virtual ~Command(){};
 
   virtual void execute() = 0;
@@ -46,19 +46,22 @@ public:
   virtual QString tooltip() = 0;
   virtual QString whatsthis() = 0;
   virtual QString shortcut() = 0;
-  virtual bool hasChild() final { return !m_child.empty(); };
-  virtual void setChild(std::vector<std::unique_ptr<Command>> child) final {
-    m_child = std::move(child);
+  virtual bool hasChildren() final { return !m_children.empty(); };
+  virtual void
+  setChildren(std::vector<std::unique_ptr<Command>> children) final {
+    m_children = std::move(children);
   }
-  virtual std::vector<std::unique_ptr<Command>> &getChild() final {
-    return m_child;
+  virtual std::vector<std::unique_ptr<Command>> &getChildren() final {
+    return m_children;
   }
   virtual bool isSeparator() final {
     return name().isEmpty() && icon().isEmpty();
   }
+  virtual bool modifiesSettings() { return true; };
+  virtual bool modifiesRunningProcesses() { return false; }
 
 protected:
-  std::vector<std::unique_ptr<Command>> m_child;
+  std::vector<std::unique_ptr<Command>> m_children;
 };
 
 /// Typedef for a shared pointer to \c ReflSearchModel

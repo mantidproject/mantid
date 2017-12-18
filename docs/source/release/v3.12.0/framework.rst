@@ -34,12 +34,18 @@ Algorithms
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
 - :ref:`LoadMask <algm-Mask>` has had a bug fixed that could, under certain conditions, cause detectors from previously loaded masking to be added to the currently loaded masking.
+- In :ref:`MaxEnt <algm-MaxEnt>` the ``EvolChi`` and  ``EvolAngle`` workspaces only contain data up until the result has converged.
+
+Fitting
+-------
+- :ref:`EISFDiffSphere <func-EISFDiffSphere>` fits the Q-dependence on the EISF of a particle undergoing continuous diffusion but confined to a spherical volume.
 
 Core Functionality
 ------------------
 
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
+- The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom. 
 - Condition to check if a property is enabled when serializing.
 
 Performance
@@ -47,6 +53,7 @@ Performance
 
 - Improved performance for second and consecutive loads of instrument geometry, particularly for instruments with many detector pixels. This affects :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` and load algorithms that are using it.
 - Up to 30% performance improvement for :ref:`CropToComponent <algm-CropToComponent>` based on ongoing work on Instrument-2.0.
+- Improved rate of convergence for :ref:`MaxEnt <algm-MaxEnt>`. The  ``ChiTarget`` property has been replaced by  ``ChiTargetOverN``.
 
 Python
 ------

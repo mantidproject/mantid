@@ -101,14 +101,21 @@ void ExtractSpectra::exec() {
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
   this->checkProperties();
 
-  auto extract = boost::make_shared<ExtractSpectra2>();
-  setupAsChildAlgorithm(extract);
-  extract->setWorkspaceInputProperties(
-      "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
-      std::vector<int64_t>(m_workspaceIndexList.begin(),
-                           m_workspaceIndexList.end()));
-  extract->execute();
-  m_inputWorkspace = extract->getProperty("OutputWorkspace");
+  if (m_workspaceIndexList.empty()) {
+    MatrixWorkspace_sptr out = getProperty("OutputWorkspace");
+    // No spectra extracted, but not in-place, clone input before cropping.
+    if (out != m_inputWorkspace)
+      m_inputWorkspace = m_inputWorkspace->clone();
+  } else {
+    auto extract = boost::make_shared<ExtractSpectra2>();
+    setupAsChildAlgorithm(extract);
+    extract->setWorkspaceInputProperties(
+        "InputWorkspace", m_inputWorkspace, IndexType::WorkspaceIndex,
+        std::vector<int64_t>(m_workspaceIndexList.begin(),
+                             m_workspaceIndexList.end()));
+    extract->execute();
+    m_inputWorkspace = extract->getProperty("OutputWorkspace");
+  }
   setProperty("OutputWorkspace", m_inputWorkspace);
 
   if (isDefault("XMin") && isDefault("XMax"))
@@ -295,9 +302,11 @@ void ExtractSpectra::checkProperties() {
             "StartWorkspaceIndex must be less than or equal "
             "to EndWorkspaceIndex");
       }
-      m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
-      for (size_t i = minSpec; i <= maxSpec; ++i)
-        m_workspaceIndexList.push_back(i);
+      if (maxSpec - minSpec + 1 != numberOfSpectra) {
+        m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
+        for (size_t i = minSpec; i <= maxSpec; ++i)
+          m_workspaceIndexList.push_back(i);
+      }
     }
   }
 }

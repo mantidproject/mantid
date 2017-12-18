@@ -322,6 +322,8 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
   load->setPropertyValue("Filename", fn.str());
+  load->setPropertyValue("DetectorGroupingTable", "detGroupTable");
+  load->setPropertyValue("DeadTimeTable", "deadTimeTable");
   load->execute();
   Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 

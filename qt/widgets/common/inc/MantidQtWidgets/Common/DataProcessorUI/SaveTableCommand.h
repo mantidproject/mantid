@@ -48,6 +48,7 @@ public:
     return QString("Saves current table as a table workspace");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

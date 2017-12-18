@@ -16,6 +16,8 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
+#include <json/reader.h>
+
 namespace MantidQt {
 using API::MantidDesktopServices;
 
@@ -544,9 +546,18 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
   IAlgorithm_const_sptr oldMonitorLiveData =
       m_uiForm.mWRunFiles->stopLiveAlgorithm();
 
-  stepScanProperties.erase(0, stepScanProperties.find_first_of('(') + 1);
-  stepScanProperties.erase(stepScanProperties.find_last_of(')'));
-  std::replace(stepScanProperties.begin(), stepScanProperties.end(), ',', ';');
+  Json::Value root;
+  Json::Reader reader;
+
+  bool parsingSuccessful = reader.parse(stepScanProperties, root);
+  if (!parsingSuccessful) {
+    throw std::runtime_error("Parsing parameters failed for StepScan.");
+  }
+  Json::Value &prop = root["properties"];
+  if (prop.isNull()) {
+    throw std::runtime_error("Parsing parameters failed for StepScan.");
+  }
+  std::string ssp = prop.toStyledString();
 
   IAlgorithm_sptr startLiveData =
       AlgorithmManager::Instance().create("StartLiveData");
@@ -556,7 +567,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
   startLiveData->setProperty("UpdateEvery", 10.0);
   startLiveData->setProperty("PreserveEvents", true);
   startLiveData->setProperty("PostProcessingAlgorithm", "StepScan");
-  startLiveData->setProperty("PostProcessingProperties", stepScanProperties);
+  startLiveData->setProperty("PostProcessingProperties", ssp);
   startLiveData->setProperty("RunTransitionBehavior", "Stop");
   startLiveData->setProperty("AccumulationWorkspace", m_inputWSName);
   startLiveData->setProperty("OutputWorkspace", m_tableWSName);
