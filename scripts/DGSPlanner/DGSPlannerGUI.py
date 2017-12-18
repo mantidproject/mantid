@@ -18,8 +18,7 @@ except ImportError:
     except ImportError:
         sys.exit("Cannot import navigation toolbar")
 from matplotlib.figure import Figure
-from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-import mpl_toolkits.axisartist.floating_axes as floating_axes
+from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
 import numpy
 import copy
@@ -37,7 +36,7 @@ def float2Input(x):
 
 
 class CustomNavigationToolbar(NavigationToolbar):
-     toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
+    toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
 
 
 class DGSPlannerGUI(QtGui.QWidget):
