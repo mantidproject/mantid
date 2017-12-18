@@ -1020,7 +1020,8 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
         xstart = xstart * 1000
 
     centre_finder = SANSCentreFinder()
-    centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
+    centre = centre_finder(state, float(rlow), float(rupp), MaxIter, float(xstart), float(ystart), float(tolerance),
+                           find_direction, reduction_method)
     SetCentre(centre['pos1'], centre['pos2'], bank='rear')
     SetCentre(centre['pos1'], centre['pos2'], bank='front')
     return centre
