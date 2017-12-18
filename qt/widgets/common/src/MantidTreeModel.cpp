@@ -1,9 +1,11 @@
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace std;
 using namespace MantidQt;
 using namespace MantidWidgets;
+using namespace Mantid::API;
 
 
 // Data display and saving methods
@@ -51,8 +53,15 @@ bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
 	throw runtime_error("Not implemented");
 }
 
-Mantid::API::Workspace_const_sptr
-	MantidTreeModel::getWorkspace(const QString &workspaceName){ throw runtime_error("Not implemented"); }
+Workspace_const_sptr
+	MantidTreeModel::getWorkspace(const QString &workspaceName){
+	if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString())) {
+		return AnalysisDataService::Instance().retrieve(
+			workspaceName.toStdString());
+	}
+	Workspace_const_sptr empty;
+	return empty; //??
+}
 
 QWidget *MantidTreeModel::getParent(){ throw runtime_error("Not implemented"); }
 
