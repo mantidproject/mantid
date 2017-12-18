@@ -30,7 +30,7 @@ fi
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
+export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -254,7 +254,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=OFF -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ON_RHEL6 "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early

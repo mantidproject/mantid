@@ -479,7 +479,8 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR}
+  PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
@@ -673,7 +674,7 @@ if ( NOT MPI_BUILD )
 endif ()
 set ( ENABLE_WEB_UPDATES 1 )
 set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+set ( PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python" )
 if(MAKE_VATES)
   if (APPLE)
     set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
