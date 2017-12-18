@@ -132,12 +132,14 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Add original sample as log entry
         sam_base = self.getPropertyValue("SampleWorkspace")
-        sam_base = sam_base[:sam_base.index('_')]
-        prog_wrkflow.report('Adding sample filename')
-        s_api.AddSampleLog(Workspace=output_workspace,
-                           LogName='sample_filename',
-                           LogType='String',
-                           LogText=sam_base)
+
+        if '_' in sam_base:
+            sam_base = sam_base[:sam_base.index('_')]
+            prog_wrkflow.report('Adding sample filename')
+            s_api.AddSampleLog(Workspace=output_workspace,
+                               LogName='sample_filename',
+                               LogType='String',
+                               LogText=sam_base)
 
         # Convert Units back to original
         emode = str(output_workspace.getEMode())
