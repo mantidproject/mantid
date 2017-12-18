@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADMASK_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -44,7 +44,7 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadMask : public API::Algorithm {
+class DLLExport LoadMask : public API::ParallelAlgorithm {
 public:
   LoadMask();
   ~LoadMask() override;

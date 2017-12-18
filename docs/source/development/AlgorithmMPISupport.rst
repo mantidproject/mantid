@@ -515,6 +515,7 @@ LoadInstrument                    all
 LoadIsawPeaks                     Identical               see ``IFileLoader``
 LoadISISNexus2                    Identical               see ``IFileLoader``
 LoadLLB                           Identical               see ``IFileLoader``
+LoadMask                          Identical
 LoadMcStas                        Identical               see ``IFileLoader``
 LoadMcStasNexus                   Identical               see ``IFileLoader``
 LoadMD                            Identical               see ``IFileLoader``
