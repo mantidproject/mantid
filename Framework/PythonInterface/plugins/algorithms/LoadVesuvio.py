@@ -19,6 +19,7 @@ SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
 LOAD_MON = "LoadMonitors"
+LOAD_LOG_FILES = "LoadLogFiles"
 WKSP_PROP_LOAD_MON= "OutputMonitorWorkspace"
 
 FILENAME_RE = re.compile(r'^([0-9]+)(\.[a-zA-z]+)?$')
@@ -136,6 +137,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.declareProperty(LOAD_MON, False,
                              doc="If true then the monitor data is loaded and will be output by the "
                                  "algorithm into a separate workspace.")
+
+        self.declareProperty(LOAD_LOG_FILES, True,
+                             doc="If true, then the log files for the specified runs will be loaded.")
 
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output),
                              doc="The name of the output workspace.")
@@ -438,12 +442,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
             logger.warning("Monitors have been loaded into the data workspace not separately.")
         if mons_in_ws:
             ms.Load(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                    EnableLogging=_LOGGING_)
+                    LoadLogFiles=self._load_log_files, EnableLogging=_LOGGING_)
         else:
             all_spec_inc_mon = self._mon_spectra
             all_spec_inc_mon.extend(all_spectra)
             ms.Load(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
-                    LoadMonitors='Separate', EnableLogging=_LOGGING_)
+                    LoadLogFiles=self._load_log_files, LoadMonitors='Separate', EnableLogging=_LOGGING_)
             if self._load_monitors:
                 monitor_group = mtd[SUMMED_WS +'_monitors']
                 mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
@@ -564,6 +568,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         #endfor
 
         self._sumspectra = self.getProperty(SUM_PROP).value
+        self._load_log_files = self.getProperty(LOAD_LOG_FILES).value
 
 #----------------------------------------------------------------------------------------
 
@@ -615,6 +620,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                     SpectrumList=spec_inc_mon,
                     OutputWorkspace=out_name,
                     LoadMonitors='Separate',
+                    LoadLogFiles=self._load_log_files,
                     EnableLogging=_LOGGING_)
 
             # Sum

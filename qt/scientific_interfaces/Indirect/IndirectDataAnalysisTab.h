@@ -91,9 +91,10 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(const std::string &workspaceName,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
+  virtual void
+  updatePlot(const std::string &workspaceName,
+             MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+             MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,

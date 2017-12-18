@@ -266,6 +266,22 @@ public:
     }
   }
 
+  void test_removeRun() {
+    auto model = EnggDiffFittingModelAddWSExposed();
+
+    addSampleWorkspaceToModel(123, 1, model);
+    addSampleWorkspaceToModel(456, 2, model);
+    addSampleWorkspaceToModel(789, 1, model);
+
+    model.removeRun(123, 1);
+
+    const auto runBankPairs = model.getRunNumbersAndBankIDs();
+    TS_ASSERT_EQUALS(runBankPairs.size(), 2);
+
+    TS_ASSERT_EQUALS(runBankPairs[0], RunBankPair(456, 2));
+    TS_ASSERT_EQUALS(runBankPairs[1], RunBankPair(789, 1));
+  }
+
 private:
   const static std::string FOCUSED_WS_FILENAME;
   const static int FOCUSED_WS_RUN_NUMBER;

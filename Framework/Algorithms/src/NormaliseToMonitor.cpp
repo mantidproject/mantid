@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -104,26 +105,24 @@ bool MonIDPropChanger::monitorIdReader(
   if (!pInstr)
     return false;
 
-  std::vector<detid_t> mon = pInstr->getMonitors();
-  if (mon.empty()) {
-    if (iExistingAllowedValues.empty()) {
-      return false;
-    } else {
-      iExistingAllowedValues.clear();
-      return true;
-    }
-  }
   // are these monitors really there?
-  // got the index of correspondent spectra.
-  // Only check if number of histograms is small, else this takes too long!
-  std::vector<size_t> indexList;
-  if (inputWS->getNumberHistograms() < 100000) {
-    indexList = inputWS->getIndicesFromDetectorIDs(mon);
-  } else {
-    indexList = std::vector<size_t>(mon.begin(), mon.end());
+  std::vector<detid_t> monitorIDList = pInstr->getMonitors();
+  {
+    const auto &specInfo = inputWS->spectrumInfo();
+    std::set<detid_t> idsInWorkspace;
+    size_t i = 0;
+    // Loop over spectra, but finish early if we find everything
+    while (i < specInfo.size() &&
+           idsInWorkspace.size() < monitorIDList.size()) {
+      if (specInfo.isMonitor(i))
+        idsInWorkspace.insert(specInfo.detector(i).getID());
+      ++i;
+    }
+    monitorIDList =
+        std::vector<detid_t>(idsInWorkspace.begin(), idsInWorkspace.end());
   }
 
-  if (indexList.empty()) {
+  if (monitorIDList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
     } else {
@@ -131,25 +130,20 @@ bool MonIDPropChanger::monitorIdReader(
       return true;
     }
   }
-  // index list can be less or equal to the mon list size (some monitors do
-  // not have spectra)
-  size_t mon_count =
-      (mon.size() < indexList.size()) ? mon.size() : indexList.size();
-  mon.resize(mon_count);
 
   // are known values the same as the values we have just identified?
-  if (iExistingAllowedValues.size() != mon.size()) {
+  if (iExistingAllowedValues.size() != monitorIDList.size()) {
     iExistingAllowedValues.clear();
-    iExistingAllowedValues.assign(mon.begin(), mon.end());
+    iExistingAllowedValues.assign(monitorIDList.begin(), monitorIDList.end());
     return true;
   }
   // the monitor list has the same size as before. Is it equivalent to the
   // existing one?
   bool values_redefined = false;
-  for (size_t i = 0; i < mon.size(); i++) {
-    if (iExistingAllowedValues[i] != mon[i]) {
+  for (size_t i = 0; i < monitorIDList.size(); i++) {
+    if (iExistingAllowedValues[i] != monitorIDList[i]) {
       values_redefined = true;
-      iExistingAllowedValues[i] = mon[i];
+      iExistingAllowedValues[i] = monitorIDList[i];
     }
   }
   return values_redefined;
@@ -201,14 +195,15 @@ void NormaliseToMonitor::init() {
                   Direction::InOut);
 
   // Or take monitor ID to identify the spectrum one wish to use or
-  declareProperty("MonitorID", -1,
-                  "The MonitorID (pixel ID), which defines the monitor's data "
-                  "within the InputWorkspace. Will be overridden by the values "
-                  "correspondent to MonitorSpectrum field if one is provided "
-                  "in the field above.\n"
-                  "If workspace do not have monitors, the MonitorID can refer "
-                  "to empty data and the field then can accepts any MonitorID "
-                  "within the InputWorkspace.");
+  declareProperty(
+      "MonitorID", -1,
+      "The MonitorID (detector ID), which defines the monitor's data "
+      "within the InputWorkspace. Will be overridden by the values "
+      "correspondent to MonitorSpectrum field if one is provided "
+      "in the field above.\n"
+      "If workspace do not have monitors, the MonitorID can refer "
+      "to empty data and the field then can accepts any MonitorID "
+      "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
   setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
                                        "InputWorkspace", "MonitorSpectrum",

@@ -7,6 +7,7 @@
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::LibraryManager;
+using Mantid::Kernel::LibraryManagerImpl;
 
 namespace MantidQt {
 namespace API {
@@ -44,7 +45,15 @@ int loadPluginsFromCfgPath(std::string key) {
  * @return The number of libraries successfully loaded
  */
 int loadPluginsFromPath(std::string path) {
-  return LibraryManager::Instance().OpenAllLibraries(path);
+// We must *NOT* load plugins compiled against a different version of Qt
+// so we set exclude flags by Qt version.
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+  static std::vector<std::string> excludes{"Qt5"};
+#else
+  static std::vector<std::string> excludes{"Qt4"};
+#endif
+  return LibraryManager::Instance().openLibraries(
+      path, LibraryManagerImpl::NonRecursive, excludes);
 }
 }
 }

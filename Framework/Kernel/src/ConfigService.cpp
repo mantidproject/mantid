@@ -194,7 +194,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
-  m_ConfigPaths.emplace("plugins.directory", true);
+  m_ConfigPaths.emplace("framework.plugins.directory", true);
   m_ConfigPaths.emplace("pvplugins.directory", false);
   m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
   m_ConfigPaths.emplace("instrumentDefinition.directory", true);

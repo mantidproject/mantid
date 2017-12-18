@@ -49,7 +49,7 @@ protected:
   boost::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
-      const int &version = -1, const bool useTemps = true) override;
+      const int &version = -1) override;
   void setLoadAlg(const std::string &alg);
   void setLoadAlgFileProp(const std::string &filePropName);
   void setAccumAlg(const std::string &alg);
