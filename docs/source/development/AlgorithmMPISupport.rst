@@ -561,6 +561,7 @@ ReplaceSpecialValues              all                     see ``UnaryOperation``
 RotateInstrumentComponent         all
 SaveNexus                         MasterOnly
 SaveNexusProcessed                MasterOnly
+Scale                             all
 SignalOverError                   all                     see ``UnaryOperation``
 SortEvents                        all
 SumSpectra                        MasterOnly, Identical

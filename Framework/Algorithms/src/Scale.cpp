@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Scale.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
