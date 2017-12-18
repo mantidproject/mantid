@@ -71,7 +71,8 @@ Depends: git,
   python3-matplotlib,
   ipython3-qtconsole,
   python3-h5py,
-  python3-yaml
+  python3-yaml,
+  python3-mock
 Description: Installs all packages required for a Mantid developer
  A metapackage which requires all the dependencies and tools that are
  required for Mantid development. It works for Ubuntu versions 14.04 and 16.04
