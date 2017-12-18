@@ -20,9 +20,14 @@ Improvements
 
 - Menu items and toolbar buttons are now enabled/disabled when appropriate, e.g. to prevent table modification during processing. Directly editing table rows is also disabled during processing.
 - Removed the 'DirectBeam' box from the settings tab of the ISIS Reflectometry interface because this is not used.
+- Properties on the Runs tab now take precedence over properties on the Settings tab.
+- Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 
 Bug fixes
 #########
+
+- Fixed some bugs where transmission runs entered on the Settings tab were not being found, whether entered as a run number to load or as the name of an existing workspace in the ADS.
+- Fixed a bug where parameters were not getting passed through to CreateTransmissionWorkspaceAuto.
 
 
 Algorithms
