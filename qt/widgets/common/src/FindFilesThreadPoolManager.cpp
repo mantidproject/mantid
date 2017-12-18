@@ -13,7 +13,6 @@
 #include <QSharedPointer>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

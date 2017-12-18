@@ -12,6 +12,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace MantidQt {
 namespace API {
