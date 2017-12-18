@@ -531,6 +531,50 @@ public:
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
+  void testTrackTwoIsolatedCubes()
+    /**
+    Test a track going through two objects
+    */
+  {
+    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+
+    IObject_sptr object2 = createCube(2.0, V3D(5.5, 0.0, 0.0));
+
+    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
+
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1->interceptSurface(TL) != 0);
+    TS_ASSERT(object2->interceptSurface(TL) != 0);
+
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.push_back(
+      Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, *object2));
+    checkTrackIntercept(TL, expectedResults);
+  }
+
+  void testTrackTwoTouchingCubes()
+    /**
+    Test a track going through two objects
+    */
+  {
+    IObject_sptr object1 = createCube(2.0, V3D(0.0, 0.0, 0.0));
+
+    IObject_sptr object2 = createCube(4.0, V3D(3.0, 0.0, 0.0));
+
+    Track TL(Kernel::V3D(-5, 0, 0), Kernel::V3D(1, 0, 0));
+
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1->interceptSurface(TL) != 0);
+    TS_ASSERT(object2->interceptSurface(TL) != 0);
+
+    std::vector<Link> expectedResults;
+    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, *object1));
+    expectedResults.push_back(
+      Link(V3D(1, 0, 0), V3D(5, 0, 0), 10.0, *object2));
+    checkTrackIntercept(TL, expectedResults);
+  }
+
   void checkTrackIntercept(Track &track,
     const std::vector<Link> &expectedResults) {
     int index = 0;
@@ -633,7 +677,17 @@ public:
 
 private:
 
-  boost::shared_ptr<MeshObject> createCube(double size) {
+  boost::shared_ptr<MeshObject> createCube(const double size, const V3D &centre) {
+    /**
+    * Create cube of side length size with specified centre,
+    * parellel to axes and non-negative vertex coordinates.
+    */
+    boost::shared_ptr<MeshObject> retVal =
+      boost::shared_ptr<MeshObject>(new MeshObject);
+    return retVal;
+  }
+
+  boost::shared_ptr<MeshObject> createCube(const double size) {
     /**
     * Create cube of side length size with vertex at origin,
     * parellel to axes and non-negative vertex coordinates.
