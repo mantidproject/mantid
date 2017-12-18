@@ -58,17 +58,7 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_view->setPolarisationOptionsEnabled(enable);
 }
 
-/** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
- * this must include all applicable options, even if they are empty, because
- * the GenericDataProcessorPresenter has no other way of knowing which options
- * are applicable to the preprocessing algorithm (e.g. for options that might
- * be specified on the Runs tab instead). We get around this by providing the
- * full list here and overriding them if they also exist on the Runs tab.
- * @todo This is not idea and really we should just be passing through the
- * non-preprocessed transmission runs to ReflectometryReductionOneAuto, which
- * would then run CreateTransmissionWorkspaceAuto as a child algorithm and do
- * all of this for us. However, the transmission runs would need to be loaded
- * prior to running the processing algorithm, which is not currently possible.
+/** Returns global options for 'CreateTransmissionWorkspaceAuto'
  * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
  */
 OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
@@ -79,53 +69,69 @@ OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
 
     // Add analysis mode
     auto analysisMode = m_view->getAnalysisMode();
-    options["AnalysisMode"] = QString::fromStdString(analysisMode);
+    if (!analysisMode.empty())
+      options["AnalysisMode"] = QString::fromStdString(analysisMode);
 
     // Add start overlap
     auto startOv = m_view->getStartOverlap();
-    options["StartOverlap"] = QString::fromStdString(startOv);
+    if (!startOv.empty())
+      options["StartOverlap"] = QString::fromStdString(startOv);
 
     // Add end overlap
     auto endOv = m_view->getEndOverlap();
-    options["EndOverlap"] = QString::fromStdString(endOv);
+    if (!endOv.empty())
+      options["EndOverlap"] = QString::fromStdString(endOv);
+
+    // Add transmission runs
+    auto transRuns = this->getTransmissionRuns();
+    if (!transRuns.empty())
+      options["FirstTransmissionRun"] = QString::fromStdString(transRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
     // Add monitor integral min
     auto monIntMin = m_view->getMonitorIntegralMin();
-    options["MonitorIntegrationWavelengthMin"] =
-        QString::fromStdString(monIntMin);
+    if (!monIntMin.empty())
+      options["MonitorIntegrationWavelengthMin"] =
+          QString::fromStdString(monIntMin);
 
     // Add monitor integral max
     auto monIntMax = m_view->getMonitorIntegralMax();
-    options["MonitorIntegrationWavelengthMax"] =
-        QString::fromStdString(monIntMax);
+    if (!monIntMax.empty())
+      options["MonitorIntegrationWavelengthMax"] =
+          QString::fromStdString(monIntMax);
 
     // Add monitor background min
     auto monBgMin = m_view->getMonitorBackgroundMin();
-    options["MonitorBackgroundWavelengthMin"] =
-        QString::fromStdString(monBgMin);
+    if (!monBgMin.empty())
+      options["MonitorBackgroundWavelengthMin"] =
+          QString::fromStdString(monBgMin);
 
     // Add monitor background max
     auto monBgMax = m_view->getMonitorBackgroundMax();
-    options["MonitorBackgroundWavelengthMax"] =
-        QString::fromStdString(monBgMax);
+    if (!monBgMax.empty())
+      options["MonitorBackgroundWavelengthMax"] =
+          QString::fromStdString(monBgMax);
 
     // Add lambda min
     auto lamMin = m_view->getLambdaMin();
-    options["WavelengthMin"] = QString::fromStdString(lamMin);
+    if (!lamMin.empty())
+      options["WavelengthMin"] = QString::fromStdString(lamMin);
 
     // Add lambda max
     auto lamMax = m_view->getLambdaMax();
-    options["WavelengthMax"] = QString::fromStdString(lamMax);
+    if (!lamMax.empty())
+      options["WavelengthMax"] = QString::fromStdString(lamMax);
 
     // Add I0MonitorIndex
     auto I0MonitorIndex = m_view->getI0MonitorIndex();
-    options["I0MonitorIndex"] = QString::fromStdString(I0MonitorIndex);
+    if (!I0MonitorIndex.empty())
+      options["I0MonitorIndex"] = QString::fromStdString(I0MonitorIndex);
 
     // Add detector limits
     auto procInst = m_view->getProcessingInstructions();
-    options["ProcessingInstructions"] = QString::fromStdString(procInst);
+    if (!procInst.empty())
+      options["ProcessingInstructions"] = QString::fromStdString(procInst);
   }
 
   return options;
