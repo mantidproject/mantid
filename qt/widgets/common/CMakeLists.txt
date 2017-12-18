@@ -89,6 +89,7 @@ set ( SRC_FILES
   src/LogValueSelector.cpp
   src/MWDiag.cpp
   src/MantidHelpWindow.cpp
+  src/MantidTreeModel.cpp
   src/MantidTreeWidget.cpp
   src/MantidTreeWidgetItem.cpp
   src/MantidWSIndexDialog.cpp
@@ -330,6 +331,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/IWorkspaceFitControl.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/MantidDisplayBase.h
+  inc/MantidQtWidgets/Common/MantidTreeModel.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
