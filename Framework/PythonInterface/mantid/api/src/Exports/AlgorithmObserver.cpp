@@ -19,7 +19,9 @@ void export_algorithm_observer() {
   register_ptr_to_python<boost::shared_ptr<AlgorithmObserver>>();
 
   class_<AlgorithmObserver, boost::noncopyable>(
-      "AlgorithmObserver", "Observes Algorithm notifications: start,progress,finish,error.", no_init);
+      "AlgorithmObserver",
+      "Observes Algorithm notifications: start,progress,finish,error.",
+      no_init);
 }
 
 #ifdef _MSC_VER
