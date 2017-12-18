@@ -46,7 +46,6 @@ namespace DataHandling {
 */
 class DLLExport LoadMask : public API::Algorithm {
 public:
-  LoadMask();
   ~LoadMask() override;
 
   /// Algorithm's name for identification
@@ -104,15 +103,15 @@ private:
   /// optional source workspace, containing spectra-detector mapping
   API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
+  Poco::XML::Document *m_pDoc{nullptr};
   /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::XML::Element *m_pRootElem{nullptr};
 
   /// Default setup.  If true, not masking, but use the pixel
-  bool m_defaultToUse;
+  bool m_defaultToUse{true};
   /// input property contains name of instrument definition file rather than
   /// instrument name itself
-  bool m_IDF_provided;
+  bool m_IDF_provided{false};
 
   // detector id-s to mask
   std::vector<detid_t> m_maskDetID;

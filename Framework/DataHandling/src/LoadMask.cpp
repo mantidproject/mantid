@@ -267,13 +267,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadMask)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
-      m_pRootElem(nullptr), m_defaultToUse(true), m_IDF_provided(false) {}
-
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadMask::~LoadMask() {
