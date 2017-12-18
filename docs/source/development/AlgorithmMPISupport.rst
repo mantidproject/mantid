@@ -474,6 +474,7 @@ CompressEvents                    all
 ConvertToHistogram                all
 ConvertToPointData                all
 ConvertUnits                      all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
+CopyInstrumentParameters          all
 CreateSingleValuedWorkspace       Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
 CreateWorkspace                   all
 CropToComponent                   all
