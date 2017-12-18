@@ -135,9 +135,8 @@ public:
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
-        PostprocessingStep("", reflPostprocessor(),
-                           std::map<QString, QString>()),
-        std::map<QString, QString>(), std::map<QString, QString>());
+        PostprocessingStep("", reflPostprocessor(), OptionsMap()),
+        ColumnOptionsMap(), OptionsMap());
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
@@ -283,16 +282,15 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), std::map<QString, QString>(),
-        std::map<QString, QString>()));
+        reflProcessor(), ColumnOptionsMap(), OptionsMap()));
   }
 
   void testReduceRowString() {
     // Reduce a single row, no pre-processing is needed because there's
     // only one run in the 'Run(s)' column and no transmission runs
 
-    std::map<QString, QString> userPreProcessingOptions = {
-        {"Run(s)", ""}, {"Transmission Run(s)", ""}};
+    ColumnOptionsMap userPreProcessingOptions = {
+        {"Run(s)", OptionsMap()}, {"Transmission Run(s)", OptionsMap()}};
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
@@ -300,7 +298,7 @@ public:
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(),
                         reflPreprocessMap("TOF_"), reflProcessor(),
-                        userPreProcessingOptions, std::map<QString, QString>());
+                        userPreProcessingOptions, OptionsMap());
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -331,15 +329,15 @@ public:
     std::map<QString, PreprocessingAlgorithm> preprocessMap = {
         {"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}};
     // Specify some pre-processing options
-    std::map<QString, QString> userPreProcessingOptions = {
-        {"Run", "Property=prop"}};
+    auto runOptions = OptionsMap{{"Property", "prop"}};
+    auto userPreProcessingOptions = ColumnOptionsMap{{"Run", runOptions}};
 
     // Create some data
     const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
 
     auto output =
         reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
-                        userPreProcessingOptions, std::map<QString, QString>());
+                        userPreProcessingOptions, OptionsMap());
 
     const QString result[] = {
         "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000+1001 = RUN_1000",
@@ -369,7 +367,7 @@ public:
     // pre-process map)
 
     std::map<QString, PreprocessingAlgorithm> emptyPreProcessMap;
-    std::map<QString, QString> emptyPreProcessingOptions;
+    ColumnOptionsMap emptyPreProcessingOptions;
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
@@ -377,7 +375,7 @@ public:
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
                         reflProcessor(), emptyPreProcessingOptions,
-                        std::map<QString, QString>());
+                        OptionsMap());
 
     const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
@@ -481,7 +479,7 @@ public:
     auto output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),
         PostprocessingStep(userOptions, reflPostprocessor(),
-                           std::map<QString, QString>()));
+                           OptionsMap()));
 
     std::vector<QString> result = {
         "#Post-process workspaces",
@@ -501,7 +499,7 @@ public:
     output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),
         PostprocessingStep(userOptions, reflPostprocessor(),
-                           std::map<QString, QString>()));
+                           OptionsMap()));
 
     result = {"#Post-process workspaces",
               "IvsQ_TOF_24681_TOF_24682, _ = "
@@ -619,14 +617,15 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions =
-        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
-                                   {"Transmission Run(s)", "Property=Value"}};
+    auto runOptions = OptionsMap{{"PlusProperty", "PlusValue"}};
+    auto transmissionOptions = OptionsMap{{"Property", "Value"}};
+    auto preprocessingOptions = ColumnOptionsMap{
+        {"Run(s)", runOptions}, {"Transmission Run(s)", transmissionOptions}};
     auto processingOptions =
-        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
+        OptionsMap{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
     auto postprocessingStep = PostprocessingStep(
-        postprocessingOptions, postProcessor, std::map<QString, QString>());
+        postprocessingOptions, postProcessor, OptionsMap());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
@@ -718,14 +717,15 @@ public:
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
-    auto preprocessingOptions =
-        std::map<QString, QString>{{"Run(s)", "PlusProperty=PlusValue"},
-                                   {"Transmission Run(s)", "Property=Value"}};
+    auto runOptions = OptionsMap{{"PlusProperty", "PlusValue"}};
+    auto transmissionOptions = OptionsMap{{"Property", "Value"}};
+    auto preprocessingOptions = ColumnOptionsMap{
+        {"Run(s)", runOptions}, {"Transmission Run(s)", transmissionOptions}};
     auto processingOptions =
-        std::map<QString, QString>{{"AnalysisMode", "MultiDetectorAnalysis"}};
+        OptionsMap{{"AnalysisMode", "MultiDetectorAnalysis"}};
     auto postprocessingOptions = "Params=0.04";
     auto postprocessingStep = PostprocessingStep(
-        postprocessingOptions, postProcessor, std::map<QString, QString>());
+        postprocessingOptions, postProcessor, OptionsMap());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,

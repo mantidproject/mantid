@@ -50,7 +50,7 @@ GenerateNotebook::GenerateNotebook(
     QString name, QString instrument, WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
-    OptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
+    ColumnOptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
       m_whitelist(std::move(whitelist)),
       m_preprocessMap(std::move(preprocessMap)),
@@ -366,7 +366,7 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const OptionsMap &preprocessingOptionsMap,
+                const ColumnOptionsMap &preprocessingOptionsMap,
                 const OptionsMap &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
@@ -404,9 +404,9 @@ reduceRowString(const RowData &data, const QString &instrument,
         // The pre-processing alg
         const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
         // The pre-processing options
-        const QString options = preprocessingOptionsMap.count(colName) > 0
-                                    ? preprocessingOptionsMap.at(colName)
-                                    : "";
+        QString options;
+        if (preprocessingOptionsMap.count(colName) > 0)
+          options = convertMapToString(preprocessingOptionsMap.at(colName));
         // Python code ran to load and pre-process runs
         const boost::tuple<QString, QString> load_ws_string =
             loadWorkspaceString(runStr, instrument, preprocessor, options);

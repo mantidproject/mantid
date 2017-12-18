@@ -1,4 +1,6 @@
 #include "ReflRunsTabPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -7,17 +9,16 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "ReflCatalogSearcher.h"
+#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
-#include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
 #include <boost/regex.hpp>
@@ -403,44 +404,32 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Convert an options map to a comma-separated list of key=value pairs
+/** Requests global pre-processing options as a string. Options are supplied by
+  * the main presenter and there can be multiple sets of options for different
+  * columns that need to be preprocessed.
+  * @return :: A map of the column name to the global pre-processing options
+  * for that column
+  */
+std::map<QString, OptionsMap> ReflRunsTabPresenter::getPreprocessingOptions() const {
+
+  // Note that there are no options for the Run(s) column
+  auto transmissionOptions = OptionsMap(
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
+  return {{"Transmission Run(s)", transmissionOptions}};
+}
+
+/** Requests global pre-processing options as a string. This should not
+ * be used - use getPreprocessingOptions instead. This is because the
+ * preprocessing options are a map of column names to an OptionsMap of
+ * the actual key=value pairs. It is not clear how to represent
+ * this as a string, and in any case it is much better to use the map
+ * directly instead.
+ * @return :: Global pre-processing options as a string
  */
-QString
-ReflRunsTabPresenter::convertMapToString(const OptionsMap &optionsMap) const {
-  QString result;
-  bool first = true;
-
-  for (auto &kvp : optionsMap) {
-    if (!first)
-      result += ",";
-    else
-      first = false;
-
-    result += kvp.first + "=" + kvp.second;
-  }
-
-  return result;
-}
-
-/** Requests global pre-processing options as a string. Options are supplied by
-  * the main presenter.
-  * @return :: Global pre-processing options
-  */
-OptionsMap ReflRunsTabPresenter::getPreprocessingOptions() const {
-
-  return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
-}
-
-/** Requests global pre-processing options as a string. Options are supplied by
-  * the main presenter.
-  * @return :: Global pre-processing options as a string
-  */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  auto optionsStr = convertMapToString(
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
-
-  return optionsStr;
+  throw std::runtime_error("Not implemented: getPreprocessingOptionsAsString");
+  return QString();
 }
 
 /** Requests global processing options. Options are supplied by the main

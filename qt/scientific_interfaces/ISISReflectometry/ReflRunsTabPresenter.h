@@ -70,7 +70,7 @@ public:
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  MantidWidgets::DataProcessor::OptionsMap
+  std::map<QString, MantidWidgets::DataProcessor::OptionsMap>
   getPreprocessingOptions() const override;
   QString getPreprocessingOptionsAsString() const override;
   MantidWidgets::DataProcessor::OptionsMap
@@ -124,9 +124,6 @@ private:
   void changeInstrument();
   /// enable/disable widgets on the view
   void updateWidgetEnabledState(const bool isProcessing) const;
-  /// Convert an options map to a string
-  QString convertMapToString(
-      const MantidWidgets::DataProcessor::OptionsMap &optionsMap) const;
 };
 }
 }

@@ -168,7 +168,7 @@ public:
         .WillOnce(Return("UniformEven"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));
@@ -252,7 +252,7 @@ public:
         .WillOnce(Return("Uniform"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));
@@ -347,7 +347,7 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));
@@ -431,7 +431,7 @@ public:
         .WillOnce(Return("LogValue"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));
@@ -515,7 +515,7 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));
@@ -576,7 +576,7 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(ColumnOptionsMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillOnce(Return(OptionsMap()));

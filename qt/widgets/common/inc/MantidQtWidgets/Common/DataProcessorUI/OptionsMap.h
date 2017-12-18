@@ -31,7 +31,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
+/// A map of key=value pairs
 using OptionsMap = std::map<QString, QString>;
+/// A map of column name to options that are applicable to that column
+using ColumnOptionsMap = std::map<QString, OptionsMap>;
 }
 }
 }

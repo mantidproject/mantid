@@ -55,7 +55,9 @@ public:
   }
 
   /// Return global options for pre-processing
-  virtual OptionsMap getPreprocessingOptions() const { return OptionsMap(); }
+  virtual ColumnOptionsMap getPreprocessingOptions() const {
+    return ColumnOptionsMap();
+  }
   /// Return global options for pre-processing as a string
   virtual QString getPreprocessingOptionsAsString() const { return QString(); }
   /// Return global options for reduction

@@ -94,7 +94,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                            : PostprocessingStep(QString(),
                                                 std::move(postprocessor),
                                                 std::move(postprocessMap))),
-      m_preprocessing(OptionsMap(), std::move(preprocessMap)),
+      m_preprocessing(ColumnOptionsMap(), std::move(preprocessMap)),
       m_whitelist(std::move(whitelist)), m_processor(std::move(processor)),
       m_progressReporter(nullptr), m_promptUser(true), m_tableDirty(false),
       m_pauseReduction(false), m_reductionPaused(true),
@@ -789,16 +789,23 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
   if (!m_preprocessing.hasPreprocessing(columnName))
     return;
 
+  // Get the options for preprocessing. Note that we have to be careful
+  // here because the applicable options are different to the main
+  // reduction options. However, we still want to be able to override
+  // them from the main preprocessing options if the same option exists.
+  // in both algorithms. We therefore take the list from m_preprocessing
+  // (which defines the full list of applicable options) and update them
+  // from column values ONLY if they are in that list.
+  OptionsMap options;
+  if (m_preprocessing.hasOptions(columnName) > 0) {
+    options = m_preprocessing.m_options.at(columnName);
+    addHiddenOptions(options, data, false);
+    addUserOptions(options, data, false);
+    addRowOptions(options, data, false);
+  }
+
   auto preprocessor = m_preprocessing.m_map.at(columnName);
-
-  // Get any defaults specified on the options
-  auto const globalOptionsForColumn =
-      m_preprocessing.m_options.count(columnName) > 0
-          ? m_preprocessing.m_options.at(columnName)
-          : "";
-
-  auto optionsMap = parseKeyValueString(globalOptionsForColumn.toStdString());
-  auto runWS = prepareRunWorkspace(columnValue, preprocessor, optionsMap);
+  auto runWS = prepareRunWorkspace(columnValue, preprocessor, options);
   columnValue = QString::fromStdString(runWS->getName());
 }
 

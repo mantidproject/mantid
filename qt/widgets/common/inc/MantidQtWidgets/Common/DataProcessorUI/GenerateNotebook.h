@@ -65,13 +65,12 @@ QString DLLExport plotsString(const QStringList &output_ws,
                               const QString &stitched_wsStr,
                               const ProcessingAlgorithm &processor);
 
-boost::tuple<QString, QString> DLLExport
-reduceRowString(const RowData &data, const QString &instrument,
-                const WhiteList &whitelist,
-                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-                const ProcessingAlgorithm &processor,
-                const OptionsMap &preprocessOptionsMap,
-                const OptionsMap &processingOptions);
+boost::tuple<QString, QString> DLLExport reduceRowString(
+    const RowData &data, const QString &instrument, const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const ProcessingAlgorithm &processor,
+    const ColumnOptionsMap &preprocessOptionsMap,
+    const OptionsMap &processingOptions);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
@@ -96,7 +95,7 @@ public:
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
                    ProcessingAlgorithm processor,
                    PostprocessingStep postprocessingStep,
-                   OptionsMap preprocessingInstructionsMap,
+                   ColumnOptionsMap preprocessingInstructionsMap,
                    OptionsMap processingInstructions);
   virtual ~GenerateNotebook() = default;
 
@@ -119,7 +118,7 @@ private:
   PostprocessingStep m_postprocessingStep;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
-  OptionsMap m_preprocessingOptionsMap;
+  ColumnOptionsMap m_preprocessingOptionsMap;
   // Options to reduction algorithm specified in the view via hinting line edit
   std::map<QString, QString> m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line

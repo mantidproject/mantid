@@ -165,3 +165,33 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
 }
 }
 }
+
+/** Convert an options map to a comma-separated list of key=value pairs
+ */
+QString
+convertMapToString(const std::map<QString, QString> &optionsMap) {
+  QString result;
+  bool first = true;
+
+  for (auto &kvp : optionsMap) {
+    // comma-separate values
+    if (!first)
+      result += ", ";
+    else
+      first = false;
+
+    const auto key = kvp.first;
+    auto value = kvp.second;
+
+    // Wrap the value in single quotes, Escape single quote marks first.
+    value = value.replace("'", "\\'");
+    value = "'" + value + "'";
+
+    // Add the key=value pair to the string
+    result += key + "=" + value;
+  }
+
+  return result;
+}
+}
+}
