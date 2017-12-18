@@ -802,7 +802,9 @@ double LoadILLReflectometry::collimationAngle() const {
   if (m_instrumentName != "Figaro") {
     return 0;
   }
-  return doubleFromRun("CollAngle.actual_coll_angle");
+  const auto collimationAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  const auto sampleAngle = doubleFromRun("Theta.actual_theta");
+  return collimationAngle + sampleAngle;
 }
 
 double LoadILLReflectometry::detectorAngle() const {

@@ -292,7 +292,7 @@ public:
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
     const auto detDist = std::hypot(beamY, beamZ);
     const auto collimationAngle =
-        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
+        (run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") + run.getPropertyValueAsType<double>("Theta.actual_theta")) /
         180. * M_PI;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {
