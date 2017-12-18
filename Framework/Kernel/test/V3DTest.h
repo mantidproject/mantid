@@ -152,6 +152,13 @@ public:
     TS_ASSERT_EQUALS(b.Y(), -2.0)
     TS_ASSERT_EQUALS(b.Z(), 3.0)
   }
+  void testNegationSpecialValues() {
+    a(0. / 0., -1. / 0., 1. / 0.);
+    b = -a;
+    TS_ASSERT(std::isnan(b.X()));
+    TS_ASSERT_EQUALS(b.Y(), INFINITY)
+    TS_ASSERT_EQUALS(b.Z(), -INFINITY)
+  }
   void testEqualEqualOperator() {
     a(1.0, 1.0, 1.0);
     b = a;
