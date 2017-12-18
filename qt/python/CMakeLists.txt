@@ -27,7 +27,10 @@ if ( ENABLE_WORKBENCH )
   add_subdirectory ( mantidqt/widgets )
 
   # Setup dependency chain
-  add_dependencies ( mantidqt mantidqt_widgetscoreqt5 )
+  add_dependencies ( mantidqt
+    mantidqt_widgetscoreqt5
+    mantidqt_widgetscoreqt4
+  )
 
   ##########################################################################
   # Testing
