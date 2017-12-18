@@ -16,7 +16,7 @@ except ImportError:
     try:
         from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
     except ImportError:
-        sys.exit("Cannot import navigation toolbar")
+        raise ImportError("Cannot import navigation toolbar")
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
