@@ -468,6 +468,7 @@ CalculateCostFunction             MasterOnly, Identical   see ``IFittingAlgorith
 CalculateFlatBackground           MasterOnly, Identical
 CalculateTransmission             MasterOnly, Identical
 CloneWorkspace                    all
+Comment                           all
 CompareWorkspace                  MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used
 CompressEvents                    all
 ConvertToHistogram                all
