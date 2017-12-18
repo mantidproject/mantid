@@ -50,6 +50,7 @@ public:
                    "name of the ouput table");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }
