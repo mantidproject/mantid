@@ -25,6 +25,41 @@ using namespace testing;
 // Functional tests
 //=====================================================================================
 
+// Use this if you need the Test class to be a friend of the data processor
+// presenter
+class GenericDataProcessorPresenterFriend
+    : public GenericDataProcessorPresenter {
+  friend class GenericDataProcessorPresenterTest;
+
+public:
+  // Standard constructor
+  GenericDataProcessorPresenterFriend(
+      const WhiteList &whitelist,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessingStep,
+      const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor,
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load")
+      : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep),
+                                      processor, postprocessor, postprocessMap,
+                                      loader) {}
+
+  // Delegating constructor (no pre-processing required)
+  GenericDataProcessorPresenterFriend(
+      const WhiteList &whitelist, const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor)
+      : GenericDataProcessorPresenter(whitelist, processor, postprocessor) {}
+
+  // Delegating constructor (no pre- or post-processing required)
+  GenericDataProcessorPresenterFriend(const WhiteList &whitelist,
+                                      const ProcessingAlgorithm &processor)
+      : GenericDataProcessorPresenter(whitelist, processor) {}
+
+  // Destructor
+  ~GenericDataProcessorPresenterFriend() override {}
+};
+
 // Use this mocked presenter for tests that will start the reducing row/group
 // workers/threads. This overrides the async methods to be non-async, allowing
 // them to be tested.
@@ -366,8 +401,8 @@ private:
     return ws;
   }
 
-  std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+  std::unique_ptr<GenericDataProcessorPresenterFriend> makeDefaultPresenter() {
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenterFriend>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
   }
@@ -2788,11 +2823,9 @@ public:
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0), "TOF_12345");
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1), "TOF_12346");
     // Test the names of the post-processed ws
-    // TS_ASSERT_EQUALS(
-    //    presenter->getPostprocessedWorkspaceName(group, "new_prefix_"),
-    //    "new_prefix_TOF_12345_TOF_12346");
-    // TS_ASSERT_EQUALS(presenter->getPostprocessedWorkspaceName(group),
-    //                 "TOF_12345_TOF_12346");
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2821,11 +2854,9 @@ public:
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
                      "TOF_12346_TRANS_11116");
     // Test the names of the post-processed ws
-    // TS_ASSERT_EQUALS(
-    //     presenter->getPostprocessedWorkspaceName(group, "new_prefix_"),
-    //     "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
-    // TS_ASSERT_EQUALS(presenter->getPostprocessedWorkspaceName(group),
-    //                 "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2841,6 +2872,7 @@ public:
         "12345", "0.5", "11115,11116", "0.1", "0.3", "0.04", "1", "", ""};
     QStringList row1 = {
         "12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""};
+    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
@@ -2851,6 +2883,10 @@ public:
                      "TOF_12345_TRANS_11115+11116");
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row1),
                      "TOF_12346_TRANS_11115+11116");
+    // Test the names of the post-processed ws
+    TS_ASSERT_EQUALS(
+        presenter->getPostprocessedWorkspaceName(group).toStdString(),
+        "IvsQ_TOF_12345_TRANS_11115+11116_TOF_12346_TRANS_11115+11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -2863,21 +2899,13 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    createPrefilledWorkspaceWithTrans(QString("TestWorkspace"),
-                                      presenter->getWhiteList());
-    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-
     QStringList row0 = {"12345", "0.5"};
     QStringList row1 = {"12346", "0.5"};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter->getReducedWorkspaceName(row0));
-    // TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
+    TS_ASSERT_THROWS_ANYTHING(presenter->getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -3022,8 +3050,8 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor());
+    GenericDataProcessorPresenterFriend presenter(
+        createReflectometryWhiteList(), createReflectometryProcessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Calls that should throw
@@ -3037,8 +3065,8 @@ public:
         presenter.notify(DataProcessorPresenter::ExpandSelectionFlag));
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
-    // TS_ASSERT(presenter.getPostprocessedWorkspaceName(
-    //              std::map<int, QStringList>()) == "");
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.getPostprocessedWorkspaceName(std::map<int, QStringList>()));
   }
 
   void testPostprocessMap() {

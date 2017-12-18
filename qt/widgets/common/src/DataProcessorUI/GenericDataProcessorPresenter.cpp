@@ -660,8 +660,9 @@ Returns the name of the reduced workspace for a given group
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData) {
-  assert(hasPostprocessing() &&
-         "Only call this function if you have postprocessing.");
+  if (!hasPostprocessing())
+    throw std::runtime_error("Attempted to get postprocessing workspace but no "
+                             "postprocessing is specified.");
   return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist,
                                                          groupData);
 }
