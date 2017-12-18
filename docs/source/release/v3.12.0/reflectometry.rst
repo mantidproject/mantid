@@ -9,11 +9,13 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+    
 ISIS Reflectometry Interface
 ----------------------------
 
 New features
 ############
+
 
 Improvements
 ############
@@ -23,6 +25,7 @@ Improvements
 - Properties on the Runs tab now take precedence over properties on the Settings tab.
 - Output workspace names have been improved. Names now use '+' to indicate preprocessed (i.e. summed) workspaces, rather than '_', which is used to indicate postprocessed (i.e. stitched) workspaces.
 
+  
 Bug fixes
 #########
 
@@ -38,11 +41,13 @@ New features
 - The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
 - The new algorithm :ref:`algm-MRInspectData` takes in raw event data and determines reduction parameters.
 
+  
 Improvements
 ############
 
 - Removed the ``RegionOfDirectBeam`` property from :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` because this is not used.
 
+  
 Bug fixes
 #########
 
