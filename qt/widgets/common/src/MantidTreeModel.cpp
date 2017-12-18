@@ -1,12 +1,17 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include <Poco/ActiveResult.h>
+#include <qcoreapplication.h>
 
 using namespace std;
 using namespace MantidQt;
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
+namespace {
+	Mantid::Kernel::Logger g_log("MantidUI");
+}
 
 // Data display and saving methods
 void MantidTreeModel::updateRecentFilesList(const QString &fname){ throw runtime_error("Not implemented"); }
@@ -47,10 +52,34 @@ void
                     int version){
 	throw runtime_error("Not implemented");
 }
-void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {};
+
+void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+	executeAlgorithmAsync(alg);
+}
+
 bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                                     const bool wait){
-	throw runtime_error("Not implemented");
+	if (wait) {
+		Poco::ActiveResult<bool> result(alg->executeAsync());
+		while (!result.available()) {
+			QCoreApplication::processEvents();
+		}
+		result.wait();
+		try {
+			return result.data();
+		} catch (Poco::NullPointerException &) {
+			return false;
+		}
+	} else {
+		try {
+			alg->executeAsync();
+		} catch (Poco::NoThreadAvailableException &) {
+			g_log.error() << "No thread was available to run the " << alg->name()
+				<< " algorithm in the background.\n";
+			return false;
+		}
+		return true;
+	}
 }
 
 Workspace_const_sptr
