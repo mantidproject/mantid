@@ -79,8 +79,7 @@ def run_algorithm(input_workspace, ranges, integral, mask, detector, input_works
             SumRowColumn(InputWorkspace=input_workspace, OutputWorkspace=output_workspace, Orientation='D_V',
                          HOverVMin=hv_min, HOverVMax=hv_max)
         elif integral == IntegralEnum.Time:
-            SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace,
-                       HOverVMin=hv_min-1, HOverVMax=hv_max-1)
+            SumSpectra(InputWorkspace=input_workspace, OutputWorkspace=output_workspace)
 
     return output_workspaces
 
