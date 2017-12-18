@@ -1741,7 +1741,7 @@ public:
 
   MergeRunsTestPerformance() {}
 
-  void setUp() {
+  void setUp() override {
     for (size_t i = 0; i < 10; ++i) {
       // Create a D2B type workspace
       const auto &ws = WorkspaceCreationHelper::
@@ -1759,7 +1759,7 @@ public:
 
   void test_merge_detector_scan_workspaces() { m_mergeRuns.execute(); }
 
-  void tearDown() {
+  void tearDown() override {
     for (size_t i = 0; i < 10; ++i) {
       std::string wsName = "a" + std::to_string(i);
       AnalysisDataService::Instance().remove(wsName);
