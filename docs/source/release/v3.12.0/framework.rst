@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Instrument Definition Updates
+-----------------------------
+
+- The MAPS IDF has been updated following its upgrade.
+
 Concepts
 --------
 Corrupted Instrument Definitions
