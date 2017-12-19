@@ -11,28 +11,28 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
-#include <Poco/Path.h>
-#include <boost/shared_array.hpp>
-#include <boost/make_shared.hpp>
 #include "MantidGeometry/IDetector.h"
+#include <Poco/Path.h>
+#include <boost/make_shared.hpp>
+#include <boost/shared_array.hpp>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
@@ -137,8 +137,8 @@ IObject_sptr createCuboid(double x_side_length, double y_side_length,
 
 //----------------------------------------------------------------------------------------------
 /**
-* Create a component assembly at the origin made up of 4 cylindrical detectors
-*/
+ * Create a component assembly at the origin made up of 4 cylindrical detectors
+ */
 boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   boost::shared_ptr<CompAssembly> bank =
       boost::make_shared<CompAssembly>("BankName");
@@ -325,10 +325,55 @@ Instrument_sptr createTestInstrumentCylindrical(
   return testInst;
 }
 
+Mantid::Geometry::Instrument_sptr
+createCylInstrumentWithVerticalOffsetsSpecified(
+    size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
+    double xMin, double xMax, double yMin, double yMax) {
+  // Pixel shape
+  const double ySpan = (yMax - yMin);
+  const double xSpan = (xMax - xMin);
+  const double tubeDiameter =
+      xSpan / static_cast<double>(nTubes);   // No gaps between tubes
+  const double cylRadius = tubeDiameter / 2; // No gaps between tubes
+  const double cylHeight = ySpan / static_cast<double>(nDetsPerTube);
+  const double bankZPos = 2;
+  const double sourceZPos = -10;
+  const double sampleZPos = 0;
+
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+  auto instrument = boost::make_shared<Instrument>("instrument_with_tubes");
+  CompAssembly *bank = new CompAssembly("sixteenpack");
+  for (size_t i = 0; i < nTubes; ++i) {
+    CompAssembly *tube = new CompAssembly("tube-" + std::to_string(i));
+    for (size_t j = 0; j < nDetsPerTube; ++j) {
+
+      auto id = static_cast<int>(i * nDetsPerTube + j);
+      Detector *physicalPixel =
+          new Detector("det-" + std::to_string(id), id, pixelShape, tube);
+      tube->add(physicalPixel);
+      physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
+      instrument->markAsDetector(physicalPixel);
+    }
+    tube->setPos(
+        V3D(xMin + i * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
+    bank->add(tube);
+  }
+  bank->setPos(V3D(0, 0, bankZPos));
+  instrument->add(bank);
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+  addSourceToInstrument(instrument, V3D(0, 0, sourceZPos));
+  addSampleToInstrument(instrument, V3D(0, 0, sampleZPos));
+  return instrument;
+}
+
 /** create instrument with cylindrical detecotrs located in specific positions
-*
-*
-*/
+ *
+ *
+ */
 bool double_cmprsn(double x1, double x2) {
   const double TOL(1.e-4);
   if (std::fabs(x1 + x2) < TOL) {
@@ -663,7 +708,6 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   // Tubes will be located at 1 m from the sample (0, 0, 0) from 0 -> 90 deg
   // If mirror is set to true they will go from 0 -> -90 deg
   Instrument_sptr testInst(new Instrument("PSDTubeInst"));
-
   int xDirection(1);
   if (mirrorTubes)
     xDirection = -1;
@@ -693,7 +737,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
-      lexer << "pixel-" << i *nPixelsPerTube + j;
+      lexer << "pixel-" << i * nPixelsPerTube + j;
       Detector *pixel = new Detector(
           lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
       const double xpos = 0.0;
@@ -709,4 +753,4 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
 
   return testInst;
 }
-}
+} // namespace ComponentCreationHelper

@@ -2,17 +2,22 @@
 #define MANTID_DATAOBJECTS_PEAK_H_
 
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace Geometry {
+class InstrumentRayTracer;
+}
+
 namespace DataObjects {
 
 /** Structure describing a single-crystal peak
@@ -46,16 +51,16 @@ public:
   /// Copy constructor
   Peak(const Peak &other);
 
-// MSVC 2015/17 can build with noexcept = default however
-// intellisense still incorrectly reports this as an error despite compiling.
-// https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
-// For that reason we still use the supplied default which should be noexcept
-// once the above is fixed we can remove this workaround
+  // MSVC 2015/17 can build with noexcept = default however
+  // intellisense still incorrectly reports this as an error despite compiling.
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+  // For that reason we still use the supplied default which should be noexcept
+  // once the above is fixed we can remove this workaround
 
 #if defined(_MSC_VER) && _MSC_VER <= 1910
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
-#elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
   // The noexcept default declaration was fixed in GCC 4.9.0
   // so for versions 4.8.x and below use default only
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
@@ -81,6 +86,7 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const override;
 
   bool findDetector() override;
+  bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
   int getRunNumber() const override;
   void setRunNumber(int m_runNumber) override;
@@ -164,7 +170,8 @@ public:
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
 private:
-  bool findDetector(const Mantid::Kernel::V3D &beam);
+  bool findDetector(const Mantid::Kernel::V3D &beam,
+                    const Geometry::InstrumentRayTracer &tracer);
 
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
@@ -246,7 +253,7 @@ private:
   std::string convention;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAK_H_ */

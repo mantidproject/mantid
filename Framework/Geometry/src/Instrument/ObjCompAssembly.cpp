@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/regex.hpp>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
@@ -18,9 +19,9 @@ Mantid::Kernel::Logger g_log("ObjCompAssembly");
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
-using Kernel::Quat;
 using Kernel::DblMatrix;
+using Kernel::Quat;
+using Kernel::V3D;
 
 /// Void deleter for shared pointers
 class NoDeleting {
@@ -238,12 +239,12 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
 }
 
 /**
-* Find a component by name.
-* @param cname :: The name of the component. If there are multiple matches, the
-* first one found is returned.
-* @param nlevels :: Optional argument to limit number of levels searched.
-* @returns A shared pointer to the component
-*/
+ * Find a component by name.
+ * @param cname :: The name of the component. If there are multiple matches, the
+ * first one found is returned.
+ * @param nlevels :: Optional argument to limit number of levels searched.
+ * @returns A shared pointer to the component
+ */
 boost::shared_ptr<const IComponent>
 ObjCompAssembly::getComponentByName(const std::string &cname,
                                     int nlevels) const {
@@ -357,6 +358,11 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
+  using boost::regex;
+  const auto name = this->getName();
+  if (boost::regex_match(name, regex("^tube.+", regex::icase))) {
+    return visitor.registerTube(*this);
+  }
   return visitor.registerComponentAssembly(*this);
 }
 

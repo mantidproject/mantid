@@ -45,8 +45,10 @@ public:
   registerGenericObjComponent(const IObjComponent &objComponent) = 0;
   virtual size_t registerDetector(const IDetector &detector) = 0;
   virtual size_t registerStructuredBank(const ICompAssembly &bank) = 0;
+  virtual size_t registerBankOfTubes(const ICompAssembly &bank) = 0;
+  virtual size_t registerTube(const ICompAssembly &tube) = 0;
   virtual ~ComponentVisitor() {}
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 #endif

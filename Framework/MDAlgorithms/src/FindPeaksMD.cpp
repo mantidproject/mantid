@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -98,7 +99,7 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box) {
   // Compile time deduction of the correct function call
   addDetectors(peak, box, IsFullEvent<MDE, nd>());
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaksMD)
@@ -243,9 +244,10 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
  */
-void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
+void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
+                          const Geometry::InstrumentRayTracer &tracer) {
   try {
-    auto p = this->createPeak(Q, binCount);
+    auto p = this->createPeak(Q, binCount, tracer);
     if (m_edge > 0) {
       if (edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
         return;
@@ -262,7 +264,8 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
  * Creates a Peak object from Q & bin count
  * */
 boost::shared_ptr<DataObjects::Peak>
-FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
+FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+                        const Geometry::InstrumentRayTracer &tracer) {
   boost::shared_ptr<DataObjects::Peak> p;
   if (dimType == QLAB) {
     // Build using the Q-lab-frame constructor
@@ -278,7 +281,7 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
   }
 
   try { // Look for a detector
-    p->findDetector();
+    p->findDetector(tracer);
   } catch (...) { /* Ignore errors in ray-tracer */
   }
 
@@ -322,6 +325,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+
+    Geometry::InstrumentRayTracer tracer(inst);
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
 
@@ -447,13 +452,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (nexp > 1) {
         MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
         typename std::vector<MDE> &events = mdbox->getEvents();
-        if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
-                                                             MDE event) {
-              return event.getRunIndex() == iexp || event.getRunIndex() >= nexp;
-            }))
+        if (std::none_of(events.cbegin(), events.cend(),
+                         [&iexp, &nexp](MDE event) {
+                           return event.getRunIndex() == iexp ||
+                                  event.getRunIndex() >= nexp;
+                         }))
           continue;
       }
-// The center of the box = Q in the lab frame
+      // The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
@@ -472,7 +478,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         binCount = static_cast<double>(box->getNPoints());
 
       try {
-        auto p = this->createPeak(Q, binCount);
+        auto p = this->createPeak(Q, binCount, tracer);
         if (m_addDetectors) {
           auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
           if (!mdBox) {
@@ -527,6 +533,7 @@ void FindPeaksMD::findPeaksHisto(
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    Geometry::InstrumentRayTracer tracer(inst);
 
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
@@ -630,7 +637,7 @@ void FindPeaksMD::findPeaksHisto(
       double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
       // Create the peak
-      addPeak(Q, binCount);
+      addPeak(Q, binCount, tracer);
 
       // Report progres for each box found.
       prog->report("Adding Peaks");
@@ -717,5 +724,5 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
   return result;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

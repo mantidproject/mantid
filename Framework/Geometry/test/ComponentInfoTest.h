@@ -423,7 +423,7 @@ public:
     instrument.markAsSource(source);
 
     // A sample
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    ObjComponent *sample = new ObjComponent("some-surfbankNameace-holder");
     sample->setPos(V3D{0, 0, 0});
     sample->setShape(
         ComponentCreationHelper::createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
@@ -474,6 +474,136 @@ public:
                      ComponentType::Rectangular);
     TS_ASSERT_DELTA(boundingBoxRoot.minPoint().Y(),
                     boundingBoxBank2.minPoint().Y(), 1e-9);
+  }
+
+  void test_boundingBox_with_regular_bank_of_tubes() {
+
+    size_t nTubes = 4;
+    size_t nDetectorsPerTube = 10;
+    std::vector<double> offsets(4, 0); // No offsets in tubes
+    double width = 10;
+    double height = 12;
+    auto pixelHeight = height / static_cast<double>(nDetectorsPerTube);
+    auto pixelWidth = width / static_cast<double>(nTubes);
+    double minYCenter = -height / 2;
+    double maxYCenter =
+        minYCenter + (static_cast<double>(nDetectorsPerTube) - 1) * pixelHeight;
+    double minXCenter = -width / 2;
+    double maxXCenter =
+        minXCenter + (static_cast<double>(nTubes) - 1) * pixelWidth;
+
+    auto instrument = ComponentCreationHelper::
+        createCylInstrumentWithVerticalOffsetsSpecified(
+            nTubes, offsets, nDetectorsPerTube, -width / 2, width / 2,
+            -height / 2, height / 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    size_t bankOfTubesIndex = componentInfo->root() - 3;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(bankOfTubesIndex),
+                     Beamline::ComponentType::BankOfTube); // Sanity check
+
+    auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
+    TS_ASSERT_DELTA(boundingBox.minPoint().Y(), minYCenter - pixelHeight / 2,
+                    1e-6);
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Y(), maxYCenter + pixelHeight / 2,
+                    1e-6);
+    TS_ASSERT_DELTA(boundingBox.minPoint().Z(),
+                    componentInfo->position(0).Z() - pixelWidth / 2, 1e-6);
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Z(),
+                    componentInfo->position(0).Z() + pixelWidth / 2, 1e-6);
+    TS_ASSERT_DELTA(boundingBox.minPoint().X(), minXCenter - pixelWidth / 2,
+                    1e-6);
+    TS_ASSERT_DELTA(boundingBox.maxPoint().X(), maxXCenter + pixelWidth / 2,
+                    1e-6);
+  }
+
+  void test_boundingBox_with_irregular_bank_of_tubes() {
+
+    size_t nTubes = 4;
+    size_t nDetectorsPerTube = 10;
+    std::vector<double> offsets{
+        0, 0, 1.2, -0.3}; // one tube offset by +1.2, another by -0.3
+    double width = 10;
+    double height = 12;
+    auto pixelHeight = height / static_cast<double>(nDetectorsPerTube);
+    auto pixelWidth = width / static_cast<double>(nTubes);
+    double minYCenter = -height / 2;
+    double maxYCenter =
+        minYCenter + (static_cast<double>(nDetectorsPerTube) - 1) * pixelHeight;
+    double minXCenter = -width / 2;
+    double maxXCenter =
+        minXCenter + (static_cast<double>(nTubes) - 1) * pixelWidth;
+
+    auto instrument = ComponentCreationHelper::
+        createCylInstrumentWithVerticalOffsetsSpecified(
+            nTubes, offsets, nDetectorsPerTube, -width / 2, width / 2,
+            -height / 2, height / 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    size_t bankOfTubesIndex = componentInfo->root() - 3;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(bankOfTubesIndex),
+                     Beamline::ComponentType::BankOfTube); // Sanity check
+
+    auto boundingBox = componentInfo->boundingBox(bankOfTubesIndex);
+    TS_ASSERT_DELTA(boundingBox.minPoint().Y(),
+                    minYCenter - pixelHeight / 2 + offsets[3],
+                    1e-6); // Offset controls max Y
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Y(),
+                    maxYCenter + pixelHeight / 2 + offsets[2],
+                    1e-6); // Offset controls min Y
+    TS_ASSERT_DELTA(boundingBox.minPoint().Z(),
+                    componentInfo->position(0).Z() - pixelWidth / 2, 1e-6);
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Z(),
+                    componentInfo->position(0).Z() + pixelWidth / 2, 1e-6);
+    TS_ASSERT_DELTA(boundingBox.minPoint().X(), minXCenter - pixelWidth / 2,
+                    1e-6);
+    TS_ASSERT_DELTA(boundingBox.maxPoint().X(), maxXCenter + pixelWidth / 2,
+                    1e-6);
+  }
+
+  void test_tube_bounding_box() {
+    size_t nTubes = 2;
+    size_t nDetectorsPerTube = 5;
+    std::vector<double> offsets{
+        0.1, -0.2}; // Just two tubes one offset up the other one down
+    double width = 2;
+    double height = 10;
+    auto pixelHeight = height / static_cast<double>(nDetectorsPerTube);
+    double minYCenter = -height / 2;
+    double maxYCenter =
+        minYCenter + (static_cast<double>(nDetectorsPerTube) - 1) * pixelHeight;
+
+    auto instrument = ComponentCreationHelper::
+        createCylInstrumentWithVerticalOffsetsSpecified(
+            nTubes, offsets, nDetectorsPerTube, -width / 2, width / 2,
+            -height / 2, height / 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    size_t tube1Index = componentInfo->root() - 5;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(tube1Index),
+                     Beamline::ComponentType::Tube); // Sanity check
+    size_t tube2Index = componentInfo->root() - 4;
+    TS_ASSERT_EQUALS(componentInfo->componentFlag(tube2Index),
+                     Beamline::ComponentType::Tube); // Sanity check
+
+    auto boundingBox = componentInfo->boundingBox(tube1Index);
+    TS_ASSERT_DELTA(boundingBox.minPoint().Y(),
+                    minYCenter - pixelHeight / 2 + offsets[0],
+                    1e-6); // Offset controls max Y
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Y(),
+                    maxYCenter + pixelHeight / 2 + offsets[0],
+                    1e-6); // Offset controls min Y
+
+    boundingBox = componentInfo->boundingBox(tube2Index);
+    TS_ASSERT_DELTA(boundingBox.minPoint().Y(),
+                    minYCenter - pixelHeight / 2 + offsets[1],
+                    1e-6); // Offset controls max Y
+    TS_ASSERT_DELTA(boundingBox.maxPoint().Y(),
+                    maxYCenter + pixelHeight / 2 + offsets[1],
+                    1e-6); // Offset controls min Y
   }
 
   void test_scanning_non_bank_throws() {

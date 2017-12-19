@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
 
@@ -490,8 +491,12 @@ Quat CompAssembly::getRotation() const {
 }
 
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
-  if (this->getName() == "sixteenpack") {
-    return visitor.registerStructuredBank(*this);
+  using boost::regex;
+  const auto name = this->getName();
+  if (boost::regex_match(name, regex(".+pack$", regex::icase))) {
+    return visitor.registerBankOfTubes(*this);
+  } else if (boost::regex_match(name, regex("^tube.+", regex::icase))) {
+    return visitor.registerTube(*this);
   }
   return visitor.registerComponentAssembly(*this);
 }

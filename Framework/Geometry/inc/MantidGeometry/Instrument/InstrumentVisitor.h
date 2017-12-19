@@ -165,6 +165,11 @@ public:
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
+  registerBankOfTubes(const Mantid::Geometry::ICompAssembly &bank) override;
+
+  virtual size_t registerTube(const ICompAssembly &tube) override;
+
+  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>

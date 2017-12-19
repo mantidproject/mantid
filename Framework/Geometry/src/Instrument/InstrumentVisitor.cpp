@@ -216,7 +216,7 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
- * @brief InstrumentVisitor::registerStructuredBank
+ * Register a structured bank
  * @param bank : Rectangular Detector
  * @return
  */
@@ -224,6 +224,30 @@ size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  return index;
+}
+
+/**
+ * Register a bank of tubes
+ * @param bank : bank of tubes
+ * @return
+ */
+size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
+  auto index = registerComponentAssembly(bank);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::BankOfTube;
+  return index;
+}
+
+/**
+ * Register a Tube
+ * @param tube : Individual tube component assembly
+ * @return
+ */
+size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
+  auto index = registerComponentAssembly(tube);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::Tube;
   return index;
 }
 

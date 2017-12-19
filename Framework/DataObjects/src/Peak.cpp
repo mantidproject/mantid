@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <valgrind/callgrind.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -587,7 +588,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
     // client seems to know better.
   } else {
     // Find the detector
-    const bool found = findDetector(detectorDir);
+    InstrumentRayTracer tracer(m_inst);
+    const bool found = findDetector(detectorDir, tracer);
     if (!found) {
       // This is important, so we ought to log when this fails to happen.
       g_log.debug("Could not find detector after setting qLab via setQLab with "
@@ -623,12 +625,18 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
  * @return true if the detector ID was found.
  */
 bool Peak::findDetector() {
+  InstrumentRayTracer tracer(m_inst);
+  return findDetector(tracer);
+}
 
+bool Peak::findDetector(const InstrumentRayTracer &tracer) {
+  CALLGRIND_START_INSTRUMENTATION;
   // Scattered beam direction
   V3D beam = detPos - samplePos;
   beam.normalize();
 
-  return findDetector(beam);
+  return findDetector(beam, tracer);
+  CALLGRIND_STOP_INSTRUMENTATION;
 }
 
 /**
@@ -637,12 +645,12 @@ bool Peak::findDetector() {
  * @param beam : detector direction from the sample as V3D
  * @return True if a detector has been found
  */
-bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
+bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
+                        const InstrumentRayTracer &tracer) {
   bool found = false;
   // Create a ray tracer
-  InstrumentRayTracer tracker(m_inst);
-  tracker.traceFromSample(beam);
-  IDetector_const_sptr det = tracker.getDetectorResult();
+  tracer.traceFromSample(beam);
+  IDetector_const_sptr det = tracer.getDetectorResult();
   if (det) {
     // Set the detector ID, the row, col, etc.
     this->setDetectorID(det->getID());
@@ -663,11 +671,11 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
         V3D gapDir = V3D(0., 0., 0.);
         gapDir[i] = gap;
         V3D beam1 = beam + gapDir;
-        tracker.traceFromSample(beam1);
-        IDetector_const_sptr det1 = tracker.getDetectorResult();
+        tracer.traceFromSample(beam1);
+        IDetector_const_sptr det1 = tracer.getDetectorResult();
         V3D beam2 = beam - gapDir;
-        tracker.traceFromSample(beam2);
-        IDetector_const_sptr det2 = tracker.getDetectorResult();
+        tracer.traceFromSample(beam2);
+        IDetector_const_sptr det2 = tracer.getDetectorResult();
         if (det1 && det2) {
           // Set the detector ID to one of the neighboring pixels
           this->setDetectorID(static_cast<int>(det1->getID()));
@@ -843,8 +851,8 @@ std::string Peak::getBankName() const { return m_bankName; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, returns the row (y) of the pixel of the
-* detector.
-* Returns -1 if it could not find it. */
+ * detector.
+ * Returns -1 if it could not find it. */
 int Peak::getRow() const { return m_row; }
 
 // -------------------------------------------------------------------------------------
@@ -1003,5 +1011,5 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
 
 Mantid::Kernel::Logger Peak::g_log("PeakLogger");
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

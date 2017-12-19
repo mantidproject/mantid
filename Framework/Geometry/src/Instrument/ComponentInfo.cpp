@@ -340,6 +340,36 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
       // Skip all sub components.
       detExclusions.emplace(std::make_pair(bottomLeft, topRight));
       compIterator = innerRangeComp.rend();
+    } else if (componentFlag(index) == Beamline::ComponentType::BankOfTube) {
+      auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
+      // nSubComponents, subtract off self hence -1. nSubComponents = number of
+      // horizontal columns.
+      auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
+      auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
+      auto nSubDetectors =
+          std::distance(innerRangeDet.begin(), innerRangeDet.end());
+      auto nY = nSubDetectors / nSubComponents;
+      size_t bottomIndex = *innerRangeDet.begin();
+      size_t lastIndex = *(innerRangeDet.end() - 1);
+      while (bottomIndex < lastIndex) {
+        auto topIndex = bottomIndex + (nY - 1);
+        absoluteBB.grow(componentBoundingBox(bottomIndex, reference));
+        absoluteBB.grow(componentBoundingBox(topIndex, reference));
+        bottomIndex += nY;
+      }
+      detExclusions.emplace(
+          std::make_pair(*innerRangeDet.begin(), *(innerRangeDet.end() - 1)));
+      compIterator = innerRangeComp.rend();
+    } else if (componentFlag(index) == Beamline::ComponentType::Tube) {
+      auto rangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
+      if (!rangeDet.empty()) {
+        auto startIndex = *rangeDet.begin();
+        auto endIndex = *(rangeDet.end() - 1);
+        absoluteBB.grow(componentBoundingBox(startIndex, reference));
+        absoluteBB.grow(componentBoundingBox(endIndex, reference));
+        detExclusions.emplace(std::make_pair(startIndex, endIndex));
+      }
+      ++compIterator;
     } else {
       absoluteBB.grow(componentBoundingBox(index, reference));
       ++compIterator;
