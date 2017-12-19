@@ -217,6 +217,11 @@ protected:
   // Get output options
   void addOutputOptions(OptionsMap &options, RowData *data,
                         const bool allowInsertions = true);
+  // Get the pre-processing algorithm property values
+  OptionsMap getCanonicalPreprocessingOptions(const QString &columnName,
+                                              RowData *data);
+  // Get the processing algorithm property values
+  OptionsMap getCanonicalProcessingOptions(RowData *data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row

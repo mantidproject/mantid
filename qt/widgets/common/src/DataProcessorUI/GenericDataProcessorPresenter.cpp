@@ -788,22 +788,8 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
   if (!m_preprocessing.hasPreprocessing(columnName))
     return;
 
-  // Get the options for preprocessing. Note that we have to be careful
-  // here because the applicable options are different to the main
-  // reduction options. However, we still want to be able to override
-  // them from the main preprocessing options if the same option exists.
-  // in both algorithms. We therefore take the list from m_preprocessing
-  // (which defines the full list of applicable options) and update them
-  // from column values ONLY if they are in that list.
-  OptionsMap options;
-  if (m_preprocessing.hasOptions(columnName) > 0) {
-    options = m_preprocessing.m_options.at(columnName);
-    addHiddenOptions(options, data, false);
-    addUserOptions(options, data, false);
-    addRowOptions(options, data, false);
-  }
-
   auto preprocessor = m_preprocessing.m_map.at(columnName);
+  OptionsMap options = getCanonicalPreprocessingOptions(columnName, data);
   auto runWS = prepareRunWorkspace(columnValue, preprocessor, options);
   columnValue = QString::fromStdString(runWS->getName());
 }
@@ -964,6 +950,53 @@ void GenericDataProcessorPresenter::addOutputOptions(
   }
 }
 
+/** Get the pre-processing algorithm properties values for the given column.
+ * This consolidates relevant values from the global options as well as the
+ * data processor table columns and the Options/HiddenOptions columns.
+ *
+ * @param data [in] : the row data to get option values for
+ * @return : a map of property names to values
+ */
+OptionsMap GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(
+    const QString &columnName, RowData *data) {
+  // Get the options for preprocessing. Note that we have to be careful
+  // here because the applicable options are different to the main
+  // reduction options. However, we still want to be able to override
+  // them from the main preprocessing options if the same option exists.
+  // in both algorithms. We therefore take the list from m_preprocessing
+  // (which defines the full list of applicable options) and update them
+  // from column values ONLY if they are in that list.
+  OptionsMap options;
+  if (m_preprocessing.hasOptions(columnName) > 0) {
+    options = m_preprocessing.m_options.at(columnName);
+    addHiddenOptions(options, data, false);
+    addUserOptions(options, data, false);
+    addRowOptions(options, data, false);
+  }
+  return options;
+}
+
+/** Get the algorithm property values for the main processing algorithm.  This
+ * consolidates values from the global options as well as the data processor
+ * table columns and the Options/HiddenOptions columns.
+ *
+ * @param data [in] : the row data to get option values for
+ * @return : a map of property names to values
+ */
+OptionsMap
+GenericDataProcessorPresenter::getCanonicalProcessingOptions(RowData *data) {
+  // Compile all of the options into a single map - add them in reverse
+  // order of precedence. Latter items are overwritten, or added if they
+  // do not yet exist in the map.
+  OptionsMap options;
+  addOutputOptions(options, data);
+  addGlobalOptions(options);
+  addHiddenOptions(options, data);
+  addUserOptions(options, data);
+  addRowOptions(options, data);
+  return options;
+}
+
 /** Create an algorithm with the given properties and execute it
  * @param options : the options as a map of property name to value
  * @throws std::runtime_error if reduction fails
@@ -990,16 +1023,7 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
-  // Compile all of the options into a single map - add them in reverse
-  // order of precedence. Latter items are overwritten, or added if they
-  // do not yet exist in the map.
-  OptionsMap options;
-  addOutputOptions(options, data);
-  addGlobalOptions(options);
-  addHiddenOptions(options, data);
-  addUserOptions(options, data);
-  addRowOptions(options, data);
-
+  OptionsMap options = getCanonicalProcessingOptions(data);
   preprocessOptionValues(options, data);
   const auto alg = createAndRunAlgorithm(options);
   updateModelFromAlgorithm(alg, data);
