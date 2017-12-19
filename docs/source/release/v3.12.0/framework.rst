@@ -73,4 +73,6 @@ Support for unicode property names has been added to python. This means that one
    props = json.loads('{"DryRun":true}')
    Segfault(**props)
 
+- Fixed an issue with coercing data from python lists or numpy arrays where the datatype!=float64 into a workspace 
+
 :ref:`Release 3.12.0 <v3.12.0>`
