@@ -242,9 +242,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
         self.data_processor_table.setForcedReProcessing(True)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Table setup
-        # --------------------------------------------------------------------------------------------------------------
         # Add the presenter to the data processor
         self.data_processor_table.accept(self._main_presenter)
 
@@ -263,9 +260,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
 
     def _setup_main_tab(self):
-        # --------------------------------------------------------------------------------------------------------------
-        # Header setup
-        # --------------------------------------------------------------------------------------------------------------
         self.user_file_button.clicked.connect(self._on_user_file_load)
         self.batch_button.clicked.connect(self._on_batch_file_load)
 
@@ -578,9 +572,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def is_multi_period_view(self):
         return self.multi_period_check_box.isChecked()
 
-    def switch_to_multi_period_view(self):
-        if not self.is_multi_period_view():
-            self.multi_period_check_box.setChecked(True)
+    def set_multi_period_view_mode(self, mode):
+        self.multi_period_check_box.setChecked(mode)
 
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

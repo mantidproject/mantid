@@ -855,20 +855,24 @@ class RunTabPresenter(object):
         number_of_rows = self._view.get_number_of_rows()
         is_multi_period_view = self._view.is_multi_period_view()
         for row in range(number_of_rows):
-            sample_scatter = self._view.get_cell(row=row, column=self.table_index['SAMPLE_SCATTER_INDEX'], convert_to=str)
-            sample_scatter_period = self._view.get_cell(row=row, column=self.table_index['SAMPLE_SCATTER_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            sample_transmission = self._view.get_cell(row=row, column=self.table_index['SAMPLE_TRANSMISSION_INDEX'], convert_to=str)
-            sample_transmission_period = self._view.get_cell(row=row, column=self.table_index['SAMPLE_TRANSMISSION_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            sample_direct = self._view.get_cell(row=row, column=self.table_index['SAMPLE_DIRECT_INDEX'], convert_to=str)
-            sample_direct_period = self._view.get_cell(row=row, column=self.table_index['SAMPLE_DIRECT_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            can_scatter = self._view.get_cell(row=row, column=self.table_index['CAN_SCATTER_INDEX'], convert_to=str)
-            can_scatter_period = self._view.get_cell(row=row, column=self.table_index['CAN_SCATTER_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            can_transmission = self._view.get_cell(row=row, column=self.table_index['CAN_TRANSMISSION_INDEX'], convert_to=str)
-            can_transmission_period = self._view.get_cell(row=row, column=self.table_index['CAN_TRANSMISSION_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            can_direct = self._view.get_cell(row=row, column=self.table_index['CAN_DIRECT_INDEX'], convert_to=str)
-            can_direct_period = self._view.get_cell(row=row, column=self.table_index['CAN_DIRECT_PERIOD_INDEX'], convert_to=str) if is_multi_period_view else ""  # noqa
-            output_name = self._view.get_cell(row=row, column=self.table_index['OUTPUT_NAME_INDEX'], convert_to=str)
-            user_file = self._view.get_cell(row=row, column=self.table_index['USER_FILE_INDEX'], convert_to=str)
+            sample_scatter = self.get_cell_value(row, 'SAMPLE_SCATTER_INDEX')
+            sample_transmission = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_INDEX')
+            sample_direct = self.get_cell_value(row, 'SAMPLE_DIRECT_INDEX')
+
+            can_scatter = self.get_cell_value(row, 'CAN_SCATTER_INDEX')
+            can_transmission = self.get_cell_value(row, 'CAN_TRANSMISSION_INDEX')
+            can_direct = self.get_cell_value(row, 'CAN_DIRECT_INDEX')
+
+            sample_scatter_period = self.get_cell_value(row, 'SAMPLE_SCATTER_PERIOD_INDEX')if is_multi_period_view else ""
+            sample_transmission_period = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_PERIOD_INDEX')if is_multi_period_view else ""
+            sample_direct_period = self.get_cell_value(row, 'SAMPLE_DIRECT_PERIOD_INDEX')if is_multi_period_view else ""
+
+            can_scatter_period = self.get_cell_value(row, 'CAN_SCATTER_PERIOD_INDEX') if is_multi_period_view else ""
+            can_transmission_period = self.get_cell_value(row, 'CAN_TRANSMISSION_PERIOD_INDEX') if is_multi_period_view else ""
+            can_direct_period = self.get_cell_value(row, 'CAN_DIRECT_PERIOD_INDEX') if is_multi_period_view else ""
+
+            output_name = self.get_cell_value(row, 'OUTPUT_NAME_INDEX')
+            user_file = self.get_cell_value(row, 'USER_FILE_INDEX')
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -893,6 +897,9 @@ class RunTabPresenter(object):
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
+
+    def get_cell_value(self, row, column):
+        self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
 
     def _create_states(self, state_model, table_model, row_index=None):
         """
@@ -969,10 +976,10 @@ class RunTabPresenter(object):
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # If one of the periods is not null, then we should switch the view to multi-period view
-        if sample_scatter_period or sample_transmission_period or sample_direct_period or can_scatter_period or \
-                can_transmission_period or can_direct_period:
+        if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
+                can_transmission_period, can_direct_period)):
             if not self._view.is_multi_period_view():
-                self._view.switch_to_multi_period_view()
+                self._view.set_multi_period_view_mode(True)
 
         # 2. Create entry that can be understood by table
         if self._view.is_multi_period_view():
