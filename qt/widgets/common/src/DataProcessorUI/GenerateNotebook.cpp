@@ -341,8 +341,7 @@ QString plot1DString(const QStringList &ws_names) {
 template <typename Map>
 void addProperties(QStringList &algProperties, const Map &optionsMap) {
   for (auto &&kvp : optionsMap) {
-    algProperties.append(
-        QString::fromStdString(kvp.first + " = " + kvp.second));
+    algProperties.append(kvp.first + " = '" + kvp.second + "'");
   }
 }
 
@@ -373,10 +372,53 @@ reduceRowString(const RowData &data, const QString &instrument,
     throw std::invalid_argument("Can't generate notebook");
   }
 
+  QString preprocessString;
+
+  // Add algorithm properties for the main processing algorithm. Some of
+  // these may get overwritten by preprocessing below
   OptionsMap processingOptions =
       getCanonicalOptions(&data, globalProcessingOptions, whitelist, true);
 
-  QString preprocessString;
+  // Loop through all columns, excluding 'Options'  and 'Hidden Options'
+  int ncols = static_cast<int>(whitelist.size());
+  for (int col = 0; col < ncols - 2; col++) {
+    // The column's name
+    const QString colName = whitelist.name(col);
+    // The algorithm property name linked to this column
+    const QString algProp = whitelist.algorithmProperty(col);
+
+    // If the column doesn't have a value, there's nothing to do
+    if (processingOptions.find(algProp) == processingOptions.end())
+      continue;
+
+    const auto colValue = processingOptions[algProp];
+
+    if (preprocessMap.count(colName) > 0) {
+      // This column was pre-processed. We need to print pre-processing
+      // instructions
+
+      // The pre-processing alg
+      const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
+
+      // The options for the pre-processing alg
+      QString options;
+      if (globalPreprocessingOptionsMap.count(colName) > 0) {
+        // Only include options in the given preprocessing options map,
+        // but override them if they are set in the row data
+        OptionsMap preprocessingOptions = getCanonicalOptions(
+            &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
+        options = convertMapToString(preprocessingOptions);
+      }
+
+      // Python code ran to load and pre-process runs
+      const boost::tuple<QString, QString> load_ws_string =
+          loadWorkspaceString(colValue, instrument, preprocessor, options);
+      preprocessString += boost::get<0>(load_ws_string);
+
+      // Update the options map with the result of preprocessing
+      processingOptions[algProp] = boost::get<1>(load_ws_string);
+    }
+  }
 
   // Vector to store the algorithm properties with values
   // For example
@@ -384,77 +426,7 @@ reduceRowString(const RowData &data, const QString &instrument,
   // ThetaIn = 0.2
   // etc
   QStringList algProperties;
-
-  int ncols = static_cast<int>(whitelist.size());
-
-  // Run through columns, excluding 'Options'
-  for (int col = 0; col < ncols - 2; col++) {
-    // The column's name
-    const QString colName = whitelist.name(col);
-    // The algorithm property linked to this column
-    const QString algProp = whitelist.algorithmProperty(col);
-
-    if (preprocessMap.count(colName)) {
-      // This column was pre-processed, we need to print pre-processing
-      // instructions
-
-      // Get the runs
-      const QString &runStr = data.at(col);
-
-      if (!runStr.isEmpty()) {
-        // Some runs were given for pre-processing
-
-        // The pre-processing alg
-        const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
-        // The options for the pre-processing alg
-        QString options;
-        if (globalPreprocessingOptionsMap.count(colName) > 0) {
-          // Only include options in the given preprocessing options map,
-          // but override them if they are set in the row data
-          OptionsMap preprocessingOptions = getCanonicalOptions(
-              &data, globalPreprocessingOptionsMap.at(colName), whitelist,
-              false);
-          options = convertMapToString(preprocessingOptions);
-        }
-        // Python code ran to load and pre-process runs
-        const boost::tuple<QString, QString> load_ws_string =
-            loadWorkspaceString(runStr, instrument, preprocessor, options);
-        preprocessString += boost::get<0>(load_ws_string);
-
-        // Add runs to reduction properties
-        algProperties.append(algProp + " = '" + boost::get<1>(load_ws_string) +
-                             "'");
-      }
-    } else {
-      // No pre-processing
-
-      // Just read the property value from the table
-      const QString &propStr = data.at(col);
-
-      if (!propStr.isEmpty()) {
-        // If it was not empty, we used it as an input property to the reduction
-        // algorithm
-        algProperties.append(algProp + " = " + propStr);
-      }
-    }
-  }
-
-  auto options = processingOptions;
-
-  const auto &hiddenOptionsStr = data.back();
-  // Parse and set any user-specified options
-  auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr.toStdString());
-  // Options specified via 'Hidden Options' column will be preferred
-  addProperties(algProperties, hiddenOptionsMap);
-
-  // 'Options' specified either via 'Options' column or HintinLineEdit
-  const auto &optionsStr = data.at(ncols - 2);
-  // Parse and set any user-specified options
-  auto optionsMap = parseKeyValueString(optionsStr.toStdString());
-  // Options specified via 'Options' column will be preferred
-  for (auto &kvp : options)
-    optionsMap[kvp.first.toStdString()] = kvp.second.toStdString();
-  addProperties(algProperties, optionsMap);
+  addProperties(algProperties, processingOptions);
 
   /* Now construct the names of the reduced workspaces*/
 
