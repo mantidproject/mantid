@@ -208,7 +208,8 @@ Mantid::API::Workspace_sptr QWorkspaceDockView::getSelectedWorkspace() const {
 
 bool QWorkspaceDockView::askUserYesNo(const std::string &caption,
                                       const std::string &message) const {
-  return QMessageBox::question(this, QString::fromStdString(caption),
+  return QMessageBox::question(dynamic_cast<QWidget*>(this->parent()),
+						       QString::fromStdString(caption),
                                QString::fromStdString(message),
                                QMessageBox::Yes,
                                QMessageBox::No) == QMessageBox::Yes;
@@ -216,7 +217,8 @@ bool QWorkspaceDockView::askUserYesNo(const std::string &caption,
 
 void QWorkspaceDockView::showCriticalUserMessage(
     const std::string &caption, const std::string &message) const {
-  QMessageBox::critical(this, QString::fromStdString(caption),
+  QMessageBox::critical(dynamic_cast<QWidget*>(this->parent()),
+						QString::fromStdString(caption),
                         QString::fromStdString(message));
 }
 
