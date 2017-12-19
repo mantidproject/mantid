@@ -504,7 +504,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         if ReductionSingleton().getNumSlices() > 1:
             slices = []
             for index in range(ReductionSingleton().getNumSlices()):
-                merge_workspace = _merge_workspaces(front_slices[index], rAnds)
+                merge_workspace = _merge_workspaces(front_slices[index], rear_slices[index], rAnds)
                 slices.append(merge_workspace)
             ReductionSingleton().setSliceIndex(0)
             group_name = _common_substring(slices[0], slices[1])
@@ -513,7 +513,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             _group_workspaces(slices, group_name)
             retWSname =  group_name
         else:
-            retWSname = _merge_workspaces(retWSname_front, rAnds)
+            retWSname = _merge_workspaces(retWSname_front, retWSname_rear, rAnds)
     elif fitRequired:
         # Get fit paramters
         scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
@@ -572,16 +572,15 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     return retWSname
 
 
-def _merge_workspaces(retWSname_front, rAnds):
+def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
     # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
-    retWSname_merged = retWSname_front
-    retWSname_rear = retWSname_front
-    if retWSname_merged.count('front') == 1:
-        retWSname_merged = retWSname_merged.replace('front', 'merged')
-        retWSname_rear = retWSname_rear.replace('front', 'rear')
-    else:
-        retWSname_merged = retWSname_merged + "_merged"
-        retWSname_rear = retWSname_rear + "_rear"
+    retWSname_merged = retWSname_rear + "_merged"
+    # if retWSname_merged.count('front') == 1:
+    #     retWSname_merged = retWSname_merged.replace('front', 'merged')
+    #     retWSname_rear = retWSname_rear.replace('front', 'rear')
+    # else:
+    #     retWSname_merged = retWSname_merged + "_merged"
+    #     retWSname_rear = retWSname_rear + "_rear"
 
     Nf = mtd[retWSname_front + "_sumOfNormFactors"]
     Nr = mtd[retWSname_rear + "_sumOfNormFactors"]

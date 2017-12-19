@@ -320,7 +320,6 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         # | both           |    +_rear      |    +_front   |     -        |
         # | merged         |    +_rear      |    +_front   |     +_merged |
         # This is not great since it uses SANS2D terminology for all instruments
-
         names = [final_name]
         if combineDet == 'rear':
             new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)
