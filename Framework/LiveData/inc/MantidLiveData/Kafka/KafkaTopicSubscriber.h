@@ -55,6 +55,8 @@ public:
   getOffsetsForTimestamp(int64_t timestamp) override;
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override;
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;

@@ -169,8 +169,9 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
     std::lock_guard<std::mutex> runStatusLock(m_runStatusMutex);
     m_runStatusSeen = true;
     m_cvRunStatus.notify_one();
+    return true;
   }
-  return m_endRun;
+  return false;
 }
 
 /**
@@ -277,6 +278,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         reachedEnd[topicName][static_cast<size_t>(partition)] = true;
 
         if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
+          m_cbIterationEnd();
           continue;
         }
         g_log.debug() << "Reached end-of-run in " << topicName << " topic."
@@ -321,6 +323,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
                       << stopTime << std::endl;
         stopOffsets =
             getStopOffsets(stopOffsets, reachedEnd, stopTime, checkOffsets);
+        checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
         auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
         m_runNumber = runStartMsg->run_number();
@@ -349,7 +352,8 @@ void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
                     return std::all_of(
                         kv.second.cbegin(), kv.second.cend(),
                         [](bool partitionEnd) { return partitionEnd; });
-                  })) {
+                  }) ||
+      reachedEnd.empty()) {
     m_endRun = true;
     // If we've reached the end of a run then set m_extractWaiting to true
     // so that we wait until the buffer is emptied before continuing.
@@ -359,7 +363,7 @@ void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
     m_extractWaiting = true;
     m_extractedEndRunData = false;
     checkOffsets = false;
-    g_log.debug() << "Reached end of run in data stream." << std::endl;
+    g_log.debug("Reached end of run in data stream.");
   }
 }
 
@@ -377,6 +381,8 @@ KafkaEventStreamDecoder::getStopOffsets(
   // /1000000 to convert nanosecond precision from message to millisecond
   // precision which Kafka offset query supports
 
+  auto currentOffsets = m_eventStream->getCurrentOffsets();
+
   // Set reachedEnd to false for each topic and partition
   for (auto keyValue : stopOffsets) {
     // Ignore the runInfo topic
@@ -389,10 +395,17 @@ KafkaEventStreamDecoder::getStopOffsets(
       reachedEnd.insert(
           {keyValue.first, std::vector<bool>(keyValue.second.size(), false)});
 
-      // If the stopOffset is negative then there are no messages for us
-      // to collect on this topic, so mark reachedEnd as true already
-      for (auto partition_offset : keyValue.second) {
-        reachedEnd[keyValue.first][partition_offset < 0];
+      auto partitionOffsets = keyValue.second;
+      for (uint32_t partitionNumber = 0;
+           partitionNumber < partitionOffsets.size(); partitionNumber++) {
+        auto offset = partitionOffsets[partitionNumber];
+        // If the stop offset is negative then there are no messages for us
+        // to collect on this topic, so mark reachedEnd as true already
+        reachedEnd[keyValue.first][partitionNumber] = offset < 0;
+        // If the stop offset has already been reached then mark reachedEnd as
+        // true
+        if (currentOffsets[keyValue.first][partitionNumber] >= offset)
+          reachedEnd[keyValue.first][partitionNumber] = true;
       }
     }
   }

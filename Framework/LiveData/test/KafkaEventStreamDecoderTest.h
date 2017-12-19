@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_
-#define MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_
+#ifndef MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
+#define MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -63,7 +63,7 @@ public:
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
@@ -102,7 +102,7 @@ public:
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(2)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     // Need 2 full loops to get both periods
@@ -132,6 +132,44 @@ public:
     }
   }
 
+  void test_End_Of_Run_Reported_After_Run_Stop_Reached() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeDataStreamSubscriber))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    // 3 iterations to get first run, consisting of a run start message, an
+    // event message and a run stop message
+    startCapturing(*decoder, 3);
+    Workspace_sptr workspace;
+    // Extract data should only get data from the first run
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 6,
+                      eventWksp->getNumberEvents());
+  }
+
   void test_Sample_Log_From_Event_Stream() {
     using namespace ::testing;
     using namespace ISISKafkaTesting;
@@ -143,7 +181,7 @@ public:
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeSampleEnvironmentSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
@@ -173,7 +211,7 @@ public:
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
@@ -212,7 +250,7 @@ public:
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
@@ -318,4 +356,4 @@ private:
   uint8_t m_niterations = 0;
 };
 
-#endif /* MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_ */
+#endif /* MANTID_LIVEDATA_KAFKAEVENTSTREAMDECODERTEST_H_ */

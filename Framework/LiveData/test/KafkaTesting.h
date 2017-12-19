@@ -75,6 +75,11 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
+  }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -103,6 +108,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
@@ -146,6 +156,42 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
                  builder.GetSize());
 }
 
+void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
+                                 const std::string &startTime,
+                                 const std::string &instName,
+                                 int32_t nPeriods) {
+  // Convert date to time_t
+  auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
+  auto startTimestamp =
+      static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
+
+  flatbuffers::FlatBufferBuilder builder;
+  auto runInfo = CreateRunInfo(
+      builder, InfoTypes_RunStart,
+      CreateRunStart(builder, startTimestamp, runNumber,
+                     builder.CreateString(instName), nPeriods).Union());
+  FinishRunInfoBuffer(builder, runInfo);
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
+void fakeReceiveARunStopMessage(std::string *buffer,
+                                const std::string &stopTime) {
+  // Convert date to time_t
+  auto mantidTime = Mantid::Types::Core::DateAndTime(stopTime);
+  auto stopTimestamp =
+      static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
+
+  flatbuffers::FlatBufferBuilder builder;
+  auto runInfo = CreateRunInfo(builder, InfoTypes_RunStop,
+                               CreateRunStop(builder, stopTimestamp).Union());
+  FinishRunInfoBuffer(builder, runInfo);
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
 // -----------------------------------------------------------------------------
 // Fake ISIS event stream to provide event and sample environment data
 // -----------------------------------------------------------------------------
@@ -172,6 +218,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
@@ -209,6 +260,11 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
+  }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -218,12 +274,12 @@ public:
 };
 
 // -----------------------------------------------------------------------------
-// Fake ISIS run data stream
+// Fake run data stream
 // -----------------------------------------------------------------------------
-class FakeISISRunInfoStreamSubscriber
+class FakeRunInfoStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-  explicit FakeISISRunInfoStreamSubscriber(int32_t nperiods)
+  explicit FakeRunInfoStreamSubscriber(int32_t nperiods)
       : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
@@ -231,20 +287,8 @@ public:
                       std::string &topic) override {
     assert(buffer);
 
-    // Convert date to time_t
-    auto mantidTime = Mantid::Types::Core::DateAndTime(m_startTime);
-    auto startTime = static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
-
-    // Serialize data with flatbuffers
-    flatbuffers::FlatBufferBuilder builder;
-    auto runInfo = CreateRunInfo(
-        builder, InfoTypes_RunStart,
-        CreateRunStart(builder, startTime, m_runNumber,
-                       builder.CreateString(m_instName), m_nperiods).Union());
-    FinishRunInfoBuffer(builder, runInfo);
-    // Copy to provided buffer
-    buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
-                   builder.GetSize());
+    fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName,
+                                m_nperiods);
 
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
@@ -255,6 +299,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
@@ -268,6 +317,73 @@ private:
   int32_t m_runNumber = 1000;
   std::string m_instName = "HRPDTEST";
   int32_t m_nperiods = 1;
+};
+
+// -----------------------------------------------------------------------------
+// Fake data stream with run and event messages
+// -----------------------------------------------------------------------------
+class FakeDataStreamSubscriber
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(buffer);
+
+    // Return a messages in this order:
+    // Run start
+    // Event data
+    // Run stop
+    // Run start
+    // Event data... ad infinitum
+
+    switch (m_currentOffset) {
+    case 0:
+      fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
+                                  m_nperiods);
+      break;
+    case 2:
+      fakeReceiveARunStopMessage(buffer, m_stopTime);
+      break;
+    case 3:
+      fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
+                                  m_nperiods);
+      break;
+    default:
+      fakeReceiveAnEventMessage(buffer, 0);
+    }
+    topic = "topic_name";
+    offset = m_currentOffset;
+    partition = 0;
+    m_currentOffset++;
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
+                                                         {m_stopOffset})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
+                                                         {m_currentOffset})};
+  }
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  const std::string m_topicName = "topic_name";
+  uint32_t m_currentOffset = 0;
+  std::string m_startTime = "2016-08-31T12:07:42";
+  std::string m_stopTime = "2016-08-31T12:07:52";
+  const std::string m_instName = "HRPDTEST";
+  int32_t m_nperiods = 1;
+  int64_t m_stopOffset = 1;
 };
 
 // -----------------------------------------------------------------------------
@@ -302,6 +418,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {

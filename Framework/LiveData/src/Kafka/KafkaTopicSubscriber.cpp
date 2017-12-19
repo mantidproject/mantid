@@ -144,6 +144,34 @@ KafkaTopicSubscriber::getTopicPartitions() {
 }
 
 /**
+ * Get the current offsets the consumer has reached in each topic
+ * @return map with key of topic name and value of vector of offsets for its
+ * partitions
+ */
+std::unordered_map<std::string, std::vector<int64_t>>
+KafkaTopicSubscriber::getCurrentOffsets() {
+  std::unordered_map<std::string, std::vector<int64_t>> currentOffsets;
+  std::vector<RdKafka::TopicPartition *> partitions;
+  auto error = m_consumer->assignment(partitions);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "current partition assignment.");
+  }
+  for (auto topicPartition : partitions) {
+    std::vector<int64_t> offsetList = {topicPartition->offset()};
+    auto result = currentOffsets.emplace(
+        std::make_pair(topicPartition->topic(), offsetList));
+    if (!result.second) {
+      // If we could not emplace a new pair then the key already exists, so
+      // append the offset to the vector belonging to the existing topic key
+      currentOffsets[topicPartition->topic()].push_back(
+          topicPartition->offset());
+    }
+  }
+  return currentOffsets;
+}
+
+/**
  * Get metadata from the Kafka brokers
  * @return metadata
  */
