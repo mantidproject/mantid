@@ -97,8 +97,6 @@ template <typename... T> void Communicator::send(T &&... args) const {
 }
 
 template <typename... T> Status Communicator::recv(T &&... args) const {
-// Not returning a status since it would usually not get initialized. See
-// http://mpi-forum.org/docs/mpi-1.1/mpi-11-html/node35.html#Node35.
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
     return Status(m_communicator.recv(std::forward<T>(args)...));
