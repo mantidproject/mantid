@@ -191,6 +191,7 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
 
   auto workspace_ptr = extractDataImpl();
 
+  m_extractedEndRunData = true;
   m_extractWaiting = false;
   m_cv.notify_one();
 
@@ -263,6 +264,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
   while (!m_interrupt) {
     waitForDataExtraction();
+    waitForRunEndObservation();
     // Pull in events
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
@@ -422,20 +424,22 @@ void KafkaEventStreamDecoder::waitForDataExtraction() {
   if (m_extractWaiting) {
     m_cv.wait(readyLock, [&] { return !m_extractWaiting; });
     readyLock.unlock();
-    if (m_endRun) {
-      m_extractedEndRunData = true;
-      // Wait until MonitorLiveData has seen that end of run was
-      // reached before setting m_endRun back to false and continuing
-      std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
-      m_cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
-      m_endRun = false;
-      m_runStatusSeen = false;
-      runStatusLock.unlock();
-      // Give time for MonitorLiveData to act on runStatus information
-      // and trigger m_interrupt for next loop iteration if user requested
-      // LiveData algorithm to stop at the end of the run
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
+  }
+}
+
+void KafkaEventStreamDecoder::waitForRunEndObservation() {
+  if (m_endRun) {
+    // Wait until MonitorLiveData has seen that end of run was
+    // reached before setting m_endRun back to false and continuing
+    std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
+    m_cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
+    m_endRun = false;
+    m_runStatusSeen = false;
+    runStatusLock.unlock();
+    // Give time for MonitorLiveData to act on runStatus information
+    // and trigger m_interrupt for next loop iteration if user requested
+    // LiveData algorithm to stop at the end of the run
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
 

@@ -162,6 +162,7 @@ private:
   std::atomic<bool> m_extractedEndRunData;
 
   void waitForDataExtraction();
+  void waitForRunEndObservation();
 
   std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
