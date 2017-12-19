@@ -233,7 +233,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   }
 
 
-  m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, 0);
+  m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this);
   m_exploreMantid->init();
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
