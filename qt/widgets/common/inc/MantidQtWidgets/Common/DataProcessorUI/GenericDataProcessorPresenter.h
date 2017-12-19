@@ -203,28 +203,9 @@ protected:
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);
-  // Get options from the individual columns
-  void updateRowOptions(OptionsMap &options, RowData *data,
-                        const bool allowInsertions = true);
-  // Get options from the Options column
-  void updateUserOptions(OptionsMap &options, RowData *data,
-                         const bool allowInsertions = true);
-  // Get options from the Hidden Options column
-  void updateHiddenOptions(OptionsMap &options, RowData *data,
-                           const bool allowInsertions = true);
-  // Get global options
-  void updateGlobalOptions(OptionsMap &options,
-                           const bool allowInsertions = true);
   // Get output options
   void updateOutputOptions(OptionsMap &options, RowData *data,
                            const bool allowInsertions = true);
-  // Get the pre-processing algorithm property values for the given column
-  OptionsMap getCanonicalPreprocessingOptions(const QString &columnName,
-                                              RowData *data);
-  // Get the pre-processing algorithm property values for all columns
-  ColumnOptionsMap getCanonicalPreprocessingOptions(RowData *data);
-  // Get the processing algorithm property values
-  OptionsMap getCanonicalProcessingOptions(RowData *data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row

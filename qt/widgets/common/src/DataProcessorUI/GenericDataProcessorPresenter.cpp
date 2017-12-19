@@ -528,7 +528,8 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   QString filename = m_view->requestNotebookPath();
   if (!filename.isEmpty()) {
     // Global pre-processing options as a map where keys are column
-    // name and values are pre-processing options as a string
+    // name and values are pre-processing options as a map of
+    // property name to value
     const auto preprocessingOptionsMap = m_preprocessing.m_options;
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
@@ -779,8 +780,10 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
 /** Preprocess the property value from the given column if
  * preprocessing is applicable for this column (does nothing
  * otherwise)
- * @param columnName [input] :: the name of the column
- * @param columnValue [inout] :: the value in the column
+ * @param columnName [in] :: the name of the column
+ * @param columnValue [inout] :: the original value in the column;
+ * this gets updated to the new (preprocessed) value for the column
+ * if preprocessing was performed
  */
 void GenericDataProcessorPresenter::preprocessColumnValue(
     const QString &columnName, QString &columnValue, RowData *data) {
@@ -788,9 +791,18 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
   if (!m_preprocessing.hasPreprocessing(columnName))
     return;
 
+  // Get the options for the preprocessing algorithm
   auto preprocessor = m_preprocessing.m_map.at(columnName);
-  OptionsMap options = getCanonicalPreprocessingOptions(columnName, data);
+  OptionsMap options;
+  if (m_preprocessing.hasOptions(columnName) > 0) {
+    auto globalOptions = m_preprocessing.m_options.at(columnName);
+    options = getCanonicalOptions(data, globalOptions, m_whitelist, false);
+  }
+
+  // Run the preprocessing algorithm
   auto runWS = prepareRunWorkspace(columnValue, preprocessor, options);
+
+  // Update the column value with the result of preprocessing
   columnValue = QString::fromStdString(runWS->getName());
 }
 
@@ -856,81 +868,6 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
   }
 }
 
-/** Update the given options with user-specified options from the
- * given row. Options are pre-processed where applicable.
- * If values already exist in the map they are overwritten.
- * @param options : a map of property name to option value to update
- * @param data : the row data to get option values from
- * @param allowInsertions : if true, allow new keys to be inserted;
- * otherwise, only allow updating of keys that already exist
- */
-void GenericDataProcessorPresenter::updateRowOptions(
-    OptionsMap &options, RowData *data, const bool allowInsertions) {
-  // Loop through all columns (excluding the Options and Hidden options
-  // columns)
-  auto columnIt = m_whitelist.cbegin();
-  auto columnValueIt = data->constBegin();
-  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
-    auto column = *columnIt;
-    auto &propertyName = column.algorithmProperty();
-
-    if (allowInsertions || options.find(propertyName) != options.end()) {
-      // Get the value from this column
-      auto columnValue = *columnValueIt;
-
-      // If no value, nothing to do
-      if (!columnValue.isEmpty())
-        options[propertyName] = columnValue;
-    }
-  }
-}
-
-/** Update the given options with user-specified options from the
- * Options column. If values already exist in the map they are overwritten.
- * @param options : a map of property name to option value to update
- * @param data : the data for this row
- * @param allowInsertions : if true, allow new keys to be inserted;
- * otherwise, only allow updating of keys that already exist
- */
-void GenericDataProcessorPresenter::updateUserOptions(
-    OptionsMap &options, RowData *data, const bool allowInsertions) {
-  auto userOptions =
-      parseKeyValueQString(data->at(static_cast<int>(m_whitelist.size()) - 2));
-  for (auto &kvp : userOptions) {
-    if (allowInsertions || options.find(kvp.first) != options.end())
-      options[kvp.first] = kvp.second;
-  }
-}
-
-/** Update the given options with options from the Hidden Options
- * column. If values already exist in the map they are overwritten.
- * @param options : a map of property name to option value to update
- * @param data : the data for this row
- * @param allowInsertions : if true, allow new keys to be inserted;
- * otherwise, only allow updating of keys that already exist
- */
-void GenericDataProcessorPresenter::updateHiddenOptions(
-    OptionsMap &options, RowData *data, const bool allowInsertions) {
-  const auto hiddenOptions = parseKeyValueQString(data->back());
-  for (auto &kvp : hiddenOptions) {
-    if (allowInsertions || options.find(kvp.first) != options.end())
-      options[kvp.first] = kvp.second;
-  }
-}
-
-/** Update the given options with options from the global settings.
- * If values already exist in the map they are overwritten.
- * @param options : a map of property name to option value to update
- */
-void GenericDataProcessorPresenter::updateGlobalOptions(
-    OptionsMap &options, const bool allowInsertions) {
-  const auto globalOptions = m_processingOptions;
-  for (auto &kvp : globalOptions) {
-    if (allowInsertions || options.find(kvp.first) != options.end())
-      options[kvp.first] = kvp.second;
-  }
-}
-
 /** Update the given options with the output properties.
  * If values already exist in the map they are overwritten.
  * @param options : a map of property name to option value to update
@@ -946,77 +883,6 @@ void GenericDataProcessorPresenter::updateOutputOptions(
           getReducedWorkspaceName(*data, m_processor.prefix(i));
     }
   }
-}
-
-/** Get the pre-processing algorithm properties values for the given column.
- * This consolidates relevant values from the global options as well as the
- * data processor table columns and the Options/HiddenOptions columns.
- *
- * @param data [in] : the row data to get option values for
- * @return : a map of property names to values
- */
-OptionsMap GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(
-    const QString &columnName, RowData *data) {
-  // Get the options for preprocessing. Note that we have to be careful
-  // here because the applicable options are different to the main
-  // reduction options. However, we still want to be able to override
-  // them from the main preprocessing options if the same option exists.
-  // in both algorithms. We therefore take the list from m_preprocessing
-  // (which defines the full list of applicable options) and update them
-  // from column values ONLY if they are in that list.
-  OptionsMap options;
-  if (m_preprocessing.hasOptions(columnName) > 0) {
-    options = m_preprocessing.m_options.at(columnName);
-    updateHiddenOptions(options, data, false);
-    updateUserOptions(options, data, false);
-    updateRowOptions(options, data, false);
-  }
-  return options;
-}
-
-/** Get the pre-processing algorithm properties values for all columns for
- * which preprocessing is applicable.  This consolidates relevant values from
- * the global options as well as the data processor table columns and the
- * Options/HiddenOptions columns.
- *
- * @param whitelist [in] : the list of all columns
- * @param data [in] : the row data to get option values for
- * @return : a map of column name to preprocessing algorithm options for
- * that column
- */
-ColumnOptionsMap
-GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(RowData *data) {
-  ColumnOptionsMap columnOptionsMap;
-  // Loop through all columns except Options and Hidden Options
-  for (auto columnIt = m_whitelist.cbegin(); columnIt != m_whitelist.cend() - 2;
-       ++columnIt) {
-    auto column = *columnIt;
-    auto columnOptions = getCanonicalPreprocessingOptions(column.name(), data);
-    if (columnOptions.size() > 0)
-      columnOptionsMap[column.name()] = columnOptions;
-  }
-  return columnOptionsMap;
-}
-
-/** Get the algorithm property values for the main processing algorithm.  This
- * consolidates values from the global options as well as the data processor
- * table columns and the Options/HiddenOptions columns.
- *
- * @param data [in] : the row data to get option values for
- * @return : a map of property names to values
- */
-OptionsMap
-GenericDataProcessorPresenter::getCanonicalProcessingOptions(RowData *data) {
-  // Compile all of the options into a single map - add them in reverse
-  // order of precedence. Latter items are overwritten, or added if they
-  // do not yet exist in the map.
-  OptionsMap options;
-  updateOutputOptions(options, data);
-  updateGlobalOptions(options);
-  updateHiddenOptions(options, data);
-  updateUserOptions(options, data);
-  updateRowOptions(options, data);
-  return options;
 }
 
 /** Create an algorithm with the given properties and execute it
@@ -1045,9 +911,16 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
-  OptionsMap options = getCanonicalProcessingOptions(data);
+  // Get the algorithm input properties as an options map
+  OptionsMap options =
+      getCanonicalOptions(data, m_processingOptions, m_whitelist, true);
+  // Set the output properties in the options map
+  updateOutputOptions(options, data, true);
+  // Perform any preprocessing on the input properties
   preprocessOptionValues(options, data);
+  // Run the algorithm
   const auto alg = createAndRunAlgorithm(options);
+  // Populate any missing values in the model with output from the algorithm
   updateModelFromAlgorithm(alg, data);
 }
 

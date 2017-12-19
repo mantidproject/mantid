@@ -27,6 +27,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 #include <QString>
 #include <QStringList>
@@ -46,6 +48,11 @@ QString preprocessingListToString(const QStringList &values,
 QString DLLExport getReducedWorkspaceName(const QStringList &data,
                                           const WhiteList &whitelist,
                                           const QString prefix = QString());
+// Consolidate global options with row values
+OptionsMap DLLExport getCanonicalOptions(RowData *data,
+                                         const OptionsMap &globalOptions,
+                                         const WhiteList &whitelist,
+                                         const bool allowInsertions);
 }
 }
 }

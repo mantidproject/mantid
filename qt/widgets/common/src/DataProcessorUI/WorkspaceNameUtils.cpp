@@ -12,6 +12,70 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+namespace { // unnamed namespace
+            /** Update the given options with user-specified options from the
+             * given row. Options are pre-processed where applicable.
+             * If values already exist in the map they are overwritten.
+             * @param options : a map of property name to option value to update
+             * @param data : the row data to get option values from
+             * @param allowInsertions : if true, allow new keys to be inserted;
+             * otherwise, only allow updating of keys that already exist
+             */
+void updateRowOptions(OptionsMap &options, RowData *data,
+                      const WhiteList &whitelist, const bool allowInsertions) {
+  // Loop through all columns (excluding the Options and Hidden options
+  // columns)
+  auto columnIt = whitelist.cbegin();
+  auto columnValueIt = data->constBegin();
+  for (; columnIt != whitelist.cend() - 2; ++columnIt, ++columnValueIt) {
+    auto column = *columnIt;
+    auto &propertyName = column.algorithmProperty();
+
+    if (allowInsertions || options.find(propertyName) != options.end()) {
+      // Get the value from this column
+      auto columnValue = *columnValueIt;
+
+      // If no value, nothing to do
+      if (!columnValue.isEmpty())
+        options[propertyName] = columnValue;
+    }
+  }
+}
+
+/** Update the given options with user-specified options from the
+ * Options column. If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ * @param allowInsertions : if true, allow new keys to be inserted;
+ * otherwise, only allow updating of keys that already exist
+ */
+void updateUserOptions(OptionsMap &options, RowData *data,
+                       const WhiteList &whitelist, const bool allowInsertions) {
+  auto userOptions =
+      parseKeyValueQString(data->at(static_cast<int>(whitelist.size()) - 2));
+  for (auto &kvp : userOptions) {
+    if (allowInsertions || options.find(kvp.first) != options.end())
+      options[kvp.first] = kvp.second;
+  }
+}
+
+/** Update the given options with options from the Hidden Options
+ * column. If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ * @param allowInsertions : if true, allow new keys to be inserted;
+ * otherwise, only allow updating of keys that already exist
+ */
+void updateHiddenOptions(OptionsMap &options, RowData *data,
+                         const bool allowInsertions) {
+  const auto hiddenOptions = parseKeyValueQString(data->back());
+  for (auto &kvp : hiddenOptions) {
+    if (allowInsertions || options.find(kvp.first) != options.end())
+      options[kvp.first] = kvp.second;
+  }
+}
+} // unnamed namespace
+
 /** Parses individual values from a string containing a list of
  * values that should be preprocesed
  * @param inputStr : the input string. Multiple runs may be separated by '+' or
@@ -89,6 +153,26 @@ QString getReducedWorkspaceName(const QStringList &data,
   auto wsname = prefix;
   wsname += names.join("_");
   return wsname;
+}
+
+/** Get the algorithm property values for the main processing algorithm.  This
+ * consolidates values from the global options as well as the data processor
+ * table columns and the Options/HiddenOptions columns.
+ *
+ * @param data [in] : the row data to get option values for
+ * @return : a map of property names to values
+ */
+OptionsMap getCanonicalOptions(RowData *data, const OptionsMap &globalOptions,
+                               const WhiteList &whitelist,
+                               const bool allowInsertions) {
+  // Compile all of the options into a single map - add them in reverse
+  // order of precedence. Latter items are overwritten, or added if they
+  // do not yet exist in the map.
+  OptionsMap options = globalOptions;
+  updateHiddenOptions(options, data, allowInsertions);
+  updateUserOptions(options, data, whitelist, allowInsertions);
+  updateRowOptions(options, data, whitelist, allowInsertions);
+  return options;
 }
 }
 }
