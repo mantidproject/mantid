@@ -73,13 +73,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QWorkspaceDockView
-    : public QDockWidget,
+    : public QWidget,
       public IWorkspaceDockView,
       public boost::enable_shared_from_this<QWorkspaceDockView> {
   Q_OBJECT
 public:
-  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mui,
-                              QMainWindow *parent);
+  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+                              QWidget *parent = 0);
   ~QWorkspaceDockView();
   void dropEvent(QDropEvent *de) override;
   void init() override;
@@ -237,7 +237,7 @@ private:
   QString selectedWsName;
   QPoint m_menuPosition;
   QString m_programName;
-  MantidDisplayBase *const m_mantidUI;
+  MantidDisplayBase *const m_mantidDisplayModel;
 
   std::string m_filteredText;
   QPushButton *m_loadButton;
@@ -264,7 +264,6 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   bool m_promptDelete;
-  QMainWindow *m_appParent;
   SaveFileType m_saveFileType;
   SortCriteria m_sortCriteria;
   SortDirection m_sortDirection;
