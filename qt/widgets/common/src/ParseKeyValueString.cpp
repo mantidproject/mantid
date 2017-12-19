@@ -177,7 +177,13 @@ convertMapToString(const std::map<QString, QString> &optionsMap) {
     else
       first = false;
 
-    result += kvp.first + "=" + kvp.second;
+    const auto key = kvp.first;
+    auto value = kvp.second;
+
+    // Put quotes around the value
+    value = "'" + value + "'";
+
+    result += key + "=" + value;
   }
 
   return result;
