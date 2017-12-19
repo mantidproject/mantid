@@ -21,7 +21,7 @@ namespace { // unnamed namespace
              * @param allowInsertions : if true, allow new keys to be inserted;
              * otherwise, only allow updating of keys that already exist
              */
-void updateRowOptions(OptionsMap &options, RowData *data,
+void updateRowOptions(OptionsMap &options, const RowData *data,
                       const WhiteList &whitelist, const bool allowInsertions) {
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
@@ -49,7 +49,7 @@ void updateRowOptions(OptionsMap &options, RowData *data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateUserOptions(OptionsMap &options, RowData *data,
+void updateUserOptions(OptionsMap &options, const RowData *data,
                        const WhiteList &whitelist, const bool allowInsertions) {
   auto userOptions =
       parseKeyValueQString(data->at(static_cast<int>(whitelist.size()) - 2));
@@ -66,7 +66,7 @@ void updateUserOptions(OptionsMap &options, RowData *data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateHiddenOptions(OptionsMap &options, RowData *data,
+void updateHiddenOptions(OptionsMap &options, const RowData *data,
                          const bool allowInsertions) {
   const auto hiddenOptions = parseKeyValueQString(data->back());
   for (auto &kvp : hiddenOptions) {
@@ -162,7 +162,8 @@ QString getReducedWorkspaceName(const QStringList &data,
  * @param data [in] : the row data to get option values for
  * @return : a map of property names to values
  */
-OptionsMap getCanonicalOptions(RowData *data, const OptionsMap &globalOptions,
+OptionsMap getCanonicalOptions(const RowData *data,
+                               const OptionsMap &globalOptions,
                                const WhiteList &whitelist,
                                const bool allowInsertions) {
   // Compile all of the options into a single map - add them in reverse

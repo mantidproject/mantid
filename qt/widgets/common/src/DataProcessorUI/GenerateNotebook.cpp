@@ -366,12 +366,15 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const ColumnOptionsMap &preprocessingOptionsMap,
-                const OptionsMap &processingOptions) {
+                const ColumnOptionsMap &globalPreprocessingOptionsMap,
+                const OptionsMap &globalProcessingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
   }
+
+  OptionsMap processingOptions =
+      getCanonicalOptions(&data, globalProcessingOptions, whitelist, true);
 
   QString preprocessString;
 
@@ -403,10 +406,16 @@ reduceRowString(const RowData &data, const QString &instrument,
 
         // The pre-processing alg
         const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
-        // The pre-processing options
+        // The options for the pre-processing alg
         QString options;
-        if (preprocessingOptionsMap.count(colName) > 0)
-          options = convertMapToString(preprocessingOptionsMap.at(colName));
+        if (globalPreprocessingOptionsMap.count(colName) > 0) {
+          // Only include options in the given preprocessing options map,
+          // but override them if they are set in the row data
+          OptionsMap preprocessingOptions = getCanonicalOptions(
+              &data, globalPreprocessingOptionsMap.at(colName), whitelist,
+              false);
+          options = convertMapToString(preprocessingOptions);
+        }
         // Python code ran to load and pre-process runs
         const boost::tuple<QString, QString> load_ws_string =
             loadWorkspaceString(runStr, instrument, preprocessor, options);
