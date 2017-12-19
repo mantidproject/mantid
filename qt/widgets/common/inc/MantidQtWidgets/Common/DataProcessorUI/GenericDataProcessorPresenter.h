@@ -218,9 +218,11 @@ protected:
   // Get output options
   void updateOutputOptions(OptionsMap &options, RowData *data,
                            const bool allowInsertions = true);
-  // Get the pre-processing algorithm property values
+  // Get the pre-processing algorithm property values for the given column
   OptionsMap getCanonicalPreprocessingOptions(const QString &columnName,
                                               RowData *data);
+  // Get the pre-processing algorithm property values for all columns
+  ColumnOptionsMap getCanonicalPreprocessingOptions(RowData *data);
   // Get the processing algorithm property values
   OptionsMap getCanonicalProcessingOptions(RowData *data);
   // Create and execute the algorithm with the given properties

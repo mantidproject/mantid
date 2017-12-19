@@ -974,6 +974,30 @@ OptionsMap GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(
   return options;
 }
 
+/** Get the pre-processing algorithm properties values for all columns for
+ * which preprocessing is applicable.  This consolidates relevant values from
+ * the global options as well as the data processor table columns and the
+ * Options/HiddenOptions columns.
+ *
+ * @param whitelist [in] : the list of all columns
+ * @param data [in] : the row data to get option values for
+ * @return : a map of column name to preprocessing algorithm options for
+ * that column
+ */
+ColumnOptionsMap
+GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(RowData *data) {
+  ColumnOptionsMap columnOptionsMap;
+  // Loop through all columns except Options and Hidden Options
+  for (auto columnIt = m_whitelist.cbegin(); columnIt != m_whitelist.cend() - 2;
+       ++columnIt) {
+    auto column = *columnIt;
+    auto columnOptions = getCanonicalPreprocessingOptions(column.name(), data);
+    if (columnOptions.size() > 0)
+      columnOptionsMap[column.name()] = columnOptions;
+  }
+  return columnOptionsMap;
+}
+
 /** Get the algorithm property values for the main processing algorithm.  This
  * consolidates values from the global options as well as the data processor
  * table columns and the Options/HiddenOptions columns.
