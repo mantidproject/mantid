@@ -228,10 +228,11 @@ public:
         run.getPropertyValueAsType<double>(
             "ChopperSetting.chopperpair_sample_distance") *
         1e-3;
+    const auto incomingDeflectionAngle = run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
     const auto sampleZOffset =
         run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
         1e-3;
-    const auto sourceSample = chopperCentre + sampleZOffset;
+    const auto sourceSample = chopperCentre + sampleZOffset * std::cos(incomingDeflectionAngle / 180. * M_PI);
     const auto &spectrumInfo = output->spectrumInfo();
     const auto l1 = spectrumInfo.l1();
     TS_ASSERT_DELTA(sourceSample, l1, 1e-12)
@@ -292,7 +293,7 @@ public:
     const auto beamZ = detectorZ - pixelOffset * std::sin(detAngle);
     const auto detDist = std::hypot(beamY, beamZ);
     const auto collimationAngle =
-        (run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") + run.getPropertyValueAsType<double>("Theta.actual_theta")) /
+        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
         180. * M_PI;
     for (size_t i = 0; i < spectrumInfo.size(); ++i) {
       if (spectrumInfo.isMonitor(i)) {

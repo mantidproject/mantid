@@ -875,7 +875,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     return pairCentre - 0.5 * pairSeparation;
   } else if (m_instrumentName == "Figaro") {
     const double chopperDist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    return chopperDist + m_sampleZOffset;
+    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    return chopperDist + m_sampleZOffset * std::cos(inRad(deflectionAngle));
   }
   std::ostringstream out;
   out << "sourceSampleDistance: unknown instrument " << m_instrumentName;
