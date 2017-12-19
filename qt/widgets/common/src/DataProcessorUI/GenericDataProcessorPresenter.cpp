@@ -864,9 +864,8 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void GenericDataProcessorPresenter::addRowOptions(OptionsMap &options,
-                                                  RowData *data,
-                                                  const bool allowInsertions) {
+void GenericDataProcessorPresenter::updateRowOptions(
+    OptionsMap &options, RowData *data, const bool allowInsertions) {
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
   auto columnIt = m_whitelist.cbegin();
@@ -893,9 +892,8 @@ void GenericDataProcessorPresenter::addRowOptions(OptionsMap &options,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void GenericDataProcessorPresenter::addUserOptions(OptionsMap &options,
-                                                   RowData *data,
-                                                   const bool allowInsertions) {
+void GenericDataProcessorPresenter::updateUserOptions(
+    OptionsMap &options, RowData *data, const bool allowInsertions) {
   auto userOptions =
       parseKeyValueQString(data->at(static_cast<int>(m_whitelist.size()) - 2));
   for (auto &kvp : userOptions) {
@@ -911,7 +909,7 @@ void GenericDataProcessorPresenter::addUserOptions(OptionsMap &options,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void GenericDataProcessorPresenter::addHiddenOptions(
+void GenericDataProcessorPresenter::updateHiddenOptions(
     OptionsMap &options, RowData *data, const bool allowInsertions) {
   const auto hiddenOptions = parseKeyValueQString(data->back());
   for (auto &kvp : hiddenOptions) {
@@ -924,7 +922,7 @@ void GenericDataProcessorPresenter::addHiddenOptions(
  * If values already exist in the map they are overwritten.
  * @param options : a map of property name to option value to update
  */
-void GenericDataProcessorPresenter::addGlobalOptions(
+void GenericDataProcessorPresenter::updateGlobalOptions(
     OptionsMap &options, const bool allowInsertions) {
   const auto globalOptions = m_processingOptions;
   for (auto &kvp : globalOptions) {
@@ -938,7 +936,7 @@ void GenericDataProcessorPresenter::addGlobalOptions(
  * @param options : a map of property name to option value to update
  * @param data : the data for this row
  */
-void GenericDataProcessorPresenter::addOutputOptions(
+void GenericDataProcessorPresenter::updateOutputOptions(
     OptionsMap &options, RowData *data, const bool allowInsertions) {
   // Set the properties for the output workspace names
   for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
@@ -969,9 +967,9 @@ OptionsMap GenericDataProcessorPresenter::getCanonicalPreprocessingOptions(
   OptionsMap options;
   if (m_preprocessing.hasOptions(columnName) > 0) {
     options = m_preprocessing.m_options.at(columnName);
-    addHiddenOptions(options, data, false);
-    addUserOptions(options, data, false);
-    addRowOptions(options, data, false);
+    updateHiddenOptions(options, data, false);
+    updateUserOptions(options, data, false);
+    updateRowOptions(options, data, false);
   }
   return options;
 }
@@ -989,11 +987,11 @@ GenericDataProcessorPresenter::getCanonicalProcessingOptions(RowData *data) {
   // order of precedence. Latter items are overwritten, or added if they
   // do not yet exist in the map.
   OptionsMap options;
-  addOutputOptions(options, data);
-  addGlobalOptions(options);
-  addHiddenOptions(options, data);
-  addUserOptions(options, data);
-  addRowOptions(options, data);
+  updateOutputOptions(options, data);
+  updateGlobalOptions(options);
+  updateHiddenOptions(options, data);
+  updateUserOptions(options, data);
+  updateRowOptions(options, data);
   return options;
 }
 
