@@ -7,7 +7,7 @@ if ( NOT PYRCC5_CMD )
   # versions have a pyrcc5 executable. We prefer calling the python module.
   execute_process ( COMMAND
     ${PYTHON_EXECUTABLE} -c "import imp;imp.find_module('PyQt5.pyrcc_main')"
-    RESULT_VARIABLE _status ERROR_QUIET )
+    RESULT_VARIABLE _status )
   if ( _status EQUAL 0 )
     set ( PYRCC5_CMD ${PYTHON_EXECUTABLE} -m PyQt5.pyrcc_main CACHE string "Command line to use to run the PyQt5 resource compiler" )
   else ()
