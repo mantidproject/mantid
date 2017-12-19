@@ -325,6 +325,8 @@ private:
 class FakeDataStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
+  explicit FakeDataStreamSubscriber(int64_t stopOffset)
+      : m_stopOffset(stopOffset) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
@@ -335,6 +337,7 @@ public:
     // Run start
     // Event data
     // Run stop
+    // Event data
     // Run start
     // Event data... ad infinitum
 
@@ -346,7 +349,7 @@ public:
     case 2:
       fakeReceiveARunStopMessage(buffer, m_stopTime);
       break;
-    case 3:
+    case 4:
       fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
                                   m_nperiods);
       break;
@@ -383,7 +386,7 @@ private:
   std::string m_stopTime = "2016-08-31T12:07:52";
   const std::string m_instName = "HRPDTEST";
   int32_t m_nperiods = 1;
-  int64_t m_stopOffset = 1;
+  int64_t m_stopOffset;
 };
 
 // -----------------------------------------------------------------------------

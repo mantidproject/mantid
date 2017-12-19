@@ -142,7 +142,7 @@ public:
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeDataStreamSubscriber))
+        .WillOnce(Return(new FakeDataStreamSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
@@ -167,6 +167,44 @@ public:
         eventWksp);
 
     TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 6,
+                      eventWksp->getNumberEvents());
+  }
+
+  void test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+      .Times(Exactly(3))
+      .WillOnce(Return(new FakeDataStreamSubscriber(4)))
+      .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+      .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    // 4 iterations to get first run, consisting of a run start message, an
+    // event message, a run stop message, lastly another event message
+    startCapturing(*decoder, 4);
+    Workspace_sptr workspace;
+    // Extract data should only get data from the first run
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT(decoder->hasReachedEndOfRun());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+      "Expected an EventWorkspace from extractData(). Found something else",
+      eventWksp);
+
+    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 12,
                       eventWksp->getNumberEvents());
   }
 
