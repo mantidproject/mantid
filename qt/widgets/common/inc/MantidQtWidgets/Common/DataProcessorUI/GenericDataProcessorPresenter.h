@@ -83,6 +83,7 @@ struct PreprocessingAttributes {
 
   bool hasOptions(const QString &columnName) const {
     return m_options.count(columnName) > 0;
+  }
 
   // IAlgorithm_sptr createAlgorithmFor(const QString& columnName) const {
   //     assert(hasPreprocessing(columnName));
