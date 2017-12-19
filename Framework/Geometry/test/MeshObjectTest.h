@@ -634,6 +634,47 @@ public:
     TS_ASSERT(pt.X() < 1.0 || pt.Y() < 1.0)
   }
 
+  void testGeneratePointInside() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.45));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.55));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.65));
+
+    //  Random sequence set up so as to give point (0.90, 1.10, 0.75)
+    auto geom_obj = createLShape();
+    size_t maxAttempts(1);
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+      point = geom_obj->generatePointInObject(rng, maxAttempts));
+
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(0.90, point.X(), tolerance);
+    TS_ASSERT_DELTA(1.10, point.Y(), tolerance);
+    TS_ASSERT_DELTA(0.70, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideRespectsMaxAttempts() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.1));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.2));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.3));
+
+    //  Random sequence set up so as to give point (-0.8, -0.6, -0.4),
+    //  which is outside the octahedron
+    auto geom_obj = createOctahedron();
+    size_t maxAttempts(1);
+    TS_ASSERT_THROWS(geom_obj->generatePointInObject(rng, maxAttempts),
+      std::runtime_error);
+  }
+
   void testVolumeOfCube() {
     double size = 3.7;
     auto geom_obj = createCube(size);
