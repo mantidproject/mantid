@@ -30,11 +30,11 @@ set_target_properties ( Types PROPERTIES OUTPUT_NAME MantidTypes
                                           COMPILE_DEFINITIONS "Types_EXPORTS;PSAPI_VERSION=1" )
                                           
 set_property ( TARGET Types PROPERTY FOLDER "MantidFramework" )
-                                          
-target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
-target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
-#Auto-generate exports header
-generate_mantid_export_header(Types)
+target_link_libraries ( Types LINK_PUBLIC ${Boost_LIBRARIES} )
+target_include_directories ( Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
+target_include_directories ( Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types )
+# Auto-generate exports header
+generate_mantid_export_header ( Types )
 
 
 ###########################################################################

@@ -46,10 +46,6 @@ public:
   V3D();
   V3D(const double, const double, const double);
 
-  // Arithemetic operators overloaded
-  V3D operator+(const V3D &v) const;
-  V3D &operator+=(const V3D &v);
-
   /// Convenience method for sorting list of V3D objects based on magnitude
   static bool CompareMagnitude(const Kernel::V3D &v1, const Kernel::V3D &v2);
 
@@ -62,6 +58,9 @@ public:
     return tmp;
   }
 
+  // Arithemetic operators overloaded
+  V3D operator+(const V3D &v) const;
+  V3D &operator+=(const V3D &v);
   V3D operator-(const V3D &v) const;
   V3D &operator-=(const V3D &v);
   // Inner product
@@ -75,6 +74,8 @@ public:
   V3D &operator*=(const double D);
   V3D operator/(const double D) const;
   V3D &operator/=(const double D);
+  // Negation
+  V3D operator-() const noexcept;
   // Simple Comparison
   bool operator==(const V3D &) const;
   bool operator!=(const V3D &) const;
