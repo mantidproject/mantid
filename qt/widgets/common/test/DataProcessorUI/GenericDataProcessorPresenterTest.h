@@ -2868,10 +2868,10 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Test transmission run list separated by both comma and plus symbol
-    QStringList row0 = {
-        "12345", "0.5", "11115,11116", "0.1", "0.3", "0.04", "1", "", ""};
-    QStringList row1 = {
-        "12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""};
+    QStringList row0 = {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04",
+                        "1", "", ""};
+    QStringList row1 = {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04",
+                        "1", "", ""};
     std::map<int, QStringList> group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
