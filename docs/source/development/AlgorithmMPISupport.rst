@@ -22,7 +22,7 @@ MPI support for these multi-dimensional workspaces is beyond the scope of this d
 Spectrum and Detector
 ---------------------
 
-In Mantid the terms spectrum and detector are used interchangeably at times, leading to unnecessary confusion.
+In Mantid the terms spectrum and detector are used interchangeably at times, leading to confusion.
 In particular, it is sometimes assumed that there is a 1:1 correspondence between spectra and detectors.
 It is important to clearly distinguish between a spectrum and a detector, especially in the context of MPI support.
 We may define the terms as follows:
@@ -370,10 +370,11 @@ The consequences are as follows:
 - The number of histograms in a workspace obtained from ``MatrixWorkspace::getNumberHistograms()`` may only be used for processing all spectra, i.e., when each MPI rank is processing all its local spectra.
   It should not be logged, written as output, or used for branching execution paths since it is meaningless.
   If the total number of spectra in a workspace is required it can be accessed via ``MatrixWorkspace::indexInfo()::globalSize()``.
-- User input providing indices or spectrum numbers in way or another must be translated into local indices by ``IndexInfo``.
-  The most common cases will be covered by a workspace property that also accepts indices (under development).
+- User input providing indices or spectrum numbers in one way or another must be translated into local indices by ``IndexInfo``.
+  The most common cases are a workspace property that also accepts indices, see `IndexProperty`_.
 - The distinction between local and global indices must not be exposed to the user.
   In particular, the 'global' prefix should be omitted, i.e., for the user interface we keep referring to 'workspace index', even though it is internally not what used to be the workspace index but rather a global index.
+  Indices provided by a user may never be interpreted as local indices, since a local index has no fixed meaning.
 
 
 Instrument and detectors
