@@ -264,10 +264,10 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
   std::vector<size_t> allSizes;
   Parallel::gather(communicator(), size(), allSizes, 0);
   std::vector<GlobalSpectrumIndex> spectrumIndices;
+  int tag = 0;
   if (communicator().rank() == 0) {
     for (int rank = 1; rank < communicator().size(); ++rank) {
       spectrumDefinitions[rank].resize(allSizes[rank]);
-      int tag = 0;
       auto buffer = reinterpret_cast<char *>(spectrumDefinitions[rank].data());
       auto bytes = static_cast<int>(sizeof(int64_t) * allSizes[rank]);
       communicator().recv(rank, tag, buffer, bytes);
@@ -297,13 +297,11 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
             "possible");
     }
     for (int rank = 1; rank < communicator().size(); ++rank) {
-      int tag = 0;
       auto buffer = reinterpret_cast<char *>(spectrumIndices.data());
       auto bytes = static_cast<int>(sizeof(int64_t) * spectrumIndices.size());
       communicator().send(rank, tag, buffer, bytes);
     }
   } else {
-    int tag = 0;
     auto buffer = reinterpret_cast<char *>(thisRankSpectrumDefinitions.data());
     auto bytes = static_cast<int>(sizeof(int64_t) * size());
     communicator().send(0, tag, buffer, bytes);
