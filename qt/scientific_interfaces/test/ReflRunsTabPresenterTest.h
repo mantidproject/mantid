@@ -140,14 +140,8 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    int group = 199;
-    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
-        .Times(Exactly(1))
-        .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group))
-        .Times(1)
-        .WillOnce(Return(OptionsMap()));
-    presenter.getPreprocessingOptionsAsString();
+    // this is not implemented for the reflectometry interface so should throw
+    TS_ASSERT_THROWS_ANYTHING(presenter.getPreprocessingOptionsAsString());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
