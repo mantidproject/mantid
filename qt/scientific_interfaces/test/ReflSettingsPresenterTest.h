@@ -88,17 +88,15 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return("12"));
     EXPECT_CALL(mockView, getTransmissionRuns())
-        .Times(Exactly(1))
+        .Times(Exactly(0))
         .WillOnce(Return("INTER00013463,INTER00013464"));
 
     auto options = presenter.getTransmissionOptions();
-    TS_ASSERT_EQUALS(options.size(), 12);
+    TS_ASSERT_EQUALS(options.size(), 11);
     TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
                      "MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(options["StartOverlap"].toStdString(), "10");
     TS_ASSERT_EQUALS(options["EndOverlap"].toStdString(), "12");
-    TS_ASSERT_EQUALS(options["FirstTransmissionRun"].toStdString(),
-                     "INTER00013463,INTER00013464");
     TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"].toStdString(),
                      "4");
     TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"].toStdString(),
@@ -367,7 +365,7 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();
