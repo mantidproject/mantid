@@ -51,7 +51,7 @@ private:
 
   /// TODO - Implment .. convert peak function's parameter names to parameter
   /// index for fast access
-  void convert_parameter_name_to_index();
+  void ConvertParametersNameToIndex();
 
   /// methods to retrieve fit range and peak centers
   std::vector<double> getExpectedPeakPositions(size_t wi);
@@ -132,7 +132,7 @@ private:
   void writeFitResult(size_t wi, const std::vector<double> &expected_positions,
                       std::vector<double> &fitted_positions,
                       std::vector<std::vector<double>> &peak_parameters,
-                      std::vector<double> &peak_chi2_vec);
+                      std::vector<double> &peak_chi2_vec, bool noevents);
 
   /// estimate linear background
   void estimateLinearBackground(size_t wi, double left_window_boundary,
@@ -173,6 +173,9 @@ private:
   std::string m_minimizer;
   /// Cost function
   std::string m_costFunction;
+
+  // Inputs about peak parameters
+  std::vector<size_t> m_initParamIndexes;
 
   //-------- Peak centers (expected)
   //-------------------------------------------------

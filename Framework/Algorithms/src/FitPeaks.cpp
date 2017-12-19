@@ -278,7 +278,7 @@ void FitPeaks::processInputs() {
   else
     m_eventNumberWS = 0;
 
-  g_log.notice("[DB] Process inputs [1]");
+  g_log.debug("[DB] Process inputs [1]");
 
   // spectra to fit
   int start_wi = getProperty("StartWorkspaceIndex");
@@ -354,18 +354,33 @@ void FitPeaks::processInputFunctions() {
   if (partablename.size() == 0 && m_peakParamNames.size() > 0)
   {
     // use uniform starting value of peak parameters
-    m_uniformProfileStartingValue = true;
     m_initParamValues = getProperty("PeakParameterValues");
+    // check whether given parameter names and initial values match
+    if (m_peakParamNames.size() != m_initParamValues.size())
+      throw std::invalid_argument("PeakParameterNames and PeakParameterValues "
+                                  "have different number of items.");
     // convert the parameter name in string to parameter name in integer index
-    convert_parameter_name_to_index();
+    ConvertParametersNameToIndex();
+    // set the flag
+    m_uniformProfileStartingValue = true;
   }
   else if (partablename.size() > 0 && m_peakParamNames.size() == 0)
   {
     // use non-uniform starting value of peak parameters
     m_uniformProfileStartingValue = false;
-    m_profileStartingValueTable = getProperty("partablename");
+    m_profileStartingValueTable = getProperty(partablename);
+  } else if (partablename.size() > 0 && m_peakParamNames.size() > 0) {
+    // user specifies both of them causing confusion
+    throw std::invalid_argument("Parameter value table and initial parameter "
+                                "name/value vectors cannot be given "
+                                "simultanenously.");
+  } else {
+    // user specifies nothing
+    throw std::invalid_argument("Neither parameter value table nor initial "
+                                "parameter name/value vectors is specified.");
   }
 
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -374,38 +389,44 @@ void FitPeaks::processInputFunctions() {
  * @brief FitPeaks::processInputFitRanges
  */
 void FitPeaks::processInputFitRanges() {
-
   // get peak fit window
   std::vector<double> peakwindow = getProperty("FitWindowBoundaryList");
   std::string peakwindowname = getPropertyValue("FitPeakWindowWorkspace");
 
   if (peakwindow.size() > 0 && peakwindowname.size() == 0) {
-    // use vector for peak windows
+    // Peak windows are uniform among spectra: use vector for peak windows
     m_uniformPeakPositions = true;
+
     // check peak positions
     if (!m_uniformPeakPositions)
       throw std::invalid_argument(
           "Uniform peak range/window requires uniform peak positions.");
-
     // check size
     if (peakwindow.size() != m_numPeaksToFit * 2)
       throw std::invalid_argument(
           "Peak window vector must be twice as large as number of peaks.");
-    // check range
+
+    // set up window to m_peakWindowVector
     m_peakWindowVector.resize(m_numPeaksToFit);
     for (size_t i = 0; i < m_numPeaksToFit; ++i) {
       std::vector<double> peakranges(2);
       peakranges[0] = peakwindow[i * 2];
       peakranges[1] = peakwindow[i * 2 + 1];
-      if (!(peakranges[0] < m_peakCenters[i]) ||
-          !(m_peakCenters[i] < peakranges[1])) {
+      // check peak window (range) against peak centers
+      if ((peakranges[0] < m_peakCenters[i]) &&
+          (m_peakCenters[i] < peakranges[1])) {
+        // pass check: set
+        m_peakWindowVector[i] = peakranges;
+      } else {
+        // failed
         std::stringstream errss;
         errss << "Peak " << i
               << ": use specifies an invalid range and peak center against "
               << peakranges[0] << " < " << m_peakCenters[i] << peakranges[1];
         throw std::invalid_argument(errss.str());
       }
-    }
+    } // END-FOR
+    // END for uniform peak window
   } else if (peakwindow.size() == 0 && peakwindowname.size() > 0) {
     // use matrix workspace for non-uniform peak windows
     m_peakWindowWorkspace = getProperty("FitPeakWindowWorkspace");
@@ -464,7 +485,7 @@ void FitPeaks::processInputFitRanges() {
   } else if (peakwindow.size() == 0) {
     // no definition at all!
     // TODO/ISSUE/NOW - Implement
-    ;
+    throw std::invalid_argument("blabla");
   } else {
     // non-supported situation
     throw std::invalid_argument("One and only one of peak window array and peak window workspace can be specified.");
@@ -534,40 +555,36 @@ void FitPeaks::processInputPeakCenters() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** convert the input initial parameter name/value to parameter index/value for faster access
- * @brief FitPeaks::convert_parameter_name_to_index
+/** Convert the input initial parameter name/value to parameter index/value for
+ * faster access
+ * according to the parameter name and peak profile function
+ * @brief FitPeaks::ConvertParametersNameToIndex
+ * Output: m_initParamIndexes will be set up
  */
-void FitPeaks::convert_parameter_name_to_index() {
-
-  // get a map for parameter name and parameter index
+void FitPeaks::ConvertParametersNameToIndex() {
+  // get a map for peak profile parameter name and parameter index
   std::map<std::string, size_t> parname_index_map;
   for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
-  {
     parname_index_map.insert(std::make_pair(m_peakFunction->parameterName(iparam), iparam));
-  }
+
+  // define peak parameter names (class variable) if using table
+  if (m_profileStartingValueTable)
+    m_peakParamNames = m_profileStartingValueTable->getColumnNames();
 
   // map the input parameter names to parameter indexes
-  std::vector<std::string> init_param_names = getProperty("PeakParameterNames");
-  API::ITableWorkspace_const_sptr param_table = getProperty("PeakParameterValueTable");
-  if (param_table && init_param_names.size() > 0)
-    throw std::invalid_argument("Parameter value table and initial parameter name/value vectors cannot be given simultanenously.");
-  else if (!param_table && init_param_names.size() == 0)
-    throw std::invalid_argument("Neither parameter value table nor initial parameter name/value vectors is specified.");
-  else if (param_table) {
-    init_param_names = param_table->getColumnNames();
-  }
-
-  // convert
-  std::vector<double> m_initParamIndexes;
-  for (size_t i = 0; i < init_param_names.size(); ++i)
-  {
-    std::map<std::string, size_t>::iterator locator = parname_index_map.find(init_param_names[i]);
+  for (size_t i = 0; i < m_peakParamNames.size(); ++i) {
+    std::map<std::string, size_t>::iterator locator =
+        parname_index_map.find(m_peakParamNames[i]);
     if (locator != parname_index_map.end())
       m_initParamIndexes.push_back(locator->second);
     else
     {
-      g_log.warning() << "Given peak parameter " << init_param_names[i] << " is not an allowed parameter of peak "
-                         "function " << m_peakFunction->name() << "\n";
+      // a parameter name that is not defined in the peak profile function.  An
+      // out-of-range index is thus set to this
+      g_log.warning() << "Given peak parameter " << m_peakParamNames[i]
+                      << " is not an allowed parameter of peak "
+                         "function "
+                      << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams()*10);
     }
   }
@@ -626,7 +643,7 @@ void FitPeaks::fitPeaks() {
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(wi, expected_peak_centers, fitted_peak_centers,
-                       fitted_parameters, peak_chi2_vec);
+                       fitted_parameters, peak_chi2_vec, noevents);
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -1057,6 +1074,7 @@ int FitPeaks::estimatePeakParameters(
   if (result == GOOD) {
     // TODO - Implement!
     // use values from background to locate FWHM
+    peakfunction->setCentre(peak_center);
   }
 
   return result;
@@ -1534,10 +1552,17 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak)
 //}
 
 //----------------------------------------------------------------------------------------------
+/** reduce the background value of data set to fit
+ * @brief FitPeaks::reduceBackground
+ * @param vec_x
+ * @param vec_y
+ * @param bkgd_a
+ * @param bkgd_b
+ */
 void FitPeaks::reduceBackground(const std::vector<double> &vec_x,
                                 const std::vector<double> &vec_y,
                                 double &bkgd_a, double &bkgd_b) {
-  // calculate the area
+  // calculate the area under the curve
   double area = 0;
   for (size_t i = 1; i < vec_y.size(); ++i) {
     double y_0 = vec_y[i - 1];
@@ -1562,7 +1587,7 @@ void FitPeaks::reduceBackground(const std::vector<double> &vec_x,
     throw std::runtime_error(
         "It is not possible to have less than 2 local minima for a peak");
 
-  // loop around to find the pair
+  // loop around to find the pair of 2 lowest local minima
   double min_area = DBL_MAX;
   double min_bkgd_a, min_bkgd_b;
   double x_0 = vec_x[0];
@@ -1879,7 +1904,8 @@ void FitPeaks::writeFitResult(size_t wi,
                               const std::vector<double> &expected_positions,
                               std::vector<double> &fitted_positions,
                               std::vector<std::vector<double>> &peak_parameters,
-                              std::vector<double> &peak_chi2_vec) {
+                              std::vector<double> &peak_chi2_vec,
+                              bool noevents) {
 
   // check inputs
   if (fitted_positions.size() != expected_positions.size() ||

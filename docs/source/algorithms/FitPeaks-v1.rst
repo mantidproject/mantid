@@ -109,11 +109,34 @@ One of only one of the following will be taken.
 Fit Window
 ##########
 
+There are two input parameters that are associated with fitting window.
+
+ * FitWindowBoundaryList
+ * FitPeakWindowWorkspace
+
+
 If FitWindows is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.
 
 If FitWindows is defined, starting peak centres are NOT user's input,
 but found by highest value within peak window. (Is this correct???)
+
+
+Further down the road, here are the fitting setup that can be affected.
+
+  * Peak positions are uniform among all spectra;
+
+  * 
+
+
+
+Algorithm Configurations
+########################
+
+ * Peak profile starting value will be given as 
+
+    - an array **PeakParameterValues** such that the starting values are uniform among all spectra.
+    - a table (workspace) **PeakParameterValueTable** such that the starting values are not necessary same among all spectra.
 
 
 Calculation of starting value of peak profile and background parameters
