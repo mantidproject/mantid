@@ -34,7 +34,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <qwt_double_interval.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
