@@ -61,16 +61,17 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep);
 
-QString DLLExport plotsString(const QStringList &output_ws,
-                              const QString &stitched_wsStr,
-                              const ProcessingAlgorithm &processor);
+QString DLLExport plotsString(
+    const std::vector<OptionsMap> &processingOptionsPerRow,
+    const QString &stitched_wsStr, const ProcessingAlgorithm &processor);
 
-boost::tuple<QString, QString> DLLExport reduceRowString(
+QString DLLExport reduceRowString(
     const RowData &data, const QString &instrument, const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
-    const ColumnOptionsMap &preprocessOptionsMap,
-    const OptionsMap &processingOptions);
+    const ColumnOptionsMap &globalPreprocessingOptionsMap,
+    const OptionsMap &globalProcessingOptions,
+    std::vector<OptionsMap> &processingOptionsPerRow);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,

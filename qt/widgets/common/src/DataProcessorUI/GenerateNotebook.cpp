@@ -85,26 +85,23 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     QString groupTitle = "Group " + QString::number(groupId);
     notebook->markdownCell(groupTitle.toStdString());
 
+    // Record processing options used for each row
+    std::vector<OptionsMap> processingOptionsPerRow;
+
     /**  Reduce all rows **/
 
     // The python code
     QString codeString;
-    // A vector to store the output ws produced during the reduction process
-    // In the case of Reflectometry those will be the IvsQ_ and IvsLam
-    // workspaces
-    QStringList output_ws;
-
     for (const auto &row : rowMap) {
       codeString += "#Load and reduce\n";
 
       auto reducedRowStr = reduceRowString(
           row.second, m_instrument, m_whitelist, m_preprocessMap, m_processor,
-          m_preprocessingOptionsMap, m_processingOptions);
+          m_preprocessingOptionsMap, m_processingOptions,
+          processingOptionsPerRow);
 
       // The reduction code
-      codeString += boost::get<0>(reducedRowStr);
-      // The output workspace names
-      output_ws.append(boost::get<1>(reducedRowStr));
+      codeString += reducedRowStr;
     }
     notebook->codeCell(codeString.toStdString());
 
@@ -119,8 +116,10 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Draw plots **/
 
-    notebook->codeCell(plotsString(output_ws, boost::get<1>(postProcessString),
-                                   m_processor).toStdString());
+    notebook->codeCell(plotsString(processingOptionsPerRow,
+                                   boost::get<1>(postProcessString),
+                                   m_processor)
+                           .toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());
@@ -147,14 +146,14 @@ QString titleString(const QString &wsName) {
 
 /**
   Create string of python code to call plots() with the required workspaces
-  @param output_ws : vector containing all the output workspaces produced during
-  the reduction
+  @param processingOptions : the properties that were used in the reduction
   @param stitched_wsStr : string containing the name of the stitched
   (post-processed workspace)
   @param processor : the data processor algorithm
   @return string containing the python code
   */
-QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
+QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
+                    const QString &stitched_wsStr,
                     const ProcessingAlgorithm &processor) {
 
   // First, we have to parse 'output_ws'
@@ -187,10 +186,11 @@ QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
   // Now we iterate through groups to get the relevant workspace
   for (auto group = 0u; group < nGroups; group++) {
 
+    QString propertyName = processor.outputPropertyName(group);
+
     // From the reduction (processing) algorithm, get the prefix for the
     // output workspace, we'll use it to give name to this group
     QString prefix = processor.prefix(group);
-
     plotString += prefix + "groupWS = GroupWorkspaces(InputWorkspaces = '";
 
     // Save this group to workspaceList
@@ -198,11 +198,10 @@ QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
 
     QStringList wsNames;
 
-    // Iterate through the elements of output_ws
-    for (const auto &outws : output_ws) {
-      auto workspaces = splitByCommas(outws);
-      // Get the workspace we need for this group
-      wsNames.append(workspaces[group]);
+    // Add the output name for this property from each reduced row
+    for (auto const &processingOptions : processingOptionsPerRow) {
+      if (processingOptions.find(propertyName) != processingOptions.end())
+        wsNames.append(processingOptions.at(propertyName));
     }
 
     plotString += wsNames.join(", ");
@@ -353,20 +352,25 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
  @param whitelist : the whitelist
  @param preprocessMap : the pre-processing instructions as a map
  @param processor : the processing algorithm
- @param preprocessingOptionsMap : a map containing the pre-processing options
- @param processingOptions : the pre-processing options specified via hinting
+ @param globalPreprocessingOptionsMap : a map containing the pre-processing
+ options
+ @param globalProcessingOptions : the pre-processing options specified via
+ hinting
  line edit
+ @param processingOptionsPerRow [inout] : the processing options used for each
+ row
  @return tuple containing the python string and the output workspace names.
  First item in the tuple is the python code that performs the reduction, and
  second item are the names of the output workspaces.
 */
-boost::tuple<QString, QString>
+QString
 reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
                 const ColumnOptionsMap &globalPreprocessingOptionsMap,
-                const OptionsMap &globalProcessingOptions) {
+                const OptionsMap &globalProcessingOptions,
+                std::vector<OptionsMap> &processingOptionsPerRow) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -377,7 +381,9 @@ reduceRowString(const RowData &data, const QString &instrument,
   // Add algorithm properties for the main processing algorithm. Some of
   // these may get overwritten by preprocessing below
   OptionsMap processingOptions =
-      getCanonicalOptions(&data, globalProcessingOptions, whitelist, true);
+      getCanonicalOptions(&data, globalProcessingOptions, whitelist, true,
+                          processor.outputProperties(), processor.prefixes());
+  processingOptionsPerRow.push_back(processingOptions);
 
   // Loop through all columns, excluding 'Options'  and 'Hidden Options'
   int ncols = static_cast<int>(whitelist.size());
@@ -401,14 +407,11 @@ reduceRowString(const RowData &data, const QString &instrument,
       const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
 
       // The options for the pre-processing alg
-      QString options;
-      if (globalPreprocessingOptionsMap.count(colName) > 0) {
-        // Only include options in the given preprocessing options map,
-        // but override them if they are set in the row data
-        OptionsMap preprocessingOptions = getCanonicalOptions(
-            &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
-        options = convertMapToString(preprocessingOptions);
-      }
+      // Only include options in the given preprocessing options map,
+      // but override them if they are set in the row data
+      OptionsMap preprocessingOptions = getCanonicalOptions(
+          &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
+      QString options = convertMapToString(preprocessingOptions);
 
       // Python code ran to load and pre-process runs
       const boost::tuple<QString, QString> load_ws_string =
@@ -428,26 +431,8 @@ reduceRowString(const RowData &data, const QString &instrument,
   QStringList algProperties;
   addProperties(algProperties, processingOptions);
 
-  /* Now construct the names of the reduced workspaces*/
-
-  // Vector containing the output ws names
-  // For example
-  // 'IvsQ_TOF_13460_13462',
-  // 'IvsLam_TOF_13460_13462
-  QStringList outputProperties;
-  for (auto prop = 0u; prop < processor.numberOfOutputProperties(); prop++) {
-    outputProperties.append(
-        getReducedWorkspaceName(data, whitelist, processor.prefix(prop)));
-  }
-
-  QString outputPropertiesStr = outputProperties.join(", ");
-
   // Populate processString
   QString processString;
-  processString += outputPropertiesStr;
-  processString += completeOutputProperties(
-      processor.name(), processor.numberOfOutputProperties());
-  processString += " = ";
   processString += processor.name();
   processString += "(";
   processString += algProperties.join(", ");
@@ -461,7 +446,7 @@ reduceRowString(const RowData &data, const QString &instrument,
   codeString += "\n";
 
   // Return the python code + the output properties
-  return boost::make_tuple(codeString, outputPropertiesStr);
+  return codeString;
 }
 
 /**

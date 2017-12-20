@@ -279,10 +279,12 @@ public:
     // Whitelist and data differ in size
 
     RowData rowData = {"12345", "1.5"};
+    std::vector<OptionsMap> processingOptionsPerRow;
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
         rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
-        reflProcessor(), ColumnOptionsMap(), OptionsMap()));
+        reflProcessor(), ColumnOptionsMap(), OptionsMap(),
+        processingOptionsPerRow));
   }
 
   void testReduceRowString() {
@@ -295,10 +297,11 @@ public:
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    auto output =
-        reduceRowString(data, m_instrument, reflWhitelist(),
-                        reflPreprocessMap("TOF_"), reflProcessor(),
-                        userPreProcessingOptions, OptionsMap());
+    std::vector<OptionsMap> processingOptionsPerRow;
+    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
+                                  reflPreprocessMap("TOF_"), reflProcessor(),
+                                  userPreProcessingOptions, OptionsMap(),
+                                  processingOptionsPerRow);
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -335,9 +338,10 @@ public:
     // Create some data
     const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
 
-    auto output =
-        reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
-                        userPreProcessingOptions, OptionsMap());
+    std::vector<OptionsMap> processingOptionsPerRow;
+    auto output = reduceRowString(data, "INST", whitelist, preprocessMap,
+                                  reflProcessor(), userPreProcessingOptions,
+                                  OptionsMap(), processingOptionsPerRow);
 
     const QString result[] = {
         "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000+1001 = RUN_1000",
@@ -372,10 +376,11 @@ public:
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
+    std::vector<OptionsMap> processingOptionsPerRow;
     auto output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
                         reflProcessor(), emptyPreProcessingOptions,
-                        OptionsMap());
+                        OptionsMap(), processingOptionsPerRow);
 
     const QString result[] = {
         "IvsQ_binned_TOF_12346, IvsQ_TOF_12346, IvsLam_TOF_12346 = "
