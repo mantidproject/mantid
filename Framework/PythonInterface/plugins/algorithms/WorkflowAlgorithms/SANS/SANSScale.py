@@ -4,14 +4,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.algorithm_detail.scale_helpers import (DivideByVolumeFactory, MultiplyByAbsoluteScaleFactory)
 from sans.common.general_functions import (append_to_sans_file_tag)
 
 
-class SANSScale(DataProcessorAlgorithm):
+class SANSScale(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Scale'
 

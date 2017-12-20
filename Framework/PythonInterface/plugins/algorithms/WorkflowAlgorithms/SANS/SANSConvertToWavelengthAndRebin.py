@@ -5,14 +5,14 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, StringListValidator, Property)
 from mantid.dataobjects import EventWorkspace
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag,
                                            get_input_workspace_as_copy_if_not_same_as_output_workspace)
 from sans.common.enums import (RebinType, RangeStepType)
 
 
-class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
+class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Wavelength'
 

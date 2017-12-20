@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
+from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
@@ -22,7 +22,7 @@ class Mode(object):
         pass
 
 
-class SANSFitShiftScale(DataProcessorAlgorithm):
+class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}

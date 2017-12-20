@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
+from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
     EnabledWhenProperty, PropertyCriterion
 import numpy as np
@@ -25,7 +25,7 @@ class Mode(object):
         pass
 
 
-class SANSStitch(DataProcessorAlgorithm):
+class SANSStitch(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}

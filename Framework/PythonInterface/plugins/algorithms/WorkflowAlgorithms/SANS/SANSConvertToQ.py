@@ -3,7 +3,7 @@
 """ Converts a workspace from wavelengths to momentum transfer."""
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, CompositeValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
 
 from sans.common.constants import EMPTY_NAME
@@ -13,7 +13,7 @@ from sans.state.state_base import create_deserialized_sans_state_from_property_m
 from sans.algorithm_detail.q_resolution_calculator import QResolutionCalculatorFactory
 
 
-class SANSConvertToQ(DataProcessorAlgorithm):
+class SANSConvertToQ(DistributedDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\ConvertToQ'
 

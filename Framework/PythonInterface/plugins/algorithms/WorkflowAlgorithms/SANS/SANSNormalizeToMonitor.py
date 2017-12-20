@@ -4,14 +4,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, FloatBoundedValidator, PropertyManagerProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import RebinType, RangeStepType
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
-class SANSNormalizeToMonitor(DataProcessorAlgorithm):
+class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
 
