@@ -8,6 +8,7 @@ set ( HEADER_DEPENDS
 
 list ( APPEND common_link_libs
   ${TCMALLOC_LIBRARIES_LINKTIME}
+  Kernel
   ${POCO_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
