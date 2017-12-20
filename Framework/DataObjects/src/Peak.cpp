@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
-#include <valgrind/callgrind.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -630,13 +629,11 @@ bool Peak::findDetector() {
 }
 
 bool Peak::findDetector(const InstrumentRayTracer &tracer) {
-  CALLGRIND_START_INSTRUMENTATION;
   // Scattered beam direction
   V3D beam = detPos - samplePos;
   beam.normalize();
 
   return findDetector(beam, tracer);
-  CALLGRIND_STOP_INSTRUMENTATION;
 }
 
 /**
