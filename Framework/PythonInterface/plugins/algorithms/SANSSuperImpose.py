@@ -195,22 +195,32 @@ class SANSSuperImpose(PythonAlgorithm):
 
     def _trim_data(self, q_min, q_max):
         '''
-        Convert the input grouped workspaces into a OrderedDict with the values
-        of interest
+        trimmed is cutoff by q
         '''
         
         for _, v in self.data.items():
             x = v['x']
             y = v['y']
             e = v['e']
-            # Getting rid of values where y is 0
+            # Getting rid of values where y <= 0
             x_positive = x[y>0]
             e_positive = e[y>0]
             y_positive = y[y>0]
+
             # Trimming of the q range
             e_trimmed = e[(x>=q_min)&(x<=q_max)]
             y_trimmed = y[(x>=q_min)&(x<=q_max)]
             x_trimmed = x[(x>=q_min)&(x<=q_max)]
+
+            # discard aditional points
+            if self.discard_end > 0:
+                x_trimmed = x_trimmed[self.discard_begin:-self.discard_end]
+                y_trimmed = y_trimmed[self.discard_begin:-self.discard_end]
+                e_trimmed = e_trimmed[self.discard_begin:-self.discard_end]
+            else:
+                x_trimmed = x_trimmed[self.discard_begin:]
+                y_trimmed = y_trimmed[self.discard_begin:]
+                e_trimmed = e_trimmed[self.discard_begin:]
 
             v.update({
                 'x_trimmed': x_trimmed,
