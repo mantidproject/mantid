@@ -357,7 +357,7 @@ createCylInstrumentWithVerticalOffsetsSpecified(
       instrument->markAsDetector(physicalPixel);
     }
     tube->setPos(
-        V3D(xMin + i * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
+        V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
     bank->add(tube);
   }
   bank->setPos(V3D(0, 0, bankZPos));

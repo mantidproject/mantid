@@ -2,12 +2,12 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
 
@@ -491,14 +491,8 @@ Quat CompAssembly::getRotation() const {
 }
 
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
-  using boost::regex;
-  const auto name = this->getName();
-  if (boost::regex_match(name, regex(".+pack$", regex::icase))) {
-    return visitor.registerBankOfTubes(*this);
-  } else if (boost::regex_match(name, regex("^tube.+", regex::icase))) {
-    return visitor.registerTube(*this);
-  }
-  return visitor.registerComponentAssembly(*this);
+    // via common helper
+    return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
 }
 
 /** Print information about elements in the assembly to a stream

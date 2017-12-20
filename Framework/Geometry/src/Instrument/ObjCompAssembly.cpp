@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -8,7 +9,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
@@ -358,12 +358,8 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
-  using boost::regex;
-  const auto name = this->getName();
-  if (boost::regex_match(name, regex("^tube.+", regex::icase))) {
-    return visitor.registerTube(*this);
-  }
-  return visitor.registerComponentAssembly(*this);
+    // via common helper
+    return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to
