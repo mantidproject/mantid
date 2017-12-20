@@ -841,20 +841,20 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
     return inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
   }
   const double restZ = inMeter(doubleFromRun(m_detectorDistanceName + ".value"));
-  const double detectorRestZ = restZ - m_sampleZOffset;
   // Motor DH1 vertical coordinate.
   const double DH1Y = inMeter(doubleFromRun("DH1.value"));
   const double detAngle = detectorAngle();
   const double detectorY =
-      std::sin(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + DH1Y -
+      std::sin(inRad(detAngle)) * (restZ - Figaro::DH1Z) + DH1Y -
       Figaro::detectorRestY;
   const double detectorZ =
-      std::cos(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + Figaro::DH1Z;
+      std::cos(inRad(detAngle)) * (restZ - Figaro::DH1Z) + Figaro::DH1Z;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
   const double sht1 = inMeter(doubleFromRun("SHT1.value"));
   const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
-  return std::hypot(beamY - sht1, beamZ);
+  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  return std::hypot(beamY - sht1, beamZ) - m_sampleZOffset / std::cos(inRad(deflectionAngle));
 }
 
 /// Return the horizontal offset along the z axis.
@@ -877,7 +877,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
   } else if (m_instrumentName == "Figaro") {
     const double chopperDist = inMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
     const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
-    return chopperDist + m_sampleZOffset * std::cos(inRad(deflectionAngle));
+    return chopperDist + m_sampleZOffset / std::cos(inRad(deflectionAngle));
   }
   std::ostringstream out;
   out << "sourceSampleDistance: unknown instrument " << m_instrumentName;
