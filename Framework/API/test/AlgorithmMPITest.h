@@ -390,8 +390,6 @@ void run1To1StorageModeTransition(const Parallel::Communicator &comm) {
   auto alg = create<FakeAlg1To1StorageModeTransition<modeOut>>(comm);
   if (modeIn != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
     alg->setProperty("InputWorkspace", in);
-  } else {
-    alg->setProperty("InputWorkspace", in->cloneEmpty());
   }
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
