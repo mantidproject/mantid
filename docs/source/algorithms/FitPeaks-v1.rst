@@ -89,6 +89,12 @@ Inputs
 The inputs tends to be general enough for various use cases.
 
 
+Limitations
+###########
+
+ * For partial spectra peak fitting, the spectra must be consecutive.
+
+
 Peak positions
 ##############
 
@@ -98,11 +104,17 @@ One of only one of the following will be taken.
    * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
    * X value is the index of the peak.
    * Y value is the position of the peaks to fit.
+   * Peak centers are stored in **m_peakCenterWorkspace**.
+   - Spectra can be a subset of all spectra because FitPeaks can work on partial spectra.
 
  * An array of double as the positions of the peaks to fit.
 
+   * Peak centers are stored in **m_peakCenters**
 
- **Peaks are always fit with the order of their positions given**
+
+ **Peaks' positions must be given in ascending order**
+
+ Parameter **FitFromRight** is used as the flag to fit from right most peak or left most peak.
 
 
 
@@ -126,7 +138,23 @@ Further down the road, here are the fitting setup that can be affected.
 
   * Peak positions are uniform among all spectra;
 
-  * 
+    - Peak window information will be retrieved from **m_peakWindowVector**
+
+  * Peak positions are different among spectra.
+
+    - Peak windown information will be retrieved from **m_peakWindowWorkspace**
+
+
+Tolerance on Fitting Peaks Positions
+####################################
+
+Tolerance will be always checked!
+
+ * Uniform tolerance
+ 
+ * Non-uniform tolerance
+
+ * Case 2, 3 and 4
 
 
 
@@ -296,6 +324,15 @@ Output:
 .. testoutput:: ExFindPeakSingle
 
    Peak 1 {Centre: 5.050, width: 1.648, height: 10.000 }
+
+
+**Example - Find multiple peaks with uniform positions among all spectra:**
+
+
+**Example - Find multiple peaks with various positions among all sepctra:**
+
+
+**Example - Find multiple peaks in partial spectra with various positions among those spectra:**
 
 
 .. categories::

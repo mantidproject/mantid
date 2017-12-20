@@ -45,7 +45,10 @@ private:
 
   /// process inputs (main and child algorithms)
   void processInputs();
-  void processInputPeakCenters();
+  /// peak centers
+  void ProcessInputPeakCenters();
+  /// fitting tolerance
+  void ProcessInputPeakTolerance();
   void processInputFunctions();
   void processInputFitRanges();
 
@@ -54,8 +57,8 @@ private:
   void ConvertParametersNameToIndex();
 
   /// methods to retrieve fit range and peak centers
-  std::vector<double> getExpectedPeakPositions(size_t wi);
-  std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
+  std::vector<double> GetExpectedPeakPositions(size_t wi);
+  std::pair<double, double> GetPeakFitWindow(size_t wi, size_t ipeak);
 
   /// suites of method to fit peaks
   void fitPeaks();
@@ -139,15 +142,16 @@ private:
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
-  /// set peak positions tolerance
-  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
+  //  /// set peak positions tolerance
+  //  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
 
   //------- Workspaces
   //-------------------------------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_const_sptr m_inputMatrixWS;
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
-  API::MatrixWorkspace_sptr m_outputWS; // output workspace for peak positions
+  API::MatrixWorkspace_sptr
+      output_peak_position_workspaces_; // output workspace for peak positions
 
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
@@ -212,8 +216,6 @@ private:
   /// minimum peak height without background and it also serves as the criteria
   /// for observed peak parameter
   double m_minPeakHeight;
-
-  bool m_checkPeakPositionByTolerance;
 
   /// flag for high background
   bool m_highBackground;
