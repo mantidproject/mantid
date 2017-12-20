@@ -203,9 +203,9 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
         wsNames.append(processingOptions.at(propertyName));
     }
 
-    plotString += wsNames.join(", ");
+    plotString += "GroupWorkspaces(InputWorkspaces = '" + wsNames.join(", ") + "', ";
     plotString += "OutputWorkspace = '" + prefix + "groupWS'";
-    plotString += "')\n";
+    plotString += ")\n";
   }
 
   // Add the post-processed workspace to the list of workspaces to plot
