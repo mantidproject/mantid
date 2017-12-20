@@ -1,15 +1,16 @@
 #ifndef MANTID_GEOMETRY_COMPONENTVISITORHELPERTEST_H_
 #define MANTID_GEOMETRY_COMPONENTVISITORHELPERTEST_H_
 
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 using namespace Mantid::Geometry;
 
 std::ostream &operator<<(std::ostream &out,
@@ -19,6 +20,7 @@ std::ostream &operator<<(std::ostream &out,
 }
 
 namespace {
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockComponentVisitor : public ComponentVisitor {
 public:
   MOCK_METHOD1(registerComponentAssembly,
@@ -36,7 +38,7 @@ public:
   MOCK_METHOD1(registerTube,
                size_t(const Mantid::Geometry::ICompAssembly &tube));
 };
-}
+} // namespace
 
 class ComponentVisitorHelperTest : public CxxTest::TestSuite {
 public:
