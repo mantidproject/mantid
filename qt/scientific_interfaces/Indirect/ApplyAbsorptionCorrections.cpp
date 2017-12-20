@@ -1,4 +1,4 @@
-#include "ApplyPaalmanPings.h"
+#include "ApplyAbsorptionCorrections.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -10,12 +10,13 @@
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("ApplyPaalmanPings");
+Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 }
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
+ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
+    : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
@@ -47,14 +48,14 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
   m_uiForm.spPreviewSpec->setMaximum(0);
 }
 
-void ApplyPaalmanPings::setup() {}
+void ApplyAbsorptionCorrections::setup() {}
 
 /**
-* Disables corrections when using S(Q, w) as input data.
-*
-* @param dataName Name of new data source
-*/
-void ApplyPaalmanPings::newSample(const QString &dataName) {
+ * Disables corrections when using S(Q, w) as input data.
+ *
+ * @param dataName Name of new data source
+ */
+void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   // Remove old curves
   m_uiForm.ppPreview->removeSpectrum("Sample");
   m_uiForm.ppPreview->removeSpectrum("Corrected");
@@ -74,7 +75,7 @@ void ApplyPaalmanPings::newSample(const QString &dataName) {
   m_uiForm.spCanShift->setMaximum(m_ppSampleWS->getXMax());
 }
 
-void ApplyPaalmanPings::newContainer(const QString &dataName) {
+void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   // Remove old curves
   m_uiForm.ppPreview->removeSpectrum("Container");
   m_uiForm.ppPreview->removeSpectrum("Corrected");
@@ -94,7 +95,7 @@ void ApplyPaalmanPings::newContainer(const QString &dataName) {
   plotInPreview("Container", m_ppContainerWS, Qt::red);
 }
 
-void ApplyPaalmanPings::updateContainer() {
+void ApplyAbsorptionCorrections::updateContainer() {
   const auto canName = m_uiForm.dsContainer->getCurrentDataName();
   const auto canValid = m_uiForm.dsContainer->isValid();
   const auto useCan = m_uiForm.ckUseCan->isChecked();
@@ -148,7 +149,7 @@ void ApplyPaalmanPings::updateContainer() {
   plotPreview(m_uiForm.spPreviewSpec->value());
 }
 
-void ApplyPaalmanPings::run() {
+void ApplyAbsorptionCorrections::run() {
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
   IAlgorithm_sptr applyCorrAlg =
@@ -162,7 +163,6 @@ void ApplyPaalmanPings::run() {
   absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
   // Get Can and Clone
   MatrixWorkspace_sptr canClone;
   if (useCan) {
@@ -213,48 +213,47 @@ void ApplyPaalmanPings::run() {
     applyCorrAlg->setProperty("RebinCanToSample", rebinContainer);
   }
 
-  if (useCorrections) {
-    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+  QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-    WorkspaceGroup_sptr corrections =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            correctionsWsName.toStdString());
-    bool interpolateAll = false;
-    for (size_t i = 0; i < corrections->size(); i++) {
-      MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+  WorkspaceGroup_sptr corrections =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          correctionsWsName.toStdString());
+  bool interpolateAll = false;
+  for (size_t i = 0; i < corrections->size(); i++) {
+    MatrixWorkspace_sptr factorWs =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
-      // Check for matching binning
-      if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
-                       factorWs->blocksize() != 1)) {
-        int result;
-        if (interpolateAll) {
-          result = QMessageBox::Yes;
-        } else {
-          std::string text = "Number of bins on sample and " +
-                             factorWs->getName() +
-                             " workspace does not match.\n" +
-                             "Would you like to interpolate this workspace to "
-                             "match the sample?";
+    // Check for matching binning
+    if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
+                     factorWs->blocksize() != 1)) {
+      int result;
+      if (interpolateAll) {
+        result = QMessageBox::Yes;
+      } else {
+        std::string text = "Number of bins on sample and " +
+                           factorWs->getName() +
+                           " workspace does not match.\n" +
+                           "Would you like to interpolate this workspace to "
+                           "match the sample?";
 
-          result = QMessageBox::question(
-              NULL, tr("Interpolate corrections?"), tr(text.c_str()),
-              QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
-        }
+        result = QMessageBox::question(NULL, tr("Interpolate corrections?"),
+                                       tr(text.c_str()), QMessageBox::YesToAll,
+                                       QMessageBox::Yes, QMessageBox::No);
+      }
 
-        switch (result) {
-        case QMessageBox::YesToAll:
-          interpolateAll = true;
-        // fall through
-        case QMessageBox::Yes:
-          addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
-          break;
-        default:
-          m_batchAlgoRunner->clearQueue();
-          g_log.error("ApplyPaalmanPings cannot run with corrections that do "
-                      "not match sample binning.");
-          return;
-        }
+      switch (result) {
+      case QMessageBox::YesToAll:
+        interpolateAll = true;
+      // fall through
+      case QMessageBox::Yes:
+        addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+        break;
+      default:
+        m_batchAlgoRunner->clearQueue();
+        g_log.error(
+            "ApplyAbsorptionCorrections cannot run with corrections that do "
+            "not match sample binning.");
+        return;
       }
     }
 
@@ -280,14 +279,9 @@ void ApplyPaalmanPings::run() {
     correctionType = "anl";
     break;
   }
-  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
 
-  // Using corrections
-  if (m_uiForm.ckUseCorrections->isChecked()) {
-    outputWsName += "_" + correctionType + "_Corrected";
-  } else {
-    outputWsName += "_Subtracted";
-  }
+  QString outputWsName = QStrSampleWsName.left(nameCutIndex);
+  outputWsName += "_" + correctionType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
@@ -324,15 +318,15 @@ void ApplyPaalmanPings::run() {
 }
 
 /**
-* Adds a spline interpolation as a step in the calculation for using legacy
-*correction factor
-* workspaces.
-*
-* @param toInterpolate Pointer to the workspace to interpolate
-* @param toMatch Name of the workspace to match
-*/
-void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
-                                             std::string toMatch) {
+ * Adds a spline interpolation as a step in the calculation for using legacy
+ *correction factor
+ * workspaces.
+ *
+ * @param toInterpolate Pointer to the workspace to interpolate
+ * @param toMatch Name of the workspace to match
+ */
+void ApplyAbsorptionCorrections::addInterpolationStep(
+    MatrixWorkspace_sptr toInterpolate, std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
   interpolationProps["WorkspaceToMatch"] = toMatch;
 
@@ -348,11 +342,11 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 }
 
 /**
-* Handles completion of the abs. correction algorithm.
-*
-* @param error True if algorithm failed.
-*/
-void ApplyPaalmanPings::absCorComplete(bool error) {
+ * Handles completion of the abs. correction algorithm.
+ *
+ * @param error True if algorithm failed.
+ */
+void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
   if (error) {
@@ -382,11 +376,11 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
 }
 
 /**
-* Handles completion of the unit conversion and saving algorithm.
-*
-* @param error True if algorithm failed.
-*/
-void ApplyPaalmanPings::postProcessComplete(bool error) {
+ * Handles completion of the unit conversion and saving algorithm.
+ *
+ * @param error True if algorithm failed.
+ */
+void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
 
@@ -421,7 +415,7 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
   }
 }
 
-bool ApplyPaalmanPings::validate() {
+bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
@@ -429,60 +423,28 @@ bool ApplyPaalmanPings::validate() {
   MatrixWorkspace_sptr sampleWs;
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
-  bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
 
-  if (!(useCan || useCorrections))
-    uiv.addErrorMessage("Must use either container subtraction or corrections");
-
-  if (useCan) {
+  if (useCan)
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-    // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
-    QString sampleType =
-        sample.right(sample.length() - sample.lastIndexOf("_"));
-    QString container = m_uiForm.dsContainer->getCurrentDataName();
-    QString containerType =
-        container.right(container.length() - container.lastIndexOf("_"));
+  if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
+    uiv.addErrorMessage(
+        "Correction selector must contain a corrections file or workspace.");
+  } else {
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
-    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
-
-    if (containerType != sampleType)
-      uiv.addErrorMessage(
-          "Sample and can workspaces must contain the same type of data.");
-  }
-
-  if (useCorrections) {
-    if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
-      uiv.addErrorMessage(
-          "Use Correction must contain a corrections file or workspace.");
-    } else {
-
-      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
-      WorkspaceGroup_sptr corrections =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              correctionsWsName.toStdString());
-      for (size_t i = 0; i < corrections->size(); i++) {
-        // Check it is a MatrixWorkspace
-        MatrixWorkspace_sptr factorWs =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(
-                corrections->getItem(i));
-        if (!factorWs) {
-          QString msg = "Correction factor workspace " + QString::number(i) +
-                        " is not a MatrixWorkspace";
-          uiv.addErrorMessage(msg);
-          continue;
-        }
-
-        // Check X unit is wavelength
-        Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
-        if (xUnit->caption() != "Wavelength") {
-          QString msg = "Correction factor workspace " +
-                        QString::fromStdString(factorWs->getName()) +
-                        " is not in wavelength";
-          uiv.addErrorMessage(msg);
-        }
+    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+    WorkspaceGroup_sptr corrections =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            correctionsWsName.toStdString());
+    for (size_t i = 0; i < corrections->size(); i++) {
+      // Check it is a MatrixWorkspace
+      MatrixWorkspace_sptr factorWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+      if (!factorWs) {
+        QString msg = "Correction factor workspace " + QString::number(i) +
+                      " is not a MatrixWorkspace";
+        uiv.addErrorMessage(msg);
+        continue;
       }
     }
   }
@@ -494,18 +456,18 @@ bool ApplyPaalmanPings::validate() {
   return uiv.isAllInputValid();
 }
 
-void ApplyPaalmanPings::loadSettings(const QSettings &settings) {
+void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCorrections->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
 /**
-* Handles when the type of geometry changes
-*
-* Updates the file extension to search for
-*/
-void ApplyPaalmanPings::handleGeometryChange(int index) {
+ * Handles when the type of geometry changes
+ *
+ * Updates the file extension to search for
+ */
+void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
   QString ext("");
   switch (index) {
   case 0:
@@ -526,11 +488,11 @@ void ApplyPaalmanPings::handleGeometryChange(int index) {
 }
 
 /**
-* Replots the preview plot.
-*
-* @param wsIndex Spectrum index to plot
-*/
-void ApplyPaalmanPings::plotPreview(int wsIndex) {
+ * Replots the preview plot.
+ *
+ * @param wsIndex Spectrum index to plot
+ */
+void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
   m_uiForm.ppPreview->clear();
@@ -557,7 +519,7 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
 /**
  * Handles saving of the workspace
  */
-void ApplyPaalmanPings::saveClicked() {
+void ApplyAbsorptionCorrections::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
@@ -567,7 +529,7 @@ void ApplyPaalmanPings::saveClicked() {
 /**
  * Handles mantid plotting of workspace
  */
-void ApplyPaalmanPings::plotClicked() {
+void ApplyAbsorptionCorrections::plotClicked() {
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
@@ -582,9 +544,9 @@ void ApplyPaalmanPings::plotClicked() {
 }
 
 /**
-* Plots the current spectrum displayed in the preview plot
-*/
-void ApplyPaalmanPings::plotCurrentPreview() {
+ * Plots the current spectrum displayed in the preview plot
+ */
+void ApplyAbsorptionCorrections::plotCurrentPreview() {
   QStringList workspaces = QStringList();
 
   // Check whether a sample workspace has been specified
@@ -614,9 +576,9 @@ void ApplyPaalmanPings::plotCurrentPreview() {
  * @param ws          The workspace whose spectra to plot in the preview.
  * @param curveColor  The color of the curve to plot in the preview.
  */
-void ApplyPaalmanPings::plotInPreview(const QString &curveName,
-                                      MatrixWorkspace_sptr &ws,
-                                      const QColor &curveColor) {
+void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
+                                               MatrixWorkspace_sptr &ws,
+                                               const QColor &curveColor) {
 
   // Check whether the selected spectra is now out of bounds with
   // respect to the specified workspace.
