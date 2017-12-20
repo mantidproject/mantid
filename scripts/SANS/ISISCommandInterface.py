@@ -726,7 +726,6 @@ def _WavRangeReduction(name_suffix=None):
             return group_name, slices
         else:
             return ReductionSingleton()._reduce(), None
-
     result = ""
     slices = []
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:
@@ -737,7 +736,8 @@ def _WavRangeReduction(name_suffix=None):
     try:
         for period in ReductionSingleton().get_sample().loader.entries:
             _setUpPeriod(period)
-            calculated.append(_reduceAllSlices())
+            result, slices = _reduceAllSlices()
+            calculated.append(result)
 
     finally:
         if len(calculated) > 0:
