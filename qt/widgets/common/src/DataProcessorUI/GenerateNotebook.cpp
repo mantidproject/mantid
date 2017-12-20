@@ -413,7 +413,7 @@ reduceRowString(const RowData &data, const QString &instrument,
       if (globalPreprocessingOptionsMap.count(colName) > 0) {
         OptionsMap preprocessingOptions = getCanonicalOptions(
             &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
-        QString options = convertMapToString(preprocessingOptions);
+        options = convertMapToString(preprocessingOptions);
       }
 
       // Python code ran to load and pre-process runs
