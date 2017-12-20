@@ -269,6 +269,7 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
     IteratorT &mutableIterator) const {
   const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   const auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
+  // subtract 1 because component ranges includes self
   auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
   auto nSubDetectors =
       std::distance(innerRangeDet.begin(), innerRangeDet.end());
@@ -315,10 +316,13 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
     std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
   auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
+  // subtract 1 because component ranges includes self
   auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
   auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
   auto nSubDetectors =
       std::distance(innerRangeDet.begin(), innerRangeDet.end());
+  // We are assuming that we ALWAYS have the same number of pixels in each tube
+  // of the bank. This should be a safe assumption for a pack of tubes.
   auto nY = nSubDetectors / nSubComponents;
   size_t bottomIndex = *innerRangeDet.begin();
   size_t lastIndex = *(innerRangeDet.end() - 1);

@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentVisitorHelper.h"
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
@@ -16,7 +16,8 @@ namespace {
  */
 bool matchesPackOfTubes(const std::string &nameHint) {
   using boost::regex;
-  return boost::regex_match(nameHint, regex("^[a-z]*pack$", regex::icase));
+  static regex expression("^[a-z]*pack$", regex::icase);
+  return boost::regex_match(nameHint, expression);
 }
 
 /**
@@ -26,9 +27,10 @@ bool matchesPackOfTubes(const std::string &nameHint) {
  */
 bool matchesPSDTube(const std::string &nameHint) {
   using boost::regex;
-  return boost::regex_match(nameHint, regex("^tube[0-9]*$", regex::icase));
+  static regex expression("^tube[0-9]*$", regex::icase);
+  return boost::regex_match(nameHint, expression);
 }
-}
+} // namespace
 
 /**
  * Determines and calls the appropriate vistor method relating to an
