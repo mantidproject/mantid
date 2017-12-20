@@ -49,10 +49,11 @@ QString DLLExport getReducedWorkspaceName(const QStringList &data,
                                           const WhiteList &whitelist,
                                           const QString prefix = QString());
 // Consolidate global options with row values
-OptionsMap DLLExport getCanonicalOptions(const RowData *data,
-                                         const OptionsMap &globalOptions,
-                                         const WhiteList &whitelist,
-                                         const bool allowInsertions);
+OptionsMap DLLExport getCanonicalOptions(
+    const RowData *data, const OptionsMap &globalOptions,
+    const WhiteList &whitelist, const bool allowInsertions,
+    const std::vector<QString> &outputProperties = std::vector<QString>(),
+    const std::vector<QString> &prefixes = std::vector<QString>());
 }
 }
 }

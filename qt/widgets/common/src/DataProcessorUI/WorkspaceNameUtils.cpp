@@ -74,6 +74,25 @@ void updateHiddenOptions(OptionsMap &options, const RowData *data,
       options[kvp.first] = kvp.second;
   }
 }
+
+/** Update the given options with the output properties.
+ * If values already exist in the map they are overwritten.
+ * @param options : a map of property name to option value to update
+ * @param data : the data for this row
+ */
+void updateOutputOptions(OptionsMap &options, const RowData *data,
+                         const WhiteList &whitelist, const bool allowInsertions,
+                         const std::vector<QString> &outputPropertyNames,
+                         const std::vector<QString> &outputNamePrefixes) {
+  // Set the properties for the output workspace names
+  for (auto i = 0u; i < outputPropertyNames.size(); i++) {
+    const auto propertyName = outputPropertyNames[i];
+    if (allowInsertions || options.find(propertyName) != options.end()) {
+      options[propertyName] =
+          getReducedWorkspaceName(*data, whitelist, outputNamePrefixes[i]);
+    }
+  }
+}
 } // unnamed namespace
 
 /** Parses individual values from a string containing a list of
@@ -160,12 +179,18 @@ QString getReducedWorkspaceName(const QStringList &data,
  * table columns and the Options/HiddenOptions columns.
  *
  * @param data [in] : the row data to get option values for
- * @return : a map of property names to values
+ * @param globalOptions [in] : default property values from the global settings
+ * @param whitelist [in] : the list of columns
+ * @outputProperties [in] : the list of output property names
+ * @prefixes [in] : the list of prefixes to apply to output workspace names
+ * @return : a map of property names to value
  */
 OptionsMap getCanonicalOptions(const RowData *data,
                                const OptionsMap &globalOptions,
                                const WhiteList &whitelist,
-                               const bool allowInsertions) {
+                               const bool allowInsertions,
+                               const std::vector<QString> &outputProperties,
+                               const std::vector<QString> &prefixes) {
   // Compile all of the options into a single map - add them in reverse
   // order of precedence. Latter items are overwritten, or added if they
   // do not yet exist in the map.
@@ -173,6 +198,8 @@ OptionsMap getCanonicalOptions(const RowData *data,
   updateHiddenOptions(options, data, allowInsertions);
   updateUserOptions(options, data, whitelist, allowInsertions);
   updateRowOptions(options, data, whitelist, allowInsertions);
+  updateOutputOptions(options, data, whitelist, allowInsertions,
+                      outputProperties, prefixes);
   return options;
 }
 }

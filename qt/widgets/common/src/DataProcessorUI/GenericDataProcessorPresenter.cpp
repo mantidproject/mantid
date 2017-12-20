@@ -868,23 +868,6 @@ void GenericDataProcessorPresenter::updateModelFromAlgorithm(
   }
 }
 
-/** Update the given options with the output properties.
- * If values already exist in the map they are overwritten.
- * @param options : a map of property name to option value to update
- * @param data : the data for this row
- */
-void GenericDataProcessorPresenter::updateOutputOptions(
-    OptionsMap &options, RowData *data, const bool allowInsertions) {
-  // Set the properties for the output workspace names
-  for (auto i = 0u; i < m_processor.numberOfOutputProperties(); i++) {
-    const auto propertyName = m_processor.outputPropertyName(i);
-    if (allowInsertions || options.find(propertyName) != options.end()) {
-      options[propertyName] =
-          getReducedWorkspaceName(*data, m_processor.prefix(i));
-    }
-  }
-}
-
 /** Create an algorithm with the given properties and execute it
  * @param options : the options as a map of property name to value
  * @throws std::runtime_error if reduction fails
@@ -912,10 +895,9 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Get the algorithm input properties as an options map
-  OptionsMap options =
-      getCanonicalOptions(data, m_processingOptions, m_whitelist, true);
-  // Set the output properties in the options map
-  updateOutputOptions(options, data, true);
+  OptionsMap options = getCanonicalOptions(
+      data, m_processingOptions, m_whitelist, true,
+      m_processor.outputProperties(), m_processor.prefixes());
   // Perform any preprocessing on the input properties
   preprocessOptionValues(options, data);
   // Run the algorithm

@@ -203,9 +203,6 @@ protected:
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
                                 RowData *data);
-  // Get output options
-  void updateOutputOptions(OptionsMap &options, RowData *data,
-                           const bool allowInsertions = true);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
