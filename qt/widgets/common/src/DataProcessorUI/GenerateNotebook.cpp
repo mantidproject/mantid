@@ -200,7 +200,7 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
 
     // Add the output name for this property from each reduced row
     for (auto const &processingOptions : processingOptionsPerRow) {
-      if (processingOptions.find(propertyName) != processingOptions.end())
+      if (processingOptions.count(propertyName) > 0)
         wsNames.append(processingOptions.at(propertyName));
     }
 
@@ -409,9 +409,12 @@ reduceRowString(const RowData &data, const QString &instrument,
       // The options for the pre-processing alg
       // Only include options in the given preprocessing options map,
       // but override them if they are set in the row data
-      OptionsMap preprocessingOptions = getCanonicalOptions(
-          &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
-      QString options = convertMapToString(preprocessingOptions);
+      QString options;
+      if (globalPreprocessingOptionsMap.count(colName) > 0) {
+        OptionsMap preprocessingOptions = getCanonicalOptions(
+            &data, globalPreprocessingOptionsMap.at(colName), whitelist, false);
+        QString options = convertMapToString(preprocessingOptions);
+      }
 
       // Python code ran to load and pre-process runs
       const boost::tuple<QString, QString> load_ws_string =
