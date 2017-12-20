@@ -167,7 +167,7 @@ private:
   std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
       std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-      uint64_t stopTime, bool &checkOffsets) const;
+      uint64_t stopTime) const;
 
   void checkIfAllStopOffsetsReached(
       const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,

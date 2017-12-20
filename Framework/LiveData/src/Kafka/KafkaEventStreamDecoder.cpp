@@ -191,7 +191,6 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
 
   auto workspace_ptr = extractDataImpl();
 
-  m_extractedEndRunData = true;
   m_extractWaiting = false;
   m_cv.notify_one();
 
@@ -263,8 +262,10 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   bool checkOffsets = false;
 
   while (!m_interrupt) {
-    waitForDataExtraction();
-    waitForRunEndObservation();
+    if (m_endRun)
+      waitForRunEndObservation();
+    else
+      waitForDataExtraction();
     // Pull in events
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
@@ -279,17 +280,23 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
         reachedEnd[topicName][static_cast<size_t>(partition)] = true;
 
+        if (offset == stopOffsets[topicName][static_cast<size_t>(partition)]) {
+          g_log.debug() << "Reached end-of-run in " << topicName << " topic."
+                        << std::endl;
+          g_log.debug()
+              << "topic: " << topicName << " offset: " << offset
+              << " stopOffset: "
+              << stopOffsets[topicName][static_cast<size_t>(partition)]
+              << std::endl;
+        }
+        checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
+
         if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
+          // If the offset is beyond the end of the current run, then skip to
+          // the next iteration and don't process the message
           m_cbIterationEnd();
           continue;
         }
-        g_log.debug() << "Reached end-of-run in " << topicName << " topic."
-                      << std::endl;
-        g_log.debug() << "topic: " << topicName << " offset: " << offset
-                      << " stopOffset: "
-                      << stopOffsets[topicName][static_cast<size_t>(partition)]
-                      << std::endl;
-        checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       }
     }
 
@@ -323,8 +330,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         auto stopTime = runStopMsg->stop_time();
         g_log.debug() << "Received an end-of-run message with stop time = "
                       << stopTime << std::endl;
-        stopOffsets =
-            getStopOffsets(stopOffsets, reachedEnd, stopTime, checkOffsets);
+        stopOffsets = getStopOffsets(stopOffsets, reachedEnd, stopTime);
+        checkOffsets = true;
         checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
       } else if (runMsg->info_type_type() == InfoTypes_RunStart) {
         auto runStartMsg = static_cast<const RunStart *>(runMsg->info_type());
@@ -362,10 +369,9 @@ void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
     // Otherwise we can end up with data from two different runs in the
     // same buffer workspace which is problematic if the user wanted the
     // "Stop" or "Rename" run transition option.
-    m_extractWaiting = true;
     m_extractedEndRunData = false;
     checkOffsets = false;
-    g_log.debug("Reached end of run in data stream.");
+    g_log.notice("Reached end of run in data streams.");
   }
 }
 
@@ -373,7 +379,7 @@ std::unordered_map<std::string, std::vector<int64_t>>
 KafkaEventStreamDecoder::getStopOffsets(
     std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
     std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
-    uint64_t stopTime, bool &checkOffsets) const {
+    uint64_t stopTime) const {
   reachedEnd.clear();
   stopOffsets.clear();
   // Wait for max latency so that we don't miss any late messages
@@ -386,32 +392,35 @@ KafkaEventStreamDecoder::getStopOffsets(
   auto currentOffsets = m_eventStream->getCurrentOffsets();
 
   // Set reachedEnd to false for each topic and partition
-  for (auto keyValue : stopOffsets) {
+  for (auto topicOffsets : stopOffsets) {
+    auto topicName = topicOffsets.first;
     // Ignore the runInfo topic
-    if (keyValue.first.substr(
-            keyValue.first.length() -
-            KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
+    if (topicName.substr(topicName.length() -
+                         KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
         KafkaTopicSubscriber::RUN_TOPIC_SUFFIX) {
-      g_log.debug() << "TOPIC: " << keyValue.first
-                    << " PARTITIONS: " << keyValue.second.size() << std::endl;
+      g_log.debug() << "TOPIC: " << topicName
+                    << " PARTITIONS: " << topicOffsets.second.size()
+                    << std::endl;
       reachedEnd.insert(
-          {keyValue.first, std::vector<bool>(keyValue.second.size(), false)});
+          {topicName, std::vector<bool>(topicOffsets.second.size(), false)});
 
-      auto partitionOffsets = keyValue.second;
+      auto partitionOffsets = topicOffsets.second;
       for (uint32_t partitionNumber = 0;
            partitionNumber < partitionOffsets.size(); partitionNumber++) {
+        // -1 to get last offset _before_ the stop time
+        partitionOffsets[partitionNumber] =
+            partitionOffsets[partitionNumber] - 1;
         auto offset = partitionOffsets[partitionNumber];
         // If the stop offset is negative then there are no messages for us
         // to collect on this topic, so mark reachedEnd as true already
-        reachedEnd[keyValue.first][partitionNumber] = offset < 0;
+        reachedEnd[topicName][partitionNumber] = offset < 0;
         // If the stop offset has already been reached then mark reachedEnd as
         // true
-        if (currentOffsets[keyValue.first][partitionNumber] >= offset)
-          reachedEnd[keyValue.first][partitionNumber] = true;
+        if (currentOffsets[topicName][partitionNumber] >= offset)
+          reachedEnd[topicName][partitionNumber] = true;
       }
     }
   }
-  checkOffsets = true;
   return stopOffsets;
 }
 
@@ -420,27 +429,28 @@ KafkaEventStreamDecoder::getStopOffsets(
  * then we wait for it to finish
  */
 void KafkaEventStreamDecoder::waitForDataExtraction() {
-  std::unique_lock<std::mutex> readyLock(m_waitMutex);
-  if (m_extractWaiting) {
+  {
+    std::unique_lock<std::mutex> readyLock(m_waitMutex);
     m_cv.wait(readyLock, [&] { return !m_extractWaiting; });
-    readyLock.unlock();
   }
 }
 
 void KafkaEventStreamDecoder::waitForRunEndObservation() {
-  if (m_endRun) {
-    // Wait until MonitorLiveData has seen that end of run was
-    // reached before setting m_endRun back to false and continuing
-    std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
-    m_cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
-    m_endRun = false;
-    m_runStatusSeen = false;
-    runStatusLock.unlock();
-    // Give time for MonitorLiveData to act on runStatus information
-    // and trigger m_interrupt for next loop iteration if user requested
-    // LiveData algorithm to stop at the end of the run
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
+  m_extractWaiting = true;
+  waitForDataExtraction();
+  m_extractedEndRunData = true;
+
+  // Wait until MonitorLiveData has seen that end of run was
+  // reached before setting m_endRun back to false and continuing
+  std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
+  m_cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
+  m_endRun = false;
+  m_runStatusSeen = false;
+  runStatusLock.unlock();
+  // Give time for MonitorLiveData to act on runStatus information
+  // and trigger m_interrupt for next loop iteration if user requested
+  // LiveData algorithm to stop at the end of the run
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /**

@@ -456,8 +456,8 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
 }
 
 /**
- * Get offsets corresponding to given timestamp for each topic-partition to
- * which we are subscribed
+ * Offsets of the messages whose timestamps are greater than or equal to the
+ * given target time of each partition.
  * @param timestamp : timestamp at which to get corresponding offsets
  * @return : map with topic names as key with a vector of offsets for the
  * partitions
