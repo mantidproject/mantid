@@ -346,7 +346,7 @@ createCylInstrumentWithVerticalOffsetsSpecified(
   auto instrument = boost::make_shared<Instrument>("instrument_with_tubes");
   CompAssembly *bank = new CompAssembly("sixteenpack");
   for (size_t i = 0; i < nTubes; ++i) {
-    CompAssembly *tube = new CompAssembly("tube-" + std::to_string(i));
+    CompAssembly *tube = new CompAssembly("tube" + std::to_string(i));
     for (size_t j = 0; j < nDetsPerTube; ++j) {
 
       auto id = static_cast<int>(i * nDetsPerTube + j);
@@ -356,8 +356,8 @@ createCylInstrumentWithVerticalOffsetsSpecified(
       physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
       instrument->markAsDetector(physicalPixel);
     }
-    tube->setPos(
-        V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
+    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
+                     -ySpan / 2 + verticalOffsets[i], 0));
     bank->add(tube);
   }
   bank->setPos(V3D(0, 0, bankZPos));

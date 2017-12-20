@@ -5,6 +5,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/shared_ptr.hpp>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -70,6 +71,27 @@ private:
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
+  template <typename IteratorT>
+  void growBoundingBoxAsRectuangularBank(
+      size_t index, const Geometry::BoundingBox *reference,
+      Geometry::BoundingBox &mutableBB,
+      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+      IteratorT &mutableIterator) const;
+  template <typename IteratorT>
+  void growBoundingBoxAsBankOfTubes(
+      size_t index, const Geometry::BoundingBox *reference,
+      Geometry::BoundingBox &mutableBB,
+      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+      IteratorT &mutableIterator) const;
+  template <typename IteratorT>
+  void growBoundingBoxAsTube(
+      size_t index, const Geometry::BoundingBox *reference,
+      Geometry::BoundingBox &mutableBB,
+      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+      IteratorT &mutableIterator) const;
+  void growBoundingBoxByDetectors(
+      size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
+      std::stack<std::pair<size_t, size_t>> detectorExclusions) const;
 
 public:
   ComponentInfo(
