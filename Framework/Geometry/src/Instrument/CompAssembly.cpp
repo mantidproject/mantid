@@ -491,8 +491,8 @@ Quat CompAssembly::getRotation() const {
 }
 
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
-    // via common helper
-    return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
+  // via common helper
+  return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
 }
 
 /** Print information about elements in the assembly to a stream

@@ -358,8 +358,8 @@ void ObjCompAssembly::testIntersectionWithChildren(
 
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
-    // via common helper
-    return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
+  // via common helper
+  return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to

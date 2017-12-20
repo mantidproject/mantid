@@ -10,7 +10,9 @@ namespace Geometry {
 class ComponentVisitor;
 class ICompAssembly;
 
-/** ComponentVisitorHelper namespace : Helper functions for Component Visitors. These mainly relate to helping with common code for IDF compatibility problems.
+/** ComponentVisitorHelper namespace : Helper functions for Component Visitors.
+  These mainly relate to helping with common code for IDF compatibility
+  problems.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -35,7 +37,9 @@ class ICompAssembly;
 */
 namespace ComponentVisitorHelper {
 
-size_t MANTID_GEOMETRY_DLL visitAssembly(ComponentVisitor& visitor, const ICompAssembly& visitee, const std::string& nameHint);
+size_t MANTID_GEOMETRY_DLL visitAssembly(ComponentVisitor &visitor,
+                                         const ICompAssembly &visitee,
+                                         const std::string &nameHint);
 
 } // namespace ComponentVisitorHelper
 } // namespace Geometry

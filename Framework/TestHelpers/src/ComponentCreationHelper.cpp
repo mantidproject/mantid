@@ -737,7 +737,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
-      lexer << "pixel-" << i * nPixelsPerTube + j;
+      lexer << "pixel-" << i *nPixelsPerTube + j;
       Detector *pixel = new Detector(
           lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
       const double xpos = 0.0;
