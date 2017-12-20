@@ -199,7 +199,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(view.add_row.call_count == 1)
-        self.assertTrue(view.switch_to_multi_period_view.call_count == 1)
+        self.assertTrue(view.set_multi_period_view_mode.call_count == 1)
 
         expected_row = "SampleScatter:1,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
                        "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"

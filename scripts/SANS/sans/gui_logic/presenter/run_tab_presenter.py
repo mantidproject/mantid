@@ -899,7 +899,7 @@ class RunTabPresenter(object):
         return table_model
 
     def get_cell_value(self, row, column):
-        self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
+        return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
 
     def _create_states(self, state_model, table_model, row_index=None):
         """
