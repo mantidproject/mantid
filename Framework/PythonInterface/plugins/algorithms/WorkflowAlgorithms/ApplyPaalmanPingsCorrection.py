@@ -132,12 +132,14 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Add original sample as log entry
         sam_base = self.getPropertyValue("SampleWorkspace")
-        sam_base = sam_base[:sam_base.index('_')]
-        prog_wrkflow.report('Adding sample filename')
-        s_api.AddSampleLog(Workspace=output_workspace,
-                           LogName='sample_filename',
-                           LogType='String',
-                           LogText=sam_base)
+
+        if '_' in sam_base:
+            sam_base = sam_base[:sam_base.index('_')]
+            prog_wrkflow.report('Adding sample filename')
+            s_api.AddSampleLog(Workspace=output_workspace,
+                               LogName='sample_filename',
+                               LogType='String',
+                               LogText=sam_base)
 
         # Convert Units back to original
         emode = str(output_workspace.getEMode())
@@ -277,7 +279,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Container scaled by %f' % self._can_scale_factor)
             return scaled_container
         else:
-            return shifted_container
+            return self._convert_units_wavelength(shifted_container)
 
     def _get_correction_factor_workspace(self, factor_type):
         """

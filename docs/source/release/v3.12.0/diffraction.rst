@@ -48,9 +48,13 @@ Single Crystal Diffraction
 
 - :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` now has option to specify background shell instead of using default background determination.
 
+- :ref:`IndexPeaks <algm-IndexPeaks>` now has option, CommonUBForAll, to use the current UB to index all peaks from different runs. This option does not optimize the UB for the different runs.
+
 - :ref:`FindUBUsingFFT <algm-FindUBUsingFFT>` now has options to specify number of iterations to refine UB and also resolution of the search through possible orientations.  Minimum angle between a,b,c vectors reduced for large unit cells.
 
 - :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters>` now has option to specify number of iterations to refine UB. 
+
+- SCD Event Data Reduction interface now uses the Indexing Tolerance for Index Peaks to index the peaks for the Select Cell options in Choose Cell tab.  Previously it used a constant, 0.12, for the tolerance.
 
 
 Total Scattering

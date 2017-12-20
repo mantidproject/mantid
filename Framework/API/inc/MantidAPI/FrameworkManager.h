@@ -48,8 +48,9 @@ class MANTID_API_DLL FrameworkManagerImpl {
 public:
   FrameworkManagerImpl(const FrameworkManagerImpl &) = delete;
   FrameworkManagerImpl &operator=(const FrameworkManagerImpl &) = delete;
-  /// Load a set of plugins using a key from the ConfigService
-  void loadPluginsUsingKey(const std::string &key);
+
+  /// Load framework plugins
+  void loadPlugins();
 
   /// Set the number of OpenMP threads to use based on the config value
   void setNumOMPThreadsToConfigValue();
@@ -103,20 +104,23 @@ private:
   /// Private Constructor
   FrameworkManagerImpl();
   /// Private Destructor
-  ~FrameworkManagerImpl();
+  ~FrameworkManagerImpl() = default;
 
+  /// Load a set of plugins using a key from the ConfigService
+  void loadPluginsUsingKey(const std::string &locationKey,
+                           const std::string &excludeKey);
   /// Set up the global locale
   void setGlobalNumericLocaleToC();
   /// Silence NeXus output
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
-  void AsynchronousStartupTasks();
+  void asynchronousStartupTasks();
   /// Setup Usage Reporting if enabled
   void setupUsageReporting();
   /// Update instrument definitions from github
-  void UpdateInstrumentDefinitions();
+  void updateInstrumentDefinitions();
   /// check if a newer version of Mantid is available
-  void CheckIfNewerVersionIsAvailable();
+  void checkIfNewerVersionIsAvailable();
 
 #ifdef MPI_BUILD
   /** Member variable that initialises the MPI environment on construction (in

@@ -446,40 +446,13 @@ bool ApplyAbsorptionCorrections::validate() {
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
 
-  if (useCan) {
+  if (useCan)
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-
-    const auto container = m_uiForm.dsContainer->getCurrentDataName();
-    const auto containerName = container.toStdString();
-    bool containerExists =
-        AnalysisDataService::Instance().doesExist(containerName);
-
-    if (containerExists &&
-        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerName)) {
-      uiv.addErrorMessage(
-          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-    }
-
-    // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
-    QString containerType =
-        container.right(container.length() - container.lastIndexOf("_"));
-    QString sampleType =
-        sampleName.right(sampleName.length() - sampleName.lastIndexOf("_"));
-
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
-    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
-
-    if (containerType != sampleType)
-      uiv.addErrorMessage(
-          "Sample and can workspaces must contain the same type of data.");
-  }
 
   if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
     uiv.addErrorMessage(
         "Correction selector must contain a corrections file or workspace.");
   } else {
-
     QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
     WorkspaceGroup_sptr corrections =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(

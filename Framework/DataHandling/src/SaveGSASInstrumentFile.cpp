@@ -1093,6 +1093,7 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   }
 
   loadfpirf->setProperty("Filename", irffilename);
+  loadfpirf->setProperty("OutputTableWorkspace", "outputTableWorkspace");
 
   loadfpirf->execute();
   if (!loadfpirf->isExecuted())

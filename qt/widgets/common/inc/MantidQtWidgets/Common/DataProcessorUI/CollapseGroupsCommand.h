@@ -49,6 +49,7 @@ public:
         "all expanded groups, hiding their individual runs.");
   }
   QString shortcut() override { return QString(); }
+  bool modifiesSettings() override { return false; }
 };
 }
 }

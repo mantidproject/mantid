@@ -177,6 +177,10 @@ void EnggDiffFittingPresenter::notify(
   case IEnggDiffFittingPresenter::selectRun:
     processSelectRun();
     break;
+
+  case IEnggDiffFittingPresenter::removeRun:
+    processRemoveRun();
+    break;
   }
 }
 
@@ -328,10 +332,7 @@ void EnggDiffFittingPresenter::processLoad() {
                                                               pair.second);
                  });
   m_view->enableFittingListWidget(true);
-  m_view->clearFittingListWidget();
-  std::for_each(
-      listWidgetLabels.begin(), listWidgetLabels.end(),
-      [&](const std::string &listLabel) { m_view->addRunNoItem(listLabel); });
+  m_view->updateFittingListWidget(listWidgetLabels);
 
   m_view->enableFitAllButton(m_model->getNumFocusedWorkspaces() > 1);
 }
@@ -346,6 +347,32 @@ void EnggDiffFittingPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
     g_log.information() << msgs[i] << '\n';
+  }
+}
+
+void EnggDiffFittingPresenter::processRemoveRun() {
+  const auto workspaceLabel = m_view->getFittingListWidgetCurrentValue();
+
+  if (workspaceLabel) {
+    const auto runBankPair =
+        runAndBankNumberFromListWidgetLabel(*workspaceLabel);
+    const auto bank = runBankPair.first;
+    const auto runNumber = runBankPair.second;
+    m_model->removeRun(bank, runNumber);
+
+    const auto runNoBankPairs = m_model->getRunNumbersAndBankIDs();
+    std::vector<std::string> listWidgetLabels;
+    std::transform(runNoBankPairs.begin(), runNoBankPairs.end(),
+                   std::back_inserter(listWidgetLabels),
+                   [](const std::pair<int, size_t> &pair) {
+                     return listWidgetLabelFromRunAndBankNumber(pair.first,
+                                                                pair.second);
+                   });
+    m_view->updateFittingListWidget(listWidgetLabels);
+  } else {
+    m_view->userWarning("No run selected",
+                        "Tried to remove run but no run was selected.\n"
+                        "Please select a run and try again");
   }
 }
 
