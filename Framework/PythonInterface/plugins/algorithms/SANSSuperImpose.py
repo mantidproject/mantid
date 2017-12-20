@@ -141,10 +141,11 @@ class SANSSuperImpose(PythonAlgorithm):
 
         return issues
 
+
     def _ws_to_dict(self):
         '''
         Convert the input grouped workspaces into a OrderedDict with the values
-        of interes
+        of interest
         '''
         d = OrderedDict()
         for ws in self.input_wss:
@@ -152,14 +153,19 @@ class SANSSuperImpose(PythonAlgorithm):
             logger.debug("Putthing WS %s in a dictionary..."%(name))
             x_bins = ws.readX(0)
             x = [x_bins[i] + (abs(x_bins[i]-x_bins[i+1])/2.0) for i in range(len(x_bins)-1)]
+            # Values to np arrays
+            x = np.array(x)
             y = ws.readY(0)
+            e = ws.readE(0)
+
             d[name] = {
-                'x': np.array(x),
+                'x': x,
                 'y': y,
-                'e': ws.readE(0),
+                'e': e,
                 'f': interpolate.interp1d(x, y),
             }
         return d
+
 
     def _find_q_space(self):
         '''
@@ -186,8 +192,38 @@ class SANSSuperImpose(PythonAlgorithm):
             x_max = self.q_max
         return x_min, x_max
 
+
+    def _trim_data(self, q_min, q_max):
+        '''
+        Convert the input grouped workspaces into a OrderedDict with the values
+        of interest
+        '''
+        
+        for _, v in self.data.items():
+            x = v['x']
+            y = v['y']
+            e = v['e']
+            # Getting rid of values where y is 0
+            x_positive = x[y>0]
+            e_positive = e[y>0]
+            y_positive = y[y>0]
+            # Trimming of the q range
+            e_trimmed = e[(x>=q_min)&(x<=q_max)]
+            y_trimmed = y[(x>=q_min)&(x<=q_max)]
+            x_trimmed = x[(x>=q_min)&(x<=q_max)]
+
+            v.update({
+                'x_trimmed': x_trimmed,
+                'y_trimmed': y_trimmed,
+                'e_trimmed': e_trimmed,
+                'x_positive': x_positive,
+                'y_positive': y_positive,
+                'e_positive': e_positive,
+            })
+
+
     @staticmethod
-    def _residuals(p, x, f_target, f_to_optimise, k=None, b=None):
+    def _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
         """
         k and p are mutually exclusive (they cannot be both None)
         """
@@ -197,9 +233,13 @@ class SANSSuperImpose(PythonAlgorithm):
             k = p[0]
         else:
             k, b = p
-        err = f_target(x) - (k * f_to_optimise(x) - b)
+        # residual = f_target(x) - (k * f_to_optimise(x) - b)
+
+        residual = 1.0 / sigma * ( f_target(x) - (k * f_to_optimise(x) - b) )
+
         # return np.sum(err**2)
-        return err
+        # Leastsq expects that the residual function returns just the residual
+        return residual
 
     @staticmethod
     def _peval(x, f, p, k=None, b=None):
@@ -234,7 +274,7 @@ class SANSSuperImpose(PythonAlgorithm):
         else:
             return None
 
-    def _fitting(self, input_ws_reference_name, q_space):
+    def _fitting(self, input_ws_reference_name):
         
         progress = Progress(self, start=0.0, end=1.0, nreports=len(self.data.items()))
         for k, v in self.data.items():
@@ -249,29 +289,38 @@ class SANSSuperImpose(PythonAlgorithm):
                     self._residuals,
                     ([1,1] if self.k is None and self.b is None else [1]), # guess
                     args=(
-                        # _residuals(p, x, f_target, f_to_optimise, k=None, b=None):
-                        q_space,
+                        # _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
+                        v['x_trimmed'],
+                        v['e_trimmed'],
                         self.data[input_ws_reference_name]['f'], # reference interpolation function
                         v['f'],
                         self.k, self.b),
                     full_output=True)
+                
+                # Goodness of Fit Estimator
+                ss_err = (infodict['fvec']**2).sum() # infodict['fvec'] is the array of residuals:
+                ss_tot = ((y-y.mean())**2).sum()
+                r_squared = 1 - (ss_err/ss_tot)
 
-                y_trimmed_fit = self._peval(q_space, v['f'], plsq, k=self.k, b=self.b)
+                y_trimmed_fit = self._peval(v['x_trimmed'], v['f'], plsq, k=self.k, b=self.b)
+                y_positive_fit = self._peval(v['x_positive'], v['f'], plsq, k=self.k, b=self.b)
                 y_fit = self._peval(v['x'], v['f'], plsq, k=self.k, b=self.b)
                 v.update({
-                    'x_trimmed': q_space,
                     'y_trimmed_fit': y_trimmed_fit,
+                    'y_positive_fit': y_positive_fit,
                     'y_fit': y_fit,
                     'plsq': plsq,
                     'cov' : cov,
+                    'r_squared': r_squared,
                 })
             else:
                 v.update({
-                    'x_trimmed': q_space,
-                    'y_trimmed_fit': v['f'](q_space),
+                    'y_trimmed_fit': v['f'](v['x_trimmed']),
+                    'y_positive_fit': v['f'](v['x_positive']),
                     'y_fit': v['f'](v['x']),
                     'plsq': None,
                     'cov' : None,
+                    'r_squared': 0,
                 })
     
     def _create_grouped_wss(self):
@@ -292,6 +341,17 @@ class SANSSuperImpose(PythonAlgorithm):
 
         out_ws_list = []
         for k, v in self.data.items():
+            ws_name = "_" + k + "_positive_fit"
+            CreateWorkspace(
+                OutputWorkspace=ws_name,
+                DataX=list(v['x_positive']), DataY=list(v['y_positive_fit']),
+                UnitX="Q")
+            out_ws_list.append(ws_name)
+        prefix = self.getProperty("OutputWorkspacePrefix").value
+        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + '_positive_fit')
+
+        out_ws_list = []
+        for k, v in self.data.items():
             ws_name = "_" + k + "_fit"
             CreateWorkspace(
                 OutputWorkspace=ws_name,
@@ -300,6 +360,7 @@ class SANSSuperImpose(PythonAlgorithm):
             out_ws_list.append(ws_name)
         prefix = self.getProperty("OutputWorkspacePrefix").value
         GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + '_fit')
+        
 
     def _create_table_ws(self):
         '''
@@ -368,12 +429,13 @@ class SANSSuperImpose(PythonAlgorithm):
 
         logger.debug("Transforming input WSs in OrderedDict")
         self.data = self._ws_to_dict()
-        
+
         logger.debug("Finding common Q space for all datasets")
         q_min, q_max = self._find_q_space()
         logger.debug("q_min = %s, q_max = %s." %(q_min, q_max ))
-        q_space = np.linspace(q_min, q_max, 100)
 
+        self._trim_data(q_min, q_max)
+        
         if self.input_ws_reference:
             input_ws_reference_name = self.input_ws_reference.name()
         else:
@@ -381,7 +443,7 @@ class SANSSuperImpose(PythonAlgorithm):
             input_ws_reference_name = self.input_wss[0].name()
         logger.debug("Reference WS: %s" % input_ws_reference_name)
 
-        self._fitting(input_ws_reference_name, q_space)
+        self._fitting(input_ws_reference_name)
 
         self._create_grouped_wss()
 
