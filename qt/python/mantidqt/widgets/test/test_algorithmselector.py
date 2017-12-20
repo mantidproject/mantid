@@ -1,16 +1,16 @@
+from __future__ import absolute_import
+
 from collections import Counter, namedtuple
 from mock import Mock, patch, call
 import unittest
 
+from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
+from mantidqt.utils.qt.testing import gui_test_case,  select_item_in_combo_box, select_item_in_tree
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
-from mantidqt.utils.qt.plugins import setup_library_paths
-from mantidqt.utils.qt.testing import *
 
-
-setup_library_paths()
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
