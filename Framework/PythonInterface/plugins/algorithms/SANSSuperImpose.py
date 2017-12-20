@@ -1,25 +1,22 @@
 # pylint: disable=no-init
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
-from collections import OrderedDict
-
-import sys
 import glob
-import numpy as np
-from scipy import interpolate
-import scipy.optimize as optimize
-from pprint import pprint
-from operator import itemgetter
 import os.path
+import sys
+from collections import OrderedDict
 from itertools import cycle
-from pprint import pformat
+from operator import itemgetter
+from pprint import pformat, pprint
 
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
-                        Progress, PropertyMode)
+import numpy as np
+import scipy.optimize as optimize
+from scipy import interpolate
+
 from mantid.kernel import Direction
 from mantid.simpleapi import *
+
 
 '''
 
@@ -64,11 +61,19 @@ class SANSSuperImpose(PythonAlgorithm):
 
         self.declareProperty(
             name='DiscardBegin', defaultValue=0,
-            doc='Discard n points from the beginning of every dataset')
+            doc='Discard n points from the beginning of every dataset for every curve fitting')
 
         self.declareProperty(
             name='DiscardEnd', defaultValue=0,
-            doc='Discard n points from the end of every dataset.')
+            doc='Discard n points from the end of every dataset for every curve fitting.')
+        
+        self.declareProperty(
+            name='DiscardBeginGlobal', defaultValue=0,
+            doc='Discard n points from the beginning of every dataset for the global I(q)')
+
+        self.declareProperty(
+            name='DiscardEndGlobal', defaultValue=0,
+            doc='Discard n points from the end of every dataset for the global I(q).')
 
         self.declareProperty(
             name='K', defaultValue=Property.EMPTY_DBL,
@@ -116,6 +121,9 @@ class SANSSuperImpose(PythonAlgorithm):
 
         self.discard_begin = self.getProperty('DiscardBegin').value
         self.discard_end = self.getProperty('DiscardEnd').value
+
+        self.discard_begin_global = self.getProperty('DiscardBeginGlobal').value
+        self.discard_end_global = self.getProperty('DiscardEndGlobal').value
 
         self._k = None if self.getProperty('K').value == Property.EMPTY_DBL else self.getProperty('K').value
         self.k_list = None if len(self.getProperty('KList').value) ==0 else cycle(self.getProperty('KList').value)
@@ -202,33 +210,44 @@ class SANSSuperImpose(PythonAlgorithm):
             x = v['x']
             y = v['y']
             e = v['e']
+            #
             # Getting rid of values where y <= 0
-            x_positive = x[y>0]
-            e_positive = e[y>0]
-            y_positive = y[y>0]
+            x_trimmed = x[y>0]
+            e_trimmed = e[y>0]
+            y_trimmed = y[y>0]
 
+            # discard aditional points
+            if self.discard_end_global > 0:
+                x_trimmed = x_trimmed[self.discard_begin_global:-self.discard_end_global]
+                y_trimmed = y_trimmed[self.discard_begin_global:-self.discard_end_global]
+                e_trimmed = e_trimmed[self.discard_begin_global:-self.discard_end_global]
+            else:
+                x_trimmed = x_trimmed[self.discard_begin_global:]
+                y_trimmed = y_trimmed[self.discard_begin_global:]
+                e_trimmed = e_trimmed[self.discard_begin_global:]
+            #    
             # Trimming of the q range
-            e_trimmed = e[(x>=q_min)&(x<=q_max)]
-            y_trimmed = y[(x>=q_min)&(x<=q_max)]
-            x_trimmed = x[(x>=q_min)&(x<=q_max)]
+            e_qrange = e[(x>=q_min)&(x<=q_max)]
+            y_qrange = y[(x>=q_min)&(x<=q_max)]
+            x_qrange = x[(x>=q_min)&(x<=q_max)]
 
             # discard aditional points
             if self.discard_end > 0:
-                x_trimmed = x_trimmed[self.discard_begin:-self.discard_end]
-                y_trimmed = y_trimmed[self.discard_begin:-self.discard_end]
-                e_trimmed = e_trimmed[self.discard_begin:-self.discard_end]
+                x_qrange = x_qrange[self.discard_begin:-self.discard_end]
+                y_qrange = y_qrange[self.discard_begin:-self.discard_end]
+                e_qrange = e_qrange[self.discard_begin:-self.discard_end]
             else:
-                x_trimmed = x_trimmed[self.discard_begin:]
-                y_trimmed = y_trimmed[self.discard_begin:]
-                e_trimmed = e_trimmed[self.discard_begin:]
+                x_qrange = x_qrange[self.discard_begin:]
+                y_qrange = y_qrange[self.discard_begin:]
+                e_qrange = e_qrange[self.discard_begin:]
 
             v.update({
+                'x_qrange': x_qrange,
+                'y_qrange': y_qrange,
+                'e_qrange': e_qrange,
                 'x_trimmed': x_trimmed,
                 'y_trimmed': y_trimmed,
                 'e_trimmed': e_trimmed,
-                'x_positive': x_positive,
-                'y_positive': y_positive,
-                'e_positive': e_positive,
             })
 
 
@@ -300,24 +319,25 @@ class SANSSuperImpose(PythonAlgorithm):
                     ([1,1] if self.k is None and self.b is None else [1]), # guess
                     args=(
                         # _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
-                        v['x_trimmed'],
-                        v['e_trimmed'],
+                        v['x_qrange'],
+                        v['e_qrange'],
                         self.data[input_ws_reference_name]['f'], # reference interpolation function
                         v['f'],
                         self.k, self.b),
                     full_output=True)
                 
+                y_qrange_fit = self._peval(v['x_qrange'], v['f'], plsq, k=self.k, b=self.b)
                 # Goodness of Fit Estimator
                 ss_err = (infodict['fvec']**2).sum() # infodict['fvec'] is the array of residuals:
-                ss_tot = ((y-y.mean())**2).sum()
+                ss_tot = ((y_qrange_fit-y_qrange_fit.mean())**2).sum()
                 r_squared = 1 - (ss_err/ss_tot)
+                logger.debug("r_squared=%s"%r_squared)
 
                 y_trimmed_fit = self._peval(v['x_trimmed'], v['f'], plsq, k=self.k, b=self.b)
-                y_positive_fit = self._peval(v['x_positive'], v['f'], plsq, k=self.k, b=self.b)
                 y_fit = self._peval(v['x'], v['f'], plsq, k=self.k, b=self.b)
                 v.update({
+                    'y_qrange_fit': y_qrange_fit,
                     'y_trimmed_fit': y_trimmed_fit,
-                    'y_positive_fit': y_positive_fit,
                     'y_fit': y_fit,
                     'plsq': plsq,
                     'cov' : cov,
@@ -325,52 +345,64 @@ class SANSSuperImpose(PythonAlgorithm):
                 })
             else:
                 v.update({
+                    'y_qrange_fit': v['f'](v['x_qrange']),
                     'y_trimmed_fit': v['f'](v['x_trimmed']),
-                    'y_positive_fit': v['f'](v['x_positive']),
                     'y_fit': v['f'](v['x']),
                     'plsq': None,
                     'cov' : None,
                     'r_squared': 0,
                 })
     
+    
+    def _create_grouped_ws(self, suffix=""):
+        '''
+        @suffix = e.g. '_qrange'
+        '''
+        out_ws_list = []
+        for k, v in self.data.items():
+            ws_name = k + suffix + "_fit"
+            CreateWorkspace(
+                OutputWorkspace=ws_name,
+                DataX=list(v['x' + suffix]), DataY=list(v['y' + suffix + '_fit']),
+                UnitX="Q")
+            out_ws_list.append(ws_name)
+        prefix = self.getProperty("OutputWorkspacePrefix").value
+        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + suffix + '_fit')
+    
+
     def _create_grouped_wss(self):
         '''
         Create the two grouped workspaces for the fitted data for the whole x
         and for the minimal overlap q range
         '''
-        out_ws_list = []
-        for k, v in self.data.items():
-            ws_name = "_" + k + "_trimmed_fit"
-            CreateWorkspace(
-                OutputWorkspace=ws_name,
-                DataX=list(v['x_trimmed']), DataY=list(v['y_trimmed_fit']),
-                UnitX="Q")
-            out_ws_list.append(ws_name)
-        prefix = self.getProperty("OutputWorkspacePrefix").value
-        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + '_trimmed_fit')
+        self._create_grouped_ws('_qrange')
+        self._create_grouped_ws('_trimmed')
+        self._create_grouped_ws('')
 
-        out_ws_list = []
-        for k, v in self.data.items():
-            ws_name = "_" + k + "_positive_fit"
-            CreateWorkspace(
-                OutputWorkspace=ws_name,
-                DataX=list(v['x_positive']), DataY=list(v['y_positive_fit']),
-                UnitX="Q")
-            out_ws_list.append(ws_name)
-        prefix = self.getProperty("OutputWorkspacePrefix").value
-        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + '_positive_fit')
 
-        out_ws_list = []
-        for k, v in self.data.items():
-            ws_name = "_" + k + "_fit"
-            CreateWorkspace(
-                OutputWorkspace=ws_name,
-                DataX=list(v['x']), DataY=list(v['y_fit']),
+    def _create_averaged_ws(self):
+        '''
+        This goes through all the X and Y values 
+        (non negative and without the ends) and calculates de average in Y
+        Note that all 
+        '''
+        x = np.array([])
+        for _, v in self.data.items():
+            x = np.append(x, v['x_trimmed'])
+        x = np.unique(x)
+
+        y = np.array([])
+        for xi in x:
+            yi = np.array([])
+            for _, v in self.data.items():
+                yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
+            y = np.append(y, np.average(yi))
+
+        CreateWorkspace(
+                OutputWorkspace=self.getProperty("OutputWorkspacePrefix").value \
+                + "_trimmed_fit_averaged",
+                DataX=list(x), DataY=list(y),
                 UnitX="Q")
-            out_ws_list.append(ws_name)
-        prefix = self.getProperty("OutputWorkspacePrefix").value
-        GroupWorkspaces(InputWorkspaces=out_ws_list, OutputWorkspace=prefix + '_fit')
-        
 
     def _create_table_ws(self):
         '''
@@ -378,7 +410,7 @@ class SANSSuperImpose(PythonAlgorithm):
         # Workspace Table
         outws = CreateEmptyTableWorkspace(
             OutputWorkspace=self.out_ws_table_name)
-        columns = ["IQCurve", "K", "KError", "B", "BError"]
+        columns = ["IQCurve", "K", "KError", "B", "BError", "GoodnessOfFit"]
 
         outws.addColumn(type="str", name=columns[0])
         for col in columns[1:]:
@@ -393,6 +425,7 @@ class SANSSuperImpose(PythonAlgorithm):
                     "KError": 0,
                     "B": 0,
                     "BError": 0,
+                    "GoodnessOfFit": 0,
                 }
             else:
                 if v['cov'].any():
@@ -409,6 +442,7 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": errors[0],
                         "B":  v['plsq'][1],
                         "BError": errors[1],
+                        "GoodnessOfFit": v['r_squared'],
                     }
                 elif b is None:
                     # b was fitted
@@ -418,6 +452,7 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": 0,
                         "B": v['plsq'][0],
                         "BError": errors[0],
+                        "GoodnessOfFit": v['r_squared'],
                     }
                 elif k is None:
                     # k was fitted
@@ -427,6 +462,7 @@ class SANSSuperImpose(PythonAlgorithm):
                         "KError": errors[0],
                         "B": b,
                         "BError": 0,
+                        "GoodnessOfFit": v['r_squared'],
                     }
             logger.debug("%s"%row)
             outws.addRow(row)
@@ -458,6 +494,8 @@ class SANSSuperImpose(PythonAlgorithm):
         self._create_grouped_wss()
 
         self._create_table_ws()
+
+        self._create_averaged_ws()
 
         return
 
