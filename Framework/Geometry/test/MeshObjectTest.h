@@ -758,9 +758,65 @@ private:
 
 };
 
+
 // -----------------------------------------------------------------------------
 // Performance tests
 // -----------------------------------------------------------------------------
+class MeshObjectTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MeshObjectTestPerformance *createSuite() {
+    return new MeshObjectTestPerformance();
+  }
+  static void destroySuite(MeshObjectTestPerformance *suite) { delete suite; }
 
+  MeshObjectTestPerformance()
+    : rng(200000), octahedron(createOctahedron()),
+    lShape(createLShape()) {}
+
+  void test_generatePointInside_Convex_Solid() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = octahedron->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+  void test_Point_Inside_NonConvex_Solid() {
+    const size_t maxAttempts(500);
+    V3D dummy;
+    for (size_t i = 0; i < npoints; ++i) {
+      dummy = lShape->generatePointInObject(rng, maxAttempts);
+    }
+  }
+
+  boost::shared_ptr<MeshObject> createOctahedron() {
+    /**
+    * Create octahedron with vertices on the axes at -1 & +1.
+    */
+    boost::shared_ptr<MeshObject> retVal =
+      boost::shared_ptr<MeshObject>(new MeshObject);
+    return retVal;
+  }
+
+  boost::shared_ptr<MeshObject> createLShape() {
+    /**
+    * Create an L shape with vertices at
+    * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+    *  where Z = 0 or 1.
+    */
+    boost::shared_ptr<MeshObject> retVal =
+      boost::shared_ptr<MeshObject>(new MeshObject);
+    return retVal;
+  }
+
+
+private:
+  const size_t npoints = 20000;
+  Mantid::Kernel::MersenneTwister rng;
+  IObject_sptr octahedron;
+  IObject_sptr lShape;
+};
 
 #endif // MANTID_TESTMESHOBJECT__
