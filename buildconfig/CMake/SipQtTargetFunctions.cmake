@@ -1,7 +1,7 @@
 # Defines utility functions to help with generating
 # targets that produce a Python module from a set
 # of .sip definitions
-#
+include ( QtTargetFunctions )
 
 #
 # brief: Add a module target to generate Python bindings
@@ -77,6 +77,9 @@ function ( mtd_add_sip_module )
   add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${_sip_include_deps} )
   target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
+  if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
+  endif ()
   target_link_libraries ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS} )
 
   # Set all required properties on the target
