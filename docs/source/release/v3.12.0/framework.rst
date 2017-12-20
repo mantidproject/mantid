@@ -34,6 +34,7 @@ Algorithms
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
 - In :ref:`MaxEnt <algm-MaxEnt>` the ``EvolChi`` and  ``EvolAngle`` workspaces only contain data up until the result has converged.
+- :ref:`LoadLamp <algm-LoadLamp>` is a new algorithm to load processed HDF5 files produced by LAMP program at ILL. 
 
 Fitting
 -------
@@ -44,7 +45,7 @@ Core Functionality
 
 - Fixed an issue where certain isotopes could not be accessed using the `Atom` classes, e.g Si28.
 - Added new functionality to ``datasearch.searcharchive`` :ref:`property <Properties File>` to only search the default facility
-- The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom. 
+- The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom.
 - Condition to check if a property is enabled when serializing.
 
 Performance
