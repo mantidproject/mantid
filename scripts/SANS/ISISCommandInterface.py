@@ -574,13 +574,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
 def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
     # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
-    retWSname_merged = retWSname_rear + "_merged"
-    # if retWSname_merged.count('front') == 1:
-    #     retWSname_merged = retWSname_merged.replace('front', 'merged')
-    #     retWSname_rear = retWSname_rear.replace('front', 'rear')
-    # else:
-    #     retWSname_merged = retWSname_merged + "_merged"
-    #     retWSname_rear = retWSname_rear + "_rear"
+    retWSname_merged = retWSname_rear
+    if retWSname_merged.count('rear') == 1:
+        retWSname_merged = retWSname_merged.replace('rear', 'merged')
+    else:
+        retWSname_merged = retWSname_merged + "_merged"
 
     Nf = mtd[retWSname_front + "_sumOfNormFactors"]
     Nr = mtd[retWSname_rear + "_sumOfNormFactors"]

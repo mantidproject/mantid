@@ -337,8 +337,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             names = [new_name_HAB, new_name_LAB]
         elif combineDet == 'merged':
             if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('_merged', '')
-                front_reduced = rear_reduced.replace('rear', 'front')
+                rear_reduced = reduced.replace('merged', 'rear')
+                front_reduced = reduced.replace('merged', 'front')
             else:
                 rear_reduced = reduced.replace('_merged', '')
                 front_reduced = rear_reduced.replace('main', 'HAB')
