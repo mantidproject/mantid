@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>700</width>
-    <height>700</height>
+    <height>709</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabContainerSubtraction">
        <attribute name="title">
@@ -36,14 +36,14 @@
         <string>Calculate Paalman Pings</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabApplyPaalmanPings">
-       <attribute name="title">
-        <string>Apply Paalman Pings</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
         <string>Calculate Monte Carlo Absorption</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabApplyAbsorptionCorrections">
+       <attribute name="title">
+        <string>Apply Absorption Corrections</string>
        </attribute>
       </widget>
      </widget>
