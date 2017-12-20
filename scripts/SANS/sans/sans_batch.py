@@ -82,17 +82,17 @@ class SANSCentreFinder(object):
     def __init__(self):
         super(SANSCentreFinder, self).__init__()
 
-    def __call__(self, state, r_min = 0.06, r_max = 0.026, max_iter = 20, x_start = 0.0, y_start = 0.0,
+    def __call__(self, state, r_min = 60, r_max = 280, max_iter = 20, x_start = 0.0, y_start = 0.0,
                  tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True, verbose=False):
         """
         This is the start of the beam centre finder algorithm.
 
         :param state: This is a sans state, to find the beam centre for.
-        :param r_min: This is the inner radius of the quartile mask.
-        :param r_max: This is the outer radius of the quartile mask.
+        :param r_min: This is the inner radius of the quartile mask in mm.
+        :param r_max: This is the outer radius of the quartile mask in mm.
         :param max_iter: This is the maximum number of iterations.
-        :param x_start: This is the starting position of the search on the x axis.
-        :param y_start: This is the starting position of the search on the y axis.
+        :param x_start: This is the starting position of the search on the x axis in metres or degrees.
+        :param y_start: This is the starting position of the search on the y axis in metres.
         :param tolerance: This is the tolerance for the search.
         :param fine_direction: This is an enumerator controlling which axis or both should be searched.
         :param reduction_method: This is a bool controlling which centre finder algorithm to use. By default the
