@@ -311,10 +311,10 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
   if (!postprocessingStep.m_options.isEmpty()) {
     postprocessString += ", ";
     postprocessString += postprocessingStep.m_options;
-    postprocessString += ")";
   }
   postprocessString += ", " + postprocessingStep.m_algorithm.outputProperty() +
                        " = '" + outputWSName + "'";
+  postprocessString += ")";
 
   return boost::make_tuple(postprocessString, outputWSName);
 }
@@ -483,16 +483,15 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   if (runs.size() == 1) {
     return boost::make_tuple(loadStrings, boost::get<1>(loadString));
   }
-  loadStrings += outputName;
-  loadStrings += " = ";
-  loadStrings += boost::get<1>(loadString);
-  loadStrings += "\n";
+
+  auto inputName1 = boost::get<1>(loadString);
 
   // Load each subsequent run and add it to the first run
   for (auto runIt = runs.begin() + 1; runIt != runs.end(); ++runIt) {
     loadString = loadRunString(*runIt, instrument, prefix);
     loadStrings += boost::get<0>(loadString);
-    loadStrings += preprocessString(boost::get<1>(loadString), outputName,
+    auto inputName2 = boost::get<1>(loadString);
+    loadStrings += preprocessString(inputName1, inputName2, outputName,
                                     preprocessor, options);
   }
 
@@ -509,15 +508,15 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
  @param options : options given for pre-processing
  @return string of python code
 */
-QString preprocessString(const QString &input_name, const QString &output_name,
+QString preprocessString(const QString &input_name1, const QString &input_name2, const QString &output_name,
                          const PreprocessingAlgorithm &preprocessor,
                          const QString &options) {
   QString preprocessString;
 
   preprocessString += preprocessor.name();
   preprocessString += "(";
-  preprocessString += preprocessor.lhsProperty() + " = '" + output_name + "', ";
-  preprocessString += preprocessor.rhsProperty() + " = '" + input_name + "'";
+  preprocessString += preprocessor.lhsProperty() + " = '" + input_name1 + "', ";
+  preprocessString += preprocessor.rhsProperty() + " = '" + input_name2 + "'";
   if (!options.isEmpty()) {
     preprocessString += ", " + options;
   }

@@ -172,6 +172,9 @@ convertMapToString(const std::map<QString, QString> &optionsMap) {
   bool first = true;
 
   for (auto &kvp : optionsMap) {
+    if (kvp.second.isEmpty())
+      continue;
+
     if (!first)
       result += ", ";
     else

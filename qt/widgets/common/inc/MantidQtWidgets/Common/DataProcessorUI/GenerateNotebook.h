@@ -78,7 +78,8 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const PreprocessingAlgorithm &preprocessor,
                     const QString &options);
 
-QString DLLExport preprocessString(const QString &input_name,
+QString DLLExport preprocessString(const QString &input_name1,
+                                   const QString &input_name2,
                                    const QString &output_name,
                                    const PreprocessingAlgorithm &preprocessor,
                                    const QString &options);
