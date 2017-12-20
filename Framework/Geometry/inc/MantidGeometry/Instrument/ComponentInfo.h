@@ -33,7 +33,6 @@ class Instrument;
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
-isRectBank
   This file is part of Mantid.
 
   Mantid is free software; you can redistribute it and/or modify
@@ -98,8 +97,9 @@ public:
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-      boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
-                                                 size_t>> componentIdToIndexMap,
+      boost::shared_ptr<
+          const std::unordered_map<Geometry::IComponent *, size_t>>
+          componentIdToIndexMap,
       boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::IObject>>>
           shapes);
   ~ComponentInfo();
@@ -149,7 +149,7 @@ public:
                     const Kernel::V3D &observer) const;
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
-  Beamline::ComponentType componentFlag(const size_t componentIndex) const;
+  Beamline::ComponentType componentType(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
   size_t scanSize() const;

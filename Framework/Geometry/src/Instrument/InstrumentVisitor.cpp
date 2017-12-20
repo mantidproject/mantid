@@ -69,8 +69,9 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -86,7 +87,7 @@ InstrumentVisitor::InstrumentVisitor(
               m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
-      m_componentTypeFlag(
+      m_componentType(
           boost::make_shared<std::vector<Beamline::ComponentType>>()),
       m_names(boost::make_shared<std::vector<std::string>>(
           m_orderedDetectorIds->size())) {
@@ -160,7 +161,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_componentTypeFlag->push_back(Beamline::ComponentType::Generic);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   m_names->emplace_back(assembly.getName());
   clearLegacyParameters(m_pmap, assembly);
@@ -195,7 +196,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_componentTypeFlag->push_back(Beamline::ComponentType::Generic);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   m_names->emplace_back(component.getName());
   clearLegacyParameters(m_pmap, component);
@@ -222,7 +223,7 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
   return index;
 }
 
@@ -234,7 +235,7 @@ size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
 size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::BankOfTube;
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::BankOfTube;
   return index;
 }
 
@@ -246,7 +247,7 @@ size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
 size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
   auto index = registerComponentAssembly(tube);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_componentTypeFlag)[rangesIndex] = Beamline::ComponentType::Tube;
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Tube;
   return index;
 }
 
@@ -343,7 +344,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_componentTypeFlag, m_names, m_sourceIndex, m_sampleIndex);
+      m_componentType, m_names, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

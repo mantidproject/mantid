@@ -476,7 +476,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   auto compIterator = rangeComp.rbegin();
   while (compIterator != rangeComp.rend()) {
     const size_t index = *compIterator;
-    const auto compFlag = componentFlag(index);
+    const auto compFlag = componentType(index);
     if (hasSource() && index == source()) {
       ++compIterator;
     } else if (compFlag == Beamline::ComponentType::Rectangular) {
@@ -502,8 +502,8 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 }
 
 Beamline::ComponentType
-ComponentInfo::componentFlag(const size_t componentIndex) const {
-  return m_componentInfo->componentFlag(componentIndex);
+ComponentInfo::componentType(const size_t componentIndex) const {
+  return m_componentInfo->componentType(componentIndex);
 }
 
 void ComponentInfo::setScanInterval(

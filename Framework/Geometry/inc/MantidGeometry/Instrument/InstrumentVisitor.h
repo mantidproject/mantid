@@ -129,13 +129,14 @@ private:
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>>
+      m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
-  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentTypeFlag;
+  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentType;
 
   /// Component names
   boost::shared_ptr<std::vector<std::string>> m_names;

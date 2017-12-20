@@ -196,9 +196,10 @@ public:
         "Should contain the sample id", 1,
         componentIds.count(visitee->getComponentByName("some-surface-holder")
                                ->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")
-                                             ->getComponentID()));
+    TSM_ASSERT_EQUALS(
+        "Should contain the source id", 1,
+        componentIds.count(
+            visitee->getComponentByName("source")->getComponentID()));
 
     auto detectorComponentId =
         visitee->getComponentByName("point-detector")->getComponentID();
@@ -309,11 +310,11 @@ public:
 
     const size_t bankIndex = compInfo->indexOf(
         instrument->getComponentByName("bank1")->getComponentID());
-    TS_ASSERT(compInfo->componentFlag(bankIndex) ==
+    TS_ASSERT(compInfo->componentType(bankIndex) ==
               ComponentType::Rectangular); // Bank is rectangular
-    TS_ASSERT(compInfo->componentFlag(compInfo->source()) ==
+    TS_ASSERT(compInfo->componentType(compInfo->source()) ==
               ComponentType::Generic); // Source is not a rectangular bank
-    TS_ASSERT_EQUALS(compInfo->componentFlag(0),
+    TS_ASSERT_EQUALS(compInfo->componentType(0),
                      ComponentType::Detector); //  A detector is never a bank,
                                                //  let alone a detector
   }
@@ -330,7 +331,7 @@ public:
 
     // Nothing should be marked as a rectangular bank
     for (size_t index = 0; index < compInfo->size(); ++index) {
-      TS_ASSERT(compInfo->componentFlag(index) != ComponentType::Rectangular);
+      TS_ASSERT(compInfo->componentType(index) != ComponentType::Rectangular);
     }
   }
 
