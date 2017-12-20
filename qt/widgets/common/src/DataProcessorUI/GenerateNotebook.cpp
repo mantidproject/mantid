@@ -281,9 +281,9 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep) {
 
-  QString stitchString;
+  QString postprocessString;
 
-  stitchString += "#Post-process workspaces\n";
+  postprocessString += "#Post-process workspaces\n";
 
   // Properties for post-processing algorithm
   // Vector containing the list of input workspaces
@@ -304,22 +304,19 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
   auto &postprocessingAlgorithm = postprocessingStep.m_algorithm;
 
   auto outputWSName = postprocessingAlgorithm.prefix() + outputName.join("_");
-  stitchString += outputWSName;
-  stitchString += completeOutputProperties(
-      postprocessingAlgorithm.name(),
-      postprocessingAlgorithm.numberOfOutputProperties());
-  stitchString += " = ";
-  stitchString += postprocessingAlgorithm.name() + "(";
-  stitchString += postprocessingAlgorithm.inputProperty() + " = '";
-  stitchString += inputNames.join(", ");
-  stitchString += "'";
+  postprocessString += postprocessingAlgorithm.name() + "(";
+  postprocessString += postprocessingAlgorithm.inputProperty() + " = '";
+  postprocessString += inputNames.join(", ");
+  postprocessString += "'";
   if (!postprocessingStep.m_options.isEmpty()) {
-    stitchString += ", ";
-    stitchString += postprocessingStep.m_options;
-    stitchString += ")";
+    postprocessString += ", ";
+    postprocessString += postprocessingStep.m_options;
+    postprocessString += ")";
   }
+  postprocessString += ", " + postprocessingStep.m_algorithm.outputProperty() +
+                       " = '" + outputWSName + "'";
 
-  return boost::make_tuple(stitchString, outputWSName);
+  return boost::make_tuple(postprocessString, outputWSName);
 }
 
 /**
@@ -495,35 +492,39 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   for (auto runIt = runs.begin() + 1; runIt != runs.end(); ++runIt) {
     loadString = loadRunString(*runIt, instrument, prefix);
     loadStrings += boost::get<0>(loadString);
-    loadStrings += plusString(boost::get<1>(loadString), outputName,
-                              preprocessor, options);
+    loadStrings += preprocessString(boost::get<1>(loadString), outputName,
+                                    preprocessor, options);
   }
 
   return boost::make_tuple(loadStrings, outputName);
 }
 
 /**
- Create string of python code to run the Plus algorithm on specified workspaces
- @param input_name : name of workspace to add to the other workspace
- @param output_name : other workspace will be added to the one with this name
+ Create string of python code to run the preprocessing algorithm on specified
+ workspaces
+ @param input_name : name of workspace to combine with the other workspace
+ @param output_name : other workspace will be combined with the one with this
+ name
  @param preprocessor : the preprocessor algorithm
  @param options : options given for pre-processing
  @return string of python code
 */
-QString plusString(const QString &input_name, const QString &output_name,
-                   const PreprocessingAlgorithm &preprocessor,
-                   const QString &options) {
-  QString plusString;
+QString preprocessString(const QString &input_name, const QString &output_name,
+                         const PreprocessingAlgorithm &preprocessor,
+                         const QString &options) {
+  QString preprocessString;
 
-  plusString += output_name + " = " + preprocessor.name();
-  plusString += "(";
-  plusString += preprocessor.lhsProperty() + " = '" + output_name + "', ";
-  plusString += preprocessor.rhsProperty() + " = '" + input_name + "'";
+  preprocessString += preprocessor.name();
+  preprocessString += "(";
+  preprocessString += preprocessor.lhsProperty() + " = '" + output_name + "', ";
+  preprocessString += preprocessor.rhsProperty() + " = '" + input_name + "'";
   if (!options.isEmpty()) {
-    plusString += ", " + options;
+    preprocessString += ", " + options;
   }
-  plusString += ")\n";
-  return plusString;
+  preprocessString +=
+      ", " + preprocessor.outputProperty() + " = '" + output_name + "'";
+  preprocessString += ")\n";
+  return preprocessString;
 }
 
 /**
@@ -541,9 +542,9 @@ boost::tuple<QString, QString> loadRunString(const QString &run,
   // run from file
   const QString filename = instrument + run;
   const QString ws_name = prefix + run;
-  loadString += ws_name + " = ";
   loadString += "Load(";
   loadString += "Filename = '" + filename + "'";
+  loadString += ", OutputWorkspace = '" + ws_name + "'";
   loadString += ")\n";
 
   return boost::make_tuple(loadString, ws_name);

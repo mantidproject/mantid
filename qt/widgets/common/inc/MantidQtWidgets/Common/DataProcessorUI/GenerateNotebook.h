@@ -78,9 +78,10 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const PreprocessingAlgorithm &preprocessor,
                     const QString &options);
 
-QString DLLExport
-plusString(const QString &input_name, const QString &output_name,
-           const PreprocessingAlgorithm &preprocessor, const QString &options);
+QString DLLExport preprocessString(const QString &input_name,
+                                   const QString &output_name,
+                                   const PreprocessingAlgorithm &preprocessor,
+                                   const QString &options);
 
 boost::tuple<QString, QString> DLLExport
 loadRunString(const QString &run, const QString &instrument,
