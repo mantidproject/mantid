@@ -852,8 +852,9 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
       std::cos(inRad(detAngle)) * (detectorRestZ - Figaro::DH1Z) + Figaro::DH1Z;
   const double pixelOffset = Figaro::detectorRestY - 0.5 * m_pixelWidth;
   const double beamY = detectorY + pixelOffset * std::cos(inRad(detAngle));
+  const double sht1 = inMeter(doubleFromRun("SHT1.value"));
   const double beamZ = detectorZ - pixelOffset * std::sin(inRad(detAngle));
-  return std::hypot(beamY, beamZ);
+  return std::hypot(beamY - sht1, beamZ);
 }
 
 /// Return the horizontal offset along the z axis.
