@@ -142,7 +142,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 /** Returns true if the workspace is in the ADS or there is none.
  * @return true if the string returned by value() is valid
  */
-template<typename TYPE>
+template <typename TYPE>
 bool WorkspaceProperty<TYPE>::isValueSerializable() const {
   return !m_workspaceName.empty() || !this->m_value;
 }
@@ -441,7 +441,7 @@ std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
   std::string error;
 
   if (m_workspaceName.empty()) {
-    if (isOptional()) {
+    if (isOptional() || !m_isMasterRank) {
       error = "";
     } else {
       error = "Enter a name for the Input/InOut workspace";
