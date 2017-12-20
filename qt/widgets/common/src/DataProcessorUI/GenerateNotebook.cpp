@@ -191,7 +191,6 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
     // From the reduction (processing) algorithm, get the prefix for the
     // output workspace, we'll use it to give name to this group
     QString prefix = processor.prefix(group);
-    plotString += prefix + "groupWS = GroupWorkspaces(InputWorkspaces = '";
 
     // Save this group to workspaceList
     workspaceList.append(prefix + "groupWS");
@@ -205,6 +204,7 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
     }
 
     plotString += wsNames.join(", ");
+    plotString += "OutputWorkspace = '" + prefix + "groupWS'";
     plotString += "')\n";
   }
 
@@ -508,7 +508,8 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
  @param options : options given for pre-processing
  @return string of python code
 */
-QString preprocessString(const QString &input_name1, const QString &input_name2, const QString &output_name,
+QString preprocessString(const QString &input_name1, const QString &input_name2,
+                         const QString &output_name,
                          const PreprocessingAlgorithm &preprocessor,
                          const QString &options) {
   QString preprocessString;
