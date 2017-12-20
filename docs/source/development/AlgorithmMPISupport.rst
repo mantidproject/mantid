@@ -456,6 +456,25 @@ Documentation
 When adding MPI support for an algorithm, add it to the table at the end of this document.
 Potential limitations must be described in the comments.
 
+Porting Python reduction scripts in practice
+--------------------------------------------
+
+The mechanism of execution modes and storage modes allows for "guided" porting of algorithms as follows:
+
+1. Run Python script such as a system test with two (or more) MPI ranks.
+2. At some point an algorithm without any MPI support or inadequate MPI support may be encountered, resulting in an error message similar to this:
+
+  .. code-block::
+
+    MyAlg-[Error] Error in execution of algorithm MyAlg:
+    MyAlg-[Error] Algorithm does not support execution with input workspaces of the following storage types:
+    MyAlg-[Error] InputWorkspace Parallel::StorageMode::Distributed
+    MyAlg-[Error] InputWorkspaceMonitor Parallel::StorageMode::Cloned
+    MyAlg-[Error] .
+
+3. Add the required MPI support to ``MyAlg`` with one of the mechanisms described above. In rare cases the combination of storage modes of the inputs may be unexpected, indicating an error earlier in the chain which needs to be fixed.
+4. Go to 1., until the script finishes successfully.
+
 Supported Algorithms
 ####################
 
