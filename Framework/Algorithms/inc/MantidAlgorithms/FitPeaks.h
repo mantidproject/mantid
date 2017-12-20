@@ -52,6 +52,13 @@ private:
   void processInputFunctions();
   void processInputFitRanges();
 
+  /// Generate output workspaces
+  void GenerateFittedParametersValueWorkspace();
+  /// main method to create output workspaces
+  void GenerateOutputPeakPositionWS();
+  ///
+  void GenerateCalculatedPeaksWS();
+
   /// TODO - Implment .. convert peak function's parameter names to parameter
   /// index for fast access
   void ConvertParametersNameToIndex();
@@ -66,14 +73,15 @@ private:
   fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                    std::vector<double> &fitted_peak_centers,
                    std::vector<std::vector<double>> &fitted_function_parameters,
-                   std::vector<double> &peak_chi2_vec);
+                   std::vector<double> *peak_chi2_vec);
+
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
-                           API::IFunction_sptr peakbkgdfunc,
-                           API::IPeakFunction_sptr peakfunction,
-                           API::IBackgroundFunction_sptr bkgdfunc,
+                           const double &exppeakcenter,
                            const std::pair<double, double> &fitwindow,
-                           const double &exppeakcenter, const bool high);
+                           const bool &high, API::IFunction_sptr peakbkgdfunc,
+                           API::IPeakFunction_sptr peakfunction,
+                           API::IBackgroundFunction_sptr bkgdfunc);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
@@ -84,6 +92,18 @@ private:
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
+
+  ///
+  double FitFunctionHighBackground(IAlgorithm_sptr fit,
+                                   const double &exp_center,
+                                   const std::pair<double, double> &fit_window,
+                                   const size_t &ws_index,
+                                   API::IFunction_sptr peakbkgdfunc,
+                                   API::IPeakFunction_sptr peakfunction,
+                                   API::IBackgroundFunction_sptr bkgdfunc);
+
+  void ReduceBackground(const std::vector<double> &vec_x,
+                        std::vector<double> *vec_y, std::vector<double> *vec_e);
 
   void estimateBackground(size_t wi,
                           const std::pair<double, double> &peak_window,
@@ -109,7 +129,7 @@ private:
       API::IBackgroundFunction_sptr bkgdfunction, double cost,
       std::vector<double> &fitted_peak_positions,
       std::vector<std::vector<double>> &function_parameters_vector,
-      std::vector<double> &peak_chi2_vec);
+      std::vector<double> *peak_chi2_vec);
 
   /// calculate peak+background for fitted
   void calculateFittedPeaks();
@@ -118,11 +138,6 @@ private:
   //                               const std::vector<double> &peak_window);
 
   size_t getXIndex(size_t wi, double x);
-
-  /// main method to create output workspaces
-  void generateOutputWorkspaces();
-  /// create table workspace for fitted parameter value
-  void genearateFittedParameterTable(const std::string &param_table_name);
 
   //  double processFitResult(DataObjects::TableWorkspace_sptr param_table,
   //                          std::vector<double> &param_values,
@@ -177,6 +192,8 @@ private:
   std::string m_minimizer;
   /// Cost function
   std::string m_costFunction;
+  /// Fit from right or left
+  bool fit_peaks_from_right_;
 
   // Inputs about peak parameters
   std::vector<size_t> m_initParamIndexes;
