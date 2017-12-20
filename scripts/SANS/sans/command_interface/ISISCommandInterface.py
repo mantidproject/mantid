@@ -1023,9 +1023,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     @param tolerance: Sets the step size at which the search will stop
     @param find_direction: FindDirectionEnum controls which directions to find the centre in by default is All
     @param reduction_method: if true uses the quadrant centre finder method. If false user the COM method
-    
-    There is quite a lot of special cases for LARMOR in this function. This could be nicer but compatability with old 
-    user scripts needs to be mantained.
     """
 
     if not xstart:
