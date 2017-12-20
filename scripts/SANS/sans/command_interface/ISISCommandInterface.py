@@ -1010,10 +1010,14 @@ def PhiRanges(phis, plot=True):
     return reduced_workspace_names[0]
 
 
-def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=0.0, ystart=0.0, tolerance=1.251e-4,
+def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
                    find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
 
+    if not xstart:
+        xstart = state.move.detectors['LAB'].sample_centre_pos1
+    if not ystart:
+        ystart = state.move.detectors['LAB'].sample_centre_pos2
     # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
     # function
     if config['default.instrument'] == 'LARMOR':

@@ -204,7 +204,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
 
-                if residueLR[j]+residueTB[j] < residueLR[j-1]+residueTB[j-1]:
+                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or state.compatibility.use_compatibility_mode:
                     centre_1_hold = centre1
                     centre_2_hold = centre2
 
