@@ -478,116 +478,108 @@ The mechanism of execution modes and storage modes allows for "guided" porting o
 Supported Algorithms
 ####################
 
-================================= ======================= ========
-Algorithm                         Supported modes         Comments
-================================= ======================= ========
-BinaryOperation                   all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
-CalculateChiSquared               MasterOnly, Identical   see ``IFittingAlgorithm``
-CalculateCostFunction             MasterOnly, Identical   see ``IFittingAlgorithm``
-CalculateFlatBackground           MasterOnly, Identical
-CalculateTransmission             MasterOnly, Identical
-CloneWorkspace                    all
-Comment                           all
-CompareWorkspace                  MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used
-CompressEvents                    all
-ConvertToHistogram                all
-ConvertToPointData                all
-ConvertUnits                      all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
-CopyInstrumentParameters          all
-CreateSingleValuedWorkspace       Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
-CreateWorkspace                   all
-CropToComponent                   all
-CropWorkspace                     all                     see ``ExtractSpectra`` regarding X cropping
-Divide                            all                     see ``BinaryOperation``
-EstimateFitParameters             MasterOnly, Identical   see ``IFittingAlgorithm``
-EvaluateFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
-ExponentialCorrection             all                     see ``UnaryOperation``
-ExtractSingleSpectrum             all                     in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
-ExtractSpectra2                   all                     currently not available via algorithm factory or Python
-ExtractSpectra                    all                     not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
-FilterBadPulses                   all
-FilterByLogValue                  all
-FilterByTime                      all
-FilterEventsByLogValuePreNexus    Identical               see ``IFileLoader``
-FindDetectorsInShape              all
-Fit                               MasterOnly, Identical   see ``IFittingAlgorithm``
-GroupWorkspaces                   all
-IFileLoader                       Identical               implicitly adds support for many load-algorithms inheriting from this
-IFittingAlgorithm                 MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
-Load                              all                     actual supported mode is dictated by underlying load algorithm, which depends on file type
-LoadAscii2                        Identical               see ``IFileLoader``
-LoadAscii                         Identical               see ``IFileLoader``
-LoadBBY                           Identical               see ``IFileLoader``
-LoadCanSAS1D                      Identical               see ``IFileLoader``
-LoadDaveGrp                       Identical               see ``IFileLoader``
-LoadEmptyInstrument               Identical               see ``IFileLoader``
-LoadEventNexus                    Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
-LoadEventPreNexus2                Identical               see ``IFileLoader``
-LoadFITS                          Identical               see ``IFileLoader``
-LoadGSS                           Identical               see ``IFileLoader``
-LoadILLDiffraction                Identical               see ``IFileLoader``
-LoadILLIndirect2                  Identical               see ``IFileLoader``
-LoadILLReflectometry              Identical               see ``IFileLoader``
-LoadILLSANS                       Identical               see ``IFileLoader``
-LoadILLTOF2                       Identical               see ``IFileLoader``
-LoadInstrument                    all
-LoadIsawPeaks                     Identical               see ``IFileLoader``
-LoadISISNexus2                    Identical               see ``IFileLoader``
-LoadLLB                           Identical               see ``IFileLoader``
-LoadMask                          Identical
-LoadMcStas                        Identical               see ``IFileLoader``
-LoadMcStasNexus                   Identical               see ``IFileLoader``
-LoadMD                            Identical               see ``IFileLoader``
-LoadMLZ                           Identical               see ``IFileLoader``
-LoadMuonNexus                     Identical               see ``IFileLoader``
-LoadNexusLogs                     all
-LoadNexusMonitors2                Identical
-LoadNexusProcessed                Identical               see ``IFileLoader``
-LoadNXcanSAS                      Identical               see ``IFileLoader``
-LoadNXSPE                         Identical               see ``IFileLoader``
-LoadParameterFile                 all                     segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
-LoadPDFgetNFile                   Identical               see ``IFileLoader``
-LoadPreNexus                      Identical               see ``IFileLoader``
-LoadQKK                           Identical               see ``IFileLoader``
-LoadRawHelper                     Identical               see ``IFileLoader``
-LoadRKH                           Identical               see ``IFileLoader``
-LoadSassena                       Identical               see ``IFileLoader``
-LoadSESANS                        Identical               see ``IFileLoader``
-LoadSINQFocus                     Identical               see ``IFileLoader``
-LoadSNSspec                       Identical               see ``IFileLoader``
-LoadSPE                           Identical               see ``IFileLoader``
-LoadSpice2D                       Identical               see ``IFileLoader``
-LoadSQW2                          Identical               see ``IFileLoader``
-LoadSQW                           Identical               see ``IFileLoader``
-LoadSwans                         Identical               see ``IFileLoader``
-LoadTBL                           Identical               see ``IFileLoader``
-LoadTOFRawNexus                   Identical               see ``IFileLoader``
-Logarithm                         all                     see ``UnaryOperation``
-MaskBins                          all
-MaskDetectorsInShape              all
-MaskSpectra                       all
-Minus                             all                     see ``BinaryOperation``
-MoveInstrumentComponent           all
-Multiply                          all                     see ``BinaryOperation``
-OneMinusExponentialCor            all                     see ``UnaryOperation``
-Plus                              all                     see ``BinaryOperation``
-PoissonErrors                     all                     see ``BinaryOperation``
-PolynomialCorrection              all                     see ``UnaryOperation``
-Power                             all                     see ``UnaryOperation``
-PowerLawCorrection                all                     see ``UnaryOperation``
-Rebin                             all                     min and max bin boundaries must be given explicitly
-RebinToWorkspace                  all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
-RemovePromptPulse                 all
-ReplaceSpecialValues              all                     see ``UnaryOperation``
-RotateInstrumentComponent         all
-SaveNexus                         MasterOnly
-SaveNexusProcessed                MasterOnly
-Scale                             all
-SignalOverError                   all                     see ``UnaryOperation``
-SortEvents                        all
-SumSpectra                        MasterOnly, Identical
-UnaryOperation                    all
-WeightedMean                      all                     see ``BinaryOperation``
+====================================== ======================= ========
+Algorithm                              Supported modes         Comments
+====================================== ======================= ========
+BinaryOperation                        all                     not supported if ``AllowDifferentNumberSpectra`` is enabled
+CalculateChiSquared                    MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateCostFunction                  MasterOnly, Identical   see ``IFittingAlgorithm``
+CalculateFlatBackground                MasterOnly, Identical
+CalculateTransmission                  MasterOnly, Identical
+CloneWorkspace                         all
+Comment                                all
+CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used
+CompressEvents                         all
+ConvertToHistogram                     all
+ConvertToPointData                     all
+ConvertUnits                           all                     ``AlignBins`` not supported; for indirect energy mode the number of resulting bins is in general inconsistent across MPI ranks
+CopyInstrumentParameters               all
+CreateSingleValuedWorkspace            Identical               ``OutputWorkspace`` has ``StorageMode::Cloned``, support of ``MasterOnly`` would require adding property for selecting the mode
+CreateWorkspace                        all
+CropToComponent                        all
+CropWorkspace                          all                     see ``ExtractSpectra`` regarding X cropping
+Divide                                 all                     see ``BinaryOperation``
+EstimateFitParameters                  MasterOnly, Identical   see ``IFittingAlgorithm``
+EvaluateFunction                       MasterOnly, Identical   see ``IFittingAlgorithm``
+ExponentialCorrection                  all                     see ``UnaryOperation``
+ExtractSingleSpectrum                  all                     in practice ``ExecutionMode::Distributed`` not supported due to current nonzero-spectrum-count limitation
+ExtractSpectra2                        all                     currently not available via algorithm factory or Python
+ExtractSpectra                         all                     not supported with ``DetectorList``, cropping in X may exhibit inconsistent behavior in case spectra have common boundaries within some ranks but not within all ranks or across ranks
+FilterBadPulses                        all
+FilterByLogValue                       all
+FilterByTime                           all
+FilterEventsByLogValuePreNexus         Identical               see ``IFileLoader``
+FindDetectorsInShape                   all
+Fit                                    MasterOnly, Identical   see ``IFittingAlgorithm``
+GroupWorkspaces                        all
+IFileLoader                            Identical               implicitly adds support for many load-algorithms inheriting from this
+IFittingAlgorithm                      MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
+Load                                   all                     actual supported mode is dictated by underlying load algorithm, which depends on file type
+LoadAscii2                             Identical               see ``IFileLoader``
+LoadAscii                              Identical               see ``IFileLoader``
+LoadBBY                                Identical               see ``IFileLoader``
+LoadCanSAS1D                           Identical               see ``IFileLoader``
+LoadDaveGrp                            Identical               see ``IFileLoader``
+LoadEmptyInstrument                    Identical               see ``IFileLoader``
+LoadEventNexus                         Distributed             storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
+LoadEventPreNexus2                     Identical               see ``IFileLoader``
+LoadFITS                               Identical               see ``IFileLoader``
+LoadGSS                                Identical               see ``IFileLoader``
+LoadILLDiffraction                     Identical               see ``IFileLoader``
+LoadILLIndirect2                       Identical               see ``IFileLoader``
+LoadILLReflectometry                   Identical               see ``IFileLoader``
+LoadILLSANS                            Identical               see ``IFileLoader``
+LoadILLTOF2                            Identical               see ``IFileLoader``
+LoadInstrument                         all
+LoadIsawPeaks                          Identical               see ``IFileLoader``
+LoadISISNexus2                         Identical               see ``IFileLoader``
+LoadLLB                                Identical               see ``IFileLoader``
+LoadMask                               Identical
+LoadMcStas                             Identical               see ``IFileLoader``
+LoadMcStasNexus                        Identical               see ``IFileLoader``
+LoadMD                                 Identical               see ``IFileLoader``
+LoadMLZ                                Identical               see ``IFileLoader``
+LoadMuonNexus                          Identical               see ``IFileLoader``
+LoadNexusLogs                          all
+LoadNexusMonitors2                     Identical
+LoadNexusProcessed                     Identical               see ``IFileLoader``
+LoadNXcanSAS                           Identical               see ``IFileLoader``
+LoadNXSPE                              Identical               see ``IFileLoader``
+LoadParameterFile                      all                     segfaults when used in unit tests with MPI threading backend due to `#9365 <https://github.com/mantidproject/mantid/issues/9365>`_, normal use should be ok
+LoadPDFgetNFile                        Identical               see ``IFileLoader``
+LoadPreNexus                           Identical               see ``IFileLoader``
+LoadQKK                                Identical               see ``IFileLoader``
+LoadRawHelper                          Identical               see ``IFileLoader``
+LoadRKH                                Identical               see ``IFileLoader``
+LoadSassena                            Identical               see ``IFileLoader``
+LoadSESANS                             Identical               see ``IFileLoader``
+LoadSINQFocus                          Identical               see ``IFileLoader``
+LoadSNSspec                            Identical               see ``IFileLoader``
+LoadSPE                                Identical               see ``IFileLoader``
+LoadSpice2D                            Identical               see ``IFileLoader``
+LoadSQW2                               Identical               see ``IFileLoader``
+LoadSQW                                Identical               see ``IFileLoader``
+LoadSwans                              Identical               see ``IFileLoader``
+LoadTBL                                Identical               see ``IFileLoader``
+LoadTOFRawNexus                        Identical               see ``IFileLoader``
+Logarithm                              all                     see ``UnaryOperation``
+MaskBins                               all
+MaskDetectorsInShape                   all
+MaskSpectra                            all
+Minus                                  all                     see ``BinaryOperation``
+MoveInstrumentComponent                all
+Multiply                               all                     see ``BinaryOperation``
+OneMinusExponentialCor                 all                     see ``UnaryOperation``
+Plus                                   all                     see ``BinaryOperation``
+PoissonErrors                          all                     see ``BinaryOperation``
+PolynomialCorrection                   all                     see ``UnaryOperation``
+Power                                  all                     see ``UnaryOperation``
+PowerLawCorrection                     all                     see ``UnaryOperation``
+Rebin                                  all                     min and max bin boundaries must be given explicitly
+RebinToWorkspace                       all                     ``WorkspaceToMatch`` must have ``StorageMode::Cloned``
+RemovePromptPulse                      all
+ReplaceSpecialValues                   all                     see ``UnaryOperation``
+RotateInstrumentComponent              all
 SANSCalculateTransmission              MasterOnly, Identical
 SANSConvertToQ                         all
 SANSConvertToWavelength                all
@@ -595,6 +587,7 @@ SANSConvertToWavelengthAndRebin        all
 SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
 SANSCrop                               all
+SANSFitShiftScale                      MasterOnly, Identical
 SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
 SANSMaskWorkspace                      all
 SANSMove                               all
@@ -603,9 +596,16 @@ SANSReductionCore                      all
 SANSScale                              all
 SANSSingleReduction                    all
 SANSSliceEvent                         all
-SANSFitShiftScale                      MasterOnly, Identical
 SANSStitch                             MasterOnly, Identical
-================================= ======================= ========
+SaveNexus                              MasterOnly
+SaveNexusProcessed                     MasterOnly
+Scale                                  all
+SignalOverError                        all                     see ``UnaryOperation``
+SortEvents                             all
+SumSpectra                             MasterOnly, Identical
+UnaryOperation                         all
+WeightedMean                           all                     see ``BinaryOperation``
+====================================== ======================= ========
 
 Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
 
