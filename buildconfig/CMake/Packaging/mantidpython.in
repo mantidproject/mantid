@@ -51,6 +51,11 @@ if [ -n "$1" ] && [ "$1" = "--classic" ]; then
 
     set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
 
+elif [ -n "$1" ] && [ -n "$2" ] && [ "$1" = "-n" ]; then
+    ranks=$2
+    shift 2
+    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
 
