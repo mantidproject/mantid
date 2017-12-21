@@ -110,6 +110,12 @@ class AddActionsTest(unittest.TestCase):
         test_toolbar = QObject()
         self.assertRaises(AttributeError, add_actions, test_toolbar, [test_act_1, test_act_2])
 
+    def test_add_actions_with_invalid_parameter_raises_value_error(self):
+        test_act_1 = create_action(None, "Test Action 1")
+        test_act_2 = QObject()
+        test_toolbar = QToolBar()
+        self.assertRaises(ValueError, add_actions, test_toolbar, [test_act_1, test_act_2])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -30,24 +30,7 @@ from mantidqt.utils.qt.plugins import setup_library_paths
 QAPP = None
 
 
-def gui_test(test_method):
-    """
-    Decorator for GUI test methods. Creates a QApplication before
-    executing the test.
-    :param test_method: A test method.
-    """
-    def _wrapper(self):
-        global QAPP
-        if not QAPP:
-            setup_library_paths()
-            QAPP = QApplication([''])
-        test_method(self)
-        QAPP.closeAllWindows()
-
-    return _wrapper
-
-
-def gui_test_case(cls):
+def requires_qapp(cls):
     """
     Converts a unittest.TestCase class to a GUI test case by wrapping all
     test methods in gui_test decorator. Usage:
@@ -82,8 +65,25 @@ def gui_test_case(cls):
     for name in dir(cls):
         attr = getattr(cls, name)
         if is_test_method(name, attr):
-            setattr(cls, name, gui_test(attr))
+            setattr(cls, name, _requires_qapp_impl(attr))
     return cls
+
+
+def _requires_qapp_impl(test_method):
+    """
+    Decorator for GUI test methods. Creates a QApplication before
+    executing the test.
+    :param test_method: A test method.
+    """
+    def _wrapper(self):
+        global QAPP
+        if not QAPP:
+            setup_library_paths()
+            QAPP = QApplication([''])
+        test_method(self)
+        QAPP.closeAllWindows()
+
+    return _wrapper
 
 
 def select_item_in_tree(tree, item_label):

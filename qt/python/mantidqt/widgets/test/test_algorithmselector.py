@@ -7,7 +7,7 @@ import unittest
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
-from mantidqt.utils.qt.testing import gui_test_case,  select_item_in_combo_box, select_item_in_tree
+from mantidqt.utils.qt.testing import requires_qapp,  select_item_in_combo_box, select_item_in_tree
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -64,7 +64,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@gui_test_case
+@requires_qapp
 @patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
 class WidgetTest(unittest.TestCase):
 
