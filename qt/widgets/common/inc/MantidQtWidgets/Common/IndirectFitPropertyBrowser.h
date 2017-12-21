@@ -2,8 +2,11 @@
 #define INDIRECTFITPROPERTYBROWSER_H_
 
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
 #include <QSet>
+
+#include <unordered_map>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -13,43 +16,124 @@ class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowser
   Q_OBJECT
 
 public:
-  enum class CustomGroupMode { COMBOBOX, CHECKBOX };
-
   /// Constructor.
   IndirectFitPropertyBrowser(QWidget *parent = nullptr,
                              QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init() override;
 
-  void addCustomFunctionGroup(const QString &groupName,
-                              std::vector<std::string> functionNames,
-                              CustomGroupMode mode = CustomGroupMode::COMBOBOX);
+  Mantid::API::IFunction_sptr background() const;
 
-  void updateParameterValues(QHash<QString, double> parameterValues);
+  Mantid::API::IFunction_sptr model() const;
+
+  size_t numberOfCustomFunctions(const std::string &functionName) const;
+
+  void addCheckBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      bool defaultValue = false);
+
+  void addSpinnerFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      int minimum = 0, int maximum = 10, int defaultValue = 0);
+
+  void addComboBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions);
+
+  void setBackgroundOptions(const QStringList &backgrounds);
+
+  bool boolSettingValue(const QString &settingKey) const;
+
+  int intSettingValue(const QString &settingKey) const;
+
+  double doubleSettingValue(const QString &settingKey) const;
+
+  QString enumSettingValue(const QString &settingKey) const;
+
+  void addBoolCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            bool defaultValue = false);
+
+  void addIntCustomSetting(const QString &settingKey,
+                           const QString &settingName, int defaultValue = 0);
+
+  void addDoubleCustomSetting(const QString &settingKey,
+                              const QString &settingName,
+                              double defaultValue = 0);
+
+  void addEnumCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            const QStringList &options);
+
+  void addCustomSetting(const QString &settingKey, QtProperty *settingProperty);
+
+  void updateParameterValue(const QString &parameterName,
+                            const double &parameterValue);
+
+  void updateParameterValues(const QHash<QString, double> &parameterValues);
+
+  void updateParameterValues(PropertyHandler *functionHandler,
+                             const QHash<QString, double> &parameterValues);
+
+  void removeFunction(PropertyHandler *handler) override;
+
+public slots:
+  void fit() override;
+
+  void sequentialFit() override;
 
 protected slots:
   void enumChanged(QtProperty *prop) override;
 
   void boolChanged(QtProperty *prop) override;
 
+  void intChanged(QtProperty *prop) override;
+
+signals:
+  void customBoolChanged(const QString &settingName, bool value);
+
+  void customIntChanged(const QString &settingName, int value);
+
+  void customEnumChanged(const QString &settingName, const QString &value);
+
+  void fitScheduled();
+
+  void sequentialFitScheduled();
+
 private:
-  void addCustomFunctionGroupToComboBox(const QString &groupName);
+  void addCustomFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functionNames);
 
   void addCustomFunctions(QtProperty *prop, const QString &groupName);
 
+  void addCustomFunctions(QtProperty *prop, const QString &groupName,
+                          const int &multiples);
+
   void clearCustomFunctions(QtProperty *prop);
+
+  QtProperty *
+  createFunctionGroupProperty(const QString &groupName,
+                              QtAbstractPropertyManager *propertyManager);
 
   QString enumValue(QtProperty *prop) const;
 
   QtProperty *m_customFunctionGroups;
+  QtProperty *m_customSettingsGroup;
   QtProperty *m_functionsInComboBox;
   QSet<QtProperty *> m_functionsAsCheckBox;
+  QSet<QtProperty *> m_functionsAsSpinner;
+  QHash<QString, QtProperty *> m_customSettings;
   QtProperty *m_backgroundSelection;
   PropertyHandler *m_backgroundHandler;
   QHash<QtProperty *, QVector<PropertyHandler *>> m_functionHandlers;
+  std::unordered_map<std::string, size_t> m_customFunctionCount;
 
   std::string selectedBackground;
-  QHash<QString, std::vector<std::string>> m_groupToFunctionList;
+  QHash<QString, std::vector<Mantid::API::IFunction_sptr>>
+      m_groupToFunctionList;
 };
 
 } // namespace MantidWidgets
