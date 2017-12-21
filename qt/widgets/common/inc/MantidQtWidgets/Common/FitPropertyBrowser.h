@@ -101,7 +101,7 @@ public:
   PropertyHandler *addFunction(const std::string &fnName);
 
   /// Removes the function held by the property handler
-  void removeFunction(PropertyHandler *handler);
+  virtual void removeFunction(PropertyHandler *handler);
 
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
@@ -304,9 +304,10 @@ protected slots:
   virtual void boolChanged(QtProperty *prop);
 
   virtual void enumChanged(QtProperty *prop);
-private slots:
 
-  void intChanged(QtProperty *prop);
+  virtual void intChanged(QtProperty *prop);
+
+private slots:
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
   void parameterChanged(QtProperty *prop);
