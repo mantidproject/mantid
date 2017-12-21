@@ -10,8 +10,6 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <string>
 
 namespace Mantid {
@@ -34,8 +32,8 @@ const std::string LIB_SUFFIX = ".dll";
  * @param filename The file name of the library
  * @return True if it matches the expected format, false otherwise
  */
-const std::string DllOpen::isValidFilename(const std::string &filename) {
-  return boost::ends_with(fileName, LIB_SUFFIX);
+bool DllOpen::isValidFilename(const std::string &filename) {
+  return boost::ends_with(filename, LIB_SUFFIX);
 }
 
 /* Opens the Windows .dll file.

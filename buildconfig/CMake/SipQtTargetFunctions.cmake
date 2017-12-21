@@ -1,7 +1,7 @@
 # Defines utility functions to help with generating
 # targets that produce a Python module from a set
 # of .sip definitions
-#
+include ( QtTargetFunctions )
 
 #
 # brief: Add a module target to generate Python bindings
@@ -47,7 +47,7 @@ function ( mtd_add_sip_module )
       set ( _directory ${CMAKE_CURRENT_LIST_DIR}/${_directory} )
     endif()
     list ( APPEND _sip_include_flags "-I${_directory}" )
-    list ( APPEND _sip_include_deps "${_directory}/${_sip_file}" )
+    list ( APPEND _sip_include_deps "${_sip_file}" )
   endforeach ()
 
   # Add absolute paths for header dependencies
@@ -74,8 +74,15 @@ function ( mtd_add_sip_module )
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
-  add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${PARSED_SIP_SRCS} )
-  target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
+  add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${_sip_include_deps} )
+  if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
+    if ( NOT (SIP_INCLUDE_DIR STREQUAL /usr/local/include) )
+      target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
+    endif ()
+  else()
+    target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
+  endif ()
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
   target_link_libraries ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS} )
 

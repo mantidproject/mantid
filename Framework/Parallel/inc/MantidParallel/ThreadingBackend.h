@@ -16,6 +16,7 @@
 #include <ostream>
 #include <sstream>
 #include <tuple>
+#include <vector>
 
 namespace Mantid {
 namespace Parallel {

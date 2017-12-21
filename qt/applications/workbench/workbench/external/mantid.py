@@ -31,4 +31,3 @@ def prepare_mantid_env():
     if 'MANTIDPATH' not in os.environ:
         _, pkgpath, _ = find_module('mantid')
         os.environ['MANTIDPATH'] = os.path.dirname(pkgpath)
-

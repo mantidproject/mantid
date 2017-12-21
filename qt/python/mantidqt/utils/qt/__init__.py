@@ -19,14 +19,14 @@
 from __future__ import absolute_import
 
 # stdlib modules
-import importlib
-import os
 from contextlib import contextmanager
+from importlib import import_module
+import os.path as osp
 
 # 3rd-party modules
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
-from qtpy.QtWidgets import QAction
+from qtpy.QtWidgets import QAction, QMenu
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -47,10 +47,10 @@ def import_qtlib(modulename, package, attr=None):
     :return: Either the module object if no attribute is specified of the requested attribute
     """
     try:
-        lib = importlib.import_module('.' + modulename + LIB_SUFFIX, package)
+        lib = import_module('.' + modulename + LIB_SUFFIX, package)
     except ImportError:
-        lib = importlib.import_module(modulename + LIB_SUFFIX)
-    if attr:
+        lib = import_module(modulename + LIB_SUFFIX)
+    if attr is not None:
         return getattr(lib, attr)
     else:
         return lib
@@ -71,11 +71,37 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     :return: A new instance of the form class if baseinstance is given, otherwise
     return the form class
     """
-    filepath = os.path.join(os.path.dirname(caller_filename), ui_relfilename)
-    if baseinstance:
+    filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
+    if baseinstance is not None:
         return loadUi(filepath, baseinstance=baseinstance)
     else:
         return loadUiType(filepath)
+
+
+@contextmanager
+def block_signals(widget):
+    """
+    A context manager that helps to block widget's signals temporarily. Usage:
+
+        with block_signals(widget):
+            widget.do_actions_that_emit_signals()
+
+    :param widget: A Qt widget signals from which should be blocked.
+    """
+    widget.blockSignals(True)
+    yield
+    widget.blockSignals(False)
+
+
+@contextmanager
+def widget_updates_disabled(widget):
+    """Context manager that disables widget updates for the duration of the context
+    and reenables them at the end
+    :param widget: A widget object to use as context
+    """
+    widget.setUpdatesEnabled(False)
+    yield
+    widget.setUpdatesEnabled(True)
 
 
 def create_action(parent, text, on_triggered=None, shortcut=None,
@@ -101,16 +127,18 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     return action
 
 
-@contextmanager
-def block_signals(widget):
+def add_actions(target, actions):
+    """Add a collection of actions to a relevant
+    target (menu or toolbar)
+    :param target: An instance of QMenu or QToolbar
+    :param actions: A collection of actions to be added
+    :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
-    A context manager that helps to block widget's signals temporarily. Usage:
-
-        with block_signals(widget):
-            widget.do_actions_that_emit_signals()
-
-    :param widget: A Qt widget signals from which should be blocked.
-    """
-    widget.blockSignals(True)
-    yield
-    widget.blockSignals(False)
+    for action in actions:
+        if isinstance(action, QMenu):
+            target.addMenu(action)
+        elif isinstance(action, QAction):
+            target.addAction(action)
+        else:
+            raise ValueError("Unexpected action type. "
+                             "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))

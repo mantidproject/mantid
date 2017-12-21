@@ -29,6 +29,7 @@ Powder Diffraction
 
 Engineering Diffraction
 -----------------------
+ - Fixed a bug where the engineering diffraction GUI could hang when performing a long running file search.
 
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` has been re-integrated with the
   latest version of GSAS-II, allowing Rietveld and Pawley refinement
