@@ -588,6 +588,23 @@ SortEvents                        all
 SumSpectra                        MasterOnly, Identical
 UnaryOperation                    all
 WeightedMean                      all                     see ``BinaryOperation``
+SANSCalculateTransmission              MasterOnly, Identical
+SANSConvertToQ                         all
+SANSConvertToWavelength                all
+SANSConvertToWavelengthAndRebin        all
+SANSCreateAdjustmentWorkspaces         all
+SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
+SANSCrop                               all
+SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
+SANSMaskWorkspace                      all
+SANSMove                               all
+SANSNormalizeToMonitor                 MasterOnly, Identical
+SANSReductionCore                      all
+SANSScale                              all
+SANSSingleReduction                    all
+SANSSliceEvent                         all
+SANSFitShiftScale                      MasterOnly, Identical
+SANSStitch                             MasterOnly, Identical
 ================================= ======================= ========
 
 Currently none of the above algorithms works with ``StorageMode::Distributed`` in case there are zero spectra on any rank.
