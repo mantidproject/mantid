@@ -139,6 +139,19 @@ Build with MPI support
 To build Mantid with MPI support as described in this document run ``cmake`` with the additional option ``-DMPI_EXPERIMENTAL=ON``.
 This requires ``boost-mpi`` and a working MPI installation.
 
+Configuration
+-------------
+
+To avoid unintentional DDOSing or potential other issues, there is no MPI support for ``DownloadInstrument`` and ``CheckMantidVersion``.
+Error messages can be avoided by disabling these startup checks in the configuration.
+Furthermore, to avoid pollution of usage reports, usage reporting should be disabled:
+
+.. code-block:: sh
+
+  UpdateInstrumentDefinitions.OnStartup = 0
+  CheckMantidVersion.OnStartup = 0
+  usagereports.enabled = 0
+
 Writing and running Python scripts
 ----------------------------------
 
@@ -165,15 +178,11 @@ For example:
       print(ws.readY(i))
 
 
-Run Python with ``mpirun`` and the desired number of MPI ranks:
+Run Python with ``mpirun`` and the desired number of MPI ranks, by using the new ``-n`` flag to ``mantidpython``:
 
 .. code-block:: sh
 
-  mpirun -n 3 python test.py
-
-Note that directly using the Mantid Python wrapper ``mantidpython`` is not possible, i.e., ``mpirun -n 3 mantidpython test.py`` does not work.
-Instead the correct paths to Mantid and library preloads should be set manually.
-Alternatively, a modified version of ``mantidpython`` that internally uses ``mpirun`` to call python could be created.
+  mantidpython -n 3 test.py
 
 Possible output:
 
