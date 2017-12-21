@@ -26,32 +26,26 @@ class LoadLamp(PythonAlgorithm):
         output_ws = self.getPropertyValue("OutputWorkspace")
 
         with h5py.File(input_file, 'r') as hf:
-            DATA = numpy.array(hf.get('entry1/data1/DATA'), dtype='float')
-            if len(DATA.shape) > 2:
+            data = numpy.array(hf.get('entry1/data1/DATA'), dtype='float')
+            if data.ndim > 2:
                 raise RuntimeError('Data with more than 2 dimensions are not supported.')
-            E = numpy.array(hf.get('entry1/data1/errors'), dtype='float')
-            X = numpy.array(hf.get('entry1/data1/X'), dtype='float')
-            LOGS = str(hf.get('entry1/data1/PARAMETERS')[0])
-            if len(DATA.shape) == 2:
-                Y = numpy.array(hf.get('entry1/data1/Y'), dtype='float')
+            errors = numpy.array(hf.get('entry1/data1/errors'), dtype='float')
+            x = numpy.array(hf.get('entry1/data1/X'), dtype='float')
+            logs = str(hf.get('entry1/data1/PARAMETERS')[0])
+            y = numpy.array([0])
+            nspec = 1
+            if data.ndim == 2:
+                y = numpy.array(hf.get('entry1/data1/Y'), dtype='float')
+                nspec = data.shape[0]
+                if x.ndim == 1:
+                    x = numpy.tile(x, nspec)
 
-        nspec = 1
-        y_axis = None
-        if len(DATA.shape) == 2:
-            nspec = DATA.shape[0]
-            if len(X.shape) == 1:
-                X = numpy.tile(X, nspec)
-            y_axis = NumericAxis.create(nspec)
-            for i in range(nspec):
-                y_axis.setValue(i, Y[i])
-
-        CreateWorkspace(DataX=X, DataY=DATA, DataE=E, NSpec=nspec, OutputWorkspace=output_ws)
-        if len(DATA.shape) == 2:
-            mtd[output_ws].replaceAxis(1, y_axis)
+        CreateWorkspace(DataX=x, DataY=data, DataE=errors, NSpec=nspec, VerticalAxisUnit='Label',
+                        VerticalAxisValues=y, OutputWorkspace=output_ws)
 
         log_names = []
         log_values = []
-        for log in LOGS.split('\n'):
+        for log in logs.split('\n'):
             split = log.strip().split('=')
             if len(split) == 2:
                 name = split[0]
@@ -60,7 +54,7 @@ class LoadLamp(PythonAlgorithm):
                     log_names.append(name)
                     log_values.append(value)
         if log_names:
-            AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values, ParseType=False)
+            AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputWorkspace', output_ws)
 
