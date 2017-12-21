@@ -15,8 +15,8 @@ size_t MAXIMUM_DEPTH = 100;
 Kernel::Logger g_log("WorkspaceGroup");
 }
 
-WorkspaceGroup::WorkspaceGroup()
-    : Workspace(),
+WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
+    : Workspace(storageMode),
       m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
       m_beforeReplaceObserver(*this,
                               &WorkspaceGroup::workspaceBeforeReplaceHandle),

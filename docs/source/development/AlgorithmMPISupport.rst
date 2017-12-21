@@ -511,7 +511,7 @@ FilterByTime                           all
 FilterEventsByLogValuePreNexus         Identical               see ``IFileLoader``
 FindDetectorsInShape                   all
 Fit                                    MasterOnly, Identical   see ``IFittingAlgorithm``
-GroupWorkspaces                        all
+GroupWorkspaces                        all                     grouping workspaces with mixed ``StorageMode`` is not supported
 IFileLoader                            Identical               implicitly adds support for many load-algorithms inheriting from this
 IFittingAlgorithm                      MasterOnly, Identical   implicitly adds support for several fit-algorithms inheriting from this
 Load                                   all                     actual supported mode is dictated by underlying load algorithm, which depends on file type
