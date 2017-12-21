@@ -77,6 +77,8 @@ set ( SRC_FILES
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
 	src/FindDialog.cpp
+        src/FindFilesThreadPoolManager.cpp
+        src/FindFilesWorker.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
@@ -218,6 +220,9 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
@@ -362,7 +367,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
 )
 
 set ( UI_FILES
@@ -415,6 +422,7 @@ set ( TARGET_LIBRARIES
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
@@ -485,6 +493,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
 set( TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h

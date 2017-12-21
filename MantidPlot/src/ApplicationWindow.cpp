@@ -199,6 +199,7 @@
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/CatalogSearch.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/TrackedAction.h"
@@ -9843,6 +9844,9 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
 
   ce->accept();
   qApp->closeAllWindows();
+
+  // Delete the file finding thread pool if it still exists.
+  MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool();
 }
 
 void ApplicationWindow::customEvent(QEvent *e) {
