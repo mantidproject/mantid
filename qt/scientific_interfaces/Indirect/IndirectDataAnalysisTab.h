@@ -60,7 +60,7 @@ protected:
   void runPythonScript(const QString &pyInput);
 
   /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace() const;
 
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
@@ -106,12 +106,12 @@ protected:
                        const QString &endRangePropName = "EndX");
 
   void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                 Mantid::API::IFunction_sptr function);
+                 Mantid::API::IFunction_const_sptr function);
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::IFunction_sptr func, size_t wsIndex);
+  createGuessWorkspace(Mantid::API::IFunction_const_sptr func, size_t wsIndex);
 
-  std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
+  std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
                                     const std::vector<double> &dataX);
 
   Mantid::API::IAlgorithm_sptr
@@ -148,7 +148,7 @@ protected slots:
   void plotCurrentPreview();
 
   /// Sets the selected spectrum
-  void setSelectedSpectrum(int spectrum);
+  virtual void setSelectedSpectrum(int spectrum);
 
   /// Sets the maximum spectrum
   void setMaximumSpectrum(int spectrum);

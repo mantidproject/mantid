@@ -55,7 +55,7 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  *
  * @return  The input workspace to be used in data analysis.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() {
+MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
   return m_inputWorkspace.lock();
 }
 
@@ -161,9 +161,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -335,7 +334,7 @@ void IndirectDataAnalysisTab::updatePlotRange(
  */
 void IndirectDataAnalysisTab::plotGuess(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-    IFunction_sptr function) {
+    IFunction_const_sptr function) {
   previewPlot->removeSpectrum("Guess");
 
   if (inputWorkspace()) {
@@ -362,7 +361,7 @@ void IndirectDataAnalysisTab::plotGuess(
  * @return        A guess workspace containing the guess data for the fit.
  */
 MatrixWorkspace_sptr
-IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func,
+IndirectDataAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
                                               size_t wsIndex) {
   const auto inputWS = inputWorkspace();
   const auto startX = m_dblManager->value(m_properties["StartX"]);
@@ -397,7 +396,7 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func,
  *                the specified function to the input data.
  */
 std::vector<double>
-IndirectDataAnalysisTab::computeOutput(IFunction_sptr func,
+IndirectDataAnalysisTab::computeOutput(IFunction_const_sptr func,
                                        const std::vector<double> &dataX) {
   if (dataX.empty())
     return std::vector<double>();
