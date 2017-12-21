@@ -34,8 +34,8 @@ const std::string LIB_SUFFIX = ".dll";
  * @param filename The file name of the library
  * @return True if it matches the expected format, false otherwise
  */
-bool DllOpen::isValidFilename(const std::string &filename) {
-  return boost::ends_with(filename, LIB_SUFFIX);
+const std::string DllOpen::isValidFilename(const std::string &filename) {
+  return boost::ends_with(fileName, LIB_SUFFIX);
 }
 
 /* Opens the Windows .dll file.

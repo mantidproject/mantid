@@ -6,7 +6,7 @@ add_python_package ( workbench EXECUTABLE )
 set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
 set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py )
 add_custom_command ( OUTPUT ${_output_res_py}
-  COMMAND ${PYTHON_EXECUTABLE} -m PyQt5.pyrcc_main -o ${_output_res_py} ${_qrc_file}
+  COMMAND ${PYQT5_RCC} -o ${_output_res_py} ${_qrc_file}
   COMMENT "Generating workbench resources"
   DEPENDS ${_qrc_file}
 )
