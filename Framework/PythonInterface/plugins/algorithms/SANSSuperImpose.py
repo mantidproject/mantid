@@ -34,7 +34,7 @@ class SANSSuperImpose(PythonAlgorithm):
         return "SANSSuperImpose"
 
     def summary(self):
-        return "From a Workspace Group of I(Q) calculates I(scaled) = f * I(original) – b"
+        return "From the input Workspace group calculates I(Scaled) = K * I(Original) -b "
 
     def PyInit(self):
         # In
