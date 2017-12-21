@@ -276,6 +276,7 @@ The level of thereby enabled MPI support is as follows:
 
 In the latter two cases more than one execution mode is supported.
 Thus this usually works only for algorithms with a single input (and a single output) such that the execution mode can be uniquely derived from the storage mode of the input workpace.
+Multiple inputs are also supported to a certain extent. For example, for ``API::DistributedAlgorithm`` the storage modes of the inputs can be mixed if they are compatible, such as ``StorageMode::Distributed`` with ``StorageMode::Cloned`` (resulting in ``ExecutionMode::Distributed``).
 
 If none of the other virtual methods listed above is implemented, ``Algorithm`` will run the normal ``exec()`` method on all MPI ranks.
 The exception are non-master ranks if the execution mode is ``ExecutionMode::MasterOnly`` -- in that case creating a dummy workspace is attempted.
