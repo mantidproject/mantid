@@ -55,6 +55,11 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
 private:
   /// the experimental workspace with counts across the detector
   API::MatrixWorkspace_const_sptr m_dataWS;

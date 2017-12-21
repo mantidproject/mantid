@@ -580,6 +580,7 @@ Minus                                  all                     see ``BinaryOpera
 MoveInstrumentComponent                all
 Multiply                               all                     see ``BinaryOperation``
 OneMinusExponentialCor                 all                     see ``UnaryOperation``
+Q1D2                                   all                     not all optional normalization inputs are supported
 Plus                                   all                     see ``BinaryOperation``
 PoissonErrors                          all                     see ``BinaryOperation``
 PolynomialCorrection                   all                     see ``UnaryOperation``
