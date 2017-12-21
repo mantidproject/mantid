@@ -41,6 +41,13 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point,
                                     compInfo, componentIndex));
 }
 
+/**
+ * Gets next item or gives a nullptr if map is empty.
+ */
+auto nextPairOrNullPtr(const std::map<size_t, size_t> &container)
+    -> decltype(&*container.begin()) {
+  return container.empty() ? nullptr : &*container.begin();
+}
 } // namespace
 
 /**
@@ -265,7 +272,7 @@ template <typename IteratorT>
 void ComponentInfo::growBoundingBoxAsRectuangularBank(
     size_t index, const Geometry::BoundingBox *reference,
     Geometry::BoundingBox &mutableBB,
-    std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+    std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
   const auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   const auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
@@ -286,7 +293,7 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
 
   // Get bounding box for rectangular bank.
   // Record detector ranges to skip
-  mutableDetExclusions.emplace(std::make_pair(bottomLeft, topRight));
+  mutableDetExclusions.insert(std::make_pair(bottomLeft, topRight));
   // Skip all sub components.
   mutableIterator = innerRangeComp.rend();
 }
@@ -313,7 +320,7 @@ void ComponentInfo::growBoundingBoxAsRectuangularBank(
 template <typename IteratorT>
 void ComponentInfo::growBoundingBoxAsBankOfTubes(
     size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-    std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+    std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
   auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   // subtract 1 because component ranges includes self
@@ -332,7 +339,7 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
     mutableBB.grow(componentBoundingBox(topIndex, reference));
     bottomIndex += nY;
   }
-  mutableDetExclusions.emplace(
+  mutableDetExclusions.insert(
       std::make_pair(*innerRangeDet.begin(), *(innerRangeDet.end() - 1)));
   mutableIterator = innerRangeComp.rend();
 }
@@ -357,7 +364,7 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
 template <typename IteratorT>
 void ComponentInfo::growBoundingBoxAsTube(
     size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-    std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+    std::map<size_t, size_t> &mutableDetExclusions,
     IteratorT &mutableIterator) const {
 
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(index);
@@ -366,7 +373,7 @@ void ComponentInfo::growBoundingBoxAsTube(
     auto endIndex = *(rangeDet.end() - 1);
     mutableBB.grow(componentBoundingBox(startIndex, reference));
     mutableBB.grow(componentBoundingBox(endIndex, reference));
-    mutableDetExclusions.emplace(std::make_pair(startIndex, endIndex));
+    mutableDetExclusions.insert(std::make_pair(startIndex, endIndex));
   }
   // No sub components (non detectors) in tube, so just increment iterator
   mutableIterator++;
@@ -375,6 +382,12 @@ void ComponentInfo::growBoundingBoxAsTube(
 /**
  * Grow the bounding box for a component by evaluating all detector bounding
  * boxes for detectors not within any limits described by excusion ranges.
+ *
+ * Map of exlusion ranges provided as input. There should be no intersection
+ * between exclusion ranges, but that should already be guaranteed since
+ * detector indices are unique. The key is the beginning of the exclusion range,
+ * and therefore we have a guranteed ordering of exclusion ranges.
+ *
  * @param index : Index of the component to get the bounding box for
  * @param mutableBB : Output bounding box. This will be grown.
  * @param mutableDetExclusions : Output detector exclusions to append to. These
@@ -384,24 +397,24 @@ void ComponentInfo::growBoundingBoxAsTube(
  */
 void ComponentInfo::growBoundingBoxByDetectors(
     size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-    std::stack<std::pair<size_t, size_t>> detectorExclusions) const {
+    std::map<size_t, size_t> detectorExclusions) const {
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(index);
-  auto detIterator = rangeDet.begin();
-  auto *exclusion =
-      detectorExclusions.empty() ? nullptr : &detectorExclusions.top();
-  while (detIterator != rangeDet.end()) {
-
-    // Handle detectors in exclusion ranges
-    if (exclusion && (*detIterator) >= exclusion->first &&
-        (*detIterator) <= exclusion->second) {
-      detIterator += (exclusion->second - exclusion->first +
-                      1); // Jump the iterator forward
-      detectorExclusions.pop();
-      exclusion =
-          detectorExclusions.empty() ? nullptr : &detectorExclusions.top();
-    } else if (detIterator != rangeDet.end()) {
-      mutableBB.grow(componentBoundingBox(*detIterator, reference));
-      ++detIterator;
+  auto detIt = rangeDet.begin();
+  auto *ptrCurrentExclusion = nextPairOrNullPtr(detectorExclusions);
+  while (detIt != rangeDet.end()) {
+    auto detIndex = *detIt;
+    if (ptrCurrentExclusion != nullptr &&
+        detIndex >= ptrCurrentExclusion->first &&
+        detIndex <= ptrCurrentExclusion->second) {
+      // Move the detector iterator outside the current exclusion
+      detIt += ptrCurrentExclusion->second - ptrCurrentExclusion->first + 1;
+      // Erase the spent exclusion
+      detectorExclusions.erase(detectorExclusions.begin());
+      // Set the next exclusion range to consider
+      ptrCurrentExclusion = nextPairOrNullPtr(detectorExclusions);
+    } else {
+      mutableBB.grow(componentBoundingBox(*detIt, reference));
+      ++detIt;
     }
   }
 }
@@ -476,7 +489,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
   }
   BoundingBox absoluteBB;
   auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
-  std::stack<std::pair<size_t, size_t>> detExclusions{};
+  std::map<size_t, size_t> detExclusions{};
   auto compIterator = rangeComp.rbegin();
   while (compIterator != rangeComp.rend()) {
     const size_t index = *compIterator;

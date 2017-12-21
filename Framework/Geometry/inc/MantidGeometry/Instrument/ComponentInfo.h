@@ -5,7 +5,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/shared_ptr.hpp>
-#include <stack>
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -74,23 +74,25 @@ private:
   void growBoundingBoxAsRectuangularBank(
       size_t index, const Geometry::BoundingBox *reference,
       Geometry::BoundingBox &mutableBB,
-      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
+      std::map<size_t, size_t> &mutableDetExclusions,
       IteratorT &mutableIterator) const;
   template <typename IteratorT>
-  void growBoundingBoxAsBankOfTubes(
-      size_t index, const Geometry::BoundingBox *reference,
-      Geometry::BoundingBox &mutableBB,
-      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
-      IteratorT &mutableIterator) const;
+  void
+  growBoundingBoxAsBankOfTubes(size_t index,
+                               const Geometry::BoundingBox *reference,
+                               Geometry::BoundingBox &mutableBB,
+                               std::map<size_t, size_t> &mutableDetExclusions,
+                               IteratorT &mutableIterator) const;
   template <typename IteratorT>
-  void growBoundingBoxAsTube(
-      size_t index, const Geometry::BoundingBox *reference,
-      Geometry::BoundingBox &mutableBB,
-      std::stack<std::pair<size_t, size_t>> &mutableDetExclusions,
-      IteratorT &mutableIterator) const;
-  void growBoundingBoxByDetectors(
-      size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-      std::stack<std::pair<size_t, size_t>> detectorExclusions) const;
+  void growBoundingBoxAsTube(size_t index,
+                             const Geometry::BoundingBox *reference,
+                             Geometry::BoundingBox &mutableBB,
+                             std::map<size_t, size_t> &mutableDetExclusions,
+                             IteratorT &mutableIterator) const;
+  void
+  growBoundingBoxByDetectors(size_t index, const BoundingBox *reference,
+                             BoundingBox &mutableBB,
+                             std::map<size_t, size_t> detectorExclusions) const;
 
 public:
   ComponentInfo(
