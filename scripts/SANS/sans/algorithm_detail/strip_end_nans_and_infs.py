@@ -13,7 +13,7 @@ def strip_end_nans(workspace, parent_alg=None):
     :return: A trimmed NAN- and INF-trimmed workspace
     """
     # If the workspace is larger than 1D, then there is nothing we can do
-    if workspace.getNumberHistograms() > 1:
+    if workspace is None or workspace.getNumberHistograms() != 1:
         return workspace
     data = workspace.readY(0)
     # Find the index at which the first legal value appears

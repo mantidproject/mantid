@@ -312,6 +312,9 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
         for reduction_mode, output_workspace in list(reduction_mode_vs_output_workspaces.items()):
+            # In an MPI reduction output_workspace is produced on the master rank, skip others.
+            if output_workspace is None:
+                continue
             if reduction_mode is ReductionMode.Merged:
                 self.setProperty("OutputWorkspaceMerged", output_workspace)
             elif reduction_mode is ISISReductionMode.LAB:
