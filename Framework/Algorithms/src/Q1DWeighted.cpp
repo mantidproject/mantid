@@ -179,6 +179,11 @@ void Q1DWeighted::exec() {
     tof_ws->setDistribution(true);
     tof_ws->setBinEdges(0, XOut);
 
+    /**
+     * * TODO:
+     * Find the index of X for the 1st positive and for the last positive
+     * https://stackoverflow.com/questions/41791298/finding-position-of-element-of-a-vector-that-satisfies-given-condition-in-c
+     * /
     const MantidVec &xValues = tof_ws->readX(0);
     
     auto wl_min = *std::min_element(xValues.begin(), xValues.end());
