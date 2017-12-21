@@ -59,7 +59,8 @@ class LoadLamp(PythonAlgorithm):
                 if name and value:
                     log_names.append(name)
                     log_values.append(value)
-        AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values, ParseType=False)
+        if log_names:
+            AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values, ParseType=False)
 
         self.setProperty('OutputWorkspace', output_ws)
 
