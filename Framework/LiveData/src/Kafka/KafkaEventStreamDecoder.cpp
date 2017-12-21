@@ -163,7 +163,7 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
   // Notify the decoder that MonitorLiveData knows it has reached end of run
   // and after giving it opportunity to interrupt, decoder can continue with
   // messages of the next run
-  if (!m_extractedEndRunData)
+  if (!m_extractedEndRunData || m_extractWaiting)
     return false;
   if (m_endRun) {
     std::lock_guard<std::mutex> runStatusLock(m_runStatusMutex);
@@ -306,23 +306,17 @@ void KafkaEventStreamDecoder::captureImplExcept() {
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             EVENT_MESSAGE_ID.c_str())) {
       eventDataFromMessage(buffer);
-      m_cbIterationEnd();
-      continue;
     }
-
     // Check if we have a sample environment log message
-    if (flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            SAMPLE_MESSAGE_ID.c_str())) {
+    else if (flatbuffers::BufferHasIdentifier(
+                 reinterpret_cast<const uint8_t *>(buffer.c_str()),
+                 SAMPLE_MESSAGE_ID.c_str())) {
       sampleDataFromMessage(buffer);
-      m_cbIterationEnd();
-      continue;
     }
-
     // Check if we have a runMessage
-    if (flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            RUN_MESSAGE_ID.c_str())) {
+    else if (flatbuffers::BufferHasIdentifier(
+                 reinterpret_cast<const uint8_t *>(buffer.c_str()),
+                 RUN_MESSAGE_ID.c_str())) {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
       if (!checkOffsets && runMsg->info_type_type() == InfoTypes_RunStop) {
@@ -392,7 +386,7 @@ KafkaEventStreamDecoder::getStopOffsets(
   auto currentOffsets = m_eventStream->getCurrentOffsets();
 
   // Set reachedEnd to false for each topic and partition
-  for (auto topicOffsets : stopOffsets) {
+  for (auto &topicOffsets : stopOffsets) {
     auto topicName = topicOffsets.first;
     // Ignore the runInfo topic
     if (topicName.substr(topicName.length() -
@@ -404,7 +398,7 @@ KafkaEventStreamDecoder::getStopOffsets(
       reachedEnd.insert(
           {topicName, std::vector<bool>(topicOffsets.second.size(), false)});
 
-      auto partitionOffsets = topicOffsets.second;
+      auto &partitionOffsets = topicOffsets.second;
       for (uint32_t partitionNumber = 0;
            partitionNumber < partitionOffsets.size(); partitionNumber++) {
         // -1 to get last offset _before_ the stop time
@@ -437,8 +431,11 @@ void KafkaEventStreamDecoder::waitForDataExtraction() {
 
 void KafkaEventStreamDecoder::waitForRunEndObservation() {
   m_extractWaiting = true;
-  waitForDataExtraction();
+  // Mark extractedEndRunData true before waiting on the extraction to ensure
+  // an immediate request for run status after extracting the data will return
+  // the correct value - avoids race condition in MonitorLiveData and tests
   m_extractedEndRunData = true;
+  waitForDataExtraction();
 
   // Wait until MonitorLiveData has seen that end of run was
   // reached before setting m_endRun back to false and continuing

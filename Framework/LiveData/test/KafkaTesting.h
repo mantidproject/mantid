@@ -333,7 +333,7 @@ public:
                       std::string &topic) override {
     assert(buffer);
 
-    // Return a messages in this order:
+    // Return messages in this order:
     // Run start
     // Event data
     // Run stop
@@ -341,7 +341,7 @@ public:
     // Run start
     // Event data... ad infinitum
 
-    switch (m_currentOffset) {
+    switch (m_nextOffset) {
     case 0:
       fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
                                   m_nperiods);
@@ -357,20 +357,22 @@ public:
       fakeReceiveAnEventMessage(buffer, 0);
     }
     topic = "topic_name";
-    offset = m_currentOffset;
+    offset = m_nextOffset;
     partition = 0;
-    m_currentOffset++;
+    m_nextOffset++;
   }
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
+    // + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
+    // given timestamp
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
-                                                         {m_stopOffset})};
+                                                         {m_stopOffset + 1})};
   }
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
-                                                         {m_currentOffset})};
+                                                         {m_nextOffset - 1})};
   }
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
@@ -381,7 +383,7 @@ public:
 
 private:
   const std::string m_topicName = "topic_name";
-  uint32_t m_currentOffset = 0;
+  uint32_t m_nextOffset = 0;
   std::string m_startTime = "2016-08-31T12:07:42";
   std::string m_stopTime = "2016-08-31T12:07:52";
   const std::string m_instName = "HRPDTEST";

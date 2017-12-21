@@ -170,7 +170,8 @@ public:
                       eventWksp->getNumberEvents());
   }
 
-  void test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
+  void
+  test_Get_All_Run_Events_When_Run_Stop_Message_Received_Before_Last_Event_Message() {
     using namespace ::testing;
     using namespace ISISKafkaTesting;
     using Mantid::API::Workspace_sptr;
@@ -179,10 +180,10 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-      .Times(Exactly(3))
-      .WillOnce(Return(new FakeDataStreamSubscriber(4)))
-      .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-      .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeDataStreamSubscriber(3)))
+        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
@@ -201,11 +202,11 @@ public:
                workspace);
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
-      "Expected an EventWorkspace from extractData(). Found something else",
-      eventWksp);
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
 
-    TSM_ASSERT_EQUALS("Expected exactly 6 events from message in first run", 12,
-                      eventWksp->getNumberEvents());
+    TSM_ASSERT_EQUALS("Expected exactly 12 events from messages in first run",
+                      12, eventWksp->getNumberEvents());
   }
 
   void test_Sample_Log_From_Event_Stream() {
