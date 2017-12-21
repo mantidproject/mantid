@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Instrument Definition Updates
+-----------------------------
+
+- The MAPS IDF has been updated following its upgrade.
+
 Concepts
 --------
 Corrupted Instrument Definitions
@@ -33,6 +38,7 @@ Algorithms
 - :ref:`CompressEvents <algm-CompressEvents>` now supports compressing events with pulse time.
 - :ref:`MaskBins <algm-MaskBins>` now uses a modernized and standardized way for providing a list of workspace indices. For compatibility reasons the previous ``SpectraList`` property is still supported.
 - :ref:`Fit <algm-Fit>` has had a bug fixed that prevented a fix from being removed.
+- :ref:`LoadMask <algm-Mask>` has had a bug fixed that could, under certain conditions, cause detectors from previously loaded masking to be added to the currently loaded masking.
 - In :ref:`MaxEnt <algm-MaxEnt>` the ``EvolChi`` and  ``EvolAngle`` workspaces only contain data up until the result has converged.
 
 Fitting
@@ -61,6 +67,7 @@ In `mantid.simpleapi`, a keyword has been implemented for function-like algorith
 
 - The standard Python operators, e.g. ``+``, ``+=``, etc., now work also with workspaces not in the ADS.
 - The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
+- ``mantid.kernel.V3D`` vectors now support negation through the usual ``-`` operator.
 
 Support for unicode property names has been added to python. This means that one can run the following in python2 or python3.
 
@@ -70,5 +77,7 @@ Support for unicode property names has been added to python. This means that one
    import json
    props = json.loads('{"DryRun":true}')
    Segfault(**props)
+
+- Fixed an issue with coercing data from python lists or numpy arrays where the datatype!=float64 into a workspace 
 
 :ref:`Release 3.12.0 <v3.12.0>`
