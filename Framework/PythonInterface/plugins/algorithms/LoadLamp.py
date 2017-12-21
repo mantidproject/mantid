@@ -31,7 +31,7 @@ class LoadLamp(PythonAlgorithm):
                 raise RuntimeError('Data with more than 2 dimensions are not supported.')
             E = numpy.array(hf.get('entry1/data1/errors'), dtype='float')
             X = numpy.array(hf.get('entry1/data1/X'), dtype='float')
-            LOGS = hf.get('entry1/data1/PARAMETERS')[0]
+            LOGS = str(hf.get('entry1/data1/PARAMETERS')[0])
             if len(DATA.shape) == 2:
                 Y = numpy.array(hf.get('entry1/data1/Y'), dtype='float')
 
@@ -51,8 +51,8 @@ class LoadLamp(PythonAlgorithm):
 
         log_names = []
         log_values = []
-        for log in LOGS.split("\n"):
-            split = log.strip().split("=")
+        for log in LOGS.split('\n'):
+            split = log.strip().split('=')
             if len(split) == 2:
                 name = split[0]
                 value = split[1]
