@@ -390,7 +390,7 @@ void ComponentInfo::growBoundingBoxAsTube(
  */
 void ComponentInfo::growBoundingBoxByDetectors(
     size_t index, const BoundingBox *reference, BoundingBox &mutableBB,
-    std::map<size_t, size_t> detectorExclusions) const {
+    const std::map<size_t, size_t> &detectorExclusions) const {
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(index);
   auto detIt = rangeDet.begin();
   auto exclIt = detectorExclusions.begin();
