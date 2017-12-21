@@ -64,7 +64,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         instrument_name = input_workspaces[0].getInstrument().getName()
         supported_instruments = ['D2B', 'D20']
         if instrument_name not in supported_instruments:
-            self.log.warning('Running for unspported instrument, use with caution. Supported instruments are: ' + str(supported_instruments))
+            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: ' + str(supported_instruments))
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
@@ -77,26 +77,28 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
 
         output_workspaces = []
         self._progress.report('Doing Output2D Option')
-        if self.getPropertyValue('Output2D'):
+        if self.getProperty('Output2D').value:
             output2D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='2D',
                                            HeightAxis=height_range)
             output_workspaces.append(output2D)
 
         self._progress.report('Doing Output2DStraight Option')
-        if self.getPropertyValue('Output2DStraight'):
+        if self.getProperty('Output2DStraight').value:
             output2Dstraight = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                                    OutputType='2DStraight',
                                                    HeightAxis=height_range)
             output_workspaces.append(output2Dstraight)
 
         self._progress.report('Doing Output1D Option')
-        if self.getPropertyValue('Output1D'):
+        if self.getProperty('Output1D').value:
             output1D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='1DStraight',
                                            HeightAxis=height_range)
             output_workspaces.append(output1D)
         DeleteWorkspace('input_workspaces')
+
+        self._progress.report('Finishing up...')
 
         grouped_output_workspace = GroupWorkspaces(output_workspaces)
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
@@ -112,7 +114,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         """
         runs = self.getPropertyValue('Run')
         to_group = []
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + runs.count('+') + 4)
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + 1 + runs.count('+') + 4)
 
         data_type = 'Raw'
         if self.getPropertyValue('UsePreCalibratedData'):
@@ -122,21 +124,21 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             runs_sum = runs_list.split('+')
             if len(runs_sum) == 1:
                 run = os.path.basename(runs_sum[0]).split('.')[0]
+                self._progress.report('Loading run #' + run)
                 LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=run, DataType=data_type)
-                self._progress.report('Loaded run #' + run)
                 to_group.append(run)
             else:
                 for i, run in enumerate(runs_sum):
                     runnumber = os.path.basename(run).split('.')[0]
                     output_ws_name = 'merged_runs'
                     if i == 0:
+                        self._progress.report('Loading run #' + run)
                         LoadILLDiffraction(Filename=run, OutputWorkspace=output_ws_name, DataType=data_type)
-                        self._progress.report('Loaded run #' + run)
                         to_group.append(output_ws_name)
                     else:
                         run = runnumber
+                        self._progress.report('Loading run #' + run)
                         LoadILLDiffraction(Filename=run, OutputWorkspace=run, DataType=data_type)
-                        self._progress.report('Loaded run #' + run)
                         MergeRuns(InputWorkspaces=[output_ws_name, run], OutputWorkspace=output_ws_name)
                         DeleteWorkspace(Workspace=run)
 
