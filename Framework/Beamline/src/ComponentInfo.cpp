@@ -507,7 +507,7 @@ const std::string &ComponentInfo::name(const size_t componentIndex) const {
   return (*m_names)[componentIndex];
 }
 
-size_t ComponentInfo::indexOf(const std::string &name) const {
+size_t ComponentInfo::indexOfAny(const std::string &name) const {
   // Reverse iterate to hit top level components sooner
   auto it = std::find(m_names->rbegin(), m_names->rend(), name);
   if (it == m_names->rend()) {

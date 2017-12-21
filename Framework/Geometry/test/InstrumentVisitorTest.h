@@ -3,21 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include <set>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
+#include <set>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -31,7 +30,7 @@ makeParameterized(boost::shared_ptr<const Instrument> baseInstrument) {
   return boost::make_shared<const Instrument>(
       baseInstrument, boost::make_shared<ParameterMap>());
 }
-}
+} // namespace
 
 class InstrumentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -197,9 +196,10 @@ public:
         "Should contain the sample id", 1,
         componentIds.count(visitee->getComponentByName("some-surface-holder")
                                ->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")
-                                             ->getComponentID()));
+    TSM_ASSERT_EQUALS(
+        "Should contain the source id", 1,
+        componentIds.count(
+            visitee->getComponentByName("source")->getComponentID()));
 
     auto detectorComponentId =
         visitee->getComponentByName("point-detector")->getComponentID();
@@ -308,8 +308,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
 
-    const size_t bankIndex = compInfo->indexOf(
-        instrument->getComponentByName("bank1")->getComponentID());
+    const size_t bankIndex = compInfo->indexOfAny("bank1");
     TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
     TS_ASSERT(!compInfo->isStructuredBank(
         compInfo->source())); // Source is not a rectangular bank
@@ -398,7 +397,7 @@ public:
     // Check root name
     TS_ASSERT_EQUALS("basic_rect", componentInfo->name(componentInfo->root()));
     // Backward check that we get the right index
-    TS_ASSERT_EQUALS(componentInfo->indexOf("basic_rect"),
+    TS_ASSERT_EQUALS(componentInfo->indexOfAny("basic_rect"),
                      componentInfo->root());
 
     // Check all names are the same in old instrument and component info

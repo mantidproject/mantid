@@ -142,7 +142,7 @@ public:
   size_t root() const;
   double l1() const;
   const std::string &name(const size_t componentIndex) const;
-  size_t indexOf(const std::string &name) const;
+  size_t indexOfAny(const std::string &name) const;
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Eigen::Vector3d &scaleFactor);

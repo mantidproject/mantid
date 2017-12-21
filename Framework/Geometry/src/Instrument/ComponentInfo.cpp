@@ -111,8 +111,8 @@ size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
 
-size_t ComponentInfo::indexOf(const std::string &name) const {
-  return m_componentInfo->indexOf(name);
+size_t ComponentInfo::indexOfAny(const std::string &name) const {
+  return m_componentInfo->indexOfAny(name);
 }
 
 bool ComponentInfo::isDetector(const size_t componentIndex) const {
