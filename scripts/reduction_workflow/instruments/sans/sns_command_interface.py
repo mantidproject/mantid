@@ -9,23 +9,22 @@
     Command set for EQSANS reduction
 """
 # Import the specific commands that we need - some of these are used in systemtests
-
 from __future__ import (absolute_import, division, print_function)
 from reduction_workflow.command_interface import *
-
-from .hfir_command_interface import SolidAngle
-from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
 # The following imports allow users to import this file and have all functionality automatically imported
 # Do not remove these imports as it will break user scripts which rely on them
 
-from .hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization, NoSolidAngle  # noqa: F401
+from .hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization  # noqa: F401
+from .hfir_command_interface import SolidAngle, NoSolidAngle  # noqa: F401
 from .hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter  # noqa: F401
+from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter  # noqa: F401
+
 from .hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter  # noqa: F401
 from .hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter  # noqa: F401
 from .hfir_command_interface import NoSensitivityCorrection, DivideByThickness  # noqa: F401
 
-from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii, SetWedges  # noqa: F401
+from .hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii  # noqa: F401
 
 from .hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent  # noqa: F401
 from .hfir_command_interface import ThetaDependentTransmission  # noqa: F401
@@ -40,7 +39,8 @@ from .hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmis
 from .hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance  # noqa: F401
 from .hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
 from .hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
-from .hfir_command_interface import Stitch
+from .hfir_command_interface import Stitch  # noqa: F401
+from .hfir_command_interface import SetWedges  # noqa: F401
 
 from reduction_workflow.find_data import find_data
 

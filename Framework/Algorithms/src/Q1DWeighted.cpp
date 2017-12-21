@@ -178,6 +178,16 @@ void Q1DWeighted::exec() {
     tof_ws->setYUnitLabel("1/cm");
     tof_ws->setDistribution(true);
     tof_ws->setBinEdges(0, XOut);
+
+    const MantidVec &xValues = tof_ws->readX(0);
+    
+    auto wl_min = *std::min_element(xValues.begin(), xValues.end());
+    tof_ws->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom",
+                                     true);
+    auto wl_max = *std::max_element(xValues.begin(), xValues.end());
+    tof_ws->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom",
+                                     true);
+
     tofWorkspaces.push_back(std::move(tof_ws));
   }
 
