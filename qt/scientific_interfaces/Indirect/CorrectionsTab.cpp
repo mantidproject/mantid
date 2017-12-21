@@ -111,15 +111,20 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
  */
 void CorrectionsTab::displayInvalidWorkspaceTypeError(
     const std::string &workspaceName, Mantid::Kernel::Logger &log) {
+  QString errorMessage =
+      "Invalid workspace loaded, ensure a MatrixWorkspace is "
+      "entered into the field.\n";
+
   if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           workspaceName)) {
-    log.warning() << "Workspace Groups are currently not allowed.\n";
+    errorMessage += "Consider loading the WorkspaceGroup first into mantid, "
+                    "and then choose one of its items here.\n";
+    log.error() << "Workspace Groups are currently not allowed.\n";
   } else {
-    log.warning() << "Workspace " << workspaceName
-                  << " is not a MatrixWorkspace.\n";
+    log.error() << "Workspace " << workspaceName
+                << " is not a MatrixWorkspace.\n";
   }
-  emit showMessageBox("Invalid workspace loaded, ensure a MatrixWorkspace is "
-                      "entered into the field.\n");
+  emit showMessageBox(errorMessage);
 }
 
 } // namespace CustomInterfaces
