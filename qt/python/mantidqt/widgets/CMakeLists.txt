@@ -30,6 +30,8 @@ mtd_add_sip_module (
     Qt4::QtCore
     Qt4::QtGui
     ${PYTHON_LIBRARIES}
+    ${Boost_LIBRARIES}
+    API
   FOLDER Qt4
 )
 
@@ -50,6 +52,5 @@ mtd_add_sip_module (
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API
-    Kernel
   FOLDER Qt5
 )
