@@ -488,7 +488,7 @@ CalculateFlatBackground                MasterOnly, Identical
 CalculateTransmission                  MasterOnly, Identical
 CloneWorkspace                         all
 Comment                                all
-CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used
+CompareWorkspace                       MasterOnly, Identical   if one input has ``StorageMode::Cloned`` and the other has ``StorageMode::MasterOnly`` then ``ExecutionMode::MasterOnly`` is used, with ``ExecutionMode::MasterOnly`` the workspaces always compare equal on non-master ranks
 CompressEvents                         all
 ConvertToHistogram                     all
 ConvertToPointData                     all
