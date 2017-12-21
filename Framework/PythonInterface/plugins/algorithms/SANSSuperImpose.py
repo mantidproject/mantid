@@ -16,6 +16,8 @@ from scipy import interpolate
 
 from mantid.kernel import Direction
 from mantid.simpleapi import *
+from mantid.api import *
+from mantid.kernel import *
 
 
 '''
