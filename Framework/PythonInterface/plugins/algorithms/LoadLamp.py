@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, NumericAxis, AlgorithmFactory, FileAction
+from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction
 from mantid.kernel import Direction
-from mantid.simpleapi import CreateWorkspace, AddSampleLogMultiple, mtd
+from mantid.simpleapi import CreateWorkspace, AddSampleLogMultiple
 
 import numpy
 import h5py
