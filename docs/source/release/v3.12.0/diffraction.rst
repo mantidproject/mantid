@@ -42,8 +42,9 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
-
 - HB3A reduction interface has been enhanced.  A child window is added to it for users to pre-process scans and save the processed and merged data to NeXus files in order to save time when they start to reduce and visualize the data. A record file is generated along with processed scans to record the calibration information. During data reduction, scans that have been processed in pre-processing will be loaded automatically from corresponding MD files.
+- Fix a bug in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` and :ref:`IntegrateEllipsoidsTwoStep <algm-IntegrateEllipsoidsTwoStep>` that forced output to be weighted by the bin width.
+- :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` now has option to specify background shell instead of using default background determination.
 
 - In HB3A reduction interface, section for downloading experimental data via http server has been removed from main UI.
 
