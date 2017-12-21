@@ -50,7 +50,7 @@ def import_qtlib(modulename, package, attr=None):
         lib = import_module('.' + modulename + LIB_SUFFIX, package)
     except ImportError:
         lib = import_module(modulename + LIB_SUFFIX)
-    if attr:
+    if attr is not None:
         return getattr(lib, attr)
     else:
         return lib
@@ -72,7 +72,7 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     return the form class
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
-    if baseinstance:
+    if baseinstance is not None:
         return loadUi(filepath, baseinstance=baseinstance)
     else:
         return loadUiType(filepath)
