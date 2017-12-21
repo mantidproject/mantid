@@ -41,13 +41,6 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point,
                                     compInfo, componentIndex));
 }
 
-/**
- * Gets next item or gives a nullptr if map is empty.
- */
-auto nextPairOrNullPtr(const std::map<size_t, size_t> &container)
-    -> decltype(&*container.begin()) {
-  return container.empty() ? nullptr : &*container.begin();
-}
 } // namespace
 
 /**
@@ -400,18 +393,16 @@ void ComponentInfo::growBoundingBoxByDetectors(
     std::map<size_t, size_t> detectorExclusions) const {
   auto rangeDet = m_componentInfo->detectorRangeInSubtree(index);
   auto detIt = rangeDet.begin();
-  auto *ptrCurrentExclusion = nextPairOrNullPtr(detectorExclusions);
+  auto exclIt = detectorExclusions.begin();
   while (detIt != rangeDet.end()) {
     auto detIndex = *detIt;
-    if (ptrCurrentExclusion != nullptr &&
-        detIndex >= ptrCurrentExclusion->first &&
-        detIndex <= ptrCurrentExclusion->second) {
+    if (exclIt != detectorExclusions.end() && detIndex >= exclIt->first &&
+        detIndex <= exclIt->second) {
       // Move the detector iterator outside the current exclusion
-      detIt += ptrCurrentExclusion->second - ptrCurrentExclusion->first + 1;
-      // Erase the spent exclusion
-      detectorExclusions.erase(detectorExclusions.begin());
-      // Set the next exclusion range to consider
-      ptrCurrentExclusion = nextPairOrNullPtr(detectorExclusions);
+      detIt += exclIt->second - exclIt->first + 1;
+      // Move the exclusion iterator forward. Do not consider the same exclusion
+      // range again.
+      ++exclIt;
     } else {
       mutableBB.grow(componentBoundingBox(*detIt, reference));
       ++detIt;
