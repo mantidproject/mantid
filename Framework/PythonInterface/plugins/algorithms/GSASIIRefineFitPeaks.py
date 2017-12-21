@@ -203,7 +203,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         # Output file MUST end with "-n.fxye" where n is a number
         # If you see "Runtime error: Rvals" from GSASIIscriptable.py, it may be because this name is badly formatted
         file_path = os.path.join(temp_dir, "{}_focused_spectrum-{}.fxye".format(self.name(), workspace_index))
-        mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
+        mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False, IncludeHeader=False)
         return file_path
 
     def _set_output_properties(self, rwp, gof, lattice_params):
