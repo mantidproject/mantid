@@ -214,12 +214,7 @@ def average_ws_list(ws_list):
         raise RuntimeError("getAverageWs: Trying to take an average of nothing")
 
     if num_workspaces == 1:
-        if mtd.doesExist(ws_list[0].getName()):
-            return CloneWorkspace(InputWorkspace=ws_list[0],
-                                  OutputWorkspace=ws_list[0].getName() + "_clone",
-                                  StoreInADS=False)
-        else:
-            return ws_list[0]
+        return ws_list[0]
 
     return sum(ws_list) / num_workspaces
 
