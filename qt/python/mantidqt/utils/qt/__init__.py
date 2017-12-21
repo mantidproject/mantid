@@ -132,9 +132,13 @@ def add_actions(target, actions):
     target (menu or toolbar)
     :param target: An instance of QMenu or QToolbar
     :param actions: A collection of actions to be added
+    :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
     for action in actions:
         if isinstance(action, QMenu):
             target.addMenu(action)
         elif isinstance(action, QAction):
             target.addAction(action)
+        else:
+            raise ValueError("Unexpected action type. "
+                             "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
