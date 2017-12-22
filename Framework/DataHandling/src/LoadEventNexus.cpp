@@ -869,6 +869,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_file->close();
     try {
       ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
+      g_log.information() << "Used ParallelEventLoader.\n";
       loaded = true;
       shortest_tof = 0.0;
       longest_tof = 1e10;
