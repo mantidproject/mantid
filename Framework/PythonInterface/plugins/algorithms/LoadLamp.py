@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction
+from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, NumericAxis, AlgorithmFactory, FileAction
 from mantid.kernel import Direction
-from mantid.simpleapi import CreateWorkspace, AddSampleLogMultiple
+from mantid.simpleapi import CreateWorkspace, AddSampleLogMultiple, mtd
 
 import numpy
 import h5py
@@ -54,7 +54,10 @@ class LoadLamp(PythonAlgorithm):
                     log_names.append(name)
                     log_values.append(value)
         if log_names:
-            AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values)
+            try:
+                AddSampleLogMultiple(Workspace=output_ws, LogNames=log_names, LogValues=log_values)
+            except RuntimeError as e:
+                self.log().warning('Unable to set the sample logs, reason: '+str(e))
 
         self.setProperty('OutputWorkspace', output_ws)
 
