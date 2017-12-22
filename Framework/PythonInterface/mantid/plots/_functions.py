@@ -192,6 +192,42 @@ def _getMDData2D_bin_centers(workspace,normalization,withError=False):
     coordinate[1]=points_from_boundaries(coordinate[1])
     return (coordinate,data,err)
 
+def _commonX(arr):
+    return numpy.all(arr==arr[0,:],axis=(1,0))
+
+def _getMatrix2DData(workspace, distribution,histogram2D=False):
+    try:
+        _=workspace.blocksize()
+    except RuntimeError:
+        raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
+    x = workspace.extractX()
+    y = workspace.getAxis(1).extractValues()
+    z = workspace.extractY()
+
+    if workspace.isHistogramData():
+        if not distribution:
+            z = z / (x[:,1:] - x[:,0:-1])
+        if histogram2D:
+            if len(y)==z.shape[0]:
+                y = boundaries_from_points(y)
+            x = numpy.vstack((x[0],x))
+        else:
+            x = .5*(x[:,0:-1]+x[:,1:])
+            if len(y)==z.shape[0]+1:
+                y=points_from_boundaries(y)
+    else:
+        if histogram2D:
+            if _commonX(x):
+                x=numpy.broadcast(boundaries_from_points(x[0]),(z.shape[0]+1,z.shape[1]+1))
+                if len(y)==z.shape[0]:
+                    y=boundaries_from_points(y)
+            else:
+                raise ValueError('Spectra have different bin boundaries')
+        else:
+            if len(y)==z.shape[0]+1:
+                y=points_from_boundaries(y)
+    y = numpy.broadcast_to(numpy.expand_dims(y,1),x.shape)
+    return (x,y,z)
 
 
 def _getContour(workspace, distribution):
