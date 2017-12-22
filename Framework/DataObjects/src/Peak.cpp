@@ -639,7 +639,8 @@ bool Peak::findDetector(const InstrumentRayTracer &tracer) {
 /**
  * @brief Peak::findDetector : Find the detector along the beam location. sets
  * the detector, and detector position if found
- * @param beam : detector direction from the sample as V3D
+ * @param beam : Detector direction from the sample as V3D
+ * @param tracer : Ray tracer to use for detector finding
  * @return True if a detector has been found
  */
 bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
