@@ -382,10 +382,8 @@ void ComponentInfo::growBoundingBoxAsTube(
  * and therefore we have a guranteed ordering of exclusion ranges.
  *
  * @param index : Index of the component to get the bounding box for
+ * @param reference : Reference bounding box.
  * @param mutableBB : Output bounding box. This will be grown.
- * @param mutableDetExclusions : Output detector exclusions to append to. These
- * are ranges of detector indices that we do NOT need to consider for future
- * bounding box calculations for detectors.
  * @param detectorExclusions : ranges of detector indices NOT to consider.
  */
 void ComponentInfo::growBoundingBoxByDetectors(
