@@ -2,25 +2,32 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/tuple.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::DataObjects::Workspace2D;
+using Mantid::SpectrumDefinition;
 using namespace Mantid::PythonInterface::Registry;
+using namespace Mantid::Indexing;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Workspace2D);
@@ -31,17 +38,16 @@ public:
   static dict getstate(const Workspace2D& ws) {
     using namespace Mantid::PythonInterface::Converters;
 
-    auto spectra = ws.getNumberHistograms();
-
-    dict state;
-
-    state["instrument_name"] = ws.getInstrument()->getName();
-    state["instrument_xml"] = ws.getInstrument()->getXmlText();
-    state["unit_x"] = ws.getAxis(0)->unit()->unitID();
-
+    // Python lists that will be added to dict
     list spectraList;
     list errorList;
     list binEdgeList;
+    list detectorList;
+    list specNumList;
+
+    auto spectra = ws.getNumberHistograms();
+    const auto& indexInfo = ws.indexInfo();
+    const auto& spectrumDefinitions = indexInfo.spectrumDefinitions();
 
     for (decltype(spectra) i = 0; i < spectra; ++i) {
       const auto &histo = ws.histogram(i);
@@ -53,12 +59,29 @@ public:
       spectraList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
       errorList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));
       binEdgeList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(binEdges))));
+
+      auto spectrumNumber = indexInfo.spectrumNumber(i);
+      const auto& spectrumDefinition = (*spectrumDefinitions)[i];
+      std::vector<size_t> detectorIndices;
+
+      for(size_t j = 0; j < spectrumDefinition.size(); ++j) {
+        size_t detectorIndex = spectrumDefinition[j].first;
+        detectorIndices.emplace_back(std::move(detectorIndex));
+      }
+
+      detectorList.append(object(handle<>(VectorToNDArray<size_t, Clone>()(detectorIndices))));
+      specNumList.append(static_cast<int32_t>(spectrumNumber));
     }
 
+    dict state;
+    state["instrument_name"] = ws.getInstrument()->getName();
+    state["instrument_xml"] = ws.getInstrument()->getXmlText();
+    state["unit_x"] = ws.getAxis(0)->unit()->unitID();
     state["spectra"] = spectraList;
     state["error"] = errorList;
     state["bin_edges"] = binEdgeList;
-
+    state["detectors"] = detectorList;
+    state["spectrum_numbers"] = specNumList;
     return state;
   }
 
@@ -66,9 +89,14 @@ public:
   {
     using namespace Mantid::PythonInterface::Converters;
 
+    std::vector<SpectrumNumber> spectrumNumbers;
+    std::vector<SpectrumDefinition> spectrumDefinitions;
+
     list spectraList = extract<list>(state["spectra"]);
     list errorList = extract<list>(state["error"]);
     list binEdgeList = extract<list>(state["bin_edges"]);
+    list detectorList = extract<list>(state["detectors"]);
+    list specNumList = extract<list>(state["spectrum_numbers"]);
 
     ws.initialize(len(spectraList), len(binEdgeList[0]), len(spectraList[0]));
 
@@ -76,10 +104,20 @@ public:
       std::vector<double> spectraData = NDArrayToVector<double>(spectraList[i])();
       std::vector<double> errorData = NDArrayToVector<double>(errorList[i])();
       std::vector<double> binEdgeData = NDArrayToVector<double>(binEdgeList[i])();
+      std::vector<size_t> detectorIndices = NDArrayToVector<size_t>(detectorList[i])();
+      SpectrumNumber specNum = static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
 
       ws.setCounts(i, std::move(spectraData));
       ws.setCountStandardDeviations(i, std::move(errorData));
       ws.setBinEdges(i, std::move(binEdgeData));
+
+      SpectrumDefinition specDef;
+      for (size_t j = 0; j < detectorIndices.size(); ++j) {
+        size_t detectorIndex = detectorIndices[j];
+        specDef.add(detectorIndex);
+      }
+      spectrumDefinitions.emplace_back(std::move(specDef));
+      spectrumNumbers.emplace_back(std::move(specNum));
     }
 
     std::string unitX = extract<std::string>(state["unit_x"]);
@@ -102,6 +140,10 @@ public:
       Mantid::Kernel::Logger("Workspace2DPickleSuite").warning()
           << "Could not load instrument XML: " << exc.what() << "\n";
     }
+
+    Mantid::Indexing::IndexInfo indexInfo(spectrumNumbers);
+    indexInfo.setSpectrumDefinitions(spectrumDefinitions);
+    ws.setIndexInfo(indexInfo);
   }
 };
 
