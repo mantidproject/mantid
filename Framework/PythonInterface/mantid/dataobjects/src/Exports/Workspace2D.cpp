@@ -74,9 +74,11 @@ public:
     }
 
     dict state;
+    state["title"] = ws.getTitle();
     state["instrument_name"] = ws.getInstrument()->getName();
     state["instrument_xml"] = ws.getInstrument()->getXmlText();
     state["unit_x"] = ws.getAxis(0)->unit()->unitID();
+    state["unit_y"] = ws.getAxis(1)->unit()->unitID();
     state["spectra"] = spectraList;
     state["error"] = errorList;
     state["bin_edges"] = binEdgeList;
@@ -99,6 +101,12 @@ public:
     list specNumList = extract<list>(state["spectrum_numbers"]);
 
     ws.initialize(len(spectraList), len(binEdgeList[0]), len(spectraList[0]));
+    ws.setTitle(extract<std::string>(state["title"]));
+
+    std::string unitX = extract<std::string>(state["unit_x"]);
+    ws.getAxis(0)->setUnit(unitX);
+    std::string unitY = extract<std::string>(state["unit_y"]);
+    ws.getAxis(1)->setUnit(unitY);
 
     for(size_t i = 0; i < static_cast<size_t>(len(spectraList)); ++i){
       std::vector<double> spectraData = NDArrayToVector<double>(spectraList[i])();
@@ -120,8 +128,7 @@ public:
       spectrumNumbers.emplace_back(std::move(specNum));
     }
 
-    std::string unitX = extract<std::string>(state["unit_x"]);
-    ws.getAxis(0)->setUnit(unitX);
+
 
     std::string instrumentXML = extract<std::string>(state["instrument_xml"]);
     std::string instrumentName = extract<std::string>(state["instrument_name"]);
