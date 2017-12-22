@@ -243,6 +243,7 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
  *
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
+ * @param tracer :: Ray tracer to use for detector finding
  */
 void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
                           const Geometry::InstrumentRayTracer &tracer) {
