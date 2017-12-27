@@ -249,8 +249,9 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+  inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h
-        inc/MantidQtWidgets/Common/DropEventHelper.h
+	inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
