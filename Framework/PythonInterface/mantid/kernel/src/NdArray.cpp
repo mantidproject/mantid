@@ -2,11 +2,13 @@
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
+#include <boost/python/tuple.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
 using Mantid::PythonInterface::Converters::getNDArrayType;
+using namespace boost::python;
 
 namespace Mantid {
 namespace PythonInterface {
@@ -23,7 +25,22 @@ inline PyArrayObject *rawArray(const NdArray &obj) {
 // -----------------------------------------------------------------------------
 
 /**
- * @return The shape of the array as a C-array
+ * Check if a python object points to an array type object
+ * @param obj A pointer to an arbitrary python object
+ * @returns True if the underlying object is an ndarray, false otherwise
+ */
+bool NdArray::check(const object &obj) { return PyArray_Check(obj.ptr()); }
+
+/**
+ * Construction from a plain object. Assumes the array is actually a
+ * a numpy array
+ * @param obj A wrapper around a Python object pointing to a numpy array
+ */
+NdArray::NdArray(const object &obj)
+    : object(detail::borrowed_reference(obj.ptr())) {}
+
+/**
+ * @return Return the shape of the array
  */
 Py_intptr_t const *NdArray::get_shape() const {
   return PyArray_DIMS(rawArray(*this));
@@ -40,6 +57,24 @@ int NdArray::get_nd() const { return PyArray_NDIM(rawArray(*this)); }
  * @return The array's raw data pointer
  */
 void *NdArray::get_data() const { return PyArray_DATA(rawArray(*this)); }
+
+/**
+ * Casts (and copies if necessary) the array to the given data type
+ * @param dtype Character code for the numpy data types
+ * (https://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html)
+ * @param copy If true then the return array is always a copy otherwise
+ * the returned array will only be copied if necessary
+ * @return A numpy array with values of the requested type
+ */
+NdArray NdArray::astype(char dtype, bool copy) const {
+  auto callable = object(handle<>(
+      PyObject_GetAttrString(this->ptr(), const_cast<char *>("astype"))));
+  auto args = tuple();
+  auto kwargs = object(handle<>(Py_BuildValue(
+      const_cast<char *>("{s:c,s:i}"), "dtype", dtype, "copy", copy ? 1 : 0)));
+  return NdArray(boost::python::detail::new_reference(
+      PyObject_Call(callable.ptr(), args.ptr(), kwargs.ptr())));
+}
 }
 }
 }

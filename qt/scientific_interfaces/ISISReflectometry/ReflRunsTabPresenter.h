@@ -119,6 +119,8 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  /// enable/disable widgets on the view
+  void updateWidgetEnabledState(const bool isProcessing) const;
 };
 }
 }

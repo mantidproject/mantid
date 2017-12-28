@@ -48,7 +48,7 @@ Usage
         fit_ws, result_ws, prob_ws = BayesQuasi(Program='QL', SampleWorkspace=sampleWs, ResolutionWorkspace=resWs,
                                             MinRange=-0.547607, MaxRange=0.543216, SampleBins=1, ResolutionBins=1,
                                             Elastic=False, Background='Sloping', FixedWidth=False, UseResNorm=False,
-                                            WidthFile='', Loop=True, Save=False, Plot='None')
+                                            WidthFile='', Loop=True)
 
 .. categories::
 

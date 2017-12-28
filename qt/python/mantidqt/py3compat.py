@@ -65,3 +65,8 @@ def to_text_string(obj, encoding=None):
             return obj
         else:
             return str(obj, encoding)
+
+
+def qbytearray_to_str(qba):
+    """Convert QByteArray object to str in a way compatible with Python 2/3"""
+    return str(bytes(qba.toHex().data()).decode())
