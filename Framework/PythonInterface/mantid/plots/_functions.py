@@ -140,18 +140,18 @@ def _dim2array(d):
 
 
 def boundaries_from_points(input_array):
-    assert isinstance(input_array,np.ndarray),'Not a numpy array'
+    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
     if len(input_array)==0:
         raise ValueError('could not extend array with no elements')
     if len(input_array)==1:
-        return np.array([input_array[0]-0.5,input_array[0]+0.5])
-    return np.concatenate(([(3*input_array[0]-input_array[1])*0.5],
+        return numpy.array([input_array[0]-0.5,input_array[0]+0.5])
+    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
                            (input_array[1:]+input_array[:-1])*0.5,
                            [(3*input_array[-1]-input_array[-2])*0.5]))
 
     
 def points_from_boundaries(input_array):
-    assert isinstance(input_array,np.ndarray),'Not a numpy array'
+    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
     if len(input_array)<2:
         raise ValueError('could not get centers from less than two boundaries')
     return (.5*(input_array[0:-1]+input_array[1:]))
@@ -170,7 +170,7 @@ def _getMDData(workspace,normalization,withError=False):
         err2=workspace.getErrorSquaredArray()*1.
         if normalization==mantid.api.MDNormalization.NumEventsNormalization:
             err2/=(nev*nev)
-        err=np.sqrt(err2)
+        err=numpy.sqrt(err2)
     return (dimarrays,data.squeeze(),err.squeeze())
 
 
