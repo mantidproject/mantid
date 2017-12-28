@@ -61,14 +61,15 @@ class CropWorkspaceRagged(PythonAlgorithm):
             numSpec = inputWS.getNumberHistograms()
 
             # fill out the values for min and max as appropriate
+            # numpy 1.7 (on rhel7) doesn't have np.full
             if len(xmins) == 0:
-                xmins = np.full((numSpec), np.nan)
+                xmins = np.array([Property.EMPTY_DBL]*numSpec)
             elif len(xmins) == 1:
-                xmins = np.full((numSpec), xmins[0])
+                xmins = np.array([xmins[0]]*numSpec)
             if len(xmaxs) == 0:
-                xmaxs = np.full((numSpec), np.nan)
+                xmaxs = np.array([Property.EMPTY_DBL]*numSpec)
             elif len(xmaxs) == 1:
-                xmaxs = np.full((numSpec), xmaxs[0])
+                xmaxs = np.array([xmaxs[0]]*numSpec)
 
             # replace nan with EMPTY_DBL in xmin/xmax
             indices = np.where(np.isnan(xmins))
