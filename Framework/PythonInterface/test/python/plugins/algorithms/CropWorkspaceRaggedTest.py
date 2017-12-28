@@ -13,13 +13,16 @@ from mantid.api import AnalysisDataService
 class CropWorkspaceRaggedTest(unittest.TestCase):
 
     def test_nomad_inplace(self):
-        import numpy as np
-        import math
+        from numpy import nan as np_nan
+        try:
+            from math import nan as math_nan
+        except ImportError:
+            math_nan = np_nan # rhel7 python is too old
         api.LoadNexusProcessed(Filename='NOM_91796_banks.nxs', OutputWorkspace='NOM_91796_banks')
         alg_test = run_algorithm('CropWorkspaceRagged',
                                  InputWorkspace='NOM_91796_banks', OutputWorkspace='NOM_91796_banks',
                                  Xmin=[0.67, 1.20, 2.42, 3.70, 4.12, 0.39],
-                                 Xmax=[10.20, 20.8, np.nan, math.nan, np.nan, 9.35])
+                                 Xmax=[10.20, 20.8, np_nan, math_nan, np_nan, 9.35])
 
         self.assertTrue(alg_test.isExecuted())
 

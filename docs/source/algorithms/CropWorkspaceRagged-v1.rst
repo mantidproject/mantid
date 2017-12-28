@@ -31,7 +31,7 @@ mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
 
 .. code-block:: python
 
-    from math import nan
+    from numpy import nan
     NOM_91796 = LoadNexusProcessed(Filename='NOM_91796_banks.nxs')
     CropWorkspaceRagged(InputWorkspace=NOM_91796, OutputWorkspace='cropped',
                         Xmin=[0.67, 1.20, 2.42, 3.70, 4.12, 0.39],
