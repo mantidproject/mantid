@@ -8,23 +8,20 @@ import numpy as np
 
 class CropWorkspaceRagged(PythonAlgorithm):
 
-    __exts = None
-    __loader = None
-
-    def category(self): # TODO
-        return "DataHandling\\Text"
+    def category(self):
+        return 'Transforms\\Splitting;Workflow'
 
     def name(self):
-        return "CropWorkspaceRagged"
+        return 'CropWorkspaceRagged'
 
-    def summary(self): # TODO
-        return "This algorithm loads multiple gsas files from a single directory into mantid."
+    def summary(self):
+        return 'Crop each spectrum of a workspace independently'
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('InputWorkspace', '',
-                                               direction=Direction.Input), 'input workspace') # TODO
+                                               direction=Direction.Input), 'input workspace')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output), 'output workspace') # TODO
+                                               direction=Direction.Output), 'output workspace')
         self.declareProperty(FloatArrayProperty('Xmin'), 'minimum x values with NaN meaning no minimum')
         self.declareProperty(FloatArrayProperty('Xmax'), 'maximum x values with NaN meaning no maximum')
 
@@ -39,14 +36,14 @@ class CropWorkspaceRagged(PythonAlgorithm):
 
         errors = {}
 
-        if numMin == 0:
-            errors['XMin'] = 'Must specify minimums'
-        elif numMin > 1 and numMin != numSpec:
+        if numMin == 0 and numMax == 0:
+            errors['XMin'] = 'Must specify minimums or maximums'
+            errors['XMax'] = 'Must specify minimums or maximums'
+
+        if numMin > 1 and numMin != numSpec:
             errors['XMin'] = 'Must specify min for each spectra ({}!={})'.format(numMin, numSpec)
 
-        if numMin == 0:
-            errors['XMax'] = 'Must specify maximums'
-        elif numMax > 1 and numMax != numSpec:
+        if numMax > 1 and numMax != numSpec:
             errors['XMax'] = 'Must specify max for each spectra ({}!={})'.format(numMax, numSpec)
 
         return errors
@@ -63,12 +60,17 @@ class CropWorkspaceRagged(PythonAlgorithm):
         else:
             numSpec = inputWS.getNumberHistograms()
 
-            if len(xmins) == 1:
+            # fill out the values for min and max as appropriate
+            if len(xmins) == 0:
+                xmins = np.full((numSpec), np.nan)
+            elif len(xmins) == 1:
                 xmins = np.full((numSpec), xmins[0])
-            if len(xmaxs) == 1:
+            if len(xmaxs) == 0:
+                xmaxs = np.full((numSpec), np.nan)
+            elif len(xmaxs) == 1:
                 xmaxs = np.full((numSpec), xmaxs[0])
 
-            # fix up the values of xmin/xmax
+            # replace nan with EMPTY_DBL in xmin/xmax
             indices = np.where(np.isnan(xmins))
             xmins[indices] = Property.EMPTY_DBL
             indices = np.where(np.isnan(xmaxs))
@@ -77,7 +79,11 @@ class CropWorkspaceRagged(PythonAlgorithm):
             self.log().information('MIN: ' + str(xmins))
             self.log().information('MAX: ' + str(xmaxs))
 
-            names = ['spec_{}'.format(i) for i in range(len(xmins))]
+            # temporary workspaces should be hidden
+            names = ['__{}_spec_{}'.format(outputWS, i) for i in range(len(xmins))]
+
+            # how much the progress bar moves forward for each spectrum
+            progStep = float(1)/float(2*numSpec)
 
             # crop out each spectra and conjoin to a temporary workspace
             accumulationWS = None
@@ -89,18 +95,24 @@ class CropWorkspaceRagged(PythonAlgorithm):
                 if xmax > x[-1]:
                     xmax = Property.EMPTY_DBL
 
+                progStart = 2 * i * progStep
+
                 # extract the range of the spectrum requested
                 CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=name,
-                              StartWorkspaceIndex=i, EndWorkspaceIndex=i, Xmin=xmin, XMax=xmax)
+                              StartWorkspaceIndex=i, EndWorkspaceIndex=i, Xmin=xmin, XMax=xmax,
+                              startProgress=progStart, endProgress=(progStart + progStep),
+                              EnableLogging=False)
 
                 # accumulate
                 if accumulationWS is None:
-                    accumulationWS = name
+                    accumulationWS = name # messes up progress during very first step
                 else:
                     ConjoinWorkspaces(InputWorkspace1=accumulationWS,
-                                      InputWorkspace2=name)
+                                      InputWorkspace2=name,
+                                      startProgress=(progStart + progStep), endProgress=(progStart + 2 * progStep),
+                                      EnableLogging=False)
 
-            RenameWorkspace(InputWorkspace=accumulationWS, OutputWorkspace=outputWS)
+            RenameWorkspace(InputWorkspace=accumulationWS, OutputWorkspace=outputWS, EnableLogging=False)
 
         # set the output property
         self.setProperty('OutputWorkspace', mtd[outputWS])
