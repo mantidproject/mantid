@@ -21,6 +21,7 @@ and assign it to the rebinned variable
 from __future__ import (absolute_import, division,
                         print_function)
 
+import six
 from six import iteritems
 from collections import OrderedDict, namedtuple
 import os
@@ -66,11 +67,8 @@ def extract_progress_kwargs(kwargs):
     keywords removed from kwargs. If the progress keywords are not
     specified, None will be returned in their place.
     """
-    start = kwargs.get('startProgress')
-    end = kwargs.get('endProgress')
-    for item in ('startProgress', 'endProgress'):
-        if item in kwargs:
-            del kwargs[item]
+    start = kwargs.pop('startProgress', None)
+    end = kwargs.pop('endProgress', None)
     return start, end, kwargs
 
 
@@ -170,10 +168,8 @@ def Load(*args, **kwargs):
                          'you might have forgotten to add its location in the data search '
                          'directories.')
     # Remove from keywords so it is not set twice
-    try:
+    if 'Filename' in kwargs:
         del kwargs['Filename']
-    except KeyError:
-        pass
     lhs = _kernel.funcinspect.lhs_info()
     # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
     # then raise a more helpful error than what we would get from an algorithm
@@ -269,9 +265,9 @@ def StartLiveData(*args, **kwargs):
     def handleSpecialProperty(name, value=None):
         try:
             if value is None:
-                value = kwargs[name]
+                value = kwargs.pop(name)
             algm.setProperty(name, value)
-            kwargs.pop(name, None)
+
         except ValueError as ve:
             raise ValueError('Problem when setting %s. This is the detailed error '
                              'description: %s' % (name, str(ve)))
@@ -436,7 +432,10 @@ def FitDialog(*args, **kwargs):
       - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
-    arguments = {}
+    # default values will be overridden
+    arguments = {'Enable':'',
+                 'Disable':'',
+                 'Message':''}
     try:
         function, inputworkspace = _get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
         arguments['Function'] = function
@@ -444,12 +443,6 @@ def FitDialog(*args, **kwargs):
     except RuntimeError:
         pass
     arguments.update(kwargs)
-    if 'Enable' not in arguments:
-        arguments['Enable'] = ''
-    if 'Disable' not in arguments:
-        arguments['Disable'] = ''
-    if 'Message' not in arguments:
-        arguments['Message'] = ''
 
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
 
@@ -583,19 +576,18 @@ def RenameWorkspace(*args, **kwargs):
     """
     arguments = {}
     lhs = _kernel.funcinspect.lhs_info()
-    if lhs[0] > 0:
-        if 'OutputWorkspace' not in kwargs:
-            arguments['OutputWorkspace'] = lhs[1][0]
-            pos_arg = {0: "InputWorkspace", 1: "RenameMonitors"}
-        else:
-            pos_arg = {0: "InputWorkspace", 1: "OutputWorkspace", 2: "RenameMonitors"}
-    else:
-        pos_arg = {0: "InputWorkspace", 1: "OutputWorkspace", 2: "RenameMonitors"}
 
-    for ind, arg in enumerate(args):
-        arguments[pos_arg[ind]] = arg
-    for key, val in kwargs.items():
-        arguments[key] = val
+    # convert positional args to keyword arguments
+    if lhs[0] > 0 and 'OutputWorkspace' not in kwargs:
+        arguments['OutputWorkspace'] = lhs[1][0]
+        for name, value in zip(("InputWorkspace","RenameMonitors"), args):
+            arguments[name] = value
+    else:
+        for name, value in zip(("InputWorkspace","OutputWorkspace","RenameMonitors"), args):
+            arguments[name] = value
+
+    arguments.update(kwargs)
+
     if 'OutputWorkspace' not in arguments:
         raise RuntimeError("Unable to set output workspace name."
                            " Please either assign the output of "
@@ -629,12 +621,13 @@ def _get_function_spec(func):
     :param func: A Python function object
     """
     import inspect
-    import six
     try:
-        if six.PY3:
+        if six.PY2:
+            argspec = inspect.getargspec(func)
+        elif six.PY3:
             argspec = inspect.getfullargspec(func)
         else:
-            argspec = inspect.getargspec(func)
+            raise RuntimeError('Only works for python2 or python3')
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -790,9 +783,7 @@ def _is_function_property(prop):
     :type Property
     :return:  True if the property is considered a fit function
     """
-    if isinstance(prop, _api.FunctionProperty):
-        return True
-    return False
+    return isinstance(prop, _api.FunctionProperty)
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -949,9 +940,7 @@ def _set_logging_option(algm_obj, kwargs):
         :param algm_obj: An initialised algorithm object
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
-    if __LOGGING_KEYWORD__ in kwargs:
-        algm_obj.setLogging(kwargs[__LOGGING_KEYWORD__])
-        del kwargs[__LOGGING_KEYWORD__]
+    algm_obj.setLogging(kwargs.pop(__LOGGING_KEYWORD__, True))
 
 
 def _set_store_ads(algm_obj, kwargs):
@@ -961,11 +950,7 @@ def _set_store_ads(algm_obj, kwargs):
         :param algm_obj: An initialised algorithm object
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
-    if __STORE_KEYWORD__ in kwargs:
-        algm_obj.setAlwaysStoreInADS(kwargs[__STORE_KEYWORD__])
-        del kwargs[__STORE_KEYWORD__]
-    else:
-        algm_obj.setAlwaysStoreInADS(__STORE_ADS_DEFAULT__)
+    algm_obj.setAlwaysStoreInADS(kwargs.pop(__STORE_KEYWORD__, __STORE_ADS_DEFAULT__))
 
 
 def set_properties(alg_object, *args, **kwargs):
@@ -988,16 +973,15 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = alg_object.mandatoryProperties()
     else:
         mandatory_props = []
-    if len(kwargs) > 0:
-        for (key, value) in iteritems(kwargs):
-            do_set_property(key, value)
-            try:
-                mandatory_props.remove(key)
-            except ValueError:
-                pass
-    if len(args) > 0:
-        for (key, value) in zip(mandatory_props[:len(args)], args):
-            do_set_property(key, value)
+
+    for (key, value) in iteritems(kwargs):
+        do_set_property(key, value)
+        if key in mandatory_props:
+            mandatory_props.remove(key)
+
+    # zip stops at the length of the shorter list
+    for (key, value) in zip(mandatory_props, args):
+        do_set_property(key, value)
 
 
 def _create_algorithm_function(name, version, algm_object):
@@ -1037,11 +1021,7 @@ def _create_algorithm_function(name, version, algm_object):
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
             del kwargs["CoordinatesToUse"]
 
-        try:
-            frame = kwargs["__LHS_FRAME_OBJECT__"]
-            del kwargs["__LHS_FRAME_OBJECT__"]
-        except KeyError:
-            frame = None
+        frame = kwargs.pop("__LHS_FRAME_OBJECT__", None)
 
         lhs = _kernel.funcinspect.lhs_info(frame=frame)
         lhs_args = _get_args_from_lhs(lhs, algm)
@@ -1063,11 +1043,9 @@ def _create_algorithm_function(name, version, algm_object):
                                    _create_generic_signature(algm_object),
                                    algm_object.docString())
     globals()[name] = algm_wrapper
-    # Register aliases
-    for alias in algm_object.alias().strip().split(' '):
-        alias = alias.strip()
-        if len(alias) > 0:
-            globals()[alias] = algm_wrapper
+    # Register aliases - split on whitespace
+    for alias in algm_object.alias().strip().split():
+        globals()[alias] = algm_wrapper
     # endfor
     return algm_wrapper
 # -------------------------------------------------------------------------------------------------------------
@@ -1148,12 +1126,9 @@ def set_properties_dialog(algm_object, *args, **kwargs):
         raise RuntimeError("Can only display properties dialog in gui mode")
 
     # generic setup
-    enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
-    del kwargs["Enable"]  # no longer needed
-    disabled_list = [s.lstrip(' ') for s in kwargs.get("Disable", "").split(',')]
-    del kwargs["Disable"]  # no longer needed
-    message = kwargs.get("Message", "")
-    del kwargs["Message"]
+    enabled_list = [s.lstrip(' ') for s in kwargs.pop("Enable", "").split(',')]  # no longer needed
+    disabled_list = [s.lstrip(' ') for s in kwargs.pop("Disable", "").split(',')]  # no longer needed
+    message = kwargs.pop("Message", "")
     presets = '|'
 
     # -------------------------------------------------------------------------------
@@ -1173,7 +1148,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
         elif isinstance(value_to_use, tuple):
             return str(value_to_use).lstrip('(').rstrip(')')
         elif isinstance(value_to_use, bool):
-            if value_to_use:
+            if value_to_use:  # not sure why these are set to '0' and '1'
                 return '1'
             else:
                 return '0'
@@ -1230,12 +1205,10 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
     algm_wrapper = _customise_func(algorithm_wrapper, "%sDialog" % algorithm,
                                    signature, "\n\n%s dialog" % algorithm)
 
-    globals()["%sDialog" % algorithm] = algm_wrapper
+    globals()["{}Dialog".format(algorithm)] = algm_wrapper
     # Register aliases
-    for alias in _algm_object.alias().strip().split(' '):
-        alias = alias.strip()
-        if len(alias) > 0:
-            globals()["%sDialog" % alias] = algm_wrapper
+    for alias in _algm_object.alias().strip().split(): # split on whitespace
+        globals()["{}Dialog".format(alias)] = algm_wrapper
 
 # --------------------------------------------------------------------------------------------------
 
@@ -1299,7 +1272,6 @@ def _mockup(plugins):
 
     # Start with the loaded C++ algorithms
     from mantid.api import AlgorithmFactory
-    import os
     cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
     create_fake_functions(cppalgs.keys())
 
