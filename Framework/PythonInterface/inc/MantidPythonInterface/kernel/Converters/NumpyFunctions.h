@@ -57,6 +57,7 @@ PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
                                          Py_intptr_t *dims);
 PyArrayObject *func_PyArray_NewFromDescr(const std::string &datadescr,
                                          const int ndims, Py_intptr_t *dims);
+PyArray_Descr *func_PyArray_Descr(const std::string &datadescr);
 }
 }
 }
