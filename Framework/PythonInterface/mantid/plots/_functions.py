@@ -65,11 +65,13 @@ def _getDistribution(workspace, **kwargs):
 
 
 def _getNormalization(mdworkspace, **kwargs):
+    '''gets the normalization flag of an MDHistoWorkspace'''
     normalization = kwargs.pop('normalization', mdworkspace.displayNormalizationHisto())
     return (normalization,kwargs)
 
 
 def getAxesLabels(workspace):
+    ''' get axis labels from a Workspace2D or an MDHistoWorkspace'''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
@@ -129,11 +131,11 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
 
 
 def _dim2array(d):
-    """
+    '''
     Create a numpy array containing bin centers along the dimension d
     input: d - IMDDimension
     returns: bin boundaries for dimension d
-    """
+    '''
     dmin=d.getMinimum()
     dmax=d.getMaximum()
     return numpy.linspace(dmin,dmax,d.getNBins()+1)
@@ -171,7 +173,10 @@ def _getMDData(workspace,normalization,withError=False):
         if normalization==mantid.api.MDNormalization.NumEventsNormalization:
             err2/=(nev*nev)
         err=numpy.sqrt(err2)
-    return (dimarrays,data.squeeze(),err.squeeze())
+    data=data.squeeze()
+    if err is not None:
+        err=err.squeeze()
+    return (dimarrays,data,err)
 
 
 def _getMDData1D(workspace,normalization):
