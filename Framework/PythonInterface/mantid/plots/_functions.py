@@ -256,6 +256,8 @@ def _getUnevenData(workspace, distribution):
         y.append([yvals[index],yvals[index+1]])
     return(x,y,z)
 
+
+####TODO: delete
 def _getContour(workspace, distribution):
     x = workspace.extractX()
     z = workspace.extractY()
@@ -285,18 +287,25 @@ def plot(axes, workspace, *args, **kwargs):
     line according to the spectrum number unless specified otherwise.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param specNum:   spectrum number to plot
     :param wkspIndex: workspace index to plot
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
 
-    Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`RuntimeError`.
+    For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
+    needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
+    keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
+    dimension
     '''
-    (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
-    (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        (x,y,_)=_getMDData1D(workspace,normalization)
+    else:
+        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
+        (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     _setLabels1D(axes, workspace)
     return axes.plot(x, y, *args, **kwargs)
 
