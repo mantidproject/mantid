@@ -48,8 +48,8 @@ PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
       Types::Core::DateAndTime("1975-01-01T00:00").totalNanoseconds();
 
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
-  PyArrayObject *nparray =
-      func_PyArray_NewFromDescr("M8[ns]", 1, &dims[0]); // datetime64[ns]
+  PyArrayObject *nparray = func_PyArray_NewFromDescr(
+      "M8[ns]", 1, &dims[0]); // datetime64[ns] from 64bit integer
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
     const npy_datetime abstime =
@@ -57,7 +57,7 @@ PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
         UNIX_EPOCH_NS;
     PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
                     PyLong_FromLong(abstime)); // currently works but will break
-                                               // if underlying types change
+                                               // if PyLong is no longer int64_t
   }
   return reinterpret_cast<PyObject *>(nparray);
 }
