@@ -32,8 +32,7 @@ namespace Converters {
 /// Convert to numpy's datetime64. This is panda's name for the function.
 PyObject *to_datetime64(const Types::Core::DateAndTime &dateandtime);
 /// Total nanoseconds since the unix epoch
-npy_datetime
-to_npy_datetime(const Types::Core::DateAndTime &dateandtime);
+npy_datetime to_npy_datetime(const Types::Core::DateAndTime &dateandtime);
 PyArray_Descr *descr_ns();
 
 } // namespace Converters
