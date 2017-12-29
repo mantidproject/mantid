@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -42,22 +43,19 @@ PyObject *clone1D(const std::vector<ElementType> &cvector) {
  */
 template <>
 PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
-
-  // there is a different EPOCH for DateAndTime vs npy_datetime
-  const npy_datetime UNIX_EPOCH_NS =
-      Types::Core::DateAndTime("1975-01-01T00:00").totalNanoseconds();
-
+  // create an empty array
+  PyArray_Descr *descr = Converters::descr_ns();
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
-  PyArrayObject *nparray = func_PyArray_NewFromDescr(
-      "M8[ns]", 1, &dims[0]); // datetime64[ns] from 64bit integer
+  PyArrayObject *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
+          &PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
+
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
-    const npy_datetime abstime =
-        static_cast<npy_datetime>(cvector[i].totalNanoseconds()) -
-        UNIX_EPOCH_NS;
-    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
-                    PyLong_FromLong(abstime)); // currently works but will break
-                                               // if PyLong is no longer int64_t
+    npy_datetime abstime = Converters::to_npy_datetime(cvector[i]);
+    PyArray_SETITEM(
+        nparray, reinterpret_cast<char *>(itemPtr),
+        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr));
   }
   return reinterpret_cast<PyObject *>(nparray);
 }

@@ -1,5 +1,5 @@
 #include "MantidKernel/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include <boost/python/class.hpp>
 #include <boost/python/operators.hpp> // Also provides self
 #include <numpy/arrayobject.h>
@@ -10,12 +10,6 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 using boost::python::arg;
 
-namespace {
-// there is a different EPOCH for DateAndTime vs npy_datetime
-const npy_datetime UNIX_EPOCH_NS =
-    DateAndTime("1975-01-01T00:00").totalNanoseconds();
-}
-
 /** Circumvent a bug in IPython 1.1, which chokes on nanosecond precision
  * datetimes.
  *  Adding a space to the string returned by the C++ method avoids it being
@@ -25,20 +19,6 @@ const npy_datetime UNIX_EPOCH_NS =
 std::string ISO8601StringPlusSpace(DateAndTime &self) {
   // TODO this should cmake check and turn off the behavior
   return self.toISO8601String() + " ";
-}
-
-// for numpy's datetime64. This is panda's name for the function.
-PyObject *to_datetime64(DateAndTime &self) {
-  PyArray_Descr *descr = Converters::Impl::func_PyArray_Descr(
-      "M8[ns]"); // datetime64[ns] from 64bit integer
-
-  // create object
-  npy_datetime abstime =
-      static_cast<npy_datetime>(self.totalNanoseconds()) - UNIX_EPOCH_NS;
-  PyObject *ret =
-      PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
-
-  return ret;
 }
 
 void export_DateAndTime() {
@@ -62,8 +42,10 @@ void export_DateAndTime() {
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
       .def("setToMinimum", &DateAndTime::setToMinimum, arg("self"))
-      .def("to_datetime64", &to_datetime64, arg("self"),
-           "Convert to numpy.datetime64")
+      .def("to_datetime64", &Mantid::PythonInterface::Converters::to_datetime64,
+           arg("self"),
+           "Convert to numpy.datetime64") // this is panda's name for the
+                                          // function
       .def("__str__", &ISO8601StringPlusSpace, arg("self"))
       .def("__long__", &DateAndTime::totalNanoseconds, arg("self"))
       .def("__int__", &DateAndTime::totalNanoseconds, arg("self"))
