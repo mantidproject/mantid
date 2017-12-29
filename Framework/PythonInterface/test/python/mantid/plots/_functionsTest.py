@@ -6,7 +6,7 @@ import mantid.plots._functions as funcs
 import mantid.api
 import numpy as np
 from mantid.kernel import config
-
+import matplotlib.pyplot as plt
 class PlotsFunctionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -228,6 +228,13 @@ class PlotsFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y[1],np.array([15,25]))
         np.testing.assert_allclose(z[0],np.array([1,2,3]))
         np.testing.assert_allclose(z[1],np.array([1,2,3,4]))
+
+    def test_1dplots(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax,self.ws2d_histo,'rs',specNum=1)
+        funcs.plot(ax,self.ws2d_histo,specNum=2,linewidth=6)
+        funcs.plot(ax,self.ws_MD_1d,'bs')
+
 
 if __name__ == '__main__':
     unittest.main()
