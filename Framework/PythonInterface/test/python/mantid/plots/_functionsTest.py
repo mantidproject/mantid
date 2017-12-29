@@ -1,52 +1,95 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import CreateWorkspace,DeleteWorkspace,CreateMDHistoWorkspace
+from mantid.simpleapi import CreateWorkspace,DeleteWorkspace,CreateMDHistoWorkspace, ConjoinWorkspaces
 import mantid.plots._functions as funcs
 import mantid.api
 import numpy as np
-from mantid.kernel import logger,config
+from mantid.kernel import config
 
 class PlotsFunctionsTest(unittest.TestCase):
-
-    def setUp(self):
-        self.g1da=config['graph1d.autodistribution']
+    @classmethod
+    def setUpClass(cls):
+        cls.g1da=config['graph1d.autodistribution']
         config['graph1d.autodistribution']='On'
-        dataX=[10,20,30,10,20,30]
-        dataY=[2,3,4,5]
-        dataE=[1,2,3,4]
-        self.ws2d_histo = CreateWorkspace(DataX=dataX,
-                                          DataY=dataY,
-                                          DataE=dataE,
-                                          NSpec=2,
-                                          Distribution=True,
-                                          UnitX='Wavelength',
-                                          VerticalAxisUnit='DeltaE',
-                                          VerticalAxisValues=[4,6],
-                                          OutputWorkspace='ws2d_histo')
-        dataX_1=[1,2]
-        dataY_1=[1,2]
-        self.ws1d_point = CreateWorkspace(DataX=dataX_1,
-                                          DataY=dataY_1,
-                                          NSpec=1,
-                                          Distribution=False,
-                                          OutputWorkspace='ws1d_point')
-        self.ws_MD_2d = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(25),
-                                               ErrorInput=range(25),
-                                               NumberOfEvents=10*np.ones(25),
-                                               NumberOfBins='5,5,1',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_2d')
+        cls.ws2d_histo = CreateWorkspace(DataX=[10,20,30,10,20,30],
+                                         DataY=[2,3,4,5],
+                                         DataE=[1,2,3,4],
+                                         NSpec=2,
+                                         Distribution=True,
+                                         UnitX='Wavelength',
+                                         VerticalAxisUnit='DeltaE',
+                                         VerticalAxisValues=[4,6,8],
+                                         OutputWorkspace='ws2d_histo')
+        cls.ws2d_point = CreateWorkspace(DataX=[1,2,3,4,1,2,3,4,1,2,3,4],
+                                         DataY=[2]*12,
+                                         NSpec=3,
+                                         OutputWorkspace='ws2d_point')
+        cls.ws1d_point = CreateWorkspace(DataX=[1,2],
+                                         DataY=[1,2],
+                                         NSpec=1,
+                                         Distribution=False,
+                                         OutputWorkspace='ws1d_point')
+        cls.ws2d_histo_rag = CreateWorkspace(DataX=[1,2,3,4,5,2,4,6,8,10],
+                                             DataY=[2]*8,
+                                             NSpec=2,
+                                             VerticalAxisUnit='DeltaE',
+                                             VerticalAxisValues=[5,7,9],
+                                             OutputWorkspace='ws2d_histo_rag')
+        cls.ws2d_point_rag = CreateWorkspace(DataX=[1,2,3,4,2,4,6,8],
+                                             DataY=[2]*8,
+                                             NSpec=2,
+                                             OutputWorkspace='ws2d_point_rag')
+        cls.ws_MD_2d = CreateMDHistoWorkspace(Dimensionality=3,
+                                              Extents='-3,3,-10,10,-1,1',
+                                              SignalInput=range(25),
+                                              ErrorInput=range(25),
+                                              NumberOfEvents=10*np.ones(25),
+                                              NumberOfBins='5,5,1',
+                                              Names='Dim1,Dim2,Dim3',
+                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                              OutputWorkspace='ws_MD_2d')
+        cls.ws_MD_1d = CreateMDHistoWorkspace(Dimensionality=3,
+                                              Extents='-3,3,-10,10,-1,1',
+                                              SignalInput=range(5),
+                                              ErrorInput=range(5),
+                                              NumberOfEvents=10*np.ones(5),
+                                              NumberOfBins='1,5,1',
+                                              Names='Dim1,Dim2,Dim3',
+                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                              OutputWorkspace='ws_MD_1d')
+        cls.ws2d_point_uneven=CreateWorkspace(DataX=[10,20,30],
+                                              DataY=[1,2,3],
+                                              NSpec=1,
+                                              OutputWorkspace='ws2d_point_uneven')
+        wp=CreateWorkspace(DataX=[15,25,35,45],DataY=[1,2,3,4],NSpec=1)
+        ConjoinWorkspaces(cls.ws2d_point_uneven,wp,CheckOverlapping=False)
+        cls.ws2d_point_uneven=mantid.mtd['ws2d_point_uneven']
+        cls.ws2d_histo_uneven=CreateWorkspace(DataX=[10,20,30,40],
+                                              DataY=[1,2,3],
+                                              NSpec=1,
+                                              OutputWorkspace='ws2d_histo_uneven')
+        wp=CreateWorkspace(DataX=[15,25,35,45,55],DataY=[1,2,3,4],NSpec=1)
+        ConjoinWorkspaces(cls.ws2d_histo_uneven,wp,CheckOverlapping=False)
+        cls.ws2d_histo_uneven=mantid.mtd['ws2d_histo_uneven']
+        newYAxis=mantid.api.NumericAxis.create(3)
+        newYAxis.setValue(0,10)
+        newYAxis.setValue(1,15)
+        newYAxis.setValue(2,25)
+        cls.ws2d_histo_uneven.replaceAxis(1,newYAxis)
 
-    def tearDown(self):
-        config['graph1d.autodistribution']=self.g1da
+    @classmethod
+    def tearDownClass(cls):
+        config['graph1d.autodistribution']=cls.g1da
         DeleteWorkspace('ws2d_histo')
+        DeleteWorkspace('ws2d_point')
         DeleteWorkspace('ws1d_point')
         DeleteWorkspace('ws_MD_2d')
-
+        DeleteWorkspace('ws_MD_1d')
+        DeleteWorkspace('ws2d_histo_rag')
+        DeleteWorkspace('ws2d_point_rag')
+        DeleteWorkspace('ws2d_point_uneven')
+        DeleteWorkspace('ws2d_histo_uneven')
 
     def test_getWkspIndexDistAndLabel(self):
         #fail case
@@ -111,7 +154,80 @@ class PlotsFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(data,np.arange(25).reshape(5,5).transpose()*0.1,atol=1e-10)
 
     def test_getMDData1D(self):
-        pass
+        coords,data,err=funcs._getMDData1D(self.ws_MD_1d,mantid.api.MDNormalization.NumEventsNormalization)
+        np.testing.assert_allclose(coords,np.array([-8,-4,0,4,8]),atol=1e-10)
+
+    def test_getMatrix2DData_rect(self):
+        #contour from aligned point data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_point,True,histogram2D=False)
+        np.testing.assert_allclose(x,np.array([[1,2,3,4],[1,2,3,4],[1,2,3,4]]))
+        np.testing.assert_allclose(y,np.array([[1,1,1,1],[2,2,2,2],[3,3,3,3]]))
+        #mesh from aligned point data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_point,True,histogram2D=True)
+        np.testing.assert_allclose(x,np.array([[0.5,1.5,2.5,3.5,4.5],[0.5,1.5,2.5,3.5,4.5],[0.5,1.5,2.5,3.5,4.5],[0.5,1.5,2.5,3.5,4.5]]))
+        np.testing.assert_allclose(y,np.array([[0.5,0.5,0.5,0.5,0.5],[1.5,1.5,1.5,1.5,1.5],[2.5,2.5,2.5,2.5,2.5],[3.5,3.5,3.5,3.5,3.5]]))        
+        #contour from aligned histo data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_histo,True,histogram2D=False)
+        np.testing.assert_allclose(x,np.array([[15,25],[15,25]]))
+        np.testing.assert_allclose(y,np.array([[5,5],[7,7]]))
+        #mesh from aligned histo data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_histo,True,histogram2D=True)
+        np.testing.assert_allclose(x,np.array([[10,20,30],[10,20,30],[10,20,30]]))
+        np.testing.assert_allclose(y,np.array([[4,4,4],[6,6,6],[8,8,8]]))
+
+    def test_getMatrix2DData_rag(self):
+        #contour from ragged point data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_point_rag,True,histogram2D=False)
+        np.testing.assert_allclose(x,np.array([[1,2,3,4],[2,4,6,8]]))
+        np.testing.assert_allclose(y,np.array([[1,1,1,1],[2,2,2,2]]))
+        #contour from ragged histo data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_histo_rag,True,histogram2D=False)
+        np.testing.assert_allclose(x,np.array([[1.5,2.5,3.5,4.5],[3,5,7,9]]))
+        np.testing.assert_allclose(y,np.array([[6,6,6,6],[8,8,8,8]]))
+        #mesh from ragged point data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_point_rag,True,histogram2D=True)
+        np.testing.assert_allclose(x,np.array([[0.5,1.5,2.5,3.5,4.5],[1,3,5,7,9],[1,3,5,7,9]]))
+        np.testing.assert_allclose(y,np.array([[0.5,0.5,0.5,0.5,0.5],[1.5,1.5,1.5,1.5,1.5],[2.5,2.5,2.5,2.5,2.5]]))
+        #mesh from ragged histo data
+        x,y,z=funcs._getMatrix2DData(self.ws2d_histo_rag,True,histogram2D=True)
+        np.testing.assert_allclose(x,np.array([[1,2,3,4,5],[2,4,6,8,10],[2,4,6,8,10]]))
+        np.testing.assert_allclose(y,np.array([[5,5,5,5,5],[7,7,7,7,7],[9,9,9,9,9]]))
+        #check that fails for uneven data
+        self.assertRaises(ValueError,funcs._getMatrix2DData, self.ws2d_point_uneven,True)
+
+    def test_getUnevenData(self):
+        #even points
+        x,y,z=funcs._getUnevenData(self.ws2d_point_rag,True)
+        np.testing.assert_allclose(x[0],np.array([0.5,1.5,2.5,3.5,4.5]))
+        np.testing.assert_allclose(x[1],np.array([1,3,5,7,9]))
+        np.testing.assert_allclose(y[0],np.array([0.5,1.5]))
+        np.testing.assert_allclose(y[1],np.array([1.5,2.5]))
+        np.testing.assert_allclose(z[0],np.array([2,2,2,2]))
+        np.testing.assert_allclose(z[1],np.array([2,2,2,2]))
+        #even histo
+        x,y,z=funcs._getUnevenData(self.ws2d_histo_rag,True)
+        np.testing.assert_allclose(x[0],np.array([1,2,3,4,5]))
+        np.testing.assert_allclose(x[1],np.array([2,4,6,8,10]))
+        np.testing.assert_allclose(y[0],np.array([5,7]))
+        np.testing.assert_allclose(y[1],np.array([7,9]))
+        np.testing.assert_allclose(z[0],np.array([2,2,2,2]))
+        np.testing.assert_allclose(z[1],np.array([2,2,2,2]))
+        #uneven points
+        x,y,z=funcs._getUnevenData(self.ws2d_point_uneven,True)
+        np.testing.assert_allclose(x[0],np.array([5,15,25,35]))
+        np.testing.assert_allclose(x[1],np.array([10,20,30,40,50]))
+        np.testing.assert_allclose(y[0],np.array([0.5,1.5]))
+        np.testing.assert_allclose(y[1],np.array([1.5,2.5]))
+        np.testing.assert_allclose(z[0],np.array([1,2,3]))
+        np.testing.assert_allclose(z[1],np.array([1,2,3,4]))
+        #uneven histo
+        x,y,z=funcs._getUnevenData(self.ws2d_histo_uneven,True)
+        np.testing.assert_allclose(x[0],np.array([10,20,30,40]))
+        np.testing.assert_allclose(x[1],np.array([15,25,35,45,55]))
+        np.testing.assert_allclose(y[0],np.array([10,15]))
+        np.testing.assert_allclose(y[1],np.array([15,25]))
+        np.testing.assert_allclose(z[0],np.array([1,2,3]))
+        np.testing.assert_allclose(z[1],np.array([1,2,3,4]))
 
 if __name__ == '__main__':
     unittest.main()

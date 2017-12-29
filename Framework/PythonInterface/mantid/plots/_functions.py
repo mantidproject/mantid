@@ -215,7 +215,7 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
         if histogram2D:
             if len(y)==z.shape[0]:
                 y = boundaries_from_points(y)
-            x = numpy.vstack((x[0],x))
+            x = numpy.vstack((x,x[-1]))
         else:
             x = .5*(x[:,0:-1]+x[:,1:])
             if len(y)==z.shape[0]+1:
@@ -223,17 +223,38 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
     else:
         if histogram2D:
             if _commonX(x):
-                x=numpy.broadcast(boundaries_from_points(x[0]),(z.shape[0]+1,z.shape[1]+1))
-                if len(y)==z.shape[0]:
-                    y=boundaries_from_points(y)
+                x=numpy.broadcast_to(numpy.expand_dims(boundaries_from_points(x[0]),0),(z.shape[0]+1,z.shape[1]+1))
             else:
-                raise ValueError('Spectra have different bin boundaries')
+                x = numpy.vstack((x,x[-1]))
+                x = numpy.array([boundaries_from_points(xi) for xi in x])
+            if len(y)==z.shape[0]:
+                y=boundaries_from_points(y)
         else:
             if len(y)==z.shape[0]+1:
                 y=points_from_boundaries(y)
     y = numpy.broadcast_to(numpy.expand_dims(y,1),x.shape)
     return (x,y,z)
 
+def _getUnevenData(workspace, distribution):
+    z=[]
+    x=[]
+    y=[]
+    nhist=workspace.getNumberHistograms()
+    yvals=workspace.getAxis(1).extractValues()
+    if len(yvals)==(nhist):
+        yvals=boundaries_from_points(yvals)
+    for index in range(nhist):
+        xvals=workspace.readX(index)
+        zvals=workspace.readY(index)
+        if workspace.isHistogramData():
+            if not distribution:
+                zvals = zvals / (xvals[1:] - xvals[0:-1])
+        else:
+            xvals=boundaries_from_points(xvals)
+        z.append(zvals)
+        x.append(xvals)
+        y.append([yvals[index],yvals[index+1]])
+    return(x,y,z)
 
 def _getContour(workspace, distribution):
     x = workspace.extractX()
