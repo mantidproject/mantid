@@ -87,7 +87,6 @@ QWorkspaceDockView::~QWorkspaceDockView() {}
 void QWorkspaceDockView::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
 
 void QWorkspaceDockView::setupWidgetLayout() {
-  QFrame *f = new QFrame(this);
 
   m_tree = new MantidTreeWidget(this, m_mantidDisplayModel);
   m_tree->setHeaderLabel("Workspaces");
@@ -115,12 +114,12 @@ void QWorkspaceDockView::setupWidgetLayout() {
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
   QVBoxLayout *layout = new QVBoxLayout();
-  f->setLayout(layout);
   layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
   layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
+  this->setLayout(layout);
 }
 
 void QWorkspaceDockView::setupLoadButtonMenu() {
