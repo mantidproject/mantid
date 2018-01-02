@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_MANTIDWIDGETS_QWORKSPACEWIDGET_H
-#define MANTIDQT_MANTIDWIDGETS_QWORKSPACEWIDGET_H
+#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
+#define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
@@ -72,15 +72,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QWorkspaceWidget
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
     : public QWidget,
       public IWorkspaceDockView,
-      public boost::enable_shared_from_this<QWorkspaceWidget> {
+      public boost::enable_shared_from_this<WorkspaceTreeWidget> {
   Q_OBJECT
 public:
-  explicit QWorkspaceWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+  explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
                             QWidget *parent = 0);
-  ~QWorkspaceWidget();
+  ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
   void init() override;
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
@@ -282,4 +282,4 @@ signals:
 };
 }
 }
-#endif // MANTIDQT_MANTIDWIDGETS_QWORKSPACEWIDGET_H
+#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

@@ -47,7 +47,7 @@
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceWidget.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -232,7 +232,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-  m_exploreMantid = boost::make_shared<QWorkspaceWidget>(this);
+  m_exploreMantid = boost::make_shared<WorkspaceTreeWidget>(this);
   m_exploreMantid->init();
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
