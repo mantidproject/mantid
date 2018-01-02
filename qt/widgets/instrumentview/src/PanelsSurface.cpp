@@ -180,7 +180,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   info->id = bankId;
   // record the first detector index of the bank
   info->startDetectorIndex = m_unwrappedDetectors.size();
-  int nelem = detectors.size();
+  auto nelem = detectors.size();
   m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
 
   // keep reference position on the bank's plane
@@ -284,9 +284,8 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
-        // TODO: Replace somehow with componentInfo name method.
-        /*g_log.warning() << "Assembly " << componentInfo->name(rootIndex)
-        << " isn't flat.\n";*/
+        g_log.warning() << "Assembly " << componentInfo.name(rootIndex)
+                        << " isn't flat.\n";
         break;
       }
     }
@@ -318,7 +317,7 @@ PanelsSurface::findFlatPanels(size_t rootIndex,
 }
 
 void PanelsSurface::constructFromComponentInfo() {
-  const auto componentInfo = m_instrActor->getComponentInfo();
+  const auto &componentInfo = m_instrActor->getComponentInfo();
   std::vector<bool> visited(componentInfo.size(), false);
 
   for (size_t i = 0; i < componentInfo.size()-1; ++i) {
@@ -378,11 +377,10 @@ void PanelsSurface::addDetector(size_t detIndex,
   Mantid::detid_t detid = detectorInfo.detectorIDs()[detIndex];
   m_detector2bankMap[detid] = index;
   // get the colour
-  unsigned char color[3];
-  m_instrActor->getColor(detid).getUB3(&color[0]);
-  UnwrappedDetector udet(
-      color[0], color[1], color[2], detid, pos, detectorInfo.rotation(detIndex),
-      componentInfo.scaleFactor(detIndex), componentInfo.shape(detIndex));
+  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detid, pos,
+                         detectorInfo.rotation(detIndex),
+                         componentInfo.scaleFactor(detIndex),
+                         componentInfo.shape(detIndex));
   // apply bank's rotation
   pos -= refPos;
   rotation.rotate(pos);

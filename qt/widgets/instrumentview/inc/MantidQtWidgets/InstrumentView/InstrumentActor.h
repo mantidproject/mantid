@@ -159,6 +159,8 @@ public:
   const std::vector<Mantid::detid_t> &getAllDetIDs() const;
   /// Get displayed color of a detector by its detector ID.
   GLColor getColor(Mantid::detid_t id) const;
+  /// Get displayed color of a detector by its index.
+  GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector ID.
   size_t getWorkspaceIndex(Mantid::detid_t id) const;
   /// Get the integrated counts of a detector by its detector ID.
