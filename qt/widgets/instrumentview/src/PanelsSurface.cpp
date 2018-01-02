@@ -377,7 +377,7 @@ void PanelsSurface::addDetector(size_t detIndex,
   Mantid::detid_t detid = detectorInfo.detectorIDs()[detIndex];
   m_detector2bankMap[detid] = index;
   // get the colour
-  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detid, pos,
+  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detid, detIndex, pos,
                          detectorInfo.rotation(detIndex),
                          componentInfo.scaleFactor(detIndex),
                          componentInfo.shape(detIndex));

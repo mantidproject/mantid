@@ -117,8 +117,8 @@ void RotationSurface::init() {
                                   auto shape = componentInfo.shape(i);
                                   // Create the unwrapped shape
                                   UnwrappedDetector udet(
-                                      m_instrActor->getColor(i), id, pos, rot,
-                                      scaleFactor, shape);
+                                      m_instrActor->getColor(i), id, i, pos,
+                                      rot, scaleFactor, shape);
                                   // Calculate its position/size in UV
                                   // coordinates
                                   this->calcUV(udet, rpos);
