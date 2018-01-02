@@ -750,6 +750,13 @@ GLColor InstrumentActor::getColor(Mantid::detid_t id) const {
   }
 }
 
+GLColor InstrumentActor::getColor(size_t index) const {
+  if (index <= m_colors.size() - 1)
+    return m_colors.at(index);
+
+  return m_colors.front();
+}
+
 void InstrumentActor::draw(bool picking) const {
   if (std::none_of(m_isCompVisible.cbegin(), m_isCompVisible.cend(),
                    [](bool visible) { return visible; }))

@@ -239,12 +239,14 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 */
 void UnwrappedSurface::setColor(int index, bool picking) const {
   if (picking) {
-    GLColor c = GLActor::makePickColor(index);
+    auto c = GLActor::makePickColor(index);
     unsigned char r, g, b;
     c.get(r, g, b);
     glColor3ub(r, g, b);
   } else {
-    glColor3ubv(&m_unwrappedDetectors[index].color[0]);
+    unsigned char col[3];
+    m_unwrappedDetectors[index].color.getUB3(&col[0]);
+    glColor3ub(col[0], col[1], col[2]);
   }
 }
 
@@ -389,11 +391,7 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
 void UnwrappedSurface::changeColorMap() {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    unsigned char color[3];
-    m_instrActor->getColor(udet.detID).getUB3(&color[0]);
-    udet.color[0] = color[0];
-    udet.color[1] = color[1];
-    udet.color[2] = color[2];
+    udet.color = m_instrActor->getColor(udet.detID);
   }
 }
 
@@ -522,8 +520,8 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
       c.get(r, g, b);
       color = QColor(r, g, b);
     } else {
-      auto c = &m_unwrappedDetectors[index].color[0];
-      color = QColor(c[0], c[1], c[2]);
+      auto c = m_unwrappedDetectors[index].color;
+      color = QColor(c.red(), c.green(), c.blue());
     }
 
     paint.fillRect(u - iw / 2, v - ih / 2, iw, ih, color);

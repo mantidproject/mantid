@@ -3,6 +3,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include <QCursor>
 #include <QMessageBox>
@@ -79,8 +80,8 @@ void RotationSurface::init() {
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
-  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
-
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  const auto &componentInfo = m_instrActor->getComponentInfo();
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
@@ -93,13 +94,8 @@ void RotationSurface::init() {
                             try {
                               size_t i = size_t(ii);
 
-                              unsigned char color[3];
-                              Mantid::detid_t id = m_instrActor->getDetID(i);
-
+                              auto id = m_instrActor->getDetID(i);
                               try {
-                                auto &det =
-                                    m_instrActor->getDetectorByDetID(id);
-
                                 if (detectorInfo.isMonitor(
                                         detectorInfo.indexOf(id)) ||
                                     (id < 0)) {
@@ -109,19 +105,23 @@ void RotationSurface::init() {
                                   m_unwrappedDetectors[i] = UnwrappedDetector();
                                 } else {
                                   // A real detector.
-                                  m_instrActor->getColor(id).getUB3(&color[0]);
-
                                   // Position, relative to origin
                                   // Mantid::Kernel::V3D pos = det->getPos() -
                                   // m_pos;
-                                  Mantid::Kernel::V3D pos =
+                                  Mantid::Kernel::V3D rpos =
                                       m_instrActor->getDetPos(i) - m_pos;
 
+                                  auto pos = detectorInfo.position(i);
+                                  auto rot = detectorInfo.rotation(i);
+                                  auto scaleFactor = componentInfo.scaleFactor(i);
+                                  auto shape = componentInfo.shape(i);
                                   // Create the unwrapped shape
-                                  UnwrappedDetector udet(&color[0], det);
+                                  UnwrappedDetector udet(
+                                      m_instrActor->getColor(i), id, pos, rot,
+                                      scaleFactor, shape);
                                   // Calculate its position/size in UV
                                   // coordinates
-                                  this->calcUV(udet, pos);
+                                  this->calcUV(udet, rpos);
 
                                   m_unwrappedDetectors[i] = udet;
                                 } // is a real detector
