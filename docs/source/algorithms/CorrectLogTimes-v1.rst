@@ -42,9 +42,9 @@ Output:
 
 .. testoutput:: CorrectLogTimes
 
-    Original start time for 'proton_charge': 2010-03-25T16:08:37
+    Original start time for 'proton_charge': 2010-03-25T16:08:37.000000000
     Original start time for 'Speed5': 2010-03-25T16:09:27.780000000
-    Corrected start time for 'Speed5': 2010-03-25T16:08:37
+    Corrected start time for 'Speed5': 2010-03-25T16:08:37.000000000
 
 .. categories::
 
