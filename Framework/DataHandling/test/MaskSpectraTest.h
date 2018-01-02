@@ -24,7 +24,7 @@ std::unique_ptr<Workspace2D> makeWorkspace() {
   ws->setHistogram(1, Points{1.1}, Counts{2.1});
   ws->setHistogram(2, Points{1.2}, Counts{2.2});
   ws->setHistogram(3, Points{1.3}, Counts{2.3});
-  return std::move(ws);
+  return ws;
 }
 
 void checkWorkspace(const MatrixWorkspace &ws) {
