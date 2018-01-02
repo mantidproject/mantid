@@ -103,7 +103,8 @@ public:
   }
 
   std::vector<Mantid::API::IMDIterator *> createIterators(
-      size_t = 1, Mantid::Geometry::MDImplicitFunction * = NULL) const override {
+      size_t = 1,
+      Mantid::Geometry::MDImplicitFunction * = NULL) const override {
     throw std::runtime_error("Not Implemented");
   }
 
@@ -113,9 +114,9 @@ public:
     return 0;
   }
 
-  Mantid::signal_t
-  getSignalWithMaskAtCoord(const Mantid::coord_t *,
-                           const Mantid::API::MDNormalization &) const override {
+  Mantid::signal_t getSignalWithMaskAtCoord(
+      const Mantid::coord_t *,
+      const Mantid::API::MDNormalization &) const override {
     return 0;
   }
 
@@ -123,7 +124,7 @@ public:
 
   ~MockIMDWorkspace() override {}
 
-  private:
+private:
   MockIMDWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
   }
