@@ -1058,7 +1058,7 @@ bool QWorkspaceDockView::hasUBMatrix(const std::string &wsName) {
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
   IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
   if (ws && wsIMD) {
-    bool hasUB = wsIMD->hasOrientedLattice();
+    hasUB = wsIMD->hasOrientedLattice();
   }
   return hasUB;
 }
