@@ -23,6 +23,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/DateAndTime.h"
+#include <pyport.h>
 #include <numpy/ndarraytypes.h>
 
 namespace Mantid {
