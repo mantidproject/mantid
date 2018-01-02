@@ -23,9 +23,9 @@ Mantid::Kernel::Logger treelog("MantidTreeWidget");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MantidTreeWidget::MantidTreeWidget(WorkspaceTreeWidget *w,
-                                   MantidDisplayBase *mui)
-    : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
+MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui,
+								   QWidget *parent)
+    : m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);

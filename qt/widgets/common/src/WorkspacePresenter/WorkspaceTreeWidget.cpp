@@ -87,7 +87,7 @@ void WorkspaceTreeWidget::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
 
 void WorkspaceTreeWidget::setupWidgetLayout() {
 
-  m_tree = new MantidTreeWidget(this, m_mantidDisplayModel);
+  m_tree = new MantidTreeWidget(m_mantidDisplayModel, this);
   m_tree->setHeaderLabel("Workspaces");
 
   FlowLayout *buttonLayout = new FlowLayout();
