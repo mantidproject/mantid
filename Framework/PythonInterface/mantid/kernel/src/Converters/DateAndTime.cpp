@@ -7,7 +7,7 @@ using Mantid::PythonInterface::Converters::Impl::func_PyArray_Descr;
 namespace {
 // there is a different EPOCH for DateAndTime vs npy_datetime
 const npy_datetime UNIX_EPOCH_NS =
-    DateAndTime("1975-01-01T00:00").totalNanoseconds();
+    DateAndTime("1970-01-01T00:00").totalNanoseconds();
 
 /* datetime64[ns] from 64bit integer - numpy's interface requires this to be
  * non-const
