@@ -8,17 +8,20 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(0) {
+    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(0),
+      detIndex(0) {
   color = GLColor(0, 0, 0);
 }
 
 UnwrappedDetector::UnwrappedDetector(GLColor color, Mantid::detid_t detID,
+                                     size_t detIndex,
                                      const Mantid::Kernel::V3D &pos,
                                      const Mantid::Kernel::Quat &rot,
                                      const Mantid::Kernel::V3D &scaleFactor,
                                      boost::shared_ptr<const IObject> shape)
     : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(detID),
-      position(pos), rotation(rot), scaleFactor(scaleFactor) {
+      detIndex(detIndex), position(pos), rotation(rot),
+      scaleFactor(scaleFactor) {
   this->color = color;
   this->shape = shape;
 }
@@ -39,6 +42,7 @@ operator=(const UnwrappedDetector &other) {
   uscale = other.uscale;
   vscale = other.vscale;
   detID = other.detID;
+  detIndex = other.detIndex;
   position = other.position;
   rotation = other.rotation;
   shape = other.shape;

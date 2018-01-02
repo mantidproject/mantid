@@ -739,17 +739,6 @@ void InstrumentActor::showGuides(bool on) {
   m_showGuides = on;
 }
 
-GLColor InstrumentActor::getColor(Mantid::detid_t id) const {
-  try {
-    size_t i = getDetectorInfo().indexOf(id);
-    return m_colors.at(i);
-  } catch (NotFoundError &) {
-    // Return the first color if the detector is not represented in the
-    // workspace
-    return m_colors.front();
-  }
-}
-
 GLColor InstrumentActor::getColor(size_t index) const {
   if (index <= m_colors.size() - 1)
     return m_colors.at(index);

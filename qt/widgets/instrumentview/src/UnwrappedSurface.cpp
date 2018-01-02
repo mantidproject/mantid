@@ -391,7 +391,7 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
 void UnwrappedSurface::changeColorMap() {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    udet.color = m_instrActor->getColor(udet.detID);
+    udet.color = m_instrActor->getColor(udet.detIndex);
   }
 }
 

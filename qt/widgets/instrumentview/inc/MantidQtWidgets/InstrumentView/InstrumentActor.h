@@ -157,8 +157,6 @@ public:
   const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
   /// Get a vector of IDs of all detectors in the instrument.
   const std::vector<Mantid::detid_t> &getAllDetIDs() const;
-  /// Get displayed color of a detector by its detector ID.
-  GLColor getColor(Mantid::detid_t id) const;
   /// Get displayed color of a detector by its index.
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector ID.
