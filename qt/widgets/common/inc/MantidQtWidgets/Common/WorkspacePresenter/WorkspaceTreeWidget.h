@@ -79,7 +79,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
   Q_OBJECT
 public:
   explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
-                            QWidget *parent = 0);
+                            QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
   void init() override;
