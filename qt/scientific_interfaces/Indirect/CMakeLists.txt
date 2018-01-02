@@ -1,6 +1,6 @@
 set ( SRC_FILES
 	AbsorptionCorrections.cpp
-	ApplyPaalmanPings.cpp
+	ApplyAbsorptionCorrections.cpp
 	CalculatePaalmanPings.cpp
 	ContainerSubtraction.cpp
 	ConvFit.cpp
@@ -47,7 +47,7 @@ set ( SRC_FILES
 set ( INC_FILES
     DllConfig.h
 	AbsorptionCorrections.h
-	ApplyPaalmanPings.h
+	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
 	ContainerSubtraction.h
 	ConvFit.h
@@ -91,7 +91,7 @@ set ( INC_FILES
 
 set ( MOC_FILES
     AbsorptionCorrections.h
-    ApplyPaalmanPings.h
+    ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
     ConvFit.h
@@ -135,7 +135,7 @@ set ( MOC_FILES
 
 set ( UI_FILES
    AbsorptionCorrections.ui
-   ApplyPaalmanPings.ui
+   ApplyAbsorptionCorrections.ui
    CalculatePaalmanPings.ui
    ContainerSubtraction.ui
    ConvFit.ui
