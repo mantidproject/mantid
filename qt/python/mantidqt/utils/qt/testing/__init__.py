@@ -35,26 +35,16 @@ QAPP = None
 def requires_qapp(cls):
     """
     Converts a unittest.TestCase class to a GUI test case by wrapping all
-    test methods in gui_test decorator. Usage:
+    test methods in a decorator that makes sure that a QApplication is created.
+    Qt widgets don't work without QApplication.
+    Usage:
 
-        @gui_test_case
+        @requires_qapp
         class MyWidgetTest(unittest.TestCase):
 
             def test_something(self):
                 ...
 
-            def test_something_else(self):
-                ...
-
-    Which is equivalent to the definition:
-
-        class MyWidgetTest(unittest.TestCase):
-
-            @gui_test
-            def test_something(self):
-                ...
-
-            @gui_test
             def test_something_else(self):
                 ...
 

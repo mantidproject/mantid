@@ -1,17 +1,28 @@
+#  This file is part of the mantid workbench.
+#
+#  Copyright (C) 2017 mantidproject
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 
 from qtpy.QtWidgets import QWidget, QLineEdit
 
-from mantid.api import PythonAlgorithm
+from mantid.api import AlgorithmManager, AlgorithmFactory, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty
-from mantid.simpleapi import AlgorithmManager, AlgorithmFactory
-from mantidqt.utils.qt.plugins import setup_library_paths
-from mantidqt.utils.qt.testing import gui_test_case
+from mantidqt.utils.qt.testing import requires_qapp
 
 from _widgetscoreqt5 import AlgorithmDialog, GenericDialog, InterfaceManager
-
-
-setup_library_paths()
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
@@ -29,7 +40,7 @@ class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
         pass
 
 
-@gui_test_case
+@requires_qapp
 class TestAlgorithmDialog(unittest.TestCase):
 
     def setUp(self):
