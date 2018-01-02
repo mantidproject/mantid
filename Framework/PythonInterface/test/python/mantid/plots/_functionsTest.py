@@ -7,6 +7,8 @@ import mantid.api
 import numpy as np
 from mantid.kernel import config
 import matplotlib.pyplot as plt
+
+
 class PlotsFunctionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -96,23 +98,35 @@ class PlotsFunctionsTest(unittest.TestCase):
         self.assertRaises(RuntimeError,funcs._getWkspIndexDistAndLabel,self.ws2d_histo)
         #get info from a 2d workspace
         index, dist, kwargs = funcs._getWkspIndexDistAndLabel(self.ws2d_histo,specNum=2)
-        self.assertEquals(index,1)
+        self.assertEqual(index,1)
         self.assertTrue(dist)
-        self.assertEquals(kwargs['label'],'spec 2')
+        self.assertEqual(kwargs['label'],'spec 2')
         #get info from default spectrum in the 1d case
         index, dist, kwargs = funcs._getWkspIndexDistAndLabel(self.ws1d_point)
-        self.assertEquals(index,0)
+        self.assertEqual(index,0)
         self.assertFalse(dist)
-        self.assertEquals(kwargs['label'],'spec 1')
+        self.assertEqual(kwargs['label'],'spec 1')
 
     def test_getAxesLabels(self):
         axs=funcs.getAxesLabels(self.ws2d_histo)
-        self.assertEquals(axs,('', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
+        self.assertEqual(axs,('', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
 
     def test_getAxesLabeld_MDWS(self):
         axs=funcs.getAxesLabels(self.ws_MD_2d)
         #should get the first two dimension labels only
-        self.assertEquals(axs,('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)'))
+        self.assertEqual(axs,('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)'))
+
+    def test_getDataUnevenFlag(self):
+        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_rag, AxisAligned=True, other_kwarg=1)
+        self.assertTrue(flag)
+        self.assertEquals(kwargs,{'other_kwarg':1})
+        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_rag, other_kwarg=2)
+        self.assertFalse(flag)
+        self.assertEquals(kwargs,{'other_kwarg':2})
+        flag,kwargs=funcs._getDataUnevenFlag(self.ws2d_histo_uneven, AxisAligned=False, other_kwarg=3)
+        self.assertTrue(flag)
+        self.assertEquals(kwargs,{'other_kwarg':3})
+
 
     def test_boundaries_from_points(self):
         centers=np.array([1.,2.,4.,8.])
@@ -130,28 +144,28 @@ class PlotsFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal(x,np.array([15.,25.])))
         self.assertTrue(np.array_equal(y,np.array([.4,.5])))
         self.assertTrue(np.array_equal(dy,np.array([.3,.4])))
-        self.assertEquals(dx,None)
+        self.assertEqual(dx,None)
         #get data not divided by bin width
         x,y,dy,dx=funcs._getSpectrum(self.ws2d_histo, 0, True, withDy=True, withDx=True)
         self.assertTrue(np.array_equal(x,np.array([15.,25.])))
         self.assertTrue(np.array_equal(y,np.array([2,3])))
         self.assertTrue(np.array_equal(dy,np.array([1,2])))
-        self.assertEquals(dx,None)
+        self.assertEqual(dx,None)
         #fail case - try to find spectrum out of range
         self.assertRaises(RuntimeError,funcs._getSpectrum, self.ws2d_histo, 10, True)
 
     def test_getMDData2D_bin_bounds(self):
-        coords,data,err=funcs._getMDData2D_bin_bounds(self.ws_MD_2d,mantid.api.MDNormalization.NoNormalization)
+        x,y,data=funcs._getMDData2D_bin_bounds(self.ws_MD_2d,mantid.api.MDNormalization.NoNormalization)
         #logger.error(str(coords))
-        np.testing.assert_allclose(coords[0],np.array([-3,-1.8,-0.6,0.6,1.8,3]),atol=1e-10)
-        np.testing.assert_allclose(coords[1],np.array([-10,-6,-2,2,6,10.]),atol=1e-10)
-        np.testing.assert_allclose(data,np.arange(25).reshape(5,5).transpose(),atol=1e-10)
+        np.testing.assert_allclose(x,np.array([-3,-1.8,-0.6,0.6,1.8,3]),atol=1e-10)
+        np.testing.assert_allclose(y,np.array([-10,-6,-2,2,6,10.]),atol=1e-10)
+        np.testing.assert_allclose(data,np.arange(25).reshape(5,5),atol=1e-10)
 
     def test_getMDData2D_bin_centers(self):
-        coords,data,err=funcs._getMDData2D_bin_centers(self.ws_MD_2d,mantid.api.MDNormalization.NumEventsNormalization)
-        np.testing.assert_allclose(coords[0],np.array([-2.4,-1.2,0,1.2,2.4]),atol=1e-10)
-        np.testing.assert_allclose(coords[1],np.array([-8,-4,0,4,8]),atol=1e-10)
-        np.testing.assert_allclose(data,np.arange(25).reshape(5,5).transpose()*0.1,atol=1e-10)
+        x,y,data=funcs._getMDData2D_bin_centers(self.ws_MD_2d,mantid.api.MDNormalization.NumEventsNormalization)
+        np.testing.assert_allclose(x,np.array([-2.4,-1.2,0,1.2,2.4]),atol=1e-10)
+        np.testing.assert_allclose(y,np.array([-8,-4,0,4,8]),atol=1e-10)
+        np.testing.assert_allclose(data,np.arange(25).reshape(5,5)*0.1,atol=1e-10)
 
     def test_getMDData1D(self):
         coords,data,err=funcs._getMDData1D(self.ws_MD_1d,mantid.api.MDNormalization.NumEventsNormalization)
@@ -233,7 +247,19 @@ class PlotsFunctionsTest(unittest.TestCase):
         fig, ax = plt.subplots()
         funcs.plot(ax,self.ws2d_histo,'rs',specNum=1)
         funcs.plot(ax,self.ws2d_histo,specNum=2,linewidth=6)
-        funcs.plot(ax,self.ws_MD_1d,'bs')
+        funcs.plot(ax,self.ws_MD_1d,'bo')
+
+    def test_1derrorbars(self):
+        fig, ax = plt.subplots()
+        funcs.errorbar(ax,self.ws2d_histo,'rs',specNum=1)
+        funcs.errorbar(ax,self.ws2d_histo,specNum=2,linewidth=6)
+        funcs.errorbar(ax,self.ws_MD_1d,'bo')
+
+    def test_1dscatter(self):
+        fig, ax = plt.subplots()
+        funcs.scatter(ax,self.ws2d_histo,specNum=1)
+        funcs.scatter(ax,self.ws2d_histo,specNum=2)
+        funcs.scatter(ax,self.ws_MD_1d)
 
 
 if __name__ == '__main__':

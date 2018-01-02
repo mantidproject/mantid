@@ -173,9 +173,9 @@ def _getMDData(workspace,normalization,withError=False):
         if normalization==mantid.api.MDNormalization.NumEventsNormalization:
             err2/=(nev*nev)
         err=numpy.sqrt(err2)
-    data=data.squeeze()
+    data=data.squeeze().T
     if err is not None:
-        err=err.squeeze()
+        err=err.squeeze().T
     return (dimarrays,data,err)
 
 
@@ -187,15 +187,15 @@ def _getMDData1D(workspace,normalization):
 
 
 def _getMDData2D_bin_bounds(workspace,normalization,withError=False):
-    coordinate,data,err=_getMDData(workspace,normalization,withError)
+    coordinate,data,_=_getMDData(workspace,normalization,withError)
     assert len(coordinate)==2, 'The workspace is not 2D'
-    return (coordinate,data,err)
+    return (coordinate[0],coordinate[1],data)
 
 def _getMDData2D_bin_centers(workspace,normalization,withError=False):
-    coordinate,data,err=_getMDData2D_bin_bounds(workspace,normalization,withError)
-    coordinate[0]=points_from_boundaries(coordinate[0])
-    coordinate[1]=points_from_boundaries(coordinate[1])
-    return (coordinate,data,err)
+    x,y,data=_getMDData2D_bin_bounds(workspace,normalization,withError)
+    x=points_from_boundaries(x)
+    y=points_from_boundaries(y)
+    return (x,y,data)
 
 def _commonX(arr):
     return numpy.all(arr==arr[0,:],axis=(1,0))
@@ -235,6 +235,20 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
     y = numpy.broadcast_to(numpy.expand_dims(y,1),x.shape)
     return (x,y,z)
 
+def _getDataUnevenFlag(workspace,**kwargs):
+    '''
+    workspace is a workspace2d
+    if AxisAligned keyword is True or if the workspace does not
+    a constant number of bins, it will return true, otherwise false
+    '''
+    aligned = kwargs.pop('AxisAligned', False)
+    try:
+        _=workspace.blocksize()
+    except RuntimeError:
+        aligned=True
+    return(aligned,kwargs)
+
+
 def _getUnevenData(workspace, distribution):
     z=[]
     x=[]
@@ -255,27 +269,6 @@ def _getUnevenData(workspace, distribution):
         x.append(xvals)
         y.append([yvals[index],yvals[index+1]])
     return(x,y,z)
-
-
-####TODO: delete
-def _getContour(workspace, distribution):
-    x = workspace.extractX()
-    z = workspace.extractY()
-
-    if workspace.isHistogramData():
-        if not distribution:
-            z = z / (x[:,1:] - x[:,0:-1])
-        x = .5*(x[:,0:-1]+x[:,1:])
-
-    # y axis is held differently
-    y = workspace.getAxis(1).extractValues()
-    if len(y) == x.shape[0]+1:
-        y = .5*(y[0:-1]+y[1:])
-    y = numpy.tile(y, (x.shape[1], 1)).transpose()
-
-    return (x,y,z)
-
-
 
 
 
@@ -328,8 +321,14 @@ def errorbar(axes, workspace, *args, **kwargs):
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
     both will generate a :class:`RuntimeError`.
     '''
-    (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
-    (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        (x,y,dy)=_getMDData1D(workspace,normalization)
+        dx=None
+    else:
+        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
+        (x, y, dy, dx) = _getSpectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+    _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 
@@ -351,8 +350,13 @@ def scatter(axes, workspace, *args, **kwargs):
     Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
     both will generate a :class:`RuntimeError`.
     '''
-    (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, kwargs)
-    (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        (x,y,_)=_getMDData1D(workspace,normalization)
+    else:
+        (wkspIndex, distribution, kwargs) = _getWkspIndexDistAndLabel(workspace, **kwargs)
+        (x, y, _, _) = _getSpectrum(workspace, wkspIndex, distribution)
+    _setLabels1D(axes, workspace)
     return axes.scatter(x, y, *args, **kwargs)
 
 
@@ -369,10 +373,13 @@ def contour(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        x,y,z=_getMDData2D_bin_centers(workspace,normalization)
+    else:
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-
     return axes.contour(x, y, z, *args, **kwargs)
 
 
@@ -388,10 +395,13 @@ def contourf(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        x,y,z=_getMDData2D_bin_centers(workspace,normalization)
+    else:
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-
     return axes.contourf(x, y, z, *args, **kwargs)
 
 def pcolor(axes, workspace, *args, **kwargs):
