@@ -232,7 +232,6 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-
   m_exploreMantid = boost::make_shared<QWorkspaceWidget>(this);
   m_exploreMantid->init();
   m_exploreMantid->enableDeletePrompt(
@@ -245,7 +244,6 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   m_workspaceDockWidget->setMinimumWidth(200);
   m_workspaceDockWidget->setWidget(m_exploreMantid.get());
   aw->addDockWidget(Qt::RightDockWidgetArea, m_workspaceDockWidget);
-
 
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
