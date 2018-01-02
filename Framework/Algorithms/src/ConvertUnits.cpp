@@ -13,6 +13,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidParallel/Communicator.h"
 
 #include <numeric>
 
@@ -26,11 +27,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
-
-/// Default constructor
-ConvertUnits::ConvertUnits()
-    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
-      m_inputEvents(false), m_inputUnit(), m_outputUnit() {}
 
 /// Initialisation method
 void ConvertUnits::init() {
@@ -605,6 +601,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr
 ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
+  if (communicator().size() != 1)
+    throw std::runtime_error(
+        "ConvertUnits: Parallel support for aligning bins not implemented.");
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);

@@ -3,6 +3,7 @@
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
+#include "MantidParallel/Status.h"
 #include "MantidParallel/ThreadingBackend.h"
 
 #ifdef MPI_EXPERIMENTAL
@@ -62,7 +63,7 @@ public:
   int rank() const;
   int size() const;
   template <typename... T> void send(T &&... args) const;
-  template <typename... T> void recv(T &&... args) const;
+  template <typename... T> Status recv(T &&... args) const;
   template <typename... T> Request isend(T &&... args) const;
   template <typename... T> Request irecv(T &&... args) const;
 
@@ -95,14 +96,12 @@ template <typename... T> void Communicator::send(T &&... args) const {
   backend().send(m_rank, std::forward<T>(args)...);
 }
 
-template <typename... T> void Communicator::recv(T &&... args) const {
-// Not returning a status since it would usually not get initialized. See
-// http://mpi-forum.org/docs/mpi-1.1/mpi-11-html/node35.html#Node35.
+template <typename... T> Status Communicator::recv(T &&... args) const {
 #ifdef MPI_EXPERIMENTAL
   if (!hasBackend())
-    return static_cast<void>(m_communicator.recv(std::forward<T>(args)...));
+    return Status(m_communicator.recv(std::forward<T>(args)...));
 #endif
-  backend().recv(m_rank, std::forward<T>(args)...);
+  return backend().recv(m_rank, std::forward<T>(args)...);
 }
 
 template <typename... T> Request Communicator::isend(T &&... args) const {

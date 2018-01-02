@@ -1,19 +1,20 @@
-#ifndef MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_
-#define MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_
+#ifndef MANTID_DATAHANDLING_MASKSPECTRA_H_
+#define MANTID_DATAHANDLING_MASKSPECTRA_H_
 
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidAPI/Run.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace DataHandling {
 
-/** RemovePromptPulse : TODO: DESCRIPTION
+/** Mask specified spectra and the underlying detectors in a workspace. This is
+  equivalent to MaskDetectors but does not support PeaksWorkspace, which does
+  not have spectra.
 
-  @author
-  @date 2011-07-18
+  @author Simon Heybrock
+  @date 2017
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -34,36 +35,19 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RemovePromptPulse : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL MaskSpectra : public API::DistributedAlgorithm {
 public:
-  /// Algorithm's name for identification
   const std::string name() const override;
-
-  /// Algorithm's version for identification
   int version() const override;
-
-  /// Algorithm's category for identification
   const std::string category() const override;
-
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Remove the prompt pulse for a time of flight measurement.";
-  }
+  const std::string summary() const override;
 
 private:
-  /// Sets documentation strings for this algorithm
-
-  /// Initialise the properties
   void init() override;
-  /// Run the algorithm
   void exec() override;
-  /// Try to get the frequency from a given name.
-  double getFrequency(const API::Run &run);
-  std::vector<double> calculatePulseTimes(const double tmin, const double tmax,
-                                          const double period);
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_REMOVEPROMPTPULSE_H_ */
+#endif /* MANTID_DATAHANDLING_MASKSPECTRA_H_ */

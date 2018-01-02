@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
@@ -49,7 +49,7 @@ namespace DataHandling {
 *
 * File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport LoadNexusMonitors2 : public API::Algorithm {
+class DLLExport LoadNexusMonitors2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNexusMonitors"; }
