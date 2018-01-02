@@ -26,6 +26,12 @@
 #include <pyport.h>
 #include <numpy/ndarraytypes.h>
 
+// forward declare PyObject
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
+
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
@@ -36,6 +42,7 @@ PyObject *to_datetime64(const Types::Core::DateAndTime &dateandtime);
 npy_datetime to_npy_datetime(const Types::Core::DateAndTime &dateandtime);
 PyArray_Descr *descr_ns();
 
+Types::Core::DateAndTime to_dateandtime(PyObject *datetime);
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid

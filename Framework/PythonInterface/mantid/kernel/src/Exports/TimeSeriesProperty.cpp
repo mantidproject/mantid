@@ -1,6 +1,7 @@
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -14,6 +15,7 @@ using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;
 using boost::python::arg;
+using Mantid::PythonInterface::Converters::to_dateandtime;
 
 GET_POINTER_SPECIALIZATION(TimeSeriesProperty<std::string>)
 GET_POINTER_SPECIALIZATION(TimeSeriesProperty<int32_t>)
@@ -25,6 +27,13 @@ namespace {
 
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 
+template <typename TYPE>
+void addValuePyTime(TimeSeriesProperty<TYPE> &self, PyObject *time,
+                    const TYPE value) {
+  DateAndTime dateandtime = to_dateandtime(time);
+  self.addValue(dateandtime, value);
+}
+
 // Macro to reduce copy-and-paste
 #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)                                   \
   register_ptr_to_python<TimeSeriesProperty<TYPE> *>();                        \
@@ -33,22 +42,26 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
       #Prefix "TimeSeriesProperty",                                            \
       init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
-           "value",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,      \
-               return_value_policy<VectorToNumpy>()))                          \
+          "value",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
+              return_value_policy<VectorToNumpy>()))                           \
       .add_property(                                                           \
-           "times",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,       \
-               return_value_policy<VectorToNumpy>()))                          \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const DateAndTime &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+          "times",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
+              return_value_policy<VectorToNumpy>()))                           \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const std::string &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
+           (arg("self"), arg("time"), arg("value")))                           \
+      .def("addValue", &addValuePyTime<TYPE>,                                  \
            (arg("self"), arg("time"), arg("value")))                           \
       .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))             \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \

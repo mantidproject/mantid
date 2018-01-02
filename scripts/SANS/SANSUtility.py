@@ -1164,8 +1164,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
             prop = run_to.getProperty(time_series_name)
             prop.clear()
             for time, value in zip(times, values):
-                prop.addValue(str(time), # TODO allow datetime64 in TimeSeriesProperty
-                              type_map[time_series_name](value))
+                prop.addValue(time, type_map[time_series_name](value))
 
     alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
     alg_log.initialize()
@@ -1409,8 +1408,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         @param type_converter: a type converter
         '''
         for time, value in zip(times, values):
-            prop.addValue(str(time),  # TODO add support to TimeSeriesProperty
-                          type_converter(value))
+            prop.addValue(time, type_converter(value))
 
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
