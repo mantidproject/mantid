@@ -28,6 +28,6 @@ if [ -f UsageData.zip ]; then
 fi
 
 # create the zip archive
-zip -r UsageData UsageData -x \*hash-stamp README\*
+zip -r UsageData UsageData -x \*hash-stamp \*md5-stamp README\*
 cd -
 mv ExternalData/Testing/Data/UsageData.zip .
