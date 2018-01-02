@@ -952,7 +952,7 @@ void QWorkspaceWidget::addMDEventWorkspaceMenuItems(
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
 #ifdef MAKE_VATES
-  } else if (!m_mantidUI->doesVatesSupportOpenGL()) {
+  } else if (!m_mantidDisplayModel->doesVatesSupportOpenGL()) {
     m_showVatesGui->setEnabled(false);
 #endif
   } else {
@@ -973,7 +973,7 @@ void QWorkspaceWidget::addMDHistoWorkspaceMenuItems(
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
 #ifdef MAKE_VATES
-  } else if (!m_mantidUI->doesVatesSupportOpenGL()) {
+  } else if (!m_mantidDisplayModel->doesVatesSupportOpenGL()) {
     m_showVatesGui->setEnabled(false);
 #endif
   } else {
