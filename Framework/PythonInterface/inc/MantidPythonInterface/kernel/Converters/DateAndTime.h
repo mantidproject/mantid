@@ -23,14 +23,8 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/DateAndTime.h"
-#include <pyport.h>
+#include <Python.h>
 #include <numpy/ndarraytypes.h>
-
-// forward declare PyObject
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
 
 namespace Mantid {
 namespace PythonInterface {
