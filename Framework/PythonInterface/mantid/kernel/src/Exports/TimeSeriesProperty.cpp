@@ -42,24 +42,22 @@ void addValuePyTime(TimeSeriesProperty<TYPE> &self, PyObject *time,
       #Prefix "TimeSeriesProperty",                                            \
       init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
-          "value",                                                             \
-          make_function(                                                       \
-              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
-              return_value_policy<VectorToNumpy>()))                           \
+           "value",                                                            \
+           make_function(                                                      \
+               &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,      \
+               return_value_policy<VectorToNumpy>()))                          \
       .add_property(                                                           \
-          "times",                                                             \
-          make_function(                                                       \
-              &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
-              return_value_policy<VectorToNumpy>()))                           \
-      .def("addValue",                                                         \
-           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
-                                               const TYPE)) &                  \
-               TimeSeriesProperty<TYPE>::addValue,                             \
+           "times",                                                            \
+           make_function(                                                      \
+               &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,       \
+               return_value_policy<VectorToNumpy>()))                          \
+      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
+                           const DateAndTime &, const TYPE)) &                 \
+                           TimeSeriesProperty<TYPE>::addValue,                 \
            (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue",                                                         \
-           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
-                                               const TYPE)) &                  \
-               TimeSeriesProperty<TYPE>::addValue,                             \
+      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
+                           const std::string &, const TYPE)) &                 \
+                           TimeSeriesProperty<TYPE>::addValue,                 \
            (arg("self"), arg("time"), arg("value")))                           \
       .def("addValue", &addValuePyTime<TYPE>,                                  \
            (arg("self"), arg("time"), arg("value")))                           \
