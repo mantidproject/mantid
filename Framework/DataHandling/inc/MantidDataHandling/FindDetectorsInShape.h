@@ -1,10 +1,7 @@
 #ifndef MANTID_DATAHANDLING_FINDDETECTORSINSHAPE_H_
 #define MANTID_DATAHANDLING_FINDDETECTORSINSHAPE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,7 +52,7 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FindDetectorsInShape : public API::Algorithm {
+class DLLExport FindDetectorsInShape : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsInShape"; };
