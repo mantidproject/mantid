@@ -93,7 +93,7 @@ public:
   MOCK_METHOD0(clearMDMasking, void());
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  MOCK_CONST_METHOD0(hasOrientedLattice(), bool());
+  MOCK_CONST_METHOD0(hasOrientedLattice, bool());
 }
 
 Mantid::API::IMDWorkspace::LinePlot
