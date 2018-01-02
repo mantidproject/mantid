@@ -52,12 +52,10 @@ class AlgorithmMonitor;
 class InstrumentWindow;
 
 namespace MantidQt {
-namespace API {
-class Message;
-}
 namespace MantidWidgets {
 class FitPropertyBrowser;
 class QWorkspaceWidget;
+class Message;
 }
 namespace SliceViewer {
 class SliceViewerWindow;

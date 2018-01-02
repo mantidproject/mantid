@@ -1,7 +1,7 @@
 #ifndef MANTID_API_IFILELOADER_H_
 #define MANTID_API_IFILELOADER_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/NexusDescriptor.h"
 
@@ -35,7 +35,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename DescriptorType>
-class MANTID_API_DLL IFileLoader : public Algorithm {
+class MANTID_API_DLL IFileLoader : public ParallelAlgorithm {
 public:
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(DescriptorType &descriptor) const = 0;
