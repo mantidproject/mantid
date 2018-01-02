@@ -240,6 +240,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   // Add QWorkspaceView to a QDockWidget
   auto m_workspaceDockWidget = new QDockWidget(tr("Workspaces"), aw);
+  m_workspaceDockWidget->setObjectName("WorkspaceDockWidget");
   m_workspaceDockWidget->setMinimumHeight(150);
   m_workspaceDockWidget->setMinimumWidth(200);
   m_workspaceDockWidget->setWidget(m_exploreMantid.get());
