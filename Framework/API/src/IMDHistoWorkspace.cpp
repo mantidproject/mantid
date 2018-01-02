@@ -15,17 +15,6 @@ namespace API {
 
 //----------------------------------------------------------------------------------------------
 
-bool IMDHistoWorkspace::hasOrientedLattice() const {
-  for (auto i = 0; i < MultipleExperimentInfos::getNumExperimentInfo(); i++) {
-    if (MultipleExperimentInfos::getExperimentInfo(i)
-            ->sample()
-            .hasOrientedLattice()) {
-      return true;
-    }
-  }
-  return false;
-}
-
 const std::string IMDHistoWorkspace::toString() const {
   std::ostringstream os;
   os << IMDWorkspace::toString();

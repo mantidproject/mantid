@@ -105,8 +105,10 @@ public:
   virtual void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) = 0;
 
-  // Check if this class has an oriented lattice on a sample object
-  virtual bool hasOrientedLattice() const override;
+  // Check if this class has an oriented lattice on any sample object
+  virtual bool hasOrientedLattice() const override {
+    return MultipleExperimentInfos::hasOrientedLattice();
+  }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

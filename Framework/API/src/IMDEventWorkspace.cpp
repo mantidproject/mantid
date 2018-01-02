@@ -41,20 +41,6 @@ void IMDEventWorkspace::setFileNeedsUpdating(bool value) {
  */
 bool IMDEventWorkspace::threadSafe() const { return !this->isFileBacked(); }
 
-//-----------------------------------------------------------------------------------------------
-
-/** Returns true is any experiment info sample has an oriented lattice
- */
-bool IMDEventWorkspace::hasOrientedLattice() const {
-  for (auto i = 0; i < MultipleExperimentInfos::getNumExperimentInfo(); i++) {
-    if (MultipleExperimentInfos::getExperimentInfo(i)
-            ->sample()
-            .hasOrientedLattice()) {
-      return true;
-    }
-  }
-  return false;
-}
 const std::string IMDEventWorkspace::toString() const {
   std::ostringstream os;
   os << IMDWorkspace::toString();
