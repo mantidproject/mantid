@@ -57,7 +57,7 @@ class Message;
 }
 namespace MantidWidgets {
 class FitPropertyBrowser;
-class QWorkspaceDockView;
+class QWorkspaceWidget;
 }
 namespace SliceViewer {
 class SliceViewerWindow;
@@ -650,7 +650,7 @@ private:
 
   ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
   QDockWidget m_workspaceDockWidget;
-  boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceDockView>
+  boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceWidget>
       m_exploreMantid; // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
   RemoteClusterDockWidget *

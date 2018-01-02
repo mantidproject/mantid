@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class MantidDisplayBase;
-class QWorkspaceDockView;
+class QWorkspaceWidget;
 
 enum class MantidItemSortScheme { ByName, ByLastModified };
 
@@ -20,7 +20,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 public:
-  MantidTreeWidget(QWorkspaceDockView *w, MantidDisplayBase *mui);
+  MantidTreeWidget(QWorkspaceWidget *w, MantidDisplayBase *mui);
   void mousePressEvent(QMouseEvent *e) override;
   void mouseMoveEvent(QMouseEvent *e) override;
   void mouseDoubleClickEvent(QMouseEvent *e) override;
@@ -47,7 +47,7 @@ protected:
 
 private:
   QPoint m_dragStartPosition;
-  QWorkspaceDockView *m_dockWidget;
+  QWorkspaceWidget *m_dockWidget;
   MantidDisplayBase *m_mantidUI;
   Mantid::API::AnalysisDataServiceImpl &m_ads;
   MantidItemSortScheme m_sortScheme;

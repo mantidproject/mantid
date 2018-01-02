@@ -47,7 +47,7 @@
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceWidget.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -233,12 +233,12 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   }
 
 
-  m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this);
+  m_exploreMantid = boost::make_shared<QWorkspaceWidget>(this);
   m_exploreMantid->init();
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
 
-  // Add QWorkspaceView to a QDockWidget
+  // Add QWorkspaceWidget to a QDockWidget
   auto m_workspaceDockWidget = new QDockWidget(tr("Workspaces"), aw);
   m_workspaceDockWidget->setObjectName("WorkspaceDockWidget");
   m_workspaceDockWidget->setMinimumHeight(150);

@@ -1,5 +1,5 @@
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
-#include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
+#include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceWidget.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -23,7 +23,7 @@ Mantid::Kernel::Logger treelog("MantidTreeWidget");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w,
+MantidTreeWidget::MantidTreeWidget(QWorkspaceWidget *w,
                                    MantidDisplayBase *mui)
     : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
