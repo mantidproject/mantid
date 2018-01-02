@@ -872,7 +872,6 @@ public:
     std::cout << "Finished Workspace splitting performance test, 4 threads in "
               << clock.elapsed() << " sec\n";
   }
-
 };
 
 #endif

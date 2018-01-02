@@ -1279,7 +1279,6 @@ public:
     TS_ASSERT(wsCastNonConst != NULL);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
-
 };
 
 #endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_ */

@@ -10,7 +10,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -64,13 +63,12 @@ public:
 
     // remove the last one
     mei.getExperimentInfo(nExperimentInfosToAdd - 1)
-      ->mutableSample()
-      .clearOrientedLattice();
+        ->mutableSample()
+        .clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
 
     delete latt;
   }
-
 };
 
 #endif /* MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_ */
