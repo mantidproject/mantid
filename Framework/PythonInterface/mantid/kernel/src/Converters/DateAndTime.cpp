@@ -1,5 +1,6 @@
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include <Python.h>
 #include <numpy/arrayscalars.h>
 
 using Mantid::Types::Core::DateAndTime;
