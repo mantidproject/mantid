@@ -93,45 +93,44 @@ public:
   MOCK_METHOD0(clearMDMasking, void());
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  MOCK_CONST_METHOD0(hasOrientedLattice(),bool());
-  }
+  MOCK_CONST_METHOD0(hasOrientedLattice(), bool());
+}
 
-  Mantid::API::IMDWorkspace::LinePlot
-  getLinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
-              Mantid::API::MDNormalization) const override {
-    LinePlot line;
-    return line;
-  }
+Mantid::API::IMDWorkspace::LinePlot
+getLinePlot(const Mantid::Kernel::VMD &, const Mantid::Kernel::VMD &,
+            Mantid::API::MDNormalization) const override {
+  LinePlot line;
+  return line;
+}
 
-  std::vector<Mantid::API::IMDIterator *> createIterators(
-      size_t = 1,
-      Mantid::Geometry::MDImplicitFunction * = NULL) const override {
-    throw std::runtime_error("Not Implemented");
-  }
+std::vector<Mantid::API::IMDIterator *> createIterators(
+    size_t = 1, Mantid::Geometry::MDImplicitFunction * = NULL) const override {
+  throw std::runtime_error("Not Implemented");
+}
 
-  Mantid::signal_t
-  getSignalAtCoord(const Mantid::coord_t *,
-                   const Mantid::API::MDNormalization &) const override {
-    return 0;
-  }
+Mantid::signal_t
+getSignalAtCoord(const Mantid::coord_t *,
+                 const Mantid::API::MDNormalization &) const override {
+  return 0;
+}
 
-  Mantid::signal_t getSignalWithMaskAtCoord(
-      const Mantid::coord_t *,
-      const Mantid::API::MDNormalization &) const override {
-    return 0;
-  }
+Mantid::signal_t
+getSignalWithMaskAtCoord(const Mantid::coord_t *,
+                         const Mantid::API::MDNormalization &) const override {
+  return 0;
+}
 
-  MockIMDWorkspace() : IMDWorkspace() {}
+MockIMDWorkspace() : IMDWorkspace() {}
 
-  ~MockIMDWorkspace() override {}
+~MockIMDWorkspace() override {}
 
 private:
-  MockIMDWorkspace *doClone() const override {
-    throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
-  }
-  MockIMDWorkspace *doCloneEmpty() const override {
-    throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
-  }
+MockIMDWorkspace *doClone() const override {
+  throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
+}
+MockIMDWorkspace *doCloneEmpty() const override {
+  throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
+}
 };
 
 //=================================================================================================
