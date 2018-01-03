@@ -403,61 +403,21 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Convert an options map to a comma-separated list of key=value pairs
- */
-QString
-ReflRunsTabPresenter::convertMapToString(const OptionsMap &optionsMap) const {
-  QString result;
-  bool first = true;
-
-  for (auto &kvp : optionsMap) {
-    if (!first)
-      result += ",";
-    else
-      first = false;
-
-    result += kvp.first + "=" + kvp.second;
-  }
-
-  return result;
-}
-
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
   * @return :: Global pre-processing options
   */
-OptionsMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+OptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
-}
-
-/** Requests global pre-processing options as a string. Options are supplied by
-  * the main presenter.
-  * @return :: Global pre-processing options as a string
-  */
-QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
-
-  auto optionsStr = convertMapToString(
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
-
-  return optionsStr;
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-OptionsMap ReflRunsTabPresenter::getProcessingOptions() const {
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
   return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
-}
-
-/** Requests global processing options. Options are supplied by the main
-* presenter
-* @return :: Global processing options as a string
-*/
-QString ReflRunsTabPresenter::getProcessingOptionsAsString() const {
-  return convertMapToString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global post-processing options as a string. Options are supplied by

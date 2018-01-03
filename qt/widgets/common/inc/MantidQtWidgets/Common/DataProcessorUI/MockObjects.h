@@ -109,10 +109,8 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptions, OptionsMap());
-  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getProcessingOptions, OptionsMap());
-  MOCK_CONST_METHOD0(getProcessingOptionsAsString, QString());
+  MOCK_CONST_METHOD0(getPreprocessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
   MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 

@@ -1,5 +1,5 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
 /** This file defines the OptionsData type alias used by
    the DataProcessor widget.
 
@@ -25,19 +25,14 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-
 #include <QString>
-#include <map>
+#include <QMap>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-using OptionsMap = std::map<QString, QString>;
-
-OptionsMap DLLExport convertOptionsFromQMap(const OptionsQMap &src);
+using OptionsQMap = QMap<QString, QString>;
 }
 }
 }
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
+#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H

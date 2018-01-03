@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 
 #include <QSet>
 #include <QString>
@@ -55,13 +55,9 @@ public:
   }
 
   /// Return global options for pre-processing
-  virtual OptionsMap getPreprocessingOptions() const { return OptionsMap(); }
-  /// Return global options for pre-processing as a string
-  virtual QString getPreprocessingOptionsAsString() const { return QString(); }
+  virtual OptionsQMap getPreprocessingOptions() const { return OptionsQMap(); }
   /// Return global options for reduction
-  virtual OptionsMap getProcessingOptions() const { return OptionsMap(); }
-  /// Return global options for reduction as a string
-  virtual QString getProcessingOptionsAsString() const { return QString(); }
+  virtual OptionsQMap getProcessingOptions() const { return OptionsQMap(); }
   /// Return global options for post-processing as a string
   virtual QString getPostprocessingOptionsAsString() const { return QString(); }
   /// Return time-slicing values

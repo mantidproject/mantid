@@ -61,9 +61,9 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
  * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
  */
-OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
+OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
 
-  OptionsMap options;
+  OptionsQMap options;
 
   if (m_view->experimentSettingsEnabled()) {
 
@@ -140,9 +140,9 @@ OptionsMap ReflSettingsPresenter::getTransmissionOptions() const {
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */
-OptionsMap ReflSettingsPresenter::getReductionOptions() const {
+OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
-  OptionsMap options;
+  OptionsQMap options;
 
   if (m_view->experimentSettingsEnabled()) {
 
