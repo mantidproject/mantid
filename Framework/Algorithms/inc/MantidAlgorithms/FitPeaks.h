@@ -40,7 +40,9 @@ public:
   const std::string category() const override { return "Optimization"; }
 
 private:
+  /// Init
   void init() override;
+  /// Main exec method
   void exec() override;
 
   /// process inputs (main and child algorithms)
@@ -56,10 +58,10 @@ private:
   void GenerateFittedParametersValueWorkspace();
   /// main method to create output workspaces
   void GenerateOutputPeakPositionWS();
-  ///
+  /// Generate workspace for calculated values
   void GenerateCalculatedPeaksWS();
 
-  /// TODO - Implment .. convert peak function's parameter names to parameter
+  /// Convert peak function's parameter names to parameter
   /// index for fast access
   void ConvertParametersNameToIndex();
 
@@ -69,6 +71,8 @@ private:
 
   /// suites of method to fit peaks
   void fitPeaks();
+
+  /// fit peaks in a same spectrum
   void
   fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
                    std::vector<double> &fitted_peak_centers,
@@ -94,7 +98,7 @@ private:
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
 
-  ///
+  /// fit a single peak with high background
   double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
                                    const std::pair<double, double> &fit_window,
                                    const size_t &ws_index,
@@ -116,20 +120,31 @@ private:
                         const std::vector<double> &vec_y,
                         const std::vector<double> &vec_e);
 
+  /// Esitmate background by 'observation'
   void EstimateBackground(size_t wi,
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr bkgd_function);
+  /// estimate linear background
+  void estimateLinearBackground(size_t wi, double left_window_boundary,
+                                double right_window_boundary, double &bkgd_a1,
+                                double &bkgd_a0);
+
+  /// Estimate peak parameters by 'observation'
   int EstimatePeakParameters(size_t wi,
                              const std::pair<double, double> &peak_window,
                              API::IPeakFunction_sptr peakfunction,
                              API::IBackgroundFunction_sptr bkgdfunction);
 
-  double findMaxValue(size_t wi, const std::pair<double, double> &window,
-                      API::IBackgroundFunction_sptr bkgdfunction,
-                      size_t &center_index, double &peak_center,
-                      double &max_value);
+  //  double findMaxValue(size_t wi, const std::pair<double, double> &window,
+  //                      API::IBackgroundFunction_sptr bkgdfunction,
+  //                      size_t &center_index, double &peak_center,
+  //                      double &max_value);
 
-  void processSinglePeakFitResult(
+  //  std::vector<size_t> getRange(size_t wi,
+  //                               const std::vector<double> &peak_window);
+
+  /// Process the result from fitting a single peak
+  void ProcessSinglePeakFitResult(
       size_t wsindex, size_t peakindex,
       const std::vector<double> &expected_peak_positions,
       API::IPeakFunction_sptr peakfunction,
@@ -141,10 +156,8 @@ private:
   /// calculate peak+background for fitted
   void calculateFittedPeaks();
 
-  //  std::vector<size_t> getRange(size_t wi,
-  //                               const std::vector<double> &peak_window);
-
-  size_t getXIndex(size_t wi, double x);
+  /// Get index of value X in a spectrum's X histogram
+  size_t GetXIndex(size_t wi, double x);
 
   //  double processFitResult(DataObjects::TableWorkspace_sptr param_table,
   //                          std::vector<double> &param_values,
@@ -157,11 +170,6 @@ private:
                       std::vector<double> &fitted_positions,
                       std::vector<std::vector<double>> &peak_parameters,
                       std::vector<double> &peak_chi2_vec, bool noevents);
-
-  /// estimate linear background
-  void estimateLinearBackground(size_t wi, double left_window_boundary,
-                                double right_window_boundary, double &bkgd_a1,
-                                double &bkgd_a0);
 
   //  /// set peak positions tolerance
   //  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
