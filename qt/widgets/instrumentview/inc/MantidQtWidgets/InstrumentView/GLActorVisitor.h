@@ -4,12 +4,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class GLActor;
-class GLActorCollection;
-class ComponentActor;
-class CompAssemblyActor;
-class ObjCompAssemblyActor;
-class RectangularDetectorActor;
-class StructuredDetectorActor;
 class InstrumentActor;
 
 /**
@@ -21,13 +15,7 @@ public:
   virtual ~GLActorVisitor() {}
   /// Abstract method that must be implemented in sub-classes
   virtual bool visit(GLActor *) = 0;
-  virtual bool visit(GLActorCollection *);
-  virtual bool visit(CompAssemblyActor *);
-  virtual bool visit(ObjCompAssemblyActor *);
-  virtual bool visit(ComponentActor *);
   virtual bool visit(InstrumentActor *);
-  virtual bool visit(RectangularDetectorActor *);
-  virtual bool visit(StructuredDetectorActor *);
 };
 
 /**
@@ -39,13 +27,7 @@ public:
   virtual ~GLActorConstVisitor() {}
   /// Abstract method that must be implemented in sub-classes
   virtual bool visit(const GLActor *) = 0;
-  virtual bool visit(const GLActorCollection *);
-  virtual bool visit(const CompAssemblyActor *);
-  virtual bool visit(const ObjCompAssemblyActor *);
-  virtual bool visit(const ComponentActor *);
   virtual bool visit(const InstrumentActor *);
-  virtual bool visit(const RectangularDetectorActor *);
-  virtual bool visit(const StructuredDetectorActor *);
 };
 
 /*
@@ -66,7 +48,6 @@ public:
   explicit SetAllVisibleVisitor(bool showNonDet) : m_showNonDet(showNonDet) {}
   using GLActorVisitor::visit;
   bool visit(GLActor *) override;
-  bool visit(ComponentActor *actor) override;
 
 private:
   bool m_showNonDet;

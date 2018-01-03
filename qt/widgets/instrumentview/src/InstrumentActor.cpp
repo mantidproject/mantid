@@ -1,12 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/InstrumentView/CompAssemblyActor.h"
-#include "MantidQtWidgets/InstrumentView/ComponentActor.h"
 #include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
-#include "MantidQtWidgets/InstrumentView/ObjCompAssemblyActor.h"
-#include "MantidQtWidgets/InstrumentView/ObjComponentActor.h"
-#include "MantidQtWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtWidgets/InstrumentView/StructuredDetectorActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -219,14 +213,27 @@ bool InstrumentActor::accept(GLActorConstVisitor &visitor,
   return ok;
 }
 
+void InstrumentActor::setComponentVisible(
+    Mantid::Geometry::ComponentID component) {
+  setChildVisibility(false);
+  const auto &componentInfo = getComponentInfo();
+  auto index = componentInfo.indexOf(component);
+
+  auto children = componentInfo.componentsInSubtree(index);
+  m_isCompVisible[index] = true;
+  for (auto child : children)
+    m_isCompVisible[child] = true;
+
+  invalidateDisplayLists();
+}
+
 void InstrumentActor::setChildVisibility(bool on) {
-  // m_scene.setChildVisibility(on);
-  // auto guidesVisitor = SetVisibleNonDetectorVisitor(m_showGuides);
-  // m_scene.accept(guidesVisitor);
+  std::fill(m_isCompVisible.begin(), m_isCompVisible.end(), on);
 }
 
 bool InstrumentActor::hasChildVisible() const {
-  return true; // m_scene.hasChildVisible();
+  return std::any_of(m_isCompVisible.begin(), m_isCompVisible.end(),
+                     [](bool visible) { return visible; });
 }
 
 /** Returns the workspace relating to this instrument view.
@@ -665,11 +672,21 @@ void InstrumentActor::resetColors() {
   m_colors.assign(componentInfo.size(),
                   GLColor(qRed(color), qGreen(color), qBlue(color), 1));
 
+  IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
+  const auto &detectorIDs = detectorInfo.detectorIDs();
   for (size_t wi = 0; wi < m_specIntegrs.size(); ++wi) {
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
+    bool masked = false;
+
     for (const auto &det : specDef) {
       auto detIndex = det.first;
-      if (detectorInfo.isMasked(detIndex)) {
+
+      if (mask)
+        masked = mask->isMasked(detectorIDs[detIndex]);
+      else
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
+
+      if (detectorInfo.isMasked(detIndex) || masked) {
         m_colors[detIndex] = m_maskedColor;
       } else {
         auto integratedValue = m_specIntegrs[wi];
@@ -733,11 +750,7 @@ void InstrumentActor::updateColors() {
 /**
  * @param on :: True or false for on or off.
  */
-void InstrumentActor::showGuides(bool on) {
-  auto visitor = SetVisibleNonDetectorVisitor(on);
-  this->accept(visitor);
-  m_showGuides = on;
-}
+void InstrumentActor::showGuides(bool on) { m_showGuides = on; }
 
 GLColor InstrumentActor::getColor(size_t index) const {
   if (index <= m_colors.size() - 1)
@@ -1328,95 +1341,6 @@ void InstrumentActor::addMaskBinsData(const QList<int> &detIDs) {
 
 /// Show if bin masks have been defined.
 bool InstrumentActor::hasBinMask() const { return !m_maskBinsData.isEmpty(); }
-
-//-------------------------------------------------------------------------//
-bool SetVisibleComponentVisitor::visit(GLActor *actor) {
-  actor->setVisibility(false);
-  return false;
-}
-
-bool SetVisibleComponentVisitor::visit(GLActorCollection *actor) {
-  bool visible = actor->hasChildVisible();
-  actor->setVisibility(visible);
-  return visible;
-}
-
-bool SetVisibleComponentVisitor::visit(ComponentActor *actor) {
-  bool on = actor->getComponent()->getComponentID() == m_id;
-  actor->setVisibility(on);
-  return on;
-}
-
-bool SetVisibleComponentVisitor::visit(CompAssemblyActor *actor) {
-  bool visible = false;
-  if (actor->getComponent()->getComponentID() == m_id) {
-    visible = true;
-    actor->setChildVisibility(true);
-  } else {
-    visible = actor->hasChildVisible();
-    actor->setVisibility(visible);
-  }
-  return visible;
-}
-
-bool SetVisibleComponentVisitor::visit(ObjCompAssemblyActor *actor) {
-  bool on = actor->getComponent()->getComponentID() == m_id;
-  actor->setVisibility(on);
-  return on;
-}
-
-bool SetVisibleComponentVisitor::visit(InstrumentActor *actor) {
-  bool visible = false;
-  if (actor->getInstrument()->getComponentID() == m_id) {
-    visible = true;
-    actor->setChildVisibility(true);
-  } else {
-    visible = actor->hasChildVisible();
-    actor->setVisibility(visible);
-  }
-  return visible;
-}
-
-bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor) {
-  bool on = actor->getComponent()->getComponentID() == m_id ||
-            actor->isChildDetector(m_id);
-  actor->setVisibility(on);
-  return on;
-}
-
-bool SetVisibleComponentVisitor::visit(StructuredDetectorActor *actor) {
-  bool on = actor->getComponent()->getComponentID() == m_id ||
-            actor->isChildDetector(m_id);
-  actor->setVisibility(on);
-  return on;
-}
-
-//-------------------------------------------------------------------------//
-/**
- * Visits an actor and if it is a "non-detector" sets its visibility.
- *
- * @param actor :: A visited actor.
- * @return always false to traverse all the instrument tree.
- */
-bool SetVisibleNonDetectorVisitor::visit(GLActor *actor) {
-  ComponentActor *comp = dynamic_cast<ComponentActor *>(actor);
-  if (comp && comp->isNonDetector()) {
-    actor->setVisibility(m_on);
-  }
-  return false;
-}
-
-//-------------------------------------------------------------------------//
-bool FindComponentVisitor::visit(GLActor *actor) {
-  ComponentActor *comp = dynamic_cast<ComponentActor *>(actor);
-  if (comp) {
-    if (comp->getComponent()->getComponentID() == m_id) {
-      m_actor = comp;
-      return true;
-    }
-  }
-  return false;
-}
 
 /**
  * Save the state of the instrument actor to a project file.
