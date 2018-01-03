@@ -220,22 +220,23 @@ public:
     TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
-  void testPlusString() {
+  void testPreprocessString() {
 
     auto reflectometryPreprocessMap = reflPreprocessMap();
-    auto output = plusString("INPUT_WS", "OUTPUT_WS",
-                             reflectometryPreprocessMap["Run(s)"], "");
+    auto output = preprocessString("INPUT_WS", "OUTPUT_WS", "OUTPUT_WS",
+                                   reflectometryPreprocessMap["Run(s)"], "");
     auto const result = QString("OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
                                 "RHSWorkspace = 'INPUT_WS')\n");
     TS_ASSERT_EQUALS(output, result)
   }
 
-  void testPlusStringWithOptions() {
+  void testPreprocessStringWithOptions() {
 
     auto preprocessMap = reflPreprocessMap();
     auto transProcessor = preprocessMap["Transmission Run(s)"];
-    auto output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
-                             "WavelengthMin = 0.5, WavelengthMax = 5.0");
+    auto output =
+        preprocessString("INPUT_WS", "OUTPUT_WS", "OUTPUT_WS", transProcessor,
+                         "WavelengthMin = 0.5, WavelengthMax = 5.0");
     auto result = QString(
         "OUTPUT_WS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun "
         "= 'OUTPUT_WS', SecondTransmissionRun = 'INPUT_WS', WavelengthMin = "
@@ -311,7 +312,7 @@ public:
         "MomentumTransferStep = 0.04, ScaleFactor = 1)",
         ""};
 
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReduceRowStringWithPreprocessing() {
@@ -354,16 +355,15 @@ public:
         "ThetaIn = 0.5)",
         ""};
 
-    std::cout << boost::get<1>(output).toStdString() << std::endl;
+    std::cout << output.toStdString() << std::endl;
 
     // Check the names of the reduced workspaces
-    TS_ASSERT_EQUALS(boost::get<1>(output).toStdString(),
-                     "IvsQ_binned_1000+1001_angle_0.5, "
-                     "IvsQ_1000+1001_angle_0.5, "
-                     "IvsLam_1000+1001_angle_0.5");
+    TS_ASSERT_EQUALS(output.toStdString(), "IvsQ_binned_1000+1001_angle_0.5, "
+                                           "IvsQ_1000+1001_angle_0.5, "
+                                           "IvsLam_1000+1001_angle_0.5");
 
     // Check the python code
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReduceRowStringNoPreProcessing() {
@@ -389,7 +389,7 @@ public:
         "MomentumTransferStep = 0.04, ScaleFactor = 1)",
         ""};
 
-    assertContainsMatchingLines(result, boost::get<0>(output));
+    assertContainsMatchingLines(result, output);
   }
 
   void testReducedWorkspaceNameWrong() {
@@ -531,9 +531,13 @@ public:
   }
 
   void testPlotsString() {
-    QStringList unprocessed_ws;
-    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    auto unprocessed_ws = std::vector<OptionsMap>();
+    unprocessed_ws.push_back({{"OutputWorkspaceBinned", "IvsQ_binned_1"},
+                              {"OutputWorkspace", "IvsQ_1"},
+                              {"OutputWorkspaceWavelength", "IvsLam_1"}});
+    unprocessed_ws.push_back({{"OutputWorkspaceBinned", "IvsQ_binned_2"},
+                              {"OutputWorkspace", "IvsQ_2"},
+                              {"OutputWorkspaceWavelength", "IvsLam_2"}});
 
     QStringList postprocessed_ws;
     postprocessed_ws.append("TEST_WS3");
@@ -560,9 +564,13 @@ public:
 
   void testPlotsStringNoPostprocessing() {
     // Reduced workspaces
-    QStringList unprocessed_ws;
-    unprocessed_ws.append("IvsQ_binned_1, IvsQ_1, IvsLam_1");
-    unprocessed_ws.append("IvsQ_binned_2, IvsQ_2, IvsLam_2");
+    auto unprocessed_ws = std::vector<OptionsMap>();
+    unprocessed_ws.push_back({{"OutputWorkspaceBinned", "IvsQ_binned_1"},
+                              {"OutputWorkspace", "IvsQ_1"},
+                              {"OutputWorkspaceWavelength", "IvsLam_1"}});
+    unprocessed_ws.push_back({{"OutputWorkspaceBinned", "IvsQ_binned_2"},
+                              {"OutputWorkspace", "IvsQ_2"},
+                              {"OutputWorkspaceWavelength", "IvsLam_2"}});
     // Post-processed ws (empty)
     auto postprocessed_ws = "";
 
