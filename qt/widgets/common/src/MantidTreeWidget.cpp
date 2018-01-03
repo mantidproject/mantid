@@ -25,7 +25,7 @@ namespace MantidWidgets {
 
 MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui,
 								   QWidget *parent)
-    : m_mantidUI(mui),
+    : QTreeWidget(parent), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
