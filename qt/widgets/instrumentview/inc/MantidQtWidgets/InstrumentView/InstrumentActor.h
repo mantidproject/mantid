@@ -3,7 +3,6 @@
 
 #include "DllOption.h"
 #include "GLActor.h"
-#include "GLActorCollection.h"
 #include "GLActorVisitor.h"
 #include "GLColor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -34,7 +33,6 @@ class DetectorInfo;
 
 namespace MantidQt {
 namespace MantidWidgets {
-class ObjComponentActor;
 
 /**
 \class  InstrumentActor
@@ -69,6 +67,7 @@ public:
   /// Run visitors callback on each component (const version)
   bool accept(GLActorConstVisitor &visitor,
               VisitorAcceptRule rule = VisitAll) const override;
+  void setComponentVisible(Mantid::Geometry::ComponentID component);
   /// Toggle the visibility of the child actors (if exist).
   void setChildVisibility(bool) override;
   /// Check if any child is visible
@@ -304,66 +303,6 @@ private:
   //Two display lists for normal rendering and picking
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
-
-  friend class ObjComponentActor;
-  friend class ObjCompAssemblyActor;
-  friend class RectangularDetectorActor;
-  friend class StructuredDetectorActor;
-};
-
-/**
-* Sets visibility of an actor with a particular ComponentID
-* and makes all other components invisible.
-*/
-class SetVisibleComponentVisitor : public SetVisibilityVisitor {
-public:
-  explicit SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id) {}
-  bool visit(GLActor *) override;
-  bool visit(GLActorCollection *) override;
-  bool visit(ComponentActor *actor) override;
-  bool visit(CompAssemblyActor *actor) override;
-  bool visit(ObjCompAssemblyActor *actor) override;
-  bool visit(InstrumentActor *actor) override;
-  bool visit(RectangularDetectorActor *actor) override;
-  bool visit(StructuredDetectorActor *actor) override;
-  Mantid::Geometry::ComponentID getID() const { return m_id; }
-
-private:
-  Mantid::Geometry::ComponentID m_id;
-};
-
-/**
-* Set visibility of all actors of non-detector components.
-* Pass true to constructor to set them visible and false to make them invisible.
-*/
-class SetVisibleNonDetectorVisitor : public SetVisibilityVisitor {
-public:
-  /// Constructor
-  /// @param on :: If true then all non-detectors will be made visible or
-  /// invisible if false.
-  explicit SetVisibleNonDetectorVisitor(bool on) : m_on(on) {}
-  using GLActorVisitor::visit;
-  bool visit(GLActor *) override;
-
-private:
-  bool m_on;
-};
-
-/**
-* Finds an actor with a particular ComponentID
-*/
-class FindComponentVisitor : public GLActorVisitor {
-public:
-  explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id), m_actor(nullptr) {}
-  using GLActorVisitor::visit;
-  bool visit(GLActor *) override;
-  ComponentActor *getActor() const { return m_actor; }
-
-private:
-  Mantid::Geometry::ComponentID m_id;
-  mutable ComponentActor *m_actor;
 };
 
 } // MantidWidgets
