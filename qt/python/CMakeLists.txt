@@ -27,8 +27,9 @@ if ( ENABLE_WORKBENCH )
   # file is added to the toplevel gitignore
   set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
   set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py )
+  configure_file ( create_resources.cmake.in create_resources.cmake @ONLY)
   add_custom_command ( OUTPUT ${_output_res_py}
-    COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_qrc_file}
+    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
     COMMENT "Generating mantidqt resources module"
     DEPENDS ${_qrc_file}
   )
