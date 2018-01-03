@@ -192,9 +192,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    Property *log(nullptr);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void test_GetLog_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
@@ -204,9 +205,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, actualLogName, "some  value");
 
-    Property *log(nullptr);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void

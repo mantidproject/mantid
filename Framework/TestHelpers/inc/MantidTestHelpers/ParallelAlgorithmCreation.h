@@ -2,6 +2,7 @@
 #define PARALLELALGORITHMCREATION_H_
 
 #include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/make_unique.h"
 
 namespace Mantid {
