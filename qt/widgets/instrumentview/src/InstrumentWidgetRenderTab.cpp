@@ -487,9 +487,7 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
-  auto &actor = m_instrWidget->getInstrumentActor();
-  auto visitor = SetAllVisibleVisitor(actor.areGuidesShown());
-  actor.accept(visitor);
+
   getSurface()->updateView();
   getSurface()->requestRedraw();
 }

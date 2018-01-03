@@ -3,8 +3,6 @@ set ( SRC_FILES
 	src/CollapsiblePanel.cpp
 	src/ColorMapWidget.cpp
 	src/DetXMLFile.cpp
-	src/GLActor.cpp
-	src/GLActorVisitor.cpp
 	src/GLColor.cpp
 	src/GLObject.cpp
 	src/InstrumentActor.cpp
@@ -69,8 +67,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
 	inc/MantidQtWidgets/InstrumentView/DetXMLFile.h
 	inc/MantidQtWidgets/InstrumentView/DllOption.h
-	inc/MantidQtWidgets/InstrumentView/GLActor.h
-	inc/MantidQtWidgets/InstrumentView/GLActorVisitor.h
 	inc/MantidQtWidgets/InstrumentView/GLColor.h
 	inc/MantidQtWidgets/InstrumentView/GLObject.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
