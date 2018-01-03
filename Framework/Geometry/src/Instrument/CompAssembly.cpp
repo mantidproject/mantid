@@ -492,7 +492,14 @@ Quat CompAssembly::getRotation() const {
 
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
   // via common helper
-  return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
+  const auto name = this->getName();
+  if (ComponentVisitorHelper::matchesPackOfTubes(name)) {
+    return visitor.registerBankOfTubes(*this);
+  } else if (ComponentVisitorHelper::matchesPSDTube(name)) {
+    return visitor.registerTube(*this);
+  }
+  // Generic Assembly registration call.
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream

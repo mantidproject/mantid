@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -69,8 +70,9 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
@@ -217,7 +219,7 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 /**
  * Register a structured bank
  * @param bank : Rectangular Detector
- * @return
+ * @return index assigned
  */
 size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
@@ -229,7 +231,7 @@ size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
 /**
  * Register a bank of tubes
  * @param bank : bank of tubes
- * @return
+ * @return index assigned
  */
 size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
@@ -239,14 +241,25 @@ size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
 }
 
 /**
- * Register a Tube
+ * Register a Tube as an IComponent Assembly.
  * @param tube : Individual tube component assembly
- * @return
+ * @return index assigned
  */
 size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
   auto index = registerComponentAssembly(tube);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
   (*m_componentType)[rangesIndex] = Beamline::ComponentType::Tube;
+  return index;
+}
+
+/**
+ * Register a Tube as an Object Component Assembly. Has shape.
+ * @param tube : Individual tube component assembly
+ * @return index assigned
+ */
+size_t InstrumentVisitor::registerTubeObj(const ObjCompAssembly &objTube) {
+  auto index = registerTube(objTube);
+  (*m_shapes)[index] = objTube.shape();
   return index;
 }
 

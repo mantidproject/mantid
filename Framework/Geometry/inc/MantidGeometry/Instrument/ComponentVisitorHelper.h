@@ -7,9 +7,6 @@
 namespace Mantid {
 namespace Geometry {
 
-class ComponentVisitor;
-class ICompAssembly;
-
 /** ComponentVisitorHelper namespace : Helper functions for Component Visitors.
   These mainly relate to helping with common code for IDF compatibility
   problems.
@@ -37,9 +34,9 @@ class ICompAssembly;
 */
 namespace ComponentVisitorHelper {
 
-size_t MANTID_GEOMETRY_DLL visitAssembly(ComponentVisitor &visitor,
-                                         const ICompAssembly &visitee,
-                                         const std::string &nameHint);
+bool MANTID_GEOMETRY_DLL matchesPackOfTubes(const std::string &nameHint);
+
+bool MANTID_GEOMETRY_DLL matchesPSDTube(const std::string &nameHint);
 
 } // namespace ComponentVisitorHelper
 } // namespace Geometry

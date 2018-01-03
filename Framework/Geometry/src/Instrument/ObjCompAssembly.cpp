@@ -359,7 +359,14 @@ void ObjCompAssembly::testIntersectionWithChildren(
 size_t ObjCompAssembly::registerContents(
     Mantid::Geometry::ComponentVisitor &visitor) const {
   // via common helper
-  return ComponentVisitorHelper::visitAssembly(visitor, *this, this->getName());
+  const auto name = this->getName();
+  if (ComponentVisitorHelper::matchesPackOfTubes(name)) {
+    return visitor.registerBankOfTubes(*this);
+  } else if (ComponentVisitorHelper::matchesPSDTube(name)) {
+    return visitor.registerTubeObj(*this);
+  }
+  // Generic Assembly registration call.
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to

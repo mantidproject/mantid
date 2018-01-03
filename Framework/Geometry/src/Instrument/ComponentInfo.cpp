@@ -171,7 +171,8 @@ bool ComponentInfo::hasDetectorInfo() const {
 }
 
 bool ComponentInfo::hasShape(const size_t componentIndex) const {
-  return (*m_shapes)[componentIndex].get() != nullptr;
+  const auto *shape = (*m_shapes)[componentIndex].get();
+  return shape != nullptr && shape->hasValidShape();
 }
 
 Kernel::V3D ComponentInfo::sourcePosition() const {
@@ -317,8 +318,11 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
     IteratorT &mutableIterator) const {
   auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
   // subtract 1 because component ranges includes self
-  auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
   auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
+
+  // subtract 1 because component ranges includes self
+  auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
+
   auto nSubDetectors =
       std::distance(innerRangeDet.begin(), innerRangeDet.end());
   // We are assuming that we ALWAYS have the same number of pixels in each tube
@@ -326,12 +330,17 @@ void ComponentInfo::growBoundingBoxAsBankOfTubes(
   auto nY = nSubDetectors / nSubComponents;
   size_t bottomIndex = *innerRangeDet.begin();
   size_t lastIndex = *(innerRangeDet.end() - 1);
-  while (bottomIndex < lastIndex) {
-    auto topIndex = bottomIndex + (nY - 1);
-    mutableBB.grow(componentBoundingBox(bottomIndex, reference));
-    mutableBB.grow(componentBoundingBox(topIndex, reference));
+  for (const auto tubeIndex : innerRangeComp) {
+    if (hasShape(tubeIndex)) {
+      mutableBB.grow(componentBoundingBox(tubeIndex, reference));
+    } else if (bottomIndex < lastIndex) {
+      auto topIndex = bottomIndex + (nY - 1);
+      mutableBB.grow(componentBoundingBox(bottomIndex, reference));
+      mutableBB.grow(componentBoundingBox(topIndex, reference));
+    }
     bottomIndex += nY;
   }
+
   mutableDetExclusions.insert(
       std::make_pair(*innerRangeDet.begin(), *(innerRangeDet.end() - 1)));
   mutableIterator = innerRangeComp.rend();

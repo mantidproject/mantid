@@ -10,6 +10,7 @@ class IDetector;
 class IComponent;
 class IObjComponent;
 class RectangularDetector;
+class ObjCompAssembly;
 
 /** ComponentVisitor : Visitor for IComponents. Enables parsing of a full doubly
   linked InstrumentTree without need for dynamic casts. Public methods are
@@ -47,6 +48,7 @@ public:
   virtual size_t registerStructuredBank(const ICompAssembly &bank) = 0;
   virtual size_t registerBankOfTubes(const ICompAssembly &bank) = 0;
   virtual size_t registerTube(const ICompAssembly &tube) = 0;
+  virtual size_t registerTubeObj(const ObjCompAssembly &objTube) = 0;
   virtual ~ComponentVisitor() {}
 };
 } // namespace Geometry

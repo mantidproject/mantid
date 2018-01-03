@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -341,12 +342,12 @@ createCylInstrumentWithVerticalOffsetsSpecified(
   const double sampleZPos = 0;
 
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
   auto instrument = boost::make_shared<Instrument>("instrument_with_tubes");
   CompAssembly *bank = new CompAssembly("sixteenpack");
   for (size_t i = 0; i < nTubes; ++i) {
-    CompAssembly *tube = new CompAssembly("tube" + std::to_string(i));
+    ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
     for (size_t j = 0; j < nDetsPerTube; ++j) {
 
       auto id = static_cast<int>(i * nDetsPerTube + j);
@@ -358,6 +359,8 @@ createCylInstrumentWithVerticalOffsetsSpecified(
     }
     tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
                      -ySpan / 2 + verticalOffsets[i], 0));
+    tube->setOutline(tube->createOutline());
+    Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
     bank->add(tube);
   }
   bank->setPos(V3D(0, 0, bankZPos));
@@ -737,7 +740,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
-      lexer << "pixel-" << i *nPixelsPerTube + j;
+      lexer << "pixel-" << i * nPixelsPerTube + j;
       Detector *pixel = new Detector(
           lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
       const double xpos = 0.0;

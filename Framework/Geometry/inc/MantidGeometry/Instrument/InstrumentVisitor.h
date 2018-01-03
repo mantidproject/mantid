@@ -28,6 +28,7 @@ class Instrument;
 class IObject;
 class ParameterMap;
 class RectangularDetector;
+class ObjCompAssembly;
 
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -129,7 +130,8 @@ private:
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>>
+      m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
@@ -170,6 +172,8 @@ public:
 
   virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
+
+  virtual size_t registerTubeObj(const ObjCompAssembly &objTube) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;
