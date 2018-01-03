@@ -4,7 +4,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 /** Convert an options map from a QMap to a std::map
- * @papram src [in] : the options as a QMap
+ * @param src [in] : the options as a QMap
  * @return : the options as a std::map
  */
 OptionsMap convertOptionsFromQMap(const OptionsQMap &src) {
