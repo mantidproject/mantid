@@ -238,8 +238,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
       appWindow()->isDeleteWorkspacePromptEnabled());
 
   // Add QWorkspaceWidget to a QDockWidget
-  auto m_workspaceDockWidget = new QDockWidget(tr("Workspaces"), aw);
-  m_workspaceDockWidget->setObjectName("WorkspaceDockWidget");
+  m_workspaceDockWidget = new QDockWidget(tr("Workspaces"), aw);
+  m_workspaceDockWidget->setObjectName("exploreMantid");
   m_workspaceDockWidget->setMinimumHeight(150);
   m_workspaceDockWidget->setMinimumWidth(200);
   m_workspaceDockWidget->setWidget(m_exploreMantid.get());
@@ -364,7 +364,7 @@ void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
 
 void MantidUI::addMenuItems(QMenu *menu) {
-  actionToggleMantid = m_workspaceDockWidget.toggleViewAction();
+  actionToggleMantid = m_workspaceDockWidget->toggleViewAction();
   actionToggleMantid->setIcon(getQPixmap("mantid_matrix_xpm"));
   actionToggleMantid->setShortcut(tr("Ctrl+Shift+M"));
   menu->addAction(actionToggleMantid);
