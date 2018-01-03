@@ -40,6 +40,7 @@ if ( ENABLE_WORKBENCH )
   set ( PYTHON_TEST_FILES
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
+    mantidqt/utils/test/test_modal_tester.py
     mantidqt/widgets/test/test_algorithm_dialog.py
     mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_messagedisplay.py

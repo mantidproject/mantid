@@ -22,11 +22,7 @@ import unittest
 
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.plugins import setup_library_paths
 from mantidqt.utils.qt.testing import ModalTester
-
-
-setup_library_paths()
 
 
 class TestModalTester(unittest.TestCase):
@@ -99,3 +95,7 @@ class TestModalTester(unittest.TestCase):
             print_exc.assert_called_once_with()
         self.assertTrue(tester.widget is None)
         self.assertFalse(tester.passed)
+
+
+if __name__ == '__main__':
+    unittest.main()
