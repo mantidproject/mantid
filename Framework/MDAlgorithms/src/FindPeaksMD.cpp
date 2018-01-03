@@ -9,7 +9,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VMD.h"
-#include <valgrind/callgrind.h>
 
 #include <map>
 #include <vector>
@@ -654,8 +653,6 @@ void FindPeaksMD::findPeaksHisto(
  */
 void FindPeaksMD::exec() {
 
-  CALLGRIND_START_INSTRUMENTATION;
-
   bool AppendPeaks = getProperty("AppendPeaks");
 
   // Output peaks workspace, create if needed
@@ -704,7 +701,6 @@ void FindPeaksMD::exec() {
 
   // Save the output
   setProperty("OutputWorkspace", peakWS);
-  CALLGRIND_STOP_INSTRUMENTATION;
 }
 
 //----------------------------------------------------------------------------------------------
