@@ -74,8 +74,10 @@ void ReflDataProcessorPresenter::process() {
     return;
 
   // Get global settings
-  this->setPreprocessingOptions(convertOptionsFromQMap(m_mainPresenter->getPreprocessingOptions()));
-  m_processingOptions = convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
+  this->setPreprocessingOptions(
+      convertOptionsFromQMap(m_mainPresenter->getPreprocessingOptions()));
+  m_processingOptions =
+      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
   this->setPostprocessingOptions(
       m_mainPresenter->getPostprocessingOptionsAsString());
 

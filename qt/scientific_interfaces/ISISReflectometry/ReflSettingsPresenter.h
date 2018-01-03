@@ -55,7 +55,8 @@ public:
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  MantidWidgets::DataProcessor::OptionsQMap getReductionOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
 

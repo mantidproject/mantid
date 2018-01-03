@@ -10,8 +10,8 @@ namespace DataProcessor {
 OptionsMap convertOptionsFromQMap(const OptionsQMap &src) {
   OptionsMap dest;
   for (auto iter = src.constBegin(); iter != src.constEnd(); ++iter) {
-      dest[iter.key()] = iter.value();
-    }
+    dest[iter.key()] = iter.value();
+  }
   return dest;
 }
 }
