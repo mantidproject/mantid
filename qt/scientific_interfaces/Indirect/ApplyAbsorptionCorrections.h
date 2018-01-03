@@ -1,17 +1,17 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYPAALMANPINGS_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_APPLYPAALMANPINGS_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_ApplyPaalmanPings.h"
+#include "ui_ApplyAbsorptionCorrections.h"
 #include "CorrectionsTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport ApplyPaalmanPings : public CorrectionsTab {
+class DLLExport ApplyAbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  ApplyPaalmanPings(QWidget *parent = nullptr);
+  ApplyAbsorptionCorrections(QWidget *parent = nullptr);
 
 private slots:
   /// Handles the geometry being changed
@@ -45,7 +45,7 @@ private:
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
 
-  Ui::ApplyPaalmanPings m_uiForm;
+  Ui::ApplyAbsorptionCorrections m_uiForm;
 
   std::string m_originalSampleUnits;
 
@@ -61,4 +61,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_APPLYPAALMANPINGS_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_ */

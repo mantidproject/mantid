@@ -17,13 +17,17 @@ image from the many images which fit the data with the same value of the statist
 has minimum information (maximum entropy).
 More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` subject to the constraint:
 
-.. math:: \chi^2 = \sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
+.. math:: \chi^2 = \frac{1}{N'}\sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq \chi^2_{target}
 
-where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, and :math:`d_m^c`
-the calculated or reconstructed data. The image is a set of numbers
-:math:`\{x_0, x_1, \dots, x_N\}` related to the measured data via a 1D Fourier transform:
+where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, :math:`d_m^c`
+the calculated or reconstructed data, :math:`\chi^2_{target}` is value of the input algorithm 
+property ChiTargetOverN and :math:`N'` the number of measured data point. The image is a set of numbers
+:math:`\{x_0, x_1, \dots, x_{N-1}\}` related to the measured data via a 1D Fourier transform:
 
-.. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
+.. math:: d_m = \frac{1}{N} \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
+
+where :math:`N` is the number of image points, which can be made different from :math:`N'` and
+is controlled by the input algorithm property ResolutionFactor, see examples further below.
 
 Note that even for real input data the reconstructed image can be complex, which means that both the real and
 imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
@@ -127,6 +131,9 @@ whose values will be set to zero once the true maximum entropy solution is found
 Usage
 -----
 
+Some of the usage examples use usage data files.
+
+.. include:: ../usagedata-note.txt
 
 **Example - Reconstruct Fourier coefficients**
 
@@ -155,13 +162,14 @@ and the reconstructed image, i.e. Fourier transform (right).
    Y[12] = Y[188] = 0.90
    Y[14] = Y[186] = 0.90
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', chiTarget=N, A=0.0001)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', A=0.0001)
 
    print("First  reconstructed coefficient: {:.3f}".format(data.readY(0)[5]))
    print("Second reconstructed coefficient: {:.3f}".format(data.readY(0)[10]))
    print("Third  reconstructed coefficient: {:.3f}".format(data.readY(0)[20]))
    print("Fourth reconstructed coefficient: {:.3f}".format(data.readY(0)[12]))
    print("Fifth  reconstructed coefficient: {:.3f}".format(data.readY(0)[14]))
+   print("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
@@ -172,6 +180,7 @@ Output:
    Third  reconstructed coefficient: 0.846
    Fourth reconstructed coefficient: 0.896
    Fifth  reconstructed coefficient: 0.896
+   Number of iterations: 3495
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -189,14 +198,28 @@ and :ref:`algm-FFT` (right).
    CropWorkspace(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', XMin=0.11, XMax=1.6, EndWorkspaceIndex=0)
    RemoveExpDecay(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725')
    Rebin(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', Params='0.016')
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='MUSR00022725', A=0.005, ChiTarget=90)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='MUSR00022725', A=0.005)
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='MUSR00022725')
 
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[44], image.readY(0)[44]))
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[46], image.readY(0)[46]))
    print("Image at {:.3f}: {:.3f}".format(image.readX(0)[48], image.readY(0)[48]))
-
+   # check background is not nosiy
+   def getInt(originalX,originalY,xMin,xMax):
+      import numpy as np
+      yData=[]
+      xData=[]
+      for j in range(0,len(originalX)):
+          if originalX[j]>xMin and originalX[j]<xMax:
+              yData.append(originalY[j]**2)
+              xData.append(originalX[j])
+      return np.trapz(x=xData,y=np.sqrt(yData))
+   # Do not change these numbers - they test if noise has been added to the alg    
+   print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
+   print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   
 Output:
 
 .. testoutput:: ExMUSR00022725
@@ -204,7 +227,9 @@ Output:
    Image at -1.359: 0.100
    Image at 0.000: 0.009
    Image at 1.359: 0.100
-
+   Negative background 0.006431
+   Positive background 0.006431
+   Number of iterations: 22
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
 
@@ -218,27 +243,30 @@ and its imaginary part (right).
    CropWorkspace(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    RemoveExpDecay(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884')
    Rebin(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', Params='0.016')
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, ChiTarget=300, MaxIterations=2500)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, MaxIterations=2500, ChiTargetOverN=300.0/270.0)
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
    print("Image (real part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
    print("Image (real part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
-   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
-   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
-   print("Image (imaginary part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
+   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(1)[129], image.readY(1)[129]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[135], image.readY(1)[135]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[141], image.readY(1)[141]))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
 .. testoutput:: ExEMU00020884
 
-   Image (real part) at -1.389: -0.079
-   Image (real part) at  0.000:  0.015
-   Image (real part) at  1.389: -0.079
-   Image (imaginary part) at -1.389: -0.079
-   Image (imaginary part) at  0.000:  0.015
-   Image (imaginary part) at  1.389: -0.079
+   Image (real part) at -1.389: -0.063
+   Image (real part) at  0.000:  0.035
+   Image (real part) at  1.389: -0.063
+   Image (imaginary part) at -1.389: -0.277
+   Image (imaginary part) at  0.000:  0.000
+   Image (imaginary part) at  1.389:  0.277
+   Number of iterations: 33
+
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
@@ -266,19 +294,21 @@ the original and reconstructed data (left), and the reconstructed image (right).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001)
 
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[104], image.readY(0)[104]))
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
 
 Output:
 
 .. testoutput:: ExRealImage
 
    Image (real part) at 0.318: 0.000
-   Image (real part) at 0.477: 5.842
+   Image (real part) at 0.477: 5.862
    Image (real part) at 0.637: 0.000
+   Number of iterations: 20000
 
 .. figure:: ../images/MaxEntComplexData.png
    :align: center
@@ -317,20 +347,24 @@ image in order to obtain smooth results).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
-   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=False)
+   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=True)
 
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
-
+   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngleP.readX(0))))
+   
 Output:
 
 .. testoutput:: ExRealPosImage
 
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Image at 0.477: 5.842 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
    Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Number of iterations: 20000
+   Number of iterations: 11
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -356,7 +390,8 @@ points can be increased by any integer factor, but note that this will slow down
 maxent iterations so that the algorithm is able to converge to a solution.
 
 An example script where the density of points is increased by a factor of 2 can be found below. Note that when a factor of 2 is used,
-the reconstructed data is twice the size of the original (experimental) data.
+the reconstructed data is twice the size of the original (experimental) data. Also shown is how ChiTargetOverN property may be varied away
+from the default 1.0; the dataset contains 270 data points and here set to be slightly higher at 300/270.
 
 .. testcode:: ExResolutionFactor
 
@@ -364,18 +399,22 @@ the reconstructed data is twice the size of the original (experimental) data.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
-   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1, ChiTargetOverN=300.0/270.0)
+   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=5000, ResolutionFactor=2, ChiTargetOverN=300.0/270.0)
 
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
+   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle2.readX(0))))
 
 Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at 0.000: 0.015 (ResolutionFactor=1)
-   Image at 0.000: 0.079 (ResolutionFactor=2)
+   Image at 0.000: 0.035 (ResolutionFactor=1)
+   Image at 0.000: 0.068 (ResolutionFactor=2)
+   Number of iterations: 33
+   Number of iterations: 20
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
@@ -383,16 +422,30 @@ Output:
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
 a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
 
-.. code-block:: python
+.. testcode:: ExResolutionFactor2
 
    Load(Filename=r'EMU00020884.nxs', OutputWorkspace='ws')
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
-   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, ResolutionFactor=10)
-   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, ResolutionFactor=20)
-   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, ResolutionFactor=40)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1)
+   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=25000, ResolutionFactor=10)
+   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=50000, ResolutionFactor=20)
+   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=75000, ResolutionFactor=40)
+
+   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle10.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle20.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle40.readX(0))))
+
+Output:
+
+.. testoutput:: ExResolutionFactor2
+
+   Number of iterations: 41
+   Number of iterations: 20
+   Number of iterations: 24
+   Number of iterations: 32
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center

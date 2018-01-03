@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
 
+#include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "IndirectTab.h"
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class RangeSelector;
 }
-}
+} // namespace MantidQt
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -25,10 +25,10 @@ class RangeSelector;
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -61,6 +61,9 @@ protected:
                                   const std::string &unitID,
                                   const std::string &suffix = "UNIT",
                                   std::string eMode = "");
+  /// Displays and logs the error for a workspace with an invalid type
+  void displayInvalidWorkspaceTypeError(const std::string &workspaceName,
+                                        Mantid::Kernel::Logger &log);
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;

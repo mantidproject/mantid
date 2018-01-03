@@ -25,6 +25,27 @@ void send_recv(const Communicator &comm) {
   }
 }
 
+void send_recv_status(const Communicator &comm) {
+  if (comm.size() < 2)
+    return;
+
+  std::vector<double> data{1.1, 2.2};
+
+  if (comm.rank() == 0)
+    (comm.send(1, 123, data.data(), 2));
+  (comm.send(1, 123, data.data(), 1));
+  if (comm.rank() == 1) {
+    std::vector<double> result1(2);
+    const auto status1 = comm.recv(0, 123, result1.data(), 2);
+    TS_ASSERT_EQUALS(*status1.count<double>(), 2);
+    TS_ASSERT_EQUALS(result1, data);
+    std::vector<double> result2(2);
+    const auto status2 = comm.recv(0, 123, result2.data(), 2);
+    TS_ASSERT_EQUALS(*status2.count<double>(), 1);
+    TS_ASSERT_EQUALS(result2, (std::vector<double>{1.1, 0.0}));
+  }
+}
+
 void isend_recv(const Communicator &comm) {
   int64_t data = 123456789 + comm.rank();
   int dest = (comm.rank() + 1) % comm.size();
@@ -89,6 +110,8 @@ public:
   }
 
   void test_send_recv() { runParallel(send_recv); }
+
+  void test_send_recv_status() { runParallel(send_recv_status); }
 
   void test_isend_recv() { runParallel(isend_recv); }
 
