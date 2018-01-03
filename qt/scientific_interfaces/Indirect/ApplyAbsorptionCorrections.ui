@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ApplyPaalmanPings</class>
- <widget class="QWidget" name="ApplyPaalmanPings">
+ <class>ApplyAbsorptionCorrections</class>
+ <widget class="QWidget" name="ApplyAbsorptionCorrections">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>906</width>
-    <height>697</height>
+    <width>704</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
-      <string>Input</string>
+      <string>Sample</string>
      </property>
      <layout class="QVBoxLayout" name="abscor_loInput">
       <item>
@@ -55,68 +55,15 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbOptions">
+    <widget class="QGroupBox" name="gbCorrections">
      <property name="title">
-      <string>Options</string>
+      <string>Corrections</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="ckShiftCan">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Shift x-values of container by adding:</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="ckUseCan">
-        <property name="text">
-         <string>Use Container:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <layout class="QHBoxLayout" name="loShiftFactor">
-        <item>
-         <widget class="QDoubleSpinBox" name="spCanShift">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>-999.990000000000009</double>
-          </property>
-          <property name="maximum">
-           <double>999.990000000000009</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="6" column="0">
-       <widget class="QCheckBox" name="ckUseCorrections">
-        <property name="text">
-         <string>Use Corrections:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCorrections" native="true">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -130,6 +77,7 @@
         <property name="workspaceSuffixes" stdset="0">
          <stringlist>
           <string>_flt_abs</string>
+          <string>_Corrections</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
@@ -142,18 +90,37 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="ckScaleCan">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Scale Container by factor:</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOptions">
+     <property name="title">
+      <string>Options</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="loScaleFactor">
+        <item>
+         <widget class="QDoubleSpinBox" name="spCanScale">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <double>999.990000000000009</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="1" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsContainer" native="true">
@@ -189,28 +156,44 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <layout class="QHBoxLayout" name="loScaleFactor">
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="loShiftFactor">
         <item>
-         <widget class="QDoubleSpinBox" name="spCanScale">
+         <widget class="QDoubleSpinBox" name="spCanShift">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="decimals">
            <number>5</number>
           </property>
+          <property name="minimum">
+           <double>-999.990000000000009</double>
+          </property>
           <property name="maximum">
            <double>999.990000000000009</double>
           </property>
           <property name="singleStep">
-           <double>0.100000000000000</double>
+           <double>0.010000000000000</double>
           </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <double>0.000000000000000</double>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="ckScaleCan">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Scale Container by factor:</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="cbGeometry">
@@ -251,6 +234,26 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="ckShiftCan">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Shift x-values of container by adding:</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="ckUseCan">
+        <property name="text">
+         <string>Use Container:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -261,7 +264,9 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true"/>
+       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPreview" native="true">
+        <zorder>gbOptions</zorder>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -471,22 +476,6 @@
     <hint type="destinationlabel">
      <x>784</x>
      <y>119</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCorrections</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>dsCorrections</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>145</x>
-     <y>256</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>784</x>
-     <y>245</y>
     </hint>
    </hints>
   </connection>

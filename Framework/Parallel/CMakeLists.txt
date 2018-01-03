@@ -23,6 +23,7 @@ set ( INC_FILES
 	inc/MantidParallel/IO/PulseTimeGenerator.h
 	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
+	inc/MantidParallel/Status.h
 	inc/MantidParallel/StorageMode.h
 	inc/MantidParallel/ThreadingBackend.h
 )
