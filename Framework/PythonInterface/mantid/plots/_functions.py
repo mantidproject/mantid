@@ -18,7 +18,7 @@ import numpy
 import mantid.kernel
 import mantid.api
 import mantid.dataobjects
-
+import matplotlib.colors
 
 def _getWkspIndexDistAndLabel(workspace, **kwargs):
     '''
@@ -187,6 +187,9 @@ def _getMDData1D(workspace,normalization):
 
 
 def _getMDData2D_bin_bounds(workspace,normalization,withError=False):
+    '''
+    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
+    '''
     coordinate,data,_=_getMDData(workspace,normalization,withError)
     assert len(coordinate)==2, 'The workspace is not 2D'
     return (coordinate[0],coordinate[1],data)
@@ -404,6 +407,34 @@ def contourf(axes, workspace, *args, **kwargs):
     _setLabels2D(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
 
+def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
+    (x,y,z)=_getUnevenData(workspace, distribution)
+    pcolortype=kwargs.pop('pcolortype','')
+    mini=numpy.min([numpy.min(i) for i in z])
+    maxi=numpy.max([numpy.max(i) for i in z])
+    if 'vmin' in kwargs:
+        mini=kwargs['vmin']
+    if 'vmax' in kwargs:
+        maxi=kwargs['vmax']
+    if 'norm' not in kwargs:
+        kwargs['norm']=matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
+    else:
+        if kwargs['norm'].vmin==None:
+            kwargs['norm'].vmin=mini
+        if kwargs['norm'].vmax==None:
+            kwargs['norm'].vmax=maxi    
+    for xi,yi,zi in zip(x,y,z):
+        XX,YY=numpy.meshgrid(xi,yi,indexing='ij')
+        if 'mesh' in pcolortype.lower():
+            cm=axes.pcolormesh(XX,YY,zi.reshape(-1,1),**kwargs)
+        elif 'fast' in pcolortype.lower():
+            cm=axes.pcolorfast(XX,YY,zi.reshape(-1,1),**kwargs)
+        else:
+            cm=axes.pcolor(XX,YY,zi.reshape(-1,1),**kwargs)
+    return cm
+
+    
+
 def pcolor(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.pcolor`
@@ -416,10 +447,18 @@ def pcolor(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
-
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        x,y,z=_getMDData2D_bin_bounds(workspace,normalization)
+    else:
+        (aligned, kwargs)=_getDataUnevenFlag(workspace,**kwargs)
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        if aligned:
+            kwargs['pcolortype']=''
+            return _pcolorpieces(axes, workspace, distribution, *args,**kwargs)
+        else:
+            (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=True)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 def pcolorfast(axes, workspace, *args, **kwargs):
@@ -434,10 +473,18 @@ def pcolorfast(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
-
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        x,y,z=_getMDData2D_bin_bounds(workspace,normalization)
+    else:
+        (aligned, kwargs)=_getDataUnevenFlag(workspace,**kwargs)
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        if aligned:
+            kwargs['pcolortype']='fast'
+            return _pcolorpieces(axes, workspace, distribution, *args,**kwargs)
+        else:
+            (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=True)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 def pcolormesh(axes, workspace, *args, **kwargs):
@@ -452,9 +499,18 @@ def pcolormesh(axes, workspace, *args, **kwargs):
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a histogram.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
     _setLabels2D(axes, workspace)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        x,y,z=_getMDData2D_bin_bounds(workspace,normalization)
+    else:
+        (aligned, kwargs)=_getDataUnevenFlag(workspace,**kwargs)
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        if aligned:
+            kwargs['pcolortype']='mesh'
+            return _pcolorpieces(axes, workspace, distribution, *args,**kwargs)
+        else:
+            (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=True)
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
@@ -471,31 +527,36 @@ def tripcolor(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tripcolor` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        xtemp,ytemp,z=_getMDData2D_bin_centers(workspace,normalization)
+        x,y=numpy.meshgrid(xtemp,ytemp)
+    else:
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
 
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
-def triplot(axes, workspace, *args, **kwargs):
-    '''
-    Essentially the same as :meth:`mantid.plots.pcolor`, but works
-    for non-uniform grids. Currently this only works with workspaces
-    that have a constant number of bins between spectra.
-
-    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    :param distribution: ``None`` (default) asks the workspace. ``False`` means
-                         divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
-
-    See :meth:`matplotlib.axes.Axes.triplot` for more information.
-    '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
-    _setLabels2D(axes, workspace)
-
-    return axes.triplot(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+#def triplot(axes, workspace, *args, **kwargs):
+#    '''
+#    Essentially the same as :meth:`mantid.plots.pcolor`, but works
+#    for non-uniform grids. Currently this only works with workspaces
+#    that have a constant number of bins between spectra.
+#
+#    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+#    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+#    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+#                         divide by bin width. ``True`` means do not divide by bin width.
+#                         Applies only when the the workspace is a histogram.
+#
+#    See :meth:`matplotlib.axes.Axes.triplot` for more information.
+#    '''
+#    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+#    (x,y,z) = _getContour(workspace, distribution)
+#    _setLabels2D(axes, workspace)
+#
+#    return axes.triplot(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
 def tricontour(axes, workspace, *args, **kwargs):
     '''
@@ -511,11 +572,23 @@ def tricontour(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        xtemp,ytemp,z=_getMDData2D_bin_centers(workspace,normalization)
+        x,y=numpy.meshgrid(xtemp,ytemp)
+    else:
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-
-    return axes.tricontour(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+    #tricontour segfaults if z is not finite
+    x=x.ravel()
+    y=y.ravel()
+    z=z.ravel()
+    condition=numpy.isfinite(z)
+    x=x[condition]
+    y=y[condition]
+    z=z[condition]
+    return axes.tricontour(x, y, z, *args, **kwargs)
 
 
 def tricontourf(axes, workspace, *args, **kwargs):
@@ -532,8 +605,20 @@ def tricontourf(axes, workspace, *args, **kwargs):
 
     See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
     '''
-    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-    (x,y,z) = _getContour(workspace, distribution)
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
+        xtemp,ytemp,z=_getMDData2D_bin_centers(workspace,normalization)
+        x,y=numpy.meshgrid(xtemp,ytemp)
+    else:
+        (distribution, kwargs) = _getDistribution(workspace, **kwargs)
+        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-
-    return axes.tricontourf(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
+    #tricontourf segfaults if z is not finite
+    x=x.ravel()
+    y=y.ravel()
+    z=z.ravel()
+    condition=numpy.isfinite(z)
+    x=x[condition]
+    y=y[condition]
+    z=z[condition]
+    return axes.tricontourf(x, y, z, *args, **kwargs)

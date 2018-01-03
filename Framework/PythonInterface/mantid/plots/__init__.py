@@ -60,6 +60,12 @@ def mypcolormesh(ax,ws,**kwargs):
         maxi=kwargs['vmax']
     if 'norm' not in kwargs:
         kwargs['norm']=colors.Normalize(vmin=mini, vmax=maxi)
+    else:
+        if kwargs['norm'].vmin==None:
+            kwargs['norm'].vmin=mini
+        if kwargs['norm'].vmax==None:
+            kwargs['norm'].vmax=maxi
+
     for inti,xi,yi in zip(I,x,y):
         XX,YY=np.meshgrid(xi,yi,indexing='ij')
         cm=ax.pcolormesh(XX,YY,inti.reshape(-1,1),**kwargs)
