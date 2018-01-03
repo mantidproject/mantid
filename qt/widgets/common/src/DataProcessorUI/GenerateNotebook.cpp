@@ -476,7 +476,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
 
   boost::tuple<QString, QString> loadString;
 
-  loadString = loadRunString(runs[0], instrument, prefix);
+  loadString = loadRunString(runs[0], instrument, prefix, outputName);
   loadStrings += boost::get<0>(loadString);
 
   // EXIT POINT if there is only one run
@@ -536,12 +536,15 @@ QString preprocessString(const QString &input_name1, const QString &input_name2,
 */
 boost::tuple<QString, QString> loadRunString(const QString &run,
                                              const QString &instrument,
-                                             const QString &prefix) {
+                                             const QString &prefix,
+                                             const QString &outputName) {
   QString loadString;
   // We do not have access to AnalysisDataService from notebook, so must load
   // run from file
   const QString filename = instrument + run;
-  const QString ws_name = prefix + run;
+  // Use the given output name, if given, otherwise construct it from the run
+  // number
+  const QString ws_name = outputName.isEmpty() ? prefix + run : outputName;
   loadString += "Load(";
   loadString += "Filename = '" + filename + "'";
   loadString += ", OutputWorkspace = '" + ws_name + "'";

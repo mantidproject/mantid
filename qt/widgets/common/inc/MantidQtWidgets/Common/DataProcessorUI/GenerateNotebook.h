@@ -84,9 +84,10 @@ QString DLLExport preprocessString(const QString &input_name1,
                                    const PreprocessingAlgorithm &preprocessor,
                                    const QString &options);
 
-boost::tuple<QString, QString> DLLExport
-loadRunString(const QString &run, const QString &instrument,
-              const QString &prefix);
+boost::tuple<QString, QString>
+    DLLExport loadRunString(const QString &run, const QString &instrument,
+                            const QString &prefix,
+                            const QString &outputName = QString());
 
 QString DLLExport
 completeOutputProperties(const QString &algName, size_t currentProperties);
