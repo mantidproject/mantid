@@ -26,6 +26,7 @@ from qtpy.QtTest import QTest
 from mantidqt.utils.qt.testing import requires_qapp,  select_item_in_combo_box, select_item_in_tree
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
+from mantidqt.widgets.interfacemanager import InterfaceManager
 
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
@@ -144,21 +145,19 @@ class WidgetTest(unittest.TestCase):
         self.assertTrue(widget.get_selected_algorithm() is None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
-    def test_execute_signal(self):
-        slot = Mock()
-        widget = AlgorithmSelectorWidget()
-        widget.execute_selected_algorithm.connect(slot)
-        self._select_in_tree(widget, 'DoStuff v.2')
-        widget.execute_button.click()
-        slot.assert_called_once_with('DoStuff', 2)
+    def test_execute_on_click(self):
+        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'DoStuff v.2')
+            widget.execute_button.click()
+            createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_return_press(self):
-        slot = Mock()
-        widget = AlgorithmSelectorWidget()
-        widget.execute_selected_algorithm.connect(slot)
-        self._select_in_tree(widget, 'DoStuff v.2')
-        QTest.keyClick(widget.search_box, Qt.Key_Return)
-        slot.assert_called_once_with('DoStuff', 2)
+    def test_execute_on_return_press(self):
+        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'DoStuff v.2')
+            QTest.keyClick(widget.search_box, Qt.Key_Return)
+            createDialog.assert_called_once_with('DoStuff', 2)
 
 
 if __name__ == '__main__':
