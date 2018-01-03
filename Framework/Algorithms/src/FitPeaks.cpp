@@ -740,7 +740,7 @@ void FitPeaks::fitSpectrumPeaks(
                           peakfunction, bkgdfunction);
 
     // process fitting result
-    processSinglePeakFitResult(wi, ipeak, expected_peak_centers, peakfunction,
+    ProcessSinglePeakFitResult(wi, ipeak, expected_peak_centers, peakfunction,
                                bkgdfunction, cost, fitted_peak_centers,
                                fitted_function_parameters, peak_chi2_vec);
   }
@@ -761,7 +761,7 @@ void FitPeaks::fitSpectrumPeaks(
  * @param peak_params_vector
  * @param peak_chi2_vec
  */
-void FitPeaks::processSinglePeakFitResult(
+void FitPeaks::ProcessSinglePeakFitResult(
     size_t wsindex, size_t peakindex,
     const std::vector<double> &expected_peak_positions,
     API::IPeakFunction_sptr peakfunction,
@@ -944,7 +944,9 @@ void FitPeaks::calculateFittedPeaks() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Estimate background
+/** Estimate background: There are two methods that will be tried.
+ * First, algorithm FindPeakBackground will be tried;
+ * If it fails, then a linear background estimator will be called.
  * @brief estimateBackground
  * @param wi
  * @param peak_window
@@ -1066,8 +1068,8 @@ int FitPeaks::EstimatePeakParameters(
   }
 
   // check peak position
-  size_t ileft = getXIndex(wi, peak_window.first);
-  size_t iright = getXIndex(wi, peak_window.second);
+  size_t ileft = GetXIndex(wi, peak_window.first);
+  size_t iright = GetXIndex(wi, peak_window.second);
 
   // check peak height
   const size_t MAGIC3(3);
@@ -1851,7 +1853,7 @@ void FitPeaks::ReduceBackground(const std::vector<double> &vec_x,
  * @param x
  * @return
  */
-size_t FitPeaks::getXIndex(size_t wi, double x) {
+size_t FitPeaks::GetXIndex(size_t wi, double x) {
   // check input
   if (wi >= m_inputMatrixWS->getNumberHistograms()) {
     g_log.error() << "getXIndex(): given workspace index " << wi
@@ -2096,6 +2098,7 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
  * @param peak_parameters
  * @param fitted_peaks
  * @param fitted_peaks_windows
+ * @param noevents
  */
 void FitPeaks::writeFitResult(size_t wi,
                               const std::vector<double> &expected_positions,
