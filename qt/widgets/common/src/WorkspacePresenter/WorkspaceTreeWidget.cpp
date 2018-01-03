@@ -44,7 +44,8 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, QWidget *parent)
+WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
+                                         QWidget *parent)
     : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
@@ -86,7 +87,6 @@ WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
 void WorkspaceTreeWidget::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
 
 void WorkspaceTreeWidget::setupWidgetLayout() {
-
   m_tree = new MantidTreeWidget(m_mantidDisplayModel, this);
   m_tree->setHeaderLabel("Workspaces");
 
@@ -205,17 +205,16 @@ Mantid::API::Workspace_sptr WorkspaceTreeWidget::getSelectedWorkspace() const {
 }
 
 bool WorkspaceTreeWidget::askUserYesNo(const std::string &caption,
-                                    const std::string &message) const {
-  return QMessageBox::question(
-             parentWidget(),
-             QString::fromStdString(caption), QString::fromStdString(message),
-             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+                                       const std::string &message) const {
+  return QMessageBox::question(parentWidget(), QString::fromStdString(caption),
+                               QString::fromStdString(message),
+                               QMessageBox::Yes,
+                               QMessageBox::No) == QMessageBox::Yes;
 }
 
 void WorkspaceTreeWidget::showCriticalUserMessage(
     const std::string &caption, const std::string &message) const {
-  QMessageBox::critical(parentWidget(),
-                        QString::fromStdString(caption),
+  QMessageBox::critical(parentWidget(), QString::fromStdString(caption),
                         QString::fromStdString(message));
 }
 
@@ -265,7 +264,7 @@ void WorkspaceTreeWidget::showRenameDialog(const StringList &wsNames) {
 * @param newName :: New name of a renamed workspace.
 */
 void WorkspaceTreeWidget::recordWorkspaceRename(const std::string &oldName,
-                                             const std::string &newName) {
+                                                const std::string &newName) {
   QString qs_oldName = QString::fromStdString(oldName);
   QString qs_newName = QString::fromStdString(newName);
 
@@ -335,7 +334,8 @@ void WorkspaceTreeWidget::excludeItemFromSort(MantidTreeWidgetItem *item) {
   counter++;
 }
 
-WorkspaceTreeWidget::SortDirection WorkspaceTreeWidget::getSortDirection() const {
+WorkspaceTreeWidget::SortDirection
+WorkspaceTreeWidget::getSortDirection() const {
   return m_sortDirection;
 }
 
@@ -344,7 +344,7 @@ WorkspaceTreeWidget::SortCriteria WorkspaceTreeWidget::getSortCriteria() const {
 }
 
 void WorkspaceTreeWidget::sortWorkspaces(SortCriteria criteria,
-                                      SortDirection direction) {
+                                         SortDirection direction) {
   if (isTreeUpdating())
     return;
   m_tree->setSortScheme(criteria == SortCriteria::ByName
@@ -543,7 +543,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
 * @param wsID :: An icon type code.
 */
 void WorkspaceTreeWidget::setItemIcon(QTreeWidgetItem *item,
-                                   const std::string &wsID) {
+                                      const std::string &wsID) {
   try {
     item->setIcon(0, QIcon(WORKSPACE_ICONS.getIcon(wsID)));
   } catch (std::runtime_error &) {
@@ -771,7 +771,7 @@ void WorkspaceTreeWidget::updateTree(const TopLevelItems &items) {
 * @param expanded Names of items who should expanded after being populated
 */
 void WorkspaceTreeWidget::populateTopLevel(const TopLevelItems &topLevelItems,
-                                        const QStringList &expanded) {
+                                           const QStringList &expanded) {
   // collect names of selected workspaces
   QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
   m_selectedNames.clear(); // just in case
@@ -1035,7 +1035,8 @@ void WorkspaceTreeWidget::addTableWorkspaceMenuItems(QMenu *menu) const {
 * @param menu : Parent menu.
 * @param wsName : Name of the selected workspace.
 */
-void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu, const QString &wsName) {
+void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
+                                            const QString &wsName) {
   QMenu *clearMenu = new QMenu(tr("Clear Options"), this);
 
   m_clearUB->setEnabled(hasUBMatrix(wsName.toStdString()));
@@ -1065,7 +1066,7 @@ bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
 * @param menuEntryName Text to be shown in menu
 */
 void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
-                                         QString menuEntryName) {
+                                            QString menuEntryName) {
   // Default to algo string if no entry name given
   if (menuEntryName.isEmpty())
     menuEntryName = algorithmString;
@@ -1599,7 +1600,9 @@ void WorkspaceTreeWidget::onClickShowListData() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowListData);
 }
 
-void WorkspaceTreeWidget::showListData() { m_mantidDisplayModel->showListData(); }
+void WorkspaceTreeWidget::showListData() {
+  m_mantidDisplayModel->showListData();
+}
 
 void WorkspaceTreeWidget::onClickShowSpectrumViewer() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSpectrumViewer);
@@ -1621,7 +1624,9 @@ void WorkspaceTreeWidget::onClickShowFileLog() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowLogs);
 }
 
-void WorkspaceTreeWidget::showLogs() { m_mantidDisplayModel->showLogFileWindow(); }
+void WorkspaceTreeWidget::showLogs() {
+  m_mantidDisplayModel->showLogFileWindow();
+}
 
 void WorkspaceTreeWidget::onClickShowSampleMaterial() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSampleMaterialWindow);
@@ -1688,8 +1693,8 @@ void WorkspaceTreeWidget::onClickClearUB() {
 * @param alg : algorithm to be executed
 * @param wait : determines whether or not a non-gui blocking wait should occur.
 */
-bool WorkspaceTreeWidget::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                                             const bool wait) {
+bool WorkspaceTreeWidget::executeAlgorithmAsync(
+    Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   return m_mantidDisplayModel->executeAlgorithmAsync(alg, wait);
 }
 

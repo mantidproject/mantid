@@ -23,8 +23,7 @@ Mantid::Kernel::Logger treelog("MantidTreeWidget");
 namespace MantidQt {
 namespace MantidWidgets {
 
-MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui,
-								   QWidget *parent)
+MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
     : QTreeWidget(parent), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
