@@ -61,17 +61,19 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep);
 
-QString DLLExport plotsString(
-    const std::vector<OptionsMap> &processingOptionsPerRow,
-    const QString &stitched_wsStr, const ProcessingAlgorithm &processor);
+QString DLLExport
+plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
+            const QString &stitched_wsStr,
+            const ProcessingAlgorithm &processor);
 
-QString DLLExport reduceRowString(
-    const RowData &data, const QString &instrument, const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const ProcessingAlgorithm &processor,
-    const ColumnOptionsMap &globalPreprocessingOptionsMap,
-    const OptionsMap &globalProcessingOptions,
-    std::vector<OptionsMap> &processingOptionsPerRow);
+QString DLLExport
+reduceRowString(const RowData &data, const QString &instrument,
+                const WhiteList &whitelist,
+                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+                const ProcessingAlgorithm &processor,
+                const ColumnOptionsMap &globalPreprocessingOptionsMap,
+                const OptionsMap &globalProcessingOptions,
+                std::vector<OptionsMap> &processingOptionsPerRow);
 
 boost::tuple<QString, QString> DLLExport
 loadWorkspaceString(const QString &runStr, const QString &instrument,
@@ -84,10 +86,9 @@ QString DLLExport preprocessString(const QString &input_name1,
                                    const PreprocessingAlgorithm &preprocessor,
                                    const QString &options);
 
-boost::tuple<QString, QString>
-    DLLExport loadRunString(const QString &run, const QString &instrument,
-                            const QString &prefix,
-                            const QString &outputName = QString());
+boost::tuple<QString, QString> DLLExport
+loadRunString(const QString &run, const QString &instrument,
+              const QString &prefix, const QString &outputName = QString());
 
 QString DLLExport
 completeOutputProperties(const QString &algName, size_t currentProperties);

@@ -39,7 +39,8 @@ namespace MantidWidgets {
 
 std::map<std::string, std::string> DLLExport
 parseKeyValueString(const std::string &str);
-MantidQt::MantidWidgets::DataProcessor::OptionsMap DLLExport parseKeyValueQString(const QString &str);
+MantidQt::MantidWidgets::DataProcessor::OptionsMap DLLExport
+parseKeyValueQString(const QString &str);
 // Trim leading/trailing whitespace and quotes from a string
 void trimWhitespaceAndQuotes(const QString &valueIn);
 // Trim whitespace, quotes and empty values from a string list

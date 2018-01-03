@@ -118,8 +118,7 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     notebook->codeCell(plotsString(processingOptionsPerRow,
                                    boost::get<1>(postProcessString),
-                                   m_processor)
-                           .toStdString());
+                                   m_processor).toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());
@@ -203,7 +202,8 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
         wsNames.append(processingOptions.at(propertyName));
     }
 
-    plotString += "GroupWorkspaces(InputWorkspaces = '" + wsNames.join(", ") + "', ";
+    plotString +=
+        "GroupWorkspaces(InputWorkspaces = '" + wsNames.join(", ") + "', ";
     plotString += "OutputWorkspace = '" + prefix + "groupWS'";
     plotString += ")\n";
   }

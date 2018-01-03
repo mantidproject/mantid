@@ -166,8 +166,7 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
 
 /** Convert an options map to a comma-separated list of key=value pairs
  */
-QString
-convertMapToString(const std::map<QString, QString> &optionsMap) {
+QString convertMapToString(const std::map<QString, QString> &optionsMap) {
   QString result;
   bool first = true;
 

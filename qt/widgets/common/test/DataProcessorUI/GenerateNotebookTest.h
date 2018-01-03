@@ -487,8 +487,7 @@ public:
 
     auto output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),
-        PostprocessingStep(userOptions, reflPostprocessor(),
-                           OptionsMap()));
+        PostprocessingStep(userOptions, reflPostprocessor(), OptionsMap()));
 
     std::vector<QString> result = {
         "#Post-process workspaces",
@@ -506,8 +505,7 @@ public:
     groupData = {{0, rowData0}, {1, rowData1}};
     output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),
-        PostprocessingStep(userOptions, reflPostprocessor(),
-                           OptionsMap()));
+        PostprocessingStep(userOptions, reflPostprocessor(), OptionsMap()));
 
     result = {"#Post-process workspaces",
               "Stitch1DMany(InputWorkspaces = "

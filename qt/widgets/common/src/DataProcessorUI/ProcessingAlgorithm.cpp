@@ -92,9 +92,7 @@ std::vector<QString> ProcessingAlgorithm::outputProperties() const {
 
 /** Returns the list of prefixes associated with the output properties
  */
-std::vector<QString> ProcessingAlgorithm::prefixes() const {
-  return m_prefix;
-}
+std::vector<QString> ProcessingAlgorithm::prefixes() const { return m_prefix; }
 }
 }
 }

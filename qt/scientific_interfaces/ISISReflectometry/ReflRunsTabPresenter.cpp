@@ -410,7 +410,8 @@ void ReflRunsTabPresenter::notifyADSChanged(
   * @return :: A map of the column name to the global pre-processing options
   * for that column
   */
-std::map<QString, OptionsMap> ReflRunsTabPresenter::getPreprocessingOptions() const {
+std::map<QString, OptionsMap>
+ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   // Note that there are no options for the Run(s) column
   auto transmissionOptions = OptionsMap(
