@@ -253,7 +253,7 @@ size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
 
 /**
  * Register a Tube as an Object Component Assembly. Has shape.
- * @param tube : Individual tube component assembly
+ * @param objTube : Individual tube component assembly
  * @return index assigned
  */
 size_t InstrumentVisitor::registerTubeObj(const ObjCompAssembly &objTube) {
