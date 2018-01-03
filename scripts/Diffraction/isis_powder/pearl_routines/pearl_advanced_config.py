@@ -7,6 +7,7 @@ general_params = {
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60,
+    "generate_absorb_corrections": False,
 
     "file_names": {
          "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
