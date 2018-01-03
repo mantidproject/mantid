@@ -143,14 +143,14 @@ of the workspaces has been executed correctly.
     print("The sum of all scattering spectra: {0:.6e}".format(total_all))
 
     # Calculate total scattering from the 'k01' detector bank
-    single_scatter_event_ws = mtd['k01_events_dat_list_p_x_y_n_id_t']
+    single_scatter_event_ws = mtd['k01_events_dat_list_p_x_y_n_id_t_ws']
     total_single = 0
     for i in range(single_scatter_event_ws.getNumberHistograms()):
       total_single += single_scatter_event_ws.readY(i)[0]
     print("The sum of all single scattering spectra: {0:.6e}".format(total_single))
 
     # Calculate total scattering from the 'k02' detector bank
-    multiple_scatter_event_ws = mtd['k02_events_dat_list_p_x_y_n_id_t']
+    multiple_scatter_event_ws = mtd['k02_events_dat_list_p_x_y_n_id_t_ws']
     total_multiple = 0
     for i in range(multiple_scatter_event_ws.getNumberHistograms()):
       total_multiple += multiple_scatter_event_ws.readY(i)[0]
