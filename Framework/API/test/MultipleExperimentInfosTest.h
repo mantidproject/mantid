@@ -62,7 +62,7 @@ public:
     }
 
     // remove the last one
-    mei.getExperimentInfo(nExperimentInfosToAdd - 1U)
+    mei.getExperimentInfo(nExperimentInfosToAdd - ((uint16_t)1U))
         ->mutableSample()
         .clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
