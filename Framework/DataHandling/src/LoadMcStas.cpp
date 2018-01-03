@@ -138,8 +138,8 @@ void LoadMcStas::exec() {
         .closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
     nxFile.closeGroup();
 
-    for (auto i = 0; i < m_scaterringWS.size(); i++) {
-      outputGroup->addWorkspace(m_scaterringWS[i]);
+    for (auto ws : m_scaterringWS) {
+      outputGroup->addWorkspace(ws);
     }
 
     setProperty("OutputWorkspace", outputGroup);
