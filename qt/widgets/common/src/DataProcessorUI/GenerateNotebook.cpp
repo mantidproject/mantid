@@ -325,9 +325,17 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
   @return string  of python code to plot I vs Q
   */
 QString plot1DString(const QStringList &ws_names) {
+
+  // Edit workspace names to access workspaces from the ADS
+  QStringList ads_workspaces;
+  for (const auto &ws_name : ws_names) {
+    if (!ws_name.isEmpty())
+      ads_workspaces.push_back("mtd['" + ws_name + "']");
+  }
+
   QString plotString;
   plotString += "fig = plots([";
-  plotString += vectorString(ws_names);
+  plotString += vectorString(ads_workspaces);
   plotString += "], title=['";
   plotString += ws_names.join("', '");
   plotString += "'], legendLocation=[1, 1, 4])\n";

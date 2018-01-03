@@ -526,7 +526,7 @@ public:
 
     auto output = plot1DString(ws_names);
     auto const result = QString(
-        "fig = plots([workspace1, workspace2], "
+        "fig = plots([mtd['workspace1'], mtd['workspace2']], "
         "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n");
 
     TS_ASSERT_EQUALS(result, output);
@@ -558,8 +558,10 @@ public:
         "GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
         "IvsLam_2', OutputWorkspace = 'IvsLam_groupWS')",
         "#Plot workspaces",
-        "fig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "TEST_WS3_TEST_WS4], title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', "
+        "fig = plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['TEST_WS3_TEST_WS4']], title=['IvsQ_binned_groupWS', "
+        "'IvsQ_groupWS', "
         "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4])",
         ""};
 
@@ -590,8 +592,8 @@ public:
                               "GroupWorkspaces(InputWorkspaces = 'IvsLam_1, "
                               "IvsLam_2', OutputWorkspace = 'IvsLam_groupWS')",
                               "#Plot workspaces",
-                              "fig = plots([IvsQ_binned_groupWS, "
-                              "IvsQ_groupWS, IvsLam_groupWS, ], "
+                              "fig = plots([mtd['IvsQ_binned_groupWS'], "
+                              "mtd['IvsQ_groupWS'], mtd['IvsLam_groupWS']], "
                               "title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', "
                               "'IvsLam_groupWS', ''], "
                               "legendLocation=[1, 1, 4])",
@@ -699,8 +701,9 @@ public:
         "= \'IvsLam_TOF_12345, IvsLam_TOF_12346\', OutputWorkspace = "
         "'IvsLam_groupWS')\\n#Plot "
         "workspaces\\nfig = "
-        "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "IvsQ_TOF_12345_TOF_12346], title=[\'IvsQ_binned_groupWS\', "
+        "plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['IvsQ_TOF_12345_TOF_12346']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
         "\'IvsQ_TOF_12345_TOF_12346\'], "
         "legendLocation=[1, 1, 4])\\n\",");
@@ -753,8 +756,9 @@ public:
         "= \'IvsLam_TOF_24681, IvsLam_TOF_24682\', OutputWorkspace = "
         "'IvsLam_groupWS')\\n#Plot "
         "workspaces\\nfig = "
-        "plots([IvsQ_binned_groupWS, IvsQ_groupWS, IvsLam_groupWS, "
-        "IvsQ_TOF_24681_TOF_24682], title=[\'IvsQ_binned_groupWS\', "
+        "plots([mtd['IvsQ_binned_groupWS'], mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS'], "
+        "mtd['IvsQ_TOF_24681_TOF_24682']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
         "\'IvsQ_TOF_24681_TOF_24682\'], "
         "legendLocation=[1, 1, 4])\\n\",");
@@ -825,8 +829,9 @@ public:
         "\'IvsQ_TOF_12345\', OutputWorkspace = 'IvsQ_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345\', "
         "OutputWorkspace = 'IvsLam_groupWS')\\n#Plot "
-        "workspaces\\nfig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, "
-        "IvsLam_groupWS, ], title=[\'IvsQ_binned_groupWS\', "
+        "workspaces\\nfig = plots([mtd['IvsQ_binned_groupWS'], "
+        "mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', "
         "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",");
     TS_ASSERT_EQUALS(notebookLines[64].toStdString(), groupWorkspacesString);
@@ -859,8 +864,9 @@ public:
         "\'IvsQ_TOF_12346\', OutputWorkspace = 'IvsQ_groupWS')\\n"
         "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12346\', "
         "OutputWorkspace = 'IvsLam_groupWS')\\n#Plot "
-        "workspaces\\nfig = plots([IvsQ_binned_groupWS, IvsQ_groupWS, "
-        "IvsLam_groupWS, ], title=[\'IvsQ_binned_groupWS\', "
+        "workspaces\\nfig = plots([mtd['IvsQ_binned_groupWS'], "
+        "mtd['IvsQ_groupWS'], "
+        "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', "
         "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",";
     TS_ASSERT_EQUALS(notebookLines[93].toStdString(), groupWorkspacesString);
