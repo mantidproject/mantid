@@ -207,14 +207,14 @@ Mantid::API::Workspace_sptr WorkspaceTreeWidget::getSelectedWorkspace() const {
 bool WorkspaceTreeWidget::askUserYesNo(const std::string &caption,
                                     const std::string &message) const {
   return QMessageBox::question(
-             dynamic_cast<QWidget *>(this->parent()),
+             parentWidget(),
              QString::fromStdString(caption), QString::fromStdString(message),
              QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
 }
 
 void WorkspaceTreeWidget::showCriticalUserMessage(
     const std::string &caption, const std::string &message) const {
-  QMessageBox::critical(dynamic_cast<QWidget *>(this->parent()),
+  QMessageBox::critical(parentWidget(),
                         QString::fromStdString(caption),
                         QString::fromStdString(message));
 }
