@@ -40,7 +40,7 @@ public:
   }
 
   void testHasOrientedLattice() {
-    uint16_t nExperimentInfosToAdd = 3;
+    constexpr uint16_t nExperimentInfosToAdd = 3;
 
     MultipleExperimentInfos mei;
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
@@ -56,13 +56,13 @@ public:
     }
 
     // take them away one by one starting with the first, leave the last one
-    for (uint16_t i = 0; i < (nExperimentInfosToAdd - 1); ++i) {
+    for (uint16_t i = 0; i < nExperimentInfosToAdd - 1; ++i) {
       mei.getExperimentInfo(i)->mutableSample().clearOrientedLattice();
       TS_ASSERT_EQUALS(mei.hasOrientedLattice(), true);
     }
 
     // remove the last one
-    mei.getExperimentInfo(nExperimentInfosToAdd - ((uint16_t)1U))
+    mei.getExperimentInfo((nExperimentInfosToAdd - 1))
         ->mutableSample()
         .clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);

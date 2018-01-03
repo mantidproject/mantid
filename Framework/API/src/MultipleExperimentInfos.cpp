@@ -104,7 +104,7 @@ void MultipleExperimentInfos::copyExperimentInfos(
 * Returns true if any experiment info sample has an oriented lattice attached
 */
 bool MultipleExperimentInfos::hasOrientedLattice() const {
-  for (auto i = 0; i < getNumExperimentInfo(); i++) {
+  for (uint16_t i = 0; i < getNumExperimentInfo(); i++) {
     if (getExperimentInfo(i)->sample().hasOrientedLattice()) {
       return true;
     }
