@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# flake8: noqa
 """A selection of utility functions related to testing of Qt-based GUI elements.
 """
 from __future__ import absolute_import
@@ -24,6 +25,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
+from .modal_tester import ModalTester
 
 
 # Reference to created QApplication instance so that item is kept alive

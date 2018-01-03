@@ -2,9 +2,13 @@ include ( SipQtTargetFunctions )
 
 set ( COMMON_INC_DIR ../../../widgets/common/inc )
 set ( HEADER_DEPENDS
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Message.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/MessageDisplay.h
 )
+
+find_package ( Boost COMPONENTS python REQUIRED )
 
 list ( APPEND common_link_libs
   ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -26,6 +30,8 @@ mtd_add_sip_module (
     Qt4::QtCore
     Qt4::QtGui
     ${PYTHON_LIBRARIES}
+    ${Boost_LIBRARIES}
+    API
   FOLDER Qt4
 )
 
@@ -39,8 +45,12 @@ mtd_add_sip_module (
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5
+    ${POCO_LIBRARIES}
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    ${PYTHON_LIBRARIES}
+    ${Boost_LIBRARIES}
+    API
   FOLDER Qt5
 )
