@@ -41,7 +41,9 @@ public:
    * @return Standard string name  */
   const std::string id() const override { return "WorkspaceSingleValue"; }
 
-  WorkspaceSingleValue(double value = 0.0, double error = 0.0);
+  WorkspaceSingleValue(
+      double value = 0.0, double error = 0.0,
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {

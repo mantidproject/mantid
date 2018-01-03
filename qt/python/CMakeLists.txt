@@ -27,7 +27,10 @@ if ( ENABLE_WORKBENCH )
   add_subdirectory ( mantidqt/widgets )
 
   # Setup dependency chain
-  add_dependencies ( mantidqt mantidqt_widgetscoreqt5 )
+  add_dependencies ( mantidqt
+    mantidqt_widgetscoreqt5
+    mantidqt_widgetscoreqt4
+  )
 
   ##########################################################################
   # Testing
@@ -39,8 +42,8 @@ if ( ENABLE_WORKBENCH )
     mantidqt/test/import_test.py
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
-    mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_algorithmselector.py
+    mantidqt/widgets/test/test_messagedisplay.py
   )
 
   # Tests

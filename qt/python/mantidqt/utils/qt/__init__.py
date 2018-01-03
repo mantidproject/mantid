@@ -50,7 +50,7 @@ def import_qtlib(modulename, package, attr=None):
         lib = import_module('.' + modulename + LIB_SUFFIX, package)
     except ImportError:
         lib = import_module(modulename + LIB_SUFFIX)
-    if attr:
+    if attr is not None:
         return getattr(lib, attr)
     else:
         return lib
@@ -72,10 +72,25 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     return the form class
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
-    if baseinstance:
+    if baseinstance is not None:
         return loadUi(filepath, baseinstance=baseinstance)
     else:
         return loadUiType(filepath)
+
+
+@contextmanager
+def block_signals(widget):
+    """
+    A context manager that helps to block widget's signals temporarily. Usage:
+
+        with block_signals(widget):
+            widget.do_actions_that_emit_signals()
+
+    :param widget: A Qt widget signals from which should be blocked.
+    """
+    widget.blockSignals(True)
+    yield
+    widget.blockSignals(False)
 
 
 @contextmanager
@@ -117,6 +132,7 @@ def add_actions(target, actions):
     target (menu or toolbar)
     :param target: An instance of QMenu or QToolbar
     :param actions: A collection of actions to be added
+    :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
     return loadUi(filepath, baseinstance=baseinstance)
@@ -140,3 +156,6 @@ def block_signals(widget):
             target.addMenu(action)
         elif isinstance(action, QAction):
             target.addAction(action)
+        else:
+            raise ValueError("Unexpected action type. "
+                             "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))

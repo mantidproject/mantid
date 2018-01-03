@@ -2,18 +2,15 @@
 add_python_package ( workbench EXECUTABLE )
 
 # Resource compiler
-if ( NOT _pyrcc_cmd )
+if ( NOT PYRCC5_CMD )
   # Newer versions of PyQt5 have a pyrcc_main python module, whereas older
   # versions have a pyrcc5 executable. We prefer calling the python module.
-  execute_process ( COMMAND
-    ${PYTHON_EXECUTABLE} -c "\"import imp;imp.find_module('PyQt5.pyrcc_main')\""
-    RESULT_VARIABLE _result
-    OUTPUT_QUIET ERROR_QUIET )
-  if ( _result )
-    set ( _pyrcc_cmd "${PYTHON_EXECUTABLE} -m PyQt5.pyrcc_main" )
+  execute_process ( COMMAND  ${PYTHON_EXECUTABLE} -c "import PyQt5.pyrcc_main" RESULT_VARIABLE _status)
+  if ( _status EQUAL 0 )
+    set ( PYRCC5_CMD ${PYTHON_EXECUTABLE} -m PyQt5.pyrcc_main CACHE string "Command line to use to run the PyQt5 resource compiler" )
   else ()
-    find_file ( _pyrcc_cmd "pyrcc5" )
-    if ( NOT _pyrcc_cmd )
+    find_file ( PYRCC5_CMD "pyrcc5" )
+    if ( NOT PYRCC5_CMD )
       message ( FATAL_ERROR "Unable to find PyQt5 resource compiler. Tried PyQt5.pyrcc_main & pyrcc5" )
     endif()
   endif ()
@@ -24,7 +21,7 @@ endif()
 set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
 set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py )
 add_custom_command ( OUTPUT ${_output_res_py}
-  COMMAND ${_pyrcc_cmd} -o ${_output_res_py} ${_qrc_file}
+  COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_qrc_file}
   COMMENT "Generating workbench resources module"
   DEPENDS ${_qrc_file}
 )

@@ -6,6 +6,13 @@ set ( HEADER_DEPENDS
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/MessageDisplay.h
 )
 
+list ( APPEND common_link_libs
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  Kernel
+  ${POCO_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+)
+
 # Wrapper module linked against Qt4
 mtd_add_sip_module (
   MODULE_NAME _widgetscoreqt4
@@ -13,7 +20,8 @@ mtd_add_sip_module (
   SIP_SRCS src/_widgetscore.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 4
-  LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
+  LINK_LIBS
+    ${common_link_libs}
     MantidQtWidgetsCommonQt4
     Qt4::QtCore
     Qt4::QtGui
@@ -28,11 +36,11 @@ mtd_add_sip_module (
   SIP_SRCS src/_widgetscore.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 5
-  LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
+  LINK_LIBS
+    ${common_link_libs}
     MantidQtWidgetsCommonQt5
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
-    ${PYTHON_LIBRARIES}
   FOLDER Qt5
 )
