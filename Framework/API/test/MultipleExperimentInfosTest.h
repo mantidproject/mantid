@@ -39,8 +39,8 @@ public:
                        copy.getExperimentInfo(0), mei.getExperimentInfo(0));
   }
 
-  void xtestHasOrientedLattice() {
-    int nExperimentInfosToAdd = 3;
+  void testHasOrientedLattice() {
+    uint16_t nExperimentInfosToAdd = 3;
 
     MultipleExperimentInfos mei;
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
