@@ -94,7 +94,7 @@ private:
                        std::vector<double> &vec_xmax);
 
   ///
-  double FitFunctionHighBackground(IAlgorithm_sptr fit,
+  double FitFunctionHighBackground(API::IAlgorithm_sptr fit,
                                    const double &exp_center,
                                    const std::pair<double, double> &fit_window,
                                    const size_t &ws_index,
@@ -102,6 +102,12 @@ private:
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc);
 
+  /// get vector X, Y and E in a given range
+  void GetRangeData(size_t iws, const std::pair<double, double> &fit_window,
+                    std::vector<double> *vec_x, std::vector<double> *vec_y,
+                    std::vector<double> *vec_e);
+
+  /// Reduce background
   void ReduceBackground(const std::vector<double> &vec_x,
                         std::vector<double> *vec_y, std::vector<double> *vec_e);
 

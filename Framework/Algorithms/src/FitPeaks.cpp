@@ -1366,10 +1366,10 @@ double FitPeaks::FitFunctionHighBackground(
 
   // Get partial of the data
   std::vector<double> vec_x, vec_y, vec_e;
-  GetRangeData(ws_index, fit_window, vec_x, vec_y, vec_e);
+  GetRangeData(ws_index, fit_window, &vec_x, &vec_y, &vec_e);
 
   // Reduce the background
-  reduceBackground(vec_x, vec_y, vec_e);
+  ReduceBackground(vec_x, &vec_y, &vec_e);
 
   //
 
@@ -1637,6 +1637,36 @@ std::pair<double, double> FitPeaks::GetPeakFitWindow(size_t wi, size_t ipeak) {
 
 //  return chi2;
 //}
+
+//----------------------------------------------------------------------------------------------
+/** get vector X, Y and E in a given range
+ * @brief FitPeaks::GetRangeData
+ * @param iws
+ * @param fit_window
+ * @param vec_x
+ * @param vec_y
+ * @param vec_e
+ */
+void FitPeaks::GetRangeData(size_t iws,
+                            const std::pair<double, double> &fit_window,
+                            std::vector<double> *vec_x,
+                            std::vector<double> *vec_y,
+                            std::vector<double> *vec_e) {
+
+  // TODO FIXME IMPLEMENT ASAP
+
+  // get the original vectors
+  const vector<double> orig_x = m_inputMatrixWS->histogram(iws).x().rawData();
+  size_t left_index;
+  size_t right_index;
+
+  size_t num_elements = right_index - left_index;
+  vec_x->resize(num_elements);
+  std::copy(orig_x.begin() + left_index, orig_x.begin() + right_index,
+            vec_x->begin());
+
+  return;
+}
 
 // find 2 local minima: draw a line as background to reduce
 // find 1 local minima: a flat background
