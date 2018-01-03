@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -37,6 +36,18 @@ using namespace Mantid;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
+size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
+  unsigned int index = r;
+  index *= 256;
+  index += g;
+  index *= 256;
+  index += b - 1;
+  return index;
+}
+
+GLColor defaultDetectorColor() { return GLColor(200, 200, 200); }
+} // namespace
 
 /// to be used in std::transform
 struct Sqrt {
@@ -191,26 +202,6 @@ void InstrumentActor::setUpWorkspace(
 
   /// Keep the pointer to the detid2index map
   m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
-}
-
-/** Used to set visibility of an actor corresponding to a particular component
- * When selecting a component in the InstrumentTreeWidget
- *
- * @param visitor :: Visitor to be accepted bu this actor.
- * @param rule :: A rule defining visitor acceptance by assembly actors.
- */
-bool InstrumentActor::accept(GLActorVisitor &visitor, VisitorAcceptRule rule) {
-  bool ok = true; // m_scene.accept(visitor, rule);
-  visitor.visit(this);
-  invalidateDisplayLists();
-  return ok;
-}
-
-bool InstrumentActor::accept(GLActorConstVisitor &visitor,
-                             GLActor::VisitorAcceptRule rule) const {
-  bool ok = true; // m_scene.accept(visitor, rule);
-  visitor.visit(this);
-  return ok;
 }
 
 void InstrumentActor::setComponentVisible(
@@ -731,14 +722,8 @@ void InstrumentActor::resetColors() {
   //  }
   //}
 
-  setupColors();
+  setupPickColors();
   invalidateDisplayLists();
-  /*if (m_scene.getNumberOfActors() > 0) {
-    if (auto actor = dynamic_cast<CompAssemblyActor *>(m_scene.getActor(0))) {
-      actor->setColors();
-      invalidateDisplayLists();
-    }
-  }*/
   emit colorMapChanged();
 }
 
@@ -750,7 +735,11 @@ void InstrumentActor::updateColors() {
 /**
  * @param on :: True or false for on or off.
  */
-void InstrumentActor::showGuides(bool on) { m_showGuides = on; }
+void InstrumentActor::showGuides(bool on)
+{
+  m_showGuides = on;
+  invalidateDisplayLists();
+}
 
 GLColor InstrumentActor::getColor(size_t index) const {
   if (index <= m_colors.size() - 1)
@@ -839,50 +828,13 @@ void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
 }
 
 //------------------------------------------------------------------------------
-/** Add a detector ID to the pick list (m_detIDs)
- * The order of detids define the pickIDs for detectors.
- *
- * @param id :: detector ID to add.
- * @return pick ID of the added detector
- */
-size_t InstrumentActor::pushBackDetid(Mantid::detid_t id) const {
- // m_detIDs.push_back(id);
-  return 0;//m_detIDs.size() - 1;
-}
-
-//------------------------------------------------------------------------------
-/** Add a non-detector component ID to the pick list (m_nonDetIDs)
- *
- * @param actor :: ObjComponentActor for the component added.
- * @param compID :: component ID to add.
- */
-void InstrumentActor::pushBackNonDetid(
-    ObjComponentActor *actor, Mantid::Geometry::ComponentID compID) const {
-  //m_nonDetActorsTemp.push_back(actor);
-  //m_nonDetIDs.push_back(compID);
-}
-
-void InstrumentActor::setupColors() {
+void InstrumentActor::setupPickColors() {
   const auto &componentInfo = getComponentInfo();
   m_pickColors.resize(componentInfo.size());
 
   for (size_t i = 0; i < componentInfo.size(); ++i) {
     m_pickColors[i] = makePickColor(i);
   }
-}
-
-//------------------------------------------------------------------------------
-/**
- * Set pick colors to non-detectors strored by calls to pushBackNonDetid().
- */
-void InstrumentActor::setupPickColors() {
-  /*assert(m_nonDetActorsTemp.size() == m_nonDetIDs.size());
-  const auto &componentInfo = getComponentInfo();
-  auto nDets = m_detIDs.size();
-  for (size_t i = 0; i < m_nonDetActorsTemp.size(); ++i) {
-    m_nonDetActorsTemp[i]->setPickColor(makePickColor(nDets + i));
-  }
-  m_nonDetActorsTemp.clear();*/
 }
 
 //------------------------------------------------------------------------------
@@ -1393,6 +1345,21 @@ void InstrumentActor::invalidateDisplayLists() const {
       m_useDisplayList[i] = false;
     }
   }
+}
+
+GLColor InstrumentActor::makePickColor(size_t pickID) {
+  pickID += 1;
+  unsigned char r, g, b;
+  r = static_cast<unsigned char>(pickID / 65536);
+  g = static_cast<unsigned char>((pickID % 65536) / 256);
+  b = static_cast<unsigned char>((pickID % 65536) % 256);
+  return GLColor(r, g, b);
+}
+
+size_t InstrumentActor::decodePickColor(const QRgb &c) {
+  return decodePickColorRGB(static_cast<unsigned char>(qRed(c)),
+                            static_cast<unsigned char>(qGreen(c)),
+                            static_cast<unsigned char>(qBlue(c)));
 }
 
 } // namespace MantidWidgets

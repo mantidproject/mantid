@@ -2,15 +2,13 @@
 #define INSTRUMENTACTOR_H_
 
 #include "DllOption.h"
-#include "GLActor.h"
-#include "GLActorVisitor.h"
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "GLColor.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
-#include "SampleActor.h"
-
+#include "MantidGeometry/IComponent.h"
 #include <boost/weak_ptr.hpp>
 #include <vector>
 
@@ -46,32 +44,27 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public GLActor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor: public QObject {
   Q_OBJECT
 public:
   /// Constructor
   InstrumentActor(const QString &wsName, bool autoscaling = true,
                   double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
-  ~InstrumentActor() override;
+  ~InstrumentActor();
   ///< Type of the GL object
   virtual std::string type() const { return "InstrumentActor"; }
   /// Draw the instrument in 3D
-  void draw(bool picking = false) const override;
+  void draw(bool picking = false) const;
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D &minBound,
-                      Mantid::Kernel::V3D &maxBound) const override;
-  /// Run visitors callback on each component
-  bool accept(GLActorVisitor &visitor,
-              VisitorAcceptRule rule = VisitAll) override;
-  /// Run visitors callback on each component (const version)
-  bool accept(GLActorConstVisitor &visitor,
-              VisitorAcceptRule rule = VisitAll) const override;
+                      Mantid::Kernel::V3D &maxBound) const;
+  /// Set a component (and all its children) visible.
   void setComponentVisible(Mantid::Geometry::ComponentID component);
   /// Toggle the visibility of the child actors (if exist).
-  void setChildVisibility(bool) override;
+  void setChildVisibility(bool);
   /// Check if any child is visible
-  bool hasChildVisible() const override;
+  bool hasChildVisible() const;
   /// Get the underlying instrument
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
@@ -191,6 +184,10 @@ public:
                              const Mantid::Kernel::V3D &up,
                              Mantid::Kernel::Quat &R);
 
+  /// Convert a "pick ID" to a colour to put into the pick image.
+  static GLColor makePickColor(size_t pickID);
+  /// Decode a pick colour and return corresponding "pick ID"
+  static size_t decodePickColor(const QRgb &c);
   /* Masking */
 
   void initMaskHelper() const;
@@ -224,11 +221,7 @@ private:
   void sumDetectorsRagged(QList<int> &dets, std::vector<double> &x,
                           std::vector<double> &y, size_t size) const;
 
-  size_t pushBackDetid(Mantid::detid_t) const;
-  void pushBackNonDetid(ObjComponentActor *actor,
-                        Mantid::Geometry::ComponentID compID) const;
-  void setupColors();//TODO: Rename to setupPickColors
-  void setupPickColors();//TODO: Remove
+  void setupPickColors();
 
   boost::shared_ptr<Mantid::API::IMaskWorkspace>
   getMaskWorkspaceIfExists() const;
@@ -276,9 +269,6 @@ private:
   /// pickID of the component
   /// is m_detIDs.size() + i.
   mutable std::vector<Mantid::Geometry::ComponentID> m_nonDetIDs;
-  /// Temporary stores addresses of actors for non-detector components until
-  /// initialisation completes
-  mutable std::vector<ObjComponentActor *> m_nonDetActorsTemp;
 
   /// All detector positions, in order of pickIDs, populated by Obj..Actor
   /// constructors

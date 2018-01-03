@@ -500,7 +500,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
   if (!m_pickImage || !m_pickImage->valid(x, y))
     return -1;
   QRgb pixel = m_pickImage->pixel(x, y);
-  return GLActor::decodePickColor(pixel);
+  return InstrumentActor::decodePickColor(pixel);
 }
 
 /**

@@ -239,7 +239,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 */
 void UnwrappedSurface::setColor(int index, bool picking) const {
   if (picking) {
-    auto c = GLActor::makePickColor(index);
+    auto c = InstrumentActor::makePickColor(index);
     unsigned char r, g, b;
     c.get(r, g, b);
     glColor3ub(r, g, b);
@@ -515,7 +515,7 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
     QColor color;
     int index = int(i);
     if (picking) {
-      GLColor c = GLActor::makePickColor(index);
+      GLColor c = InstrumentActor::makePickColor(index);
       unsigned char r, g, b;
       c.get(r, g, b);
       color = QColor(r, g, b);
