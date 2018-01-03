@@ -23,6 +23,17 @@ if ( ENABLE_WORKBENCH )
   # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
+  # Configure resources data in place for ease of development. The output
+  # file is added to the toplevel gitignore
+  set ( _qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc )
+  set ( _output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py )
+  add_custom_command ( OUTPUT ${_output_res_py}
+    COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_qrc_file}
+    COMMENT "Generating mantidqt resources module"
+    DEPENDS ${_qrc_file}
+  )
+  add_custom_target ( mantidqt_resources ALL DEPENDS ${_output_res_py} )
+
   # Now add any compiled sip targets
   add_subdirectory ( mantidqt/widgets )
 
@@ -30,6 +41,7 @@ if ( ENABLE_WORKBENCH )
   add_dependencies ( mantidqt
     mantidqt_widgetscoreqt5
     mantidqt_widgetscoreqt4
+    mantidqt_resources
   )
 
   ##########################################################################
