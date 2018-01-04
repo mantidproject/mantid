@@ -4,6 +4,7 @@ import unittest
 from mantid.kernel import DateAndTime
 from numpy import timedelta64, datetime64
 
+
 class DateAndTimeTest(unittest.TestCase):
 
     iso_str = "2008-12-18T17:58:38"
@@ -27,6 +28,16 @@ class DateAndTimeTest(unittest.TestCase):
         dt = str(dt)[:19]
         dt_np = str(dt_np)[:19]
         self.assertEquals(dt, dt_np)
+
+    def test_convert_from_np(self):
+        dt_np = datetime64('2000-01-01T00:00')
+        dt = DateAndTime(dt_np)
+
+        # convert both into ISO8601 strings up to the minutes b/c time was only specified that much
+        dt = str(dt)[:16]
+        dt_np = str(dt_np)[:16]
+        self.assertEquals(dt, dt_np)
+
 
 if __name__ == "__main__":
     unittest.main()
