@@ -93,9 +93,15 @@ variables = {
 
 
 def get_mode_specific_dict(mode):
-    return {"focused_cropping_values":
-            pdf_focused_cropping_values if mode == "PDF"
-            else rietveld_focused_cropping_values}
+    if mode is None:
+        raise RuntimeError("Failed to supply chopper mode")
+
+    mode = mode.lower()
+    if mode == "pdf":
+        return {"focused_cropping_values": pdf_focused_cropping_values}
+    if mode == "rietveld":
+        return {"focused_cropping_values": rietveld_focused_cropping_values}
+    raise ValueError("Invalid chopper mode: \"{}\"".format(mode))
 
 
 def get_all_adv_variables(mode="PDF"):
