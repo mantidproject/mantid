@@ -71,12 +71,10 @@ public:
         fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "10.0, 5.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
     TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "8.0, 2.5"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "12.0, 6.5"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.05"));
+        fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
 
@@ -85,10 +83,16 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
 
     fitpeaks.execute();
+
+    // check result
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // get fitted peak data
+    // TODO ASAP
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on init and setup
+  /** Test on single peak and 1 spectrum among many
     */
   void Ntest_singlePeakSpectrum() {
     // Generate input workspace
@@ -115,7 +119,6 @@ public:
         fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
 
@@ -135,7 +138,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on single peak on multiple spectra
+  /** Test on single peak on partial spectra
     */
   void Ntest_singlePeakMultiSpectra() {
     // Generate input workspace
@@ -246,6 +249,15 @@ public:
     return;
   }
 
+  void Later_test_HighBackgroundPeaks() {
+
+    // TODO - Use PG3_733 from StripVanadiumTest
+    // std::string inputWSName("PG3_733");
+    // std::string outputWSName("PG3_733_stripped");
+
+    return;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
@@ -341,13 +353,16 @@ public:
 
   void createTestData(const std::string &workspacename) {
     // ---- Create the simple workspace -------
+    int num_spec = 1; // shall be 3
+
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 300);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(num_spec,
+                                                                     300);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     // change the resolution of the binning
-    for (size_t i = 0; i < 3; ++i)
+    for (size_t i = 0; i < num_spec; ++i)
       WS->mutableX(i) *= 0.05;
 
     auto xvals = WS->points(0);
@@ -357,29 +372,33 @@ public:
                             2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2));
                    });
 
-    auto xvals1 = WS->points(1);
-    std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(),
-                   [](const double x) {
-                     return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
-                            4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2));
-                   });
+    if (num_spec > 1) {
+      auto xvals1 = WS->points(1);
+      std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(),
+                     [](const double x) {
+                       return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
+                              4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2));
+                     });
+    }
 
-    auto xvals2 = WS->points(2);
-    std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(),
-                   [](const double x) {
-                     return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
-                            3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2));
-                   });
+    if (num_spec > 2) {
+      auto xvals2 = WS->points(2);
+      std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(),
+                     [](const double x) {
+                       return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
+                              3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2));
+                     });
+    }
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
 
     AnalysisDataService::Instance().addOrReplace(workspacename, WS);
 
-    auto vecx = WS->x(2);
-    auto vecy = WS->y(2);
-    for (size_t i = 0; i < vecx.size(); ++i)
-      std::cout << vecx[i] << "\t" << vecy[i] << "\n";
+    //    auto vecx = WS->x(2);
+    //    auto vecy = WS->y(2);
+    //    for (size_t i = 0; i < vecx.size(); ++i)
+    //      std::cout << vecx[i] << "\t" << vecy[i] << "\n";
 
     return;
   }

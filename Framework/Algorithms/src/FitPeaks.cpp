@@ -378,8 +378,9 @@ void FitPeaks::processInputFunctions() {
                                 "simultanenously.");
   } else {
     // user specifies nothing
-    throw std::invalid_argument("Neither parameter value table nor initial "
-                                "parameter name/value vectors is specified.");
+    g_log.warning("Neither parameter value table nor initial "
+                  "parameter name/value vectors is specified. Fitting might "
+                  "not be reliable for peak profile other than Gaussian");
   }
 
   return;
@@ -423,8 +424,9 @@ void FitPeaks::processInputFitRanges() {
         // failed
         std::stringstream errss;
         errss << "Peak " << i
-              << ": use specifies an invalid range and peak center against "
-              << peakranges[0] << " < " << m_peakCenters[i] << peakranges[1];
+              << ": user specifies an invalid range and peak center against "
+              << peakranges[0] << " < " << m_peakCenters[i] << " < "
+              << peakranges[1];
         throw std::invalid_argument(errss.str());
       }
     } // END-FOR
@@ -1021,41 +1023,25 @@ int FitPeaks::EstimatePeakParameters(
     size_t wi, const std::pair<double, double> &peak_window,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction) {
-  // TODO/ISSUE/NOW - In development!
-
-  // find the maximum value with and without background
-  //  double max_value(0);
-  //  double peak_center(DBL_MAX);
-  //  size_t peak_center_index(INT_MAX);
-  //  double real_max =
-  //      findMaxValue(wi, peak_window, bkgdfunction, peak_center_index,
-  //      peak_center, max_value);
-
-  // copied from FindMaxValue
-  double left_window_boundary = peak_window.first;
-  double right_window_boundary = peak_window.second;
-
-  auto vecY = m_inputMatrixWS->y(wi);
-
-  double real_y_max = 0;
-  double max_value = 0;
-
   // get the range of start and stop to construct a function domain
   auto vec_x = m_inputMatrixWS->x(wi);
   std::vector<double>::const_iterator istart =
-      std::lower_bound(vec_x.begin(), vec_x.end(), left_window_boundary);
+      std::lower_bound(vec_x.begin(), vec_x.end(), peak_window.first);
   std::vector<double>::const_iterator istop =
-      std::lower_bound(vec_x.begin(), vec_x.end(), right_window_boundary);
+      std::lower_bound(vec_x.begin(), vec_x.end(), peak_window.second);
 
-  // FunctionDomain1DVector domain(m_inputWS->x(wi).begin(),
-  // m_inputWS->x(wi).end());
+  // calculate background
   FunctionDomain1DVector domain(istart, istop);
   FunctionValues values(domain);
   bkgdfunction->function(domain, values);
 
+  auto vecY = m_inputMatrixWS->y(wi);
+  double real_y_max = 0;
+  double max_value = 0;
   size_t start_index = static_cast<size_t>(istart - vec_x.begin());
-  size_t peak_center_index;
+  size_t peak_center_index(-1);
   double peak_center(0);
+
   for (size_t i = 0; i < values.size(); ++i) {
     double y = vecY[i + start_index] - values.getCalculated(i);
     if (y > max_value) {
@@ -1066,6 +1052,9 @@ int FitPeaks::EstimatePeakParameters(
     if (vecY[i] > real_y_max)
       real_y_max = y;
   }
+  if (peak_center_index > vec_x.size())
+    throw std::logic_error(
+        "It is not possible for not setting peak center index");
 
   // check peak position
   size_t ileft = GetXIndex(wi, peak_window.first);
@@ -1208,8 +1197,8 @@ double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
 double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                                API::IPeakFunction_sptr peak_function,
                                API::IBackgroundFunction_sptr bkgd_function,
-                               API::MatrixWorkspace_const_sptr dataws,
-                               size_t wsindex, double xmin, double xmax) {
+                               API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                               double xmin, double xmax) {
 
   // generate peak window
   std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
@@ -1228,6 +1217,10 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   IFunction_sptr fitfunc = boost::dynamic_pointer_cast<IFunction>(comp_func);
 
   // Set the properties
+  g_log.notice() << "[DB...About to call Fit()!"
+                 << "WS: " << dataws->getName()
+                 << ", number of spectra = " << dataws->getNumberHistograms()
+                 << ", index = " << wsindex << "\n";
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
@@ -1243,8 +1236,9 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 
   fit->executeAsChildAlg();
   if (!fit->isExecuted()) {
-    g_log.error("Fit for background is not executed. ");
-    throw std::runtime_error("Fit for background is not executed. ");
+    g_log.error("Fitting peak SD (single domain) failed to execute.");
+    throw std::runtime_error(
+        "Fitting peak SD (single domain) failed to execute.");
   }
 
   // Retrieve result
@@ -1729,7 +1723,7 @@ void FitPeaks::GetRangeData(size_t iws,
   vec_e->resize(num_elements);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + right_index,
             vec_y->begin());
-  std::copy(orig_e.begin() + left_index, orig_y.begin() + right_index,
+  std::copy(orig_e.begin() + left_index, orig_e.begin() + right_index,
             vec_e->begin());
 
   return;
@@ -2114,6 +2108,11 @@ void FitPeaks::writeFitResult(size_t wi,
                              "of expected and fitted peak positions "
                              "are not equal.");
 
+  if (noevents) {
+    // TODO - Find out something to do with this no-events case
+    ;
+  }
+
   // Fill the output peak position workspace
   auto vecx = output_peak_position_workspaces_->mutableX(wi);
   auto vecy = output_peak_position_workspaces_->mutableY(wi);
@@ -2139,6 +2138,7 @@ void FitPeaks::writeFitResult(size_t wi,
     // get row number
     size_t row_index = wi * m_numPeaksToFit;
     // check again with the column size versus peak parameter values
+    // TODO - BROKEN HERE NOW FIXME
     if (peak_parameters[ipeak].size() != m_fittedParamTable->columnCount() + 3)
       throw std::runtime_error(
           "Peak parameter vector for one peak has different sizes to output "

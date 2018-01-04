@@ -89,8 +89,8 @@ Inputs
 The inputs tends to be general enough for various use cases.
 
 
-Limitations
-###########
+Limitations on Partial Spectra
+##############################
 
  * For partial spectra peak fitting, the spectra must be consecutive.
 
