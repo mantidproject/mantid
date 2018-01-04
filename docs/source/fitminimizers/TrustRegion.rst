@@ -11,5 +11,10 @@ It is a reimplementation of part of `RALFit_nonlinear least squares solver <http
 
 It is listed in `a comparison of fitting minimizers <../concepts/FittingMinimizers.html>`__.
 
+Reference
+---------
+
+* A higher order method for solving nonlinear least-squares problems, N.I.M. Gould, T.Rees, and J.A. Scott, RAL-P-2017-010
+
 .. categories:: FitMinimizers
 

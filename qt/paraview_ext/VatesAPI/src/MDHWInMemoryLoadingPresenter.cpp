@@ -8,7 +8,6 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include <qwt_double_interval.h>
 
 #include "tbb/tbb.h"
 #include "vtkStructuredGrid.h"

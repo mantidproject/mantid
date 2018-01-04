@@ -67,37 +67,44 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
+  void calculateRelativeRotations(std::vector<double> &instrumentAngles,
+                                  const Kernel::V3D &tube1Position);
+
+  void fillDataScanMetaData(const NeXus::NXDouble &);
+  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
+  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
+                                const NeXus::NXFloat &);
+
   std::vector<Types::Core::DateAndTime>
   getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
+  Kernel::V3D getReferenceComponentPosition(
+      const API::MatrixWorkspace_sptr &instrumentWorkspace);
   bool containsCalibratedData(const std::string &filename) const;
 
-  void fillDataScanMetaData(const NeXus::NXDouble &);
   std::vector<double>
   getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                   const std::string &propertyName) const;
-  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
-  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
-                                const NeXus::NXFloat &);
 
   void initStaticWorkspace();
   void initMovingWorkspace(const NeXus::NXDouble &scan);
-  Kernel::V3D getReferenceComponentPosition(
-      const API::MatrixWorkspace_sptr &instrumentWorkspace);
-  void calculateRelativeRotations(std::vector<double> &instrumentAngles,
-                                  const Kernel::V3D &tube1Position);
+
   void loadDataScan();
+  API::MatrixWorkspace_sptr loadEmptyInstrument();
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
-  API::MatrixWorkspace_sptr loadEmptyInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
   void resolveScanType();
+  void setSampleLogs();
+  void computeThetaOffset();
 
+  double
+      m_offsetTheta; ///< the 2theta offset for D20 to account for dead pixels
   size_t m_sizeDim1; ///< size of dim1, number of tubes (D2B) or the whole
                      /// detector (D20)
   size_t m_sizeDim2; ///< size of dim2, number of pixels (1 for D20!)

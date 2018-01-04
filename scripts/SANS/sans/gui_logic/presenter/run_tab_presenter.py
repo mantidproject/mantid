@@ -22,15 +22,8 @@ from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresen
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
-                                       SAMPLE_SCATTER_INDEX, SAMPLE_SCATTER_PERIOD_INDEX,
-                                       SAMPLE_TRANSMISSION_INDEX, SAMPLE_TRANSMISSION_PERIOD_INDEX,
-                                       SAMPLE_DIRECT_INDEX, SAMPLE_DIRECT_PERIOD_INDEX,
-                                       CAN_SCATTER_INDEX, CAN_SCATTER_PERIOD_INDEX,
-                                       CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
-                                       CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
-                                       OPTIONS_SEPARATOR, OPTIONS_INDEX,
-                                       OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX, USER_FILE_INDEX)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, generate_table_index, OPTIONS_SEPARATOR,
+                                       OPTIONS_EQUAL)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
@@ -38,6 +31,13 @@ from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.work_handler import WorkHandler
+
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
+    # this should happen when this is called from outside Mantidplot and only then,
+    # the result is that attempting to plot will raise an exception
 
 
 class RunTabPresenter(object):
@@ -61,6 +61,9 @@ class RunTabPresenter(object):
         def on_processing_finished(self):
             self._presenter.on_processing_finished()
 
+        def on_multi_period_selection(self):
+            self._presenter.on_multi_period_selection()
+
         def on_data_changed(self):
             self._presenter.on_data_changed()
 
@@ -73,7 +76,8 @@ class RunTabPresenter(object):
 
         # Logger
         self.sans_logger = Logger("SANS")
-
+        # Name of grpah to output to
+        self.output_graph = 'SANS-Latest'
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
@@ -159,6 +163,9 @@ class RunTabPresenter(object):
 
             # Set appropriate view for the masking table presenter
             self._masking_table_presenter.set_view(self._view.masking_table)
+
+            # Set up the correct table row indices
+            self.on_multi_period_selection()
 
             # Set the appropriate view for the beam centre presenter
             self._beam_centre_presenter.set_view(self._view.beam_centre)
@@ -276,12 +283,22 @@ class RunTabPresenter(object):
 
             # 3. Add dummy row index to Options column
             self._set_indices()
+
+            # 4. Create the graph if continuous output is specified
+            if mantidplot:
+                if self._view.plot_results and not mantidplot.graph(self.output_graph):
+                    mantidplot.newGraph(self.output_graph)
+
         except Exception as e:
             self._view.halt_process_flag()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_multi_period_selection(self):
+        multi_period = self._view.is_multi_period_view()
+        self.table_index = generate_table_index(multi_period)
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
@@ -325,13 +342,13 @@ class RunTabPresenter(object):
         self._set_hidden_options(options, row)
 
     def _set_hidden_options(self, value, row):
-        self._view.set_cell(value, row, HIDDEN_OPTIONS_INDEX)
+        self._view.set_cell(value, row, self.table_index['HIDDEN_OPTIONS_INDEX'])
 
     def _get_options(self, row):
-        return self._view.get_cell(row, OPTIONS_INDEX, convert_to=str)
+        return self._view.get_cell(row, self.table_index['OPTIONS_INDEX'], convert_to=str)
 
     def _get_hidden_options(self, row):
-        return self._view.get_cell(row, HIDDEN_OPTIONS_INDEX, convert_to=str)
+        return self._view.get_cell(row, self.table_index['HIDDEN_OPTIONS_INDEX'], convert_to=str)
 
     def is_empty_row(self, row):
         """
@@ -339,7 +356,7 @@ class RunTabPresenter(object):
         :param row: the row index
         :return: True if the row is empty.
         """
-        indices = range(OPTIONS_INDEX + 1)
+        indices = range(self.table_index['OPTIONS_INDEX'] + 1)
         for index in indices:
             cell_value = self._view.get_cell(row, index, convert_to=str)
             if cell_value:
@@ -393,6 +410,15 @@ class RunTabPresenter(object):
         global_options += ","
         global_options += output_mode_selection
 
+        # Check if results should be plotted
+        plot_results_selection = "PlotResults=1" if self._view.plot_results else "PlotResults=0"
+        global_options += ","
+        global_options += plot_results_selection
+
+        # Get the name of the graph to output to
+        output_graph_selection = "OutputGraph={}".format(self.output_graph)
+        global_options += ","
+        global_options += output_graph_selection
         return global_options
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -827,21 +853,26 @@ class RunTabPresenter(object):
 
         # 2. Iterate over each row, create a table row model and insert it
         number_of_rows = self._view.get_number_of_rows()
+        is_multi_period_view = self._view.is_multi_period_view()
         for row in range(number_of_rows):
-            sample_scatter = self._view.get_cell(row=row, column=SAMPLE_SCATTER_INDEX, convert_to=str)
-            sample_scatter_period = self._view.get_cell(row=row, column=SAMPLE_SCATTER_PERIOD_INDEX, convert_to=str)
-            sample_transmission = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_INDEX, convert_to=str)
-            sample_transmission_period = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_PERIOD_INDEX, convert_to=str)  # noqa
-            sample_direct = self._view.get_cell(row=row, column=SAMPLE_DIRECT_INDEX, convert_to=str)
-            sample_direct_period = self._view.get_cell(row=row, column=SAMPLE_DIRECT_PERIOD_INDEX, convert_to=str)
-            can_scatter = self._view.get_cell(row=row, column=CAN_SCATTER_INDEX, convert_to=str)
-            can_scatter_period = self._view.get_cell(row=row, column=CAN_SCATTER_PERIOD_INDEX, convert_to=str)
-            can_transmission = self._view.get_cell(row=row, column=CAN_TRANSMISSION_INDEX, convert_to=str)
-            can_transmission_period = self._view.get_cell(row=row, column=CAN_TRANSMISSION_PERIOD_INDEX, convert_to=str)
-            can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
-            can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
-            output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
-            user_file = self._view.get_cell(row=row, column=USER_FILE_INDEX, convert_to=str)
+            sample_scatter = self.get_cell_value(row, 'SAMPLE_SCATTER_INDEX')
+            sample_transmission = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_INDEX')
+            sample_direct = self.get_cell_value(row, 'SAMPLE_DIRECT_INDEX')
+
+            can_scatter = self.get_cell_value(row, 'CAN_SCATTER_INDEX')
+            can_transmission = self.get_cell_value(row, 'CAN_TRANSMISSION_INDEX')
+            can_direct = self.get_cell_value(row, 'CAN_DIRECT_INDEX')
+
+            sample_scatter_period = self.get_cell_value(row, 'SAMPLE_SCATTER_PERIOD_INDEX')if is_multi_period_view else ""
+            sample_transmission_period = self.get_cell_value(row, 'SAMPLE_TRANSMISSION_PERIOD_INDEX')if is_multi_period_view else ""
+            sample_direct_period = self.get_cell_value(row, 'SAMPLE_DIRECT_PERIOD_INDEX')if is_multi_period_view else ""
+
+            can_scatter_period = self.get_cell_value(row, 'CAN_SCATTER_PERIOD_INDEX') if is_multi_period_view else ""
+            can_transmission_period = self.get_cell_value(row, 'CAN_TRANSMISSION_PERIOD_INDEX') if is_multi_period_view else ""
+            can_direct_period = self.get_cell_value(row, 'CAN_DIRECT_PERIOD_INDEX') if is_multi_period_view else ""
+
+            output_name = self.get_cell_value(row, 'OUTPUT_NAME_INDEX')
+            user_file = self.get_cell_value(row, 'USER_FILE_INDEX')
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
@@ -866,6 +897,9 @@ class RunTabPresenter(object):
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
+
+    def get_cell_value(self, row, column):
+        return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
 
     def _create_states(self, state_model, table_model, row_index=None):
         """
@@ -941,22 +975,39 @@ class RunTabPresenter(object):
         can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
+        # If one of the periods is not null, then we should switch the view to multi-period view
+        if any ((sample_scatter_period, sample_transmission_period, sample_direct_period, can_scatter_period,
+                can_transmission_period, can_direct_period)):
+            if not self._view.is_multi_period_view():
+                self._view.set_multi_period_view_mode(True)
+
         # 2. Create entry that can be understood by table
-        row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
-                    "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                    "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
-                                                               get_string_period(sample_scatter_period),
-                                                               sample_transmission,
-                                                               get_string_period(sample_transmission_period),
-                                                               sample_direct,
-                                                               get_string_period(sample_direct_period),
-                                                               can_scatter,
-                                                               get_string_period(can_scatter_period),
-                                                               can_transmission,
-                                                               get_string_period(can_transmission_period),
-                                                               can_direct,
-                                                               get_string_period(can_direct_period),
-                                                               output_name)
+        if self._view.is_multi_period_view():
+            row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+                        "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+                        "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
+                                                                   get_string_period(sample_scatter_period),
+                                                                   sample_transmission,
+                                                                   get_string_period(sample_transmission_period),
+                                                                   sample_direct,
+                                                                   get_string_period(sample_direct_period),
+                                                                   can_scatter,
+                                                                   get_string_period(can_scatter_period),
+                                                                   can_transmission,
+                                                                   get_string_period(can_transmission_period),
+                                                                   can_direct,
+                                                                   get_string_period(can_direct_period),
+                                                                   output_name)
+        else:
+            row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
+                        "CanScatter:{},CanTrans:{}," \
+                        "CanDirect:{},OutputName:{}".format(sample_scatter,
+                                                            sample_transmission,
+                                                            sample_direct,
+                                                            can_scatter,
+                                                            can_transmission,
+                                                            can_direct,
+                                                            output_name)
 
         self._view.add_row(row_entry)
 
