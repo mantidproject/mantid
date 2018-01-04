@@ -181,8 +181,11 @@ QString getReducedWorkspaceName(const QStringList &data,
  * @param data [in] : the row data to get option values for
  * @param globalOptions [in] : default property values from the global settings
  * @param whitelist [in] : the list of columns
- * @outputProperties [in] : the list of output property names
- * @prefixes [in] : the list of prefixes to apply to output workspace names
+ * @param allowInsertions [in] : if true, allow values to be inserted into the
+ * map if they do not exist; otherwise, only update existing values
+ * @param outputProperties [in] : the list of output property names
+ * @param prefixes [in] : the list of prefixes to apply to output workspace
+ * names
  * @return : a map of property names to value
  */
 OptionsMap getCanonicalOptions(const RowData *data,
@@ -193,7 +196,7 @@ OptionsMap getCanonicalOptions(const RowData *data,
                                const std::vector<QString> &prefixes) {
   // Compile all of the options into a single map - add them in reverse
   // order of precedence. Latter items are overwritten, or added if they
-  // do not yet exist in the map.
+  // do not yet exist in the map if allowInsertions is true.
   OptionsMap options = globalOptions;
   updateHiddenOptions(options, data, allowInsertions);
   updateUserOptions(options, data, whitelist, allowInsertions);

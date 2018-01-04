@@ -145,7 +145,8 @@ QString titleString(const QString &wsName) {
 
 /**
   Create string of python code to call plots() with the required workspaces
-  @param processingOptions : the properties that were used in the reduction
+  @param processingOptionsPerRow : the properties that were used in the
+  reduction for each row
   @param stitched_wsStr : string containing the name of the stitched
   (post-processed workspace)
   @param processor : the data processor algorithm
@@ -509,11 +510,11 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
 /**
  Create string of python code to run the preprocessing algorithm on specified
  workspaces
- @param input_name : name of workspace to combine with the other workspace
- @param output_name : other workspace will be combined with the one with this
- name
+ @param input_name1 : the name of the 1st workspace to combine
+ @param input_name2 : the name of the 2nd workspace to combine
+ @param output_name : the name to give to the output workspace
  @param preprocessor : the preprocessor algorithm
- @param options : options given for pre-processing
+ @param options : the properties to pass to the pre-processing algorithm
  @return string of python code
 */
 QString preprocessString(const QString &input_name1, const QString &input_name2,
@@ -537,9 +538,12 @@ QString preprocessString(const QString &input_name1, const QString &input_name2,
 
 /**
  Create string of python code to load a single workspace
- @param run : run to load
- @param instrument : name of the instrument
- @param prefix : the prefix to prepend to the output workspace name
+ @param run : the run to load
+ @param instrument : the name of the instrument
+ @param prefix : if the outputName is not given, the output name will
+ be constructed using the run number and this prefix
+ @param outputName : the output name to use. If empty, a default name
+ will be created based on the run number and prefix
  @return tuple of strings of python code and output workspace name
 */
 boost::tuple<QString, QString> loadRunString(const QString &run,

@@ -784,6 +784,7 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
  * @param columnValue [inout] :: the original value in the column;
  * this gets updated to the new (preprocessed) value for the column
  * if preprocessing was performed
+ * @param data [in] :: the data in the row
  */
 void GenericDataProcessorPresenter::preprocessColumnValue(
     const QString &columnName, QString &columnValue, RowData *data) {
@@ -809,6 +810,7 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
 /** Perform preprocessing on algorithm property values where applicable
  * @param options : the algorithm properties as a map of property name
  * to value
+ * @param data : the data in the row
 */
 void GenericDataProcessorPresenter::preprocessOptionValues(OptionsMap &options,
                                                            RowData *data) {
