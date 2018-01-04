@@ -215,6 +215,9 @@ QString plotsString(const std::vector<OptionsMap> &processingOptionsPerRow,
   // Plot I vs Q and I vs Lambda graphs
   plotString += "#Plot workspaces\n";
 
+  // Remove empty values
+  workspaceList.removeAll("");
+
   plotString += plot1DString(workspaceList);
 
   return plotString;
@@ -327,19 +330,37 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
   */
 QString plot1DString(const QStringList &ws_names) {
 
-  // Edit workspace names to access workspaces from the ADS
+  // Edit workspace names to access workspaces from the ADS. Note
+  // that we avoid creating python variables based on the workspace
+  // names because they may contain invalid characters
   QStringList ads_workspaces;
   for (const auto &ws_name : ws_names) {
-    if (!ws_name.isEmpty())
-      ads_workspaces.push_back("mtd['" + ws_name + "']");
+    ads_workspaces.push_back("mtd['" + ws_name + "']");
   }
+
+  // Use a legend location of 1 (meaning top-right) for all
+  // plots by default.
+  auto legendLocations = std::string("legendLocation=[1");
+  for (auto i = 1; i < ws_names.size(); ++i) {
+    // For the 3rd plot (IvsLam) use location=4 (bottom-right).
+    // It's not ideal to hard-code this here so longer term I'd
+    // like to refactor this to store the locations alongside the
+    // output properties.
+    if (i == 2)
+      legendLocations += ", 4";
+    else
+      legendLocations += ", 1";
+  }
+  legendLocations += "]";
 
   QString plotString;
   plotString += "fig = plots([";
   plotString += vectorString(ads_workspaces);
   plotString += "], title=['";
   plotString += ws_names.join("', '");
-  plotString += "'], legendLocation=[1, 1, 4])\n";
+  plotString += "'], ";
+  plotString += QString::fromStdString(legendLocations);
+  plotString += ")\n";
   return plotString;
 }
 
