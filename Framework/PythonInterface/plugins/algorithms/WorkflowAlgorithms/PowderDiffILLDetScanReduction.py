@@ -34,26 +34,26 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         self.declareProperty(name='NormaliseTo',
                              defaultValue='Monitor',
                              validator=StringListValidator(['None', 'Monitor']),
-                             doc='Normalise to monitor, or do not perform normalisation.')
+                             doc='Normalise to monitor, or skip normalisation.')
 
-        self.declareProperty(name='UsePreCalibratedData',
+        self.declareProperty(name='UseCalibratedData',
                              defaultValue=True,
-                             doc='Whether or not to use the calibrated data in the NeXus files')
+                             doc='Whether or not to use the calibrated data in the NeXus files.')
 
-        self.declareProperty(name='Output2D',
+        self.declareProperty(name='Output2DTubes',
                              defaultValue=False,
                              doc='Output a 2D workspace of height along tube against tube scattering angle.')
 
-        self.declareProperty(name='Output2DStraight',
+        self.declareProperty(name='Output2D',
                              defaultValue=False,
                              doc='Output a 2D workspace of height along tube against the real scattering angle.')
 
         self.declareProperty(name='Output1D',
                              defaultValue=True,
-                             doc='Whether or not to use the calibrated data in the NeXus files')
+                             doc='Output a 1D workspace with counts against scattering angle.')
 
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[], validator=FloatArrayOrderedPairsValidator()),
-                             doc='A comma separated list of minimum and maximum height range (in m)')
+                             doc='A comma separated list of minimum and maximum height range (in m).')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -77,24 +77,26 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
         output_workspaces = []
+        self._progress.report('Doing Output2DTubes Option')
+        if self.getProperty('Output2DTubes').value:
+            output2DTubes = SumOverlappingTubes(InputWorkspaces=input_workspaces,
+                                                OutputType='2DTubes',
+                                                HeightAxis=height_range)
+            output_workspaces.append(output2DTubes)
+
         self._progress.report('Doing Output2D Option')
         if self.getProperty('Output2D').value:
             output2D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='2D',
+                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range)
             output_workspaces.append(output2D)
-
-        self._progress.report('Doing Output2DStraight Option')
-        if self.getProperty('Output2DStraight').value:
-            output2Dstraight = SumOverlappingTubes(InputWorkspaces=input_workspaces,
-                                                   OutputType='2DStraight',
-                                                   HeightAxis=height_range)
-            output_workspaces.append(output2Dstraight)
 
         self._progress.report('Doing Output1D Option')
         if self.getProperty('Output1D').value:
             output1D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
-                                           OutputType='1DStraight',
+                                           OutputType='1D',
+                                           CropNegativeScatteringAngles=True,
                                            HeightAxis=height_range)
             output_workspaces.append(output1D)
         DeleteWorkspace('input_workspaces')
@@ -117,7 +119,7 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',') + 1 + runs.count('+') + 4)
 
         data_type = 'Raw'
-        if self.getPropertyValue('UsePreCalibratedData'):
+        if self.getPropertyValue('UseCalibratedData'):
             data_type = 'Calibrated'
 
         for runs_list in runs.split(','):

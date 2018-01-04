@@ -24,18 +24,18 @@ If the Normalise option is set then the counts for each point in the OutputWorks
 
 where :math:`C_{scaled, i}` is the scaled counts, :math:`C_i` the raw counts, :math:`N_{max}` is the maximum number of tube pixels contributing to any point in the OutputWorkspace, and :math:`N_{i}` is the number of tube pixels contributing to the point being scaled.
 
-2D Option
-+++++++++
+2DTubes Option
+++++++++++++++
 
 In this case the x-axis, the scattering angle, is the scattering angle of the tube centre. The height is the pixel height in the tube.
 
-2DStraight Option
-+++++++++++++++++
+2D Option
++++++++++
 
 In this case the x-axis is the true scattering angle of a pixel, so the Debye-Scherrer cones are effectively straightened. The x-axis is strictly positive in this case, the negative angles from the 2D case are put in the same bins as the equivalent positive angles. The height is the pixel height in the tube as for the 2D Option.
 
-1DStraight Option
-+++++++++++++++++
+1D Option
++++++++++
 
 This is effectively the 2DStraight option, with a single bin in the y-axis. For this case only the HeightAxis option can be given as a minimum and maximum.
 
@@ -46,12 +46,12 @@ If the instrument parameter ``mirror_detector_angles`` is set to true, then outp
 
 Usage
 -----
-**Example - an example of running SumOverlappingTubes in the 2D case.**
+**Example - an example of running SumOverlappingTubes in the 2DTubes case.**
 
 .. testcode:: SumOverlappingTubes2DComponent
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2D', ComponentForHeightAxis='tube_1')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2DTubes', ComponentForHeightAxis='tube_1')
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
     print('Counts: ' + str(ws.dataY(63)[2068:2078]))
     print('Errors: ' + str(ws.dataE(63)[2068:2078]))
@@ -66,12 +66,12 @@ Output:
     Errors: [ 2.03598273  3.00072517  3.46216187  4.1661015   5.29106717  4.88935243
       5.28366714  4.68457643  3.1474581   0.96348311]
 
-**Example - an example of running SumOverlappingTubes in the 1DStraight case.**
+**Example - an example of running SumOverlappingTubes in the 1D case.**
 
 .. testcode:: SumOverlappingTubes1DHeightRange
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1DStraight', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='1D', CropNegativeScatteringAngles=True, HeightAxis='-0.05,0.05')
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
     print('Counts: ' + str(ws.dataY(0)[2068:2078]))
     print('Errors: ' + str(ws.dataE(0)[2068:2078]))

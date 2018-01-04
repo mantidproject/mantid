@@ -40,11 +40,11 @@ void SumOverlappingTubes::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
-  std::vector<std::string> outputTypes{"2D", "2DStraight", "1DStraight"};
+  std::vector<std::string> outputTypes{"2DTubes", "2D", "1D"};
   declareProperty("OutputType", "2D",
                   boost::make_shared<StringListValidator>(outputTypes),
-                  "Whether to have the output in 2D, 2D with straightened "
-                  "Debye-Scherrer cones, or 1D.");
+                  "Whether to have the output in raw 2D, with no "
+                  "Debye-Scherrer cone correction, 2D or 1D.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
           "ScatteringAngleBinning", "0.05",
@@ -209,7 +209,7 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
                              "instrument. Please enter a value for the "
                              "HeightAxis parameter.");
   if ((componentName.length() > 0 && heightBinning.empty()) ||
-      (m_outputType != "1DStraight" && heightBinning.size() == 2)) {
+      (m_outputType != "1D" && heightBinning.size() == 2)) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
     const auto &ws = m_workspaceList.front();
@@ -230,13 +230,13 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
     }
   } else {
     if (heightBinning.size() != 3) {
-      if (heightBinning.size() == 2 && m_outputType == "1DStraight") {
+      if (heightBinning.size() == 2 && m_outputType == "1D") {
         m_heightAxis.push_back(heightBinning[0]);
         m_heightAxis.push_back(heightBinning[1]);
       } else
         throw std::runtime_error("Height binning must have start, step and end "
-                                 "values (except for 1DStraight option).");
-    } else if (m_outputType == "1DStraight") {
+                                 "values (except for 1D option).");
+    } else if (m_outputType == "1D") {
       m_heightAxis.push_back(heightBinning[0]);
       m_heightAxis.push_back(heightBinning[2]);
     } else {
@@ -251,7 +251,7 @@ void SumOverlappingTubes::getHeightAxis(const std::string &componentName) {
   m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
   m_endHeight = *max_element(m_heightAxis.begin(), m_heightAxis.end());
 
-  if (m_outputType == "1DStraight")
+  if (m_outputType == "1D")
     m_heightAxis = {(m_heightAxis.front() + m_heightAxis.back()) * 0.5};
 
   m_numHistograms = m_heightAxis.size();
@@ -296,7 +296,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       }
 
       double angle;
-      if (m_outputType == "2D")
+      if (m_outputType == "2DTubes")
         angle = atan2(pos.X(), pos.Z());
       else
         angle = specInfo.signedTwoTheta(i);
