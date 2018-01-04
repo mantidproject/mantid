@@ -19,6 +19,46 @@ from __future__ import absolute_import
 # system imports
 import sys
 import threading
+import time
+
+
+def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
+                        period_secs=0.05):
+    """Run the target in a separate thread and block the calling thread
+    until execution is complete.
+
+    :param target: A Python callable object
+    :param args: Arguments to pass to the callable
+    :param kwargs: Keyword arguments to pass to the callable
+    :param blocking_cb: An optional callback to process while waiting for the task
+    to finish
+    :param period_secs: Sleep for this many seconds at the start of each loop that checks
+    the task is still alive. This will be the minimum time between calls to blocking_cb.
+    :returns: An AsyncTaskResult object
+    """
+    blocking_cb = blocking_cb if blocking_cb is not None else lambda: None
+
+    class Receiver(object):
+        output, exception = None, None
+
+        def on_success(self, result):
+            self.output = result.output
+
+        def on_error(self, result):
+            self.exception = result.exception
+
+    recv = Receiver()
+    task = AsyncTask(target, args, kwargs, success_cb=recv.on_success,
+                     error_cb=recv.on_error)
+    task.start()
+    while task.is_alive():
+        time.sleep(period_secs)
+        blocking_cb()
+
+    if recv.exception is not None:
+        raise recv.exception
+    else:
+        return recv.output
 
 
 class AsyncTask(threading.Thread):
@@ -42,6 +82,7 @@ class AsyncTask(threading.Thread):
         self.target = target
         self.args = args
         self.kwargs = kwargs if kwargs is not None else {}
+
         self.success_cb = success_cb if success_cb is not None else lambda x: None
         self.error_cb = error_cb if error_cb is not None else lambda x: None
         self.finished_cb = finished_cb if finished_cb is not None else lambda: None
