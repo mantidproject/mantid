@@ -64,7 +64,8 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         instrument_name = input_workspaces[0].getInstrument().getName()
         supported_instruments = ['D2B', 'D20']
         if instrument_name not in supported_instruments:
-            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: ' + str(supported_instruments))
+            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
+                             + str(supported_instruments))
 
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
@@ -104,7 +105,6 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
         output_workspace_name = self.getPropertyValue('OutputWorkspace')
         RenameWorkspace(InputWorkspace=grouped_output_workspace, OutputWorkspace=output_workspace_name)
         self.setProperty('OutputWorkspace', output_workspace_name)
-
 
     def _load(self):
         """
