@@ -96,3 +96,12 @@ public:
       const QStringList &enabled = QStringList(),
       const QStringList &disabled = QStringList());
 };
+
+class WorkspaceTreeWidget : QWidget, IWorkspaceDockView, boost::enabled_shared_from_this<WorkspaceTreeWidget> {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
+%End
+public:
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+                      QWidget *parent /TransferThis/ = nullptr);
+};
