@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.kernel import DateAndTime
+import numpy
 from numpy import timedelta64, datetime64
 
 
@@ -30,7 +31,10 @@ class DateAndTimeTest(unittest.TestCase):
         self.assertEquals(dt, dt_np)
 
     def test_convert_from_np(self):
-        dt_np = datetime64('2000-01-01T00:00')
+        if numpy.__version__.startswith('1.7.'):
+            dt_np = datetime64('2000-01-01T00:00Z')
+        else: # newer numpy only uses UTC and warns on specifying timezones
+            dt_np = datetime64('2000-01-01T00:00')
         dt = DateAndTime(dt_np)
 
         # convert both into ISO8601 strings up to the minutes b/c time was only specified that much
