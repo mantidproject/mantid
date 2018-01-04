@@ -523,11 +523,11 @@ public:
     ws_names.append("workspace2");
 
     auto output = plot1DString(ws_names);
-    auto const result = QString(
+    auto const result = std::string(
         "fig = plots([mtd['workspace1'], mtd['workspace2']], "
-        "title=['workspace1', 'workspace2'], legendLocation=[1, 1, 4])\n");
+        "title=['workspace1', 'workspace2'], legendLocation=[1, 1])\n");
 
-    TS_ASSERT_EQUALS(result, output);
+    TS_ASSERT_EQUALS(result, output.toStdString());
   }
 
   void testPlotsString() {
@@ -560,7 +560,7 @@ public:
         "mtd['IvsLam_groupWS'], "
         "mtd['TEST_WS3_TEST_WS4']], title=['IvsQ_binned_groupWS', "
         "'IvsQ_groupWS', "
-        "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4])",
+        "'IvsLam_groupWS', 'TEST_WS3_TEST_WS4'], legendLocation=[1, 1, 4, 1])",
         ""};
 
     assertContainsMatchingLines(result, output);
@@ -593,7 +593,7 @@ public:
                               "fig = plots([mtd['IvsQ_binned_groupWS'], "
                               "mtd['IvsQ_groupWS'], mtd['IvsLam_groupWS']], "
                               "title=['IvsQ_binned_groupWS', 'IvsQ_groupWS', "
-                              "'IvsLam_groupWS', ''], "
+                              "'IvsLam_groupWS'], "
                               "legendLocation=[1, 1, 4])",
                               ""};
 
@@ -704,7 +704,7 @@ public:
         "mtd['IvsQ_TOF_12345_TOF_12346']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
         "\'IvsQ_TOF_12345_TOF_12346\'], "
-        "legendLocation=[1, 1, 4])\\n\",");
+        "legendLocation=[1, 1, 4, 1])\\n\",");
     ;
     TS_ASSERT_EQUALS(notebookLines[64].toStdString(),
                      groupWorkspacesStringFirstGroup);
@@ -759,7 +759,7 @@ public:
         "mtd['IvsQ_TOF_24681_TOF_24682']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', \'IvsLam_groupWS\', "
         "\'IvsQ_TOF_24681_TOF_24682\'], "
-        "legendLocation=[1, 1, 4])\\n\",");
+        "legendLocation=[1, 1, 4, 1])\\n\",");
 
     TS_ASSERT_EQUALS(notebookLines[93].toStdString(),
                      groupWorkspacesStringSecondGroup);
@@ -831,7 +831,7 @@ public:
         "mtd['IvsQ_groupWS'], "
         "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",");
+        "\'IvsLam_groupWS\'], legendLocation=[1, 1, 4])\\n\",");
     TS_ASSERT_EQUALS(notebookLines[64].toStdString(), groupWorkspacesString);
 
     // Second group
@@ -866,7 +866,7 @@ public:
         "mtd['IvsQ_groupWS'], "
         "mtd['IvsLam_groupWS']], title=[\'IvsQ_binned_groupWS\', "
         "\'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, 4])\\n\",";
+        "\'IvsLam_groupWS\'], legendLocation=[1, 1, 4])\\n\",";
     TS_ASSERT_EQUALS(notebookLines[93].toStdString(), groupWorkspacesString);
   }
 };
