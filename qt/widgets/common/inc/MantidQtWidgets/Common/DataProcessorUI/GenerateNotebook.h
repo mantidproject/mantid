@@ -36,8 +36,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <QStringList>
+#include <boost/optional.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <map>
 #include <set>
 #include <sstream>
@@ -99,7 +100,7 @@ public:
   GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
                    std::map<QString, PreprocessingAlgorithm> preprocessMap,
                    ProcessingAlgorithm processor,
-                   PostprocessingStep postprocessingStep,
+                   boost::optional<PostprocessingStep> postprocessingStep,
                    ColumnOptionsMap preprocessingInstructionsMap,
                    OptionsMap processingInstructions);
   virtual ~GenerateNotebook() = default;
@@ -107,6 +108,8 @@ public:
   QString generateNotebook(const TreeData &data);
 
 private:
+  bool hasPostprocessing() const;
+
   // The table ws name
   const QString m_wsName;
   // The instrument
@@ -120,7 +123,7 @@ private:
   // The processing (reduction) algorithm
   ProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  PostprocessingStep m_postprocessingStep;
+  boost::optional<PostprocessingStep> m_postprocessingStep;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   ColumnOptionsMap m_preprocessingOptionsMap;

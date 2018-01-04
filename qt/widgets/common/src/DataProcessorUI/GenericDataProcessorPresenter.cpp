@@ -522,9 +522,6 @@ there
 @param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
-  assert(hasPostprocessing() &&
-         "Postprocessing details required by notebook generator.");
-
   QString filename = m_view->requestNotebookPath();
   if (!filename.isEmpty()) {
     // Global pre-processing options as a map where keys are column
@@ -534,7 +531,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessing.m_map, m_processor, *m_postprocessing,
+        m_preprocessing.m_map, m_processor, m_postprocessing,
         preprocessingOptionsMap, m_processingOptions);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());

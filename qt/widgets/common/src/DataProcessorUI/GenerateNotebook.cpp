@@ -49,7 +49,8 @@ the corresponding hinting line edit in the view
 GenerateNotebook::GenerateNotebook(
     QString name, QString instrument, WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
+    ProcessingAlgorithm processor,
+    boost::optional<PostprocessingStep> postprocessingStep,
     ColumnOptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
       m_whitelist(std::move(whitelist)),
@@ -62,6 +63,13 @@ GenerateNotebook::GenerateNotebook(
   if (m_whitelist.size() < 2)
     throw std::invalid_argument(
         "A valid WhiteList must have at least two columns");
+}
+
+/** Check whether post-processing is applicable
+ * @return : true if there is a post-processing step
+ * */
+bool GenerateNotebook::hasPostprocessing() const {
+  return bool(m_postprocessingStep);
 }
 
 /**
@@ -107,10 +115,10 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Post-process string **/
     boost::tuple<QString, QString> postProcessString;
-    if (rowMap.size() > 1) {
+    if (hasPostprocessing() && rowMap.size() > 1) {
       // If there was only one run selected, it could not be post-processed
       postProcessString = postprocessGroupString(
-          rowMap, m_whitelist, m_processor, m_postprocessingStep);
+          rowMap, m_whitelist, m_processor, *m_postprocessingStep);
     }
     notebook->codeCell(boost::get<0>(postProcessString).toStdString());
 
