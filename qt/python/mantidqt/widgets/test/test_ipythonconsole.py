@@ -34,6 +34,11 @@ class InProcessIPythonConsoleTest(unittest.TestCase):
         self.assertTrue(hasattr(widget, "kernel_manager"))
         self.assertTrue(hasattr(widget, "kernel_client"))
 
+    def test_banner_extra_updates_banner(self):
+        widget = InProcessIPythonConsole(banner_extra="foo")
+        self.assertTrue(widget.banner.endswith("foo"))
+        self.assertTrue(widget.banner.startswith("Python"))
+
 
 if __name__ == '__main__':
     unittest.main()

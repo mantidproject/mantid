@@ -39,6 +39,15 @@ from mantidqt.utils.async import blocking_async_task
 class InProcessIPythonConsole(RichIPythonWidget):
 
     def __init__(self, *args, **kwargs):
+        """
+        A constructor matching that of RichIPythonWidget
+        :param args: Positional arguments passed directly to RichIPythonWidget
+        :param kwargs: Keyword arguments. The following are used by this
+        widget:
+          - banner_extra: An additinal string to append to the default banner
+        """
+        # remove our arguments
+        banner_extra = kwargs.pop("banner_extra", "")
         super(InProcessIPythonConsole, self).__init__(*args, **kwargs)
 
         # create an in-process kernel
@@ -50,6 +59,10 @@ class InProcessIPythonConsole(RichIPythonWidget):
         # use a separate thread for execution
         shell = kernel.shell
         shell.run_code = async_wrapper(shell.run_code, shell)
+
+        # custom banner
+        if banner_extra:
+            self.banner += "\n" + banner_extra
 
         # attach channels and start kenel
         kernel_client = kernel_manager.client()
