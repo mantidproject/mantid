@@ -1,5 +1,7 @@
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+#include <boost/make_shared.hpp>
+#include <boost/python.hpp>
 #include <numpy/arrayscalars.h>
 
 using Mantid::Types::Core::DateAndTime;
@@ -47,12 +49,15 @@ PyObject *to_datetime64(const DateAndTime &dateandtime) {
  */
 PyArray_Descr *descr_ns() { return func_PyArray_Descr("M8[ns]"); }
 
-Types::Core::DateAndTime to_dateandtime(PyObject *datetime) {
+// internal function that handles raw pointer
+boost::shared_ptr<Types::Core::DateAndTime>
+to_dateandtime(const PyObject *datetime) {
   if (!PyArray_IsScalar(datetime, Datetime)) {
     throw std::runtime_error("Expected datetime64");
   }
 
-  PyDatetimeScalarObject *npdatetime = (PyDatetimeScalarObject *)datetime;
+  const PyDatetimeScalarObject *npdatetime =
+      reinterpret_cast<const PyDatetimeScalarObject *>(datetime);
   npy_datetime value = npdatetime->obval;
 
   // DateAndTime only understands nanoseconds
@@ -74,7 +79,38 @@ Types::Core::DateAndTime to_dateandtime(PyObject *datetime) {
   default:
     throw std::runtime_error("Not implemented time unit");
   } // units
-  return DateAndTime(UNIX_EPOCH_NS + value);
+  return boost::make_shared<DateAndTime>(UNIX_EPOCH_NS + value);
+}
+
+boost::shared_ptr<Types::Core::DateAndTime>
+to_dateandtime(const boost::python::api::object &value) {
+  boost::python::extract<Types::Core::DateAndTime> converter_dt(value);
+  if (converter_dt.check()) {
+    return boost::make_shared<DateAndTime>(converter_dt());
+  }
+
+  boost::python::extract<std::string> converter_str(value);
+  if (converter_str.check()) {
+    return boost::make_shared<DateAndTime>(converter_str());
+  }
+
+  boost::python::extract<double> converter_dbl(value);
+  if (converter_dbl.check()) {
+    return boost::make_shared<DateAndTime>(converter_dbl());
+  }
+
+  boost::python::extract<int64_t> converter_int64(value);
+  if (converter_int64.check()) {
+    return boost::make_shared<DateAndTime>(converter_int64());
+  }
+
+  boost::python::extract<int64_t> converter_int32(value);
+  if (converter_int32.check()) {
+    return boost::make_shared<DateAndTime>(converter_int32());
+  }
+
+  // assume it is a numpy.datetime64
+  return to_dateandtime(value.ptr());
 }
 
 } // namespace Converters

@@ -23,19 +23,6 @@ std::string ISO8601StringPlusSpace(DateAndTime &self) {
   return self.toISO8601String() + " ";
 }
 
-boost::shared_ptr<DateAndTime> makeDateAndTime(boost::python::object &value) {
-  extract<std::string> converter_str(value);
-  if (converter_str.check()) {
-    return boost::make_shared<DateAndTime>(converter_str());
-  }
-  extract<int64_t> converter_int(value);
-  if (converter_int.check()) {
-    return boost::make_shared<DateAndTime>(converter_int());
-  }
-  return boost::make_shared<DateAndTime>(
-      Converters::to_dateandtime(value.ptr()));
-}
-
 void export_DateAndTime() {
   class_<DateAndTime>("DateAndTime", no_init)
       // Constructors
@@ -53,7 +40,7 @@ void export_DateAndTime() {
           (arg("self"), arg("total_nanoseconds")),
           "Construct a total number of nanoseconds since 1990-01-01T00:00"))
       .def("__init__",
-           make_constructor(makeDateAndTime, default_call_policies(),
+           make_constructor(Converters::to_dateandtime, default_call_policies(),
                             (arg("other"))),
            "Construct from numpy.datetime64")
       .def("total_nanoseconds", &DateAndTime::totalNanoseconds, arg("self"),

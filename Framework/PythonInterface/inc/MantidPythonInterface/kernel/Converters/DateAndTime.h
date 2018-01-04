@@ -24,6 +24,7 @@
  */
 #include "MantidKernel/DateAndTime.h"
 #include <Python.h>
+#include <boost/python/object.hpp>
 #include <numpy/ndarraytypes.h>
 
 namespace Mantid {
@@ -36,7 +37,8 @@ PyObject *to_datetime64(const Types::Core::DateAndTime &dateandtime);
 npy_datetime to_npy_datetime(const Types::Core::DateAndTime &dateandtime);
 PyArray_Descr *descr_ns();
 
-Types::Core::DateAndTime to_dateandtime(PyObject *datetime);
+boost::shared_ptr<Types::Core::DateAndTime>
+to_dateandtime(const boost::python::api::object &value);
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
