@@ -304,6 +304,7 @@ def StartLiveData(*args, **kwargs):
 
 # ---------------------------- Fit ---------------------------------------------
 
+
 def fitting_algorithm(inout=False):
     """
     Decorator generating code for fitting algorithms (Fit, CalculateChiSquared,
@@ -318,7 +319,8 @@ def fitting_algorithm(inout=False):
         """
         def wrapper(*args, **kwargs):
             function, input_workspace = _get_mandatory_args(function_name,
-                ["Function", "InputWorkspace"], *args, **kwargs)
+                                                            ["Function", "InputWorkspace"],
+                                                            *args, **kwargs)
             # Remove from keywords so it is not set twice
             if "Function" in kwargs:
                 del kwargs['Function']
@@ -565,6 +567,7 @@ def CutMD(*args, **kwargs):
         return out_names[0]
 # enddef
 
+
 _replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
 
 
@@ -600,7 +603,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+    if arguments.get(__STORE_KEYWORD__, False):
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
@@ -610,6 +613,8 @@ def RenameWorkspace(*args, **kwargs):
 
     return _gather_returns("RenameWorkspace", lhs, algm)
 # enddef
+
+
 _replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
 
 # --------------------------------------------------- --------------------------
@@ -624,10 +629,8 @@ def _get_function_spec(func):
     try:
         if six.PY2:
             argspec = inspect.getargspec(func)
-        elif six.PY3:
-            argspec = inspect.getfullargspec(func)
         else:
-            raise RuntimeError('Only works for python2 or python3')
+            argspec = inspect.getfullargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -775,6 +778,7 @@ def _is_workspace_property(prop):
         # Doesn't look like a workspace property
         return False
 
+
 def _is_function_property(prop):
     """
     Returns True if the property is a fit function
@@ -784,6 +788,7 @@ def _is_function_property(prop):
     :return:  True if the property is considered a fit function
     """
     return isinstance(prop, _api.FunctionProperty)
+
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
