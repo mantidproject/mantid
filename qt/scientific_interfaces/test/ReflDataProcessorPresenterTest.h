@@ -168,10 +168,10 @@ public:
         .WillOnce(Return("UniformEven"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -252,10 +252,10 @@ public:
         .WillOnce(Return("Uniform"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -347,10 +347,10 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -431,10 +431,10 @@ public:
         .WillOnce(Return("LogValue"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));
@@ -515,10 +515,10 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(QString()));
@@ -576,10 +576,10 @@ public:
         .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillOnce(Return(ColumnOptionsMap()));
+        .WillOnce(Return(ColumnOptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
-        .WillOnce(Return(OptionsMap()));
+        .WillOnce(Return(OptionsQMap()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
         .Times(1)
         .WillOnce(Return(""));

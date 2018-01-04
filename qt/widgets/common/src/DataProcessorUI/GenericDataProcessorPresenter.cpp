@@ -261,8 +261,10 @@ void GenericDataProcessorPresenter::acceptViews(
 }
 
 bool GenericDataProcessorPresenter::areOptionsUpdated() {
-  auto newPreprocessingOptions = m_mainPresenter->getPreprocessingOptions();
-  auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
+  auto newPreprocessingOptions =
+      convertColumnOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
+  auto newProcessingOptions =
+      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
   auto newPostprocessingOptions =
       m_mainPresenter->getPostprocessingOptionsAsString();
 

@@ -128,7 +128,7 @@ private:
   // hinting line edits
   ColumnOptionsMap m_preprocessingOptionsMap;
   // Options to reduction algorithm specified in the view via hinting line edit
-  std::map<QString, QString> m_processingOptions;
+  OptionsMap m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line
   // edit
 };

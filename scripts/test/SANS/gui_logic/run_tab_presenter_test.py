@@ -374,7 +374,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_that_get_processing_options_returns_correct_value(self):
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
-        expected_result = 'UseOptimizations=1,OutputMode=PublishToADS,PlotResults=1,OutputGraph=SANS-Latest'
+        expected_result = {'UseOptimizations':'1','OutputMode':'PublishToADS','PlotResults':'1','OutputGraph':'SANS-Latest'}
 
         result = presenter.get_processing_options()
 

@@ -63,12 +63,13 @@ class MainPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         # Act
-        pre_processing_options = presenter.getProcessingOptionsAsString()
+        pre_processing_options = presenter.getProcessingOptions()
 
         # Assert
-        expected = 'UseOptimizations=1,OutputMode=PublishToADS,PlotResults=1,OutputGraph=SANS-Latest'
+        expected = {'UseOptimizations':'1','OutputMode':'PublishToADS','PlotResults':'1', \
+                    'OutputGraph':'SANS-Latest'}
         self.assertEqual(expected, pre_processing_options)
-        self.assertFalse(presenter.getPreprocessingOptionsAsString())
+        self.assertFalse(presenter.getPreprocessingOptions())
         self.assertFalse(presenter.getPostprocessingOptionsAsString())
 
         # Clean up

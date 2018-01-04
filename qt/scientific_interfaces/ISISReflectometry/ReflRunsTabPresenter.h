@@ -70,12 +70,10 @@ public:
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  std::map<QString, MantidWidgets::DataProcessor::OptionsMap>
+  MantidWidgets::DataProcessor::ColumnOptionsQMap
   getPreprocessingOptions() const override;
-  QString getPreprocessingOptionsAsString() const override;
-  MantidWidgets::DataProcessor::OptionsMap
+  MantidWidgets::DataProcessor::OptionsQMap
   getProcessingOptions() const override;
-  QString getProcessingOptionsAsString() const override;
   QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;

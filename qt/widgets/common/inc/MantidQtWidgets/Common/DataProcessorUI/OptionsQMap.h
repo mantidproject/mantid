@@ -1,5 +1,5 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
 /** This file defines the OptionsData type alias used by
    the DataProcessor widget.
 
@@ -25,24 +25,19 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-
-#include <QString>
-#include <map>
+#include <QVariantMap>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-/// A map of key=value pairs
-using OptionsMap = std::map<QString, QString>;
-/// A map of column name to options that are applicable to that column
-using ColumnOptionsMap = std::map<QString, OptionsMap>;
-/// Convert a QMap of options to a std::map of options
-OptionsMap DLLExport convertOptionsFromQMap(const OptionsQMap &src);
-/// Convert a QMap of column options to a std::map of column options
-ColumnOptionsMap DLLExport convertColumnOptionsFromQMap(const ColumnOptionsQMap &src);
+/// A map where the key is a string containing the property name and
+/// the value is a string continaing the property value
+using OptionsQMap = QVariantMap;
+/// A map where the key is a string containing the column name and the
+/// value is an OptionsQMap containing the properties applicable to that
+/// column
+using ColumnOptionsQMap = QVariantMap;
 }
 }
 }
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSMAP_H
+#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H

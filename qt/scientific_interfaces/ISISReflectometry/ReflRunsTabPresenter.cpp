@@ -404,50 +404,32 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests global pre-processing options as a string. Options are supplied by
+/** Requests global pre-processing options. Options are supplied by
   * the main presenter and there can be multiple sets of options for different
   * columns that need to be preprocessed.
   * @return :: A map of the column name to the global pre-processing options
   * for that column
+  * the main presenter.
+  * @return :: Global pre-processing options
   */
-std::map<QString, OptionsMap>
-ReflRunsTabPresenter::getPreprocessingOptions() const {
+ColumnOptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
+  ColumnOptionsQMap result;
 
-  // Note that there are no options for the Run(s) column
-  auto transmissionOptions = OptionsMap(
+  // Note that there are no options for the Run(s) column so just add
+  // Transmission Run(s)
+  auto transmissionOptions = OptionsQMap(
       m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup()));
-  return {{"Transmission Run(s)", transmissionOptions}};
-}
+  result["Transmission Run(s)"] = transmissionOptions;
 
-/** Requests global pre-processing options as a string. This should not
- * be used - use getPreprocessingOptions instead. This is because the
- * preprocessing options are a map of column names to an OptionsMap of
- * the actual key=value pairs. It is not clear how to represent
- * this as a string, and in any case it is much better to use the map
- * directly instead.
- * @return :: Global pre-processing options as a string
- */
-QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
-
-  throw std::runtime_error("Not implemented: getPreprocessingOptionsAsString");
-  return QString();
+  return result;
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-OptionsMap ReflRunsTabPresenter::getProcessingOptions() const {
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
   return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
-}
-
-/** Requests global processing options. Options are supplied by the main
-* presenter
-* @return :: Global processing options as a string
-*/
-QString ReflRunsTabPresenter::getProcessingOptionsAsString() const {
-  return convertMapToString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global post-processing options as a string. Options are supplied by

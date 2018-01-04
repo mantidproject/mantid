@@ -76,7 +76,7 @@ std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
 *options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-OptionsMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
@@ -89,7 +89,7 @@ OptionsMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 *options
 * @return :: Global processing options
 */
-OptionsMap ReflMainWindowPresenter::getReductionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getReductionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
