@@ -32,87 +32,11 @@
 #include <cmath>
 #include <stdexcept>
 
-//***************************************************************************
-//
-// CommandHistory struct
-//
-//***************************************************************************
 /**
- * Add a block of lines to the store
- * @param block
  */
-void CommandHistory::addCode(QString block) {
-  QStringList lines = block.split("\n");
-  QStringListIterator iter(lines);
-  while (iter.hasNext()) {
-    this->add(iter.next());
-  }
+}
 }
 
-/**
- * Add a command to the store.
- */
-void CommandHistory::add(QString cmd) {
-  // Ignore duplicates that are the same as the last command entered and just
-  // reset the pointer
-  int ncmds = m_commands.count();
-  if (ncmds > 1 && m_commands.lastIndexOf(cmd) == ncmds - 2) {
-    // Reset the index pointer
-    m_current = ncmds - 1;
-    return;
-  }
-
-  // If the stack is full, then remove the oldest
-  if (ncmds == m_hist_maxsize + 1) {
-    m_commands.removeFirst();
-  }
-  if (!m_commands.isEmpty()) {
-    // Remove blankline
-    m_commands.removeLast();
-  }
-  // Add the command and an extra blank line
-  m_commands.append(cmd);
-  m_commands.append("");
-
-  // Reset the index pointer
-  m_current = m_commands.count() - 1;
-}
-
-/**
- * Is there a previous command
- * @returns A boolean indicating whether there is command on the left of the
- * current index
- */
-bool CommandHistory::hasPrevious() const {
-  return !m_commands.isEmpty() && m_current > 0;
-}
-
-/**
- * Get the item pointed to by the current index and move it back one
- */
-QString CommandHistory::getPrevious() const {
-  return m_commands.value(--m_current);
-}
-
-/**
- * Is there a command next on the stack
- */
-bool CommandHistory::hasNext() const {
-  return !m_commands.isEmpty() && m_current < m_commands.count() - 1;
-}
-
-/**
- * Get the item pointed to by the current index and move it down one
- */
-QString CommandHistory::getNext() const {
-  return m_commands.value(++m_current);
-}
-
-//***************************************************************************
-//
-// ScriptEditor class
-//
-//***************************************************************************
 // The colour for a success marker
 QColor ScriptEditor::g_success_colour = QColor("lightgreen");
 // The colour for an error marker
