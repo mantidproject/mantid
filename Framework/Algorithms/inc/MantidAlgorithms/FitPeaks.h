@@ -90,7 +90,7 @@ private:
   double FitFunctionSD(API::IAlgorithm_sptr fit,
                        API::IPeakFunction_sptr peak_function,
                        API::IBackgroundFunction_sptr bkgd_function,
-                       API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax);
 
   double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
@@ -177,7 +177,7 @@ private:
   //------- Workspaces
   //-------------------------------------------------------------
   /// mandatory input and output workspaces
-  API::MatrixWorkspace_const_sptr m_inputMatrixWS;
+  API::MatrixWorkspace_sptr m_inputMatrixWS;
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
   API::MatrixWorkspace_sptr
       output_peak_position_workspaces_; // output workspace for peak positions
