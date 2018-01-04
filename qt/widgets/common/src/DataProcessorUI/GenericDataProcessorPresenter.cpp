@@ -794,7 +794,7 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
   // Get the options for the preprocessing algorithm
   auto preprocessor = m_preprocessing.m_map.at(columnName);
   OptionsMap options;
-  if (m_preprocessing.hasOptions(columnName) > 0) {
+  if (m_preprocessing.hasOptions(columnName)) {
     auto globalOptions = m_preprocessing.m_options.at(columnName);
     options = getCanonicalOptions(data, globalOptions, m_whitelist, false);
   }
