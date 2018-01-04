@@ -57,6 +57,9 @@ Types::Core::DateAndTime to_dateandtime(PyObject *datetime) {
 
   // DateAndTime only understands nanoseconds
   switch (npdatetime->obmeta.base) {
+  case NPY_FR_m: // minutes
+    value *= 60000000000;
+    break;
   case NPY_FR_s: // second
     value *= 1000000000;
     break;
