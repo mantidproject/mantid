@@ -180,16 +180,43 @@ void Q1DWeighted::exec() {
     tof_ws->setBinEdges(0, XOut);
 
     /**
-     * * TODO:
+     * TODO:
      * Find the index of X for the 1st positive and for the last positive
      * https://stackoverflow.com/questions/41791298/finding-position-of-element-of-a-vector-that-satisfies-given-condition-in-c
-     * /
+     */
     const MantidVec &xValues = tof_ws->readX(0);
+    const MantidVec &yValues = tof_ws->readY(0);
+
+    size_t first_non_zero = 0, last_non_zero = yValues.size() - 1;
+    bool in_the_zone = false;
+
+    for (size_t i = 0; i != yValues.size(); i++) {
+
+        if (!in_the_zone) {
+          if (yValues[i] == 0) {
+
+          } else {
+            first_non_zero = i;
+            in_the_zone = true;
+          }
+
+        } else {
+
+          if (yValues[i] == 0) {
+            if (i < last_non_zero) {
+              last_non_zero = i;
+            }
+          } else {
+            last_non_zero = yValues.size();
+          }
+        }
+      }
+
     
-    auto wl_min = *std::min_element(xValues.begin(), xValues.end());
+    auto wl_min = xValues[first_non_zero];
     tof_ws->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom",
                                      true);
-    auto wl_max = *std::max_element(xValues.begin(), xValues.end());
+    auto wl_max = xValues[last_non_zero-1];
     tof_ws->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom",
                                      true);
 
