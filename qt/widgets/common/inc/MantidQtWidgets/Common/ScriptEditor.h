@@ -68,7 +68,7 @@ public:
   };
 
 public:
-  /// Constructor
+  ScriptEditor(const QString &language, QWidget *parent = nullptr);
   ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
                const QString &settingsGroup = "");
   /// Destructor

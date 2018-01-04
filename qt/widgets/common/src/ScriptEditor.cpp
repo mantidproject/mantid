@@ -32,8 +32,20 @@
 #include <cmath>
 #include <stdexcept>
 
+namespace {
 /**
+ * Return a new instance of a lexer based on the given language
+ * @param language A string defining the language. Currently hardcoded to
+ * Python.
+ * @param editor The editor that the lexer will be installed on.
+ * @return A new QsciLexer instance
  */
+QsciLexer *createLexerFromLanguage(const QString &language,
+                                   QsciScintilla *editor) {
+  if (language != "Python")
+    throw std::invalid_argument("createLexerFromLanguage: Unsupported "
+                                "language. Supported languages=Python");
+  return new QsciLexerPython(editor);
 }
 }
 
@@ -46,10 +58,19 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 // Public member functions
 //------------------------------------------------
 /**
+ * Construction based on a string defining the langauge used
+ * for syntax highlighting
+ * @param language A string choosing the language for the lexer
+ * @param parent Parent widget
+ */
+ScriptEditor::ScriptEditor(const QString &language, QWidget *parent)
+    : ScriptEditor(parent, createLexerFromLanguage(language, this)) {}
+
+/**
  * Constructor
- * @param parent :: The parent widget (can be NULL)
- * @param codelexer :: define the syntax highlighting and code completion.
- * @param settingsGroup :: Used when saving settings to persistent store
+ * @param parent The parent widget (can be NULL)
+ * @param codelexer define the syntax highlighting and code completion.
+ * @param settingsGroup Used when saving settings to persistent store
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
                            const QString &settingsGroup)
