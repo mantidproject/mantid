@@ -181,6 +181,7 @@ private:
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
   API::MatrixWorkspace_sptr
       output_peak_position_workspaces_; // output workspace for peak positions
+  bool is_d_space_;
 
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
@@ -227,6 +228,10 @@ private:
   /// flag whether the peak center workspace has only a subset of spectra to fit
   bool m_partialSpectra;
   std::vector<double> m_peakPosTolerances;
+  double m_peakDSpacePercentage;
+
+  /// Flag for observing peak width
+  bool observe_peak_width_;
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;

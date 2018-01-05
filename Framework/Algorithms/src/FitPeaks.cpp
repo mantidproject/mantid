@@ -14,6 +14,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -139,8 +140,6 @@ void FitPeaks::init() {
 
   auto min = boost::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
-  // TODO/ISSUE/NOW - Implement this and use it as an estimation of peak fit
-  // window
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
                   "The estimated peak width as a "
                   "percentage of the d-spacing "
@@ -285,6 +284,10 @@ void FitPeaks::processInputs() {
     m_eventNumberWS = getProperty("EventNumberWorkspace");
   else
     m_eventNumberWS = 0;
+  if (m_inputMatrixWS->getAxis(0)->unit()->unitID() == "dSpacing")
+    is_d_space_ = true;
+  else
+    is_d_space_ = false;
 
   // spectra to fit
   int start_wi = getProperty("StartWorkspaceIndex");
@@ -324,10 +327,22 @@ void FitPeaks::processInputs() {
     throw std::runtime_error("number of peaks to fit is zero.");
   ProcessInputPeakTolerance();
   processInputFitRanges();
+  // about how to estimate the peak width
+  m_peakDSpacePercentage = getProperty("PeakWidthPercent");
+  if (isEmpty(m_peakDSpacePercentage))
+    m_peakDSpacePercentage = -1;
+  else if (m_peakDSpacePercentage < 0)
+    throw std::invalid_argument("Peak D-spacing percentage cannot be negative!");
 
   // set up background
   m_highBackground = getProperty("HighBackground");
   m_bkgdSimga = getProperty("FindBackgroundSigma");
+
+  // about peak width and other peak parameter estimating method
+  observe_peak_width_ = false;
+  if (m_peakFunction->name().compare('Gaussian') == )
+    if (!(is_d_space_ && m_peakDSpacePercentage < 0))
+        observe_peak_width_ = true;
 
   g_log.notice("[DB] Process inputs [OVER]");
 
@@ -1032,6 +1047,8 @@ void FitPeaks::EstimateBackground(size_t wi,
  * @param peakfunction
  * @param bgkdfunction
  */
+// FIXME - TODO - NOTE: It is still in a mushy definition when and how to estimate peak parameters
+//                      under different scenarios
 int FitPeaks::EstimatePeakParameters(
     size_t wi, const std::pair<double, double> &peak_window,
     API::IPeakFunction_sptr peakfunction,
@@ -1100,12 +1117,32 @@ int FitPeaks::EstimatePeakParameters(
     //    lastPeakParameters[HEIGHT] = max_value;
   }
 
-  // estimate FWHM (left and right) by observation
+  // set the peak center
   if (result == GOOD) {
-    // TODO - Implement!
     // use values from background to locate FWHM
     peakfunction->setCentre(peak_center);
   }
+
+  // Estimate FHWM (peak width)
+  if (is_d_space_ && m_peakDSpacePercentage > 0)
+  {
+    // width from guessing from delta(D)/D
+    double start_width = peak_center * m_peakDSpacePercentage;
+    peakfunction->setFwhm(start_width);
+  }
+  else if (observe_peak_width_)
+  {
+    // TODO observe peak width
+    // estimate FWHM (left and right) by observation
+    throw std::runtime_error("Observe peak width is not implemented yet!");
+  }
+  else
+  {
+    // get from last peak or from input!
+    throw std::runtime_error("Implement how to get FWHM from last peak or input");
+    ;
+  }
+
 
   return result;
 }
