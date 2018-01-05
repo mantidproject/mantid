@@ -209,7 +209,6 @@ void LoadMcStas::readEventData(
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
   } catch (Exception::InstrumentDefinitionError &e) {
-    std::string errorMsg = e.what();
     g_log.warning()
         << "When trying to read the instrument description in the Nexus file: "
         << filename << " the following error is reported: " << e.what()
