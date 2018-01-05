@@ -12,9 +12,6 @@ DECLARE_ALGORITHM(GroupWorkspaces)
 using namespace API;
 using namespace Kernel;
 
-/// Default constructor
-GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group() {}
-
 /// Initialisation method
 void GroupWorkspaces::init() {
 

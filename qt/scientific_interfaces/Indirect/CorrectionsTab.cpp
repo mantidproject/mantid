@@ -1,5 +1,6 @@
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QSettings>
 
@@ -99,6 +100,31 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
   m_batchAlgoRunner->addAlgorithm(convertAlg);
 
   return outputName;
+}
+
+/*
+ * Displays and logs an invalid workspace type error, for the workspace
+ * with the specified name.
+ *
+ * @param workspaceName The name of the workspace.
+ * @param log           The logger for sending log messages.
+ */
+void CorrectionsTab::displayInvalidWorkspaceTypeError(
+    const std::string &workspaceName, Mantid::Kernel::Logger &log) {
+  QString errorMessage =
+      "Invalid workspace loaded, ensure a MatrixWorkspace is "
+      "entered into the field.\n";
+
+  if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          workspaceName)) {
+    errorMessage += "Consider loading the WorkspaceGroup first into mantid, "
+                    "and then choose one of its items here.\n";
+    log.error() << "Workspace Groups are currently not allowed.\n";
+  } else {
+    log.error() << "Workspace " << workspaceName
+                << " is not a MatrixWorkspace.\n";
+  }
+  emit showMessageBox(errorMessage);
 }
 
 } // namespace CustomInterfaces

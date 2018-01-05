@@ -16,6 +16,9 @@ set QT4_BIN=%THIRD_PARTY_DIR%\lib\qt4\bin;%THIRD_PARTY_DIR%\lib\qt4\lib
 :: Qt5 - exes are in bin & dlls are in lib
 set QT5_BIN=%THIRD_PARTY_DIR%\lib\qt5\bin;%THIRD_PARTY_DIR%\lib\qt5\lib
 
+:: Set path to windows plugins for QApplication
+set QT_QPA_PLATFORM_PLUGIN_PATH=%THIRD_PARTY_DIR%\lib\qt5\plugins
+
 :: Python -
 set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python@PYTHON_MAJOR_VERSION@.@PYTHON_MINOR_VERSION@
 
