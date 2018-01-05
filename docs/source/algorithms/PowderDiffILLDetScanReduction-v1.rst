@@ -35,12 +35,13 @@ Output
 
 The output from the algorithm is a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`, containing the requested
 outputs:
- * **Output2DTubes** - Outputs a 2D workspace of tube height against scattering angle. In other words with no correction
-   for Debye-Scherrer cones. It is expected that this is only used for checking alignment.
- * **Output2D** - Outputs a 2D workspace of height along tube against scattering angle for pixel in tube. Here
-   there is effectively a correction for the Debye-Scherrer cones.
- * **Output1D** - Outputs a 1D workspace of counts against scattering angle. The vertical integration range for this
-   is set in the ``HeightRange`` option.
+
+* **Output2DTubes** - Outputs a 2D workspace of tube height against scattering angle. In other words with no correction
+  for Debye-Scherrer cones. It is expected that this is only used for checking alignment.
+* **Output2D** - Outputs a 2D workspace of height along tube against scattering angle for pixel in tube. Here
+  there is effectively a correction for the Debye-Scherrer cones.
+* **Output1D** - Outputs a 1D workspace of counts against scattering angle. The vertical integration range for this
+  is set in the ``HeightRange`` option.
 
 Note for D20 only the ``Output1D`` option will be relevant.
 
