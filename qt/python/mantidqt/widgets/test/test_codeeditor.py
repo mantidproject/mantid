@@ -25,6 +25,8 @@ import unittest
 from mantidqt.widgets.codeeditor import CodeEditor
 from mantidqt.utils.qt.testing import requires_qapp
 
+TEST_LANG = "Python"
+
 
 @requires_qapp
 class CodeEditorTest(unittest.TestCase):
@@ -32,7 +34,26 @@ class CodeEditorTest(unittest.TestCase):
     # Success tests
 
     def test_construction_accepts_Python_as_language(self):
-        widget = CodeEditor("Python")
+        widget = CodeEditor(TEST_LANG)
+
+    def test_default_construction_yields_empty_filename(self):
+        widget = CodeEditor(TEST_LANG)
+        self.assertEqual("", widget.fileName())
+
+    def test_set_filename_returns_expected_string(self):
+        widget = CodeEditor(TEST_LANG)
+        test_filename = "myscript.py"
+        widget.setFileName(test_filename)
+        self.assertEqual(test_filename, widget.fileName())
+
+    def test_default_construction_yields_editable_widget(self):
+        widget = CodeEditor(TEST_LANG)
+        self.assertFalse(widget.isReadOnly())
+
+    def test_setReadOnly_to_true_sets_readonly_status(self):
+        widget = CodeEditor(TEST_LANG)
+        widget.setReadOnly(True)
+        self.assertTrue(widget.isReadOnly())
 
     # Failure tests
 

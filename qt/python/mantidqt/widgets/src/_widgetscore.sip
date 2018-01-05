@@ -55,7 +55,7 @@ public:
   void attachLoggingChannel();
 };
 
-class ScriptEditor {
+class ScriptEditor : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 %End
@@ -63,6 +63,13 @@ class ScriptEditor {
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
+
+  QString fileName() const;
+  bool isReadOnly() const;
+
+  void setFileName(const QString &filename);
+  void setReadOnly(bool ro);
+
 private:
   ScriptEditor(const ScriptEditor&);
 };
