@@ -3210,7 +3210,7 @@ bool MuonAnalysis::safeToLoadAllGroupsOrPairs() {
     return false;
   }
   return true;
-};
+}
 
 /**
 * Load all of the pairs if the all pairs tickbox is ticked
