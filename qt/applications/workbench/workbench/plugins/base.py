@@ -18,7 +18,7 @@
 from __future__ import absolute_import
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QDockWidget, QWidget
+from qtpy.QtWidgets import QDockWidget, QMainWindow, QWidget
 
 
 class PluginWidget(QWidget):
@@ -29,7 +29,9 @@ class PluginWidget(QWidget):
 
     def __init__(self, main_window):
         QWidget.__init__(self, main_window)
+        assert isinstance(main_window, QMainWindow)
 
+        self.dockwidget = None
         self.main = main_window
 
 # ----------------- Plugin API --------------------
@@ -50,4 +52,13 @@ class PluginWidget(QWidget):
         dock.setAllowedAreas(self.ALLOWED_AREAS)
         dock.setFeatures(self.FEATURES)
         dock.setWidget(self)
+        self.dockwidget = dock
         return dock, self.LOCATION
+
+    def toggle_view(self, checked):
+        """Toggle view visible or hidden"""
+        if checked:
+            self.dockwidget.show()
+            self.dockwidget.raise_()
+        else:
+            self.dockwidget.hide()

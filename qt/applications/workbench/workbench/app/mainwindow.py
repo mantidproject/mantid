@@ -119,6 +119,7 @@ class MainWindow(QMainWindow):
         self.maximized_flag = None
         # widgets
         self.messagedisplay = None
+        self.ipythonconsole = None
 
         # Menus
         self.file_menu = None
@@ -140,6 +141,11 @@ class MainWindow(QMainWindow):
         from workbench.plugins.logmessagedisplay import LogMessageDisplay
         self.messagedisplay = LogMessageDisplay(self)
         self.messagedisplay.register_plugin()
+
+        self.set_splash("Loading IPython console")
+        from workbench.plugins.jupyterconsole import JupyterConsole
+        self.ipythonconsole = JupyterConsole(self)
+        self.ipythonconsole.register_plugin()
 
         self.setup_layout()
 
@@ -259,8 +265,51 @@ class MainWindow(QMainWindow):
     def setup_default_layouts(self, window_settings):
         """Set or reset the layouts of the child widgets"""
         self.set_window_settings(*window_settings)
+
+        # layout definition
+        logmessages = self.messagedisplay
+        ipython = self.ipythonconsole
+        default_layout = {
+            'widgets': [
+                # column 0
+                [[ipython]],
+                # column 1
+                [[logmessages]]
+            ],
+            'width-fraction': [0.75,    # column 0 width
+                               0.25],   # column 1 width
+            'height-fraction': [[1.0],  # column 0 row heights
+                                [1.0]]  # column 0 row heights
+        }
+
         with widget_updates_disabled(self):
-            pass
+            widgets_layout = default_layout['widgets']
+            # flatten list
+            widgets = [item for column in widgets_layout for row in column for item in row]
+            # show everything
+            map(lambda w: w.toggle_view(True), widgets)
+            # split everything on the horizontal
+            for i in range(len(widgets) - 1):
+                first, second = widgets[i], widgets[i+1]
+                self.splitDockWidget(first.dockwidget, second.dockwidget,
+                                     Qt.Horizontal)
+            # now arrange the rows
+            for column in widgets_layout:
+                for i in range(len(column) - 1):
+                    first_row, second_row = column[i], column[i+1]
+                    self.splitDockWidget(first_row[0].dockwidget,
+                                         second_row[0].dockwidget,
+                                         Qt.Vertical)
+            # and finally tabify those in the same position
+            for column in widgets_layout:
+                for row in column:
+                    for i in range(len(row) - 1):
+                        first, second = row[i], row[i+1]
+                        self.tabifyDockWidget(first, second)
+
+                    # Raise front widget per row
+                    row[0].dockwidget.show()
+                    row[0].dockwidget.raise_()
 
     def save_current_window_settings(self, prefix, section='main'):
         """Save current window settings with *prefix* in

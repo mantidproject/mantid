@@ -41,6 +41,7 @@ if ( ENABLE_WORKBENCH )
     mantidqt/test/test_import.py
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/widgets/test/test_algorithmselector.py
+    mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
   )
 
