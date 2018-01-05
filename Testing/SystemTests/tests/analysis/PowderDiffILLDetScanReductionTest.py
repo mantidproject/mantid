@@ -17,7 +17,7 @@ class PowderDiffILLDetScanReductionTest(stresstesting.MantidStressTest):
         config.appendDataSearchSubDir('ILL/D2B/')
 
     def requiredFiles(self):
-        return ["508093.nxs, 508094.nxs, 508095.nxs, d2b_scan_test.nxs"]
+        return ["508093.nxs, 508094.nxs, 508095.nxs, D2B_scan_test.nxs"]
 
     def d2b_2d_test(self):
         ws_2d_tubes = PowderDiffILLDetScanReduction(
@@ -70,4 +70,4 @@ class PowderDiffILLDetScanReductionTest(stresstesting.MantidStressTest):
         GroupWorkspaces([ws_2d_tubes[0], ws_2d[0], ws_1d[0]], OutputWorkspace='grouped_output')
 
     def validate(self):
-        return 'grouped_output', 'd2b_scan_test.nxs'
+        return 'grouped_output', 'D2B_scan_test.nxs'

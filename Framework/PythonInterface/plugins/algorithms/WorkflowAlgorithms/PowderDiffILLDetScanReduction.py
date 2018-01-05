@@ -77,11 +77,14 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
 
         output_workspaces = []
+        output_workspace_name = self.getPropertyValue('OutputWorkspace')
+
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:
             output2DTubes = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                                 OutputType='2DTubes',
-                                                HeightAxis=height_range)
+                                                HeightAxis=height_range,
+                                                OutputWorkspace=output_workspace_name + '_2DTubes')
             output_workspaces.append(output2DTubes)
 
         self._progress.report('Doing Output2D Option')
@@ -89,7 +92,8 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             output2D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='2D',
                                            CropNegativeScatteringAngles=True,
-                                           HeightAxis=height_range)
+                                           HeightAxis=height_range,
+                                           OutputWorkspace = output_workspace_name + '_2D')
             output_workspaces.append(output2D)
 
         self._progress.report('Doing Output1D Option')
@@ -97,14 +101,14 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
             output1D = SumOverlappingTubes(InputWorkspaces=input_workspaces,
                                            OutputType='1D',
                                            CropNegativeScatteringAngles=True,
-                                           HeightAxis=height_range)
+                                           HeightAxis=height_range,
+                                           OutputWorkspace=output_workspace_name + '_1D')
             output_workspaces.append(output1D)
         DeleteWorkspace('input_workspaces')
 
         self._progress.report('Finishing up...')
 
         grouped_output_workspace = GroupWorkspaces(output_workspaces)
-        output_workspace_name = self.getPropertyValue('OutputWorkspace')
         RenameWorkspace(InputWorkspace=grouped_output_workspace, OutputWorkspace=output_workspace_name)
         self.setProperty('OutputWorkspace', output_workspace_name)
 
