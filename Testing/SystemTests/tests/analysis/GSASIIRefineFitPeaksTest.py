@@ -6,6 +6,7 @@ import stresstesting
 import tempfile
 from mantid.simpleapi import GSASIIRefineFitPeaks, Load
 
+
 class _GSASFinder(object):
     """
     Helper class for unit test - the algorithm can't run without a version of GSAS-II that includes the module
