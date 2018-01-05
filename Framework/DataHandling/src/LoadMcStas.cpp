@@ -212,7 +212,7 @@ void LoadMcStas::readEventData(
     std::string errorMsg = e.what();
     g_log.warning()
         << "When trying to read the instrument description in the Nexus file: "
-        << filename << " the following error is reported: " << e.what() 
+        << filename << " the following error is reported: " << e.what()
         << " Ignore eventdata from the Nexus file\n";
     return;
   } catch (...) {
