@@ -62,7 +62,7 @@ class _GSASFinder(object):
         return None
 
 
-class GSASIIRefineFitPeaksTestHelper(object):
+class _GSASIIRefineFitPeaksTestHelper(object):
 
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
     _INPUT_WORKSPACE_FILENAME = "focused_bank1_ENGINX00256663.nxs"
@@ -88,7 +88,7 @@ class GSASIIRefineFitPeaksTestHelper(object):
                 os.remove(os.path.join(self._TEMP_DIR, filename))
 
 
-class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, GSASIIRefineFitPeaksTestHelper):
+class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
 
     rwp = None
     gof = None
@@ -122,7 +122,7 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, GSASIIRef
         self.remove_all_gsas_files(gsas_filename_without_extension=self._GSAS_PROJ_FILE_NAME.split(".")[0])
 
 
-class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, GSASIIRefineFitPeaksTestHelper):
+class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
 
     rwp = None
     gof = None
