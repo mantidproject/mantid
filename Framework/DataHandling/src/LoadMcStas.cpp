@@ -184,11 +184,10 @@ void LoadMcStas::readEventData(
     nxFile.readData("data", instrumentXML);
     nxFile.closeGroup();
     nxFile.closeGroup();
-  }
-  catch (...) {
+  } catch (...) {
     g_log.warning()
-      << "\nCould not find the instrument description in the Nexus file:"
-      << filename << " Ignore eventdata from the Nexus file\n";
+        << "\nCould not find the instrument description in the Nexus file:"
+        << filename << " Ignore eventdata from the Nexus file\n";
     return;
   }
 
@@ -209,18 +208,17 @@ void LoadMcStas::readEventData(
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-  }
-  catch (Exception::InstrumentDefinitionError &e) {
+  } catch (Exception::InstrumentDefinitionError &e) {
     std::string errorMsg = e.what();
     g_log.warning()
-      << "When trying to read the instrument description in the Nexus file: "
-      << filename << " the following error is reported: " << e.what() 
-      << " Ignore eventdata from the Nexus file\n";
+        << "When trying to read the instrument description in the Nexus file: "
+        << filename << " the following error is reported: " << e.what() 
+        << " Ignore eventdata from the Nexus file\n";
     return;
   } catch (...) {
     g_log.warning()
-      << "Could not parse instrument description in the Nexus file: "
-      << filename << " Ignore eventdata from the Nexus file\n";
+        << "Could not parse instrument description in the Nexus file: "
+        << filename << " Ignore eventdata from the Nexus file\n";
     return;
   }
   // Finished reading Instrument. Then open new data folder again
