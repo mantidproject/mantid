@@ -251,6 +251,7 @@ private slots:
 
   /// Called when "enable multi fit" checkbox is turned on/off
   void multiFitCheckboxChanged(int state);
+  bool safeToLoadAllGroupsOrPairs();
   void loadAllGroups(int state = 0);
   void loadAllPairs(int state = 0);
 

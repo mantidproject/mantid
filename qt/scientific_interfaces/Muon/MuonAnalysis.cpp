@@ -3195,12 +3195,31 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
+* Checks if the run is set and if the plot name is valid.
+* If they are not valid then the loadAllGroups and loadAllPairs
+* methods should do nothing. 
+*/
+
+bool MuonAnalysis::safeToLoadAllGroupsOrPairs()
+{
+	std::string plotTypeName = m_uiForm.frontPlotFuncs->currentText().toStdString();
+	if (m_currentLabel == "NoLabelSet") {
+		return false;
+	}
+	else if (plotTypeName != "Asymmetry" && plotTypeName != "Counts" && plotTypeName != "Logarithm") {
+		return false;
+	}
+	return true;
+};
+
+/**
 * Load all of the pairs if the all pairs tickbox is ticked
 * @param state :: [input] (not used) Setting of combo box
 */
 void MuonAnalysis::loadAllGroups(int state) {
   Q_UNUSED(state);
-  if (m_uiForm.loadAllGroupsCheckBox->isChecked()) {
+
+  if (m_uiForm.loadAllGroupsCheckBox->isChecked() && safeToLoadAllGroupsOrPairs()) {
     ItemType itemType = Group;
     PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
     for (int j = 0; j < numGroups(); j++) {
@@ -3215,7 +3234,7 @@ void MuonAnalysis::loadAllGroups(int state) {
 void MuonAnalysis::loadAllPairs(int state) {
 
   Q_UNUSED(state);
-  if (m_uiForm.loadAllPairsCheckBox->isChecked()) {
+  if (m_uiForm.loadAllPairsCheckBox->isChecked() && safeToLoadAllGroupsOrPairs()) {
     ItemType itemType = Pair;
     PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
     for (int j = 0; j < numPairs(); j++) {
