@@ -16,6 +16,7 @@
 
 #include <MantidAPI/FileProperty.h>
 #include <MantidAPI/IMDEventWorkspace.h>
+#include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/IPeaksWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
@@ -1047,13 +1048,10 @@ void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
 
 bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
-  auto alg = m_mantidDisplayModel->createAlgorithm("HasUB");
-
-  if (alg) {
-    alg->setLogging(false);
-    alg->setPropertyValue("Workspace", wsName);
-    executeAlgorithmAsync(alg, true);
-    hasUB = alg->getProperty("HasUB");
+  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+  IMDWorkspace_sptr wsIMD = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+  if (ws && wsIMD) {
+    hasUB = wsIMD->hasOrientedLattice();
   }
   return hasUB;
 }
@@ -1075,7 +1073,7 @@ void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
   QAction *saveAction = new QAction(menuEntryName, this);
   saveAction->setData(QVariant(algorithmString));
 
-  // Connect the tigger slot to show algorithm dialog
+  // Connect the trigger slot to show algorithm dialog
   connect(saveAction, SIGNAL(triggered()), this,
           SLOT(handleShowSaveAlgorithm()));
 
