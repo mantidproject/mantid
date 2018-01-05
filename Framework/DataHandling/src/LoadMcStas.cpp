@@ -176,16 +176,23 @@ void LoadMcStas::readEventData(
   const double progressFractionInitial = 0.1;
   Progress progInitial(this, 0.0, progressFractionInitial, reports);
 
+  std::string instrumentXML;
+  progInitial.report("Loading instrument");
   try {
     nxFile.openGroup("instrument", "NXinstrument");
-    std::string instrumentXML;
     nxFile.openGroup("instrument_xml", "NXnote");
     nxFile.readData("data", instrumentXML);
     nxFile.closeGroup();
     nxFile.closeGroup();
+  }
+  catch (...) {
+    g_log.warning()
+      << "\nCould not find the instrument description in the Nexus file:"
+      << filename << " Ignore eventdata from the Nexus file\n";
+    return;
+  }
 
-    progInitial.report("Loading instrument");
-
+  try {
     std::string instrumentName = "McStas";
     Geometry::InstrumentDefinitionParser parser(filename, instrumentName,
                                                 instrumentXML);
@@ -202,11 +209,18 @@ void LoadMcStas::readEventData(
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-  } catch (...) {
-    // Loader should not stop if there is no IDF.xml
+  }
+  catch (Exception::InstrumentDefinitionError &e) {
+    std::string errorMsg = e.what();
     g_log.warning()
-        << "\nCould not find the instrument description in the Nexus file:"
-        << filename << " Ignore evntdata from data file\n";
+      << "When trying to read the instrument description in the Nexus file: "
+      << filename << " the following error is reported: " << e.what() 
+      << " Ignore eventdata from the Nexus file\n";
+    return;
+  } catch (...) {
+    g_log.warning()
+      << "Could not parse instrument description in the Nexus file: "
+      << filename << " Ignore eventdata from the Nexus file\n";
     return;
   }
   // Finished reading Instrument. Then open new data folder again
