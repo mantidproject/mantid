@@ -222,7 +222,7 @@ private:
 
   /// start index
   size_t m_startWorkspaceIndex;
-  /// stop index
+  /// stop index: the last index is one less than this value
   size_t m_stopWorkspaceIndex;
   /// flag whether the peak center workspace has only a subset of spectra to fit
   bool m_partialSpectra;

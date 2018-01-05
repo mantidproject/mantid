@@ -296,8 +296,11 @@ void FitPeaks::processInputs() {
   int stop_wi = getProperty("StopWorkspaceIndex");
   if (isEmpty(stop_wi))
     m_stopWorkspaceIndex = m_inputMatrixWS->getNumberHistograms();
-  else
+  else {
     m_stopWorkspaceIndex = static_cast<size_t>(stop_wi);
+    if (m_stopWorkspaceIndex > m_inputMatrixWS->getNumberHistograms())
+      m_stopWorkspaceIndex = m_inputMatrixWS->getNumberHistograms();
+  }
 
   g_log.notice() << "[DB] Process inputs [2] Start/Stop ws index = "
                  << m_startWorkspaceIndex << ", " << m_stopWorkspaceIndex
@@ -627,6 +630,9 @@ void FitPeaks::ConvertParametersNameToIndex() {
  * @brief FitPeaks::fitPeaks
  */
 void FitPeaks::fitPeaks() {
+
+  g_log.notice() << "[DB] Start WS Index = " << m_startWorkspaceIndex
+                 << "; Stop WS Index = " << m_stopWorkspaceIndex << "\n";
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -982,13 +988,16 @@ void FitPeaks::EstimateBackground(size_t wi,
   int find_bkgd = bkgd_finder.findBackground(histogram, l0, n,
                                              peak_min_max_indexes, vector_bkgd);
 
-  g_log.notice() << "[DB] Find peak background: ws-index = " << wi
-                 << ", result = " << find_bkgd << ", X[" << l0 << ", " << n
-                 << "] = " << histogram.x()[l0] << ", " << histogram.x()[n]
-                 << "\n";
+  g_log.notice()
+      << "[DB] Find peak background (Algorithm FindPeakBackground): ws-index = "
+      << wi << ", result = " << find_bkgd << ", X[" << l0 << ", " << n
+      << "] = " << histogram.x()[l0] << ", " << histogram.x()[n] << "\n";
+  for (size_t i = 0; i < vector_bkgd.size(); ++i)
+    g_log.notice() << "[DB] Background order " << i << " : " << vector_bkgd[i]
+                   << "\n";
 
   // use the simple way to find linear background
-  if (find_bkgd <= 0) {
+  if (find_bkgd <= 0 || true) {
     double bkgd_a1, bkgd_a0;
     this->estimateLinearBackground(wi, peak_window.first, peak_window.second,
                                    bkgd_a1, bkgd_a0);
@@ -1005,6 +1014,10 @@ void FitPeaks::EstimateBackground(size_t wi,
     bkgd_function->setParameter(1, vector_bkgd[1]);
   if (bkgd_function->nParams() > 2)
     bkgd_function->setParameter(2, vector_bkgd[2]);
+
+  for (size_t i = 0; i < vector_bkgd.size(); ++i)
+    g_log.notice() << "[DB] Background order " << i << " : " << vector_bkgd[i]
+                   << "\n";
 
   return;
 }
@@ -1044,6 +1057,8 @@ int FitPeaks::EstimatePeakParameters(
 
   for (size_t i = 0; i < values.size(); ++i) {
     double y = vecY[i + start_index] - values.getCalculated(i);
+    // g_log.notice() << "[Temp DB] y[" << i+start_index << "] = " << vecY[i +
+    // start_index] << " reduced to Y = " << y << "\n";
     if (y > max_value) {
       max_value = y;
       peak_center = vec_x[i + start_index];
@@ -1052,9 +1067,14 @@ int FitPeaks::EstimatePeakParameters(
     if (vecY[i] > real_y_max)
       real_y_max = y;
   }
-  if (peak_center_index > vec_x.size())
+  if (peak_center_index > vec_x.size()) {
+    g_log.error() << "Peak center between " << peak_window.first << " and "
+                  << peak_window.second
+                  << " is out of range.  Estimated/observed center is at "
+                  << peak_center << " at index " << peak_center_index << "\n";
     throw std::logic_error(
         "It is not possible for not setting peak center index");
+  }
 
   // check peak position
   size_t ileft = GetXIndex(wi, peak_window.first);
@@ -2139,10 +2159,17 @@ void FitPeaks::writeFitResult(size_t wi,
     size_t row_index = wi * m_numPeaksToFit;
     // check again with the column size versus peak parameter values
     // TODO - BROKEN HERE NOW FIXME
-    if (peak_parameters[ipeak].size() != m_fittedParamTable->columnCount() + 3)
+    if (peak_parameters[ipeak].size() !=
+        m_fittedParamTable->columnCount() - 3) {
+      g_log.error() << "Peak " << ipeak << " has "
+                    << peak_parameters[ipeak].size()
+                    << " parameters.  Parameter table shall have 3 more "
+                       "columns.  But not it has "
+                    << m_fittedParamTable->columnCount() << " columns\n";
       throw std::runtime_error(
           "Peak parameter vector for one peak has different sizes to output "
           "table workspace");
+    }
 
     for (size_t iparam = 0; iparam < peak_parameters.size(); ++iparam) {
       m_fittedParamTable->cell<double>(row_index, iparam + 2) =
