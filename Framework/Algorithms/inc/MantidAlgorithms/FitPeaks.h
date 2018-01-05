@@ -83,7 +83,7 @@ private:
   // Peak fitting suite
   double FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                            const std::pair<double, double> &fitwindow,
-                           const bool &high,
+                           const bool &high, const bool &observe_peak_width,
                            API::IPeakFunction_sptr peakfunction,
                            API::IBackgroundFunction_sptr bkgdfunc);
 
@@ -92,7 +92,7 @@ private:
                        API::IPeakFunction_sptr peak_function,
                        API::IBackgroundFunction_sptr bkgd_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax);
+                       double xmin, double xmax, bool observe_peak_width);
 
   double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
@@ -104,7 +104,8 @@ private:
                                    const std::pair<double, double> &fit_window,
                                    const size_t &ws_index,
                                    API::IPeakFunction_sptr peakfunction,
-                                   API::IBackgroundFunction_sptr bkgdfunc);
+                                   API::IBackgroundFunction_sptr bkgdfunc,
+                                   bool observe_peak_width);
 
   /// get vector X, Y and E in a given range
   void GetRangeData(size_t iws, const std::pair<double, double> &fit_window,
@@ -134,14 +135,23 @@ private:
   int EstimatePeakParameters(size_t wi,
                              const std::pair<double, double> &peak_window,
                              API::IPeakFunction_sptr peakfunction,
-                             API::IBackgroundFunction_sptr bkgdfunction);
+                             API::IBackgroundFunction_sptr bkgdfunction,
+                             bool observe_peak_width);
 
-  int ObservePeakCenter(HistogramData::HistogramY &vector_y,
-                        API::FunctionValues &bkgd_values,
+  bool DecideToEstimatePeakWidth(size_t peak_index,
+                                 API::IPeakFunction_sptr peak_function);
 
-                        size_t start_index, size_t stop_index,
-                        double *peak_center, size_t *peak_center_index,
-                        double *peak_intensity);
+  /// observe peak center
+  int ObservePeakCenter(HistogramData::HistogramX &vector_x,
+                        HistogramData::HistogramY &vector_y,
+                        API::FunctionValues &bkgd_values, size_t start_index,
+                        size_t stop_index, double *peak_center,
+                        size_t *peak_center_index, double *peak_intensity);
+
+  /// Observe peak width
+  double ObservePeakWidth(HistogramData::HistogramX &vector_x,
+                          HistogramData::HistogramY &vector_y,
+                          double peak_center);
 
   /// Process the result from fitting a single peak
   void ProcessSinglePeakFitResult(
