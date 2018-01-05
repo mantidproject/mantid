@@ -161,7 +161,7 @@ class SANSSuperImpose(PythonAlgorithm):
                 'x': x,
                 'y': y,
                 'e': e,
-                'f': interpolate.interp1d(x, y),
+                'f': interpolate.interp1d(x, y, kind='quadratic'),
             }
         return d
 
@@ -194,7 +194,8 @@ class SANSSuperImpose(PythonAlgorithm):
 
     def _trim_data(self, q_min, q_max):
         '''
-        trimmed is cutoff by q
+        trimmed is the original minus the points ti cut off
+        qrange is the q range defined
         '''
         
         for _, v in self.data.items():
@@ -237,18 +238,22 @@ class SANSSuperImpose(PythonAlgorithm):
         """
         k and p are mutually exclusive (they cannot be both None)
         """
+#         logger.debug('_residuals with p = %s (K=%s, B=%s, X=[%s,%s])' % (p, k, b, x.min(), x.max()))
+        
         if k is not None:
             b = p[0]
         elif b is not None:
             k = p[0]
         else:
             k, b = p
-        # residual = f_target(x) - (k * f_to_optimise(x) - b)
+        
+        residual = f_target(x) - (k * f_to_optimise(x) - b)
+        
+        # with error
+        # residual = 1.0 / sigma * ( f_target(x) - (k * f_to_optimise(x) - b) )
+        
+        logger.debug('_residuals with K=%s, B=%s, residual=%s' % (k, b, np.average(residual)))
 
-        residual = 1.0 / sigma * ( f_target(x) - (k * f_to_optimise(x) - b) )
-
-        # return np.sum(err**2)
-        # Leastsq expects that the residual function returns just the residual
         return residual
 
     @staticmethod
@@ -297,7 +302,7 @@ class SANSSuperImpose(PythonAlgorithm):
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
                     self._residuals,
-                    ([1,1] if self.k is None and self.b is None else [1]), # guess
+                    ([0.1,0.1] if self.k is None and self.b is None else [0.1]), # guess
                     args=(
                         # _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
                         v['x_qrange'],
@@ -305,7 +310,8 @@ class SANSSuperImpose(PythonAlgorithm):
                         self.data[input_ws_reference_name]['f'], # reference interpolation function
                         v['f'],
                         self.k, self.b),
-                    full_output=True)
+                    full_output=True,
+                )
                 
                 y_qrange_fit = self._peval(v['x_qrange'], v['f'], plsq, k=self.k, b=self.b)
                 # Goodness of Fit Estimator
