@@ -77,6 +77,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
@@ -88,7 +89,19 @@ public:
     TS_ASSERT(fitpeaks.isExecuted());
 
     // get fitted peak data
-    // TODO ASAP
+    API::MatrixWorkspace_sptr plot_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("FittedPeaksWS"));
+    TS_ASSERT(plot_ws);
+    TS_ASSERT_EQUALS(plot_ws->getNumberHistograms(), 3);
+
+    API::ITableWorkspace_sptr param_ws =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS"));
+    TS_ASSERT(param_ws);
+    TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
+
+    // TODO ASAP : check values
   }
 
   //----------------------------------------------------------------------------------------------
@@ -249,11 +262,51 @@ public:
     return;
   }
 
-  void Later_test_HighBackgroundPeaks() {
+  //----------------------------------------------------------------------------------------------
+  /** Test fit Gaussian peaks with high background
+   * @brief Later_test_HighBackgroundPeaks
+   */
+  void test_HighBackgroundPeaks() {
+    // load file to workspace
+    std::string input_ws_name("PG3_733");
 
-    // TODO - Use PG3_733 from StripVanadiumTest
-    // std::string inputWSName("PG3_733");
-    // std::string outputWSName("PG3_733_stripped");
+    // Start by loading our NXS file
+    IAlgorithm *loader =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    loader->setPropertyValue("Filename", "PG3_733.nxs");
+    loader->setPropertyValue("OutputWorkspace", input_ws_name);
+    loader->execute();
+    TS_ASSERT(loader->isExecuted());
+
+    // Initialize FitPeak
+    FitPeaks fit_peaks_alg;
+
+    fit_peaks_alg.initialize();
+    TS_ASSERT(fit_peaks_alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
+
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
+        "PeakCenters", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0."
+                       "6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,"
+                       "1.5133,2.1401"));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
+
+    std::string output_ws_name("PG3_733_stripped");
+    std::string peak_pos_ws_name("PG3_733_peak_positions");
+    std::string peak_param_ws_name("PG3_733_peak_params");
+    fit_peaks_alg.setProperty("OutputWorkspace", peak_pos_ws_name);
+    fit_peaks_alg.setProperty("OutputPeakParametersWorkspace",
+                              peak_param_ws_name);
+    fit_peaks_alg.setProperty("FittedPeaksWorkspace", output_ws_name);
+
+    fit_peaks_alg.execute();
+    TS_ASSERT(fit_peaks_alg.isExecuted());
+
+    // Clean up
+    AnalysisDataService::Instance().remove(input_ws_name);
 
     return;
   }
@@ -353,11 +406,11 @@ public:
 
   void createTestData(const std::string &workspacename) {
     // ---- Create the simple workspace -------
-    int num_spec = 1; // shall be 3
+    size_t num_spec = 3;
 
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(num_spec,
-                                                                     300);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            static_cast<int>(num_spec), 300);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
