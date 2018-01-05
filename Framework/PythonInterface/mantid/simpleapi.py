@@ -603,7 +603,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if arguments.get(__STORE_KEYWORD__, False):
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
