@@ -73,9 +73,6 @@ class GSASIIRefineFitPeaksTestHelper(object):
     def excludeInPullRequests(self):
         return True
 
-    def cleanup(self):
-        mantid.mtd.clear()
-
     def path_to_gsas(self):
         return _GSASFinder.GSASIIscriptable_location()
 
