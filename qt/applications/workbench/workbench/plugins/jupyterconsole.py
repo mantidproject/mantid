@@ -26,11 +26,11 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 
 
-class JupyerConsole(PluginWidget):
+class JupyterConsole(PluginWidget):
     """Provides an in-process Jupyter Qt-based console"""
 
     def __init__(self, parent):
-        super(JupyerConsole, self).__init__(parent)
+        super(JupyterConsole, self).__init__(parent)
 
         # layout
         self.console = InProcessJupyterConsole(self)

@@ -24,15 +24,15 @@ from mantidqt.utils.qt.testing import requires_qapp
 from qtpy.QtWidgets import QMainWindow
 
 # local package imports
-from workbench.plugins.jupyterconsole import InProcessJupyterConsole, JupyerConsole
+from workbench.plugins.jupyterconsole import InProcessJupyterConsole, JupyterConsole
 
 
 @requires_qapp
-class InProcessJupyterConsoleTest(unittest.TestCase):
+class JupyterConsoleTest(unittest.TestCase):
 
     def test_construction_creates_inprocess_console_widget(self):
         main_window = QMainWindow()
-        widget = JupyerConsole(main_window)
+        widget = JupyterConsole(main_window)
         self.assertTrue(hasattr(widget, "console"))
         self.assertTrue(isinstance(widget.console, InProcessJupyterConsole))
 
