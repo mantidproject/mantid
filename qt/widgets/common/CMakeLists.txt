@@ -115,7 +115,7 @@ set ( SRC_FILES
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidget.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
@@ -223,7 +223,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
+
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h

@@ -335,9 +335,10 @@ Fitting
 .. warning:: The input workspace must be converted into a focused file
 			 first. The steps to complete this are found here: :ref:`focus-Engineering_Diffraction-ref`
 
-The Fitting tab provides a graphical interface which fits and
-visualises an expected diffraction pattern. The pattern is specified
-by providing a list of dSpacing values where Bragg peaks are expected.
+The Fitting tab provides a graphical interface which fits an expected
+diffraction pattern and visualises them. The pattern is specified by
+providing a list of peak centre values where Bragg peaks are expected.
+These values can have units of either TOF of dSpacing but **not** both.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
