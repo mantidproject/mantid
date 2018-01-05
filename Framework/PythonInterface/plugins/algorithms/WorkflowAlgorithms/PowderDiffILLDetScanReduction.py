@@ -53,7 +53,8 @@ class PowderDiffILLDetScanReduction(PythonAlgorithm):
                              doc='Output a 1D workspace with counts against scattering angle.')
 
         self.declareProperty(FloatArrayProperty(name='HeightRange', values=[], validator=FloatArrayOrderedPairsValidator()),
-                             doc='A comma separated list of minimum and maximum height range (in m).')
+                             doc='A pair of values, comma separated, to give the minimum and maximum height range (in m). If not specified '
+                                 'the full height range is used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),

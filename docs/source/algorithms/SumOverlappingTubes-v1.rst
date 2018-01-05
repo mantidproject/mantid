@@ -51,7 +51,7 @@ Usage
 .. testcode:: SumOverlappingTubes2DComponent
 
     ws_508093 = Load('ILL/D2B/508093.nxs')
-    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2DTubes', ComponentForHeightAxis='tube_1')
+    ws = SumOverlappingTubes(InputWorkspaces=ws_508093, OutputType='2DTubes')
     print('X Size: ' + str(ws.blocksize()) + ', Y Size: ' + str(ws.getNumberHistograms()))
     print('Counts: ' + str(ws.dataY(63)[2068:2078]))
     print('Errors: ' + str(ws.dataE(63)[2068:2078]))
