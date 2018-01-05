@@ -20,6 +20,53 @@ import mantid.api
 import mantid.dataobjects
 import matplotlib.colors
 
+
+def _getDistribution(workspace, **kwargs):
+    '''Determine whether or not the data is a distribution. The value in
+    the kwargs wins. Applies to Matrix workspaces only
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from'''
+    distribution = kwargs.pop('distribution', workspace.isDistribution())
+    return (bool(distribution), kwargs)
+
+
+def _getNormalization(mdworkspace, **kwargs):
+    '''gets the normalization flag of an MDHistoWorkspace. For workspaces
+    derived similar to MSlice/Horace, one needs to average data, the so-called
+    "number of events" normalization.
+    :param mdworkspace: :class:`mantid.dataobjects.MDHistoWorkspace` to extract the data from'''
+    normalization = kwargs.pop('normalization', mdworkspace.displayNormalizationHisto())
+    return (normalization,kwargs)
+
+
+def getAxesLabels(workspace):
+    ''' get axis labels from a Workspace2D or an MDHistoWorkspace
+    Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
+    All other elements in the tuple are labels for axes.
+    Some of them are latef formatted already.'''
+    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
+        axes = ['Intensity']
+        dims = workspace.getNonIntegratedDimensions()
+        for d in dims:
+            axis_title = d.name.replace('DeltaE','$\Delta E$')
+            axis_unit = d.getUnits().replace('Angstrom^-1','$\AA^{-1}$')
+            axis_unit = axis_unit.replace('DeltaE','meV')
+            axis_unit = axis_unit.replace('Angstrom','$\AA$')
+            axis_unit = axis_unit.replace('MomentumTransfer','$\AA^{-1}$')
+            axes.append('{0} ({1})'.format(axis_title,axis_unit))
+    else:
+        '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
+        axes = [workspace.YUnit()] #TODO: deal with distribution
+        for index in range(workspace.axes()):
+            axis = workspace.getAxis(index)
+            unit = axis.getUnit()
+            if len(str(unit.symbol())) > 0:
+                unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
+            else:
+                unit = unit.caption()
+            axes.append(unit)
+    return tuple(axes)
+
+
 def _getWkspIndexDistAndLabel(workspace, **kwargs):
     '''
     Get workspace index, whether the workspace is a distribution,
@@ -57,59 +104,22 @@ def _getWkspIndexDistAndLabel(workspace, **kwargs):
     return (wkspIndex, distribution, kwargs)
 
 
-def _getDistribution(workspace, **kwargs):
-    '''Determine whether or not the data is a distribution. The value in
-    the kwargs wins.'''
-    distribution = kwargs.pop('distribution', workspace.isDistribution())
-    return (bool(distribution), kwargs)
-
-
-def _getNormalization(mdworkspace, **kwargs):
-    '''gets the normalization flag of an MDHistoWorkspace'''
-    normalization = kwargs.pop('normalization', mdworkspace.displayNormalizationHisto())
-    return (normalization,kwargs)
-
-
-def getAxesLabels(workspace):
-    ''' get axis labels from a Workspace2D or an MDHistoWorkspace'''
-    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
-        axes = ['Intensity']
-        dims = workspace.getNonIntegratedDimensions()
-        for d in dims:
-            axis_title = d.name.replace('DeltaE','$\Delta E$')
-            axis_unit = d.getUnits().replace('Angstrom^-1','$\AA^{-1}$')
-            axis_unit = axis_unit.replace('DeltaE','meV')
-            axis_unit = axis_unit.replace('Angstrom','$\AA$')
-            axis_unit = axis_unit.replace('MomentumTransfer','$\AA^{-1}$')
-            axes.append('{0} ({1})'.format(axis_title,axis_unit))
-    else:
-        '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
-        axes = [workspace.YUnit()] #TODO: deal with distribution
-        for index in range(workspace.axes()):
-            axis = workspace.getAxis(index)
-            unit = axis.getUnit()
-            if len(str(unit.symbol())) > 0:
-                unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
-            else:
-                unit = unit.caption()
-            axes.append(unit)
-    return tuple(axes)
-
-
-def _setLabels1D(axes, workspace):
-    labels = getAxesLabels(workspace)
-    axes.set_xlabel(labels[1])
-    axes.set_ylabel(labels[0])
-
-
-def _setLabels2D(axes, workspace):
-    labels = getAxesLabels(workspace)
-    axes.set_xlabel(labels[1])
-    axes.set_ylabel(labels[2])
-
-
 def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
-    '''Extract a single spectrum and process the data into a frequency'''
+    '''Extract a single spectrum and process the data into a frequency
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param wkspIndex: workspace index
+    :param distribution: flag to divide the data by bin width. It happens only
+        when this flag is False, the workspace contains histogram data, and
+        the mantid configuration is set up to divide such workspaces by bin
+        width. The same effect can be obtained by running the
+        :ref:`algm-ConvertToDistribution` algorithm
+    :param withDy: if True, it will return the error in the "counts", otherwise None
+    :param with Dx: if True, and workspace has them, it will return errors
+        in the x coordinate, otherwise None
+    Note that for workspaces containing bin boundaries, this function will return
+    the bin centers for x.
+    To be used in 1D plots (plot, scatter, errorbar)
+    '''
     x = workspace.readX(wkspIndex)
     y = workspace.readY(wkspIndex)
     dy = None
@@ -130,80 +140,25 @@ def _getSpectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     return (x,y,dy,dx)
 
 
-def _dim2array(d):
-    '''
-    Create a numpy array containing bin centers along the dimension d
-    input: d - IMDDimension
-    returns: bin boundaries for dimension d
-    '''
-    dmin=d.getMinimum()
-    dmax=d.getMaximum()
-    return numpy.linspace(dmin,dmax,d.getNBins()+1)
-
-
-def boundaries_from_points(input_array):
-    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
-    if len(input_array)==0:
-        raise ValueError('could not extend array with no elements')
-    if len(input_array)==1:
-        return numpy.array([input_array[0]-0.5,input_array[0]+0.5])
-    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
-                           (input_array[1:]+input_array[:-1])*0.5,
-                           [(3*input_array[-1]-input_array[-2])*0.5]))
-
-    
-def points_from_boundaries(input_array):
-    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
-    if len(input_array)<2:
-        raise ValueError('could not get centers from less than two boundaries')
-    return (.5*(input_array[0:-1]+input_array[1:]))
-
-
-def _getMDData(workspace,normalization,withError=False):
-    dims=workspace.getNonIntegratedDimensions()
-    dimarrays=[_dim2array(d) for d in dims]
-    #get data
-    data=workspace.getSignalArray()*1.
-    if normalization==mantid.api.MDNormalization.NumEventsNormalization:
-        nev=workspace.getNumEventsArray()
-        data/=nev
-    err=None
-    if withError:
-        err2=workspace.getErrorSquaredArray()*1.
-        if normalization==mantid.api.MDNormalization.NumEventsNormalization:
-            err2/=(nev*nev)
-        err=numpy.sqrt(err2)
-    data=data.squeeze().T
-    if err is not None:
-        err=err.squeeze().T
-    return (dimarrays,data,err)
-
-
-def _getMDData1D(workspace,normalization):
-    coordinate,data,err=_getMDData(workspace,normalization,withError=True)
-    assert len(coordinate)==1, 'The workspace is not 1D'
-    coordinate=points_from_boundaries(coordinate[0])
-    return (coordinate,data,err)
-
-
-def _getMDData2D_bin_bounds(workspace,normalization,withError=False):
-    '''
-    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
-    '''
-    coordinate,data,_=_getMDData(workspace,normalization,withError)
-    assert len(coordinate)==2, 'The workspace is not 2D'
-    return (coordinate[0],coordinate[1],data)
-
-def _getMDData2D_bin_centers(workspace,normalization,withError=False):
-    x,y,data=_getMDData2D_bin_bounds(workspace,normalization,withError)
-    x=points_from_boundaries(x)
-    y=points_from_boundaries(y)
-    return (x,y,data)
-
 def _commonX(arr):
+    '''
+    Helper functionto check if all rows in a 2d :class:`numpy.ndarray` are identical
+    '''
     return numpy.all(arr==arr[0,:],axis=(1,0))
 
+
 def _getMatrix2DData(workspace, distribution,histogram2D=False):
+    '''
+    Get all data from a Matrix workspace that has the same number of bins
+    in every spectrum. It is used for 2D plots
+    :param workspace: Matrix workspace to extract the data from
+    :param distribution: if False, and the workspace contains histogram data,
+        the intensity will be divided by the x bin width
+    :param histogram2D: flag that specifies if the coordinates in the output are
+        -bin centers (such as for contour) for False, or
+        -bin edges (such as for pcolor) for True.
+    Returns x,y,z 2D arrays
+    '''
     try:
         _=workspace.blocksize()
     except RuntimeError:
@@ -238,11 +193,16 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
     y = numpy.broadcast_to(numpy.expand_dims(y,1),x.shape)
     return (x,y,z)
 
+
 def _getDataUnevenFlag(workspace,**kwargs):
     '''
-    workspace is a workspace2d
-    if AxisAligned keyword is True or if the workspace does not
-    a constant number of bins, it will return true, otherwise false
+    Helper function that allows :meth:`matplotlib.axes.Axes.pcolor`,
+    :meth:`matplotlib.axes.Axes.pcolorfast`, and :meth:`matplotlib.axes.Axes.pcolormesh`
+    to plot rectangles parallel to the axes even if the data is not
+    on a regular grid.
+    :param workspace: a workspace2d
+    if AxisAligned keyword is available and True or if the workspace does
+    not have a constant number of bins, it will return true, otherwise false
     '''
     aligned = kwargs.pop('AxisAligned', False)
     try:
@@ -253,6 +213,16 @@ def _getDataUnevenFlag(workspace,**kwargs):
 
 
 def _getUnevenData(workspace, distribution):
+    '''
+    Function to get data for uneven workspace2Ds, such as
+    that pcolor, pcolorfast, and pcolormesh will plot axis aligned rectangles
+    :param workspace: a workspace2d
+    :param distribution: if False, and the workspace contains histogram data,
+        the intensity will be divided by the x bin width
+    Returns three lists. Each element in the x list is an array of boundaries
+    for a spectra. Each element in the y list is a 2 element array with the extents
+    of a particular spectra. The z list contains arrays of intensities at bin centers
+    '''
     z=[]
     x=[]
     y=[]
@@ -274,6 +244,127 @@ def _getUnevenData(workspace, distribution):
     return(x,y,z)
 
 
+def _dim2array(d):
+    '''
+    Create a numpy array containing bin centers along the dimension d
+    :param d: an :class:`mantid.geometry.IMDDimension` object
+
+    returns: bin boundaries for dimension d
+    '''
+    dmin=d.getMinimum()
+    dmax=d.getMaximum()
+    return numpy.linspace(dmin,dmax,d.getNBins()+1)
+
+
+def boundaries_from_points(input_array):
+    '''
+    The function tries to guess bin boundaries from bin centers
+    :param input_array: a :class:`numpy.ndarray` of bin centers
+    '''
+    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
+    if len(input_array)==0:
+        raise ValueError('could not extend array with no elements')
+    if len(input_array)==1:
+        return numpy.array([input_array[0]-0.5,input_array[0]+0.5])
+    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
+                           (input_array[1:]+input_array[:-1])*0.5,
+                           [(3*input_array[-1]-input_array[-2])*0.5]))
+
+
+def points_from_boundaries(input_array):
+    '''
+    The function returns bin centers from bin boundaries
+    :param input_array: a :class:`numpy.ndarray` of bin boundaries
+    '''
+    assert isinstance(input_array,numpy.ndarray),'Not a numpy array'
+    if len(input_array)<2:
+        raise ValueError('could not get centers from less than two boundaries')
+    return (.5*(input_array[0:-1]+input_array[1:]))
+
+
+def _getMDData(workspace,normalization,withError=False):
+    '''
+    generic function to extract data from an MDHisto workspace
+    :param workspace: :class:`mantid.dataobjects.MDHistoWorkspace` containing data
+    :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
+        it will divide intensity by the number of corresponding MDEvents
+    returns a tuple containing bin boundaries for each dimension, the (maybe normalized)
+    signal and error arrays
+    '''
+    dims=workspace.getNonIntegratedDimensions()
+    dimarrays=[_dim2array(d) for d in dims]
+    #get data
+    data=workspace.getSignalArray()*1.
+    if normalization==mantid.api.MDNormalization.NumEventsNormalization:
+        nev=workspace.getNumEventsArray()
+        data/=nev
+    err=None
+    if withError:
+        err2=workspace.getErrorSquaredArray()*1.
+        if normalization==mantid.api.MDNormalization.NumEventsNormalization:
+            err2/=(nev*nev)
+        err=numpy.sqrt(err2)
+    data=data.squeeze().T
+    if err is not None:
+        err=err.squeeze().T
+    return (dimarrays,data,err)
+
+
+def _getMDData1D(workspace,normalization):
+    '''
+    Function to transform data in an MDHisto workspace with exactly
+    one non-integrated dimension into arrays of bin centers, data,
+    and error, to be used in 1D plots (plot, scatter, errorbar)
+    '''
+    coordinate,data,err=_getMDData(workspace,normalization,withError=True)
+    assert len(coordinate)==1, 'The workspace is not 1D'
+    coordinate=points_from_boundaries(coordinate[0])
+    return (coordinate,data,err)
+
+
+def _getMDData2D_bin_bounds(workspace,normalization):
+    '''
+    Function to transform data in an MDHisto workspace with exactly
+    two non-integrated dimension into arrays of bin boundaries in each
+    dimension, and data. To be used in 2D plots (pcolor, pcolorfast, pcolormesh)
+    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
+    '''
+    coordinate,data,_=_getMDData(workspace,normalization,withError=False)
+    assert len(coordinate)==2, 'The workspace is not 2D'
+    return (coordinate[0],coordinate[1],data)
+
+
+def _getMDData2D_bin_centers(workspace,normalization):
+    '''
+    Function to transform data in an MDHisto workspace with exactly
+    two non-integrated dimension into arrays of bin centers in each
+    dimension, and data. To be used in 2D plots (contour, contourf,
+    tricontour, tricontourf, tripcolor)
+    Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
+    '''
+    x,y,data=_getMDData2D_bin_bounds(workspace,normalization,withError=False)
+    x=points_from_boundaries(x)
+    y=points_from_boundaries(y)
+    return (x,y,data)
+
+
+def _setLabels1D(axes, workspace):
+    '''
+    helper function to automatically set axes labels for 1D plots
+    '''
+    labels = getAxesLabels(workspace)
+    axes.set_xlabel(labels[1])
+    axes.set_ylabel(labels[0])
+
+
+def _setLabels2D(axes, workspace):
+    '''
+    helper function to automatically set axes labels for 2D plots
+    '''
+    labels = getAxesLabels(workspace)
+    axes.set_xlabel(labels[1])
+    axes.set_ylabel(labels[2])
+
 
 def plot(axes, workspace, *args, **kwargs):
     '''
@@ -285,11 +376,11 @@ def plot(axes, workspace, *args, **kwargs):
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
                       to extract the data from
-    :param specNum:   spectrum number to plot
-    :param wkspIndex: workspace index to plot
+    :param specNum:   spectrum number to plot if MatrixWorkspace
+    :param wkspIndex: workspace index to plot if MatrixWorkspace
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the workspace is a MatrixWorkspace histogram.
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
@@ -538,26 +629,6 @@ def tripcolor(axes, workspace, *args, **kwargs):
 
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
-#def triplot(axes, workspace, *args, **kwargs):
-#    '''
-#    Essentially the same as :meth:`mantid.plots.pcolor`, but works
-#    for non-uniform grids. Currently this only works with workspaces
-#    that have a constant number of bins between spectra.
-#
-#    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-#    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
-#    :param distribution: ``None`` (default) asks the workspace. ``False`` means
-#                         divide by bin width. ``True`` means do not divide by bin width.
-#                         Applies only when the the workspace is a histogram.
-#
-#    See :meth:`matplotlib.axes.Axes.triplot` for more information.
-#    '''
-#    (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-#    (x,y,z) = _getContour(workspace, distribution)
-#    _setLabels2D(axes, workspace)
-#
-#    return axes.triplot(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
-
 def tricontour(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`mantid.plots.contour`, but works
@@ -580,7 +651,8 @@ def tricontour(axes, workspace, *args, **kwargs):
         (distribution, kwargs) = _getDistribution(workspace, **kwargs)
         (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-    #tricontour segfaults if z is not finite
+    #tricontour segfaults if many z values are not finite
+    #https://github.com/matplotlib/matplotlib/issues/10167
     x=x.ravel()
     y=y.ravel()
     z=z.ravel()
@@ -595,30 +667,32 @@ def tricontourf(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`mantid.plots.contourf`, but works
     for non-uniform grids. Currently this only works with workspaces
-    that have a constant number of bins between spectra.
+    that have a constant number of bins between spectra or with
+    MDHistoWorkspaces.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the workspace is a matrix workspace histogram.
 
     See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
     '''
-    if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
-        (normalization,kwargs)=_getNormalization(workspace, **kwargs)
-        xtemp,ytemp,z=_getMDData2D_bin_centers(workspace,normalization)
-        x,y=numpy.meshgrid(xtemp,ytemp)
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+        (normalization, kwargs) = _getNormalization(workspace, **kwargs)
+        (xtemp, ytemp, z) = _getMDData2D_bin_centers(workspace, normalization)
+        (x, y) = numpy.meshgrid(xtemp, ytemp)
     else:
         (distribution, kwargs) = _getDistribution(workspace, **kwargs)
-        (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
+        (x, y, z) = _getMatrix2DData(workspace, distribution,histogram2D=False)
     _setLabels2D(axes, workspace)
-    #tricontourf segfaults if z is not finite
-    x=x.ravel()
-    y=y.ravel()
-    z=z.ravel()
-    condition=numpy.isfinite(z)
-    x=x[condition]
-    y=y[condition]
-    z=z[condition]
+    #tricontourf segfaults if many z values are not finite
+    #https://github.com/matplotlib/matplotlib/issues/10167
+    x = x.ravel()
+    y = y.ravel()
+    z = z.ravel()
+    condition = numpy.isfinite(z)
+    x = x[condition]
+    y = y[condition]
+    z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
