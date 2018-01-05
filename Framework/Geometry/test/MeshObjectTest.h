@@ -508,6 +508,28 @@ public:
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
+  void testInterceptOctahedronXthroughEdge() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.2, 0.0), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 11.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
+  void testInterceptOctahedronXthroughVertex() {
+    std::vector<Link> expectedResults;
+    IObject_sptr geom_obj = createOctahedron();
+    Track track(V3D(-10, 0.0, 0.0), V3D(1, 0, 0));
+
+    // format = startPoint, endPoint, total distance so far
+    expectedResults.push_back(
+      Link(V3D(-1.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), 11.0, *geom_obj));
+    checkTrackIntercept(geom_obj, track, expectedResults);
+  }
+
   void testInterceptLShapeTwoPass() {
     std::vector<Link> expectedResults;
     IObject_sptr geom_obj = createLShape();
