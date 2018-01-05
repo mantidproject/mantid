@@ -103,11 +103,15 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
         input_ws = Load(Filename=self.input_ws_path())
 
+        gsas_path = self.path_to_gsas()
+        if not gsas_path:
+            self.fail("Could not find GSAS-II installation")
+
         self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
                                                      InputWorkspace=input_ws,
                                                      PhaseInfoFile=self.phase_file_path(),
                                                      InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=self.path_to_gsas(),
+                                                     PathToGSASII=gsas_path,
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
@@ -137,11 +141,15 @@ class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefi
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
         input_ws = Load(Filename=self.input_ws_path())
 
+        gsas_path = self.path_to_gsas()
+        if not gsas_path:
+            self.fail("Could not find GSAS-II installation")
+
         self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
                                                      InputWorkspace=input_ws,
                                                      PhaseInfoFile=self.phase_file_path(),
                                                      InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=self.path_to_gsas(),
+                                                     PathToGSASII=gsas_path,
                                                      SaveGSASIIProjectFile=self.gsas_proj_path,
                                                      MuteGSASII=True,
                                                      LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
