@@ -38,8 +38,11 @@ class DateAndTimeTest(unittest.TestCase):
         dt = DateAndTime(dt_np)
 
         # convert both into ISO8601 strings up to the minutes b/c time was only specified that much
-        dt = str(dt)[:16]
-        dt_np = str(dt_np)[:16]
+        dt = str(dt)
+        dt_np = dt_np.item().strftime('%Y-%m-%dT%M:%S')
+        length = min(len(dt), len(dt_np))
+        dt = dt[:length]
+        dt_np = dt_np[:length]
         self.assertEquals(dt, dt_np)
 
 
