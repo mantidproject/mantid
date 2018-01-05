@@ -34,7 +34,7 @@ class CodeEditorTest(unittest.TestCase):
     # Success tests
 
     def test_construction_accepts_Python_as_language(self):
-        widget = CodeEditor(TEST_LANG)
+        CodeEditor(TEST_LANG)
 
     def test_default_construction_yields_empty_filename(self):
         widget = CodeEditor(TEST_LANG)

@@ -26,7 +26,7 @@ class PluginWidget(QWidget):
     ALLOWED_AREAS = Qt.AllDockWidgetAreas
     LOCATION = Qt.LeftDockWidgetArea
     FEATURES = QDockWidget.DockWidgetClosable | \
-               QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable
+        QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable
 
     def __init__(self, main_window):
         QWidget.__init__(self, main_window)

@@ -120,6 +120,7 @@ class MainWindow(QMainWindow):
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
+        self.editor = None
 
         # Menus
         self.file_menu = None
@@ -146,6 +147,11 @@ class MainWindow(QMainWindow):
         from workbench.plugins.jupyterconsole import JupyterConsole
         self.ipythonconsole = JupyterConsole(self)
         self.ipythonconsole.register_plugin()
+
+        self.set_splash("Loading code editing widget")
+        from workbench.plugins.codeeditor import MultiFileEditor
+        self.editor = MultiFileEditor(self)
+        self.editor.register_plugin()
 
         self.setup_layout()
 
@@ -269,10 +275,11 @@ class MainWindow(QMainWindow):
         # layout definition
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
+        editor = self.editor
         default_layout = {
             'widgets': [
                 # column 0
-                [[ipython]],
+                [[editor, ipython]],
                 # column 1
                 [[logmessages]]
             ],
@@ -305,7 +312,7 @@ class MainWindow(QMainWindow):
                 for row in column:
                     for i in range(len(row) - 1):
                         first, second = row[i], row[i+1]
-                        self.tabifyDockWidget(first, second)
+                        self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
                     row[0].dockwidget.show()

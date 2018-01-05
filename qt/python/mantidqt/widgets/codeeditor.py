@@ -26,10 +26,11 @@ EDITOR_LANGUAGE = "Python"
 # Import single-file editor from C++ wrapping
 CodeEditor = import_qtlib('_widgetscore', 'mantidqt.widgets', 'ScriptEditor')
 
+
 class MultiFileCodeEditor(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(MultiFileCodeEditor, self).__init__(parent)
 
         # layout
@@ -40,11 +41,11 @@ class MultiFileCodeEditor(QWidget):
         self.setLayout(layout)
 
         # add a single editor by default
-        self.append_new_editor()
+        self.append_new_editor(EDITOR_LANGUAGE)
 
-    def append_new_editor(self):
+    def append_new_editor(self, language):
         title = "New"
-        self.editors.addTab(CodeEditor(EDITOR_LANGUAGE, self.editors), title)
+        self.editors.addTab(CodeEditor(language, self.editors), title)
 
     @property
     def editor_count(self):
