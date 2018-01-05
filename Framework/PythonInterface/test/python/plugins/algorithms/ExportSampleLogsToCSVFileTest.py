@@ -286,7 +286,8 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         """
         from mantid.simpleapi import CreateWorkspace
         from mantid.simpleapi import AddSampleLog
-        from datetime import datetime, timedelta
+        import numpy
+        from numpy import datetime64, timedelta64
         #from time import gmtime, strftime,mktime # in debug prints
 
         # Create a matrix workspace
@@ -296,18 +297,13 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=1,UnitX='TOF')
 
         # Add run_start
-        year = 2014
-        month = 2
-        day = 15
-        hour = 13
-        minute = 34
-        second = 3
         dtimesec = 0.0010
-
         timefluc = 0.0001
+        runstart = '2014-02-15T13:34:03'
+        if numpy.__version__.startswith('1.7.'): # older numpy assumes local timezone
+            runstart = runstart + 'Z'
+        runstart = datetime64(runstart, 'us') # microsecond needed for deltas
 
-        #tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())))
-        runstart = datetime(year, month, day, hour, minute, second)
         AddSampleLog(Workspace=wksp,LogName='run_start',LogText=str(runstart))
 
         tsp_a = kernel.FloatTimeSeriesProperty("SensorA")
@@ -348,17 +344,18 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
                     # first record should have the 'exactly' same time stamps
                     timeshift *= 0.0001
 
-                deltatime = timedelta(i*dtimesec + timeshift)
-                tmptime = str(runstart + deltatime)
+                deltatime = i*dtimesec + timeshift # fraction of a day
+                deltatime = timedelta64(int(deltatime * 24 * 3600 * 1e6), 'us') # timedelta64 requires int
+                tmptime = runstart + deltatime
                 tmpvalue = float(i*i*6)+j
                 logs[j].addValue(tmptime, tmpvalue)
 
-                dbbuf += "%s: %s = %d\n" % (logs[j].name, tmptime, tmpvalue)
+                dbbuf += "{}: {} = {}\n".format(logs[j].name, tmptime, tmpvalue)
 
             # ENDFOR (j)
         # ENDFOR (i)
 
-        # print dbbuf
+        #print(dbbuf)
 
         wksp.mutableRun()['SensorA']=tsp_a
         wksp.mutableRun()['SensorB']=tsp_b
