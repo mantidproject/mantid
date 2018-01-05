@@ -381,6 +381,9 @@ def plot(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
@@ -405,15 +408,21 @@ def errorbar(axes, workspace, *args, **kwargs):
     line according to the spectrum number unless specified otherwise.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    :param specNum:   spectrum number to plot
-    :param wkspIndex: workspace index to plot
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
+    :param specNum:   spectrum number to plot if MatrixWorkspace
+    :param wkspIndex: workspace index to plot if MatrixWorkspace
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the workspace is a MatrixWorkspace histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
-    Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`RuntimeError`.
+    For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
+    needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
+    keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
+    dimension
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         (normalization,kwargs)=_getNormalization(workspace, **kwargs)
@@ -434,15 +443,21 @@ def scatter(axes, workspace, *args, **kwargs):
     line according to the spectrum number unless specified otherwise.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
-    :param specNum:   spectrum number to plot
-    :param wkspIndex: workspace index to plot
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
+    :param specNum:   spectrum number to plot if MatrixWorkspace
+    :param wkspIndex: workspace index to plot if MatrixWorkspace
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the workspace is a MatrixWorkspace histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
-    Either ``specNum`` or ``wkspIndex`` needs to be specified. Giving
-    both will generate a :class:`RuntimeError`.
+    For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
+    needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
+    keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
+    dimension
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         (normalization,kwargs)=_getNormalization(workspace, **kwargs)
@@ -454,7 +469,6 @@ def scatter(axes, workspace, *args, **kwargs):
     return axes.scatter(x, y, *args, **kwargs)
 
 
-
 def contour(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.contour`
@@ -462,10 +476,14 @@ def contour(axes, workspace, *args, **kwargs):
     workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         (normalization,kwargs)=_getNormalization(workspace, **kwargs)
@@ -484,10 +502,14 @@ def contourf(axes, workspace, *args, **kwargs):
     workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         (normalization,kwargs)=_getNormalization(workspace, **kwargs)
@@ -498,7 +520,22 @@ def contourf(axes, workspace, *args, **kwargs):
     _setLabels2D(axes, workspace)
     return axes.contourf(x, y, z, *args, **kwargs)
 
+
 def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
+    '''
+    Helper function for pcolor, pcolorfast, and pcolormesh that will
+    plot a 2d representation of each spectra. The polycollections or meshes
+    will be normalized to the same intensity limits.
+    :param axes: :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the matrix workspace is a histogram.
+    :param pcolortype: this keyword allows the plotting to be one of pcolormesh or
+        pcolorfast if there is "mesh" or "fast" in the value of the keyword, or 
+        pcolor by default
+    Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
+    '''
     (x,y,z)=_getUnevenData(workspace, distribution)
     pcolortype=kwargs.pop('pcolortype','')
     mini=numpy.min([numpy.min(i) for i in z])
@@ -523,20 +560,21 @@ def _pcolorpieces(axes, workspace, distribution, *args,**kwargs):
         else:
             cm=axes.pcolor(XX,YY,zi.reshape(-1,1),**kwargs)
     return cm
-
     
 
 def pcolor(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.pcolor`
-    but calculates the countour levels. Currently this only works with
-    workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -555,14 +593,16 @@ def pcolor(axes, workspace, *args, **kwargs):
 def pcolorfast(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.pcolorfast`
-    but calculates the countour levels. Currently this only works with
-    workspaces that have a constant number of bins between spectra.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -578,17 +618,20 @@ def pcolorfast(axes, workspace, *args, **kwargs):
             (x,y,z) = _getMatrix2DData(workspace, distribution,histogram2D=True)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
+
 def pcolormesh(axes, workspace, *args, **kwargs):
     '''
-    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`
-    but calculates the countour levels. Currently this only works with
-    workspaces that have a constant number of bins between spectra.
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
     '''
     _setLabels2D(axes, workspace)
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
@@ -605,16 +648,22 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+
 def tripcolor(axes, workspace, *args, **kwargs):
     '''
     To be used with non-uniform grids. Currently this only works with workspaces
-    that have a constant number of bins between spectra.
+    that have a constant number of bins between spectra or with
+    MDHistoWorkspaces.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     See :meth:`matplotlib.axes.Axes.tripcolor` for more information.
     '''
@@ -633,13 +682,18 @@ def tricontour(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`mantid.plots.contour`, but works
     for non-uniform grids. Currently this only works with workspaces
-    that have a constant number of bins between spectra.
+    that have a constant number of bins between spectra or with
+    MDHistoWorkspaces.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
     '''
@@ -671,10 +725,14 @@ def tricontourf(axes, workspace, *args, **kwargs):
     MDHistoWorkspaces.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
-    :param workspace: :class:`mantid.api.MatrixWorkspace` to extract the data from
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a matrix workspace histogram.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     See :meth:`matplotlib.axes.Axes.tricontourf` for more information.
     '''
