@@ -60,14 +60,6 @@ class SANSSuperImpose(PythonAlgorithm):
         self.declareProperty(
             name='Qmax', defaultValue=Property.EMPTY_DBL,
             doc='End of the fitting range')
-
-        self.declareProperty(
-            name='DiscardBegin', defaultValue=0,
-            doc='Discard n points from the beginning of every dataset for every curve fitting')
-
-        self.declareProperty(
-            name='DiscardEnd', defaultValue=0,
-            doc='Discard n points from the end of every dataset for every curve fitting.')
         
         self.declareProperty(
             name='DiscardBeginGlobal', defaultValue=0,
@@ -120,9 +112,6 @@ class SANSSuperImpose(PythonAlgorithm):
 
         self.q_min = None if self.getProperty('Qmin').value == Property.EMPTY_DBL else self.getProperty('Qmin').value
         self.q_max = None if self.getProperty('Qmax').value == Property.EMPTY_DBL else self.getProperty('Qmax').value
-
-        self.discard_begin = self.getProperty('DiscardBegin').value
-        self.discard_end = self.getProperty('DiscardEnd').value
 
         self.discard_begin_global = self.getProperty('DiscardBeginGlobal').value
         self.discard_end_global = self.getProperty('DiscardEndGlobal').value
@@ -232,16 +221,6 @@ class SANSSuperImpose(PythonAlgorithm):
             e_qrange = e[(x>=q_min)&(x<=q_max)]
             y_qrange = y[(x>=q_min)&(x<=q_max)]
             x_qrange = x[(x>=q_min)&(x<=q_max)]
-
-            # discard aditional points
-            if self.discard_end > 0:
-                x_qrange = x_qrange[self.discard_begin:-self.discard_end]
-                y_qrange = y_qrange[self.discard_begin:-self.discard_end]
-                e_qrange = e_qrange[self.discard_begin:-self.discard_end]
-            else:
-                x_qrange = x_qrange[self.discard_begin:]
-                y_qrange = y_qrange[self.discard_begin:]
-                e_qrange = e_qrange[self.discard_begin:]
 
             v.update({
                 'x_qrange': x_qrange,
