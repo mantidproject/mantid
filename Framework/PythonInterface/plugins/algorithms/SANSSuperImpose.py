@@ -313,7 +313,7 @@ class SANSSuperImpose(PythonAlgorithm):
             progress.report('Running Fitting for workspace: %s' % k)
             if k != input_ws_reference_name:
 
-                logger.debug('Running Fitting for workspace %s with reference %s (K=%s, B-%s)' %
+                logger.debug('Running Fitting for workspace %s with initial %s (K=%s, B=%s)' %
                     (k, input_ws_reference_name, self.k, self.b))
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
