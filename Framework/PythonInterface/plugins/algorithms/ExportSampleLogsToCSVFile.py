@@ -178,7 +178,10 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         else:
             localtimediff = np.timedelta64(0, 's')
 
-        return np.datetime64('1990-01-01T00:00') + localtimediff
+        epoch = '1990-01-01T00:00'
+        if np.__version__.startswith('1.7.'):
+            epoch = epoch+'Z'
+        return np.datetime64(epoch) + localtimediff
 
     def _getLogsInfo(self, logtimeslist):
         """ Get maximum number of lines, staring time and ending time in the output log file
