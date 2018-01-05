@@ -350,7 +350,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
                 tmpvalue = float(i*i*6)+j
                 logs[j].addValue(tmptime, tmpvalue)
 
-                dbbuf += "{}: {} = {}\n".format(logs[j].name, tmptime, tmpvalue)
+                #dbbuf += "{}: {} = {}\n".format(logs[j].name, tmptime, tmpvalue)
 
             # ENDFOR (j)
         # ENDFOR (i)
