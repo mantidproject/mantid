@@ -123,3 +123,34 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, GSASIIRef
     def cleanup(self):
         mantid.mtd.clear()
         self.remove_all_gsas_files(gsas_filename_without_extension=self._GSAS_PROJ_FILE_NAME.split(".")[0])
+
+
+class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, GSASIIRefineFitPeaksTestHelper):
+
+    rwp = None
+    gof = None
+    gsas_proj_path = None
+    _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyFitParams.nxs"
+    _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksPawleyTest.gpx"
+
+    def runTest(self):
+        self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
+        input_ws = Load(Filename=self.input_ws_path())
+
+        self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
+                                                     InputWorkspace=input_ws,
+                                                     PhaseInfoFile=self.phase_file_path(),
+                                                     InstrumentFile=self.inst_param_file_path(),
+                                                     PathToGSASII=self.path_to_gsas(),
+                                                     SaveGSASIIProjectFile=self.gsas_proj_path,
+                                                     MuteGSASII=True,
+                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+
+    def validate(self):
+        self.assertAlmostEquals(self.gof, 3.57847, delta=1e-6)
+        self.assertAlmostEquals(self.rwp, 77.755147, delta=1e-6)
+        return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._REFERENCE_FILE_NAME)
+
+    def cleanup(self):
+        mantid.mtd.clear()
+        self.remove_all_gsas_files(gsas_filename_without_extension=self._GSAS_PROJ_FILE_NAME.split(".")[0])
