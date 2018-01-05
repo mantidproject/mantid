@@ -179,47 +179,6 @@ void Q1DWeighted::exec() {
     tof_ws->setDistribution(true);
     tof_ws->setBinEdges(0, XOut);
 
-    /**
-     * TODO:
-     * Find the index of X for the 1st positive and for the last positive
-     * https://stackoverflow.com/questions/41791298/finding-position-of-element-of-a-vector-that-satisfies-given-condition-in-c
-     */
-    const MantidVec &xValues = tof_ws->readX(0);
-    const MantidVec &yValues = tof_ws->readY(0);
-
-    size_t first_non_zero = 0, last_non_zero = yValues.size() - 1;
-    bool in_the_zone = false;
-
-    for (size_t i = 0; i != yValues.size(); i++) {
-
-        if (!in_the_zone) {
-          if (yValues[i] == 0) {
-
-          } else {
-            first_non_zero = i;
-            in_the_zone = true;
-          }
-
-        } else {
-
-          if (yValues[i] == 0) {
-            if (i < last_non_zero) {
-              last_non_zero = i;
-            }
-          } else {
-            last_non_zero = yValues.size();
-          }
-        }
-      }
-
-    
-    auto wl_min = xValues[first_non_zero];
-    tof_ws->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom",
-                                     true);
-    auto wl_max = xValues[last_non_zero-1];
-    tof_ws->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom",
-                                     true);
-
     tofWorkspaces.push_back(std::move(tof_ws));
   }
 
@@ -378,6 +337,9 @@ void Q1DWeighted::exec() {
       }
     }
     PARALLEL_END_INTERUPT_REGION
+
+	setWavelengthBoundaries(tofWorkspaces[j]);
+
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
@@ -425,5 +387,47 @@ void Q1DWeighted::exec() {
   setProperty("IQLambdaWorkspace", wsLambdaGroup);
 }
 
+
+/*
+ * For a workspace finds the min and max wavelength
+ * The walenghts (x axis) are cut when the value of the
+ * corresponding spectrum (y axis) is below 0.001
+ * Note this only works for the ends of the spectrum
+ */
+void Q1DWeighted::setWavelengthBoundaries(
+    Mantid::API::MatrixWorkspace_sptr ws) {
+
+  const MantidVec &xValues = ws->readX(0);
+  const MantidVec &yValues = ws->readY(0);
+
+  size_t first_non_zero = 0, last_non_zero = yValues.size() - 1;
+  bool in_the_zone = false;
+
+  for (size_t i = 0; i != yValues.size(); i++) {
+    if (!in_the_zone) {
+      if (yValues[i] > 0.001) {
+        first_non_zero = i;
+        in_the_zone = true;
+      }
+
+    } else {
+      if (yValues[i] <= 0.001) {
+        if (i < last_non_zero) {
+          last_non_zero = i;
+        }
+      } else {
+        last_non_zero = yValues.size();
+      }
+    }
+  }
+
+  auto wl_min = xValues[first_non_zero];
+  ws->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom", true);
+  auto wl_max = xValues[last_non_zero];
+  ws->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
+
+  g_log.debug() << "WS " << ws->getName() << " wavelength_min=" << wl_min
+                      << " wavelength_max=" << wl_max << '\n';
+}
 } // namespace Algorithms
 } // namespace Mantid
