@@ -29,6 +29,7 @@ class Track;
 class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
+
 /**
 \class MeshObject
 \brief Triangular Mesh Object
@@ -73,6 +74,11 @@ public:
   virtual ~MeshObject();
   /// Clone
   IObject *clone() const override { return new MeshObject(*this); }
+
+  void initialize(int nPts, int nFaces, double *points,
+    int *faces) const;
+
+  void initialize(std::vector<int> &faces, std::vector<Mantid::Kernel::V3D> &vertices) const;
 
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }

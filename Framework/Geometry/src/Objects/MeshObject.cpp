@@ -76,6 +76,34 @@ MeshObject &MeshObject::operator=(const MeshObject &A) {
 /// Destructor in .cpp so we can forward declare Rule class.
 MeshObject::~MeshObject() = default;
 
+
+/*
+ * Initialise in CacheGeogmetryRenderer format
+ */
+void MeshObject::initialize(int nPts, int nFaces, double *points,
+  int *faces) const {
+
+  std::vector<V3D> vertices;
+  for (int i=0; i<nPts; ++i) {
+    vertices.push_back(V3D(nPts+(3 * i), nPts+(3 * i + 1), nPts+(3 * i + 2)));
+  }
+
+  std::vector<int> triangles;
+  for (int i = 0; i < 3*nFaces; ++i) {
+    triangles.push_back(nFaces + i);
+  }
+
+  initialize(triangles, vertices);
+
+}
+
+/*
+ * Initialise with vectors
+ */
+void MeshObject::initialize(std::vector<int> &faces, std::vector<V3D> &vertices) const {
+
+}
+
 /**
  * @param material The new Material that the object is composed from
  */
