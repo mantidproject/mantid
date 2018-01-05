@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_FITPEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -135,13 +136,12 @@ private:
                              API::IPeakFunction_sptr peakfunction,
                              API::IBackgroundFunction_sptr bkgdfunction);
 
-  //  double findMaxValue(size_t wi, const std::pair<double, double> &window,
-  //                      API::IBackgroundFunction_sptr bkgdfunction,
-  //                      size_t &center_index, double &peak_center,
-  //                      double &max_value);
+  int ObservePeakCenter(HistogramData::HistogramY &vector_y,
+                        API::FunctionValues &bkgd_values,
 
-  //  std::vector<size_t> getRange(size_t wi,
-  //                               const std::vector<double> &peak_window);
+                        size_t start_index, size_t stop_index,
+                        double *peak_center, size_t *peak_center_index,
+                        double *peak_intensity);
 
   /// Process the result from fitting a single peak
   void ProcessSinglePeakFitResult(
@@ -159,10 +159,7 @@ private:
   /// Get index of value X in a spectrum's X histogram
   size_t GetXIndex(size_t wi, double x);
 
-  //  double processFitResult(DataObjects::TableWorkspace_sptr param_table,
-  //                          std::vector<double> &param_values,
-  //                          std::vector<double> &param_errors);
-
+  /// Set the workspaces and etc to output properties
   void setOutputProperties();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
@@ -178,26 +175,21 @@ private:
   //-------------------------------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
+  bool is_d_space_;
+  /// event workspace for input
   DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
+  /// output workspace for peak positions
   API::MatrixWorkspace_sptr
       output_peak_position_workspaces_; // output workspace for peak positions
-  bool is_d_space_;
-
+  /// matrix workspace contains number of events of each spectrum
+  API::MatrixWorkspace_const_sptr m_eventNumberWS;
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
-
-  /// FIXME - will be replaed by m_fittedParaTable output workspace for all peak
-  /// parameters
-  // API::MatrixWorkspace_sptr m_peakParamsWS;
   /// matrix workspace contained calcalated peaks+background from fitted result
   API::MatrixWorkspace_sptr m_fittedPeakWS;
 
-  /// matrix workspace contains number of events of each spectrum
-  API::MatrixWorkspace_const_sptr m_eventNumberWS;
-
-  //-------- Functions
-  //-------------------------------------------------------------
+  //-------- Functions ------------------------------------------------------
   /// Peak profile name
   API::IPeakFunction_sptr m_peakFunction;
   /// Background function
@@ -210,17 +202,20 @@ private:
   /// Fit from right or left
   bool fit_peaks_from_right_;
 
-  // Inputs about peak parameters
+  //-------- Input param init values --------------------------------
+  /// input starting parameters' indexes in peak function
   std::vector<size_t> m_initParamIndexes;
 
-  //-------- Peak centers (expected)
-  //-------------------------------------------------
   /// Designed peak positions and tolerance
   std::vector<double> m_peakCenters;
   API::MatrixWorkspace_const_sptr m_peakCenterWorkspace;
   size_t m_numPeaksToFit;
   bool m_uniformPeakPositions;
 
+  /// flag to estimate peak width from
+  double m_peakDSpacePercentage;
+
+  //--------- Fitting range -----------------------------------------
   /// start index
   size_t m_startWorkspaceIndex;
   /// stop index: the last index is one less than this value
@@ -228,7 +223,6 @@ private:
   /// flag whether the peak center workspace has only a subset of spectra to fit
   bool m_partialSpectra;
   std::vector<double> m_peakPosTolerances;
-  double m_peakDSpacePercentage;
 
   /// Flag for observing peak width
   bool observe_peak_width_;

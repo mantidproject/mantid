@@ -340,7 +340,7 @@ void FitPeaks::processInputs() {
 
   // about peak width and other peak parameter estimating method
   observe_peak_width_ = false;
-  if (m_peakFunction->name().compare('Gaussian') == 0)
+  if (m_peakFunction->name().compare("Gaussian") == 0)
     if (!(is_d_space_ && m_peakDSpacePercentage < 0))
         observe_peak_width_ = true;
 
@@ -1059,32 +1059,120 @@ int FitPeaks::EstimatePeakParameters(
       std::lower_bound(vec_x.begin(), vec_x.end(), peak_window.first);
   std::vector<double>::const_iterator istop =
       std::lower_bound(vec_x.begin(), vec_x.end(), peak_window.second);
+  size_t start_index = static_cast<size_t>(istart - vec_x.begin());
+  size_t stop_index = static_cast<size_t>(istop - vec_x.begin());
 
   // calculate background
   FunctionDomain1DVector domain(istart, istop);
-  FunctionValues values(domain);
-  bkgdfunction->function(domain, values);
+  FunctionValues bkgd_values(domain);
+  bkgdfunction->function(domain, bkgd_values);
 
-  auto vecY = m_inputMatrixWS->y(wi);
+  auto vector_y = m_inputMatrixWS->y(wi);
+
+  // Estimate peak center
+  double peak_center, peak_height;
+  size_t peak_center_index;
+  int result =
+      ObservePeakCenter(vector_y, bkgd_values, start_index, stop_index,
+                        &peak_center, &peak_center_index, &peak_height);
+
+  //  double real_y_max = 0;
+  //  double max_value = 0;
+  //  size_t start_index = static_cast<size_t>(istart - vec_x.begin());
+  //  size_t peak_center_index(-1);
+  //  double peak_center(0);
+
+  //  for (size_t i = 0; i < bkgd_values.size(); ++i) {
+  //    double y = vector_y[i + start_index] - bkgd_values.getCalculated(i);
+  //    // g_log.notice() << "[Temp DB] y[" << i+start_index << "] = " << vecY[i
+  //    +
+  //    // start_index] << " reduced to Y = " << y << "\n";
+  //    if (y > max_value) {
+  //      max_value = y;
+  //      peak_center = vec_x[i + start_index];
+  //      peak_center_index = i + start_index;
+  //    }
+  //    if (vector_y[i] > real_y_max)
+  //      real_y_max = y;
+  //  }
+  //  if (peak_center_index > vec_x.size()) {
+  //    g_log.error() << "Peak center between " << peak_window.first << " and "
+  //                  << peak_window.second
+  //                  << " is out of range.  Estimated/observed center is at "
+  //                  << peak_center << " at index " << peak_center_index <<
+  //                  "\n";
+  //    throw std::logic_error(
+  //        "It is not possible for not setting peak center index");
+  //  }
+
+  //  // check peak position
+  //  size_t ileft = GetXIndex(wi, peak_window.first);
+  //  size_t iright = GetXIndex(wi, peak_window.second);
+
+  //  // check peak height
+  //  const size_t MAGIC3(3);
+
+  //  int result(0);
+  //  if (real_y_max < 1.0) {
+  //    // none-event, but no signal within region
+  //    result = NOSIGNAL;
+  //  } else if (max_value < m_minPeakHeight) {
+  //    // peak too low
+  //    result = LOWPEAK;
+  //  } else if ((peak_center_index - ileft) < MAGIC3 ||
+  //             (iright - peak_center_index) < MAGIC3) {
+  //    // peak not at center
+  //    result = OUTOFBOUND;
+  //  } else {
+  //    result = GOOD;
+  //    //    lastPeakParameters[X0] = peak_center;
+  //    //    lastPeakParameters[HEIGHT] = max_value;
+  //  }
+
+  // set the peak center
+  if (result == GOOD) {
+    // use values from background to locate FWHM
+    peakfunction->setCentre(peak_center);
+    peakfunction->setHeight(peak_height);
+  }
+
+  // Estimate FHWM (peak width)
+  if (result == GOOD) {
+
+    double peak_width = ObservePeakWidth();
+
+    if (peak_width > 0) {
+      peakfunction->setFwhm(peak_width);
+    }
+  }
+
+  return result;
+}
+
+int FitPeaks::ObservePeakCenter(HistogramData::HistogramY &vector_y,
+                                FunctionValues &bkgd_values, size_t start_index,
+                                size_t stop_index, double *peak_center,
+                                size_t *peak_center_index,
+                                double *peak_intensity) {
+
   double real_y_max = 0;
   double max_value = 0;
-  size_t start_index = static_cast<size_t>(istart - vec_x.begin());
-  size_t peak_center_index(-1);
-  double peak_center(0);
+  *peak_center_index = -1;
+  *peak_center = 0;
 
-  for (size_t i = 0; i < values.size(); ++i) {
-    double y = vecY[i + start_index] - values.getCalculated(i);
+  for (size_t i = 0; i < bkgd_values.size(); ++i) {
+    double y = vector_y[i + start_index] - bkgd_values.getCalculated(i);
     // g_log.notice() << "[Temp DB] y[" << i+start_index << "] = " << vecY[i +
     // start_index] << " reduced to Y = " << y << "\n";
     if (y > max_value) {
       max_value = y;
-      peak_center = vec_x[i + start_index];
-      peak_center_index = i + start_index;
+      *peak_center = vec_x[i + start_index];
+      *peak_center_index = i + start_index;
     }
-    if (vecY[i] > real_y_max)
+    if (vector_y[i] > real_y_max)
       real_y_max = y;
   }
-  if (peak_center_index > vec_x.size()) {
+  if (*peak_center_index > vec_x.size()) {
     g_log.error() << "Peak center between " << peak_window.first << " and "
                   << peak_window.second
                   << " is out of range.  Estimated/observed center is at "
@@ -1092,10 +1180,6 @@ int FitPeaks::EstimatePeakParameters(
     throw std::logic_error(
         "It is not possible for not setting peak center index");
   }
-
-  // check peak position
-  size_t ileft = GetXIndex(wi, peak_window.first);
-  size_t iright = GetXIndex(wi, peak_window.second);
 
   // check peak height
   const size_t MAGIC3(3);
@@ -1107,8 +1191,8 @@ int FitPeaks::EstimatePeakParameters(
   } else if (max_value < m_minPeakHeight) {
     // peak too low
     result = LOWPEAK;
-  } else if ((peak_center_index - ileft) < MAGIC3 ||
-             (iright - peak_center_index) < MAGIC3) {
+  } else if ((*peak_center_index - start_index) < MAGIC3 ||
+             (stop_index - *peak_center_index) < MAGIC3) {
     // peak not at center
     result = OUTOFBOUND;
   } else {
@@ -1117,34 +1201,31 @@ int FitPeaks::EstimatePeakParameters(
     //    lastPeakParameters[HEIGHT] = max_value;
   }
 
-  // set the peak center
-  if (result == GOOD) {
-    // use values from background to locate FWHM
-    peakfunction->setCentre(peak_center);
-  }
+  // TODO FIXME ASAP - peak intensity
 
-  // Estimate FHWM (peak width)
-  if (is_d_space_ && m_peakDSpacePercentage > 0)
-  {
+  return result;
+}
+
+// TODO FIXME NOWNOW - Implement
+double FitPeaks::PeakWidth() {
+  // case 1:
+
+  if (is_d_space_ && m_peakDSpacePercentage > 0) {
     // width from guessing from delta(D)/D
     double start_width = peak_center * m_peakDSpacePercentage;
     peakfunction->setFwhm(start_width);
-  }
-  else if (observe_peak_width_)
-  {
+  } else if (observe_peak_width_) {
     // TODO observe peak width
     // estimate FWHM (left and right) by observation
     throw std::runtime_error("Observe peak width is not implemented yet!");
-  }
-  else
-  {
+  } else {
     // get from last peak or from input!
-    throw std::runtime_error("Implement how to get FWHM from last peak or input");
+    throw std::runtime_error(
+        "Implement how to get FWHM from last peak or input");
     ;
   }
 
-
-  return result;
+  return peak_width;
 }
 
 ////----------------------------------------------------------------------------------------------
@@ -1248,6 +1329,8 @@ double FitPeaks::FitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
  * @param wsindex
  * @param xmin
  * @param xmax
+ * @param observe_peak_width::flag to 'observe' peak width. Otherwise, use width
+ * related parameter set in function
  * @return chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL,
  * return DBL_MAX
  */
@@ -1255,7 +1338,8 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
                                API::IPeakFunction_sptr peak_function,
                                API::IBackgroundFunction_sptr bkgd_function,
                                API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                               double xmin, double xmax) {
+                               double xmin, double xmax,
+                               bool observe_peak_width) {
 
   // generate peak window
   std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
@@ -1264,7 +1348,8 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   EstimateBackground(wsindex, peak_window, bkgd_function);
 
   // Estimate peak profile parameter
-  EstimatePeakParameters(wsindex, peak_window, peak_function, bkgd_function);
+  EstimatePeakParameters(wsindex, peak_window, peak_function, bkgd_function,
+                         observe_peak_width);
 
   // Create the composition function
   CompositeFunction_sptr comp_func =
