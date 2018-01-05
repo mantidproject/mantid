@@ -134,23 +134,6 @@ def add_actions(target, actions):
     :param actions: A collection of actions to be added
     :raises ValueError: If one of the actions is not an instance of QMenu/QAction
     """
-    filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
-    return loadUi(filepath, baseinstance=baseinstance)
-
-
-@contextmanager
-def block_signals(widget):
-    """
-    A context manager that helps to block widget's signals temporarily. Usage:
-
-        with block_signals(widget):
-            widget.do_actions_that_emit_signals()
-
-    :param widget: A Qt widget signals from which should be blocked.
-    """
-    widget.blockSignals(True)
-    yield
-    widget.blockSignals(False)
     for action in actions:
         if isinstance(action, QMenu):
             target.addMenu(action)

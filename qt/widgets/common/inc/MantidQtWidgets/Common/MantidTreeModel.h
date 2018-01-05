@@ -4,6 +4,7 @@
 // Includes
 //----------------------------------
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include <qobject.h>
 
 //----------------------------------
 // Forward declarations
@@ -44,9 +45,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 
-class MantidTreeModel : public QObject,
-                        public MantidQt::MantidWidgets::MantidDisplayBase {
-
+class MantidTreeModel : public QObject, 
+						public MantidQt::MantidWidgets::MantidDisplayBase {
+  Q_OBJECT
 public:
 // Data display and saving methods
   void updateRecentFilesList(const QString &fname) override;

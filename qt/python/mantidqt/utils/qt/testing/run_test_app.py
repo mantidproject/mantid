@@ -18,7 +18,7 @@
 
 Usage:
 
-    python run_test_app.py qualified.name.of.SomeWidget [--script qualified.name.of.some_script]
+    python run_test_app.py qualified.name.of.SomeWidget [--script qualified.name.of.some_script]_
 
 The widget (and optional script) should be in the location form where python could import it as in:
 
@@ -35,9 +35,7 @@ from __future__ import absolute_import, print_function
 
 import sys
 import traceback
-
 from qtpy.QtWidgets import QApplication
-
 from mantidqt.utils.qt.plugins import setup_library_paths
 
 
@@ -57,11 +55,21 @@ def create_widget(widget_path):
     :param widget_path: A qualified name of a widget, ie mantidqt.mywidget.MyWidget
     :return: The widget's class.
     """
+    print("Creating Widget...")
     module_name, widget_name = split_qualified_name(widget_path)
     m = __import__(module_name, fromlist=[widget_name])
+    print(m)
     widget_generator = getattr(m, widget_name)
-    return widget_generator()
+    print("Created Widget generator")
+    param = get_sip_wrapper('mantidqt.widgets.mantidtreemodel.MantidTreeModel')
+    return widget_generator(param)
 
+def get_sip_wrapper(class_path):
+    module_name, class_name = split_qualified_name(class_path)
+    m = __import__(module_name, fromlist=[class_name])
+    wrapper = getattr(m, class_name)
+    obj_of_class = wrapper();
+    return obj_of_class
 
 def open_in_window(widget_name, script):
     """
@@ -72,7 +80,9 @@ def open_in_window(widget_name, script):
     app = QApplication([""])
 
     w = create_widget(widget_name)
+    print("Widget Created")
     w.setWindowTitle(widget_name)
+    print("Showing QApp")
     w.show()
 
     if script is not None:
@@ -102,4 +112,6 @@ if __name__ == "__main__":
                                          " The name must contain the python module where the function is defined,"
                                          " eg somepackage.somemodule.test_my_widget")
     args = parser.parse_args()
+    print(args.widget)
+    print(args.script)
     open_in_window(args.widget, args.script)
