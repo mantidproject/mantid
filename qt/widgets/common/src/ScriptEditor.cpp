@@ -37,15 +37,13 @@ namespace {
  * Return a new instance of a lexer based on the given language
  * @param language A string defining the language. Currently hardcoded to
  * Python.
- * @param editor The editor that the lexer will be installed on.
  * @return A new QsciLexer instance
  */
-QsciLexer *createLexerFromLanguage(const QString &language,
-                                   QsciScintilla *editor) {
+QsciLexer *createLexerFromLanguage(const QString &language) {
   if (language != "Python")
     throw std::invalid_argument("createLexerFromLanguage: Unsupported "
                                 "language. Supported languages=Python");
-  return new QsciLexerPython(editor);
+  return new QsciLexerPython;
 }
 }
 
@@ -64,7 +62,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * @param parent Parent widget
  */
 ScriptEditor::ScriptEditor(const QString &language, QWidget *parent)
-    : ScriptEditor(parent, createLexerFromLanguage(language, this)) {}
+    : ScriptEditor(parent, createLexerFromLanguage(language)) {}
 
 /**
  * Constructor

@@ -9,6 +9,24 @@ qRegisterMetaType<MantidQt::MantidWidgets::Message>();
 %End
 
 // ----------------------------------------------------------------------------
+// Exceptions
+// ----------------------------------------------------------------------------
+
+%Exception std::invalid_argument(SIP_Exception) /PyName=ValueError/
+{
+%TypeHeaderCode
+#include <stdexcept>
+%End
+%RaiseCode
+    const char *detail = sipExceptionRef.what();
+
+    SIP_BLOCK_THREADS
+    PyErr_SetString(PyExc_ValueError, detail);
+    SIP_UNBLOCK_THREADS
+%End
+};
+
+// ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
 
@@ -35,4 +53,16 @@ class MessageDisplay : QWidget, Configurable {
 public:
   MessageDisplay(QWidget *parent = 0);
   void attachLoggingChannel();
+};
+
+class ScriptEditor {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptEditor.h"
+%End
+
+public:
+  ScriptEditor(const QString & language,
+               QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
+private:
+  ScriptEditor(const ScriptEditor&);
 };
