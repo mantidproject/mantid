@@ -70,9 +70,6 @@ class GSASIIRefineFitPeaksTestHelper(object):
     _INST_PARAM_FILENAME = "template_ENGINX_241391_236516_North_bank.prm"
     _TEMP_DIR = tempfile.gettempdir()
 
-    def excludeInPullRequests(self):
-        return True
-
     def path_to_gsas(self):
         return _GSASFinder.GSASIIscriptable_location()
 
@@ -98,6 +95,9 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, GSASIIRef
     gsas_proj_path = None
     _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldFitParams.nxs"
     _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksRietveldTest.gpx"
+
+    def excludeInPullRequests(self):
+        return True
 
     def runTest(self):
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
@@ -129,6 +129,9 @@ class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, GSASIIRefin
     gsas_proj_path = None
     _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyFitParams.nxs"
     _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksPawleyTest.gpx"
+
+    def excludeInPullRequests(self):
+        return True
 
     def runTest(self):
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
