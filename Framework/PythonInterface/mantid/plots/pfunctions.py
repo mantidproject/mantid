@@ -42,7 +42,9 @@ def getAxesLabels(workspace):
     ''' get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
     All other elements in the tuple are labels for axes.
-    Some of them are latef formatted already.'''
+    Some of them are latex formatted already.
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.dataobjects.MDHistoWorkspace` 
+    '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
@@ -342,7 +344,7 @@ def _getMDData2D_bin_centers(workspace,normalization):
     tricontour, tricontourf, tripcolor)
     Note return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     '''
-    x,y,data=_getMDData2D_bin_bounds(workspace,normalization,withError=False)
+    x,y,data=_getMDData2D_bin_bounds(workspace,normalization)
     x=points_from_boundaries(x)
     y=points_from_boundaries(y)
     return (x,y,data)
