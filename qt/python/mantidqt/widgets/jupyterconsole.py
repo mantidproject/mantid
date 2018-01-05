@@ -26,25 +26,25 @@ import types
 from qtpy.QtWidgets import QApplication
 try:
     # Later versions of Qtconsole are part of Jupyter
-    from qtconsole.rich_jupyter_widget import RichJupyterWidget as RichIPythonWidget
+    from qtconsole.rich_jupyter_widget import RichJupyterWidget
     from qtconsole.inprocess import QtInProcessKernelManager
 except ImportError:
-    from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
+    from IPython.qt.console.rich_ipython_widget import RichIPythonWidget as RichJupyterWidget
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
 from mantidqt.utils.async import blocking_async_task
 
 
-class InProcessIPythonConsole(RichIPythonWidget):
+class InProcessJupyterConsole(RichJupyterWidget):
 
     def __init__(self, *args, **kwargs):
         """
-        A constructor matching that of RichIPythonWidget
-        :param args: Positional arguments passed directly to RichIPythonWidget
-        :param kwargs: Keyword arguments passed directly to RichIPythonWidget
+        A constructor matching that of RichJupyterWidget
+        :param args: Positional arguments passed directly to RichJupyterWidget
+        :param kwargs: Keyword arguments passed directly to RichJupyterWidget
         """
-        super(InProcessIPythonConsole, self).__init__(*args, **kwargs)
+        super(InProcessJupyterConsole, self).__init__(*args, **kwargs)
 
         # create an in-process kernel
         kernel_manager = QtInProcessKernelManager()

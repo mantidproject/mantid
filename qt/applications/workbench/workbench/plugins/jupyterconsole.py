@@ -14,28 +14,34 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import (absolute_import)
+from __future__ import (absolute_import, unicode_literals)
 
 # system imports
-import unittest
 
 # third-party library imports
+from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
+from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
-from mantidqt.widgets.ipythonconsole import InProcessIPythonConsole
-from mantidqt.utils.qt.testing import requires_qapp
+from workbench.plugins.base import PluginWidget
 
 
-@requires_qapp
-class InProcessIPythonConsoleTest(unittest.TestCase):
+class JupyerConsole(PluginWidget):
+    """Provides an in-process Jupyter Qt-based console"""
 
-    def test_construction_raises_no_errors(self):
-        widget = InProcessIPythonConsole()
-        self.assertTrue(hasattr(widget, "kernel_manager"))
-        self.assertTrue(hasattr(widget, "kernel_client"))
-        self.assertTrue(len(widget.banner) > 0)
+    def __init__(self, parent):
+        super(JupyerConsole, self).__init__(parent)
 
+        # layout
+        self.console = InProcessJupyterConsole(self)
+        layout = QVBoxLayout()
+        layout.addWidget(self.console)
+        self.setLayout(layout)
 
+# ----------------- Plugin API --------------------
 
-if __name__ == '__main__':
-    unittest.main()
+    def register_plugin(self):
+        self.main.add_dockwidget(self)
+
+    def get_plugin_title(self):
+        return "IPython"

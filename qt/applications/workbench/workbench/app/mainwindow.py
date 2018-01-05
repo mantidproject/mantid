@@ -143,8 +143,8 @@ class MainWindow(QMainWindow):
         self.messagedisplay.register_plugin()
 
         self.set_splash("Loading IPython console")
-        from workbench.plugins.ipythonconsole import IPythonConsole
-        self.ipythonconsole = IPythonConsole(self)
+        from workbench.plugins.jupyterconsole import JupyerConsole
+        self.ipythonconsole = JupyerConsole(self)
         self.ipythonconsole.register_plugin()
 
         self.setup_layout()
