@@ -340,7 +340,7 @@ void FitPeaks::processInputs() {
 
   // about peak width and other peak parameter estimating method
   observe_peak_width_ = false;
-  if (m_peakFunction->name().compare('Gaussian') == )
+  if (m_peakFunction->name().compare('Gaussian') == 0)
     if (!(is_d_space_ && m_peakDSpacePercentage < 0))
         observe_peak_width_ = true;
 
