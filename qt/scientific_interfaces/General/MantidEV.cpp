@@ -962,17 +962,23 @@ void MantidEV::chooseCell_slot() {
     std::string cell_type = m_uiForm.CellType_cmbx->currentText().toStdString();
     std::string centering =
         m_uiForm.CellCentering_cmbx->currentText().toStdString();
+    double index_tolerance = 0.12;
+    if (!getPositiveDouble(m_uiForm.IndexingTolerance_ledt, index_tolerance))
+      return;
     if (!worker->selectCellOfType(peaks_ws_name, cell_type, centering,
-                                  allow_perm)) {
+                                  allow_perm, index_tolerance)) {
       errorMessage("Failed to Select Specified Conventional Cell");
     }
   } else if (select_cell_form) {
     std::string form =
         m_uiForm.CellFormNumber_cmbx->currentText().toStdString();
     double form_num = 0;
+    double index_tolerance = 0.12;
+    if (!getPositiveDouble(m_uiForm.IndexingTolerance_ledt, index_tolerance))
+      return;
     getDouble(form, form_num);
-    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num,
-                                    allow_perm)) {
+    if (!worker->selectCellWithForm(peaks_ws_name, (size_t)form_num, allow_perm,
+                                    index_tolerance)) {
       errorMessage("Failed to Select the Requested Form Number");
     }
   }

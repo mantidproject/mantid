@@ -50,6 +50,43 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"Angstrom^-1", "Angstrom"}};
 // A threshold for small singular values
 const double THRESHOLD = 1E-6;
+
+/** removes zeros from converged results
+* @param ws :: [input] The input workspace with zeros
+* @param maxIt :: [input] The max number of iteration this alg used
+* @param yLabel :: [input] y-label to use for returned ws
+* @return : ws cut down in lenght to maxIt
+*/
+MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
+                                 const size_t maxIt,
+                                 const ::std::string yLabel) {
+
+  ws->setYUnitLabel(yLabel);
+  try {
+    ws->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Number of Iterations");
+  } catch (Exception::NotFoundError &) {
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+    Unit_sptr unit = ws->getAxis(0)->unit();
+    boost::shared_ptr<Units::Label> label =
+        boost::dynamic_pointer_cast<Units::Label>(unit);
+    label->setLabel("Number of Iterations", "");
+  }
+
+  if (maxIt == ws->readY(0).size()) {
+    return ws;
+  }
+  const size_t nspec = ws->getNumberHistograms();
+  MatrixWorkspace_sptr outWS =
+      WorkspaceFactory::Instance().create(ws, nspec, maxIt, maxIt);
+  for (size_t spec = 0; spec < nspec; spec++) {
+    outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
+    auto Data = ws->readY(spec);
+    outWS->setCounts(spec,
+                     std::vector<double>(Data.begin(), Data.begin() + maxIt));
+  }
+  return outWS;
+}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -313,7 +350,7 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-
+  size_t maxIt = 0; // used to determine max iterations used by alg
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
 
@@ -360,10 +397,13 @@ void MaxEnt::exec() {
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
-
+      if (it > maxIt) {
+        maxIt = it;
+      }
       // Stop condition, solution found
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
+
         g_log.information() << "Stopped after " << it << " iterations"
                             << std::endl;
         break;
@@ -398,9 +438,10 @@ void MaxEnt::exec() {
     // No errors
 
   } // Next spectrum
-
-  setProperty("EvolChi", outEvolChi);
-  setProperty("EvolAngle", outEvolTest);
+  // add 1 to maxIt to account for starting at 0
+  maxIt++;
+  setProperty("EvolChi", removeZeros(outEvolChi, maxIt, "Chi squared"));
+  setProperty("EvolAngle", removeZeros(outEvolTest, maxIt, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }

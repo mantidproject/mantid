@@ -43,10 +43,12 @@ the example below.
 
 All workspaces are converted into wavelength using the appropriate
 mode of :ref:`ConvertUnits <algm-ConvertUnits>`. Then
-``CanShiftFactor`` is added to wavelength of the
-``CanWorkspace``. Then the following equation is performed:
+``CanShiftFactor`` is added to wavelength of the ``CanWorkspace``.
+Then one of the two following equations is performed
+(dependant on the number of correction factors provided):
 
 .. math:: I_s = \frac{1}{A_{s,sc}} \left( I_{sc}^E - I_c^E K_c \frac{A_{c,sc}}{A_{c,c}} \right)
+.. math:: I_s = \frac{1}{A_{s,s}} \left( I_{sc}^E \right) - \frac{1}{A_{c,c}} \left( I_{c}^E \right)
 
 The variables that are not defined above are
 
@@ -71,8 +73,9 @@ or one.
 Workflow
 --------
 
-Depending on the input workspaces provided to the algorithm it may operate in
-one of three ways, each of which is described on a separate workflow diagram.
+Depending on the input workspaces and correction factors provided to the algorithm
+it may operate in one of four ways, each of which is described on a separate
+workflow diagram.
 
 Container Scale Only
 ====================
@@ -90,11 +93,19 @@ provided.
 
 .. diagram:: ApplyPaalmanPingsCorrection-v1_samplecorrectiononly_wkflw.dot
 
+Two-Factor Approximation
+========================
+
+In the case where a container workspace, along with the :math:`A_{s,s}`
+and :math:`A_{c, c}` factors are provided.
+
+.. diagram:: ApplyPaalmanPingsCorrection-v1_twofactorcorrection_wkflw.dot
+
 Full Corrections
 ================
 
-In the case where both a container workspace and correction factors are
-provided.
+In the case where a container workspace, along with the :math:`A_{s,sc}`,
+:math:`A_{c,c}` and :math:`A_{c,sc}` factors are provided.
 
 .. diagram:: ApplyPaalmanPingsCorrection-v1_fullcorrection_wkflw.dot
 

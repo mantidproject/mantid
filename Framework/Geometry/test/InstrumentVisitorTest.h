@@ -291,7 +291,7 @@ public:
   }
 
   void test_visitation_of_rectangular_detector() {
-
+    using Mantid::Beamline::ComponentType;
     // Need confidence that this works properly for RectangularDetectors
     const int nPixelsWide = 10; // Gives 10*10 detectors in total
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -316,6 +316,7 @@ public:
   }
 
   void test_visitation_of_non_rectangular_detectors() {
+    using Mantid::Beamline::ComponentType;
 
     auto instrument =
         ComponentCreationHelper::createTestInstrumentCylindrical(1 /*n banks*/);
@@ -326,7 +327,7 @@ public:
 
     // Nothing should be marked as a rectangular bank
     for (size_t index = 0; index < compInfo->size(); ++index) {
-      TS_ASSERT(!compInfo->isStructuredBank(index));
+      TS_ASSERT(compInfo->componentType(index) != ComponentType::Rectangular);
     }
   }
 

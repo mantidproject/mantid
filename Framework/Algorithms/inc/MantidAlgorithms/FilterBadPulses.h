@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_FILTERBADPULSES_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -46,7 +46,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FilterBadPulses : public API::ParallelAlgorithm {
+class DLLExport FilterBadPulses : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

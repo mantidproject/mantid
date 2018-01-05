@@ -1,21 +1,22 @@
 #ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 #define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <numeric>
-#include <cmath>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/UnitFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/PDFFourierTransform.h"
+#include <algorithm>
+#include <cmath>
+#include <numeric>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
@@ -23,8 +24,8 @@ using namespace Mantid;
 
 namespace {
 /**
-* Create Workspace from 0 to N*dx
-*/
+ * Create Workspace from 0 to N*dx
+ */
 Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
                                            const std::string &name,
                                            const std::string unitlabel,
@@ -58,7 +59,7 @@ Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
 
   return ws;
 }
-}
+} // namespace
 
 class PDFFourierTransformTest : public CxxTest::TestSuite {
 public:
@@ -154,9 +155,9 @@ public:
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
     // make sure that nan didn' slip in
-    TS_ASSERT(std::find_if(GofR.begin(), GofR.end(),
-                           static_cast<bool (*)(double)>(std::isnan)) ==
-              GofR.end());
+    TS_ASSERT(std::find_if(GofR.begin(), GofR.end(), [](const double d) {
+      return std::isnan(d);
+    }) == GofR.end());
   }
 
   void test_filter() {
