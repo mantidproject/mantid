@@ -91,8 +91,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0 and len(line.split()) == 6 and line.startswith('76130'):
                 goodlines += 1
-            else:
-                print('BAD', line.strip())
         self.assertEquals(goodlines, 64)
 
         # Remove generated files
