@@ -515,7 +515,7 @@ public:
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.push_back(
-      Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 11.0, *geom_obj));
+      Link(V3D(-0.8, 0.2, 0.0), V3D(0.8, 0.2, 0.0), 10.8, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
 
