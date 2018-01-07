@@ -35,6 +35,11 @@ class MultiFileCodeEditorTest(unittest.TestCase):
         widget = MultiFileCodeEditor()
         self.assertEqual(1, widget.editor_count)
 
+    def test_execute_current_file_executes_correct_tab(self):
+        # set up code in current tab
+        widget = MultiFileCodeEditor()
+        editor = self.current_editor()
+
 
 if __name__ == '__main__':
     unittest.main()

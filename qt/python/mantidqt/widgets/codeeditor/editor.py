@@ -19,7 +19,9 @@ from __future__ import (absolute_import)
 # 3rd party imports
 from qtpy.QtWidgets import QTabWidget, QVBoxLayout, QWidget
 
+# local imports
 from mantidqt.utils.qt import import_qtlib
+from .execution import PythonCodeExecution
 
 EDITOR_LANGUAGE = "Python"
 
@@ -43,10 +45,10 @@ class MultiFileCodeEditor(QWidget):
         # add a single editor by default
         self.append_new_editor(EDITOR_LANGUAGE)
 
-    def append_new_editor(self, language):
-        title = "New"
-        self.editors.addTab(CodeEditor(language, self.editors), title)
-
     @property
     def editor_count(self):
         return self.editors.count()
+
+    def append_new_editor(self, language):
+        title = "New"
+        self.editors.addTab(CodeEditor(language, self.editors), title)
