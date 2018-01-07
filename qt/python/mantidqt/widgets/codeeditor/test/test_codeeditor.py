@@ -22,7 +22,7 @@ import unittest
 # third-party library imports
 
 # local imports
-from mantidqt.widgets.codeeditor import CodeEditor
+from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.utils.qt.testing import requires_qapp
 
 TEST_LANG = "Python"

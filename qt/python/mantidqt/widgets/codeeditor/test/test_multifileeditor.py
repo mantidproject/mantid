@@ -22,7 +22,7 @@ import unittest
 # third-party library imports
 
 # local imports
-from mantidqt.widgets.codeeditor import MultiFileCodeEditor
+from mantidqt.widgets.codeeditor.editor import MultiFileCodeEditor
 from mantidqt.utils.qt.testing import requires_qapp
 
 
