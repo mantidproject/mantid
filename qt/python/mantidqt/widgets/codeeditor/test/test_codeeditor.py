@@ -46,6 +46,12 @@ class CodeEditorTest(unittest.TestCase):
         widget.setFileName(test_filename)
         self.assertEqual(test_filename, widget.fileName())
 
+    def test_set_text_can_be_read_again(self):
+        widget = CodeEditor(TEST_LANG)
+        code_str = 'print "Hello World!"'
+        widget.setText(code_str)
+        self.assertEqual(code_str, widget.text())
+
     def test_default_construction_yields_editable_widget(self):
         widget = CodeEditor(TEST_LANG)
         self.assertFalse(widget.isReadOnly())

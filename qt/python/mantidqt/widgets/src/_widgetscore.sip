@@ -66,9 +66,11 @@ public:
 
   QString fileName() const;
   bool isReadOnly() const;
+  QString text() const;
 
   void setFileName(const QString &filename);
   void setReadOnly(bool ro);
+  void setText(const QString &text);
 
 private:
   ScriptEditor(const ScriptEditor&);
