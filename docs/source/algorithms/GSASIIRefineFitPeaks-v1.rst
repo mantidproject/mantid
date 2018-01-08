@@ -63,7 +63,7 @@ When Pawley refinement is selected as refinement method the flag for
 histogram scale factor refinement is disabled, as recommended in the
 `GSAS-II documentation
 <https://subversion.xray.aps.anl.gov/pyGSAS/trunk/help/gsasII.html>`_,
-as this cannot be refined simultaenously with the Pawley reflection
+as this cannot be refined simultaneously with the Pawley reflection
 intensities.
 
 The GSAS-II Rietveld/Pawley refinement process writes lattice
