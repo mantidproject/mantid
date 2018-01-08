@@ -153,7 +153,7 @@ class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
 class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
 
     def skipTests(self):
-        return False
+        return self.path_to_gsas() is None
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
@@ -171,7 +171,7 @@ class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
 class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
 
     def skipTests(self):
-        return False
+        return self.path_to_gsas() is None
 
     def _get_fit_params_reference_filename(self):
         return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
