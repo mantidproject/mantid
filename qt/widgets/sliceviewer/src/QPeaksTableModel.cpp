@@ -373,6 +373,5 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
 
 /// Destructor
 QPeaksTableModel::~QPeaksTableModel() {}
-
 }
 }
