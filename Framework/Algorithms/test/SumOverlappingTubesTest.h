@@ -25,6 +25,40 @@ using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
 
+namespace {
+MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
+                                          std::vector<double> rotations) {
+  const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
+      nTubes, nPixelsPerTube, true);
+  size_t nTimeIndexes = rotations.size();
+  size_t nBins = 1;
+
+  std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i)
+    timeRanges.push_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
+
+  ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
+  builder.setTimeRanges(timeRanges);
+  builder.setRelativeRotationsForScans(rotations, V3D(0, 0, 0), V3D(0, 1, 0));
+
+  Points x(nBins, LinearGenerator(0.0, 1.0));
+  Counts y(std::vector<double>(nBins, 2.0));
+  builder.setHistogram(Histogram(x, y));
+
+  auto testWS = builder.buildWorkspace();
+
+  // This has to be added to the ADS so that it can be used with the string
+  // validator used in the algorithm.
+  AnalysisDataService::Instance().add("testWS", testWS);
+
+  auto parameterMap = testWS->getInstrument()->getParameterMap();
+  parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
+                          "detector_for_height_axis", "tube-1");
+
+  return testWS;
+}
+}
+
 class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -59,39 +93,6 @@ public:
                           "mirror_detector_angles", mirrorOutput);
     parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
                             "detector_for_height_axis", "tube-1");
-    return testWS;
-  }
-
-  MatrixWorkspace_sptr createTestScanningWS(size_t nTubes,
-                                            size_t nPixelsPerTube,
-                                            std::vector<double> rotations) {
-    const auto instrument =
-        ComponentCreationHelper::createInstrumentWithPSDTubes(
-            nTubes, nPixelsPerTube, true);
-    size_t nTimeIndexes = 3;
-    size_t nBins = 1;
-
-    const std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges = {
-        {0, 1}, {1, 2}, {2, 3}};
-
-    ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
-    builder.setTimeRanges(timeRanges);
-    builder.setRelativeRotationsForScans(rotations, V3D(0, 0, 0), V3D(0, 1, 0));
-
-    Points x(nBins, LinearGenerator(0.0, 1.0));
-    Counts y(std::vector<double>(nBins, 2.0));
-    builder.setHistogram(Histogram(x, y));
-
-    auto testWS = builder.buildWorkspace();
-
-    // This has to be added to the ADS so that it can be used with the string
-    // validator used in the algorithm.
-    AnalysisDataService::Instance().add("testWS", testWS);
-
-    auto parameterMap = testWS->getInstrument()->getParameterMap();
-    parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
-                            "detector_for_height_axis", "tube-1");
-
     return testWS;
   }
 
@@ -680,6 +681,41 @@ public:
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }
+};
+
+class SumOverlappingTubesTestPerformance : public CxxTest::TestSuite {
+public:
+  static SumOverlappingTubesTestPerformance *createSuite() {
+    return new SumOverlappingTubesTestPerformance();
+  }
+  static void destroySuite(SumOverlappingTubesTestPerformance *suite) {
+    delete suite;
+  }
+
+  SumOverlappingTubesTestPerformance() {}
+
+  void setUp() override {
+    std::vector<double> rotations;
+    for (size_t i = 0; i < 250; ++i)
+      rotations.push_back(double(i) * 0.1);
+
+    auto testWS = createTestScanningWS(100, 128, rotations);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("OutputType", "2D");
+    alg.setProperty("ScatteringAngleBinning", "1.0");
+  }
+
+  void test_merge_d2b_like_detector_scan_workspaces() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().remove("outWS"); }
+
+private:
+  SumOverlappingTubes alg;
 };
 
 #endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */
