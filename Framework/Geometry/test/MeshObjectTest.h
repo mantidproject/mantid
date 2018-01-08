@@ -55,8 +55,53 @@ public:
 class MeshObjectTest : public CxxTest::TestSuite {
 
 public:
+  void testInitialize() {
+    MeshObject obj;
+
+    std::vector<V3D> vertices;
+    vertices.push_back(V3D(0, 0, 0));
+    vertices.push_back(V3D(1, 0, 0));
+    vertices.push_back(V3D(0, 1, 0));
+    vertices.push_back(V3D(0, 0, 1));
+
+    std::vector<int> triangles;
+    // face
+    triangles.push_back(1);
+    triangles.push_back(2);
+    triangles.push_back(3);
+    // face
+    triangles.push_back(2);
+    triangles.push_back(1);
+    triangles.push_back(0);
+    // face
+    triangles.push_back(3);
+    triangles.push_back(0);
+    triangles.push_back(1);
+    // face
+    triangles.push_back(0);
+    triangles.push_back(3);
+    triangles.push_back(2);
+
+    // Test initialize works first time
+    TS_ASSERT_THROWS_NOTHING(obj.initialize(triangles,vertices));
+    // but connot be done again
+    TS_ASSERT_THROWS_ANYTHING(obj.initialize(triangles, vertices));
+
+  }
+
+  void testClone() {
+    MeshObject blank;
+
+    // Test unitialized object cannot be cloned
+    TS_ASSERT_THROWS_ANYTHING(blank.clone());
+
+    // and an initialized object can be cloned
+    IObject_sptr geom_obj = createOctahedron();
+    TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
+  }
+
   void testDefaultObjectHasEmptyMaterial() {
-    CSGObject obj;
+    MeshObject obj;
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
                      obj.material().numberDensity(), 1e-12);
@@ -64,7 +109,7 @@ public:
 
   void testObjectSetMaterialReplacesExisting() {
     using Mantid::Kernel::Material;
-    CSGObject obj;
+    MeshObject obj;
 
     TSM_ASSERT_DELTA("Expected a zero number density", 0.0,
                      obj.material().numberDensity(), 1e-12);
