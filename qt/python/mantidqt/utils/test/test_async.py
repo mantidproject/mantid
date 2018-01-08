@@ -17,7 +17,6 @@
 from __future__ import absolute_import
 
 # system imports
-import traceback
 import unittest
 
 # 3rdparty imports
@@ -110,7 +109,6 @@ class AsyncTaskTest(unittest.TestCase):
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
         # we only test this once as it gives the internal lineno in async.py
         self.assertEqual(92, recv.task_exc_tb.tb_lineno)
-
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):

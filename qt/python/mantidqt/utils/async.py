@@ -90,6 +90,10 @@ class AsyncTask(threading.Thread):
     def run(self):
         try:
             out = self.target(*self.args, **self.kwargs)
+        except SyntaxError as exc:
+            # treat SyntaxErrors as special as the traceback makes no sense
+            # and the lineno is part of the exception instance
+            self.error_cb(AsyncTaskFailure(exc, None))
         except:  # noqa
             self.error_cb(AsyncTaskFailure(*sys.exc_info()[1:]))
         else:
