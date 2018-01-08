@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from abc import ABCMeta, abstractmethod
 import os
 import re
 import mantid
@@ -63,7 +64,14 @@ class _GSASFinder(object):
         return None
 
 
-class _GSASIIRefineFitPeaksTestHelper(object):
+class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
+
+    __metaclass__ = ABCMeta
+
+    fitted_peaks_ws = None
+    input_ws = None
+    residuals_table = None
+    lattice_params_table = None
 
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
     _RESIDUALS_TBL_NAME = "Residuals"
@@ -72,40 +80,31 @@ class _GSASIIRefineFitPeaksTestHelper(object):
     _INST_PARAM_FILENAME = "template_ENGINX_241391_236516_North_bank.prm"
     _TEMP_DIR = tempfile.gettempdir()
 
-    def path_to_gsas(self):
-        return _GSASFinder.GSASIIscriptable_location()
+    @abstractmethod
+    def _get_fit_params_reference_filename(self):
+        pass
 
-    def input_ws_path(self):
-        return mantid.FileFinder.getFullPath(self._INPUT_WORKSPACE_FILENAME)
+    @abstractmethod
+    def _get_gsas_proj_filename(self):
+        pass
 
-    def phase_file_path(self):
-        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME)
+    @abstractmethod
+    def _get_refinement_method(self):
+        pass
 
-    def inst_param_file_path(self):
-        return mantid.FileFinder.getFullPath(self._INST_PARAM_FILENAME)
+    @abstractmethod
+    def _get_residuals_reference_filename(self):
+        pass
 
-    def remove_all_gsas_files(self, gsas_filename_without_extension):
-        for filename in os.listdir(self._TEMP_DIR):
-            if re.search(gsas_filename_without_extension, filename):
-                os.remove(os.path.join(self._TEMP_DIR, filename))
-
-
-class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
-
-    fitted_peaks_ws = None
-    gsas_proj_path = None
-    input_ws = None
-    residuals_table = None
-    lattice_params_table = None
-    _FIT_PARAMS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldFitParams.nxs"
-    _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksRietveldTest.gpx"
-    _RESIDUALS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldResiduals.nxs"
+    def cleanup(self):
+        mantid.mtd.clear()
+        self.remove_all_gsas_files(gsas_filename_without_extension=self._get_gsas_proj_filename().split(".")[0])
 
     def excludeInPullRequests(self):
         return True
 
     def runTest(self):
-        self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
+        gsas_proj_path = os.path.join(self._TEMP_DIR, self._get_gsas_proj_filename())
         self.input_ws = Load(Filename=self.input_ws_path(), OutputWorkspace="input_ws")
 
         gsas_path = self.path_to_gsas()
@@ -113,66 +112,75 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
             self.fail("Could not find GSAS-II installation")
 
         self.fitted_peaks_ws, self.residuals_table, self.lattice_params_table = \
-            GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
+            GSASIIRefineFitPeaks(RefinementMethod=self._get_refinement_method(),
                                  InputWorkspace=self.input_ws,
                                  PhaseInfoFile=self.phase_file_path(),
                                  InstrumentFile=self.inst_param_file_path(),
                                  PathToGSASII=gsas_path,
-                                 SaveGSASIIProjectFile=self.gsas_proj_path,
+                                 SaveGSASIIProjectFile=gsas_proj_path,
                                  MuteGSASII=True,
                                  LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
                                  ResidualsTable=self._RESIDUALS_TBL_NAME)
 
-    def validate(self):
-        # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
-        self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
-        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._FIT_PARAMS_REFERENCE_FILE_NAME),
-                self._RESIDUALS_TBL_NAME, mantid.FileFinder.getFullPath(self._RESIDUALS_REFERENCE_FILE_NAME))
-
-    def cleanup(self):
-        mantid.mtd.clear()
-        self.remove_all_gsas_files(gsas_filename_without_extension=self._GSAS_PROJ_FILE_NAME.split(".")[0])
-
-
-class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
-
-    fitted_peaks_ws = None
-    gsas_proj_path = None
-    input_ws = None
-    residuals_table = None
-    lattice_params_table = None
-    _FIT_PARAMS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyFitParams.nxs"
-    _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksPawleyTest.gpx"
-    _RESIDUALS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyResiduals.nxs"
-
-    def excludeInPullRequests(self):
+    def skipTests(self):
+        # Skip this test, as it's just a wrapper for the Rietveld and Pawley tests
         return True
 
-    def runTest(self):
-        self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
-        self.input_ws = Load(Filename=self.input_ws_path(), OutputWorkspace="output_ws")
-
-        gsas_path = self.path_to_gsas()
-        if not gsas_path:
-            self.fail("Could not find GSAS-II installation")
-
-        self.fitted_peaks_ws, self.residuals_table, self.lattice_params_table = \
-            GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
-                                 InputWorkspace=self.input_ws,
-                                 PhaseInfoFile=self.phase_file_path(),
-                                 InstrumentFile=self.inst_param_file_path(),
-                                 PathToGSASII=gsas_path,
-                                 SaveGSASIIProjectFile=self.gsas_proj_path,
-                                 MuteGSASII=True,
-                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
-                                 ResidualsTable=self._RESIDUALS_TBL_NAME)
-
     def validate(self):
         # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
         self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
-        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._FIT_PARAMS_REFERENCE_FILE_NAME),
-                self._RESIDUALS_TBL_NAME, mantid.FileFinder.getFullPath(self._RESIDUALS_REFERENCE_FILE_NAME))
+        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._get_fit_params_reference_filename()),
+                self._RESIDUALS_TBL_NAME, mantid.FileFinder.getFullPath(self._get_residuals_reference_filename()))
 
-    def cleanup(self):
-        mantid.mtd.clear()
-        self.remove_all_gsas_files(gsas_filename_without_extension=self._GSAS_PROJ_FILE_NAME.split(".")[0])
+    def input_ws_path(self):
+        return mantid.FileFinder.getFullPath(self._INPUT_WORKSPACE_FILENAME)
+
+    def inst_param_file_path(self):
+        return mantid.FileFinder.getFullPath(self._INST_PARAM_FILENAME)
+
+    def path_to_gsas(self):
+        return _GSASFinder.GSASIIscriptable_location()
+
+    def phase_file_path(self):
+        return mantid.FileFinder.getFullPath(self._PHASE_FILENAME)
+
+    def remove_all_gsas_files(self, gsas_filename_without_extension):
+        for filename in os.listdir(self._TEMP_DIR):
+            if re.search(gsas_filename_without_extension, filename):
+                os.remove(os.path.join(self._TEMP_DIR, filename))
+
+
+class GSASIIRefineFitPeaksRietveldTest(_AbstractGSASIIRefineFitPeaksTest):
+
+    def skipTests(self):
+        return False
+
+    def _get_fit_params_reference_filename(self):
+        return "GSASIIRefineFitPeaksRietveldFitParams.nxs"
+
+    def _get_gsas_proj_filename(self):
+        return "GSASIIRefineFitPeaksRietveldTest.gpx"
+
+    def _get_refinement_method(self):
+        return "Rietveld refinement"
+
+    def _get_residuals_reference_filename(self):
+        return "GSASIIRefineFitPeaksRietveldResiduals.nxs"
+
+
+class GSASIIRefineFitPeaksPawleyTest(_AbstractGSASIIRefineFitPeaksTest):
+
+    def skipTests(self):
+        return False
+
+    def _get_fit_params_reference_filename(self):
+        return "GSASIIRefineFitPeaksPawleyFitParams.nxs"
+
+    def _get_gsas_proj_filename(self):
+        return "GSASIIRefineFitPeaksPawleyTest.gpx"
+
+    def _get_refinement_method(self):
+        return "Pawley refinement"
+
+    def _get_residuals_reference_filename(self):
+        return "GSASIIRefineFitPeaksPawleyResiduals.nxs"
