@@ -209,7 +209,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[18], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[19], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[20], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[21], "CorrectDetectors=True");
+    TS_ASSERT_EQUALS(optionsVec[21], "CorrectDetectors=1");
     TS_ASSERT_EQUALS(optionsVec[22], "DetectorCorrectionType=VerticalShift");
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
