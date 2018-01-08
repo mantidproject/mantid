@@ -33,7 +33,7 @@ def _getNormalization(mdworkspace, **kwargs):
     '''gets the normalization flag of an MDHistoWorkspace. For workspaces
     derived similar to MSlice/Horace, one needs to average data, the so-called
     "number of events" normalization.
-    :param mdworkspace: :class:`mantid.dataobjects.MDHistoWorkspace` to extract the data from'''
+    :param mdworkspace: :class:`mantid.api.IMDHistoWorkspace` to extract the data from'''
     normalization = kwargs.pop('normalization', mdworkspace.displayNormalizationHisto())
     return (normalization,kwargs)
 
@@ -43,7 +43,7 @@ def getAxesLabels(workspace):
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
     All other elements in the tuple are labels for axes.
     Some of them are latex formatted already.
-    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.dataobjects.MDHistoWorkspace` 
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace` 
     '''
     if isinstance(workspace,mantid.dataobjects.MDHistoWorkspace):
         axes = ['Intensity']
@@ -287,7 +287,7 @@ def points_from_boundaries(input_array):
 def _getMDData(workspace,normalization,withError=False):
     '''
     generic function to extract data from an MDHisto workspace
-    :param workspace: :class:`mantid.dataobjects.MDHistoWorkspace` containing data
+    :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
     :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
         it will divide intensity by the number of corresponding MDEvents
     returns a tuple containing bin boundaries for each dimension, the (maybe normalized)

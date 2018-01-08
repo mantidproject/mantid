@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import CreateWorkspace,DeleteWorkspace,CreateMDHistoWorkspace, ConjoinWorkspaces
-import mantid.plots.pfunctions as funcs
+import mantid.plots.functions as funcs
 import mantid.api
 import numpy as np
 from mantid.kernel import config

@@ -103,27 +103,27 @@ Types of functions
 
 **Informational**
 
-* :func:`~mantid.plots.pfunctions.getAxesLabels`
+* :func:`~mantid.plots.functions.getAxesLabels`
 
 **1D Plotting**
 
-* :func:`~mantid.plots.pfunctions.plot` - Plot lines and/or markers
-* :func:`~mantid.plots.pfunctions.errorbar` - Plot valuse with errorbars
-* :func:`~mantid.plots.pfunctions.scatter` - Make a scatter plot
+* :func:`~mantid.plots.MantidAxes.plot` - Plot lines and/or markers
+* :func:`~mantid.plots.MantidAxes.errorbar` - Plot valuse with errorbars
+* :func:`~mantid.plots.MantidAxes.scatter` - Make a scatter plot
 
 **2D Plotting - uniform grid**
 
-* :func:`~mantid.plots.pfunctions.contour` - Draw contours at specified levels
-* :func:`~mantid.plots.pfunctions.contourf` - Draw contours at calculated levels
-* :func:`~mantid.plots.pfunctions.pcolor` - Draw a pseudocolor plot of a 2-D array
-* :func:`~mantid.plots.pfunctions.pcolorfast` - Draw a pseudocolor plot of a 2-D array
-* :func:`~mantid.plots.pfunctions.pcolormesh` - Draw a quadrilateral mesh
+* :func:`~mantid.plots.MantidAxes.contour` - Draw contours at specified levels
+* :func:`~mantid.plots.MantidAxes.contourf` - Draw contours at calculated levels
+* :func:`~mantid.plots.MantidAxes.pcolor` - Draw a pseudocolor plot of a 2-D array
+* :func:`~mantid.plots.MantidAxes.pcolorfast` - Draw a pseudocolor plot of a 2-D array
+* :func:`~mantid.plots.MantidAxes.pcolormesh` - Draw a quadrilateral mesh
 
 **2D Plotting - nonuniform grid**
 
-* :func:`~mantid.plots.pfunctions.tripcolor` - Draw a pseudocolor plot of an unstructured triangular grid
-* :func:`~mantid.plots.pfunctions.tricontour` - Draw contours at specified levels on an unstructured triangular grid
-* :func:`~mantid.plots.pfunctions.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
+* :func:`~mantid.plots.MantidAxes.tripcolor` - Draw a pseudocolor plot of an unstructured triangular grid
+* :func:`~mantid.plots.MantidAxes.tricontour` - Draw contours at specified levels on an unstructured triangular grid
+* :func:`~mantid.plots.MantidAxes.tricontourf` - Draw contours at calculated levels on an unstructured triangular grid
 
 matplotlib demonstrates the difference between uniform and nonuniform
 grids well in `this example
@@ -132,7 +132,18 @@ grids well in `this example
 Available Functions
 ===================
 
-.. automodule:: mantid.plots.pfunctions
+Directly on the :class:`matplotlib.axes.Axes` objects, when using **mantid** projection
+---------------------------------------------------------------------------------------
+ 
+.. autoclass:: mantid.plots.MantidAxes
+   :members: plot, errorbar, scatter, contour,
+             contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
+             tricontour, tricontourf
+
+Functions to use when **mantid** projection is not available
+------------------------------------------------------------
+
+.. automodule:: mantid.plots.functions
    :members: getAxesLabels, plot, errorbar, scatter, contour,
              contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
-             triplot, tricontour, tricontourf
+             tricontour, tricontourf
