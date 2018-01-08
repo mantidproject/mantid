@@ -74,6 +74,7 @@ public:
     ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED * 2, call_count);
   }
+
 private:
   std::string m_searchDirectories;
   std::string m_defaultSaveDirectory;
