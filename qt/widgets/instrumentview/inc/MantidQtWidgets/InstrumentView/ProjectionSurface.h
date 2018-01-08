@@ -109,9 +109,9 @@ public:
   virtual bool hasSelection() const;
 
   virtual int getDetectorID(int x, int y) const;
-  virtual const Mantid::Geometry::IDetector &getDetector(int x, int y) const;
+  virtual size_t getDetector(int x, int y) const;
   /// NULL deselects components and selects the whole instrument
-  virtual void componentSelected(Mantid::Geometry::ComponentID = nullptr) = 0;
+  virtual void componentSelected(size_t componentIndex) = 0;
   /// fill in a list of detector ids which were selected by the selction tool
   virtual void getSelectedDetectors(QList<int> &dets) = 0;
   /// fill in a list of detector ids which were masked by the mask shapes

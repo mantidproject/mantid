@@ -111,6 +111,7 @@ public:
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
+  const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
   StructuredPanel structuredPanel(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;

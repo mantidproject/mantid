@@ -105,7 +105,6 @@ PanelsSurface::~PanelsSurface() { clearBanks(); }
 */
 void PanelsSurface::init() {
   m_unwrappedDetectors.clear();
-  m_assemblies.clear();
 
   size_t ndet = m_instrActor->ndetectors();
   if (ndet == 0)

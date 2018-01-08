@@ -49,11 +49,6 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
 GLColor defaultDetectorColor() { return GLColor(200, 200, 200); }
 } // namespace
 
-/// to be used in std::transform
-struct Sqrt {
-  double operator()(double x) { return sqrt(x); }
-};
-
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
@@ -88,13 +83,9 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
 
   const auto &componentInfo = sharedWorkspace->componentInfo();
-  const auto &detectorInfo = sharedWorkspace->detectorInfo();
 
   m_isCompVisible.assign(componentInfo.size(), true);
-  m_pickColors.resize(componentInfo.size());
-
-  for (size_t i = 0; i < componentInfo.size(); ++i)
-    m_pickColors[i] = makePickColor(i);
+  setupPickColors();
 
   // set up the color map
   if (!m_currentColorMapFilename.isEmpty()) {
@@ -105,23 +96,17 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   // set up data ranges and colours
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
-  Instrument_const_sptr instrument = getInstrument();
-
   // If the instrument is empty, maybe only having the sample and source
-  const int nelements = instrument->nelements();
+  auto nelements = componentInfo.size();
   if ((nelements == 0) ||
       (nelements == 1 &&
-       (instrument->getSource() || instrument->getSample())) ||
-      (nelements == 2 && instrument->getSource() && instrument->getSample())) {
+       (componentInfo.hasSource() || componentInfo.hasSample())) ||
+      (nelements == 2 && componentInfo.hasSource() &&
+       componentInfo.hasSample())) {
     QMessageBox::warning(nullptr, "MantidPlot - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
-
-  // this adds actors for all instrument components to the scene and fills in
-  // m_detIDs
-  // m_scene.addActor(new CompAssemblyActor(*this,
-  // instrument->getComponentID()));  setupPickColors();
 
   if (!m_showGuides) {
     // hide guide and other components
@@ -204,14 +189,11 @@ void InstrumentActor::setUpWorkspace(
   m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
 }
 
-void InstrumentActor::setComponentVisible(
-    Mantid::Geometry::ComponentID component) {
+void InstrumentActor::setComponentVisible(size_t componentIndex) {
   setChildVisibility(false);
   const auto &componentInfo = getComponentInfo();
-  auto index = componentInfo.indexOf(component);
-
-  auto children = componentInfo.componentsInSubtree(index);
-  m_isCompVisible[index] = true;
+  auto children = componentInfo.componentsInSubtree(componentIndex);
+  m_isCompVisible[componentIndex] = true;
   for (auto child : children)
     m_isCompVisible[child] = true;
 
@@ -358,6 +340,18 @@ void InstrumentActor::clearMasks() {
   }
 }
 
+std::vector<size_t> InstrumentActor::getMonitors() const {
+  const auto &detectorInfo = getDetectorInfo();
+  std::vector<size_t> monitors;
+
+  for (size_t i = 0; i < detectorInfo.size(); i++) {
+    if (detectorInfo.isMonitor(i))
+      monitors.push_back(i);
+  }
+
+  return monitors;
+}
+
 Instrument_const_sptr InstrumentActor::getInstrument() const {
   Instrument_const_sptr retval;
 
@@ -389,19 +383,9 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
   return m_colorMap;
 }
 
-/// Get a detector reference given a pick ID.
-const Mantid::Geometry::IDetector &
-InstrumentActor::getDetectorByPickID(size_t pickID) const {
+size_t InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
   const auto &detectorInfo = getDetectorInfo();
-  return detectorInfo.detector(pickID);
-}
-
-/// Get a reference to a detector by a detector ID.
-const Mantid::Geometry::IDetector &
-InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
-  const auto &detectorInfo = getDetectorInfo();
-  auto detectorIndex = detectorInfo.indexOf(detID);
-  return detectorInfo.detector(detectorIndex);
+  return detectorInfo.indexOf(detID);
 }
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
@@ -688,40 +672,6 @@ void InstrumentActor::resetColors() {
       }
     }
   }
-  // QwtDoubleInterval qwtInterval(m_DataMinScaleValue, m_DataMaxScaleValue);
-  // m_colors.resize(m_specIntegrs.size());
-
-  // auto sharedWorkspace = getWorkspace();
-  // const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
-
-  // IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
-
-  // for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
-  //  size_t wi = size_t(iwi);
-  //  double integratedValue = m_specIntegrs[wi];
-  //  try {
-  //    // Find if the detector is masked
-  //    const auto &dets = sharedWorkspace->getSpectrum(wi).getDetectorIDs();
-  //    bool masked = false;
-
-  //    if (mask) {
-  //      masked = mask->isMasked(dets);
-  //    } else {
-  //      masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
-  //    }
-
-  //    if (masked) {
-  //      m_colors[wi] = m_maskedColor;
-  //    } else {
-  //      QRgb color = m_colorMap.rgb(qwtInterval, integratedValue);
-  //      m_colors[wi] = GLColor(qRed(color), qGreen(color), qBlue(color));
-  //    }
-  //  } catch (NotFoundError &) {
-  //    m_colors[wi] = m_failedColor;
-  //    continue;
-  //  }
-  //}
-
   setupPickColors();
   invalidateDisplayLists();
   emit colorMapChanged();
@@ -838,22 +788,7 @@ void InstrumentActor::setupPickColors() {
 }
 
 //------------------------------------------------------------------------------
-/** If needed, cache the detector positions for all detectors.
- * Call this BEFORE getDetPos().
- * Does nothing if the positions have already been cached.
- */
-void InstrumentActor::cacheDetPos() const {
-  /*if (m_detPos.size() != m_detIDs.size()) {
-    m_detPos.clear();
-    for (size_t pickID = 0; pickID < m_detIDs.size(); pickID++) {
-      auto &det = this->getDetectorByPickID(pickID);
-      m_detPos.push_back(det.getPos());
-    }
-  }*/
-}
-
-//------------------------------------------------------------------------------
-/** Get the cached detector position
+/** Get the detector position
  *
  * @param pickID :: pick Index maching the getDetector() calls;
  * @return the real-space position of the detector
@@ -1218,14 +1153,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
   auto workspace = getWorkspace();
   calculateIntegratedSpectra(*workspace);
-
-  // get the workspace indices of monitors in order to exclude them from finding
-  // of the max value
-  auto monitorIDs = getInstrument()->getMonitors();
-  // clang-format off
-      // because it indents this line half way across the page (?)
-			auto monitorIndices = workspace->getIndicesFromDetectorIDs(monitorIDs);
-  // clang-format on
+  auto monitorIndices = getMonitors();
 
   // check that there is at least 1 non-monitor spectrum
   if (monitorIndices.size() == m_specIntegrs.size()) {
@@ -1294,6 +1222,79 @@ void InstrumentActor::addMaskBinsData(const QList<int> &detIDs) {
 /// Show if bin masks have been defined.
 bool InstrumentActor::hasBinMask() const { return !m_maskBinsData.isEmpty(); }
 
+QString InstrumentActor::getParameterInfo(size_t index) const {
+  auto instr = getInstrument();
+  const auto &componentInfo = getComponentInfo();
+
+  auto compID = componentInfo.componentID(index);
+  auto comp = instr->getComponentByID(compID);
+
+  QString text = "";
+  std::map<Mantid::Geometry::ComponentID, std::vector<std::string>>
+      mapCmptToNameVector;
+
+  auto paramNames = comp->getParameterNamesByComponent();
+  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
+       ++itParamName) {
+    // build the data structure I need Map comp id -> vector of names
+    std::string paramName = itParamName->first;
+    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
+    // attempt to insert this will fail silently if the key already exists
+    if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
+      mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
+    }
+    // get the vector out and add the name
+    mapCmptToNameVector[paramCompId].push_back(paramName);
+  }
+
+  // walk out from the selected component
+  const Mantid::Geometry::IComponent *paramComp = comp.get();
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
+  while (paramComp) {
+    auto id = paramComp->getComponentID();
+    auto &compParamNames = mapCmptToNameVector[id];
+    if (compParamNames.size() > 0) {
+      text += QString::fromStdString(
+          "\nParameters from: " + paramComp->getName() + "\n");
+      std::sort(compParamNames.begin(), compParamNames.end(),
+                Mantid::Kernel::CaseInsensitiveStringComparator());
+      for (auto itParamName = compParamNames.begin();
+           itParamName != compParamNames.end(); ++itParamName) {
+        std::string paramName = *itParamName;
+        // no need to search recursively as we are asking from the matching
+        // component
+        std::string paramValue =
+            paramComp->getParameterAsString(paramName, false);
+        if (paramValue != "") {
+          text += QString::fromStdString(paramName + ": " + paramValue + "\n");
+        }
+      }
+    }
+    parentComp = paramComp->getParent();
+    paramComp = parentComp.get();
+  }
+
+  return text;
+}
+
+std::string InstrumentActor::getDefaultAxis() const {
+  return getInstrument()->getDefaultAxis();
+}
+
+std::string InstrumentActor::getDefaultView() const {
+  return getInstrument()->getDefaultView();
+}
+
+std::string InstrumentActor::getInstrumentName() const {
+  const auto &componentInfo = getComponentInfo();
+  return componentInfo.name(componentInfo.root());
+}
+
+std::vector<std::string>
+InstrumentActor::getStringParameter(const std::string &name,
+                                    bool recursive) const {
+  return getInstrument()->getStringParameter(name, recursive);
+}
 /**
  * Save the state of the instrument actor to a project file.
  * @return string representing the current state of the instrumet actor.

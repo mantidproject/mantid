@@ -31,7 +31,6 @@ RotationSurface::RotationSurface(const InstrumentActor *rootActor,
 void RotationSurface::init() {
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();
-  m_assemblies.clear();
 
   // if u-correction is applied manually then m_u_min and m_u_max
   // have valid values and have to be saved
@@ -42,12 +41,6 @@ void RotationSurface::init() {
   m_unwrappedDetectors.resize(ndet);
   if (ndet == 0)
     return;
-
-  // Pre-calculate all the detector positions (serial because
-  // I suspect the IComponent->getPos() method to not be properly thread safe)
-  m_instrActor->cacheDetPos();
-
-  Instrument_const_sptr inst = m_instrActor->getInstrument();
 
   // First detector defines the surface's x axis
   if (m_xaxis.nullVector()) {

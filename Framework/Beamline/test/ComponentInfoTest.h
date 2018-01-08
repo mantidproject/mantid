@@ -66,6 +66,11 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
   auto isRectangularBank =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
 
+  std::vector<size_t> children(detPositions.size());
+  std::iota(children.begin(), children.end(), 0);
+  auto instrumentTree =
+      boost::make_shared<std::vector<std::vector<size_t>>>(1, children);
+
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
@@ -73,8 +78,8 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, positions, rotations, scaleFactors, isRectangularBank,
-      names, -1, -1);
+      parentIndices, instrumentTree, positions, rotations, scaleFactors,
+      isRectangularBank, names, -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
 
@@ -141,6 +146,8 @@ makeTreeExampleAndReturnGeometricArguments() {
   // Rectangular bank flag
   auto isRectangularBank =
       boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+  auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
+      2, std::vector<size_t>(2));
 
   auto compInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -149,7 +156,7 @@ makeTreeExampleAndReturnGeometricArguments() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, compPositions, compRotations, scaleFactors,
+      parentIndices, instrumentTree, compPositions, compRotations, scaleFactors,
       isRectangularBank, names, -1, -1);
 
   compInfo->setDetectorInfo(detectorInfo.get());
@@ -207,6 +214,9 @@ makeTreeExample() {
   // Rectangular bank flag
   auto isRectangularBank =
       boost::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
+  
+  auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
+    2, std::vector<size_t>(2));
 
   auto componentInfo = boost::make_shared<ComponentInfo>(
       bankSortedDetectorIndices,
@@ -215,7 +225,7 @@ makeTreeExample() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, positions, rotations, scaleFactors, isRectangularBank,
+      parentIndices, instrumentTree, positions, rotations, scaleFactors, isRectangularBank,
       names, -1, -1);
 
   componentInfo->setDetectorInfo(detectorInfo.get());
@@ -273,12 +283,13 @@ public:
         boost::make_shared<const std::vector<size_t>>(
             std::vector<size_t>{0, 1, 2});
     auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{});
+        boost::make_shared<const std::vector<size_t>>(std::vector<size_t>(1));
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
-        std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
+        std::vector<size_t>{9, 9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
     auto detectorRanges =
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>();
+        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+            1, std::pair<size_t, size_t>{0, 2});
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
@@ -287,10 +298,13 @@ public:
     auto scaleFactors = boost::make_shared<PosVec>(3);
     auto names = boost::make_shared<StrVec>(3);
     auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>();
-    ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
-                                bankSortedComponentIndices, componentRanges,
-                                parentIndices, positions, rotations,
-                                scaleFactors, isRectangularBank, names, -1, -1);
+    auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>(3));
+
+    ComponentInfo componentInfo(
+        bankSortedDetectorIndices, detectorRanges, bankSortedComponentIndices,
+        componentRanges, parentIndices, instrumentTree, positions, rotations,
+        scaleFactors, isRectangularBank, names, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo),
@@ -325,11 +339,14 @@ public:
     auto names = boost::make_shared<StrVec>();
     auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
+    auto instrumentTree = boost::make_shared<
+      std::vector<std::vector<size_t>>>(); // invalid but not being tested
+
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations,
-                                   scaleFactors, isRectangularBank, names, -1,
-                                   -1),
+                                   parentIndices, instrumentTree, positions,
+                                   rotations, scaleFactors, isRectangularBank,
+                                   names, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -365,12 +382,58 @@ public:
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
     auto isRectangularBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
+    auto instrumentTree = boost::make_shared<
+      std::vector<std::vector<size_t>>>(); // invalid but not being tested
 
-    TS_ASSERT_THROWS(
-        ComponentInfo(detectorsInSubtree, detectorRanges, componentsInSubtree,
-                      componentRanges, parentIndices, positions, rotations,
-                      scaleFactors, isRectangularBank, names, -1, -1),
-        std::invalid_argument &);
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
+                                   componentsInSubtree, componentRanges,
+                                   parentIndices, instrumentTree, positions,
+                                   rotations, scaleFactors, isRectangularBank,
+                                   names, -1, -1),
+                     std::invalid_argument &);
+  }
+
+  void test_throw_if_instrument_tree_not_same_size_as_number_of_components() {
+    /*
+    * Positions are rotations are only currently stored for non-detector
+    * components
+    * We should have as many detectorRanges as we have non-detector components
+    * too.
+    * All vectors should be the same size.
+    */
+    auto detectorsInSubtree =
+      boost::make_shared<const std::vector<size_t>>(); // No detector indices
+                                                       // in this example!
+
+    auto componentsInSubtree =
+      boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
+
+    auto detectorRanges =
+        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+            1, std::pair<size_t, size_t>(0, 0));
+
+    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+      std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
+                                     // ok as not being tested here
+    auto positions = boost::make_shared<PosVec>(1);
+    auto rotations = boost::make_shared<RotVec>(1);
+
+    auto scaleFactors = boost::make_shared<PosVec>(1);
+    auto names = boost::make_shared<StrVec>(1);
+    // Only one component. So single empty component range.
+    auto componentRanges =
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+        std::vector<std::pair<size_t, size_t>>{ {0, 0}});
+    auto isRectangularBank = boost::make_shared<std::vector<bool>>(1, false);
+    auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>{1, 2}); // invalid
+
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
+      componentsInSubtree, componentRanges,
+      parentIndices, instrumentTree, positions,
+      rotations, scaleFactors, isRectangularBank,
+      names, -1, -1),
+      std::invalid_argument &);
   }
 
   void test_read_positions_rotations() {

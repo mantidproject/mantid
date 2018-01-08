@@ -107,6 +107,11 @@ ComponentInfo::componentsInSubtree(size_t componentIndex) const {
   return m_componentInfo->componentsInSubtree(componentIndex);
 }
 
+const std::vector<size_t> &
+ComponentInfo::children(size_t componentIndex) const {
+  return m_componentInfo->children(componentIndex);
+}
+
 size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 
 ComponentInfo::StructuredPanel

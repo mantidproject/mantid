@@ -18,6 +18,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
 
 #include "qwt_scale_widget.h"
@@ -850,9 +852,11 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
   if (detid >= 0) {
     // collect info about selected detector and add it to text
     const auto &actor = m_instrWidget->getInstrumentActor();
-    auto &det = actor.getDetectorByDetID(detid);
+    const auto &componentInfo = actor.getComponentInfo();
+    auto det = actor.getDetectorByDetID(detid);
 
-    text = "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
+    text = "Selected detector: " +
+           QString::fromStdString(componentInfo.name(det)) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
@@ -862,33 +866,30 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
       wsIndex = "None";
     }
     text += "Workspace index: " + wsIndex + '\n';
-    Mantid::Kernel::V3D pos = det.getPos();
+    Mantid::Kernel::V3D pos = componentInfo.position(det);
     text += "xyz: " + QString::number(pos.X()) + "," +
             QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
     double r, t, p;
     pos.getSpherical(r, t, p);
     text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
             QString::number(p) + '\n';
-    Mantid::Geometry::ICompAssembly_const_sptr parent =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-            det.getParent());
-    if (parent) {
+    if (componentInfo.hasParent(det)) {
       QString textpath;
-      while (parent) {
-        textpath = "/" + QString::fromStdString(parent->getName()) + textpath;
-        parent =
-            boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-                parent->getParent());
+      auto parent = det;
+      while (componentInfo.hasParent(parent)) {
+        parent = componentInfo.parent(parent);
+        textpath =
+            "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
       }
       text += "Component path:" + textpath + "/" +
-              QString::fromStdString(det.getName()) + '\n';
+              QString::fromStdString(componentInfo.name(det)) + '\n';
     }
     const double integrated = actor.getIntegratedCounts(detid);
     const QString counts =
         integrated == -1.0 ? "N/A" : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
-    text += getParameterInfo(det);
+    text += actor.getParameterInfo(det);
   }
   return text;
 }
@@ -900,19 +901,19 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto component =
-      m_instrWidget->getInstrumentActor().getInstrument()->getComponentByID(
-          compID);
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.getComponentInfo();
+  auto component = componentInfo.indexOf(compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component->getName()) + '\n';
-  Mantid::Kernel::V3D pos = component->getPos();
+  text += QString::fromStdString(componentInfo.name(component)) + '\n';
+  Mantid::Kernel::V3D pos = componentInfo.position(component);
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
           "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
   text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
           QString::number(p) + '\n';
-  text += getParameterInfo(*component);
+  text += actor.getParameterInfo(component);
   return text;
 }
 
@@ -1038,59 +1039,6 @@ void ComponentInfoController::displayAlignPeaksInfo(
   text << " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
-}
-
-/**
-* Form a string for output from the components instrument parameters
-*/
-QString ComponentInfoController::getParameterInfo(
-    const Mantid::Geometry::IComponent &comp) {
-  QString text = "";
-  std::map<Mantid::Geometry::ComponentID, std::vector<std::string>>
-      mapCmptToNameVector;
-
-  auto paramNames = comp.getParameterNamesByComponent();
-  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
-       ++itParamName) {
-    // build the data structure I need Map comp id -> vector of names
-    std::string paramName = itParamName->first;
-    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
-    // attempt to insert this will fail silently if the key already exists
-    if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
-      mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
-    }
-    // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].push_back(paramName);
-  }
-
-  // walk out from the selected component
-  const Mantid::Geometry::IComponent *paramComp = &comp;
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
-  while (paramComp) {
-    auto id = paramComp->getComponentID();
-    auto &compParamNames = mapCmptToNameVector[id];
-    if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " +
-                                     paramComp->getName() + "\n");
-      std::sort(compParamNames.begin(), compParamNames.end(),
-                Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (auto itParamName = compParamNames.begin();
-           itParamName != compParamNames.end(); ++itParamName) {
-        std::string paramName = *itParamName;
-        // no need to search recursively as we are asking from the matching
-        // component
-        std::string paramValue =
-            paramComp->getParameterAsString(paramName, false);
-        if (paramValue != "") {
-          text += QString::fromStdString(paramName + ": " + paramValue + "\n");
-        }
-      }
-    }
-    parentComp = paramComp->getParent();
-    paramComp = parentComp.get();
-  }
-
-  return text;
 }
 
 /**
@@ -1243,13 +1191,11 @@ void DetectorPlotController::plotSingle(int detid) {
 */
 void DetectorPlotController::plotTube(int detid) {
   const auto &actor = m_instrWidget->getInstrumentActor();
-  auto &det = actor.getDetectorByDetID(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det.getParent();
-  Mantid::Geometry::ICompAssembly_const_sptr ass =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-          parent);
-  if (parent && ass) {
+  const auto &componentInfo = actor.getComponentInfo();
+  auto det = actor.getDetectorByDetID(detid);
+
+  if (componentInfo.hasParent(det) &&
+      componentInfo.detectorsInSubtree(det).size() > 0) {
     if (m_plotType == TubeSum) // plot sums over detectors vs time bins
     {
       plotTubeSums(detid);
@@ -1278,9 +1224,10 @@ void DetectorPlotController::plotTubeSums(int detid) {
     return;
   }
   const auto &actor = m_instrWidget->getInstrumentActor();
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  QString label = QString::fromStdString(parent->getName()) + " (" +
+  const auto &componentInfo = actor.getComponentInfo();
+  auto det = actor.getDetectorByDetID(detid);
+  auto parent = componentInfo.parent(det);
+  QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Sum";
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                   actor.getWorkspace()->getAxis(0)->unit()->unitID());
@@ -1300,7 +1247,9 @@ void DetectorPlotController::plotTubeSums(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTubeIntegrals(int detid) {
-  auto &det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
+  auto det = m_instrWidget->getInstrumentActor().getDetectorByDetID(detid);
+  const auto &componentInfo =
+      m_instrWidget->getInstrumentActor().getComponentInfo();
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detid, x, y);
   if (x.empty() || y.empty()) {
@@ -1314,10 +1263,10 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   }
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                   xAxisCaption.toStdString());
-  auto parent = det.getParent();
+  auto parent = componentInfo.parent(det);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
-  QString label = QString::fromStdString(parent->getName()) + " (" +
+  QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Integrals/" + getTubeXUnitsName();
   m_plot->setLabel(label);
 }
@@ -1371,10 +1320,11 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
                                                     std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-      parent);
+  const auto &componentInfo = actor.getComponentInfo();
+  auto detector = actor.getDetectorByDetID(detid);
+  auto parent = componentInfo.parent(detector);
+  auto ass = componentInfo.detectorsInSubtree(parent);
+
   size_t wi;
   try {
     wi = actor.getWorkspaceIndex(detid);
@@ -1390,13 +1340,11 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
   if (err)
     err->resize(x.size(), 0);
 
-  const int n = ass->nelements();
-  for (int i = 0; i < n; ++i) {
-    Mantid::Geometry::IDetector_sptr idet =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-    if (idet) {
+  const auto &detectorInfo = actor.getDetectorInfo();
+  for (auto det: ass) {
+    if (componentInfo.isDetector(det)) {
       try {
-        size_t index = actor.getWorkspaceIndex(idet->getID());
+        size_t index = actor.getWorkspaceIndex(detectorInfo.detectorIDs()[det]);
         const auto &Y = ws->y(index);
         std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                        std::plus<double>());
@@ -1448,19 +1396,18 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   return;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.getComponentInfo();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
 
   // Does the instrument definition specify that psi should be offset.
-  std::vector<std::string> parameters =
-      ws->getInstrument()->getStringParameter("offset-phi");
+  std::vector<std::string> parameters = actor.getStringParameter("offset-phi");
   const bool bOffsetPsi = (!parameters.empty()) &&
                           std::find(parameters.begin(), parameters.end(),
                                     "Always") != parameters.end();
 
-  auto &det = actor.getDetectorByDetID(detid);
-  auto parent = det.getParent();
-  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-      parent);
+  auto det = actor.getDetectorByDetID(detid);
+  auto parent = componentInfo.parent(det);
+  auto ass = componentInfo.detectorsInSubtree(parent);
   size_t wi;
   try {
     wi = actor.getWorkspaceIndex(detid);
@@ -1471,9 +1418,9 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
-  Mantid::Kernel::V3D samplePos = actor.getInstrument()->getSample()->getPos();
+  auto samplePos = actor.getComponentInfo().samplePosition();
 
-  const int n = ass->nelements();
+  auto n = ass.size();
   if (n == 0) {
     // don't think it's ever possible but...
     throw std::runtime_error("PickTab miniplot: empty instrument assembly");
@@ -1485,32 +1432,32 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   // collect and sort xy pairs in xymap
   std::map<double, double> xymap, errmap;
   // get the first detector in the tube for lenth calculation
-  Mantid::Geometry::IDetector_sptr idet0 =
-      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
-  if (!idet0) {
+  if (!componentInfo.isDetector(ass[0])) {
     // it's not an assembly of detectors,
     // could be a mixture of monitors and other components
     PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
   }
-  Mantid::Kernel::V3D normal = (*ass)[1]->getPos() - idet0->getPos();
+
+  auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
   normal.normalize();
-  for (int i = 0; i < n; ++i) {
-    Mantid::Geometry::IDetector_sptr idet =
-        boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-    if (idet) {
+  const auto &detectorInfo = actor.getDetectorInfo();
+  for (auto det: ass) {
+    if (componentInfo.isDetector(det)) {
       try {
-        const int id = idet->getID();
+        auto id = detectorInfo.detectorIDs()[det];
         // get the x-value for detector idet
         double xvalue = 0;
         switch (m_tubeXUnits) {
         case LENGTH:
-          xvalue = idet->getDistance(*idet0);
+          xvalue = detectorInfo.position(det).distance(
+              detectorInfo.position(ass[0]));
           break;
         case PHI:
-          xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi();
+          xvalue = bOffsetPsi ? detectorInfo.getPhiOffset(det, M_PI)
+                              : detectorInfo.getPhi(det);
           break;
         case OUT_OF_PLANE_ANGLE: {
-          Mantid::Kernel::V3D pos = idet->getPos();
+          auto pos = detectorInfo.position(det);
           xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
           break;
         }

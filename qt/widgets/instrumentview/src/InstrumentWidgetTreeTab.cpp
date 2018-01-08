@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/InstrumentView/GLActorVisitor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -18,10 +17,8 @@ InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
   // Tree Controls
   m_instrumentTree = new InstrumentTreeWidget(nullptr);
   layout->addWidget(m_instrumentTree);
-  connect(m_instrumentTree,
-          SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-          m_instrWidget,
-          SLOT(componentSelected(Mantid::Geometry::ComponentID)));
+  connect(m_instrumentTree, SIGNAL(componentSelected(size_t)), m_instrWidget,
+          SLOT(componentSelected(size_t)));
   connect(m_instrWidget, SIGNAL(requestSelectComponent(QString)), this,
           SLOT(selectComponentByName(QString)));
 }

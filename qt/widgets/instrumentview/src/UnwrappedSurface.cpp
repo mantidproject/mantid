@@ -8,7 +8,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 
@@ -53,52 +53,6 @@ QString UnwrappedSurface::getDimInfo() const {
       .arg(m_viewRect.x1())
       .arg(m_viewRect.y0())
       .arg(m_viewRect.y1());
-}
-
-//------------------------------------------------------------------------------
-/** Calculate the rectangular region in uv coordinates occupied by an assembly.
-*
-* @param comp :: A member of the assembly. The total area of the assembly is a
-*sum of areas of its members
-* @param compRect :: A rect. area occupied by comp in uv space
-*/
-void UnwrappedSurface::calcAssemblies(const Mantid::Geometry::IComponent *comp,
-                                      const QRectF &compRect) {
-  // We don't need the parametrized version = use the bare parent for speed
-  const Mantid::Geometry::IComponent *parent = comp->getBareParent();
-  if (parent) {
-    QRectF &r = m_assemblies[parent->getComponentID()];
-    r |= compRect;
-    calcAssemblies(parent, r);
-  }
-}
-
-//------------------------------------------------------------------------------
-/** If needed, recalculate the cached bounding rectangles of all assemblies. */
-void UnwrappedSurface::cacheAllAssemblies() {
-  if (!m_assemblies.empty())
-    return;
-
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.isValid())
-      continue;
-    // Get the BARE parent (not parametrized) to speed things up.
-    auto &detector = m_instrActor->getDetectorByDetID(udet.detID);
-    const Mantid::Geometry::IComponent *bareDet = detector.getComponentID();
-    const Mantid::Geometry::IComponent *parent = bareDet->getBareParent();
-    if (parent) {
-      QRectF detRect;
-      detRect.setLeft(udet.u - udet.width);
-      detRect.setRight(udet.u + udet.width);
-      detRect.setBottom(udet.v - udet.height);
-      detRect.setTop(udet.v + udet.height);
-      Mantid::Geometry::ComponentID id = parent->getComponentID();
-      QRectF &r = m_assemblies[id];
-      r |= detRect;
-      calcAssemblies(parent, r);
-    }
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -268,30 +222,19 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 *
 * @param id :: ComponentID to zoom to.
 */
-void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
-  boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
-      m_instrActor->getInstrument();
-  if (id == nullptr) {
-    id = instr->getComponentID();
-  }
-  boost::shared_ptr<const Mantid::Geometry::IComponent> comp =
-      instr->getComponentByID(id);
-  boost::shared_ptr<const Mantid::Geometry::ICompAssembly> ass =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(comp);
-  boost::shared_ptr<const Mantid::Geometry::IDetector> det =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(comp);
-  if (det) {
-    int detID = det->getID();
-
-    std::vector<UnwrappedDetector>::const_iterator it;
-    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end();
-         ++it) {
-      const UnwrappedDetector &udet = *it;
+void UnwrappedSurface::componentSelected(size_t componentIndex) {
+  const auto &componentInfo = m_instrActor->getComponentInfo();
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  if (componentInfo.isDetector(componentIndex)) {
+    int detID = detectorInfo.detectorIDs()[componentIndex];
+    for (auto it = m_unwrappedDetectors.cbegin();
+         it != m_unwrappedDetectors.cend(); ++it) {
+      const auto &udet = *it;
       if (udet.detID == detID) {
-        double w = udet.width;
+        auto w = udet.width;
         if (w > m_width_max)
           w = m_width_max;
-        double h = udet.height;
+        auto h = udet.height;
         if (h > m_height_max)
           h = m_height_max;
         QRectF area(udet.u - w, udet.v - h, w * 2, h * 2);
@@ -300,16 +243,9 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
       }
     }
   }
-  if (ass) {
-    this->cacheAllAssemblies();
-    QMap<Mantid::Geometry::ComponentID, QRectF>::iterator assRect =
-        m_assemblies.find(ass->getComponentID());
-    if (assRect != m_assemblies.end())
-      zoom(*assRect);
-    else {
-      // std::cout << "Assembly not found \n";
-    }
-  }
+
+  if (componentInfo.detectorsInSubtree(componentIndex).size() > 0)
+    zoom(componentInfo.boundingBox(componentIndex));
 }
 
 void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
@@ -541,6 +477,19 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 * Zooms to the specified area. The previous zoom stack is cleared.
 */
 void UnwrappedSurface::zoom(const QRectF &area) {
+  doZoom(area);
+}
+
+void UnwrappedSurface::zoom(const Mantid::Geometry::BoundingBox &area) {
+  double left = area.xMin();
+  double top = area.yMin();
+  double width = abs(area.xMax() - area.xMin());
+  double height = abs(area.yMax() - area.yMin());
+
+  doZoom(QRectF(left, top, width, height));
+}
+
+void UnwrappedSurface::doZoom(const QRectF &area) {
   if (!m_zoomStack.isEmpty()) {
     m_viewRect = m_zoomStack.first();
     m_zoomStack.clear();

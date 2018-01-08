@@ -78,6 +78,9 @@ private:
   /// Index of the parent component
   boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
 
+  /// Stores instrument tree structure by storing children of all Components
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_instrumentTree;
+
   /// Only Assemblies and other NON-detectors yield detector ranges
   boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
 

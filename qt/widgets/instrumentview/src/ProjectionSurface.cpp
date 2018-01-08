@@ -441,10 +441,8 @@ int ProjectionSurface::getDetectorID(int x, int y) const {
 }
 
 //------------------------------------------------------------------------------
-const Mantid::Geometry::IDetector &ProjectionSurface::getDetector(int x,
-                                                                  int y) const {
-  size_t pickID = getPickID(x, y);
-  return m_instrActor->getDetectorByPickID(pickID);
+size_t ProjectionSurface::getDetector(int x, int y) const {
+  return getPickID(x, y);
 }
 
 /**

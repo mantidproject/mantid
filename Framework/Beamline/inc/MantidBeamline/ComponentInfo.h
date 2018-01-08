@@ -52,6 +52,7 @@ private:
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_componentRanges;
   boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
+  boost::shared_ptr<std::vector<std::vector<size_t>>> m_instrumentTree;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<
       Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
@@ -98,13 +99,11 @@ public:
       boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
           componentRanges,
       boost::shared_ptr<const std::vector<size_t>> parentIndices,
+      boost::shared_ptr<std::vector<std::vector<size_t>>> instrumentTree,
       boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-      boost::shared_ptr<std::vector<
-          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>
-          rotations,
+      boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
       boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-      boost::shared_ptr<std::vector<ComponentType>> componentType,
-      boost::shared_ptr<const std::vector<std::string>> names,
+      boost::shared_ptr<std::vector<ComponentType>> componentType,      boost::shared_ptr<const std::vector<std::string>> names,
       int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
@@ -112,6 +111,7 @@ public:
   std::unique_ptr<ComponentInfo> cloneWithoutDetectorInfo() const;
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
+  const std::vector<size_t> &children(const size_t componentIndex) const;
   size_t size() const;
   bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();

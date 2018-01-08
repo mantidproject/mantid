@@ -292,7 +292,7 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 */
 void InstrumentWidgetRenderTab::initSurface() {
   setAxis(QString::fromStdString(
-      m_instrWidget->getInstrumentActor().getInstrument()->getDefaultAxis()));
+      m_instrWidget->getInstrumentActor().getDefaultAxis()));
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
