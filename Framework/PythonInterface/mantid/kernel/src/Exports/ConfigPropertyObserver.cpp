@@ -26,7 +26,8 @@ private:
 
 namespace boost {
 namespace python {
-template <> struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
+template <>
+struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
 }
 }
 
