@@ -318,10 +318,6 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       // counts are split between bins if outside this tolerance
       if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
-        g_log.debug() << "Splitting counts for workspace " << ws->getName()
-                      << " at spectrum " << i << " for angle " << angle
-                      << ".\n";
-
         int angleIndexNeighbor;
         if (distanceFromAngle(angleIndex - 1, angle) <
             distanceFromAngle(angleIndex + 1, angle))
