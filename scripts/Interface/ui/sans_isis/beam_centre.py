@@ -39,7 +39,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.log_widget = MantidQt.MantidWidgets.MessageDisplay(self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
         self.log_widget.setObjectName(_fromUtf8("log_widget"))
-        self.gridLayout_4.addWidget(self.log_widget, 0, 1, 4, 1)
+        self.gridLayout.addWidget(self.log_widget, 0, 1, 4, 1)
         self.log_widget.setSource("CentreFinder")
         self.log_widget.attachLoggingChannel()
 
