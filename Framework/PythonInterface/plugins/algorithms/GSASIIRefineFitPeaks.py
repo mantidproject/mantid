@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from contextlib import contextmanager
+import numpy
 import os
 import sys
 import tempfile
@@ -19,6 +20,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_GROUP_PAWLEY_PARAMS = "Pawley Parameters"
     PROP_GSAS_PROJ_PATH = "SaveGSASIIProjectFile"
     PROP_INPUT_WORKSPACE = "InputWorkspace"
+    PROP_OUT_FITTED_PEAKS_WS = "OutputWorkspace"
     PROP_OUT_GOF = "GOF"
     PROP_OUT_GROUP_RESULTS = "Results"
     PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
@@ -66,6 +68,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
 
+        self.declareProperty(WorkspaceProperty(name=self.PROP_OUT_FITTED_PEAKS_WS, defaultValue="",
+                                               direction=Direction.Output), doc="Workspace with fitted peaks")
         self.declareProperty(name=self.PROP_OUT_GOF, defaultValue=0.0, direction=Direction.Output,
                              doc="Goodness of fit value (Chi squared)")
         self.declareProperty(name=self.PROP_OUT_RWP, defaultValue=0.0, direction=Direction.Output,
@@ -107,7 +111,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             rwp, gof, lattice_params = \
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
                                                      do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
-            self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params)
+
+            self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params,
+                                        fitted_peaks_ws=self._generate_fitted_peaks_ws(gsas_proj))
 
     def _build_output_lattice_table(self, lattice_params):
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
@@ -134,6 +140,17 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             spectrum = mantid.CloneWorkspace(InputWorkspace=ws)
 
         return spectrum
+
+    def _generate_fitted_peaks_ws(self, gsas_proj):
+        input_ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
+        fitted_peaks_ws_name = self.getPropertyValue(self.PROP_OUT_FITTED_PEAKS_WS)
+        fitted_peaks_ws = mantid.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=fitted_peaks_ws_name)
+
+        hist = gsas_proj.histogram(0)
+        fitted_peaks_y = hist.getdata(datatype="yCalc")
+        fitted_peaks_y_unmasked = self._replace_masked_elements_with_default(masked_array=fitted_peaks_y, default=0)
+        fitted_peaks_ws.setY(0, fitted_peaks_y_unmasked)
+        return fitted_peaks_ws
 
     def _initialise_GSAS(self):
         """
@@ -162,6 +179,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self._remove_temporary_fxye(spectrum_path=spectrum_path)
 
         return gsas_proj
+
+    def _replace_masked_elements_with_default(self, masked_array, default):
+        return numpy.array([val if not masked else default for val, masked in zip(masked_array, masked_array.mask)])
 
     def _remove_temporary_fxye(self, spectrum_path):
         try:
@@ -206,7 +226,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False, IncludeHeader=False)
         return file_path
 
-    def _set_output_properties(self, rwp, gof, lattice_params):
+    def _set_output_properties(self, fitted_peaks_ws, rwp, gof, lattice_params):
+        self.setProperty(self.PROP_OUT_FITTED_PEAKS_WS, fitted_peaks_ws)
         self.setProperty(self.PROP_OUT_RWP, rwp)
         self.setProperty(self.PROP_OUT_GOF, gof)
         self.setProperty(self.PROP_OUT_LATTICE_PARAMS, lattice_params)
