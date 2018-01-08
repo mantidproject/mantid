@@ -16,7 +16,7 @@ Description
    SVN revision **3216** onwards (introduced 8 January 2018). If you see
    the error ``RuntimeError: 'G2PwdrData' object has no attribute 'getdata'``
    then you probably need to update your version of GSAS-II - instructions
-   [here](https://subversion.xray.aps.anl.gov/trac/pyGSAS/wiki).
+   `here <https://subversion.xray.aps.anl.gov/trac/pyGSAS/wiki>`_
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 [TobyVonDreele2013]_ as external software to fit peaks to a powder /
