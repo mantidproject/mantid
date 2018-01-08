@@ -301,6 +301,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.save_current_session)
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
+        self.connect(self.ui.actionLoad_Mask, QtCore.SIGNAL('triggered()'),
+                     self.menu_load_mask)
 
         self.connect(self.ui.actionSave_Project, QtCore.SIGNAL('triggered()'),
                      self.action_save_project)
@@ -3413,6 +3415,22 @@ class MainWindow(QtGui.QMainWindow):
         self._dataDownloadDialog.show()
 
         return
+
+    def menu_load_mask(self):
+        """ Load Mask and apply to both workspaces and GUI
+        hb3a_clean_ui_21210
+        """
+        # get the XML file to load
+        file_filter = 'XML Files (*.xml);;All Files (*)'
+        mask_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Masking File', self._homeDir,
+                                                               file_filter))
+
+        # call controller to load mask XML
+        self._controller.load_mask_file(mask_file_name)
+
+        # generate a mask name
+        mask_name = 'User'
+
 
     def menu_quit(self):
         """
