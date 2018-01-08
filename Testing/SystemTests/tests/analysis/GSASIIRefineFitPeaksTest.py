@@ -66,6 +66,7 @@ class _GSASFinder(object):
 class _GSASIIRefineFitPeaksTestHelper(object):
 
     _LATTICE_PARAM_TBL_NAME = "LatticeParameters"
+    _RESIDUALS_TBL_NAME = "Residuals"
     _INPUT_WORKSPACE_FILENAME = "focused_bank1_ENGINX00256663.nxs"
     _PHASE_FILENAME = "FE_ALPHA.cif"
     _INST_PARAM_FILENAME = "template_ENGINX_241391_236516_North_bank.prm"
@@ -91,36 +92,42 @@ class _GSASIIRefineFitPeaksTestHelper(object):
 
 class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
 
-    rwp = None
-    gof = None
+    fitted_peaks_ws = None
     gsas_proj_path = None
-    _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldFitParams.nxs"
+    input_ws = None
+    residuals_table = None
+    lattice_params_table = None
+    _FIT_PARAMS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldFitParams.nxs"
     _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksRietveldTest.gpx"
+    _RESIDUALS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksRietveldResiduals.nxs"
 
     def excludeInPullRequests(self):
         return True
 
     def runTest(self):
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
-        input_ws = Load(Filename=self.input_ws_path())
+        self.input_ws = Load(Filename=self.input_ws_path(), OutputWorkspace="input_ws")
 
         gsas_path = self.path_to_gsas()
         if not gsas_path:
             self.fail("Could not find GSAS-II installation")
 
-        self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
-                                                     InputWorkspace=input_ws,
-                                                     PhaseInfoFile=self.phase_file_path(),
-                                                     InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=gsas_path,
-                                                     SaveGSASIIProjectFile=self.gsas_proj_path,
-                                                     MuteGSASII=True,
-                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+        self.fitted_peaks_ws, self.residuals_table, self.lattice_params_table = \
+            GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
+                                 InputWorkspace=self.input_ws,
+                                 PhaseInfoFile=self.phase_file_path(),
+                                 InstrumentFile=self.inst_param_file_path(),
+                                 PathToGSASII=gsas_path,
+                                 SaveGSASIIProjectFile=self.gsas_proj_path,
+                                 MuteGSASII=True,
+                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+                                 ResidualsTable=self._RESIDUALS_TBL_NAME)
 
     def validate(self):
-        self.assertAlmostEqual(self.gof, 3.57776, delta=1e-6)
-        self.assertAlmostEqual(self.rwp, 77.754994, delta=1e-6)
-        return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._REFERENCE_FILE_NAME)
+        # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
+        self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
+        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._FIT_PARAMS_REFERENCE_FILE_NAME),
+                self._RESIDUALS_TBL_NAME, mantid.FileFinder.getFullPath(self._RESIDUALS_REFERENCE_FILE_NAME))
 
     def cleanup(self):
         mantid.mtd.clear()
@@ -129,36 +136,42 @@ class GSASIIRefineFitPeaksRietveldTest(stresstesting.MantidStressTest, _GSASIIRe
 
 class GSASIIRefineFitPeaksPawleyTest(stresstesting.MantidStressTest, _GSASIIRefineFitPeaksTestHelper):
 
-    rwp = None
-    gof = None
+    fitted_peaks_ws = None
     gsas_proj_path = None
-    _REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyFitParams.nxs"
+    input_ws = None
+    residuals_table = None
+    lattice_params_table = None
+    _FIT_PARAMS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyFitParams.nxs"
     _GSAS_PROJ_FILE_NAME = "GSASIIRefineFitPeaksPawleyTest.gpx"
+    _RESIDUALS_REFERENCE_FILE_NAME = "GSASIIRefineFitPeaksPawleyResiduals.nxs"
 
     def excludeInPullRequests(self):
         return True
 
     def runTest(self):
         self.gsas_proj_path = os.path.join(self._TEMP_DIR, self._GSAS_PROJ_FILE_NAME)
-        input_ws = Load(Filename=self.input_ws_path())
+        self.input_ws = Load(Filename=self.input_ws_path(), OutputWorkspace="output_ws")
 
         gsas_path = self.path_to_gsas()
         if not gsas_path:
             self.fail("Could not find GSAS-II installation")
 
-        self.gof, self.rwp, _ = GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
-                                                     InputWorkspace=input_ws,
-                                                     PhaseInfoFile=self.phase_file_path(),
-                                                     InstrumentFile=self.inst_param_file_path(),
-                                                     PathToGSASII=gsas_path,
-                                                     SaveGSASIIProjectFile=self.gsas_proj_path,
-                                                     MuteGSASII=True,
-                                                     LatticeParameters=self._LATTICE_PARAM_TBL_NAME)
+        self.fitted_peaks_ws, self.residuals_table, self.lattice_params_table = \
+            GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
+                                 InputWorkspace=self.input_ws,
+                                 PhaseInfoFile=self.phase_file_path(),
+                                 InstrumentFile=self.inst_param_file_path(),
+                                 PathToGSASII=gsas_path,
+                                 SaveGSASIIProjectFile=self.gsas_proj_path,
+                                 MuteGSASII=True,
+                                 LatticeParameters=self._LATTICE_PARAM_TBL_NAME,
+                                 ResidualsTable=self._RESIDUALS_TBL_NAME)
 
     def validate(self):
-        self.assertAlmostEquals(self.gof, 3.57847, delta=1e-6)
-        self.assertAlmostEquals(self.rwp, 77.755147, delta=1e-6)
-        return self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._REFERENCE_FILE_NAME)
+        # TODO: Check fitted_peaks_ws has correct values once we have some data we're sure of
+        self.assertEqual(self.input_ws.getNumberBins(), self.fitted_peaks_ws.getNumberBins())
+        return (self._LATTICE_PARAM_TBL_NAME, mantid.FileFinder.getFullPath(self._FIT_PARAMS_REFERENCE_FILE_NAME),
+                self._RESIDUALS_TBL_NAME, mantid.FileFinder.getFullPath(self._RESIDUALS_REFERENCE_FILE_NAME))
 
     def cleanup(self):
         mantid.mtd.clear()
