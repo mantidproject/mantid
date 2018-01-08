@@ -296,8 +296,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         instr, run_number = getInstrRun(ws_name)
 
-        facility = config.getFacility()
-        pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+        pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number
