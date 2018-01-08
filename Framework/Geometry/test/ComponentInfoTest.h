@@ -108,10 +108,11 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
   using Mantid::Beamline::ComponentType;
   auto isStructuredBank =
       boost::make_shared<std::vector<ComponentType>>(1, ComponentType::Generic);
+  auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(1);
   return Kernel::make_unique<Beamline::ComponentInfo>(
       detectorIndices, detectorRanges, componentIndices, componentRanges,
-      parentIndices, positions, rotations, scaleFactors, isStructuredBank,
-      names, -1, -1);
+      parentIndices, instrumentTree, positions, rotations, scaleFactors,
+      isStructuredBank, names, -1, -1);
 }
 } // namespace
 
@@ -154,10 +155,12 @@ public:
     using Mantid::Beamline::ComponentType;
     auto isRectBank = boost::make_shared<std::vector<ComponentType>>(
         2, ComponentType::Generic);
+    auto instrumentTree = boost::make_shared<std::vector<std::vector<size_t>>>(
+        1, std::vector<size_t>(1));
     auto internalInfo = Kernel::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, scaleFactors, isRectBank, names,
-        -1, -1);
+        parentIndices, instrumentTree, positions, rotations, scaleFactors,
+        isRectBank, names, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -197,7 +200,7 @@ public:
     // Compare sizes
     TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
-    TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
+    TS_ASSERT_EQUALS(b->shape(0).get(), a.shape(0).get());
     // IDs are the same
     TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
     TS_ASSERT(!b->hasDetectorInfo());

@@ -39,6 +39,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
+    boost::shared_ptr<std::vector<std::vector<size_t>>> instrumentTree,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
@@ -51,6 +52,7 @@ ComponentInfo::ComponentInfo(
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
+      m_instrumentTree(std::move(instrumentTree)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
@@ -90,6 +92,16 @@ ComponentInfo::ComponentInfo(
   if (m_names->size() != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of names as number of components");
+  }
+
+  size_t treeSize = 1; // initialize with root
+  for (const auto &assem : *m_instrumentTree)
+    treeSize += assem.size();
+
+  if (treeSize != m_size) {
+    throw std::invalid_argument("ComponentInfo should be provided an "
+                                "instrument tree which contains same number "
+                                "components");
   }
 }
 
@@ -137,6 +149,19 @@ ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
                  m_assemblySortedComponentIndices->begin() + compRange.first,
                  m_assemblySortedComponentIndices->begin() + compRange.second);
   return indices;
+}
+
+const std::vector<size_t> &
+ComponentInfo::children(const size_t componentIndex) const {
+  static std::vector<size_t> emptyVec;
+  auto dets = detectorRangeInSubtree(root());
+  auto numDets = static_cast<size_t>(std::distance(dets.begin(), dets.end()));
+  auto index = componentIndex - numDets;
+
+  if (index < m_instrumentTree->size())
+    return (*m_instrumentTree)[index];
+
+  return emptyVec;
 }
 
 size_t ComponentInfo::size() const { return m_size; }

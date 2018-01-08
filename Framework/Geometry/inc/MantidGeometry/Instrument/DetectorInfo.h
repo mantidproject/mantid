@@ -90,6 +90,8 @@ public:
   double twoTheta(const std::pair<size_t, size_t> &index) const;
   double signedTwoTheta(const size_t index) const;
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
+  double getPhi(const size_t index) const;
+  double getPhiOffset(const size_t index, const double offset) const;
   Kernel::V3D position(const size_t index) const;
   Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;

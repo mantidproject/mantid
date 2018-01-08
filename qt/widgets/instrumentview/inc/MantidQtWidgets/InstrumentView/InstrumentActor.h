@@ -52,20 +52,19 @@ public:
                   double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
-  ///< Type of the GL object
-  virtual std::string type() const { return "InstrumentActor"; }
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D &minBound,
                       Mantid::Kernel::V3D &maxBound) const;
   /// Set a component (and all its children) visible.
-  void setComponentVisible(Mantid::Geometry::ComponentID component);
+  void setComponentVisible(size_t componentIndex);
   /// Toggle the visibility of the child actors (if exist).
   void setChildVisibility(bool);
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
+  std::vector<size_t> getMonitors() const;
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
@@ -132,18 +131,12 @@ public:
 
   /// Get the number of detectors in the instrument.
   size_t ndetectors() const;// { return m_detIDs.size(); }
-  /// Get a reference to a detector by a pick ID converted form a color in
-  /// the pick image.
-  const Mantid::Geometry::IDetector &getDetectorByPickID(size_t pickID) const;
-  /// Get a reference to a detector by a detector ID.
-  const Mantid::Geometry::IDetector &
-  getDetectorByDetID(Mantid::detid_t detID) const;
+  /// Get a detector index by a detector ID.
+  size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
-  /// Cache detector positions.
-  void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
   const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
@@ -193,6 +186,12 @@ public:
   void initMaskHelper() const;
   bool hasMaskWorkspace() const;
   bool hasBinMask() const;
+  QString getParameterInfo(size_t index) const;
+  std::string getDefaultAxis() const;
+  std::string getDefaultView() const;
+  std::string getInstrumentName() const;
+  std::vector<std::string> getStringParameter(const std::string &name,
+                                              bool recursive = true) const;
   /// Load the state of the actor from a Mantid project file.
   void loadFromProject(const std::string &lines);
   /// Save the state of the actor to a Mantid project file.

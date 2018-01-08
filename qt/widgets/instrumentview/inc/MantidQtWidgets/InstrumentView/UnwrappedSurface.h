@@ -3,7 +3,6 @@
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
@@ -61,7 +60,7 @@ public:
 
   /** @name Implemented public virtual methods */
   //@{
-  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
+  void componentSelected(size_t componentIndex) override;
   void getSelectedDetectors(QList<int> &dets) override;
   void getMaskedDetectors(QList<int> &dets) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
@@ -98,6 +97,7 @@ public:
   bool isFlippedView() const { return m_flippedView; }
   /// Zoom into an area of the screen
   void zoom(const QRectF &area);
+  void zoom(const Mantid::Geometry::BoundingBox &area);
   //@}
   /// Load settings for the unwrapped surface from a project file
   virtual void loadFromProject(const std::string &lines) override;
@@ -122,6 +122,7 @@ protected:
   void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
   void drawSimpleToImage(QImage *image, bool picking = false) const override;
   void changeColorMap() override;
+  void doZoom(const QRectF &area);
   //@}
 
   /** @name New protected virtual methods */
@@ -149,9 +150,6 @@ protected:
   /** @name Protected methods */
   //@{
   void setColor(int index, bool picking) const;
-  void calcAssemblies(const Mantid::Geometry::IComponent *comp,
-                      const QRectF &compRect);
-  void cacheAllAssemblies();
   void createPeakShapes(const QRect &viewport) const;
   //@}
 
@@ -164,9 +162,6 @@ protected:
 
   /// Info needed to draw detectors onto unwrapped image
   std::vector<UnwrappedDetector> m_unwrappedDetectors;
-
-  /// Bounding rectangles of detector assemblies
-  QMap<Mantid::Geometry::ComponentID, QRectF> m_assemblies;
 
   bool m_flippedView; ///< if false the image is seen from the sample. if true
   /// the view is looking towards the sample.
