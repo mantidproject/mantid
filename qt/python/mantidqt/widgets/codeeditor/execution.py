@@ -19,7 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # local imports
-from mantidqt.utils.async import AsyncTask
+from mantidqt.utils.async import AsyncTask, AsyncTaskFailure
 
 
 class PythonCodeExecution(object):
@@ -38,7 +38,7 @@ class PythonCodeExecution(object):
 
         :param success_cb: A callback of the form f() called on success
         :param error_cb: A callback of the form f(exc) called on error,
-        providing the exception generated
+        providing an AsyncTaskFailure object
         :param progress_cb: A callback for progress updates as the code executes
         """
         # AsyncTask's callbacks have a slightly different form
@@ -47,12 +47,7 @@ class PythonCodeExecution(object):
         else:
             def success_cb_wrap(_): pass
         self.on_success = success_cb_wrap
-
-        if error_cb:
-            def error_cb_wrapped(task_result): error_cb(task_result.exception)
-        else:
-            def error_cb_wrapped(_): pass
-        self.on_error = error_cb_wrapped
+        self.on_error = error_cb
 
         self.on_progress_update = progress_cb
 

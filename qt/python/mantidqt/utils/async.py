@@ -91,7 +91,7 @@ class AsyncTask(threading.Thread):
         try:
             out = self.target(*self.args, **self.kwargs)
         except:  # noqa
-            self.error_cb(AsyncTaskFailure(sys.exc_info()[1]))
+            self.error_cb(AsyncTaskFailure(*sys.exc_info()[1:]))
         else:
             self.success_cb(AsyncTaskSuccess(out))
 
@@ -114,8 +114,9 @@ class AsyncTaskFailure(object):
     """Object describing the failed execution of an asynchronous task
     """
 
-    def __init__(self, exception):
+    def __init__(self, exception, traceback):
         self.exception = exception
+        self.traceback = traceback
 
     @property
     def success(self):

@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 
 # system imports
+import traceback
 import unittest
 
 # 3rdparty imports
@@ -28,11 +29,8 @@ from mantidqt.utils.async import AsyncTask, blocking_async_task
 class AsyncTaskTest(unittest.TestCase):
 
     class Receiver(object):
-        success_cb_called = False
-        error_cb_called = False
-        finished_cb_called = False
-        task_output = None
-        task_exc = None
+        success_cb_called, error_cb_called, finished_cb_called = False, False, False
+        task_output, task_exc, task_exc_tb = None, None, None
 
         def on_success(self, task_result):
             self.success_cb_called = True
@@ -41,6 +39,7 @@ class AsyncTaskTest(unittest.TestCase):
         def on_error(self, task_result):
             self.error_cb_called = True
             self.task_exc = task_result.exception
+            self.task_exc_tb = task_result.traceback
 
         def on_finished(self):
             self.finished_cb_called = True
@@ -107,7 +106,11 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.finished_cb_called)
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(recv.error_cb_called)
-        self.assertTrue(isinstance(recv.task_exc, RuntimeError))
+        self.assertTrue(isinstance(recv.task_exc, RuntimeError),
+                        msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
+        # we only test this once as it gives the internal lineno in async.py
+        self.assertEqual(92, recv.task_exc_tb.tb_lineno)
+
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):

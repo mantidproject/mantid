@@ -26,16 +26,16 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 class PythonCodeExecutionTest(unittest.TestCase):
 
     class Receiver(object):
-        success_cb_called = False
-        error_cb_called = False
-        task_exc = None
+        success_cb_called, error_cb_called = False, False
+        task_exc, task_tb = None, None
 
         def on_success(self):
             self.success_cb_called = True
 
-        def on_error(self, exc):
+        def on_error(self, task_result):
             self.error_cb_called = True
-            self.task_exc = exc
+            self.task_exc = task_result.exception
+            self.task_tb = task_result.traceback
 
     class ReceiverWithProgress(Receiver):
 
@@ -93,10 +93,26 @@ class PythonCodeExecutionTest(unittest.TestCase):
         self.assertTrue(isinstance(recv.task_exc, SyntaxError),
                         msg="Unexpected exception found. "
                             "SyntaxError expected, found {}".format(recv.task_exc.__class__.__name__))
+        self.assertEqual(1, recv.task_tb.tb_lineno)
 
     def test_execute_returns_failure_on_runtime_error_and_captures_exception(self):
         code = "x = _local + 1"
         self._verify_failed_serial_execute(NameError, code, {}, {})
+
+    def test_execute_async_returns_failure_on_runtime_error_and_captures_exception(self):
+        code = """x = + 1
+y = _local + 1        
+"""
+        recv = PythonCodeExecutionTest.Receiver()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+        self.assertTrue(recv.error_cb_called)
+        self.assertFalse(recv.success_cb_called)
+        self.assertTrue(isinstance(recv.task_exc, NameError),
+                        msg="Unexpected exception found. "
+                            "NameError expected, found {}".format(recv.task_exc.__class__.__name__))
+        self.assertEqual(2, recv.task_tb.tb_lineno)
 
     # ---------------------------------------------------------------------------
     # Progress tests
