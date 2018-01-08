@@ -3,11 +3,12 @@ from mantid.kernel import ConfigService, ConfigPropertyObserver
 
 
 class OutputDirectoryObserver(ConfigPropertyObserver):
-    def __init__(self):
+    def __init__(self, callback):
         super(OutputDirectoryObserver, self).__init__("defaultsave.directory")
+        self.callback = callback
 
-    def onPropertyValueChanged(self, old_value, new_value):
-        pass
+    def onPropertyValueChanged(self, new_value, old_value):
+        self.callback(new_value)
 
 
 class AddRunsPagePresenter(object):
@@ -28,7 +29,8 @@ class AddRunsPagePresenter(object):
                                          view)
 
         self._connect_to_view(view)
-        self._output_directory_observer = OutputDirectoryObserver()
+        self._output_directory_observer = \
+            OutputDirectoryObserver(self._handle_output_directory_changed)
 
     def _init_views(self, view, parent_view):
         self._view = view
