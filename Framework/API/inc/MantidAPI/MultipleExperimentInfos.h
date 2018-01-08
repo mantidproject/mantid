@@ -51,6 +51,9 @@ public:
 
   void copyExperimentInfos(const MultipleExperimentInfos &other);
 
+  // Check if this class has an oriented lattice on any sample object
+  bool hasOrientedLattice() const;
+
 protected:
   /// Returns a string description of the object
   const std::string toString() const;
