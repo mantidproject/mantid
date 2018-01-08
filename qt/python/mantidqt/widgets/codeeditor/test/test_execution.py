@@ -30,13 +30,28 @@ class PythonCodeExecutionTest(unittest.TestCase):
         error_cb_called = False
         task_exc = None
 
-        def on_success(self, task_result):
+        def on_success(self):
             self.success_cb_called = True
 
         def on_error(self, exc):
             self.error_cb_called = True
             self.task_exc = exc
 
+    class ReceiverWithProgress(Receiver):
+
+        def __init__(self):
+            self.lines_received = []
+
+        def on_progess_update(self, lineno):
+            self.lines_received.append(lineno)
+
+        def on_error(self, exc):
+            self.error_cb_called = True
+            self.task_exc = exc
+
+    # ---------------------------------------------------------------------------
+    # Successful execution tests
+    # ---------------------------------------------------------------------------
     def test_execute_places_output_in_provided_mapping_object(self):
         code = "_local=100"
         namespace = {}
@@ -60,6 +75,9 @@ class PythonCodeExecutionTest(unittest.TestCase):
         task = executor.execute_async(code, {}, {})
         task.join()
 
+    # ---------------------------------------------------------------------------
+    # Error execution tests
+    # ---------------------------------------------------------------------------
     def test_execute_raises_syntax_error_on_bad_code(self):
         code = "if:"
         self._verify_failed_serial_execute(SyntaxError, code, {}, {})
@@ -79,6 +97,85 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_execute_returns_failure_on_runtime_error_and_captures_exception(self):
         code = "x = _local + 1"
         self._verify_failed_serial_execute(NameError, code, {}, {})
+
+    # ---------------------------------------------------------------------------
+    # Progress tests
+    # ---------------------------------------------------------------------------
+    def test_progress_cb_is_not_called_for_empty_string(self):
+        code = ""
+        recv = PythonCodeExecutionTest.ReceiverWithProgress()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
+                                       progress_cb=recv.on_progess_update)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+        self.assertEqual(0, len(recv.lines_received))
+
+    def test_progress_cb_is_not_called_for_code_with_syntax_errors(self):
+        code = """x = 1
+y = 
+"""
+        recv = PythonCodeExecutionTest.ReceiverWithProgress()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
+                                       progress_cb=recv.on_progess_update)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+        self.assertFalse(recv.success_cb_called)
+        self.assertTrue(recv.error_cb_called)
+        self.assertEqual(0, len(recv.lines_received))
+
+    def test_progress_cb_is_called_for_single_line(self):
+        code = "x = 1"
+        recv = PythonCodeExecutionTest.ReceiverWithProgress()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
+                                       progress_cb=recv.on_progess_update)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+        if not recv.success_cb_called:
+            self.assertTrue(recv.error_cb_called)
+            self.fail("Execution failed with error:\n" + str(recv.task_exc))
+
+        self.assertEqual([1], recv.lines_received)
+
+    def test_progress_cb_is_called_for_multiple_single_lines(self):
+        code = """x = 1
+y = 2
+"""
+        recv = PythonCodeExecutionTest.ReceiverWithProgress()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
+                                       progress_cb=recv.on_progess_update)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+        if not recv.success_cb_called:
+            self.assertTrue(recv.error_cb_called)
+            self.fail("Execution failed with error:\n" + str(recv.task_exc))
+
+        self.assertEqual([1, 2], recv.lines_received)
+
+    def test_progress_cb_is_called_for_mix_single_lines_and_blocks(self):
+        code = """x = 1
+# comment line
+
+sum = 0
+for i in range(10):
+    if i %2 == 0:
+        sum += i
+
+squared = sum*sum
+"""
+        recv = PythonCodeExecutionTest.ReceiverWithProgress()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
+                                       progress_cb=recv.on_progess_update)
+        context = {}
+        task = executor.execute_async(code, context, context)
+        task.join()
+        if not recv.success_cb_called:
+            self.assertTrue(recv.error_cb_called)
+            self.fail("Execution failed with error:\n" + str(recv.task_exc))
+
+        self.assertEqual(20, context['sum'])
+        self.assertEqual(20*20, context['squared'])
+        self.assertEqual(1, context['x'])
+        self.assertEqual([1, 2, 3, 4, 5, 8, 9], recv.lines_received)
 
     # -------------------------------------------------------------------------
     # Helpers
