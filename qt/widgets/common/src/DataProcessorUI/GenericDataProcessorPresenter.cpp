@@ -898,7 +898,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Get the algorithm input properties as an options map
   OptionsMap options = getCanonicalOptions(
-      data, m_processingOptions, m_whitelist, true,
+      data, getProcessingOptions(data), m_whitelist, true,
       m_processor.outputProperties(), m_processor.prefixes());
   // Perform any preprocessing on the input properties
   preprocessOptionValues(options, data);

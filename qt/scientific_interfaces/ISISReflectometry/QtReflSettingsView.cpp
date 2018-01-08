@@ -36,6 +36,22 @@ Initialise the Interface
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
 
+  // Transmission runs table has 2 columns: angle and runs
+  int numCols = 2;
+  m_ui.transmissionRunsTable->setColumnCount(numCols);
+  m_ui.transmissionRunsTable->setColumnWidth(0, 40);
+  m_ui.transmissionRunsTable->setColumnWidth(1, 149);
+  m_ui.transmissionRunsTable->setHorizontalHeaderLabels(
+      {QString::fromStdString("Angle"),
+       QString::fromStdString("Transmission Run(s)")});
+  // Hard code the number of rows for now (typically we'll have 2 or 3 angles)
+  int numRows = 3;
+  m_ui.transmissionRunsTable->setRowCount(numRows);
+  auto headerHeight = m_ui.transmissionRunsTable->horizontalHeader()->height() + 2;
+  auto rowHeight = m_ui.transmissionRunsTable->rowHeight(0);
+  m_ui.transmissionRunsTable->setMinimumHeight(rowHeight * numRows +
+                                               headerHeight);
+
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
@@ -44,6 +60,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(setPolarisationOptionsEnabled(bool)));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(summationTypeChanged(int)));
+  connect(m_ui.getAddTransmissionRowButton, SIGNAL(clicked()), this,
+          SLOT(addTransmissionTableRow()));
   connect(m_ui.correctDetectorsCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setDetectorCorrectionEnabled(bool)));
 }
@@ -317,6 +335,15 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) {
   }
 }
 
+/** Add a new row to the transmission runs table
+ * */
+void QtReflSettingsView::addTransmissionTableRow() const {
+  auto numRows = m_ui.transmissionRunsTable->rowCount() + 1;
+  m_ui.transmissionRunsTable->setRowCount(numRows);
+  // Select the first cell in the new row
+  m_ui.transmissionRunsTable->setCurrentCell(numRows - 1, 0);
+}
+
 std::string QtReflSettingsView::getText(QLineEdit const &lineEdit) const {
   return lineEdit.text().toStdString();
 }
@@ -401,8 +428,31 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */
-std::string QtReflSettingsView::getTransmissionRuns() const {
-  return getText(*m_ui.transmissionRunsEdit);
+std::map<std::string, std::string>
+QtReflSettingsView::getTransmissionRuns() const {
+
+  const auto &table = m_ui.transmissionRunsTable;
+
+  // Check that we have 2 columns (angle and runs)
+  if (table->columnCount() != 2)
+    throw std::runtime_error("Transmission runs table must have 2 columns");
+
+  // Return values in a map
+  std::map<std::string, std::string> results;
+
+  for (auto row = 0; row < table->rowCount(); ++row) {
+    auto angleItem = table->item(row, 0);
+    auto runsItem = table->item(row, 1);
+    // Extract the string values
+    auto angle = angleItem ? angleItem->text() : "";
+    auto runs = runsItem ? runsItem->text() : "";
+    // Skip empty rows
+    if (angle.isEmpty() && runs.isEmpty())
+      continue;
+    // Add to the map
+    results[angle.toStdString()] = runs.toStdString();
+  }
+  return results;
 }
 
 /** Return start overlap

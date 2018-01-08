@@ -183,6 +183,11 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+  // Get the processing options for this row
+  virtual OptionsMap getProcessingOptions(RowData *data) {
+    UNUSED_ARG(data);
+    return m_processingOptions;
+  }
 
   boost::optional<PostprocessingStep> m_postprocessing;
 

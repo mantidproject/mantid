@@ -51,7 +51,7 @@ public:
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
   /// Return transmission runs
-  std::string getTransmissionRuns() const override;
+  std::map<std::string, std::string> getTransmissionRuns() const override;
   /// Return start overlap for transmission runs
   std::string getStartOverlap() const override;
   /// Return end overlap for transmission runs
@@ -129,6 +129,8 @@ public slots:
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
+  /// Adds another row to the transmission runs table
+  void addTransmissionTableRow() const;
 
 private:
   /// Initialise the interface

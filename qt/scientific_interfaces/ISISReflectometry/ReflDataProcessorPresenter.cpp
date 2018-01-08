@@ -763,5 +763,51 @@ void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
                                                         size_t numSlices) {
   m_numGroupSlicesMap[groupID] = numSlices;
 }
+
+/** Get the processing options for a given row
+ * */
+OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData *data) {
+  // Return the global settings but also include the transmission runs,
+  // which vary depending on which row is being processed
+  auto options = m_processingOptions;
+
+  // Get the angle for the current row. The angle is the second data item
+  if (data->size() < 2 || data->at(1).isEmpty()) {
+    if (m_mainPresenter->hasPerAngleTransmissionRuns()) {
+      // The user has specified per-angle transmission runs on the settings
+      // tab. In theory this is fine, but it could cause confusion when the
+      // angle is not available in the data processor table because the
+      // per-angle transmission runs will NOT be used. However, the angle will
+      // be updated in the table AFTER reduction is run, so it might look like
+      // it should have been used (and it WILL be used next time if reduction
+      // is re-run).
+      throw std::runtime_error(
+          "An angle must be specified for all rows because "
+          "per-angle transmission runs are specified in the "
+          "Settings tab. Please enter angles for all runs, "
+          "or remove the per-angle settings.");
+    } else {
+      // If per-angle transmission runs are not set then it's fine to just use
+      // any default transmission runs, which will already be in the options.
+      return options;
+    }
+  }
+
+  double angle = 0.0;
+  try {
+    // Convert to double
+    angle = std::stod(data->at(1).toStdString());
+  } catch (std::invalid_argument &e) {
+    throw std::runtime_error(std::string("Error parsing angle: ") + e.what());
+  }
+
+  // Insert the transmission runs as the "FirstTransmissionRun" property
+  auto transmissionRuns = m_mainPresenter->getTransmissionRunsForAngle(angle);
+  if (!transmissionRuns.isEmpty()) {
+    options["FirstTransmissionRun"] = transmissionRuns;
+  }
+
+  return options;
+}
 }
 }

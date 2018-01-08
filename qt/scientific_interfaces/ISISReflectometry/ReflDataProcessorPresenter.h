@@ -58,8 +58,9 @@ public:
   void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
   // Add entry for the number of slices for all rows in a group
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
-
 private:
+  // Get the processing options for this row
+  OptionsMap getProcessingOptions(RowData *data) override;
   // Process selected rows
   void process() override;
   // Plotting
