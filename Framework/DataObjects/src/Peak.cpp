@@ -714,10 +714,7 @@ double Peak::getFinalEnergy() const { return m_finalEnergy; }
 double Peak::getInitialEnergy() const { return m_initialEnergy; }
 
 /** Get the difference between the initial and final neutron energy */
-double Peak::getEnergy() const
-{
-  return getInitialEnergy() - getFinalEnergy();
-}
+double Peak::getEnergy() const { return getInitialEnergy() - getFinalEnergy(); }
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */
@@ -798,8 +795,7 @@ double Peak::getIntensity() const { return m_intensity; }
 double Peak::getSigmaIntensity() const { return m_sigmaIntensity; }
 
 /** Return the peak intensity divided by the error in the intensity */
-double Peak::getIntensityOverSigma() const
-{
+double Peak::getIntensityOverSigma() const {
   return m_intensity / m_sigmaIntensity;
 }
 

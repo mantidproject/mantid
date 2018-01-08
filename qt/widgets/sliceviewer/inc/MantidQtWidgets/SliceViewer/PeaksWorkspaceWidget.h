@@ -1,12 +1,12 @@
 #ifndef PEAKSWORKSPACEWIDGET_H
 #define PEAKSWORKSPACEWIDGET_H
 
-#include <QWidget>
-#include <QSortFilterProxyModel>
-#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
 #include "ui_PeaksWorkspaceWidget.h"
+#include <QSortFilterProxyModel>
+#include <QWidget>
 
 #include <set>
 
@@ -73,7 +73,7 @@ private:
   /// Parent widget
   PeaksViewer *const m_parent;
   /// Sort & Filter model to map sorted indicies to unsorted indicies
-  QSortFilterProxyModel* m_tableModel;
+  QSortFilterProxyModel *m_tableModel;
 
 private slots:
   void onForegroundColorCrossClicked();
