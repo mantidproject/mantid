@@ -64,11 +64,12 @@ private:
   double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);
   // Calculates the SVD of the input matrix A
-  std::vector<double> solveSVD(const Kernel::DblMatrix &A,
+  std::vector<double> solveSVD(Kernel::DblMatrix &A,
                                const Kernel::DblMatrix &B);
   /// Moves the system one step closer towards the solution
   std::vector<double> move(const QuadraticCoefficients &coeffs,
-                           double chiTarget, double chiEps, size_t alphaIter);
+                           double ChiTargetOverN, double chiEps,
+                           size_t alphaIter);
   /// Applies a distance penalty
   std::vector<double> applyDistancePenalty(const std::vector<double> &beta,
                                            const QuadraticCoefficients &coeffs,

@@ -451,6 +451,7 @@ public:
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -511,6 +512,9 @@ public:
   /// @return the special coordinate system used if any.
   Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const override;
+
+  // Check if this class has an oriented lattice on a sample object
+  virtual bool hasOrientedLattice() const override;
 
   //=====================================================================================
   // End IMDWorkspace methods

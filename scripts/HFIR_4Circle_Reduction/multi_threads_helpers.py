@@ -1,5 +1,6 @@
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
+import os
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
@@ -70,7 +71,7 @@ class AddPeaksThread(QThread):
 
             # merge peak
             status, err_msg = self._mainWindow.controller.merge_pts_in_scan(
-                self._expNumber, scan_number, [])
+                self._expNumber, scan_number, [], False, self._mainWindow.controller.pre_processed_dir)
 
             # continue to the next scan if there is something wrong
             if status is False:
@@ -160,6 +161,9 @@ class IntegratePeaksThread(QThread):
         self._numBgPtRight = num_pt_bg_right
         self._scaleFactor = scale_factor
 
+        # other about preprocessed options
+        self._checkPreprocessedScans = True
+
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_message)
@@ -193,9 +197,14 @@ class IntegratePeaksThread(QThread):
             if merged is False:
                 merged_ws_name = 'X'
                 try:
-                    status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
-                                                                                    scan_no=scan_number,
-                                                                                    pt_num_list=pt_number_list)
+                    pre_dir = self._mainWindow.controller.pre_processed_dir
+                    status, ret_tup = \
+                        self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
+                                                                      scan_no=scan_number,
+                                                                      pt_num_list=pt_number_list,
+                                                                      rewrite=False,
+                                                                      preprocessed_dir=pre_dir)
+
                     if status:
                         merged_ws_name = str(ret_tup[0])
                         error_message = ''
@@ -380,6 +389,11 @@ class MergePeaksThread(QThread):
         if md_file_list is not None:
             self._outputMDFileList = md_file_list[:]
 
+        # other about preprocessed options
+        self._checkPreprocessedScans = False
+        self._preProcessedDir = None
+        self._redoMerge = True
+
         # link signals
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
         self.saveMsgSignal.connect(self._mainWindow.update_file_name)
@@ -420,7 +434,9 @@ class MergePeaksThread(QThread):
             try:
                 status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                 scan_no=scan_number,
-                                                                                pt_num_list=pt_number_list)
+                                                                                pt_num_list=pt_number_list,
+                                                                                rewrite=self._redoMerge,
+                                                                                preprocessed_dir=self._preProcessedDir)
                 if status:
                     merged_ws_name = str(ret_tup[0])
                     error_message = ''
@@ -452,7 +468,42 @@ class MergePeaksThread(QThread):
                 # merging error
                 self.mergeMsgSignal.emit(scan_number, error_message)
                 continue
-                # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
             # END-IF
+
+        return
+
+    def set_pre_process_options(self, option_to_use, pre_process_dir):
+        """
+        set the pre-process options
+        :param option_to_use:
+        :param pre_process_dir:
+        :return:
+        """
+        # check
+        assert isinstance(option_to_use, bool), 'Option to use pre-process must be a boolean but not a {0}.' \
+                                                ''.format(type(option_to_use))
+
+        self._checkPreprocessedScans = option_to_use
+
+        if self._checkPreprocessedScans:
+            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
+                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
+            if os.path.exists(pre_process_dir) is False:
+                raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
+            self._preProcessedDir = pre_process_dir
+        # END-IF
+
+        return
+
+    def set_rewrite(self, flag):
+        """
+        set the flag to re-merge the scan regardless whether the target workspace is in memory
+        or a pre-processed MD workspace does exist.
+        :param flag:
+        :return:
+        """
+        assert isinstance(flag, bool), 'Re-merge/re-write flag must be a boolean but not a {0}'.format(type(flag))
+
+        self._redoMerge = flag
 
         return

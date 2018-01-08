@@ -8,10 +8,13 @@ if ( CXXTEST_FOUND )
     )
 
   cxxtest_add_test ( ParallelTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_include_directories ( ParallelTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
   target_link_libraries( ParallelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
     Parallel
     ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES} )
+    ${GTEST_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    )
 
   add_dependencies ( FrameworkTests ParallelTest )
   # Add to the 'FrameworkTests' group in VS

@@ -28,7 +28,8 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
-                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                           sample_details=self._sample_details)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -40,6 +41,16 @@ class Polaris(AbstractInst):
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d,
                                              output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
+
+    def create_total_scattering_pdf(self, **kwargs):
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        # Generate pdf
+        run_details = self._get_run_details(self._inst_settings.run_number)
+        focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
+        pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
+                                                  focus_file_path=focus_file_path,
+                                                  merge_banks=self._inst_settings.merge_banks)
+        return pdf_output
 
     def set_sample_details(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -99,12 +110,6 @@ class Polaris(AbstractInst):
 
             return prefix + str(run_number)
 
-    def _generate_output_file_name(self, run_number_string):
-        suffix = self._inst_settings.suffix
-        if suffix is None:
-            suffix = ""
-        return Polaris._generate_input_file_name(run_number_string) + suffix
-
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
 
@@ -133,5 +138,8 @@ class Polaris(AbstractInst):
         return output
 
     def _switch_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "mode"):
+            mode = self._inst_settings.mode
+
         self._inst_settings.update_attributes(advanced_config=polaris_advanced_config.get_mode_specific_dict(mode),
                                               suppress_warnings=True)

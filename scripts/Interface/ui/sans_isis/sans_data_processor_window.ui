@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>897</height>
+    <height>898</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -132,6 +132,13 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="manage_directories_button">
+                <property name="text">
+                 <string>Manage Directories</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -139,7 +146,7 @@ QGroupBox::title {
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_7">
-              <item row="0" column="2">
+              <item row="0" column="3">
                <widget class="QGroupBox" name="reduction_dimensionality_group_box">
                 <property name="maximumSize">
                  <size>
@@ -148,20 +155,20 @@ QGroupBox::title {
                  </size>
                 </property>
                 <property name="title">
-                 <string>Dimensionality</string>
+                 <string>Reduction</string>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_8">
                  <item>
                   <widget class="QRadioButton" name="reduction_dimensionality_1D">
                    <property name="text">
-                    <string>1D</string>
+                    <string>&amp;1D</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QRadioButton" name="reduction_dimensionality_2D">
                    <property name="text">
-                    <string>2D</string>
+                    <string>&amp;2D</string>
                    </property>
                   </widget>
                  </item>
@@ -181,7 +188,7 @@ QGroupBox::title {
                 </property>
                </spacer>
               </item>
-              <item row="0" column="3" rowspan="2">
+              <item row="0" column="4" rowspan="2">
                <widget class="QGroupBox" name="save_group_box">
                 <property name="styleSheet">
                  <string notr="true"/>
@@ -295,19 +302,6 @@ QGroupBox::title {
                    </item>
                    <item>
                     <layout class="QGridLayout" name="gridLayout">
-                     <item row="0" column="0">
-                      <widget class="QCheckBox" name="save_zero_error_free">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>zero error free</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
                      <item row="1" column="0">
                       <widget class="QCheckBox" name="use_optimizations_checkbox">
                        <property name="toolTip">
@@ -321,11 +315,38 @@ QGroupBox::title {
                        </property>
                       </widget>
                      </item>
+                     <item row="0" column="0">
+                      <widget class="QCheckBox" name="save_zero_error_free">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>zero error free</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QCheckBox" name="plot_results_checkbox">
+                       <property name="text">
+                        <string>Plot Results</string>
+                       </property>
+                      </widget>
+                     </item>
                     </layout>
                    </item>
                   </layout>
                  </item>
                 </layout>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QCheckBox" name="multi_period_check_box">
+                <property name="text">
+                 <string>Multi-period</string>
+                </property>
                </widget>
               </item>
              </layout>
@@ -339,11 +360,11 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
-              <string>General, Wavelength, Scale, Event Slice, Sample</string>
+              <string>General, Scale, Event Slice, Sample</string>
              </attribute>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
@@ -490,7 +511,41 @@ QGroupBox::title {
                         <item row="0" column="3" colspan="2">
                          <widget class="QLabel" name="label">
                           <property name="text">
-                           <string>Custom q range:</string>
+                           <string>Custom q range for fit:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="3">
+                         <widget class="QLabel" name="label_2">
+                          <property name="text">
+                           <string>Custom q range for merge:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="6">
+                         <widget class="QLineEdit" name="merged_max_line_edit"/>
+                        </item>
+                        <item row="3" column="5">
+                         <widget class="QLabel" name="label_5">
+                          <property name="text">
+                           <string>to</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="4">
+                         <widget class="QLineEdit" name="merged_min_line_edit"/>
+                        </item>
+                        <item row="3" column="3">
+                         <widget class="QLabel" name="label_6">
+                          <property name="text">
+                           <string>from</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="4">
+                         <widget class="QCheckBox" name="merge_mask_check_box">
+                          <property name="text">
+                           <string>Use Range</string>
                           </property>
                          </widget>
                         </item>
@@ -557,62 +612,6 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compaptibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                       </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QGroupBox" name="groupBox">
-                    <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                    </property>
-                    <property name="title">
-                     <string>Wavelength</string>
-                    </property>
-                    <layout class="QGridLayout" name="gridLayout_6">
-                     <item row="1" column="0">
-                      <layout class="QGridLayout" name="gridLayout_3">
-                       <item row="0" column="2">
-                        <widget class="QLabel" name="wavelength_step_label">
-                         <property name="text">
-                          <string>Step  [Å]</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QLabel" name="wavelength_max_label">
-                         <property name="text">
-                          <string>Max  [Å]</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="3">
-                        <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
-                       </item>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="wavelength_min_label">
-                         <property name="text">
-                          <string>Min [Å]</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="3">
-                        <widget class="QLabel" name="wavelength_step_type_label">
-                         <property name="text">
-                          <string>Step Type</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="2">
-                        <widget class="QLineEdit" name="wavelength_step_line_edit"/>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QLineEdit" name="wavelength_max_line_edit"/>
-                       </item>
-                       <item row="1" column="0">
-                        <widget class="QLineEdit" name="wavelength_min_line_edit"/>
-                       </item>
-                      </layout>
                      </item>
                     </layout>
                    </widget>
@@ -778,103 +777,6 @@ QGroupBox::title {
               </item>
               <item>
                <layout class="QVBoxLayout" name="mask_tab_right_layout">
-                <item>
-                 <widget class="QGroupBox" name="phi_limit_group_box">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for selecting pizza slice masks.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="title">
-                   <string>Phi limit</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_18">
-                   <item row="0" column="3">
-                    <widget class="QLabel" name="phi_limit_to_label">
-                     <property name="text">
-                      <string>to</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="4">
-                    <widget class="QLineEdit" name="phi_limit_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="phi_limit_from_label">
-                     <property name="text">
-                      <string>from</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLineEdit" name="phi_limit_min_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="5">
-                    <widget class="QCheckBox" name="phi_limit_use_mirror_check_box">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the mirror sector should be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>use mirror sector</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="radius_limit_group_box">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disk mask which is useful for the beam stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="title">
-                   <string>Radius limit</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_19">
-                   <item row="1" column="1">
-                    <widget class="QLineEdit" name="radius_limit_min_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="phi_limit">
-                     <property name="text">
-                      <string>Radius</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QLineEdit" name="radius_limit_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="radius_limit_min_label">
-                     <property name="text">
-                      <string>Min [mm]</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QLabel" name="radius_limit_max_label">
-                     <property name="text">
-                      <string>Max [mm]</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
                 <item>
                  <widget class="QGroupBox" name="mask_file_input_group_box">
                   <property name="title">
@@ -1123,7 +1025,30 @@ QGroupBox::title {
                        <property name="title">
                         <string>Fit</string>
                        </property>
+                       <property name="flat">
+                        <bool>false</bool>
+                       </property>
+                       <property name="checkable">
+                        <bool>false</bool>
+                       </property>
                        <layout class="QGridLayout" name="gridLayout_22">
+                        <item row="1" column="0">
+                         <widget class="QComboBox" name="fit_selection_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects if fit options should be the same (Both) for Sample and Can, or if the user should be able to set them separately (Separate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string>Both</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Separate</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
                         <item row="2" column="3">
                          <widget class="QComboBox" name="fit_can_fit_type_combo_box">
                           <property name="toolTip">
@@ -1162,21 +1087,50 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="1" column="0">
-                         <widget class="QComboBox" name="fit_selection_combo_box">
+                        <item row="1" column="5">
+                         <widget class="QGroupBox" name="fit_sample_wavelength_combo_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects if fit options should be the same (Both) for Sample and Can, or if the user should be able to set them separately (Separate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
-                          <item>
-                           <property name="text">
-                            <string>Both</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>Separate</string>
-                           </property>
-                          </item>
+                          <property name="title">
+                           <string>&amp;Use custom wavelength range [Å]</string>
+                          </property>
+                          <property name="checkable">
+                           <bool>true</bool>
+                          </property>
+                          <property name="checked">
+                           <bool>false</bool>
+                          </property>
+                          <layout class="QGridLayout" name="gridLayout_23">
+                           <item row="0" column="1">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_min_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="2">
+                            <widget class="QLabel" name="fit_sample_to_label">
+                             <property name="text">
+                              <string>to</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="0">
+                            <widget class="QLabel" name="fit_sample_from_label">
+                             <property name="text">
+                              <string>from</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="3">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_max_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
                          </widget>
                         </item>
                         <item row="2" column="5">
@@ -1185,7 +1139,7 @@ QGroupBox::title {
                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="title">
-                           <string>Use custom wavelength range [Å]</string>
+                           <string>Use custom wavelength range [&amp;Å]</string>
                           </property>
                           <property name="checkable">
                            <bool>true</bool>
@@ -1232,62 +1186,6 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="1" column="2">
-                         <widget class="QCheckBox" name="fit_sample_use_fit_check_box">
-                          <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                          <property name="text">
-                           <string>Use fit</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="5">
-                         <widget class="QGroupBox" name="fit_sample_wavelength_combo_box">
-                          <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                          <property name="title">
-                           <string>Use custom wavelength range [Å]</string>
-                          </property>
-                          <property name="checkable">
-                           <bool>true</bool>
-                          </property>
-                          <property name="checked">
-                           <bool>false</bool>
-                          </property>
-                          <layout class="QGridLayout" name="gridLayout_23">
-                           <item row="0" column="1">
-                            <widget class="QLineEdit" name="fit_sample_wavelength_min_line_edit">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="2">
-                            <widget class="QLabel" name="fit_sample_to_label">
-                             <property name="text">
-                              <string>to</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="0">
-                            <widget class="QLabel" name="fit_sample_from_label">
-                             <property name="text">
-                              <string>from</string>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="3">
-                            <widget class="QLineEdit" name="fit_sample_wavelength_max_line_edit">
-                             <property name="toolTip">
-                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                             </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </widget>
-                        </item>
                         <item row="1" column="4">
                          <widget class="QSpinBox" name="fit_sample_polynomial_order_spin_box">
                           <property name="toolTip">
@@ -1318,6 +1216,23 @@ QGroupBox::title {
                           </property>
                           <property name="maximum">
                            <number>6</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="2">
+                         <widget class="QCheckBox" name="fit_sample_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="0">
+                         <widget class="QCheckBox" name="show_transmission_view">
+                          <property name="text">
+                           <string>Show Transmission</string>
                           </property>
                          </widget>
                         </item>
@@ -1474,11 +1389,164 @@ QGroupBox::title {
             </widget>
             <widget class="QWidget" name="q_tab">
              <attribute name="title">
-              <string>Q</string>
+              <string>Q, Wavelength, Detector Limits</string>
              </attribute>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <layout class="QVBoxLayout" name="q_tab_left_layout">
+                <item>
+                 <widget class="QGroupBox" name="radius_limit_group_box">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disk mask which is useful for the beam stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="title">
+                   <string>Radius limit</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_19">
+                   <item row="1" column="1">
+                    <widget class="QLineEdit" name="radius_limit_min_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="phi_limit">
+                     <property name="text">
+                      <string>Radius</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLineEdit" name="radius_limit_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="radius_limit_min_label">
+                     <property name="text">
+                      <string>Min [mm]</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="2">
+                    <widget class="QLabel" name="radius_limit_max_label">
+                     <property name="text">
+                      <string>Max [mm]</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="phi_limit_group_box">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for selecting pizza slice masks.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="title">
+                   <string>Phi limit</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_18">
+                   <item row="0" column="3">
+                    <widget class="QLabel" name="phi_limit_to_label">
+                     <property name="text">
+                      <string>to</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="4">
+                    <widget class="QLineEdit" name="phi_limit_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="phi_limit_from_label">
+                     <property name="text">
+                      <string>from</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QLineEdit" name="phi_limit_min_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="5">
+                    <widget class="QCheckBox" name="phi_limit_use_mirror_check_box">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the mirror sector should be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>use mirror sector</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="groupBox">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="title">
+                   <string>Wavelength</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_6">
+                   <item row="1" column="0">
+                    <layout class="QGridLayout" name="gridLayout_3">
+                     <item row="0" column="2">
+                      <widget class="QLabel" name="wavelength_step_label">
+                       <property name="text">
+                        <string>Step  [Å]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QLabel" name="wavelength_max_label">
+                       <property name="text">
+                        <string>Max  [Å]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="3">
+                      <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="wavelength_min_label">
+                       <property name="text">
+                        <string>Min [Å]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QLabel" name="wavelength_step_type_label">
+                       <property name="text">
+                        <string>Step Type</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="2">
+                      <widget class="QLineEdit" name="wavelength_step_line_edit"/>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QLineEdit" name="wavelength_max_line_edit"/>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLineEdit" name="wavelength_min_line_edit"/>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
                 <item>
                  <widget class="QGroupBox" name="q_limits_group_box">
                   <property name="toolTip">
@@ -1594,7 +1662,7 @@ QGroupBox::title {
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gravity settings. If checked then gravity will be accounted for in the reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="title">
-                   <string>Account for gravity</string>
+                   <string>Account &amp;for gravity</string>
                   </property>
                   <property name="checkable">
                    <bool>true</bool>
@@ -1861,6 +1929,7 @@ QGroupBox::title {
           </item>
          </layout>
         </widget>
+        <widget class="BeamCentre" name="beam_centre"/>
        </widget>
       </item>
      </layout>
@@ -1873,7 +1942,7 @@ QGroupBox::title {
      <x>0</x>
      <y>0</y>
      <width>1211</width>
-     <height>19</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -1903,7 +1972,117 @@ QGroupBox::title {
    <header>ui.sans_isis.masking_table</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>BeamCentre</class>
+   <extends>QWidget</extends>
+   <header>ui.sans_isis.beam_centre</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tab_choice_list</tabstop>
+  <tabstop>batch_button</tabstop>
+  <tabstop>user_file_button</tabstop>
+  <tabstop>batch_line_edit</tabstop>
+  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>reduction_dimensionality_1D</tabstop>
+  <tabstop>reduction_dimensionality_2D</tabstop>
+  <tabstop>output_mode_memory_radio_button</tabstop>
+  <tabstop>output_mode_file_radio_button</tabstop>
+  <tabstop>output_mode_both_radio_button</tabstop>
+  <tabstop>can_sas_checkbox</tabstop>
+  <tabstop>nx_can_sas_checkbox</tabstop>
+  <tabstop>rkh_checkbox</tabstop>
+  <tabstop>nist_qxy_checkbox</tabstop>
+  <tabstop>save_zero_error_free</tabstop>
+  <tabstop>use_optimizations_checkbox</tabstop>
+  <tabstop>settings_tab_widget</tabstop>
+  <tabstop>reduction_mode_combo_box</tabstop>
+  <tabstop>merged_scale_line_edit</tabstop>
+  <tabstop>merged_shift_line_edit</tabstop>
+  <tabstop>merged_scale_use_fit_check_box</tabstop>
+  <tabstop>merged_shift_use_fit_check_box</tabstop>
+  <tabstop>merged_q_range_start_line_edit</tabstop>
+  <tabstop>merged_q_range_stop_line_edit</tabstop>
+  <tabstop>merge_mask_check_box</tabstop>
+  <tabstop>merged_min_line_edit</tabstop>
+  <tabstop>merged_max_line_edit</tabstop>
+  <tabstop>slice_event_line_edit</tabstop>
+  <tabstop>event_binning_group_box</tabstop>
+  <tabstop>event_binning_line_edit</tabstop>
+  <tabstop>wavelength_min_line_edit</tabstop>
+  <tabstop>wavelength_max_line_edit</tabstop>
+  <tabstop>wavelength_step_line_edit</tabstop>
+  <tabstop>wavelength_step_type_combo_box</tabstop>
+  <tabstop>absolute_scale_line_edit</tabstop>
+  <tabstop>geometry_combo_box</tabstop>
+  <tabstop>height_line_edit</tabstop>
+  <tabstop>width_line_edit</tabstop>
+  <tabstop>thickness_line_edit</tabstop>
+  <tabstop>z_offset_line_edit</tabstop>
+  <tabstop>phi_limit_min_line_edit</tabstop>
+  <tabstop>phi_limit_max_line_edit</tabstop>
+  <tabstop>phi_limit_use_mirror_check_box</tabstop>
+  <tabstop>radius_limit_min_line_edit</tabstop>
+  <tabstop>radius_limit_max_line_edit</tabstop>
+  <tabstop>mask_file_input_line_edit</tabstop>
+  <tabstop>mask_file_browse_push_button</tabstop>
+  <tabstop>mask_file_add_push_button</tabstop>
+  <tabstop>monitor_normalization_line_edit</tabstop>
+  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_line_edit</tabstop>
+  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_target_combo_box</tabstop>
+  <tabstop>transmission_monitor_line_edit</tabstop>
+  <tabstop>transmission_mn_shift_line_edit</tabstop>
+  <tabstop>transmission_radius_line_edit</tabstop>
+  <tabstop>transmission_roi_files_line_edit</tabstop>
+  <tabstop>transmission_mask_files_line_edit</tabstop>
+  <tabstop>transmission_roi_files_push_button</tabstop>
+  <tabstop>transmission_mask_files_push_button</tabstop>
+  <tabstop>fit_selection_combo_box</tabstop>
+  <tabstop>fit_sample_use_fit_check_box</tabstop>
+  <tabstop>fit_sample_fit_type_combo_box</tabstop>
+  <tabstop>fit_sample_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_sample_wavelength_combo_box</tabstop>
+  <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
+  <tabstop>fit_can_use_fit_check_box</tabstop>
+  <tabstop>fit_can_fit_type_combo_box</tabstop>
+  <tabstop>fit_can_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_can_wavelength_combo_box</tabstop>
+  <tabstop>fit_can_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_can_wavelength_max_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_push_button</tabstop>
+  <tabstop>pixel_adjustment_det_2_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_1_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_1_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_2_push_button</tabstop>
+  <tabstop>q_1d_min_line_edit</tabstop>
+  <tabstop>q_1d_max_line_edit</tabstop>
+  <tabstop>q_1d_step_line_edit</tabstop>
+  <tabstop>q_1d_step_type_combo_box</tabstop>
+  <tabstop>q_xy_max_line_edit</tabstop>
+  <tabstop>q_xy_step_line_edit</tabstop>
+  <tabstop>q_xy_step_type_combo_box</tabstop>
+  <tabstop>gravity_group_box</tabstop>
+  <tabstop>gravity_extra_length_line_edit</tabstop>
+  <tabstop>q_resolution_shape_combo_box</tabstop>
+  <tabstop>q_resolution_group_box</tabstop>
+  <tabstop>q_resolution_source_h_line_edit</tabstop>
+  <tabstop>q_resolution_source_w_line_edit</tabstop>
+  <tabstop>q_resolution_source_a_line_edit</tabstop>
+  <tabstop>q_resolution_sample_h_line_edit</tabstop>
+  <tabstop>q_resolution_sample_w_line_edit</tabstop>
+  <tabstop>q_resolution_sample_a_line_edit</tabstop>
+  <tabstop>q_resolution_collimation_length_line_edit</tabstop>
+  <tabstop>q_resolution_delta_r_line_edit</tabstop>
+  <tabstop>q_resolution_moderator_file_line_edit</tabstop>
+  <tabstop>q_resolution_moderator_file_push_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

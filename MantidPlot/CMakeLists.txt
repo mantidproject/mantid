@@ -451,7 +451,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                           -I ${PYQT4_SIP_DIR} ${MANTIDQTPYTHON_SIP_INCLUDES}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
-                     DEPENDS src/qti.sip ${SIP_HDRS}
+                     DEPENDS src/qti.sip ${SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
 )
 
@@ -690,6 +690,9 @@ find_package ( QScintillaQt4 REQUIRED )
 add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
+if ( MSVC )
+  add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
+endif ()
 
 ###########################################################################
 # Application icon files
@@ -823,6 +826,8 @@ add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
 endif ()
+
+set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
 
 ###########################################################################
 # Custom Info.plist file for OS X

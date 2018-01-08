@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -69,7 +69,8 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Function to return a cuboid shape, with widths dx,dy,dz
-  Geometry::Object_sptr createCuboid(double dx, double dy, double dz);
+  boost::shared_ptr<Geometry::CSGObject> createCuboid(double dx, double dy,
+                                                      double dz);
 };
 
 } // namespace DataHandling

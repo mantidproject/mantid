@@ -77,6 +77,8 @@ set ( SRC_FILES
 	src/DiagResults.cpp
 	src/DoubleSpinBox.cpp
 	src/FindDialog.cpp
+        src/FindFilesThreadPoolManager.cpp
+        src/FindFilesWorker.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
@@ -113,7 +115,7 @@ set ( SRC_FILES
 	src/TrackedAction.cpp
 	src/UserFunctionDialog.cpp
 	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/QWorkspaceDockView.cpp
+	src/WorkspacePresenter/WorkspaceTreeWidget.cpp
 	src/WorkspacePresenter/WorkspacePresenter.cpp
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
@@ -218,7 +220,11 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
+
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -244,8 +250,9 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+  inc/MantidQtWidgets/Common/Configurable.h
 	inc/MantidQtWidgets/Common/DllOption.h
-        inc/MantidQtWidgets/Common/DropEventHelper.h
+	inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
@@ -266,6 +273,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
+	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
@@ -361,7 +369,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
 )
 
 set ( UI_FILES
@@ -414,6 +424,7 @@ set ( TARGET_LIBRARIES
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
@@ -421,9 +432,25 @@ endif()
 ###########################################################################
 # Target
 ###########################################################################
-if (ENABLE_WORKBENCH)
+if ( ENABLE_WORKBENCH )
+  # Additional components for this module
   find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
-    WebKitWidgets REQUIRED )
+    REQUIRED )
+  # Prefer WebEngineWidgets over WebkitWidgets
+  unset ( Qt5_FOUND )
+  find_package ( Qt5 COMPONENTS WebEngineWidgets QUIET )
+  if ( Qt5_FOUND )
+    set ( _webwidgets_tgt Qt5::WebEngineWidgets )
+  else ()
+    find_package ( Qt5 COMPONENTS WebKitWidgets QUIET )
+    if ( Qt5_FOUND )
+      set ( _webwidgets_tgt Qt5::WebKitWidgets )
+      set ( _webengine_def USE_QTWEBKIT )
+    else ()
+      message ( FATAL_ERROR "Unable to find suitable module for web widgets. Tried: WebEnginewidgets, WebKitWidgets" )
+    endif ()
+  endif ()
+
   find_package ( QScintillaQt5 REQUIRED )
 endif()
 
@@ -433,7 +460,12 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS
-    IN_MANTIDQT_COMMON QSCINTILLA_DLL
+    IN_MANTIDQT_COMMON
+    QSCINTILLA_DLL
+  QT4_DEFS
+    USE_QTWEBKIT
+  QT5_DEFS
+    ${_webengine_def}
   INCLUDE_DIRS
     inc
     ${PYTHON_INCLUDE_PATH}
@@ -450,7 +482,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::Help
     Qt5::Network
     Qt5::PrintSupport
-    Qt5::WebKitWidgets
+    ${_webwidgets_tgt}
     Qt5::Qscintilla
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
@@ -463,6 +495,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
 set( TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h

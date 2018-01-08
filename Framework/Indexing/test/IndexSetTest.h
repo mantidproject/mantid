@@ -84,12 +84,18 @@ public:
     TS_ASSERT_EQUALS(set[1], 2);
   }
 
-  void test_indexList() {
-    // Note duplicate index
-    IndexSetTester set({2, 1, 2}, 3);
-    TS_ASSERT_EQUALS(set.size(), 2);
-    TS_ASSERT_EQUALS(set[0], 1);
-    TS_ASSERT_EQUALS(set[1], 2);
+  void test_indexList_order_preserved() {
+    IndexSetTester set({2, 1, 3}, 4);
+    TS_ASSERT_EQUALS(set.size(), 3);
+    TS_ASSERT_EQUALS(set[0], 2);
+    TS_ASSERT_EQUALS(set[1], 1);
+    TS_ASSERT_EQUALS(set[2], 3);
+  }
+
+  void test_indexList_duplicate_throws() {
+    TS_ASSERT_THROWS_EQUALS(IndexSetTester({2, 1, 2}, 3),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "IndexSet: duplicate indices are not allowed");
   }
 
   void test_iterator_basics() {

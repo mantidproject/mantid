@@ -791,7 +791,12 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
     is_group = is_part_of_reduced_output_workspace_group(state)
-    _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+    if reduction_mode != ISISReductionMode.All:
+        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+    else:
+        _, output_workspace_base_name_hab = get_output_name(state, ISISReductionMode.HAB, is_group)
+        _, output_workspace_base_name_lab = get_output_name(state, ISISReductionMode.LAB, is_group)
+        output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 
 
@@ -1008,6 +1013,12 @@ def PhiRanges(phis, plot=True):
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
                    find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
+
+    # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
+    # function
+    if config['default.instrument'] == 'LARMOR':
+        xstart = xstart * 1000
+
     centre_finder = SANSCentreFinder()
     centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
     SetCentre(centre['pos1'], centre['pos2'], bank='rear')

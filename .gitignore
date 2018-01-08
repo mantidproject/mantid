@@ -97,7 +97,9 @@ build/
 *.tmp
 *.vspscc
 .builds
-
+*.egg-info/
+qt/python/mantidqt/utils/qt/plugins.py
+qt/applications/workbench/workbench/app/resources.py
 
 # Visual C++ cache files
 ipch/
@@ -181,4 +183,3 @@ Third_Party/
 win64/
 dbg/
 rel/
-

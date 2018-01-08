@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -304,12 +303,12 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
                                                 double &detRadius,
                                                 V3D &detAxis) {
-  boost::shared_ptr<const Object> shape_sptr = det.shape();
+  boost::shared_ptr<const IObject> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }
 
-  std::map<const Geometry::Object *,
+  std::map<const Geometry::IObject *,
            std::pair<double, Kernel::V3D>>::const_iterator it =
       m_shapeCache.find(shape_sptr.get());
   if (it == m_shapeCache.end()) {
@@ -369,7 +368,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
  * @returns The distance to the surface in meters
  */
 double DetectorEfficiencyCor::distToSurface(const V3D &start,
-                                            const Object *shape) const {
+                                            const IObject *shape) const {
   // get a vector from the point that was passed to the origin
   V3D direction = V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector
