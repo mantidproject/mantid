@@ -187,7 +187,7 @@ public:
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
+    TS_ASSERT_EQUALS(optionsVec.size(), 23);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
