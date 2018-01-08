@@ -116,7 +116,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.scale_1 = 1000
         self.scale_2 = 1000
         verbose = self.getProperty('Verbose').value
-
         x_start = self.getProperty("Position1Start").value
         y_start = self.getProperty("Position2Start").value
 
@@ -191,7 +190,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 logger.notice("Itr " + str(j) + ": (" + str(self.scale_1 * centre1) + ", " + str(self.scale_2 * centre2) + ")  SX="
                               + str(residueLR[j]) + "  SY=" + str(residueTB[j]))
                 if mantidplot:
-                    self._plot_quartiles(output_workspaces)
+                    self._plot_quartiles(output_workspaces, state.data.sample_scatter)
 
             else:
                 # have we stepped across the y-axis that goes through the beam center?
@@ -236,9 +235,12 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         return output_workspaces
 
-    def _plot_quartiles(self, output_workspaces):
+    def _plot_quartiles(self, output_workspaces, sample_scatter):
+        title = '{}_beam_centre_finder'.format(sample_scatter)
         graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
         graph_handle.activeLayer().logLogAxes()
+        graph_handle.activeLayer().setTitle(title)
+        graph_handle.setName(title)
         return graph_handle
 
     def _get_cloned_workspace(self, workspace_name):

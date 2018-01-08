@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1015</width>
-    <height>422</height>
+    <height>457</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,6 +22,9 @@
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
        <widget class="QGroupBox" name="groupBox_3">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The centre positions of both the high angle and low angle detector banks. The values here if they exist will be used in any reduction initiated from the runs tab.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="title">
          <string>Centre Position</string>
         </property>
@@ -80,6 +83,9 @@
          </item>
          <item row="0" column="1">
           <widget class="QLabel" name="label_8">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The radius limits which will be considered when finding the beam centre.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Radius Limits(mm)</string>
            </property>
@@ -100,13 +106,20 @@
          </item>
          <item row="6" column="0">
           <widget class="QLabel" name="label_6">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls which directions the beam centre will be for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Find Beam Centre for:</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLineEdit" name="max_iterations_line_edit"/>
+          <widget class="QLineEdit" name="max_iterations_line_edit">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The maximum number of iterations the algorithm will perform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="label_10">
@@ -116,7 +129,11 @@
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QLineEdit" name="tolerance_line_edit"/>
+          <widget class="QLineEdit" name="tolerance_line_edit">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the minimum step size below which the algorithm will decide it has converged.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="label_11">
@@ -141,6 +158,9 @@
          </item>
          <item row="7" column="1">
           <widget class="QCheckBox" name="verbose_check_box">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If true the quartile workspaces from each iteration will be saved.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Verbose</string>
            </property>
@@ -151,6 +171,9 @@
          </item>
          <item row="7" column="3">
           <widget class="QCheckBox" name="COM_check_box">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Option which controls whether the initial position is taken as the current centre position or determined from a centre of mass analysis of the scatter workspace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Initial COM</string>
            </property>
@@ -168,6 +191,9 @@
          </item>
          <item row="2" column="1">
           <widget class="QLabel" name="label_2">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Q range which will be considered when finding the beam centre.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Q Limits</string>
            </property>
@@ -177,6 +203,13 @@
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>from</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>General Options:</string>
            </property>
           </widget>
          </item>
