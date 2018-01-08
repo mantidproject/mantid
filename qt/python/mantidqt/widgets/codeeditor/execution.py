@@ -27,10 +27,35 @@ class PythonCodeExecution(object):
     strings of Python code. It supports
     reporting progress updates in asynchronous execution
     """
+    on_success = None
+    on_error = None
+    on_progress = None
+
+    def __init__(self,success_cb=None, error_cb=None,
+                 progress_cb=None):
+        """
+        Initialize the object
+
+        :param success_cb: A callback of the form f() called on success
+        :param error_cb: A callback of the form f(exc) called on error,
+        providing the exception generated
+        :param progress_cb: A callback for progress updates as the code executes
+        """
+        # AsyncTask's callbacks have a slightly different form
+        if success_cb:
+            def success_cb_wrap(_): success_cb()
+        else:
+            def success_cb_wrap(_): pass
+        self.on_success = success_cb_wrap
+
+        if error_cb:
+            def error_cb_wrapped(task_result): error_cb(task_result.exception)
+        else:
+            def error_cb_wrapped(_): pass
+        self.on_error = error_cb_wrapped
 
     def execute_async(self, code_str, user_globals,
-                      user_locals, success_cb=None, error_cb=None,
-                      progress_cb=None):
+                      user_locals, ):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
@@ -38,25 +63,11 @@ class PythonCodeExecution(object):
         :param code_str: A string containing code to execute
         :param user_globals: A mutable mapping type to store global variables
         :param user_locals: A mutable mapping type to store local variables
-        :param success_cb: A callback of the form f() called on success
-        :param error_cb: A callback of the form f(exc) called on error,
-        :param progress_cb: A callback for progress updates
-        providing the exception generated
         :returns: The created async task
         """
-        # AsyncTask's callbacks have a slightly different form
-        if success_cb:
-            def on_success(_): success_cb()
-        else:
-            def on_success(_): pass
-
-        if error_cb:
-            def on_error(task_result): error_cb(task_result.exception)
-        else:
-            def on_error(_): pass
 
         t = AsyncTask(self.execute, args=(code_str, user_globals, user_locals),
-                      success_cb=on_success, error_cb=on_error)
+                      success_cb=self.on_success, error_cb=self.on_error)
         t.start()
         return t
 

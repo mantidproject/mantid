@@ -53,17 +53,25 @@ class PythonCodeExecutionTest(unittest.TestCase):
         self._verify_async_execution_successful(code, user_globals, user_locals)
         self.assertEquals(100, user_locals['_local'])
 
+    def test_execute_async_calls_success_cb_on_completion(self):
+        code = "if:"
+        recv = PythonCodeExecutionTest.Receiver()
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
+        task = executor.execute_async(code, {}, {})
+        task.join()
+
     def test_execute_raises_syntax_error_on_bad_code(self):
         code = "if:"
         self._verify_failed_serial_execute(SyntaxError, code, {}, {})
 
     def test_execute_async_calls_error_cb_on_syntax_error(self):
         code = "if:"
-        executor = PythonCodeExecution()
         recv = PythonCodeExecutionTest.Receiver()
-        task = executor.execute_async(code, {}, {}, error_cb=recv.on_error)
+        executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
+        task = executor.execute_async(code, {}, {})
         task.join()
         self.assertTrue(recv.error_cb_called)
+        self.assertFalse(recv.success_cb_called)
         self.assertTrue(isinstance(recv.task_exc, SyntaxError),
                         msg="Unexpected exception found. "
                             "SyntaxError expected, found {}".format(recv.task_exc.__class__.__name__))
