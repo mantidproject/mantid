@@ -130,10 +130,10 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         if mtd[ws].getNumberHistograms > 1:
             ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
             spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index, EndWorkspaceIndex=ws_index)
-            mantid.DeleteWorkspace(Workspace=ws)
-            return spectrum
         else:
-            return ws
+            spectrum = mantid.CloneWorkspace(InputWorkspace=ws)
+
+        return spectrum
 
     def _initialise_GSAS(self):
         """
