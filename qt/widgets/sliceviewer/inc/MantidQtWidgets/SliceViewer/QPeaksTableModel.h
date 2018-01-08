@@ -20,7 +20,8 @@ class IPeaksWorkspace;
 
 namespace MantidQt {
 namespace SliceViewer {
-/** @class QtWorkspaceMementoModel
+
+/** @class QPeaksTableModel
 
 QAbstractTableModel for serving up PeaksWorkspaces.
 
@@ -54,14 +55,12 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel
 public:
   QPeaksTableModel(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
-  void update();
-  int rowCount(const QModelIndex &parent) const override;
-  int columnCount(const QModelIndex &parent) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index, int role) const override;
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
-  void sort(int column, Qt::SortOrder) override;
   int numCharacters(const int column) const;
   std::vector<int> defaultHideCols();
   ~QPeaksTableModel() override;
@@ -119,6 +118,9 @@ public:
   static const QString QSAMPLE;
 
 private:
+  /// Find the correct column name for this column index
+  QString findColumnName(const int colIndex) const;
+
   /// Index for run number column
   static const int COL_RUNNUMBER;
   /// Index for detector id column
@@ -159,25 +161,16 @@ private:
   static const int COL_QLAB;
   /// Index for Q-vector in the sample column
   static const int COL_QSAMPLE;
-
   /// The number of digits past the decimal to display in the table
   int m_hklPrec;
-
-  mutable std::vector<QString> m_dataCache;
-  mutable int m_dataCachePeakIndex;
-
-  QString findColumnName(const int colIndex) const;
-  void updateDataCache(const Mantid::Geometry::IPeak &peak,
-                       const int row) const;
-
+  /// Map from column index to raw peak data
+  std::vector<std::function<QVariant(const Mantid::Geometry::IPeak&)>> m_dataLookup;
+  /// Map from column index to formatted peak data
+  std::vector<std::function<QString(const Mantid::Geometry::IPeak&)>> m_formattedValueLookup;
   /// Collection of data for viewing.
   boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
-
   /// Map of column indexes to names
   ColumnIndexNameMap m_columnNameMap;
-
-  /// Map of column names to sortable flag.
-  ColumnNameSortableMap m_sortableColumns;
 };
 }
 }

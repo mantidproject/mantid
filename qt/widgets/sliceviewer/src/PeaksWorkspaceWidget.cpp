@@ -5,6 +5,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <QColorDialog>
 #include <QPlastiqueStyle>
+#include <QSortFilterProxyModel>
 
 namespace {
 QColor getSelectedColor() {
@@ -123,9 +124,13 @@ Populate controls with data ready for rendering.
 */
 void PeaksWorkspaceWidget::createTableMVC() {
   QPeaksTableModel *model = new QPeaksTableModel(this->m_ws);
-  connect(model, SIGNAL(peaksSorted(const std::string &, const bool)), this,
-          SLOT(onPeaksSorted(const std::string &, const bool)));
-  ui.tblPeaks->setModel(model);
+
+  m_tableModel = new QSortFilterProxyModel(this);
+  m_tableModel->setSourceModel(model);
+  m_tableModel->setDynamicSortFilter(true);
+  m_tableModel->setSortRole(Qt::UserRole);
+  ui.tblPeaks->setModel(m_tableModel);
+
   const std::vector<int> hideCols = model->defaultHideCols();
   for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
     ui.tblPeaks->setColumnHidden(*it, true);
@@ -243,16 +248,6 @@ void PeaksWorkspaceWidget::onToggleHideInPlot() {
 }
 
 /**
- * Handler for sorting of the peaks workspace.
- * @param columnToSortBy
- * @param sortAscending
- */
-void PeaksWorkspaceWidget::onPeaksSorted(const std::string &columnToSortBy,
-                                         const bool sortAscending) {
-  emit peaksSorted(columnToSortBy, sortAscending, this->m_ws);
-}
-
-/**
  * Get the workspace model.
  * @return workspace around which this is built.
  */
@@ -328,7 +323,7 @@ void PeaksWorkspaceWidget::setHidden(bool isHidden) {
  */
 void PeaksWorkspaceWidget::setSelectedPeak(int index) {
   ui.tblPeaks->clearSelection();
-  ui.tblPeaks->setCurrentIndex(ui.tblPeaks->model()->index(index, 0));
+  ui.tblPeaks->setCurrentIndex(m_tableModel->index(index, 0));
 }
 
 /**
@@ -349,9 +344,11 @@ void PeaksWorkspaceWidget::workspaceUpdate(
   if (ws) {
     m_ws = ws;
   }
+
   // Set at new representation for the model.
-  static_cast<QPeaksTableModel *>(this->ui.tblPeaks->model())
-      ->setPeaksWorkspace(m_ws);
+  auto model = static_cast<QPeaksTableModel *>(m_tableModel->sourceModel());
+  model->setPeaksWorkspace(m_ws);
+
   // Update the display name of the workspace.
   m_nameText = m_ws->getName().c_str();
   this->ui.lblWorkspaceName->setText(m_nameText);
@@ -363,6 +360,7 @@ void PeaksWorkspaceWidget::workspaceUpdate(
  */
 void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex) {
   if (index.isValid()) {
+    index = m_tableModel->mapToSource(index);
     emit zoomToPeak(this->m_ws, index.row());
   }
 }
