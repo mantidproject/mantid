@@ -11,9 +11,12 @@ Description
 
 .. warning::
 
-   This algorithm requires GSAS-II to be installed on your computer. A
-   version of GSAS-II containing the module GSASIIscriptable (added in
-   April 2017) is required.
+   This algorithm requires GSAS-II to be installed on your computer. It uses
+   features from GSAS-II which are only implemented from
+   SVN revision **3216** onwards (introduced 8 January 2018). If you see
+   the error ``RuntimeError: 'G2PwdrData' object has no attribute 'getdata'``
+   then you probably need to update your version of GSAS-II - instructions
+   [here](https://subversion.xray.aps.anl.gov/trac/pyGSAS/wiki).
 
 Uses `GSAS-II <https://subversion.xray.aps.anl.gov/trac/pyGSAS>`_
 [TobyVonDreele2013]_ as external software to fit peaks to a powder /
@@ -107,41 +110,18 @@ Usage
    # wks_focused = EnggFocus(InputWorkspace=wks, VanadiumWorkspace=wks_vana, Bank='North')
    # SaveNexus(InputWorkspace=wks_focused, Filename='focused_bank1_ENGINX00256663.nxs')
    #
-   wks=Load('focused_bank1_ENGINX00256663.nxs')
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
-                                                RefinementMethods="PawleyRefinement",
-                                                InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                                                PhaseInfoFile='FE_ALPHA.cif',
-                                                PathToGSASII='/home/user/gsas',
-                                                SaveGSASIIProjectFile='example_gsas2_project')
-   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
+   wks = Load('focused_bank1_ENGINX00256663.nxs')
+   peaks, residuals, lattice_params = \
+       GSASIIRefineFitPeaks(InputWorkspace=wks,
+                            RefinementMethod="PawleyRefinement",
+                            InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
+                            PhaseInfoFile='FE_ALPHA.cif',
+                            PathToGSASII='/home/user/gsas',
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx')
+   print "Goodness of fit coefficient: {0:.5f}".format(residuals.row(0)["GoF"])
+   print "Weighted profile R-factor (Rwp): {0:.5f}".format(residuals.row(0)["Rwp"])
    print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
-
-Output:
-
-.. code-block:: none
-
-    Goodness of fit coefficient: 3.57776
-    Weighted profile R-factor (Rwp): 77.75449
-    Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
-
-**Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
-
-.. code-block:: python
-
-   wks=Load('focused_bank1_ENGINX00256663.nxs')
-   GoF, Rwp, lattice_tbl = GSASIIRefineFitPeaks(InputWorkspace=wks,
-                                                RefinementMethod='Rietveld refinement',
-                                                InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
-                                                PhaseInfoFile='FE_ALPHA.cif',
-                                                PathToGSASII='/home/user/gsas',
-                                                SaveGSASIIProjectFile='example_gsas2_project',
-   print "Goodness of fit coefficient: {0:.5f}".format(GoF)
-   print "Weighted profile R-factor (Rwp): {0:.5f}".format(Rwp)
-   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
-          "Volume: {volume:.3f}".format(**lattice_tbl.row(0)))
+          "Volume: {volume:.3f}".format(**lattice_params.row(0)))
 
 Output:
 
@@ -149,6 +129,31 @@ Output:
 
     Goodness of fit coefficient: 3.57847
     Weighted profile R-factor (Rwp): 77.75515
+    Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
+
+**Example - Rietveld refinement of lattice parameters from a diffraction spectrum**
+
+.. code-block:: python
+
+   wks=Load('focused_bank1_ENGINX00256663.nxs')
+   peaks, residuals, lattice_params = \
+       GSASIIRefineFitPeaks(InputWorkspace=wks,
+                            RefinementMethod='Rietveld refinement',
+                            InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
+                            PhaseInfoFile='FE_ALPHA.cif',
+                            PathToGSASII='/home/user/gsas',
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx',
+   print "Goodness of fit coefficient: {0:.5f}".format(residuals.row(0)["GoF"]))
+   print "Weighted profile R-factor (Rwp): {0:.5f}".format(residuals.row(0)["Rwp"])
+   print ("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
+          "Volume: {volume:.3f}".format(**lattice_params.row(0)))
+
+Output:
+
+.. code-block:: none
+
+    Goodness of fit coefficient: 3.57776
+    Weighted profile R-factor (Rwp): 77.75499
     Lattice parameters, a: 2.8665, b: 2.8665, c: 2.8665, alpha: 90.0, beta: 90.0, gamma: 90.0, Volume: 23.554
 
 .. categories::
