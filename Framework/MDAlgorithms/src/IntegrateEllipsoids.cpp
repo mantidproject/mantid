@@ -146,9 +146,9 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     qConverter.initialize(m_targWSDescr);
 
     std::vector<double> buffer(DIMS);
-    // get tof and counts
+    // get tof and y values
     const auto &xVals = wksp->points(i);
-    const auto &yVals = wksp->counts(i);
+    const auto &yVals = wksp->y(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);

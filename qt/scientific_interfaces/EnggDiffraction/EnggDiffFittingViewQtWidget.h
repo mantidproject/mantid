@@ -163,6 +163,8 @@ public:
     m_currentInst = newInstrument;
   }
 
+  bool plotFittedPeaksEnabled() const override;
+
 protected:
   void initLayout();
 
@@ -185,6 +187,7 @@ private slots:
   void plotSeparateWindow();
   void showToolTipHelp();
   void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
+  void plotFittedPeaksStateChanged();
   void removeRunClicked();
 
 private:

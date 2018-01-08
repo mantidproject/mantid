@@ -513,6 +513,9 @@ public:
   Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const override;
 
+  // Check if this class has an oriented lattice on a sample object
+  virtual bool hasOrientedLattice() const override;
+
   //=====================================================================================
   // End IMDWorkspace methods
   //=====================================================================================
