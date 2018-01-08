@@ -156,9 +156,9 @@ QPeaksTableModel::QPeaksTableModel(
    m_dataLookup = {
       [](const IPeak& peak) { return QVariant(peak.getRunNumber()); },
       [](const IPeak& peak) { return QVariant(peak.getDetectorID()); },
-      [this](const IPeak& peak) { return QVariant(peak.getH()); },
-      [this](const IPeak& peak) { return QVariant(peak.getK()); },
-      [this](const IPeak& peak) { return QVariant(peak.getL()); },
+      [](const IPeak& peak) { return QVariant(peak.getH()); },
+      [](const IPeak& peak) { return QVariant(peak.getK()); },
+      [](const IPeak& peak) { return QVariant(peak.getL()); },
       [](const IPeak& peak) { return QVariant(peak.getWavelength()); },
       [](const IPeak& peak) { return QVariant(peak.getInitialEnergy()); },
       [](const IPeak& peak) { return QVariant(peak.getFinalEnergy()); },
