@@ -2,7 +2,7 @@
 #define MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid {
@@ -51,7 +51,7 @@ class CostFuncFitting;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFittingAlgorithm : public API::Algorithm {
+class DLLExport IFittingAlgorithm : public API::ParallelAlgorithm {
 public:
   const std::string category() const override;
 

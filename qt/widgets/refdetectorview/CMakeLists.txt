@@ -62,6 +62,8 @@ endif ()
 mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
   QT_VERSION 4
   SRC src/RefDetectorViewDemo.cpp
+  INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}
       ${Boost_LIBRARIES}

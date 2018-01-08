@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_
 #define MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -66,7 +63,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateTransmission : public API::Algorithm {
+class DLLExport CalculateTransmission : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }
