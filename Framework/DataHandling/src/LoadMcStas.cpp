@@ -417,8 +417,10 @@ void LoadMcStas::readEventData(
                                 // unique
   }
   outputGroup->addWorkspace(allEventWS[0].first);
-  m_scaterringWS.push_back(allEventWS[1].first);
-  m_scaterringWS.push_back(allEventWS[2].first);
+  allEventWS.erase(allEventWS.begin());
+  for (auto ws : allEventWS) {
+	  m_scaterringWS.push_back(ws.first);
+  }
 }
 
 /**
