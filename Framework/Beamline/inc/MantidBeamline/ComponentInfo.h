@@ -1,15 +1,16 @@
 #ifndef MANTID_BEAMLINE_COMPONENTINFO_H_
 #define MANTID_BEAMLINE_COMPONENTINFO_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/iterator/reverse_iterator.hpp>
-#include <vector>
-#include <utility>
-#include <cstddef>
 #include <Eigen/Geometry>
+#include <boost/iterator/reverse_iterator.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstddef>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -54,7 +55,7 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
-  Mantid::Kernel::cow_ptr<std::vector<bool>> m_isStructuredBank;
+  Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
   boost::shared_ptr<const std::vector<std::string>> m_names;
 
   const size_t m_size = 0;
@@ -97,7 +98,7 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-                boost::shared_ptr<std::vector<bool>> isStructuredBank,
+                boost::shared_ptr<std::vector<ComponentType>> componentType,
                 boost::shared_ptr<const std::vector<std::string>> names,
                 int64_t sourceIndex, int64_t sampleIndex);
   /// Copy assignment not permitted because of the way DetectorInfo stored
@@ -141,12 +142,12 @@ public:
   size_t sample() const;
   size_t root() const;
   double l1() const;
-  std::string name(const size_t componentIndex) const;
+  const std::string &name(const size_t componentIndex) const;
   size_t indexOf(const std::string &name) const;
   Eigen::Vector3d scaleFactor(const size_t componentIndex) const;
   void setScaleFactor(const size_t componentIndex,
                       const Eigen::Vector3d &scaleFactor);
-  bool isStructuredBank(const size_t componentIndex) const;
+  ComponentType componentType(const size_t componentIndex) const;
 
   size_t scanCount(const size_t index) const;
   size_t scanSize() const;

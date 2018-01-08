@@ -4,8 +4,8 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class EnggFitPeaksTest(unittest.TestCase):
 
+class EnggFitPeaksTest(unittest.TestCase):
     def test_wrong_properties(self):
         """
         Handle in/out property issues appropriately.
@@ -46,7 +46,6 @@ class EnggFitPeaksTest(unittest.TestCase):
                           InputWorkspace=ws_name,
                           WorkspaceIndex=0, ExpectedPeaks='a')
 
-
     def _approxRelErrorLessThan(self, val, ref, epsilon):
         """
         Checks that a value 'val' does not defer from a reference value 'ref' by 'epsilon'
@@ -62,10 +61,10 @@ class EnggFitPeaksTest(unittest.TestCase):
         if 0 == ref:
             return False
 
-        approx_comp = (abs((ref-val)/ref) < epsilon)
+        approx_comp = (abs((ref - val) / ref) < epsilon)
         if not approx_comp:
-            print ("Failed approximate comparison between value {0} and reference value "
-                   "{1}, with epsilon {2}".format(val, ref, epsilon))
+            print("Failed approximate comparison between value {0} and reference value "
+                  "{1}, with epsilon {2}".format(val, ref, epsilon))
 
         return approx_comp
 
@@ -100,10 +99,10 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # some values
         # note approx comparison - fitting results differences of ~5% between glinux/win/osx
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-2))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-2))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-2))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0, 0), cell00, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0, 1), cell01, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1, 0), cell10, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1, 4), cell14, 5e-2))
 
     def test_fitting_fails_ok(self):
         """
@@ -184,8 +183,8 @@ class EnggFitPeaksTest(unittest.TestCase):
                                                 OutFittedPeaksTable=peaksTblName)
             self.assertEquals(test_fit_peaks_table.rowCount(), 1)
         except RuntimeError as rex:
-            print ("Failed (as expected) to fit the first peak (too far off the initial "
-                   "guess), with RuntimeError: {0}".format(str(rex)))
+            print("Failed (as expected) to fit the first peak (too far off the initial "
+                  "guess), with RuntimeError: {0}".format(str(rex)))
 
     def test_2peaks_runs_ok(self):
         """
@@ -245,6 +244,65 @@ class EnggFitPeaksTest(unittest.TestCase):
         # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043,
                                                  ep2, 0.00212603392105])
+
+    def test_reject_outlying_peaks(self):
+        """
+        Tests that if all peaks lie outside the limits of the x axis of the input workspace, the algorithm fails
+        """
+        input_ws = CreateSampleWorkspace(XUnit="TOF", XMin=5000, XMax=30000)
+        error_msg = None
+
+        try:
+            EnggFitPeaks(InputWorkspace=input_ws, WorkspaceIndex=0, ExpectedPeaks=[35000.0, 40000.0],
+                         FittedPeaks="peaks")
+        except RuntimeError as e:
+            error_msg = e.args[0].split("\n")[0]
+
+        self.assertEquals(error_msg, "Expected peak centres lie outside the limits of the workspace x axis")
+
+    def test_expected_peaks_can_be_in_tof(self):
+        """
+        Tests that the expected peak values can be given in TOF - they should just be converted
+        """
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0={}, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0={}, S=40"
+        peak_centre_1_tof = 41209
+        peak_centre_2_tof = 46895
+        peaks_def = peak_def1.format(peak_centre_1_tof) + ";" + peak_def2.format(peak_centre_2_tof)
+        sample_ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peaks_def, NumBanks=1,
+                                          BankPixelWidth=1, XMin=40000, XMax=50000, BinWidth=25)
+
+        EditInstrumentGeometry(Workspace=sample_ws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
+        fit_results = EnggFitPeaks(InputWorkspace=sample_ws, WorkspaceIndex=0,
+                                   ExpectedPeaks=[peak_centre_1_tof, peak_centre_2_tof])
+
+        peak_centre_1_d = 2.238360
+        peak_centre_2_d = 2.547208
+
+        self.assertAlmostEqual(fit_results.cell(0, 0), peak_centre_1_d, 6)
+        self.assertAlmostEqual(fit_results.cell(1, 0), peak_centre_2_d, 6)
+
+    def test_expected_peaks_gsas_conversion_t_d(self):
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0={}, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0={}, S=40"
+        peak_centre_1_tof = 41209
+        peak_centre_2_tof = 46895
+        peaks_def = peak_def1.format(peak_centre_1_tof) + ";" + peak_def2.format(peak_centre_2_tof)
+        sample_ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peaks_def, NumBanks=1,
+                                          BankPixelWidth=1, XMin=40000, XMax=50000, BinWidth=25)
+        run = sample_ws.mutableRun()
+        run.addProperty("difa", 0.0, False)
+        run.addProperty("difc", 18400.0, False)
+        run.addProperty("tzero", 4.0, False)
+
+        EditInstrumentGeometry(Workspace=sample_ws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
+        fit_results = EnggFitPeaks(InputWorkspace=sample_ws, WorkspaceIndex=0,
+                                   ExpectedPeaks=[peak_centre_1_tof, peak_centre_2_tof])
+        peak_centre_1_d = 2.239402
+        peak_centre_2_d = 2.548424
+
+        self.assertAlmostEqual(fit_results.cell(0, 0), peak_centre_1_d, 6)
+        self.assertAlmostEqual(fit_results.cell(1, 0), peak_centre_2_d, 6)
 
 
 if __name__ == '__main__':
