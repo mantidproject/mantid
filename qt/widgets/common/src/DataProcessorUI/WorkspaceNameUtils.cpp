@@ -21,7 +21,7 @@ namespace { // unnamed namespace
              * @param allowInsertions : if true, allow new keys to be inserted;
              * otherwise, only allow updating of keys that already exist
              */
-void updateRowOptions(OptionsMap &options, const RowData *data,
+void updateRowOptions(OptionsMap &options, const RowData_sptr data,
                       const WhiteList &whitelist, const bool allowInsertions) {
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
@@ -49,10 +49,10 @@ void updateRowOptions(OptionsMap &options, const RowData *data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateUserOptions(OptionsMap &options, const RowData *data,
+void updateUserOptions(OptionsMap &options, const RowData_sptr data,
                        const WhiteList &whitelist, const bool allowInsertions) {
   auto userOptions =
-      parseKeyValueQString(data->at(static_cast<int>(whitelist.size()) - 2));
+      parseKeyValueQString(data->value(static_cast<int>(whitelist.size()) - 2));
   for (auto &kvp : userOptions) {
     if (allowInsertions || options.find(kvp.first) != options.end())
       options[kvp.first] = kvp.second;
@@ -66,7 +66,7 @@ void updateUserOptions(OptionsMap &options, const RowData *data,
  * @param allowInsertions : if true, allow new keys to be inserted;
  * otherwise, only allow updating of keys that already exist
  */
-void updateHiddenOptions(OptionsMap &options, const RowData *data,
+void updateHiddenOptions(OptionsMap &options, const RowData_sptr data,
                          const bool allowInsertions) {
   const auto hiddenOptions = parseKeyValueQString(data->back());
   for (auto &kvp : hiddenOptions) {
@@ -80,7 +80,7 @@ void updateHiddenOptions(OptionsMap &options, const RowData *data,
  * @param options : a map of property name to option value to update
  * @param data : the data for this row
  */
-void updateOutputOptions(OptionsMap &options, const RowData *data,
+void updateOutputOptions(OptionsMap &options, const RowData_sptr data,
                          const WhiteList &whitelist, const bool allowInsertions,
                          const std::vector<QString> &outputPropertyNames,
                          const std::vector<QString> &outputNamePrefixes) {
@@ -89,7 +89,7 @@ void updateOutputOptions(OptionsMap &options, const RowData *data,
     const auto propertyName = outputPropertyNames[i];
     if (allowInsertions || options.find(propertyName) != options.end()) {
       options[propertyName] =
-          getReducedWorkspaceName(*data, whitelist, outputNamePrefixes[i]);
+          getReducedWorkspaceName(data, whitelist, outputNamePrefixes[i]);
     }
   }
 }
@@ -133,10 +133,10 @@ Returns the name of the reduced workspace for a given row
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
-QString getReducedWorkspaceName(const QStringList &data,
+QString getReducedWorkspaceName(const RowData_sptr data,
                                 const WhiteList &whitelist,
                                 const QString prefix) {
-  if (data.size() != static_cast<int>(whitelist.size()))
+  if (data->size() != static_cast<int>(whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output
@@ -154,7 +154,7 @@ QString getReducedWorkspaceName(const QStringList &data,
   QStringList names;
 
   auto columnIt = whitelist.cbegin();
-  auto runNumbersIt = data.constBegin();
+  auto runNumbersIt = data->constBegin();
   for (; columnIt != whitelist.cend(); ++columnIt, ++runNumbersIt) {
     auto column = *columnIt;
     // Do we want to use this column to generate the name of the output ws?
@@ -188,7 +188,7 @@ QString getReducedWorkspaceName(const QStringList &data,
  * names
  * @return : a map of property names to value
  */
-OptionsMap getCanonicalOptions(const RowData *data,
+OptionsMap getCanonicalOptions(const RowData_sptr data,
                                const OptionsMap &globalOptions,
                                const WhiteList &whitelist,
                                const bool allowInsertions,

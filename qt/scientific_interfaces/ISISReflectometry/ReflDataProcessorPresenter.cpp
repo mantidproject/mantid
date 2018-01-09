@@ -5,7 +5,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ParseNumerics.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
@@ -107,6 +109,10 @@ void ReflDataProcessorPresenter::process() {
 
         // Notebook not implemented yet
         if (m_view->getEnableNotebook()) {
+          /// @todo Implement save notebook for event-sliced workspaces.
+          // The per-slice input properties are stored in the RowData but
+          // at the moment GenerateNotebook just uses the parent row
+          //saveNotebook(m_selectedData);
           GenericDataProcessorPresenter::giveUserWarning(
               "Notebook not implemented for sliced data yet",
               "Notebook will not be generated");
@@ -117,6 +123,8 @@ void ReflDataProcessorPresenter::process() {
         if (processGroupAsNonEventWS(item.first, group))
           errors = true;
         // Notebook
+        if (m_view->getEnableNotebook())
+          saveNotebook(m_selectedData);
       }
 
       if (!allEventWS)
@@ -156,7 +164,7 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
   for (const auto &row : group) {
 
     // The run number
-    auto runNo = row.second.at(0);
+    auto runNo = row.second->value(0);
     // Try loading as event workspace
     bool eventWS = loadEventRun(runNo);
     if (!eventWS) {
@@ -164,7 +172,7 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
       // process the whole group as non-event data.
       for (const auto &rowNew : group) {
         // The run number
-        auto runNo = rowNew.second.at(0);
+        auto runNo = rowNew.second->value(0);
         // Load as non-event workspace
         loadNonEventRun(runNo);
       }
@@ -208,11 +216,29 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   for (const auto &row : group) {
 
     const auto rowID = row.first;  // Integer ID of this row
-    const auto data = row.second;  // Vector containing data for this row
-    auto runNo = row.second.at(0); // The run number
+    const auto rowData = row.second;   // data values for this row
+    auto runNo = row.second->value(0); // The run number
 
+    // Get the algorithm input properties for this row
+    OptionsMap options = getCanonicalOptions(
+        rowData, getProcessingOptions(rowData), m_whitelist, true,
+        m_processor.outputProperties(), m_processor.prefixes());
+    // Cache a copy of the unpreprocessed options in the row data
+    rowData->setOptions(options);
+    // Perform any preprocessing on the input properties (e.g. multiple
+    // input runs will  be summed into a single workspace). Note that
+    // this also loads the input run(s).
+    preprocessOptionValues(options, rowData);
+    rowData->setPreprocessedOptions(options);
+    // Get the (preprocessed) input workspace name for the reduction. The
+    // input runs are from the first column in the whitelist and we look up
+    // the associated algorithm property value in the options.
+    auto const runColumn = *m_whitelist.cbegin();
+    auto const &runName = options[runColumn.algorithmProperty()];
+
+    // Do time slicing now if using uniform slicing because this is dependant
+    // on the start/stop times of the current input workspace.
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
-      const QString runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
     }
@@ -220,15 +246,32 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     size_t numSlices = startTimes.size();
     addNumSlicesEntry(groupID, rowID, numSlices);
 
+    // Get a list of workspace-name properties. These will need to be updated
+    // with the slice suffix for each slice.
+    // For the input properties, the InputWorkspace is the only one that is
+    // sliced
+    auto workspaceProperties = std::vector<QString>{ "InputWorkspace" };
+    auto outputProperties = m_processor.outputProperties();
+    workspaceProperties.insert(workspaceProperties.end(),
+                               outputProperties.begin(),
+                               outputProperties.end());
+
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        RowData slice(data);
-        QString wsName =
-            takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
-        slice[0] = wsName;
-        reduceRow(&slice);
-        slice[0] = data[0];
-        m_manager->update(groupID, rowID, slice);
+        // Create the slice
+        QString sliceSuffix =
+            takeSlice(runName, i, startTimes[i], stopTimes[i], logFilter);
+        auto slice = rowData->addSlice(sliceSuffix, workspaceProperties);
+        // Run the algorithm
+        const auto alg = createAndRunAlgorithm(slice->preprocessedOptions());
+        // Populate any empty values in the row with output from the algorithm.
+        // Note that this overwrites the data each time with the results
+        // from the latest slice. It would be good to do some validation
+        // that the results are the same for each slice e.g. the resolution
+        // should always be the same.
+        updateModelFromAlgorithm(alg, rowData);
+        // Update the model with the results
+        m_manager->update(groupID, rowID, rowData->data());
       } catch (...) {
         return true;
       }
@@ -249,16 +292,18 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     addNumGroupSlicesEntry(groupID, numGroupSlices);
 
+    // Loop through each slice index
     for (size_t i = 0; i < numGroupSlices; i++) {
-      GroupData groupNew;
-      QStringList data;
-      for (const auto &row : group) {
-        data = row.second;
-        data[0] = row.second[0] + "_slice_" + QString::number(i);
-        groupNew[row.first] = data;
+      // Create a group containing the relevant slice from each row
+      GroupData sliceGroup;
+      for (const auto rowKvp : group) {
+        auto rowIndex = rowKvp.first;
+        auto rowData = rowKvp.second;
+        sliceGroup[rowIndex] = rowData->getSlice(i);
       }
+      // Post process the group of slices
       try {
-        postProcessGroup(groupNew);
+        postProcessGroup(sliceGroup);
       } catch (...) {
         errors = true;
       }
@@ -280,11 +325,19 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
   bool errors = false;
 
   for (auto &row : group) {
+    // Get the algorithm input properties for this row and
+    // cache it in the row data (this is done just once here as
+    // it's required by both reduceRow and saveNotebook)
+    auto rowData = row.second;
+    OptionsMap options = getCanonicalOptions(
+        rowData, getProcessingOptions(rowData), m_whitelist, true,
+        m_processor.outputProperties(), m_processor.prefixes());
+    rowData->setOptions(std::move(options));
 
     // Reduce this row
-    reduceRow(&row.second);
+    reduceRow(rowData);
     // Update the tree
-    m_manager->update(groupID, row.first, row.second);
+    m_manager->update(groupID, row.first, row.second->data());
   }
 
   // Post-process (if needed)
@@ -505,20 +558,20 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
-* @param runNo :: The run number as a string
+* @param runName :: The input workspace name as a string
 * @param sliceIndex :: The index of the slice being taken
 * @param startTime :: Start time
 * @param stopTime :: Stop time
 * @param logFilter :: The log filter to use if slicing by log value
-* @return :: the name of the sliced workspace (without prefix 'TOF_')
+* @return :: the suffix used for the slice name
 */
-QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
+QString ReflDataProcessorPresenter::takeSlice(const QString &runName,
                                               size_t sliceIndex,
                                               double startTime, double stopTime,
                                               const QString &logFilter) {
 
-  QString runName = "TOF_" + runNo;
-  QString sliceName = runName + "_slice_" + QString::number(sliceIndex);
+  QString sliceSuffix = "_slice_" + QString::number(sliceIndex);
+  QString sliceName = runName + sliceSuffix;
   QString monName = runName + "_monitors";
   QString filterAlg = logFilter.isEmpty() ? "FilterByTime" : "FilterByLogValue";
 
@@ -577,7 +630,7 @@ QString ReflDataProcessorPresenter::takeSlice(const QString &runNo,
   AnalysisDataService::Instance().remove("__" + monName.toStdString() +
                                          "_temp");
 
-  return sliceName.mid(4);
+  return sliceSuffix;
 }
 
 /** Plots any currently selected rows */
@@ -704,7 +757,7 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
 
     for (const auto &row : group) {
       bool runFound = false;
-      auto runNo = row.second.at(0);
+      auto runNo = row.second->value(0);
       auto outName = findRunInADS(runNo, "TOF_", runFound);
 
       if (runFound) {
@@ -766,13 +819,13 @@ void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
 
 /** Get the processing options for a given row
  * */
-OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData *data) {
+OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData_sptr data) {
   // Return the global settings but also include the transmission runs,
   // which vary depending on which row is being processed
   auto options = m_processingOptions;
 
   // Get the angle for the current row. The angle is the second data item
-  if (data->size() < 2 || data->at(1).isEmpty()) {
+  if (data->size() < 2 || data->value(1).isEmpty()) {
     if (m_mainPresenter->hasPerAngleTransmissionRuns()) {
       // The user has specified per-angle transmission runs on the settings
       // tab. In theory this is fine, but it could cause confusion when the
@@ -796,7 +849,7 @@ OptionsMap ReflDataProcessorPresenter::getProcessingOptions(RowData *data) {
   double angle = 0.0;
   try {
     // Convert to double
-    angle = std::stod(data->at(1).toStdString());
+    angle = std::stod(data->value(1).toStdString());
   } catch (std::invalid_argument &e) {
     throw std::runtime_error(std::string("Error parsing angle: ") + e.what());
   }

@@ -95,8 +95,8 @@ private:
   // non-async row reduce
   void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
     try {
-      reduceRow(&rowItem->second);
-      m_manager->update(groupIndex, rowItem->first, rowItem->second);
+      reduceRow(rowItem->second);
+      m_manager->update(groupIndex, rowItem->first, rowItem->second->data());
       m_manager->setProcessed(true, rowItem->first, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
@@ -419,6 +419,11 @@ private:
         DEFAULT_GROUP_NUMBER);
   }
 
+  // Utility to create a row data class from a string list
+  RowData_sptr makeRowData(const QStringList &list) {
+    return std::make_shared<RowData>(list);
+  }
+
   // Expect the view's widgets to be set in a particular state according to
   // whether processing or not
   void expectUpdateViewState(MockDataProcessorView &mockDataProcessorView,
@@ -481,13 +486,14 @@ private:
     } else {
       EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
           .Times(numTimes)
-          .WillOnce(Return(ColumnOptionsQMap()));
+          .WillRepeatedly(Return(ColumnOptionsQMap()));
       EXPECT_CALL(mockMainPresenter, getProcessingOptions())
           .Times(numTimes)
-          .WillOnce(Return(OptionsQMap()));
+          .WillRepeatedly(Return(OptionsQMap()));
       EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
           .Times(numTimes)
-          .WillOnce(Return(QString::fromStdString(postprocessingOptions)));
+          .WillRepeatedly(
+              Return(QString::fromStdString(postprocessingOptions)));
     }
   }
 
@@ -2874,9 +2880,11 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
-    QStringList row1 = {"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 =
+        makeRowData({"12345", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 =
+        makeRowData({"12346", "0.5", "", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
@@ -2901,11 +2909,11 @@ public:
 
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5", "11115", "0.1", "0.3",
-                        "0.04",  "1",   "",      ""};
-    QStringList row1 = {"12346", "0.5", "11116", "0.1", "0.3",
-                        "0.04",  "1",   "",      ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData(
+        {"12345", "0.5", "11115", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 = makeRowData(
+        {"12346", "0.5", "11116", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
@@ -2931,11 +2939,11 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
     // Test transmission run list separated by both comma and plus symbol
-    QStringList row0 = {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04",
-                        "1", "", ""};
-    QStringList row1 = {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04",
-                        "1", "", ""};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData(
+        {"12345", "0.5", "11115,11116", "0.1", "0.3", "0.04", "1", "", ""});
+    auto row1 = makeRowData(
+        {"12346", "0.5", "11115+11116", "0.1", "0.3", "0.04", "1", "", ""});
+    GroupData group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(presenter->getReducedWorkspaceName(row0, "prefix_1_"),
@@ -2962,9 +2970,9 @@ public:
     auto presenter = makeDefaultPresenter();
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
 
-    QStringList row0 = {"12345", "0.5"};
-    QStringList row1 = {"12346", "0.5"};
-    std::map<int, QStringList> group = {{0, row0}, {1, row1}};
+    auto row0 = makeRowData({"12345", "0.5"});
+    auto row1 = makeRowData({"12346", "0.5"});
+    GroupData group = {{0, row0}, {1, row1}};
 
     // Test the names of the reduced workspaces
     TS_ASSERT_THROWS_ANYTHING(presenter->getReducedWorkspaceName(row0));
@@ -3130,7 +3138,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(
         presenter.notify(DataProcessorPresenter::PlotGroupFlag));
     TS_ASSERT_THROWS_ANYTHING(
-        presenter.getPostprocessedWorkspaceName(std::map<int, QStringList>()));
+        presenter.getPostprocessedWorkspaceName(GroupData()));
   }
 
   void testPostprocessMap() {

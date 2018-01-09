@@ -312,10 +312,10 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 2);
-    TS_ASSERT_EQUALS(data[0][0], firstRow);
-    TS_ASSERT_EQUALS(data[0][1], secondRow);
-    TS_ASSERT_EQUALS(data[1][0], thirdRow);
-    TS_ASSERT_EQUALS(data[1][1], fourthRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), firstRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), secondRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), thirdRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), fourthRow);
   }
 
   void test_new_table_clears_model() {
@@ -431,10 +431,10 @@ public:
     QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",
                              "0.5",   "0.02", "2",     ""};
 
-    TS_ASSERT_EQUALS(data[0][0], firstRow);
-    TS_ASSERT_EQUALS(data[0][1], secondRow);
-    TS_ASSERT_EQUALS(data[1][0], thirdRow);
-    TS_ASSERT_EQUALS(data[1][1], fourthRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), firstRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), secondRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), thirdRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), fourthRow);
   }
 
   void test_update() {
@@ -458,10 +458,10 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-    TS_ASSERT_EQUALS(data[0][0], newRow);
-    TS_ASSERT_EQUALS(data[0][1], newRow);
-    TS_ASSERT_EQUALS(data[1][0], newRow);
-    TS_ASSERT_EQUALS(data[1][1], newRow);
+    TS_ASSERT_EQUALS(data[0][0]->data(), newRow);
+    TS_ASSERT_EQUALS(data[0][1]->data(), newRow);
+    TS_ASSERT_EQUALS(data[1][0]->data(), newRow);
+    TS_ASSERT_EQUALS(data[1][1]->data(), newRow);
   }
 };
 #endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGERTEST_H */

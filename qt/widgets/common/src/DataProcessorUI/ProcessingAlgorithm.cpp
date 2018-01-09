@@ -84,6 +84,12 @@ QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
 
+/** Returns the list of input property names
+ */
+std::vector<QString> ProcessingAlgorithm::inputProperties() const {
+  return m_inputProperties;
+}
+
 /** Returns the list of output property names
  */
 std::vector<QString> ProcessingAlgorithm::outputProperties() const {

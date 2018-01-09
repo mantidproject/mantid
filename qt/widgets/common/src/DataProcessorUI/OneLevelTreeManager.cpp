@@ -306,31 +306,40 @@ std::set<int> OneLevelTreeManager::getRowsToProcess(bool shouldPrompt) const {
     return rows;
   }
 }
+
+/**
+* Returns given row data in a format that the presenter can understand and use
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData OneLevelTreeManager::constructTreeData(std::set<int> rows) {
+
+  // Return data in the format: map<int, set<vector<string>>>, where:
+  // int -> row index
+  // set<vector<string>> -> set of vectors storing the data. Each set is a row
+  // and each element in the vector is a column
+  TreeData tree;
+  for (const auto &row : rows) {
+
+    QStringList data;
+    for (int i = 0; i < m_model->columnCount(); i++)
+      data.append(m_model->data(m_model->index(row, i)).toString());
+    tree[row][row] = std::make_shared<RowData>(std::move(data));
+  }
+  return tree;
+}
+
 /**
 * Returns selected data in a format that the presenter can understand and use
 * @param prompt :: True if warning messages should be displayed. False othewise
-* @return :: Selected data as a map where keys are units of post-processing and
-* values are
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
 */
 TreeData OneLevelTreeManager::selectedData(bool prompt) {
   if (isEmptyTable()) {
     return handleEmptyTable(prompt);
   } else {
-    auto rows = getRowsToProcess(prompt);
-
-    // Return selected data in the format: map<int, set<vector<string>>>, where:
-    // int -> row index
-    // set<vector<string>> -> set of vectors storing the data. Each set is a row
-    // and each element in the vector is a column
-    TreeData selectedData;
-    for (const auto &row : rows) {
-
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(m_model->data(m_model->index(row, i)).toString());
-      selectedData[row][row] = data;
-    }
-    return selectedData;
+    return constructTreeData(getRowsToProcess(prompt));
   }
 }
 

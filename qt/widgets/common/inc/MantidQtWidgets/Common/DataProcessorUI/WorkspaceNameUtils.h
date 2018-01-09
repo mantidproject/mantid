@@ -45,12 +45,12 @@ QStringList preprocessingStringToList(const QString &inputStr);
 QString preprocessingListToString(const QStringList &values,
                                   const QString prefix = QString());
 // Returns the name of the reduced workspace for a given row
-QString DLLExport getReducedWorkspaceName(const QStringList &data,
+QString DLLExport getReducedWorkspaceName(const RowData_sptr data,
                                           const WhiteList &whitelist,
                                           const QString prefix = QString());
 // Consolidate global options with row values
 OptionsMap DLLExport getCanonicalOptions(
-    const RowData *data, const OptionsMap &globalOptions,
+    const RowData_sptr data, const OptionsMap &globalOptions,
     const WhiteList &whitelist, const bool allowInsertions,
     const std::vector<QString> &outputProperties = std::vector<QString>(),
     const std::vector<QString> &prefixes = std::vector<QString>());

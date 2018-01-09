@@ -56,6 +56,8 @@ public:
   QString inputPropertyName(size_t index) const;
   // The name of this output property
   QString outputPropertyName(size_t index) const;
+  // The input properties
+  std::vector<QString> inputProperties() const;
   // The output properties
   std::vector<QString> outputProperties() const;
   // The prefixes for the output properties

@@ -103,7 +103,7 @@ void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
   for (auto const &prop : m_map) {
     auto const &propName = prop.second;
     auto const &propValueStr =
-        groupData.begin()->second[whitelist.indexFromName(prop.first)];
+        (*groupData.begin()->second)[whitelist.indexFromName(prop.first)];
     if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in
       // Reflectometry this property refers to the rebin step, and they want a

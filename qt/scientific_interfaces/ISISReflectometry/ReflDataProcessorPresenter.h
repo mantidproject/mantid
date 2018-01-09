@@ -60,7 +60,7 @@ public:
   void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 private:
   // Get the processing options for this row
-  OptionsMap getProcessingOptions(RowData *data) override;
+  OptionsMap getProcessingOptions(RowData_sptr data) override;
   // Process selected rows
   void process() override;
   // Plotting

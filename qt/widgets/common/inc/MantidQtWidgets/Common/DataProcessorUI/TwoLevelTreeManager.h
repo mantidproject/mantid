@@ -8,6 +8,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
+using ChildItems = std::map<int, std::set<int>>;
+
 class DataProcessorPresenter;
 class WhiteList;
 class QTwoLevelTreeModel;
@@ -129,6 +131,7 @@ private:
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;
+  TreeData constructTreeData(ChildItems rows);
 };
 }
 }

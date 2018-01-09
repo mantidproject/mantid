@@ -418,6 +418,33 @@ int TwoLevelTreeManager::numRowsInGroup(int group) const {
 }
 
 /**
+* Returns given row data in a format that the presenter can understand and use
+* @return :: All data as a map where keys are units of post-processing (i.e.
+* group indices) and values are a map of row index in the group to row data
+*/
+TreeData TwoLevelTreeManager::constructTreeData(ChildItems rows) {
+  TreeData tree;
+  // Return row data in the format: map<int, set<vector<string>>>, where:
+  // int -> group index
+  // set<vector<string>> -> set of vectors storing the data. Each set is a row
+  // and each element in the vector is a column
+  for (const auto &item : rows) {
+
+    int group = item.first;
+
+    for (const auto &row : item.second) {
+      QStringList data;
+      for (int i = 0; i < m_model->columnCount(); i++)
+        data.append(
+            m_model->data(m_model->index(row, i, m_model->index(group, 0)))
+                .toString());
+      tree[group][row] = std::make_shared<RowData>(std::move(data));
+    }
+  }
+  return tree;
+}
+
+/**
 * Returns selected data in a format that the presenter can understand and use
 * @param prompt :: True if warning messages should be displayed. False othewise
 * @return :: Selected data as a map where keys are units of post-processing and
@@ -496,24 +523,7 @@ TreeData TwoLevelTreeManager::selectedData(bool prompt) {
     }
   }
 
-  // Return selected data in the format: map<int, set<vector<string>>>, where:
-  // int -> group index
-  // set<vector<string>> -> set of vectors storing the data. Each set is a row
-  // and each element in the vector is a column
-  for (const auto &item : rows) {
-
-    int group = item.first;
-
-    for (const auto &row : item.second) {
-      QStringList data;
-      for (int i = 0; i < m_model->columnCount(); i++)
-        data.append(
-            m_model->data(m_model->index(row, i, m_model->index(group, 0)))
-                .toString());
-      selectedData[group][row] = data;
-    }
-  }
-  return selectedData;
+  return constructTreeData(rows);
 }
 
 /** Transfer data to the model

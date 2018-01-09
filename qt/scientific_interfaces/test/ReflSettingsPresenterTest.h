@@ -196,9 +196,15 @@ public:
     onCallReturnDefaultSettings(mockView);
     auto presenter = makeReflSettingsPresenter(&mockView);
 
-    EXPECT_CALL(mockView, getPolarisationCorrections())
-        .Times(AtLeast(1))
-        .WillOnce(Return("PNR"));
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockView, getAnalysisMode())
+        .Times(Exactly(1))
+        .WillOnce(Return("MultiDetectorAnalysis"));
     EXPECT_CALL(mockView, getCRho())
         .Times(AtLeast(1))
         .WillOnce(Return("2.5,0.4,1.1"));
@@ -606,6 +612,52 @@ public:
     auto transmissionOptions = presenter.getTransmissionOptions();
     auto reductionOptions = presenter.getReductionOptions();
     auto stitchOptions = presenter.getStitchOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDefaultTransmissionRuns() {
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
+
+    // Default transmission runs are specified with a single
+    // entry with an empty angle as the key
+    std::map<std::string, std::string> transmissionRunsMap = {
+        {"", "INTER00013463,INTER00013464"}};
+    
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(1)
+        .WillOnce(Return(transmissionRunsMap));
+
+    auto result = presenter.getDefaultTransmissionRuns();
+    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testTransmissionRunsForAngle() {
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
+
+    // Set up a table with transmission runs for 2 different angles
+    std::map<std::string, std::string> transmissionRunsMap = {
+      {"0.7", "INTER00013463,INTER00013464"},
+      {"2.33", "INTER00013463"}};
+
+    // Test looking up transmission runs based on the angle. It has
+    // quite a generous tolerance so the angle does not have to be
+    // exact
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(1)
+        .WillOnce(Return(transmissionRunsMap));
+    auto result = presenter.getTransmissionRunsForAngle(0.69);
+    TS_ASSERT_EQUALS(result, "INTER00013463,INTER00013464");
+
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(1)
+        .WillOnce(Return(transmissionRunsMap));
+    result = presenter.getTransmissionRunsForAngle(2.34);
+    TS_ASSERT_EQUALS(result, "INTER000013463");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

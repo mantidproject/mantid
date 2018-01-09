@@ -55,6 +55,8 @@ public:
   /// Returns per-angle values passed for 'Transmission run(s)'
   std::string
   getTransmissionRunsForAngle(const double angleToFind) const override;
+  /// Returns default values passed for 'Transmission run(s)'
+  std::string getDefaultTransmissionRuns() const;
   /// Whether per-angle transmission runs are specified
   bool hasPerAngleTransmissionRuns() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -81,8 +83,6 @@ private:
   static QString asAlgorithmPropertyBool(bool value);
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
-  /// Returns default values passed for 'Transmission run(s)'
-  std::string getDefaultTransmissionRuns() const;
 
   MantidWidgets::DataProcessor::OptionsQMap transmissionOptionsMap() const;
   void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,

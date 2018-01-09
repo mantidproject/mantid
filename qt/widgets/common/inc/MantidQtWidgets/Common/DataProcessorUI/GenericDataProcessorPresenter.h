@@ -38,7 +38,7 @@ class DataProcessorView;
 class TreeManager;
 class GenericDataProcessorPresenterThread;
 
-using RowItem = std::pair<int, RowData>;
+using RowItem = std::pair<int, RowData_sptr>;
 using RowQueue = std::queue<RowItem>;
 using GroupQueue = std::queue<std::pair<int, RowQueue>>;
 
@@ -156,7 +156,7 @@ public:
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  QString getReducedWorkspaceName(const QStringList &data,
+  QString getReducedWorkspaceName(const RowData_sptr data,
                                   const QString &prefix = "") const;
 
   ParentItems selectedParents() const override;
@@ -184,7 +184,7 @@ protected:
   // The list of selected items to reduce
   TreeData m_selectedData;
   // Get the processing options for this row
-  virtual OptionsMap getProcessingOptions(RowData *data) {
+  virtual OptionsMap getProcessingOptions(RowData_sptr data) {
     UNUSED_ARG(data);
     return m_processingOptions;
   }
@@ -200,16 +200,16 @@ protected:
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
   void preprocessColumnValue(const QString &columnName, QString &columnValue,
-                             RowData *data);
+                             RowData_sptr data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(OptionsMap &options, RowData *data);
+  void preprocessOptionValues(OptionsMap &options, RowData_sptr data);
   // Update the model with results from the algorithm
   void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
-                                RowData *data);
+                                RowData_sptr data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
-  void reduceRow(RowData *data);
+  void reduceRow(RowData_sptr data);
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
                        bool &runFound);
@@ -227,6 +227,12 @@ protected:
   bool rowOutputExists(RowItem const &row) const;
   // Refl GUI Group.
   int m_group;
+  // The whitelist
+  WhiteList m_whitelist;
+  // The data processor algorithm
+  ProcessingAlgorithm m_processor;
+  // Save as ipython notebook
+  void saveNotebook(const TreeData &data);
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
@@ -241,10 +247,6 @@ private:
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
-  // The whitelist
-  WhiteList m_whitelist;
-  // The data processor algorithm
-  ProcessingAlgorithm m_processor;
 
   // The current queue of groups to be reduced
   GroupQueue m_group_queue;
@@ -358,7 +360,6 @@ private:
                     const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
-  void saveNotebook(const TreeData &data);
   std::vector<std::unique_ptr<Command>> getTableList();
 
   // set/get values in the table
