@@ -115,8 +115,14 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
   Mantid::Kernel::Matrix<Mantid::coord_t> affineMatrix;
   try {
     auto const *transform = workspace.getTransformToOriginal();
-    affineMatrix = transform->makeAffineMatrix();
-  } catch (std::runtime_error &) {
+    if(transform) affineMatrix = transform->makeAffineMatrix();
+    else {
+    // Create identity matrix of dimension+1
+         std::size_t nDims = workspace.getNumDims() + 1;
+             Mantid::Kernel::Matrix<Mantid::coord_t> temp(nDims, nDims, true);
+                 affineMatrix = temp;
+                   }
+  } catch (...) {
     // Create identity matrix of dimension+1
     std::size_t nDims = workspace.getNumDims() + 1;
     Mantid::Kernel::Matrix<Mantid::coord_t> temp(nDims, nDims, true);

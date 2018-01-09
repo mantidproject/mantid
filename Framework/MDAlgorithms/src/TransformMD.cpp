@@ -160,8 +160,23 @@ void TransformMD::exec() {
       signal_t *signals = histo->getSignalArray();
       signal_t *errorsSq = histo->getErrorSquaredArray();
 
-      this->reverse(signals, histo->getNPoints());
-      this->reverse(errorsSq, histo->getNPoints());
+      size_t nPoints = histo->getNPoints();
+      size_t d4 = 1;
+      size_t nd = histo->getNumDims();
+      if (nd > 3) {
+        nPoints = 1;
+        for (size_t i = 0; i < 3; i++) {
+          Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
+          // Find the extents
+          nPoints *= static_cast<size_t>(dim->getMaximum() - dim->getMinimum() + 1);
+        }
+        d4 = histo->getNPoints()/nPoints;
+      }
+
+      for (size_t i = 0; i < d4; i++) {
+        this->reverse(signals+i*nPoints, nPoints);
+        this->reverse(errorsSq+i*nPoints, nPoints);
+      }
     }
 
     this->setProperty("OutputWorkspace", histo);
