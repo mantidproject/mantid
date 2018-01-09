@@ -6,8 +6,6 @@
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 
-#include <QObject>
-
 #include <memory>
 
 namespace MantidQt {
@@ -15,10 +13,7 @@ namespace CustomInterfaces {
 
 // needs to be dll-exported for the tests
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingPresenter
-    : public QObject,
-      public IEnggDiffGSASFittingPresenter {
-  // Q_OBJECT for 'connect' with thread/worker
-  Q_OBJECT
+    : public IEnggDiffGSASFittingPresenter {
 
 public:
   EnggDiffGSASFittingPresenter(std::unique_ptr<IEnggDiffGSASFittingModel> model,
@@ -29,6 +24,7 @@ public:
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
 private:
+  void processLoadRun();
   void processShutDown();
   void processStart();
 

@@ -9,9 +9,7 @@ EnggDiffGSASFittingPresenter::EnggDiffGSASFittingPresenter(
     : m_model(std::move(model)), m_view(std::move(view)),
       m_viewHasClosed(false) {}
 
-EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {
-  throw new std::runtime_error("Virtual destructor not yet implemented");
-}
+EnggDiffGSASFittingPresenter::~EnggDiffGSASFittingPresenter() {}
 
 void EnggDiffGSASFittingPresenter::notify(
     IEnggDiffGSASFittingPresenter::Notification notif) {
@@ -22,6 +20,10 @@ void EnggDiffGSASFittingPresenter::notify(
 
   switch (notif) {
 
+  case IEnggDiffGSASFittingPresenter::LoadRun:
+    processLoadRun();
+    break;
+
   case IEnggDiffGSASFittingPresenter::Start:
     processStart();
     break;
@@ -29,6 +31,18 @@ void EnggDiffGSASFittingPresenter::notify(
   case IEnggDiffGSASFittingPresenter::ShutDown:
     processShutDown();
     break;
+  }
+}
+
+void EnggDiffGSASFittingPresenter::processLoadRun() {
+  const auto focusedFileName = m_view->getFocusedFileName();
+  const auto loadSuccess = m_model->loadFocusedRun(focusedFileName);
+
+  if (loadSuccess.empty()) {
+    const auto runLabels = m_model->getRunLabels();
+    m_view->updateRunList(runLabels);
+  } else {
+    m_view->userWarning(loadSuccess);
   }
 }
 
