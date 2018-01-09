@@ -98,6 +98,8 @@
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
+
 using namespace std;
 
 using namespace Mantid::API;
@@ -232,8 +234,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-  m_exploreMantid = boost::make_shared<WorkspaceTreeWidget>(this);
-  m_exploreMantid->init();
+  m_exploreMantid = new WorkspaceTreeWidget(this);
   m_exploreMantid->enableDeletePrompt(
       appWindow()->isDeleteWorkspacePromptEnabled());
 
@@ -242,7 +243,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   m_workspaceDockWidget->setObjectName("exploreMantid");
   m_workspaceDockWidget->setMinimumHeight(150);
   m_workspaceDockWidget->setMinimumWidth(200);
-  m_workspaceDockWidget->setWidget(m_exploreMantid.get());
+  m_workspaceDockWidget->setWidget(m_exploreMantid);
   aw->addDockWidget(Qt::RightDockWidgetArea, m_workspaceDockWidget);
 
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
@@ -2260,7 +2261,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot spectrum...", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
+  connect(action, SIGNAL(triggered()), m_exploreMantid,
           SLOT(plotSpectra()));
   menuMantidMatrix->addAction(action);
 
@@ -2292,7 +2293,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addSeparator();
 
   action = new QAction("Delete", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
+  connect(action, SIGNAL(triggered()), m_exploreMantid,
           SLOT(deleteWorkspaces()));
   menuMantidMatrix->addAction(action);
 }
