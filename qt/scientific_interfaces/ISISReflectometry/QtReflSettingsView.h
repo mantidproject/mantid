@@ -110,8 +110,10 @@ public slots:
   /// Request presenter to obtain default values for settings
   void requestExpDefaults() const;
   void requestInstDefaults() const;
+  void summationTypeChanged(int reductionTypeIndex);
   /// Sets enabled status for polarisation corrections and parameters
   void setPolarisationOptionsEnabled(bool enable) const override;
+  void setReductionTypeEnabled(bool enable) override;
 
 private:
   /// Initialise the interface

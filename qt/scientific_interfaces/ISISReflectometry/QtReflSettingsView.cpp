@@ -1,6 +1,7 @@
 #include "QtReflSettingsView.h"
 #include "ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,7 +37,19 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(summationTypeChanged(int)));
 }
+
+void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
+  UNUSED_ARG(reductionTypeIndex);
+  m_presenter->notify(IReflSettingsPresenter::Flag::SummationTypeChanged);
+}
+
+void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
+  m_ui.reductionTypeComboBox->setEnabled(enable);
+}
+
 
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter

@@ -41,9 +41,22 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   case IReflSettingsPresenter::InstDefaultsFlag:
     getInstDefaults();
     break;
+  case IReflSettingsPresenter::SummationTypeChanged:
+    handleSummationTypeChange();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+bool ReflSettingsPresenter::hasReductionTypes(
+    const std::string &summationType) const {
+  return summationType == "SumInQ";
+}
+
+void ReflSettingsPresenter::handleSummationTypeChange() {
+  auto summationType = m_view->getSummationType();
+  m_view->setReductionTypeEnabled(hasReductionTypes(summationType));
 }
 
 /** Sets the current instrument name and changes accessibility status of
@@ -197,13 +210,19 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     if (!endOv.empty())
       options.push_back("EndOverlap=" + endOv);
 
-    auto reductionType = m_view->getReductionType();
-    if (!reductionType.empty())
-      options.push_back("ReductionType=" + reductionType);
+    auto addReductionType = [this, &options]() -> void {
+      auto reductionType = m_view->getReductionType();
+      if (!reductionType.empty())
+        options.push_back("ReductionType=" + reductionType);
+    };
 
     auto summationType = m_view->getSummationType();
-    if (!summationType.empty())
+    if (!summationType.empty()) {
       options.push_back("SummationType=" + summationType);
+
+      if (hasReductionTypes(summationType))
+        addReductionType();
+    }
 
     // Add transmission runs
     auto transRuns = this->getTransmissionRuns(true);

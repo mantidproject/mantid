@@ -184,7 +184,7 @@ public:
         .WillOnce(Return("12"));
     EXPECT_CALL(mockView, getSummationType())
         .Times(Exactly(1))
-        .WillOnce(Return("SumInLambda"));
+        .WillOnce(Return("SumInQ"));
     EXPECT_CALL(mockView, getReductionType())
         .Times(Exactly(1))
         .WillOnce(Return("DivergentBeam"));
@@ -204,7 +204,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
     TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
     TS_ASSERT_EQUALS(optionsVec[10], "ReductionType=DivergentBeam");
-    TS_ASSERT_EQUALS(optionsVec[11], "SummationType=SumInLambda");
+    TS_ASSERT_EQUALS(optionsVec[11], "SummationType=SumInQ");
     TS_ASSERT_EQUALS(optionsVec[12], "FirstTransmissionRun=INTER00013463");
     TS_ASSERT_EQUALS(optionsVec[13], "SecondTransmissionRun=INTER00013464");
     TS_ASSERT_EQUALS(optionsVec[14], "NormalizeByIntegratedMonitors=True");

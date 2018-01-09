@@ -89,6 +89,7 @@ public:
 
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
+  virtual void setReductionTypeEnabled(bool enable) = 0;
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
 };

@@ -64,12 +64,13 @@ public:
   firstTransmissionRunLabelled(std::vector<std::string> const &runNumber) const;
   std::string secondTransmissionRunLabelled(
       std::vector<std::string> const &runNumber) const;
-
 private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
   void wrapWithQuotes(std::string &str) const;
+  bool hasReductionTypes(const std::string& reductionType) const;
+  void handleSummationTypeChange();
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
