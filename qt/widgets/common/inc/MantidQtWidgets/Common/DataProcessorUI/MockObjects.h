@@ -107,12 +107,11 @@ public:
   MOCK_METHOD2(giveUserWarning, void(QString, QString));
   MOCK_METHOD2(giveUserCritical, void(QString, QString));
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
-  MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getProcessingOptions, QString());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
+  MOCK_CONST_METHOD0(getPreprocessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
+  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 
   // Event handling
