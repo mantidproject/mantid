@@ -1,22 +1,23 @@
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 
-#include <numeric>
 #include <algorithm>
 #include <boost/make_shared.hpp>
+#include <numeric>
 
 namespace Mantid {
 namespace Geometry {
@@ -47,7 +48,7 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
   pmap->clearParametersByName(ParameterMap::scale(), &comp);
 }
-}
+} // namespace
 
 /**
  * Constructor
@@ -86,7 +87,8 @@ InstrumentVisitor::InstrumentVisitor(
               m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
-      m_isStructuredBank(boost::make_shared<std::vector<bool>>()),
+      m_componentType(
+          boost::make_shared<std::vector<Beamline::ComponentType>>()),
       m_names(boost::make_shared<std::vector<std::string>>(
           m_orderedDetectorIds->size())) {
   if (m_instrument->isParametrized()) {
@@ -159,7 +161,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isStructuredBank->push_back(false);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   m_names->emplace_back(assembly.getName());
   clearLegacyParameters(m_pmap, assembly);
@@ -194,7 +196,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
-  m_isStructuredBank->push_back(false);
+  m_componentType->push_back(Beamline::ComponentType::Generic);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   m_names->emplace_back(component.getName());
   clearLegacyParameters(m_pmap, component);
@@ -214,14 +216,49 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
- * @brief InstrumentVisitor::registerStructuredBank
+ * Register a structured bank
  * @param bank : Rectangular Detector
- * @return
+ * @return index assigned
  */
 size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
-  (*m_isStructuredBank)[rangesIndex] = true;
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Rectangular;
+  return index;
+}
+
+/**
+ * Register a bank of tubes
+ * @param bank : bank of tubes
+ * @return index assigned
+ */
+size_t InstrumentVisitor::registerBankOfTubes(const ICompAssembly &bank) {
+  auto index = registerComponentAssembly(bank);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::BankOfTube;
+  return index;
+}
+
+/**
+ * Register a Tube as an IComponent Assembly.
+ * @param tube : Individual tube component assembly
+ * @return index assigned
+ */
+size_t InstrumentVisitor::registerTube(const ICompAssembly &tube) {
+  auto index = registerComponentAssembly(tube);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_componentType)[rangesIndex] = Beamline::ComponentType::Tube;
+  return index;
+}
+
+/**
+ * Register a Tube as an Object Component Assembly. Has shape.
+ * @param objTube : Individual tube component assembly
+ * @return index assigned
+ */
+size_t InstrumentVisitor::registerTubeObj(const ObjCompAssembly &objTube) {
+  auto index = registerTube(objTube);
+  (*m_shapes)[index] = objTube.shape();
   return index;
 }
 
@@ -244,13 +281,13 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
   /* Already allocated we just need to index into the inital front-detector
-  * part of the collection.
-  * 1. Guarantee on grouping detectors by type such that the first n
-  * components
-  * are detectors.
-  * 2. Guarantee on ordering such that the
-  * detectorIndex == componentIndex for all detectors.
-  */
+   * part of the collection.
+   * 1. Guarantee on grouping detectors by type such that the first n
+   * components
+   * are detectors.
+   * 2. Guarantee on ordering such that the
+   * detectorIndex == componentIndex for all detectors.
+   */
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
@@ -318,7 +355,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_isStructuredBank, m_names, m_sourceIndex, m_sampleIndex);
+      m_componentType, m_names, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>

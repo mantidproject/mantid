@@ -13,6 +13,9 @@
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
+namespace Geometry {
+class InstrumentRayTracer;
+}
 namespace MDAlgorithms {
 
 /** FindPeaksMD : TODO: DESCRIPTION
@@ -51,11 +54,13 @@ private:
                           const Mantid::API::IMDWorkspace_sptr &ws);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
-  void addPeak(const Mantid::Kernel::V3D &Q, const double binCount);
+  void addPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+               const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  boost::shared_ptr<DataObjects::Peak> createPeak(const Mantid::Kernel::V3D &Q,
-                                                  const double binCount);
+  boost::shared_ptr<DataObjects::Peak>
+  createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+             const Geometry::InstrumentRayTracer &tracer);
 
   /// Run find peaks on an MDEventWorkspace
   template <typename MDE, size_t nd>
@@ -110,7 +115,7 @@ private:
   static const std::string numberOfEventsNormalization;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_FINDPEAKSMD_H_ */

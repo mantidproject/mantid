@@ -30,14 +30,20 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 #include "MantidKernel/System.h"
 
-#include <string>
+#include <QString>
 #include <map>
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 std::map<std::string, std::string> DLLExport
 parseKeyValueString(const std::string &str);
+std::map<QString, QString> DLLExport parseKeyValueQString(const QString &str);
+// Trim leading/trailing whitespace and quotes from a string
+void trimWhitespaceAndQuotes(const QString &valueIn);
+// Trim whitespace, quotes and empty values from a string list
+void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
 }
 }
 

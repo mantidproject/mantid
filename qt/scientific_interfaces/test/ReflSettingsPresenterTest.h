@@ -89,22 +89,40 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
+<<<<<<< HEAD
     auto options = presenter.getTransmissionOptions();
+=======
+    EXPECT_CALL(mockView, getStartOverlap())
+        .Times(Exactly(1))
+        .WillOnce(Return("10"));
+    EXPECT_CALL(mockView, getEndOverlap())
+        .Times(Exactly(1))
+        .WillOnce(Return("12"));
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(Exactly(1))
+        .WillOnce(Return("INTER00013463,INTER00013464"));
+>>>>>>> master
 
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 11);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[2], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[3], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[4], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[5], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[6], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[7], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[8], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[9], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[10], "ProcessingInstructions=\"3,4\"");
+    auto options = presenter.getTransmissionOptions();
+    TS_ASSERT_EQUALS(options.size(), 12);
+    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(options["StartOverlap"].toStdString(), "10");
+    TS_ASSERT_EQUALS(options["EndOverlap"].toStdString(), "12");
+    TS_ASSERT_EQUALS(options["FirstTransmissionRun"].toStdString(),
+                     "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"].toStdString(),
+                     "4");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"].toStdString(),
+                     "10");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"].toStdString(),
+                     "12");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"].toStdString(),
+                     "17");
+    TS_ASSERT_EQUALS(options["WavelengthMin"].toStdString(), "1");
+    TS_ASSERT_EQUALS(options["WavelengthMax"].toStdString(), "15");
+    TS_ASSERT_EQUALS(options["I0MonitorIndex"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["ProcessingInstructions"].toStdString(), "3,4");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -188,39 +206,40 @@ public:
     EXPECT_CALL(mockView, getReductionType())
         .Times(Exactly(1))
         .WillOnce(Return("DivergentBeam"));
+
     auto options = presenter.getReductionOptions();
-
-    std::vector<std::string> optionsVec;
-    boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 24);
-    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
-    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
-    TS_ASSERT_EQUALS(optionsVec[3], "CAp=\"100.0,17.0,44.0\"");
-    TS_ASSERT_EQUALS(optionsVec[4], "CPp=\"0.54,0.33,1.81\"");
-    TS_ASSERT_EQUALS(optionsVec[5], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[6], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[7], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[8], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[9], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[10], "ReductionType=DivergentBeam");
-    TS_ASSERT_EQUALS(optionsVec[11], "SummationType=SumInQ");
-    TS_ASSERT_EQUALS(optionsVec[12], "FirstTransmissionRun=INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[13], "SecondTransmissionRun=INTER00013464");
-    TS_ASSERT_EQUALS(optionsVec[14], "NormalizeByIntegratedMonitors=True");
-    TS_ASSERT_EQUALS(optionsVec[15], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[16], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[17], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[18], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[19], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[20], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[21], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[22], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[23], "DetectorCorrectionType=VerticalShift");
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT_EQUALS(options.size(), 23);
+    TS_ASSERT_EQUALS(options["AnalysisMode"].toStdString(),
+                     "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(options["CRho"].toStdString(), "2.5,0.4,1.1");
+    TS_ASSERT_EQUALS(options["CAlpha"].toStdString(), "0.6,0.9,1.2");
+    TS_ASSERT_EQUALS(options["CAp"].toStdString(), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(options["CPp"].toStdString(), "0.54,0.33,1.81");
+    TS_ASSERT_EQUALS(options["PolarizationAnalysis"].toStdString(), "PNR");
+    TS_ASSERT_EQUALS(options["ScaleFactor"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["MomentumTransferStep"].toStdString(), "-0.02");
+    TS_ASSERT_EQUALS(options["StartOverlap"].toStdString(), "10");
+    TS_ASSERT_EQUALS(options["EndOverlap"].toStdString(), "12");
+    TS_ASSERT_EQUALS(options["FirstTransmissionRun"].toStdString(),
+                     "INTER00013463,INTER00013464");
+    TS_ASSERT_EQUALS(options["NormalizeByIntegratedMonitors"].toStdString(),
+                     "True");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMin"].toStdString(),
+                     "4");
+    TS_ASSERT_EQUALS(options["MonitorIntegrationWavelengthMax"].toStdString(),
+                     "10");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMin"].toStdString(),
+                     "12");
+    TS_ASSERT_EQUALS(options["MonitorBackgroundWavelengthMax"].toStdString(),
+                     "17");
+    TS_ASSERT_EQUALS(options["WavelengthMin"].toStdString(), "1");
+    TS_ASSERT_EQUALS(options["WavelengthMax"].toStdString(), "15");
+    TS_ASSERT_EQUALS(options["I0MonitorIndex"].toStdString(), "2");
+    TS_ASSERT_EQUALS(options["ProcessingInstructions"].toStdString(), "3,4");
+    TS_ASSERT_EQUALS(options["DetectorCorrectionType"].toStdString(),
+                     "VerticalShift");
+    TS_ASSERT_EQUALS(options["SummationType"].toStdString(), "SumInQ");
+    TS_ASSERT_EQUALS(options["ReductionType"].toStdString(), "DivergentBeam");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -368,7 +387,7 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
-    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(2));
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
 
     auto transmissionOptions = presenter.getTransmissionOptions();

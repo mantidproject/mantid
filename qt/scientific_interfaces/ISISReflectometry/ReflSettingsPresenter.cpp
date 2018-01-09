@@ -14,6 +14,7 @@ namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::Geometry;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** Constructor
 * @param view :: The view we are handling
@@ -73,166 +74,160 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
  * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
  */
-std::string ReflSettingsPresenter::getTransmissionOptions() const {
+OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
 
-  std::vector<std::string> options;
+  OptionsQMap options;
 
   if (m_view->experimentSettingsEnabled()) {
 
     // Add analysis mode
     auto analysisMode = m_view->getAnalysisMode();
     if (!analysisMode.empty())
-      options.push_back("AnalysisMode=" + analysisMode);
+      options["AnalysisMode"] = QString::fromStdString(analysisMode);
 
     // Add start overlap
     auto startOv = m_view->getStartOverlap();
     if (!startOv.empty())
-      options.push_back("StartOverlap=" + startOv);
+      options["StartOverlap"] = QString::fromStdString(startOv);
 
     // Add end overlap
     auto endOv = m_view->getEndOverlap();
     if (!endOv.empty())
-      options.push_back("EndOverlap=" + endOv);
+      options["EndOverlap"] = QString::fromStdString(endOv);
+
+    // Add transmission runs
+    auto transRuns = this->getTransmissionRuns();
+    if (!transRuns.empty())
+      options["FirstTransmissionRun"] = QString::fromStdString(transRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
     // Add monitor integral min
     auto monIntMin = m_view->getMonitorIntegralMin();
     if (!monIntMin.empty())
-      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
+      options["MonitorIntegrationWavelengthMin"] =
+          QString::fromStdString(monIntMin);
 
     // Add monitor integral max
     auto monIntMax = m_view->getMonitorIntegralMax();
     if (!monIntMax.empty())
-      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+      options["MonitorIntegrationWavelengthMax"] =
+          QString::fromStdString(monIntMax);
 
     // Add monitor background min
     auto monBgMin = m_view->getMonitorBackgroundMin();
     if (!monBgMin.empty())
-      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
+      options["MonitorBackgroundWavelengthMin"] =
+          QString::fromStdString(monBgMin);
 
     // Add monitor background max
     auto monBgMax = m_view->getMonitorBackgroundMax();
     if (!monBgMax.empty())
-      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
+      options["MonitorBackgroundWavelengthMax"] =
+          QString::fromStdString(monBgMax);
 
     // Add lambda min
     auto lamMin = m_view->getLambdaMin();
     if (!lamMin.empty())
-      options.push_back("WavelengthMin=" + lamMin);
+      options["WavelengthMin"] = QString::fromStdString(lamMin);
 
     // Add lambda max
     auto lamMax = m_view->getLambdaMax();
     if (!lamMax.empty())
-      options.push_back("WavelengthMax=" + lamMax);
+      options["WavelengthMax"] = QString::fromStdString(lamMax);
 
     // Add I0MonitorIndex
     auto I0MonitorIndex = m_view->getI0MonitorIndex();
     if (!I0MonitorIndex.empty())
-      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
+      options["I0MonitorIndex"] = QString::fromStdString(I0MonitorIndex);
 
     // Add detector limits
     auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
-      options.push_back("ProcessingInstructions=" + procInst);
-    }
+    if (!procInst.empty())
+      options["ProcessingInstructions"] = QString::fromStdString(procInst);
   }
 
-  return boost::algorithm::join(options, ",");
+  return options;
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
  * @return :: Global options for 'ReflectometryReductionOneAuto'
  */
-std::string ReflSettingsPresenter::getReductionOptions() const {
+OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
-  std::vector<std::string> options;
+  OptionsQMap options;
 
   if (m_view->experimentSettingsEnabled()) {
 
     // Add analysis mode
     auto analysisMode = m_view->getAnalysisMode();
     if (!analysisMode.empty())
-      options.push_back("AnalysisMode=" + analysisMode);
+      options["AnalysisMode"] = QString::fromStdString(analysisMode);
 
     // Add CRho
     auto crho = m_view->getCRho();
-    if (!crho.empty()) {
-      wrapWithQuotes(crho);
-      options.push_back("CRho=" + crho);
-    }
+    if (!crho.empty())
+      options["CRho"] = QString::fromStdString(crho);
 
     // Add CAlpha
     auto calpha = m_view->getCAlpha();
-    if (!calpha.empty()) {
-      wrapWithQuotes(calpha);
-      options.push_back("CAlpha=" + calpha);
-    }
+    if (!calpha.empty())
+      options["CAlpha"] = QString::fromStdString(calpha);
 
     // Add CAp
     auto cap = m_view->getCAp();
-    if (!cap.empty()) {
-      wrapWithQuotes(cap);
-      options.push_back("CAp=" + cap);
-    }
+    if (!cap.empty())
+      options["CAp"] = QString::fromStdString(cap);
 
     // Add CPp
     auto cpp = m_view->getCPp();
-    if (!cpp.empty()) {
-      wrapWithQuotes(cpp);
-      options.push_back("CPp=" + cpp);
-    }
+    if (!cpp.empty())
+      options["CPp"] = QString::fromStdString(cpp);
 
     // Add polarisation corrections
     auto polCorr = m_view->getPolarisationCorrections();
     if (!polCorr.empty())
-      options.push_back("PolarizationAnalysis=" + polCorr);
+      options["PolarizationAnalysis"] = QString::fromStdString(polCorr);
 
     // Add scale factor
     auto scaleFactor = m_view->getScaleFactor();
     if (!scaleFactor.empty())
-      options.push_back("ScaleFactor=" + scaleFactor);
+      options["ScaleFactor"] = QString::fromStdString(scaleFactor);
 
     // Add momentum transfer limits
     auto qTransStep = m_view->getMomentumTransferStep();
     if (!qTransStep.empty()) {
-      options.push_back("MomentumTransferStep=" + qTransStep);
+      options["MomentumTransferStep"] = QString::fromStdString(qTransStep);
     }
 
     // Add start overlap
     auto startOv = m_view->getStartOverlap();
     if (!startOv.empty())
-      options.push_back("StartOverlap=" + startOv);
+      options["StartOverlap"] = QString::fromStdString(startOv);
 
     // Add end overlap
     auto endOv = m_view->getEndOverlap();
     if (!endOv.empty())
-      options.push_back("EndOverlap=" + endOv);
+      options["EndOverlap"] = QString::fromStdString(endOv);
 
     auto addReductionType = [this, &options]() -> void {
       auto reductionType = m_view->getReductionType();
       if (!reductionType.empty())
-        options.push_back("ReductionType=" + reductionType);
+        options["ReductionType"] = reductionType;
     };
 
     auto summationType = m_view->getSummationType();
     if (!summationType.empty()) {
-      options.push_back("SummationType=" + summationType);
+      options["SummationType"] = summationType;
 
       if (hasReductionTypes(summationType))
         addReductionType();
     }
 
     // Add transmission runs
-    auto transRuns = this->getTransmissionRuns(true);
-    if (!transRuns.empty()) {
-      std::vector<std::string> splitRuns;
-      boost::split(splitRuns, transRuns, boost::is_any_of(","));
-      options.push_back(splitRuns[0]);
-      if (splitRuns.size() > 1)
-        options.push_back(splitRuns[1]);
-    }
+    auto transRuns = this->getTransmissionRuns();
+    if (!transRuns.empty())
+      options["FirstTransmissionRun"] = QString::fromStdString(transRuns);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -240,112 +235,69 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     // Add integrated monitors option
     auto intMonCheck = m_view->getIntMonCheck();
     if (!intMonCheck.empty())
-      options.push_back("NormalizeByIntegratedMonitors=" + intMonCheck);
+      options["NormalizeByIntegratedMonitors"] =
+          QString::fromStdString(intMonCheck);
 
     // Add monitor integral min
     auto monIntMin = m_view->getMonitorIntegralMin();
     if (!monIntMin.empty())
-      options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
+      options["MonitorIntegrationWavelengthMin"] =
+          QString::fromStdString(monIntMin);
 
     // Add monitor integral max
     auto monIntMax = m_view->getMonitorIntegralMax();
     if (!monIntMax.empty())
-      options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+      options["MonitorIntegrationWavelengthMax"] =
+          QString::fromStdString(monIntMax);
 
     // Add monitor background min
     auto monBgMin = m_view->getMonitorBackgroundMin();
     if (!monBgMin.empty())
-      options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
+      options["MonitorBackgroundWavelengthMin"] =
+          QString::fromStdString(monBgMin);
 
     // Add monitor background max
     auto monBgMax = m_view->getMonitorBackgroundMax();
     if (!monBgMax.empty())
-      options.push_back("MonitorBackgroundWavelengthMax=" + monBgMax);
+      options["MonitorBackgroundWavelengthMax"] =
+          QString::fromStdString(monBgMax);
 
     // Add lambda min
     auto lamMin = m_view->getLambdaMin();
     if (!lamMin.empty())
-      options.push_back("WavelengthMin=" + lamMin);
+      options["WavelengthMin"] = QString::fromStdString(lamMin);
 
     // Add lambda max
     auto lamMax = m_view->getLambdaMax();
     if (!lamMax.empty())
-      options.push_back("WavelengthMax=" + lamMax);
+      options["WavelengthMax"] = QString::fromStdString(lamMax);
 
     // Add I0MonitorIndex
     auto I0MonitorIndex = m_view->getI0MonitorIndex();
     if (!I0MonitorIndex.empty())
-      options.push_back("I0MonitorIndex=" + I0MonitorIndex);
+      options["I0MonitorIndex"] = QString::fromStdString(I0MonitorIndex);
 
     // Add detector limits
     auto procInst = m_view->getProcessingInstructions();
-    if (!procInst.empty()) {
-      wrapWithQuotes(procInst);
-      options.push_back("ProcessingInstructions=" + procInst);
-    }
+    if (!procInst.empty())
+      options["ProcessingInstructions"] = QString::fromStdString(procInst);
 
     // Add correction type
     auto correctionType = m_view->getDetectorCorrectionType();
     if (!correctionType.empty())
-      options.push_back("DetectorCorrectionType=" + correctionType);
+      options["DetectorCorrectionType"] =
+          QString::fromStdString(correctionType);
   }
 
-  return boost::algorithm::join(options, ",");
+  return options;
 }
 
-/** Receives specified transmission runs from the view and loads them into the
-*ADS. Returns a string with transmission runs so that they are considered in the
-*reduction
+/** Gets the user-specified transmission runs from the view
 *
-* @param loadRuns :: If true, will try to load transmission runs as well
-* @return :: transmission run(s) as a string that will be used for the reduction
+* @return :: the transmission runs string
 */
-std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
-  auto transmissionRunsString = m_view->getTransmissionRuns();
-  if (transmissionRunsString.empty())
-    return "";
-
-  std::vector<std::string> transmissionRuns;
-  boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
-
-  if (loadRuns)
-    loadTransmissionRuns(transmissionRuns);
-
-  switch (transmissionRuns.size()) {
-  case 1:
-    return firstTransmissionRunLabelled(transmissionRuns);
-  case 2:
-    return firstTransmissionRunLabelled(transmissionRuns) + "," +
-           secondTransmissionRunLabelled(transmissionRuns);
-  default:
-    throw std::invalid_argument("Only one transmission run or two "
-                                "transmission runs separated by ',' "
-                                "are allowed.");
-  }
-}
-
-std::string ReflSettingsPresenter::firstTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "FirstTransmissionRun=" + runNumbers[0];
-}
-
-std::string ReflSettingsPresenter::secondTransmissionRunLabelled(
-    std::vector<std::string> const &runNumbers) const {
-  return "SecondTransmissionRun=" + runNumbers[1];
-}
-
-void ReflSettingsPresenter::loadTransmissionRuns(
-    std::vector<std::string> const &transmissionRuns) const {
-  for (const auto &run : transmissionRuns) {
-    if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
-      // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("LoadISISNexus");
-      alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-      alg->execute();
-    }
-  }
+std::string ReflSettingsPresenter::getTransmissionRuns() const {
+  return m_view->getTransmissionRuns();
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -410,16 +362,6 @@ void ReflSettingsPresenter::getExpDefaults() {
   }
 
   m_view->setExpDefaults(defaults);
-}
-
-/** Wraps string with quote marks if it does not already have them
-* @param str :: [input] The string to be wrapped
-*/
-void ReflSettingsPresenter::wrapWithQuotes(std::string &str) const {
-  if (str.front() != '\"')
-    str = "\"" + str;
-  if (str.back() != '\"')
-    str = str + "\"";
 }
 
 /** Fills instrument settings with default values
