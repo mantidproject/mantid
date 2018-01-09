@@ -68,12 +68,13 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
-  QString getPreprocessingProperties() const override;
   /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  QString getPreprocessingOptionsAsString() const override;
-  QString getProcessingOptions() const override;
-  QString getPostprocessingOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getPreprocessingOptions() const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getProcessingOptions() const override;
+  QString getPostprocessingOptionsAsString() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
   /// Handle data reduction paused/resumed

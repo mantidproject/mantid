@@ -5,6 +5,8 @@
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
 
+using namespace MantidQt::MantidWidgets::DataProcessor;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -65,7 +67,7 @@ std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
-  return m_settingsPresenter->getTransmissionRuns(group, false);
+  return m_settingsPresenter->getTransmissionRuns(group);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -74,7 +76,7 @@ std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
 *options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
@@ -87,7 +89,7 @@ std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 *options
 * @return :: Global processing options
 */
-std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
+OptionsQMap ReflMainWindowPresenter::getReductionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
 
