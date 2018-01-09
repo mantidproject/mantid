@@ -70,10 +70,10 @@ private:
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
-  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options, const QString &key,
-                     const QString &value) const;
-  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options, const QString &key,
-                     const std::string &value) const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const QString &value) const;
+  void addIfNotEmpty(MantidWidgets::DataProcessor::OptionsQMap &options,
+                     const QString &key, const std::string &value) const;
 
   /// The view we are managing
   IReflSettingsView *m_view;
