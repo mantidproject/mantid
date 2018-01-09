@@ -27,10 +27,6 @@ class PythonCodeExecution(object):
     strings of Python code. It supports
     reporting progress updates in asynchronous execution
     """
-    on_success = None
-    on_error = None
-    on_progress = None
-
     def __init__(self,success_cb=None, error_cb=None,
                  progress_cb=None):
         """
@@ -48,11 +44,24 @@ class PythonCodeExecution(object):
             def success_cb_wrap(_): pass
         self.on_success = success_cb_wrap
         self.on_error = error_cb
-
         self.on_progress_update = progress_cb
 
-    def execute_async(self, code_str, user_globals,
-                      user_locals):
+        self._globals_ns, self._locals_ns = None, None
+        self.reset_context()
+
+    @property
+    def globals_ns(self):
+        return self._globals_ns
+
+    @property
+    def locals_ns(self):
+        return self._locals_ns
+
+    def reset_context(self):
+        # create new context for execution
+        self._globals_ns, self._locals_ns = {}, {}
+
+    def execute_async(self, code_str):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
@@ -64,14 +73,13 @@ class PythonCodeExecution(object):
         """
         # Stack is chopped on error to avoid the  AsyncTask.run->_do_exec->exec calls appearing
         # as these are not useful in this context
-        t = AsyncTask(self.execute, args=(code_str, user_globals, user_locals),
+        t = AsyncTask(self.execute, args=(code_str,),
                       stack_chop=3,
                       success_cb=self.on_success, error_cb=self.on_error)
         t.start()
         return t
 
-    def execute(self, code_str, user_globals,
-                user_locals):
+    def execute(self, code_str):
         """Execute the given code on the calling thread
         within the provided context.
 
@@ -82,24 +90,23 @@ class PythonCodeExecution(object):
         """
         # execute whole string if no reporting is required
         if self.on_progress_update is None:
-            self._do_exec(code_str, user_globals, user_locals)
+            self._do_exec(code_str)
         else:
-            self._execute_as_blocks(code_str, user_globals, user_locals,
-                                    self.on_progress_update)
+            self._execute_as_blocks(code_str)
 
-    def _execute_as_blocks(self, code_str, user_globals, user_locals,
-                           progress_cb):
+    def _execute_as_blocks(self, code_str):
         """Execute the code in the supplied context and report the progress
         using the supplied callback"""
         # will raise a SyntaxError if any of the code is invalid
         compile(code_str, "<string>", mode='exec')
 
+        progress_cb = self.on_progress_update
         for block in code_blocks(code_str):
             progress_cb(block.lineno)
-            self._do_exec(block.code_obj, user_globals, user_locals)
+            self._do_exec(block.code_obj)
 
-    def _do_exec(self, code, user_globals, user_locals):
-        exec (code, user_globals, user_locals)
+    def _do_exec(self, code):
+        exec (code, self.globals_ns, self.locals_ns)
 
 
 class CodeBlock(object):

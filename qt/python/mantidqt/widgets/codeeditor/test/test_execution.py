@@ -45,36 +45,37 @@ class PythonCodeExecutionTest(unittest.TestCase):
         def on_progess_update(self, lineno):
             self.lines_received.append(lineno)
 
-        def on_error(self, exc):
-            self.error_cb_called = True
-            self.task_exc = exc
+    def test_default_construction_yields_empty_context(self):
+        executor = PythonCodeExecution()
+        self.assertEqual(0, len(executor.globals_ns))
+        self.assertEqual(0, len(executor.locals_ns))
+
+    def test_reset_context_clears_globals_and_locals(self):
+        executor = PythonCodeExecution()
+        executor.execute("x = 1")
+        self.assertEqual(1, len(executor.globals_ns))
+        self.assertEqual(1, len(executor.locals_ns))
+        executor.reset_context()
+        self.assertEqual(0, len(executor.globals_ns))
+        self.assertEqual(0, len(executor.locals_ns))
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
     # ---------------------------------------------------------------------------
-    def test_execute_places_output_in_provided_mapping_object(self):
-        code = "_local=100"
-        namespace = {}
-        self._verify_serial_execution_successful(code, namespace, namespace)
-        self.assertEquals(100, namespace['_local'])
-        namespace = {}
-        self._verify_async_execution_successful(code, namespace, namespace)
-        self.assertEquals(100, namespace['_local'])
-
     def test_execute_places_output_in_locals_mapping_if_different_to_globals(self):
         code = "_local=100"
-        user_globals, user_locals = {}, {}
-        self._verify_serial_execution_successful(code, user_globals, user_locals)
+        user_globals, user_locals = self._verify_serial_execution_successful(code)
         self.assertEquals(100, user_locals['_local'])
-        user_globals, user_locals = {}, {}
-        self._verify_async_execution_successful(code, user_globals, user_locals)
+        self.assertTrue('_local' not in user_globals)
+        user_globals, user_locals = self._verify_async_execution_successful(code)
         self.assertEquals(100, user_locals['_local'])
+        self.assertTrue('_local' not in user_globals)
 
     def test_execute_async_calls_success_cb_on_completion(self):
         code = "if:"
         recv = PythonCodeExecutionTest.Receiver()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
 
     # ---------------------------------------------------------------------------
@@ -82,13 +83,13 @@ class PythonCodeExecutionTest(unittest.TestCase):
     # ---------------------------------------------------------------------------
     def test_execute_raises_syntax_error_on_bad_code(self):
         code = "if:"
-        self._verify_failed_serial_execute(SyntaxError, code, {}, {})
+        self._verify_failed_serial_execute(SyntaxError, code)
 
     def test_execute_async_calls_error_cb_on_syntax_error(self):
         code = "if:"
         recv = PythonCodeExecutionTest.Receiver()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         self.assertTrue(recv.error_cb_called)
         self.assertFalse(recv.success_cb_called)
@@ -99,7 +100,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
     def test_execute_returns_failure_on_runtime_error_and_captures_exception(self):
         code = "x = _local + 1"
-        self._verify_failed_serial_execute(NameError, code, {}, {})
+        self._verify_failed_serial_execute(NameError, code)
 
     def test_execute_async_returns_failure_on_runtime_error_and_captures_expected_stack(self):
         code = """x = + 1
@@ -113,7 +114,7 @@ foo()
 """
         recv = PythonCodeExecutionTest.Receiver()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         self.assertTrue(recv.error_cb_called)
         self.assertFalse(recv.success_cb_called)
@@ -135,7 +136,7 @@ foo()
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
                                        progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         self.assertEqual(0, len(recv.lines_received))
 
@@ -146,7 +147,7 @@ y =
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
                                        progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         self.assertFalse(recv.success_cb_called)
         self.assertTrue(recv.error_cb_called)
@@ -157,7 +158,7 @@ y =
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
                                        progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         if not recv.success_cb_called:
             self.assertTrue(recv.error_cb_called)
@@ -172,7 +173,7 @@ y = 2
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
                                        progress_cb=recv.on_progess_update)
-        task = executor.execute_async(code, {}, {})
+        task = executor.execute_async(code)
         task.join()
         if not recv.success_cb_called:
             self.assertTrue(recv.error_cb_called)
@@ -194,13 +195,13 @@ squared = sum*sum
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,
                                        progress_cb=recv.on_progess_update)
-        context = {}
-        task = executor.execute_async(code, context, context)
+        task = executor.execute_async(code)
         task.join()
         if not recv.success_cb_called:
             self.assertTrue(recv.error_cb_called)
             self.fail("Execution failed with error:\n" + str(recv.task_exc))
 
+        context = executor.locals_ns
         self.assertEqual(20, context['sum'])
         self.assertEqual(20*20, context['squared'])
         self.assertEqual(1, context['x'])
@@ -209,21 +210,20 @@ squared = sum*sum
     # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
-    def _verify_serial_execution_successful(self, code, globals_ns,
-                                            locals_ns):
+    def _verify_serial_execution_successful(self, code):
         executor = PythonCodeExecution()
-        executor.execute(code, globals_ns, locals_ns)
+        executor.execute(code)
+        return executor.globals_ns, executor.locals_ns
 
-    def _verify_async_execution_successful(self, code, globals_ns,
-                                           locals_ns):
+    def _verify_async_execution_successful(self, code):
         executor = PythonCodeExecution()
-        task = executor.execute_async(code, globals_ns, locals_ns)
+        task = executor.execute_async(code)
         task.join()
+        return executor.globals_ns, executor.locals_ns
 
-    def _verify_failed_serial_execute(self, expected_exc_type, code,
-                                      globals_ns, locals_ns):
+    def _verify_failed_serial_execute(self, expected_exc_type, code):
         executor = PythonCodeExecution()
-        self.assertRaises(expected_exc_type, executor.execute, code, globals_ns, locals_ns)
+        self.assertRaises(expected_exc_type, executor.execute, code)
 
 
 if __name__ == "__main__":
