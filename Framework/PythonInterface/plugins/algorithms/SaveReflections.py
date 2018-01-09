@@ -1,10 +1,38 @@
 import numpy as np
-from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, IPeaksWorkspaceProperty
+from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, ITableWorkspaceProperty
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import SaveHKL
 
 # List of file format names supported by this algorithm
 SUPPORTED_FORMATS = ["Fullprof", "GSAS", "Jana", "SHELX"]
+NUM_PEAKSWS_COLUMNS = 17
+
+
+def has_modulated_indexing(workspace):
+    """Check if this workspace has more than 3 indicies
+
+    :params: workspace :: the workspace to check
+    :returns: True if the workspace > 3 indicies else False
+    """
+    return workspace.columnCount() > NUM_PEAKSWS_COLUMNS
+
+
+def num_additional_indicies(workspace):
+    """Check if this workspace has more than 3 indicies
+
+    :params: workspace :: the workspace count indicies in
+    :returns: the number of additional indicies present in the workspace
+    """
+    return workspace.columnCount() - NUM_PEAKSWS_COLUMNS
+
+
+def get_additional_index_names(workspace):
+    """Get the names of the additional indicies to export
+
+    :params: workspace :: the workspace to get column names from
+    :returns: the names of any additional columns in the workspace
+    """
+    return ["m{}".format(i+1) for i in range(num_additional_indicies(workspace))]
 
 
 class SaveReflections(PythonAlgorithm):
@@ -23,7 +51,7 @@ class SaveReflections(PythonAlgorithm):
                              direction=Direction.Input),
                              doc="File with the data from a phonon calculation.")
 
-        self.declareProperty(IPeaksWorkspaceProperty("InputWorkspace", '', Direction.Input),
+        self.declareProperty(ITableWorkspaceProperty("InputWorkspace", '', Direction.Input),
                              doc="The name of the peaks worksapce to save")
 
         self.declareProperty(name="Format",
@@ -86,10 +114,12 @@ class FullprofFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
+        num_hkl = 3+num_additional_indicies(workspace)
         f_handle.write(workspace.getTitle())
-        f_handle.write("(3i4,2f12.2,i5,4f10.4)\n")
+        f_handle.write("({}i4,2f12.2,i5,4f10.4)\n".format(num_hkl))
         f_handle.write("  0 0 0\n")
-        f_handle.write("#  h   k   l      Fsqr       s(Fsqr)   Cod   Lambda\n")
+        names =  "".join(["  {}".format(name) for name in get_additional_index_names(workspace)])
+        f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(names))
 
     def write_peaks(self, f_handle, workspace):
         """Write all the peaks in the workspace to file.
@@ -98,8 +128,15 @@ class FullprofFormat(object):
         :param workspace: the PeaksWorkspace to save to file.
         """
         for i, peak in enumerate(workspace):
-            data = (peak['h'],peak['k'],peak['l'],peak['Intens'],peak['SigInt'],i+1,peak['Wavelength'])
-            line = "{:>4.0f}{:>4.0f}{:>4.0f}{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
+            data = [peak['h'],peak['k'],peak['l']]
+            data.extend([peak[name] for name in get_additional_index_names(workspace)])
+            
+            hkls = "".join(["{:>4.0f}".format(item) for item in data])
+            
+            data = (peak['Intens'],peak['SigInt'],i+1,peak['Wavelength'])
+            line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
+            line = "".join([hkls, line])
+            
             f_handle.write(line)
 
 # ------------------------------------------------------------------------------------------------------
@@ -109,7 +146,7 @@ class JanaFormat(object):
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Jana2006 crystallographic refinement program.
 
-    This is an 11 column file format consisting of H, K, L, intensity, sigma,
+    This is an 11 column file format consisting of H, K, L, intensity, sigma, 
     crystal domain, wavelength, 2*theta, transmission, absorption weighted path length (Tbar),
     and thermal diffuse scattering correction (TDS).
 
@@ -122,6 +159,8 @@ class JanaFormat(object):
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
         """
+        if has_modulated_indexing(workspace):
+            raise RuntimeError("Cannot currently save modulated structures to Jana format")
         self._cache_instrument_params(workspace)
         with open(file_name, 'w') as f_handle:
             self.write_header(f_handle, workspace)
@@ -146,8 +185,14 @@ class JanaFormat(object):
         :param f_handle: handle to the file to write to.
         :param workspace: the PeaksWorkspace to save to file.
         """
-        column_names = ["h", "k", "l", "Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"]
-        column_format = "#{:>4}{:>4}{:>4}{:>12}{:>12}{:>5}{:>10}{:>10}{:>10}{:>10}{:>10}\n"
+        column_names = ["h", "k", "l"]
+        column_names.extend(get_additional_index_names(workspace))
+        column_names.extend(["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])
+        
+        column_format = "#{:>4}{:>4}{:>4}"
+        column_format += "".join(["{:>4}" for _ in range(num_additional_indicies(workspace))])
+        column_format += "{:>12}{:>12}{:>5}{:>10}{:>10}{:>10}{:>10}{:>10}\n"
+
         f_handle.write(column_format.format(*column_names))
         for row in workspace:
             self.write_peak(f_handle, row)
@@ -158,7 +203,9 @@ class JanaFormat(object):
         :param f_handle: handle to the file to write to.
         :param peak: the peak object to write to the file.
         """
+        ms = ["{: >5.0f}".format(peak[name]) for name in get_additional_index_names(workspace)]
         f_handle.write("{h: >5.0f}{k: >5.0f}{l: >5.0f}".format(**peak))
+        f_handle.write("".join(ms))
         f_handle.write("{Intens: >12.2f}".format(**peak))
         f_handle.write("{SigInt: >12.2f}".format(**peak))
         f_handle.write("{: >5.0f}".format(1))
@@ -204,6 +251,8 @@ class SaveHKLFormat(object):
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
         """
+        if has_modulated_indexing(workspace):
+            raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
         SaveHKL(Filename=file_name, InputWorkspace=workspace, OutputWorkspace=workspace.name())
 
 
