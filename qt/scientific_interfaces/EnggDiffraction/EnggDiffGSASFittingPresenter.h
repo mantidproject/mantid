@@ -29,9 +29,14 @@ public:
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
 private:
+  void processShutDown();
+  void processStart();
+
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
   std::unique_ptr<IEnggDiffGSASFittingView> m_view;
+
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces

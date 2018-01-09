@@ -12,7 +12,8 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
-    Start, ///< Start and setup the interface
+    ShutDown, ///< Shut down the interface
+    Start,    ///< Start and setup the interface
   };
 
   /**
