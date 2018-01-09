@@ -3,21 +3,107 @@
 
 #include "IndirectDataAnalysisTab.h"
 
+#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+
+#include <boost/variant.hpp>
+
+namespace Ui {
+class IqtFit;
+class ConvFit;
+class MSDFit;
+class JumpFit;
+} // namespace Ui
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
+  using UIForm =
+      boost::variant<Ui::IqtFit *, Ui::ConvFit *, Ui::MSDFit *, Ui::JumpFit *>;
 
 public:
   /// Constructor
   IndirectFitAnalysisTab(QWidget *parent = nullptr);
 
-protected:
-  void setFitFunctions(const QVector<QString> &fitFunctions);
+  Mantid::API::IFunction_sptr background() const;
 
-  void setPropertyFunctions(const QVector<QString> &functions);
+  Mantid::API::IFunction_sptr model() const;
+
+  size_t numberOfCustomFunctions(const std::string &functionName) const;
+
+  double startX() const;
+
+  double endX() const;
+
+  double parameterValue(const std::string &functionName,
+                        const std::string &parameterName);
+
+  bool emptyFitFunction() const;
+
+  const std::string backgroundName() const;
+
+  void setParameterValue(const std::string &functionName,
+                         const std::string &parameterName, double value);
+
+  void addCheckBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      bool defaultValue = false);
+
+  void addSpinnerFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions,
+      int minimum = 0, int maximum = 10, int defaultValue = 0);
+
+  void addComboBoxFunctionGroup(
+      const QString &groupName,
+      const std::vector<Mantid::API::IFunction_sptr> &functions);
+
+  void setBackgroundOptions(const QStringList &backgrounds);
+
+  bool boolSettingValue(const QString &settingKey) const;
+
+  int intSettingValue(const QString &settingKey) const;
+
+  double doubleSettingValue(const QString &settingKey) const;
+
+  QString enumSettingValue(const QString &settingKey) const;
+
+  void addBoolCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            bool defaultValue = false);
+
+  void addDoubleCustomSetting(const QString &settingKey,
+                              const QString &settingName,
+                              double defaultValue = 0);
+
+  void addIntCustomSetting(const QString &settingKey,
+                           const QString &settingName, int defaultValue = 0);
+
+  void addEnumCustomSetting(const QString &settingKey,
+                            const QString &settingName,
+                            const QStringList &options);
+
+  void addOptionalDoubleSetting(const QString &settingKey,
+                                const QString &settingName,
+                                const QString &optionKey,
+                                const QString &optionName, bool enabled = false,
+                                double defaultValue = 0);
+
+  QHash<QString, double> fitParameterValues() const;
+
+  virtual QHash<QString, double> createDefaultValues() const;
+
+  QHash<QString, double> defaultParameterValues() const;
+
+  virtual Mantid::API::IFunction_sptr fitFunction() const;
+
+  virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const;
+
+protected:
+  void addPropertyBrowserToUI(UIForm form);
 
   void setDefaultPropertyValue(const QString &propertyName,
                                const double &propertyValue);
@@ -26,37 +112,7 @@ protected:
 
   bool hasDefaultPropertyValue(const QString &propertyName);
 
-  bool hasParameterValue(const QString &propertyName,
-                         const size_t &spectrumNumber);
-
   void fitAlgorithmComplete(const std::string &paramWSName);
-
-  void fitAlgorithmComplete(const std::string &paramWSName,
-                            const QHash<QString, QString> &propertyToParameter);
-
-  QtProperty *createFunctionProperty(const QString &functionName,
-                                     const bool &addParameters = true);
-
-  QtProperty *createFunctionProperty(QtProperty *functionGroup,
-                                     const bool &addParameters = true);
-
-  QVector<QVector<QString>>
-  getFunctionParameters(const QVector<QString> &functionNames) const;
-
-  QVector<QString> getFunctionParameters(const QString &functionName) const;
-
-  virtual Mantid::API::IFunction_sptr
-  getFunction(const QString &functionName) const;
-
-  void fixSelectedItem();
-
-  void unFixSelectedItem();
-
-  bool isFixable(QtProperty const *prop) const;
-
-  bool isFixed(QtProperty const *prop) const;
-
-  void fitContextMenu(const QString &menuName);
 
   void saveResult(const std::string &resultName);
 
@@ -64,23 +120,42 @@ protected:
 
   void fillPlotTypeComboBox(QComboBox *comboBox);
 
-  void
-  updatePlot(const std::string &workspaceName,
-             MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-             MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) override;
+  void updatePlot(const std::string &workspaceName,
+                  MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidWidgets::PreviewPlot *diffPreviewPlot) override;
 
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  QtTreePropertyBrowser *m_propertyTree;
+  void plotGuess(MantidWidgets::PreviewPlot *previewPlot);
+
+  virtual Mantid::API::IAlgorithm_sptr singleFitAlgorithm();
+
+  virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm();
 
 protected slots:
-  virtual void algorithmComplete(bool error) = 0;
+  void setSelectedSpectrum(int spectrum) override;
 
-  void updateProperties(int specNo);
+  virtual void startXChanged(double startX) = 0;
+
+  virtual void endXChanged(double endX) = 0;
+
+  void xMinSelected(double xMin);
+
+  void xMaxSelected(double xMax);
+
+  virtual void rangeChanged(double xMin, double xMax) = 0;
+
+  void executeSingleFit();
+
+  void executeSequentialFit();
+
+  virtual void algorithmComplete(bool error) = 0;
 
   void newInputDataLoaded(const QString &wsName);
 
   void clearBatchRunnerSlots();
+
+  void fitFunctionChanged();
 
   virtual void updatePreviewPlots() = 0;
 
@@ -88,52 +163,16 @@ private:
   /// Overidden by child class.
   void setup() override = 0;
   void run() override = 0;
-  bool validate() override = 0;
   void loadSettings(const QSettings &settings) override = 0;
+  virtual void plotGuess() = 0;
   virtual void disablePlotGuess() = 0;
   virtual void enablePlotGuess() = 0;
+  QSet<QString> parameterNames();
 
-  /// Can be overidden by child class.
-  virtual QString addPrefixToParameter(const QString &parameter,
-                                       const QString &functionName,
-                                       const int &functionNumber) const;
-  virtual QString addPrefixToParameter(const QString &parameter,
-                                       const QString &functionName) const;
-
-  QVector<QVector<QString>>
-  addPrefixToParameters(const QVector<QVector<QString>> &parameters,
-                        const QVector<QString> &functionNames) const;
-
-  QVector<QString> addPrefixToParameters(const QVector<QString> &parameters,
-                                         const QString &functionName) const;
-
-  QHash<QString, QString>
-  createPropertyToParameterMap(const QVector<QString> &functionNames) const;
-
-  QHash<QString, QString> createPropertyToParameterMap(
-      const QVector<QString> &functionNames,
-      const QVector<QVector<QString>> &parameters,
-      const QVector<QVector<QString>> &parametersWithPrefix) const;
-
-  QHash<QString, QString> createPropertyToParameterMap(
-      const QString &functionName, const QVector<QString> &parameters,
-      const QVector<QString> &parametersWithPrefix) const;
-
-  QHash<QString, QHash<size_t, double>> combineParameterValues(
-      const QHash<QString, QHash<size_t, double>> &parameterValues1,
-      const QHash<QString, QHash<size_t, double>> &parameterValues2);
-
-  void updateProperty(const QString &propertyName, const size_t &index);
-
-  void clearFunctionProperties();
-
-  QtStringPropertyManager *m_stringManager;
-  QMap<QtProperty *, QtProperty *> m_fixedProps;
-  QVector<QString> m_fitFunctions;
-  QVector<QString> m_propertyFunctions;
-  QHash<QString, QHash<size_t, double>> m_parameterValues;
-  QHash<QString, QString> m_propertyToParameter;
-  QMap<QString, double> m_defaultPropertyValues;
+  Mantid::API::IFunction_sptr m_fitFunction;
+  QHash<size_t, QHash<QString, double>> m_parameterValues;
+  QHash<QString, double> m_defaultPropertyValues;
+  MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   bool m_appendResults;
 };
 
