@@ -264,6 +264,7 @@ class SANSSuperImpose(PythonAlgorithm):
             k = p[0]
         else:
             k, b = p
+        logger.debug('_peval with p=%s K=%s B=%s' % (p, k, b))
         return k * f(x) - b
 
     @property
@@ -292,37 +293,39 @@ class SANSSuperImpose(PythonAlgorithm):
     def _fitting(self, input_ws_reference_name):
         
         progress = Progress(self, start=0.0, end=1.0, nreports=len(self.data.items()))
-        for k, v in self.data.items():
-            logger.notice("Fiting WS %s against %s." %(k, input_ws_reference_name))
-            progress.report('Running Fitting for workspace: %s' % k)
-            if k != input_ws_reference_name:
-
+        for ws_name, ws_values in self.data.items():
+            logger.notice("Fiting WS %s against %s." %(ws_name, input_ws_reference_name))
+            progress.report('Running Fitting for workspace: %s' % ws_name)
+            if ws_name != input_ws_reference_name:
+                k=self.k
+                b=self.b
+                
                 logger.debug('Running Fitting for workspace %s with initial %s (K=%s, B=%s)' %
-                    (k, input_ws_reference_name, self.k, self.b))
+                    (ws_name, input_ws_reference_name, k, b))
 
                 plsq, cov, infodict, mesg, ier = optimize.leastsq(
                     self._residuals,
-                    ([0.1,0.1] if self.k is None and self.b is None else [0.1]), # guess
+                    ([0.1,0.1] if k is None and b is None else [0.1]), # guess
                     args=(
                         # _residuals(p, x, sigma, f_target, f_to_optimise, k=None, b=None):
-                        v['x_qrange'],
-                        v['e_qrange'],
+                        ws_values['x_qrange'],
+                        ws_values['e_qrange'],
                         self.data[input_ws_reference_name]['f'], # reference interpolation function
-                        v['f'],
-                        self.k, self.b),
+                        ws_values['f'],
+                        k, b),
                     full_output=True,
                 )
                 
-                y_qrange_fit = self._peval(v['x_qrange'], v['f'], plsq, k=self.k, b=self.b)
+                y_qrange_fit = self._peval(ws_values['x_qrange'], ws_values['f'], plsq, k=k, b=b)
                 # Goodness of Fit Estimator
                 ss_err = (infodict['fvec']**2).sum() # infodict['fvec'] is the array of residuals:
                 ss_tot = ((y_qrange_fit-y_qrange_fit.mean())**2).sum()
                 r_squared = 1 - (ss_err/ss_tot)
                 logger.debug("r_squared=%s"%r_squared)
 
-                y_trimmed_fit = self._peval(v['x_trimmed'], v['f'], plsq, k=self.k, b=self.b)
-                y_fit = self._peval(v['x'], v['f'], plsq, k=self.k, b=self.b)
-                v.update({
+                y_trimmed_fit = self._peval(ws_values['x_trimmed'], ws_values['f'], plsq, k=k, b=b)
+                y_fit = self._peval(ws_values['x'], ws_values['f'], plsq, k=k, b=b)
+                ws_values.update({
                     'y_qrange_fit': y_qrange_fit,
                     'y_trimmed_fit': y_trimmed_fit,
                     'y_fit': y_fit,
@@ -331,10 +334,10 @@ class SANSSuperImpose(PythonAlgorithm):
                     'r_squared': r_squared,
                 })
             else:
-                v.update({
-                    'y_qrange_fit': v['f'](v['x_qrange']),
-                    'y_trimmed_fit': v['f'](v['x_trimmed']),
-                    'y_fit': v['f'](v['x']),
+                ws_values.update({
+                    'y_qrange_fit': ws_values['f'](ws_values['x_qrange']),
+                    'y_trimmed_fit': ws_values['f'](ws_values['x_trimmed']),
+                    'y_fit': ws_values['f'](ws_values['x']),
                     'plsq': None,
                     'cov' : None,
                     'r_squared': 0,
