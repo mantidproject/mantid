@@ -73,12 +73,18 @@ public:
   /// Destructor
   virtual ~MeshObject();
   /// Clone
-  IObject *clone() const override { return new MeshObject(*this); }
+  IObject *clone() const override { 
+    if(size(m_vertices) > 0)
+      return new MeshObject(*this); 
+    else {
+      throw ("Unintialised MeshObject cannot be copied");
+    }
+  }
 
-  void initialize(int nPts, int nFaces, double *points,
-    int *faces) const;
+  void initialize(const int nPts, const int nFaces, const double *points,
+    int *faces);
 
-  void initialize(std::vector<int> &faces, std::vector<Mantid::Kernel::V3D> &vertices) const;
+  void initialize(const std::vector<int> &faces, const std::vector<Mantid::Kernel::V3D> &vertices);
 
   void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
@@ -157,6 +163,10 @@ private:
 
   /// Calculate bounding box using object's geometric data
   void calcBoundingBoxByGeometry();
+
+  /// Contents
+  std::vector<int> m_triangles;
+  std::vector < Kernel::V3D > m_vertices;
 
   /// Object's bounding box
   BoundingBox m_boundingBox;

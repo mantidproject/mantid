@@ -50,7 +50,8 @@ MeshObject::MeshObject() : MeshObject("") {}
 
 MeshObject::MeshObject(const std::string &string)
   : m_boundingBox(), m_object_number(0), m_handler(),
-  m_string(string), m_id(), m_material()
+  m_string(string), m_id(), m_material(),
+  m_triangles(), m_vertices()
 {
 }
 
@@ -80,8 +81,8 @@ MeshObject::~MeshObject() = default;
 /*
  * Initialise in CacheGeogmetryRenderer format
  */
-void MeshObject::initialize(int nPts, int nFaces, double *points,
-  int *faces) const {
+void MeshObject::initialize(const int nPts, const int nFaces, const double *points,
+  int *faces) {
 
   std::vector<V3D> vertices;
   for (int i=0; i<nPts; ++i) {
@@ -100,8 +101,14 @@ void MeshObject::initialize(int nPts, int nFaces, double *points,
 /*
  * Initialise with vectors
  */
-void MeshObject::initialize(std::vector<int> &faces, std::vector<V3D> &vertices) const {
-
+void MeshObject::initialize(const std::vector<int> &faces, const std::vector<V3D> &vertices){
+  if (m_vertices.size() == 0) {
+    m_vertices = vertices;
+    m_triangles = faces;
+  }
+  else {
+    throw std::runtime_error("MeshObject already initialized");
+  }
 }
 
 /**
