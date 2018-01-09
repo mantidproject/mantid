@@ -17,7 +17,6 @@
 #include <QMap>
 #include <QMetaType>
 #include <QHash>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -46,10 +45,10 @@ class MantidTreeWidgetItem;
 class MantidTreeWidget;
 
 /**
-\class  QWorkspaceDockView
+\class  WorkspaceTreeWidget
 \author Lamar Moore
 \date   24-08-2016
-\version 1.0
+\version 1.1
 
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -74,8 +73,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
     : public QWidget,
-      public IWorkspaceDockView,
-      public boost::enable_shared_from_this<WorkspaceTreeWidget> {
+      public IWorkspaceDockView {
   Q_OBJECT
 public:
   explicit WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
