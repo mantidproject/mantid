@@ -563,26 +563,13 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
                                        double plotCoordsPointY) {
   V3D plotCoordsPoint(plotCoordsPointX, plotCoordsPointY,
                       m_slicePoint.slicePoint());
-  V3D hkl = m_transform->transformBack(plotCoordsPoint);
+  V3D position = m_transform->transformBack(plotCoordsPoint);
 
   Mantid::API::IPeaksWorkspace_sptr peaksWS =
       boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
-  Mantid::API::IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("AddPeakHKL");
-  alg->setChild(true);
-  alg->setRethrows(true);
-  alg->initialize();
-  alg->setProperty("Workspace", peaksWS);
-  alg->setProperty("HKL", std::vector<double>(hkl));
-
-  // Execute the algorithm
-  try {
-    alg->execute();
-  } catch (...) {
-    g_log.warning("ConcretePeaksPresenter: Could not add the peak. Make sure "
-                  "that it is added within a valid workspace region");
-  }
+  const auto frame = m_transform->getCoordinateSystem();
+  peaksWS->addPeak(position, frame);
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -594,11 +581,7 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   // Upstream controls need to be regenerated.
   this->informOwnerUpdate();
 
-  return alg->isExecuted();
-}
-
-bool ConcretePeaksPresenter::hasPeakAddMode() const {
-  return m_hasAddPeaksMode;
+  return true;
 }
 
 std::vector<size_t>
