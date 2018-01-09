@@ -370,18 +370,18 @@ public:
                       peak->getHKL());
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
 
     auto detector = peak->getDetector();
     TSM_ASSERT("No detector", detector);
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong", params.detectorPosition,
-                      detector->getPos());
-    TSM_ASSERT_EQUALS("Goniometer has not been set properly", params.goniometer.getR(),
-                      peak->getGoniometerMatrix());
+    TSM_ASSERT_EQUALS("Thie detector position is wrong",
+                      params.detectorPosition, detector->getPos());
+    TSM_ASSERT_EQUALS("Goniometer has not been set properly",
+                      params.goniometer.getR(), peak->getGoniometerMatrix());
 
     // Clean up.
     delete peak;
@@ -397,8 +397,8 @@ public:
                       peak->getHKL());
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
   }
 
   void test_create_peak_with_position_qsample() {
@@ -409,8 +409,8 @@ public:
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
   }
 
   void test_create_peak_with_position_qlab() {
@@ -421,8 +421,8 @@ public:
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak->getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak->getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak->getQSampleFrame());
   }
 
   void test_add_peak_with_position_hkl() {
@@ -438,8 +438,8 @@ public:
                       peak.getHKL());
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
   }
 
   void test_add_peak_with_position_qlab() {
@@ -453,8 +453,8 @@ public:
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
   }
 
   void test_add_peak_with_position_qsample() {
@@ -468,8 +468,8 @@ public:
 
     TSM_ASSERT_EQUALS("New peak should have QLab we expected.", params.qLab,
                       peak.getQLabFrame());
-    TSM_ASSERT_EQUALS("New peak should have QSample we expected.", params.qSample,
-                      peak.getQSampleFrame());
+    TSM_ASSERT_EQUALS("New peak should have QSample we expected.",
+                      params.qSample, peak.getQSampleFrame());
   }
 
   /**
@@ -601,14 +601,13 @@ private:
         1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
                               // vectors are identical.
 
-
     V3D qSample = Rinv * qLab;
     V3D hkl = qSample / (2 * M_PI); // Given our settings above, this is the
-                                 // simplified relationship between qLab and
-                                 // hkl.
+                                    // simplified relationship between qLab and
+                                    // hkl.
 
-    return PeakParameters {minimalInstrument, goniometer, orientedLattice,
-          hkl, qLab, qSample, detectorPos};
+    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
+                          qLab, qSample, detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {

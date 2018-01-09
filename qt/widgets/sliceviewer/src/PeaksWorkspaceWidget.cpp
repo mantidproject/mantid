@@ -34,8 +34,7 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
     const std::string &coordinateSystem,
     PeakViewColor defaultForegroundPeakViewColor,
-    PeakViewColor defaultBackgroundPeakViewColor,
-    PeaksViewer *parent)
+    PeakViewColor defaultBackgroundPeakViewColor, PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
       m_foregroundPeakViewColor(defaultForegroundPeakViewColor),
       m_backgroundPeakViewColor(defaultBackgroundPeakViewColor),

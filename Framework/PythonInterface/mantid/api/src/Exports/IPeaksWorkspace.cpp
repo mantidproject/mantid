@@ -38,9 +38,7 @@ IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
       detectorDistance);
 }
 /// Create a peak via it's QLab value from a list or numpy array
-void addPeak(IPeaksWorkspace &self, const IPeak& peak) {
-  self.addPeak(peak);
-}
+void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
 }
 
 void export_IPeaksWorkspace() {

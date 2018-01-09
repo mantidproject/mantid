@@ -188,8 +188,8 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
  * @param position :: position on the peak in the specified coordinate frame
  * @param frame :: the coordinate frame that the position is specified in
  */
-void PeaksWorkspace::addPeak(const V3D &position, const SpecialCoordinateSystem &frame)
-{
+void PeaksWorkspace::addPeak(const V3D &position,
+                             const SpecialCoordinateSystem &frame) {
   auto peak = createPeak(position, frame);
   addPeak(*peak);
 }
@@ -260,23 +260,23 @@ PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
 std::unique_ptr<Geometry::IPeak>
 PeaksWorkspace::createPeak(const Kernel::V3D &position,
                            const Kernel::SpecialCoordinateSystem &frame) const {
-    if (frame == Mantid::Kernel::HKL) {
-      return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
-    } else if (frame == Mantid::Kernel::QLab) {
-      return std::unique_ptr<Geometry::IPeak>(createPeak(position));
-    } else {
-      return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
-    }
+  if (frame == Mantid::Kernel::HKL) {
+    return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
+  } else if (frame == Mantid::Kernel::QLab) {
+    return std::unique_ptr<Geometry::IPeak>(createPeak(position));
+  } else {
+    return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
+  }
 }
 
 //---------------------------------------------------------------------------------------------
 /** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
- * @param position :: QSample position of the center of the peak, in reciprocal space
+ * @param position :: QSample position of the center of the peak, in reciprocal
+ * space
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const
-{
+Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
   const auto goniometer = run().getGoniometer();
   // create a peak using the qLab frame

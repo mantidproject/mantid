@@ -85,7 +85,8 @@ public:
    * @param position :: V3D positon of the peak.
    * @param position :: Coordinate system frame of the peak position.
    */
-  virtual void addPeak(const Kernel::V3D &position, const Kernel::SpecialCoordinateSystem &frame) = 0;
+  virtual void addPeak(const Kernel::V3D &position,
+                       const Kernel::SpecialCoordinateSystem &frame) = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak
@@ -120,7 +121,7 @@ public:
    */
   virtual Mantid::Geometry::IPeak *
   createPeak(const Mantid::Kernel::V3D &QLabFrame,
-             boost::optional<double> detectorDistance= boost::none) const = 0;
+             boost::optional<double> detectorDistance = boost::none) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
