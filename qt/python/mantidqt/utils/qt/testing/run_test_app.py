@@ -35,6 +35,7 @@ from __future__ import absolute_import, print_function
 
 import sys
 import traceback
+print(sys.path)
 from qtpy.QtWidgets import QApplication
 from mantidqt.utils.qt.plugins import setup_library_paths
 
@@ -55,40 +56,37 @@ def create_widget(widget_path):
     :param widget_path: A qualified name of a widget, ie mantidqt.mywidget.MyWidget
     :return: The widget's class.
     """
-    print("Creating Widget...")
     module_name, widget_name = split_qualified_name(widget_path)
     m = __import__(module_name, fromlist=[widget_name])
-    print(m)
     widget_generator = getattr(m, widget_name)
-    print("Created Widget generator")
     param = get_sip_wrapper('mantidqt.widgets.mantidtreemodel.MantidTreeModel')
     return widget_generator(param)
+
 
 def get_sip_wrapper(class_path):
     module_name, class_name = split_qualified_name(class_path)
     m = __import__(module_name, fromlist=[class_name])
-    wrapper = getattr(m, class_name)
-    obj_of_class = wrapper();
-    return obj_of_class
+    return getattr(m, class_name)()
+
 
 def open_in_window(widget_name, script):
     """
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
     """
+    raw_input('Please attach the Debugger now if required. Press any key to continue')
     setup_library_paths()
     app = QApplication([""])
-
     w = create_widget(widget_name)
-    print("Widget Created")
+    w.init()
     w.setWindowTitle(widget_name)
-    print("Showing QApp")
     w.show()
 
     if script is not None:
         run_script(script, w)
 
     sys.exit(app.exec_())
+
 
 
 def run_script(script_name, widget):
