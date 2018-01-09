@@ -59,7 +59,7 @@ These steps would translate to something like the following simple Python script
 
     # Vanadium
     DirectILLCollectData(
-        Run='0100:0109',
+        Run='0100-0109',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
         OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
@@ -80,7 +80,7 @@ These steps would translate to something like the following simple Python script
 
     # Sample
     DirectILLCollectData(
-        Run='0201, 0205, 0209-0210',
+        Run='0201+0205+0209-0210',
         OutputWorkspace='sample'
     )
 
@@ -148,7 +148,7 @@ The above workflow would translate to this kind of Python script:
 
     # Vanadium
     DirectILLCollectData(
-        Run='0100:0109',
+        Run='0100-0109',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
         OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
@@ -169,7 +169,7 @@ The above workflow would translate to this kind of Python script:
 
     # Sample
     DirectILLCollectData(
-        Run='0201, 0205, 0209-0210',
+        Run='0201+0205+0209-0210',
         OutputWorkspace='sample',
     )
 
@@ -217,20 +217,20 @@ To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollect
 .. code-block:: python
 
     DirectILLCollectData(
-        Run='0100:0109',
+        Run='0100-0109',
         OutputWorkspace='sample1',
         OutputIncidentEnergyWorkspace='Ei'  # Get a common incident energy.
     )
 
     # Empty container.
     DirectILLCollectData(
-        Run='0201:0205',
+        Run='0201-0205',
         OutputWorkspace='container',
         IncidentEnergyWorkspace='Ei'  # Empty container should have same TOF binning.
     )
 
     # More samples with same nominal wavelength and container as 'sample1'.
-    runs = ['0110:0119,', '0253:0260']
+    runs = ['0110-0119', '0253-0260']
     index = 1
     for run in runs:
         DirectILLCollectData(
@@ -277,7 +277,7 @@ A corresponding Python script follows.
 
     # Vanadium
     DirectILLCollectData(
-        Run='0100:0109',
+        Run='0100-0109',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',
         OutputRawWorkspace='vanadium-raw'
@@ -298,14 +298,14 @@ A corresponding Python script follows.
 
     # Sample
     DirectILLCollectData(
-        Run='0201, 0205, 0209-0210',
+        Run='0201+0205+0209-0210',
         OutputWorkspace='sample',
         OutputIncidentEnergyWorkspace='Ei'
     )
 
     # Container
     DirectILLCollectData(
-        Run='0333:0335',
+        Run='0333-0335',
         OutputWorkspace='container',
         IncidentEnergyWorkspace='Ei'
     )
@@ -464,7 +464,7 @@ Lets put it all together into a complex Python script. The script below reduces 
     mantid.config.appendDataSearchDir('/data/')
 
     # Gather dataset information.
-    containerRuns = '96,97'
+    containerRuns = '96+97'
     vanadiumRuns = '100-103'
     # Samples at 50K, 100K and 150K.
     # Wavelength 1
@@ -473,14 +473,14 @@ Lets put it all together into a complex Python script. The script below reduces 
         150: '138-143'
     }
     runs1 = {
-        50: '105, 107-110',
+        50: '105+107-110',
         100: '112-117',
-        150: '119-123, 125'
+        150: '119-123+125'
     }
     # Wavelength 2
     containerRun2 = '166-170'
     runs2 = {
-        50: '146, 148, 150',
+        50: '146+148+150',
         100: '151-156',
         150: '160-165'
     }

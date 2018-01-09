@@ -16,7 +16,7 @@ This algorithm preprocesses data for the other algorithms in :ref:`ILL's time-of
 Input data
 ##########
 
-Either *Run* or *InputWorkspace* has to be specified. *Run* can take multiple run numbers. In this case the files will be merged using the :ref:`MergeRuns <algm-MergeRuns>` algorihtm. For example, `'/data/0100:0103,0200:0202'` would merge runs 100, 101, 102, 103, 200, 201 and 202 from directory `/data/`.
+Either *Run* or *InputWorkspace* has to be specified. *Run* can take multiple run numbers. In this case the files will be merged using the :ref:`MergeRuns <algm-MergeRuns>` algorihtm. For example, `'/data/0100-0103+0200-0202'` would merge runs 100, 101, 102, 103, 200, 201 and 202 from directory `/data/`.
 
 Basic reduction steps
 #####################
