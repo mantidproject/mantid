@@ -98,8 +98,6 @@
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
-#include "MantidQtWidgets/Common/MantidTreeModel.h"
-
 using namespace std;
 
 using namespace Mantid::API;
