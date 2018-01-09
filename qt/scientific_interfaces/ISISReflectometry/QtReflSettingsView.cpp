@@ -82,7 +82,6 @@ void QtReflSettingsView::connectInstrumentSettingsChangeListeners() {
 void QtReflSettingsView::connectExperimentSettingsChangeListeners() {
   connectSettingsChange(m_ui.expSettingsGroup);
   connectSettingsChange(m_ui.analysisModeComboBox);
-  connectSettingsChange(m_ui.directBeamEdit);
   connectSettingsChange(m_ui.transmissionRunsEdit);
   connectSettingsChange(m_ui.startOverlapEdit);
   connectSettingsChange(m_ui.endOverlapEdit);

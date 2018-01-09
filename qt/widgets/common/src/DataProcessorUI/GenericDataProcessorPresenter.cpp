@@ -260,15 +260,31 @@ void GenericDataProcessorPresenter::acceptViews(
   updateWidgetEnabledState(false);
 }
 
+/**
+Returns the name of the reduced workspace for a given row
+@param data :: [input] The data for this row
+@param prefix : A prefix to be appended to the generated ws name
+@throws std::runtime_error if the workspace could not be prepared
+@returns : The name of the workspace
+*/
+QString
+GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
+                                                       const QString &prefix) const {
+  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
+      data, m_whitelist, prefix);
+}
+
 void GenericDataProcessorPresenter::settingsChanged() {
   m_preprocessing.m_options =
-      m_mainPresenter->getPreprocessingOptionsAsString();
-  m_processingOptions = m_mainPresenter->getProcessingOptions();
+      convertOptionsFromQMap(m_mainPresenter->getPreprocessingOptions());
+  m_processingOptions =
+      convertOptionsFromQMap(m_mainPresenter->getProcessingOptions());
 
   m_manager->invalidateAllProcessed();
 
   if (hasPostprocessing())
-    m_postprocessing->m_options = m_mainPresenter->getPostprocessingOptions();
+    m_postprocessing->m_options =
+        m_mainPresenter->getPostprocessingOptionsAsString();
 }
 
 bool GenericDataProcessorPresenter::rowOutputExists(RowItem const &row) const {
@@ -633,21 +649,6 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   return AnalysisDataService::Instance().retrieveWS<Workspace>(
       outputName.toStdString());
 }
-
-/**
-Returns the name of the reduced workspace for a given row
-@param data :: [input] The data for this row
-@param prefix : A prefix to be appended to the generated ws name
-@throws std::runtime_error if the workspace could not be prepared
-@returns : The name of the workspace
-*/
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) {
-  return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
-      data, m_whitelist, prefix);
-}
-
 /**
 Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
