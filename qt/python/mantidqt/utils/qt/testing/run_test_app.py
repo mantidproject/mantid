@@ -35,7 +35,6 @@ from __future__ import absolute_import, print_function
 
 import sys
 import traceback
-print(sys.path)
 from qtpy.QtWidgets import QApplication
 from mantidqt.utils.qt.plugins import setup_library_paths
 
@@ -110,6 +109,4 @@ if __name__ == "__main__":
                                          " The name must contain the python module where the function is defined,"
                                          " eg somepackage.somemodule.test_my_widget")
     args = parser.parse_args()
-    print(args.widget)
-    print(args.script)
     open_in_window(args.widget, args.script)
