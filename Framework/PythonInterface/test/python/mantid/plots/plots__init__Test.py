@@ -34,7 +34,7 @@ class Plots__init__Test(unittest.TestCase):
     def test_fail(self):
         fig, ax = plt.subplots()
         self.assertRaises(Exception,ax.plot,self.ws2d_histo,'rs',specNum=1)
-        self.assertRaises(ValueError,ax.pcolormesh,self.ws2d_histo)
+        self.assertRaises(Exception,ax.pcolormesh,self.ws2d_histo)
 
 if __name__ == '__main__':
     unittest.main()
