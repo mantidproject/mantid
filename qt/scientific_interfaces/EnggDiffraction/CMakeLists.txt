@@ -2,6 +2,7 @@ set ( SRC_FILES
 	EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
+	EnggDiffGSASFittingPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
 )
