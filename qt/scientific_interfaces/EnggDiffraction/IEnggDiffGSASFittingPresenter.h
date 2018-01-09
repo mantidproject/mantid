@@ -9,7 +9,7 @@ class IEnggDiffGSASFittingPresenter {
 public:
   virtual ~IEnggDiffGSASFittingPresenter() = default;
 
-  // User actions, triggered by the (passive) view, 
+  // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
     Start, ///< Start and setup the interface
@@ -23,7 +23,6 @@ public:
    * @param notif Type of notification to process.
    */
   virtual void notify(IEnggDiffGSASFittingPresenter::Notification notif) = 0;
-
 };
 
 } // namespace CustomInterfaces
