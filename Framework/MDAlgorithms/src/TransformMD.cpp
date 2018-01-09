@@ -168,14 +168,15 @@ void TransformMD::exec() {
         for (size_t i = 0; i < 3; i++) {
           Geometry::IMDDimension_const_sptr dim = histo->getDimension(i);
           // Find the extents
-          nPoints *= static_cast<size_t>(dim->getMaximum() - dim->getMinimum() + 1);
+          nPoints *=
+              static_cast<size_t>(dim->getMaximum() - dim->getMinimum() + 1);
         }
-        d4 = histo->getNPoints()/nPoints;
+        d4 = histo->getNPoints() / nPoints;
       }
 
       for (size_t i = 0; i < d4; i++) {
-        this->reverse(signals+i*nPoints, nPoints);
-        this->reverse(errorsSq+i*nPoints, nPoints);
+        this->reverse(signals + i * nPoints, nPoints);
+        this->reverse(errorsSq + i * nPoints, nPoints);
       }
     }
 
