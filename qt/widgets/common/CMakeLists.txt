@@ -225,6 +225,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
@@ -349,8 +350,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
-  
-  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
