@@ -303,6 +303,7 @@ set ( SRC_FILES
 	src/SumNeighbours.cpp
 	src/SumOverlappingTubes.cpp
 	src/SumRowColumn.cpp
+	src/SumRowColumn_V2.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
@@ -638,6 +639,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumOverlappingTubes.h
 	inc/MantidAlgorithms/SumRowColumn.h
+	inc/MantidAlgorithms/SumRowColumn_V2.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h

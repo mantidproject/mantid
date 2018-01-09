@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_MASKBINS_H_
 #define MANTID_ALGORITHMS_MASKBINS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -53,7 +53,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MaskBins : public API::ParallelAlgorithm {
+class DLLExport MaskBins : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
