@@ -89,9 +89,6 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
-<<<<<<< HEAD
-    auto options = presenter.getTransmissionOptions();
-=======
     EXPECT_CALL(mockView, getStartOverlap())
         .Times(Exactly(1))
         .WillOnce(Return("10"));
@@ -101,7 +98,6 @@ public:
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));
->>>>>>> master
 
     auto options = presenter.getTransmissionOptions();
     TS_ASSERT_EQUALS(options.size(), 12);
