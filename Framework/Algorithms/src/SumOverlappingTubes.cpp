@@ -271,11 +271,17 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   std::vector<std::vector<double>> normalisation(
       m_numHistograms, std::vector<double>(m_numPoints, 0.0));
 
+  std::vector<MatrixWorkspace_sptr> workspaceVector{std::begin(m_workspaceList),
+                                                    std::end(m_workspaceList)};
+
   // loop over all workspaces
-  for (auto &ws : m_workspaceList) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+  for (int64_t wsIndex = 0; wsIndex < int64_t(m_workspaceList.size());
+       ++wsIndex) {
     // loop over spectra
-    const auto &specInfo = ws->spectrumInfo();
-    for (size_t i = 0; i < specInfo.size(); ++i) {
+    const auto &specInfo = workspaceVector[wsIndex]->spectrumInfo();
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
+    for (int64_t i = 0; i < int64_t(specInfo.size()); ++i) {
       if (specInfo.isMonitor(i))
         continue;
 
@@ -311,8 +317,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
-      auto counts = ws->histogram(i).y()[0];
-      auto error = ws->histogram(i).e()[0];
+      auto counts = workspaceVector[wsIndex]->histogram(i).y()[0];
+      auto error = workspaceVector[wsIndex]->histogram(i).e()[0];
       auto &yData = outputWS->mutableY(heightIndex);
       auto &eData = outputWS->mutableE(heightIndex);
 
