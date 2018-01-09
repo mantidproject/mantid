@@ -87,6 +87,8 @@ public:
 
     // check result
     TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
 
     // get fitted peak data
     API::MatrixWorkspace_sptr plot_ws =
@@ -102,6 +104,7 @@ public:
     TS_ASSERT_EQUALS(param_ws->rowCount(), 6);
 
     // TODO ASAP : check values
+    // .... check height, position and width!
   }
 
   //----------------------------------------------------------------------------------------------
@@ -262,6 +265,12 @@ public:
     return;
   }
 
+  /// workspace PG3_733
+  void test_NoSignaleWorkspace2D() {
+    // TODO ASAP - Implement  wsindex = 3
+    // blabla
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
@@ -306,6 +315,8 @@ public:
 
     fit_peaks_alg.execute();
     TS_ASSERT(fit_peaks_alg.isExecuted());
+    if (!fit_peaks_alg.isExecuted())
+      return;
 
     // Clean up
     AnalysisDataService::Instance().remove(input_ws_name);
@@ -316,7 +327,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void Later_test_highAngle4Peaks() {
+  void Redo_test_highAngle4Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -447,6 +458,9 @@ public:
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
+
+    // TODO FIXME ASAP : set the error bar to E
+    // ... ...
 
     AnalysisDataService::Instance().addOrReplace(workspacename, WS);
 

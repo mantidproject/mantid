@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FitPeaks.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -13,8 +14,8 @@
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/Axis.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -221,7 +222,7 @@ void FitPeaks::init() {
       "List of tolerance on fitted peak positions against given peak positions."
       "If there is only one value given, then ");
 
-  declareProperty("MinimumPeakHeight", 10.0,
+  declareProperty("MinimumPeakHeight", EMPTY_DBL(),
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
@@ -344,10 +345,12 @@ void FitPeaks::processInputs() {
 
   // about peak width and other peak parameter estimating method
   observe_peak_width_ = false;
-  if (m_peakFunction->name().compare("Gaussian") == 0)
-    if (!(is_d_space_ && m_peakDSpacePercentage < 0))
+  g_log.notice() << "[DB...BAT] peak function name: " << m_peakFunction->name()
+                 << "\n";
+  if (m_peakFunction->name().compare("Gaussian") == 0) {
+    if (!(is_d_space_ && m_peakDSpacePercentage > 0))
       observe_peak_width_ = true;
-
+  }
   g_log.notice("[DB] Process inputs [OVER]");
 
   return;
@@ -423,7 +426,7 @@ void FitPeaks::processInputFitRanges() {
 
   if (peakwindow.size() > 0 && peakwindowname.size() == 0) {
     // Peak windows are uniform among spectra: use vector for peak windows
-    m_uniformPeakPositions = true;
+    m_uniformPeakWindows = true;
 
     // check peak positions
     if (!m_uniformPeakPositions)
@@ -616,8 +619,10 @@ void FitPeaks::ProcessInputPeakTolerance() {
                              "peaks to fit are inconsistent.");
   }
 
-  // minimum peak height
+  // minimum peak height: set default to zero
   m_minPeakHeight = getProperty("MinimumPeakHeight");
+  if (isEmpty(m_minPeakHeight))
+    m_minPeakHeight = 0.;
 
   return;
 }
@@ -874,12 +879,13 @@ void FitPeaks::ProcessSinglePeakFitResult(
   double postol(DBL_MAX);
   bool case23(false);
   if (m_peakPosTolCase234) {
+    // peak tolerance is not defined
     if (m_numPeaksToFit == 1) {
       // case (d) one peak only
-      postol = m_inputMatrixWS->histogram(wsindex).x().back() -
+      postol = m_inputMatrixWS->histogram(wsindex).x().front() -
                m_inputMatrixWS->histogram(wsindex).x().back();
     } else {
-      // case b and c
+      // case b and c: more than 1 peaks without defined peak tolerance
       case23 = true;
     }
   } else {
@@ -890,6 +896,9 @@ void FitPeaks::ProcessSinglePeakFitResult(
   // get peak position and analyze the fitting is good or not by various
   // criteria
   double peak_pos = peakfunction->centre();
+  g_log.notice() << "[DB...Report] In function peak position = " << peak_pos
+                 << " of case234 = " << m_peakPosTolCase234
+                 << ", case23 = " << case23 << "\n";
   bool good_fit(false);
 
   if ((cost < 0) || (cost > DBL_MAX - 1.)) {
@@ -899,16 +908,18 @@ void FitPeaks::ProcessSinglePeakFitResult(
     // peak height is under minimum request
     peak_pos = -3;
   } else if (case23) {
-    // case b and c to check peak position
+    // case b and c to check peak position without defined peak tolerance
     std::pair<double, double> fitwindow = GetPeakFitWindow(wsindex, peakindex);
     if (fitwindow.first < fitwindow.second) {
-      // peak fit window is specified or calculated
+      // peak fit window is specified or calculated: use peak window as position
+      // tolerance
       if (peak_pos < fitwindow.first || peak_pos > fitwindow.second) {
         // peak is out of fit window
         peak_pos = -2;
-      }
+      } else
+        good_fit = true;
     } else {
-      // use the 1/2 distance to neiboring peak
+      // use the 1/2 distance to neiboring peak without defined peak window
       double left_bound(-1);
       if (peakindex > 0)
         left_bound = 0.5 * (expected_peak_positions[peakindex] -
@@ -926,6 +937,8 @@ void FitPeaks::ProcessSinglePeakFitResult(
                                  "boundary of peak position is negative.");
       if (peak_pos < left_bound || peak_pos > right_bound)
         peak_pos = -2;
+      else
+        good_fit = true;
     }
   } else if (fabs(peakfunction->centre() - expected_peak_positions[peakindex]) >
              postol) {
@@ -935,14 +948,17 @@ void FitPeaks::ProcessSinglePeakFitResult(
     // all criteria are passed
     good_fit = true;
   }
+  g_log.notice() << "[DB...Report] Peak position = " << peak_pos << "\n";
 
   // set cost function to DBL_MAX if fitting is bad
   if (good_fit) {
     // convert fitting result to analysis data structure
+    g_log.notice("[DB...BAT  GOOD FIT]");
     ;
   } else {
     // set the cost function value to DBL_MAX
     cost = DBL_MAX;
+    g_log.notice("[DB...BAT  BAD FIT with big cost");
   }
 
   // chi2
@@ -1023,17 +1039,39 @@ void FitPeaks::calculateFittedPeaks() {
 
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      auto vec_x = m_inputMatrixWS->x(iws);
+      auto vec_x = m_fittedPeakWS->x(iws);
       std::pair<double, double> peakwindow = GetPeakFitWindow(iws, ipeak);
-      std::vector<double>::const_iterator istart =
+      std::vector<double>::const_iterator start_x_iter =
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
-      std::vector<double>::const_iterator istop =
+      std::vector<double>::const_iterator stop_x_iter =
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
-      FunctionDomain1DVector domain(istart, istop);
+      g_log.notice() << "[DB Calculate Fitted Peaks] Domain Range (index): "
+                     << start_x_iter - vec_x.begin() << ", "
+                     << stop_x_iter - vec_x.begin() << "\n";
+      if (start_x_iter == stop_x_iter)
+        throw std::runtime_error("Range size is zero");
+
+      FunctionDomain1DVector domain(start_x_iter, stop_x_iter);
       FunctionValues values(domain);
-      peak_function->function(domain, values);
-      bkgd_function->function(domain, values);
+      CompositeFunction_sptr comp_func =
+          boost::make_shared<API::CompositeFunction>();
+      comp_func->addFunction(peak_function);
+      comp_func->addFunction(bkgd_function);
+      comp_func->function(domain, values);
+
+      g_log.notice()
+          << "[DB Calcuate fitted peaks | check] peak function: height = "
+          << peak_function->height() << ", center = " << peak_function->centre()
+          << ", width = " << peak_function->fwhm() << "\n";
+
+      // copy over the values
+      size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
+      size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
+      for (size_t yindex = istart; yindex < istop; ++yindex)
+        m_fittedPeakWS->dataY(iws)[yindex] =
+            values.getCalculated(yindex - istart);
+
     } // END-FOR (ipeak)
   }   // END-FOR (iws)
 
@@ -1079,8 +1117,10 @@ void FitPeaks::EstimateBackground(size_t wi,
 
   g_log.notice()
       << "[DB] Find peak background (Algorithm FindPeakBackground): ws-index = "
-      << wi << ", result = " << find_bkgd << ", X[" << l0 << ", " << n
-      << "] = " << histogram.x()[l0] << ", " << histogram.x()[n] << "\n";
+      << wi << ", histogram range: (" << histogram.x().front() << ", "
+      << histogram.x().back() << "), result = " << find_bkgd << ", X[" << l0
+      << ", " << n << "] = " << histogram.x()[l0] << ", " << histogram.x()[n]
+      << "\n";
   for (size_t i = 0; i < vector_bkgd.size(); ++i)
     g_log.notice() << "[DB] Background order " << i << " : " << vector_bkgd[i]
                    << "\n";
@@ -1122,24 +1162,26 @@ void FitPeaks::EstimateBackground(size_t wi,
  * @param bgkdfunction
  * @param flag to observe peak width or not
  */
-// FIXME - TODO - NOTE: It is still in a mushy definition when and how to
-// estimate peak parameters
-//                      under different scenarios
 int FitPeaks::EstimatePeakParameters(
     size_t wi, const std::pair<double, double> &peak_window,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction, bool observe_peak_width) {
   // get the range of start and stop to construct a function domain
   auto vector_x = m_inputMatrixWS->x(wi);
-  std::vector<double>::const_iterator istart =
+  std::vector<double>::const_iterator start_iter =
       std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.first);
-  std::vector<double>::const_iterator istop =
+  std::vector<double>::const_iterator stop_iter =
       std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.second);
-  size_t start_index = static_cast<size_t>(istart - vector_x.begin());
-  size_t stop_index = static_cast<size_t>(istop - vector_x.begin());
+  size_t start_index = static_cast<size_t>(start_iter - vector_x.begin());
+  size_t stop_index = static_cast<size_t>(stop_iter - vector_x.begin());
 
   // calculate background
-  FunctionDomain1DVector domain(istart, istop);
+  g_log.notice() << "[DB] Estimate Peak Parameters: Domain Range (index): "
+                 << start_index << ", " << stop_index << "\n";
+  if (start_index == stop_index)
+    throw std::runtime_error("Range size is zero");
+
+  FunctionDomain1DVector domain(start_iter, stop_iter);
   FunctionValues bkgd_values(domain);
   bkgdfunction->function(domain, bkgd_values);
 
@@ -1148,9 +1190,14 @@ int FitPeaks::EstimatePeakParameters(
   // Estimate peak center
   double peak_center, peak_height;
   size_t peak_center_index;
+  g_log.notice("Observe peak center starts...");
   int result = ObservePeakCenter(vector_x, vector_y, bkgd_values, start_index,
                                  stop_index, &peak_center, &peak_center_index,
                                  &peak_height);
+
+  g_log.notice() << "[DB EstimatePeakParameter] Peak center found operation is "
+                 << result << " @ x = " << peak_center
+                 << ", height = " << peak_height << "\n";
 
   // set the peak center
   if (result == GOOD) {
@@ -1194,7 +1241,7 @@ int FitPeaks::ObservePeakCenter(HistogramData::HistogramX &vector_x,
                                 double *peak_height) {
   // initialize paramters
   double peak_bkgd_max = 0;
-  peak_height = 0;
+  *peak_height = 0;
   *peak_center_index = -1;
   *peak_center = 0;
 
@@ -1215,15 +1262,22 @@ int FitPeaks::ObservePeakCenter(HistogramData::HistogramX &vector_x,
       *peak_center = vector_x[curr_index];
       *peak_center_index = curr_index;
     }
-    if (vector_y[i] > peak_bkgd_max)
-      peak_bkgd_max = y;
+    if (vector_y[curr_index] > peak_bkgd_max)
+      peak_bkgd_max = vector_y[curr_index];
   }
+
+  g_log.notice() << "[DB Observe peak center/height in "
+                 << vector_x[start_index] << ", " << vector_x[stop_index]
+                 << ": center = " << *peak_center << ","
+                 << " height = " << *peak_height << "\n"
+                 << "\t\tmin height = " << m_minPeakHeight
+                 << ", peak+bkgd max = " << peak_bkgd_max << "\n";
 
   // check peak height and determine the case integer to return
   // any case other than GOOD will lead to a non-peak-fit
   const size_t MAGIC3(3);
   int result(0);
-  if (peak_bkgd_max < 1.0) {
+  if (peak_bkgd_max < 1.0E-10) {
     // none-event, but no signal within region
     result = NOSIGNAL;
   } else if (*peak_height < m_minPeakHeight) {
@@ -1401,6 +1455,8 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
 
   // generate peak window
   std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
+  g_log.notice() << "[DB] FitFunctionSD: peak window: " << xmin << ", " << xmax
+                 << "\n";
 
   // Estimate background
   EstimateBackground(wsindex, peak_window, bkgd_function);
@@ -1417,10 +1473,12 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   IFunction_sptr fitfunc = boost::dynamic_pointer_cast<IFunction>(comp_func);
 
   // Set the properties
-  g_log.notice() << "[DB...About to call Fit()!"
-                 << "WS: " << dataws->getName()
-                 << ", number of spectra = " << dataws->getNumberHistograms()
-                 << ", index = " << wsindex << "\n";
+  g_log.notice() << "[DB...Before Fit()] Spectrum: " << wsindex
+                 << ": Estimated center = " << peak_function->centre()
+                 << ", height = " << peak_function->height()
+                 << ", width = " << peak_function->fwhm() << " in range "
+                 << xmin << ", " << xmax << "\n";
+
   fit->setProperty("Function", fitfunc);
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
@@ -1452,6 +1510,10 @@ double FitPeaks::FitFunctionSD(IAlgorithm_sptr fit,
   // Debug information
   m_sstream << "[F1201] FitSingleDomain Fitted-Function " << fitfunc->asString()
             << ": Fit-status = " << fitStatus << ", chi^2 = " << chi2 << ".\n";
+  g_log.notice() << "[DB F1201] FitSingleDomain Fitted-Function "
+                 << fitfunc->asString() << ": Fit-status = " << fitStatus
+                 << ", chi^2 = " << chi2 << ".\n";
+  ;
 
   return chi2;
 }
@@ -1811,6 +1873,8 @@ std::pair<double, double> FitPeaks::GetPeakFitWindow(size_t wi, size_t ipeak) {
 
     left = m_peakWindowVector[ipeak][0];
     right = m_peakWindowVector[ipeak][1];
+    g_log.notice() << "[DB] Uniform window of " << ipeak << "-th peak: " << left
+                   << ", " << right << "\n";
   } else if (m_peakWindowWorkspace) {
     // no uniform peak fit window.  locate peak in the workspace
     // get workspace index in m_peakWindowWorkspace
@@ -1818,6 +1882,8 @@ std::pair<double, double> FitPeaks::GetPeakFitWindow(size_t wi, size_t ipeak) {
 
     left = m_peakWindowWorkspace->y(window_wi)[ipeak * 2];
     right = m_peakWindowWorkspace->y(window_wi)[ipeak * 2 + 1];
+  } else {
+    throw std::runtime_error("Unhandled case for get peak fit window!");
   }
 
   return std::make_pair(left, right);
@@ -2292,7 +2358,7 @@ void FitPeaks::writeFitResult(size_t wi,
 
   for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
     // get row number
-    size_t row_index = wi * m_numPeaksToFit;
+    size_t row_index = wi * m_numPeaksToFit + ipeak;
     // check again with the column size versus peak parameter values
     // TODO - BROKEN HERE NOW FIXME
     if (peak_parameters[ipeak].size() !=
