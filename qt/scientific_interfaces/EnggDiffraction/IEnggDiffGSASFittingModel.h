@@ -13,13 +13,17 @@ class IEnggDiffGSASFittingModel {
 public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
+  /**
+   Get run labels (ie run number and bank id) of all runs loaded into model
+   @return Vector of all run labels (as pairs)
+   */
   virtual std::vector<std::pair<int, size_t>> getRunLabels() const = 0;
 
   /**
-     Load a focused run from a file to the model
-     @param filename The name of the file to load
-     @return String describing why the load was a failure (empty if success)
-  */
+   Load a focused run from a file to the model
+   @param filename The name of the file to load
+   @return String describing why the load was a failure (empty if success)
+   */
   virtual std::string loadFocusedRun(const std::string &filename) = 0;
 };
 
