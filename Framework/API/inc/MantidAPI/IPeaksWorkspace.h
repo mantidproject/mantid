@@ -83,7 +83,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Add a peak to the list
    * @param position :: V3D positon of the peak.
-   * @param position :: Coordinate system frame of the peak position.
+   * @param frame :: Coordinate system frame of the peak position.
    */
   virtual void addPeak(const Kernel::V3D &position,
                        const Kernel::SpecialCoordinateSystem &frame) = 0;
