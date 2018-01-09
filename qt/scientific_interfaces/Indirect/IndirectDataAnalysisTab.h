@@ -73,7 +73,7 @@ protected:
       Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
-  int selectedSpectrum();
+  int selectedSpectrum() const;
 
   /// Retrieve the selected minimum spectrum
   int minimumSpectrum();
