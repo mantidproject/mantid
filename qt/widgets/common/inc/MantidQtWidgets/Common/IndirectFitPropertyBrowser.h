@@ -24,9 +24,15 @@ public:
 
   Mantid::API::IFunction_sptr background() const;
 
-  Mantid::API::IFunction_sptr model() const;
+  int backgroundIndex() const;
 
   size_t numberOfCustomFunctions(const std::string &functionName) const;
+
+  double parameterValue(const std::string &functionName,
+                        const std::string &parameterName) const;
+
+  void setParameterValue(const std::string &functionName,
+                         const std::string &parameterName, double value);
 
   void addCheckBoxFunctionGroup(
       const QString &groupName,
@@ -69,8 +75,15 @@ public:
 
   void addCustomSetting(const QString &settingKey, QtProperty *settingProperty);
 
-  void updateParameterValue(const QString &parameterName,
-                            const double &parameterValue);
+  void addOptionalDoubleSetting(const QString &settingKey,
+                                const QString &settingName,
+                                const QString &optionKey,
+                                const QString &optionName, bool enabled = false,
+                                double defaultValue = 0);
+
+  void addOptionalSetting(const QString &settingKey,
+                          QtProperty *settingProperty, const QString &optionKey,
+                          const QString &optionName, bool enabled = false);
 
   void updateParameterValues(const QHash<QString, double> &parameterValues);
 
@@ -121,6 +134,7 @@ private:
   QString enumValue(QtProperty *prop) const;
 
   QtProperty *m_customFunctionGroups;
+  QtProperty *m_backgroundGroup;
   QtProperty *m_customSettingsGroup;
   QtProperty *m_functionsInComboBox;
   QSet<QtProperty *> m_functionsAsCheckBox;
@@ -130,6 +144,8 @@ private:
   PropertyHandler *m_backgroundHandler;
   QHash<QtProperty *, QVector<PropertyHandler *>> m_functionHandlers;
   std::unordered_map<std::string, size_t> m_customFunctionCount;
+  QSet<QtProperty *> m_optionProperties;
+  QHash<QtProperty *, QtProperty *> m_optionalProperties;
 
   std::string selectedBackground;
   QHash<QString, std::vector<Mantid::API::IFunction_sptr>>
