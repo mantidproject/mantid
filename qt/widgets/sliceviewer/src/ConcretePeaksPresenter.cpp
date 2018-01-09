@@ -27,26 +27,6 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
-
-/**
- * Determine if we can add peaks a peaks workspace.
- * @param peaksWS : To possibly add to
- * @param frame : Frame of base MDWorkspace
- * @return True only if we can add to the peaks workspace.
- */
-bool canAddPeaksTo(IPeaksWorkspace const *const peaksWS,
-                   Mantid::Kernel::SpecialCoordinateSystem frame) {
-  /*
-   - PeaksWS Must have an oriented lattice, otherwise we can't add a
-   self-consistent peak.
-   - PeaksWS Must not be integrated, because we have no concept of radius until
-   each individual peak is integrated.
-   - The MDWorkspace must be in the HKL frame otherwise we cannot interpret plot
-   cursor coordinates.
-   */
-  return peaksWS->sample().hasOrientedLattice() &&
-         !peaksWS->hasIntegratedPeaks() && frame == Mantid::Kernel::HKL;
-}
 }
 
 /**
@@ -155,9 +135,7 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
       m_owningPresenter(nullptr), m_isHidden(false),
-      m_editMode(SliceViewer::None),
-      m_hasAddPeaksMode(
-          canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
+      m_editMode(SliceViewer::None) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
   this->initialize();

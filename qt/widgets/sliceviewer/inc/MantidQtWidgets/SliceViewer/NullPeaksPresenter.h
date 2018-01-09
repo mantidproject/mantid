@@ -67,7 +67,6 @@ public:
   bool addPeakAt(double, double) override {
     return false; /*Do nothing. Add nothing.*/
   }
-  bool hasPeakAddMode() const override { return false; /*Do nothing.*/ }
 };
 }
 }

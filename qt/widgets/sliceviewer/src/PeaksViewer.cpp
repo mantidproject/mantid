@@ -66,11 +66,9 @@ void PeaksViewer::setPresenter(
     const auto foregroundPeakViewColor =
         m_presenter->getForegroundPeakViewColor(ws);
 
-    bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
-
     auto widget =
         new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundPeakViewColor,
-                                 backgroundPeakViewColor, canAddPeaks, this);
+                                 backgroundPeakViewColor, this);
 
     widget->setSelectedPeak(m_presenter->getZoomedPeakIndex());
 

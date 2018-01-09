@@ -61,7 +61,6 @@ public:
   void peakEditMode(EditMode mode) override;
   bool deletePeaksIn(PeakBoundingBox plotCoordsBox) override;
   bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
-  bool hasPeakAddMode() const override;
 
 private:
   /// Peak overlay view.
@@ -84,8 +83,6 @@ private:
   bool m_isHidden;
   /// Flag to indicate the current edit mode.
   EditMode m_editMode;
-  /// Can we add to this peaks workspace
-  bool m_hasAddPeaksMode;
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views

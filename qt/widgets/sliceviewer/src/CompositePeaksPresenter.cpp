@@ -711,30 +711,6 @@ bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
   return result;
 }
 
-bool CompositePeaksPresenter::hasPeakAddModeFor(
-    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
-  bool hasMode = false;
-  if (auto temp = target.lock()) {
-    auto it = this->getPresenterIteratorFromWorkspace(temp);
-    if (it != m_subjects.end()) {
-      hasMode = (*it)->hasPeakAddMode();
-    }
-  }
-  return hasMode;
-}
-
-bool CompositePeaksPresenter::hasPeakAddMode() const {
-  if (useDefault()) {
-    return m_default->hasPeakAddMode();
-  }
-  // Forward the request onwards
-  bool hasMode = false;
-  for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-    hasMode |= (*it)->hasPeakAddMode();
-  }
-  return hasMode;
-}
-
 bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,
                                         double plotCoordsPointY) {
   if (useDefault()) {

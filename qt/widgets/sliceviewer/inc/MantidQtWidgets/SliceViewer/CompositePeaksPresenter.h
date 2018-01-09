@@ -165,11 +165,6 @@ public:
   /// Enter the requested edit mode for the peaks workspace.
   void editCommand(EditMode editMode,
                    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
-  /// Can we add peaks to this peaks workspace.
-  bool
-  hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
-  /// Can we add peaks
-  bool hasPeakAddMode() const override;
 
 private:
   /// Updateable on demand method.
