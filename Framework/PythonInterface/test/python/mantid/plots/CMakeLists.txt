@@ -3,6 +3,7 @@
 ##
 set ( TEST_PY_FILES
   functionsTest.py
+  plots__init__Test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

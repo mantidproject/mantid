@@ -74,7 +74,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.plot(self,args[0],**kwargs)
+            return mantid.plots.functions.plot(self,*args,**kwargs)
         else:
             return plt.Axes.plot(self,*args,**kwargs)
 
@@ -99,7 +99,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.scatter(self,args[0],**kwargs)
+            return mantid.plots.functions.scatter(self,*args,**kwargs)
         else:
             return plt.Axes.scatter(self,*args,**kwargs)
 
@@ -124,7 +124,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.errorbar(self,args[0],**kwargs)
+            return mantid.plots.functions.errorbar(self,*args,**kwargs)
         else:
             return plt.Axes.errorbar(self,*args,**kwargs)
 
@@ -149,7 +149,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolor(self,args[0],**kwargs)
+            return mantid.plots.functions.pcolor(self,*args,**kwargs)
         else:
             return plt.Axes.pcolor(self,*args,**kwargs)
 
@@ -174,7 +174,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolorfast(self,args[0],**kwargs)
+            return mantid.plots.functions.pcolorfast(self,*args,**kwargs)
         else:
             return plt.Axes.pcolorfast(self,*args,**kwargs)
 
@@ -199,7 +199,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.pcolormesh(self,args[0],**kwargs)
+            return mantid.plots.functions.pcolormesh(self,*args,**kwargs)
         else:
             return plt.Axes.pcolormesh(self,*args,**kwargs)
 
@@ -224,7 +224,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.contour(self,args[0],**kwargs)
+            return mantid.plots.functions.contour(self,*args,**kwargs)
         else:
             return plt.Axes.contour(self,*args,**kwargs)
 
@@ -249,7 +249,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.contourf(self,args[0],**kwargs)
+            return mantid.plots.functions.contourf(self,*args,**kwargs)
         else:
             return plt.Axes.contourf(self,*args,**kwargs)
 
@@ -274,7 +274,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tripcolor(self,args[0],**kwargs)
+            return mantid.plots.functions.tripcolor(self,*args,**kwargs)
         else:
             return plt.Axes.tripcolor(self,*args,**kwargs)
 
@@ -299,7 +299,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tricontour(self,args[0],**kwargs)
+            return mantid.plots.functions.tricontour(self,*args,**kwargs)
         else:
             return plt.Axes.tricontour(self,*args,**kwargs)
 
@@ -324,7 +324,7 @@ class MantidAxes(plt.Axes):
         '''
         if self.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.functions')     
-            return mantid.plots.functions.tricontourf(self,args[0],**kwargs)
+            return mantid.plots.functions.tricontourf(self,*args,**kwargs)
         else:
             return plt.Axes.tricontourf(self,*args,**kwargs)
 
