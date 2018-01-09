@@ -12,7 +12,7 @@ using Mantid::PythonInterface::Environment::callMethod;
 
 class ConfigPropertyObserverWrapper : public ConfigPropertyObserver {
 public:
-  ConfigPropertyObserverWrapper(PyObject *self, const std::string& propertyName)
+  ConfigPropertyObserverWrapper(PyObject *self, const std::string &propertyName)
       : ConfigPropertyObserver(propertyName), m_self(self) {}
 
   void onPropertyValueChanged(const std::string &newValue,
