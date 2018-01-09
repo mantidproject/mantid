@@ -41,4 +41,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif
+#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_

@@ -164,7 +164,6 @@ public:
                "not satisfied",
                testing::Mock::VerifyAndClearExpectations(mockModel_ptr));
   }
-
 };
 
-#endif
+#endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
