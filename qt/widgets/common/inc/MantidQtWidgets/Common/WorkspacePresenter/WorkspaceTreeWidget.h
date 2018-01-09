@@ -46,7 +46,7 @@ class MantidTreeWidgetItem;
 class MantidTreeWidget;
 
 /**
-\class  QWorkspaceDockView
+\class  WorkspaceTreeWidget
 \author Lamar Moore
 \date   24-08-2016
 \version 1.0
