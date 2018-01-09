@@ -3,6 +3,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
 #include <qobject.h>
 
@@ -45,10 +46,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 
-class MantidTreeModel : public QObject, 
+class EXPORT_OPT_MANTIDQT_COMMON MantidTreeModel : public QObject,
 						public MantidQt::MantidWidgets::MantidDisplayBase {
   Q_OBJECT
 public:
+  /// DefaultConstructor
+  MantidTreeModel();
+
 // Data display and saving methods
   void updateRecentFilesList(const QString &fname) override;
   void enableSaveNexus(const QString &wsName) override;
@@ -128,6 +132,10 @@ public:
 
   void updateProject() override;
   void showCritical(const QString &) override;
+
+private:
+  MantidTreeModel(const MantidTreeModel &);
+  MantidTreeModel& operator=(const MantidTreeModel&);
 };
 }
 }
