@@ -149,9 +149,8 @@ public:
     return m_componentIds->operator[](componentIndex);
   }
   bool hasValidShape(const size_t componentIndex) const;
-  
-  boost::shared_ptr<const Geometry::IObject>
-  shape(const size_t componentIndex) const;
+
+  const Geometry::IObject &shape(const size_t componentIndex) const;
 
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;

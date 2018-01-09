@@ -97,7 +97,6 @@ public:
   bool isFlippedView() const { return m_flippedView; }
   /// Zoom into an area of the screen
   void zoom(const QRectF &area);
-  void zoom(const Mantid::Geometry::BoundingBox &area);
   //@}
   /// Load settings for the unwrapped surface from a project file
   virtual void loadFromProject(const std::string &lines) override;
@@ -122,7 +121,6 @@ protected:
   void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
   void drawSimpleToImage(QImage *image, bool picking = false) const override;
   void changeColorMap() override;
-  void doZoom(const QRectF &area);
   //@}
 
   /** @name New protected virtual methods */
@@ -149,7 +147,7 @@ protected:
 
   /** @name Protected methods */
   //@{
-  void setColor(int index, bool picking) const;
+  void setColor(size_t index, bool picking) const;
   void createPeakShapes(const QRect &viewport) const;
   //@}
 

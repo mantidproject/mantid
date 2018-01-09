@@ -368,21 +368,21 @@ public:
     // Instrument
     const auto &instrumentShape = componentInfo->shape(componentInfo->root());
     TSM_ASSERT("CompAssemblies should have no shape",
-               !instrumentShape->hasValidShape());
+               !instrumentShape.hasValidShape());
     // Bank 1
     const auto &subAssemblyShape =
         componentInfo->shape(componentInfo->root() - 3);
     TSM_ASSERT("CompAssemblies should have no shape",
-               !subAssemblyShape->hasValidShape());
+               !subAssemblyShape.hasValidShape());
     const auto &detectorShape =
         componentInfo->shape(0 /*Is a detector index!*/);
-    TSM_ASSERT("Detectors should have a shape", detectorShape->hasValidShape());
+    TSM_ASSERT("Detectors should have a shape", detectorShape.hasValidShape());
 
     // Check shapes are re-used as expected
-    TSM_ASSERT_EQUALS("Shape object should be reused", instrumentShape.get(),
-                      subAssemblyShape.get());
-    TSM_ASSERT_EQUALS("Shape object should be reused", detectorShape.get(),
-                      componentInfo->shape(1 /*another detector*/).get());
+    TSM_ASSERT_EQUALS("Shape object should be reused", &instrumentShape,
+                      &subAssemblyShape);
+    TSM_ASSERT_EQUALS("Shape object should be reused", &detectorShape,
+                      &componentInfo->shape(1 /*another detector*/));
   }
 
   void test_names() {

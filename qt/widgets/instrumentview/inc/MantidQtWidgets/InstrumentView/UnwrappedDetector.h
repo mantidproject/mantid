@@ -28,14 +28,9 @@ This class keeps information used to draw a detector on an unwrapped surface.
 class UnwrappedDetector {
 public:
   UnwrappedDetector();
-  UnwrappedDetector(GLColor color, Mantid::detid_t detID, size_t detIndex,
-                    const Mantid::Kernel::V3D &pos,
-                    const Mantid::Kernel::Quat &rot,
-                    const Mantid::Kernel::V3D &scaleFactor,
-                    boost::shared_ptr<const Mantid::Geometry::IObject> shape);
+  UnwrappedDetector(GLColor color, size_t detIndex);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
-  bool isValid() const;
   GLColor color; ///< red, green, blue colour components (0 - 255)
   double u;               ///< horizontal "unwrapped" coordinate
   double v;               ///< vertical "unwrapped" coordinate
@@ -43,13 +38,7 @@ public:
   double height;          ///< detector height in units of v
   double uscale;          ///< scaling factor in u direction
   double vscale;          ///< scaling factor in v direction
-  Mantid::detid_t detID;  ///< Detector ID
   size_t detIndex; ///< Detector Index in ComponentInfo/DetectorInfo.
-  Mantid::Kernel::V3D position;  ///< Detector position
-  Mantid::Kernel::Quat rotation; ///< Detector orientation
-  boost::shared_ptr<const Mantid::Geometry::IObject>
-      shape;                       ///< Shape of the detector
-  Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

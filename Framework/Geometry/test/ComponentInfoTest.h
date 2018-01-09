@@ -200,7 +200,7 @@ public:
     // Compare sizes
     TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
-    TS_ASSERT_EQUALS(b->shape(0).get(), a.shape(0).get());
+    TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
     // IDs are the same
     TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
     TS_ASSERT(!b->hasDetectorInfo());

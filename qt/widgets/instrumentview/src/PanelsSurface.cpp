@@ -72,7 +72,7 @@ namespace MantidWidgets {
 * @param s The surface of the panel
 */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s)
-    : id(nullptr), rotation(), startDetectorIndex(0), endDetectorIndex(0),
+    : rotation(), startDetectorIndex(0), endDetectorIndex(0),
       polygon(), surface(s) {}
 
 /**
@@ -83,7 +83,7 @@ void FlatBankInfo::translate(const QPointF &shift) {
   double du = shift.x();
   double dv = shift.y();
   polygon.translate(shift);
-  for (size_t i = startDetectorIndex; i < endDetectorIndex; ++i) {
+  for (size_t i = startDetectorIndex; i <= endDetectorIndex; ++i) {
     UnwrappedDetector &udet = surface->m_unwrappedDetectors[i];
     udet.u += du;
     udet.v += dv;
@@ -107,6 +107,7 @@ void PanelsSurface::init() {
   m_unwrappedDetectors.clear();
 
   size_t ndet = m_instrActor->ndetectors();
+  m_unwrappedDetectors.resize(ndet);
   if (ndet == 0)
     return;
 
@@ -141,9 +142,10 @@ void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet,
                            Mantid::Kernel::Quat &R) const {
-  int index = m_detector2bankMap[udet.detID];
+  const auto &detectorInfo = m_instrActor->getDetectorInfo();
+  int index = m_detector2bankMap[udet.detIndex];
   FlatBankInfo &info = *m_flatBanks[index];
-  R = info.rotation * udet.rotation;
+  R = info.rotation * detectorInfo.rotation(udet.detIndex);
 }
 
 /**
@@ -164,17 +166,14 @@ void PanelsSurface::setupAxes() {
 * @param detectors :: List of detectorIndices. 
 */
 void PanelsSurface::addFlatBankOfDetectors(
-    ComponentID bankId, const Mantid::Kernel::V3D &normal,
-    const std::vector<size_t> &detectors) {
+    const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
   int index = m_flatBanks.size();
   // save bank info
   FlatBankInfo *info = new FlatBankInfo(this);
   m_flatBanks << info;
-  info->id = bankId;
   // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
-  auto nelem = detectors.size();
-  m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
+  info->startDetectorIndex = detectors.front();
+  info->endDetectorIndex = detectors.back();
 
   // keep reference position on the bank's plane
   const auto &detectorInfo = m_instrActor->getDetectorInfo();
@@ -193,14 +192,12 @@ void PanelsSurface::addFlatBankOfDetectors(
   for (auto detector : detectors) {
     addDetector(detector, pos0, index, info->rotation);
     // update the outline polygon
-    UnwrappedDetector &udet = *(m_unwrappedDetectors.end() - 1);
+    UnwrappedDetector &udet = m_unwrappedDetectors[detector];
     auto p2 = QPointF(udet.u, udet.v);
     vert.clear();
     vert << p0 << p1 << p2;
     info->polygon = info->polygon.united(QPolygonF(vert));
   }
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
 }
 
 void PanelsSurface::processStructured(const std::vector<size_t> &children,
@@ -212,12 +209,11 @@ void PanelsSurface::processStructured(const std::vector<size_t> &children,
   // save bank info
   FlatBankInfo *info = new FlatBankInfo(this);
   m_flatBanks << info;
-  // set bank ID
-  info->id = componentInfo.componentID(rootIndex)->getComponentID();
   // find the rotation to put the bank on the plane
   info->rotation = calcBankRotation(corners[0], normal);
   // record the first detector index of the bank
-  info->startDetectorIndex = m_unwrappedDetectors.size();
+  info->startDetectorIndex = children.front();
+  info->endDetectorIndex = children.back();
   // set the outline
   QVector<QPointF> verts;
   for (auto &corner : corners) {
@@ -229,13 +225,8 @@ void PanelsSurface::processStructured(const std::vector<size_t> &children,
 
   info->polygon = QPolygonF(verts);
 
-  auto nelem = children.size();
-  m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
-
   for (auto child : children)
     addDetector(child, corners[0], index, info->rotation);
-  // record the end detector index of the bank
-  info->endDetectorIndex = m_unwrappedDetectors.size();
 }
 
 std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
@@ -323,8 +314,7 @@ void PanelsSurface::constructFromComponentInfo() {
         Mantid::Kernel::V3D normal;
         std::tie(detectors, normal) = res.get();
         if (!detectors.empty())
-          addFlatBankOfDetectors(componentInfo.componentID(i)->getComponentID(),
-            normal, detectors);
+          addFlatBankOfDetectors(normal, detectors);
       }
     } else if (children.size() > 0 &&
                componentInfo.parent(children[0]) == componentInfo.root()) {
@@ -367,13 +357,9 @@ void PanelsSurface::addDetector(size_t detIndex,
   const auto &componentInfo = m_instrActor->getComponentInfo();
 
   Mantid::Kernel::V3D pos = detectorInfo.position(detIndex);
-  Mantid::detid_t detid = detectorInfo.detectorIDs()[detIndex];
-  m_detector2bankMap[detid] = index;
+  m_detector2bankMap[detIndex] = index;
   // get the colour
-  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detid, detIndex, pos,
-                         detectorInfo.rotation(detIndex),
-                         componentInfo.scaleFactor(detIndex),
-                         componentInfo.shape(detIndex));
+  UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
   // apply bank's rotation
   pos -= refPos;
   rotation.rotate(pos);
@@ -382,7 +368,7 @@ void PanelsSurface::addDetector(size_t detIndex,
   udet.v = m_yaxis.scalar_prod(pos);
   udet.uscale = udet.vscale = 1.0;
   this->calcSize(udet);
-  m_unwrappedDetectors.push_back(udet);
+  m_unwrappedDetectors[detIndex] = udet;
 }
 
 /**
