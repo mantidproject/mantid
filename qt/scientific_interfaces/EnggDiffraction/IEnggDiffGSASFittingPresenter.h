@@ -12,8 +12,9 @@ public:
   // User actions, triggered by the (passive) view,
   // which need handling in implementation
   enum Notification {
-    ShutDown, ///< Shut down the interface
-    Start,    ///< Start and setup the interface
+    LoadRun,   ///< Load a focused run
+    ShutDown,  ///< Shut down the interface
+    Start,     ///< Start and setup the interface
   };
 
   /**
