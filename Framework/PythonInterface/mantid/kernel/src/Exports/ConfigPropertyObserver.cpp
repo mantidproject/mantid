@@ -12,8 +12,8 @@ using Mantid::PythonInterface::Environment::callMethod;
 
 class ConfigPropertyObserverWrapper : public ConfigPropertyObserver {
 public:
-  ConfigPropertyObserverWrapper(PyObject *self, std::string propertyName)
-      : ConfigPropertyObserver(std::move(propertyName)), m_self(self) {}
+  ConfigPropertyObserverWrapper(PyObject *self, const std::string& propertyName)
+      : ConfigPropertyObserver(propertyName), m_self(self) {}
 
   void onPropertyValueChanged(const std::string &newValue,
                               const std::string &prevValue) override {
