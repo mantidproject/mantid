@@ -1,4 +1,5 @@
 #include "EnggDiffGSASFittingPresenter.h"
+#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,6 +25,10 @@ void EnggDiffGSASFittingPresenter::notify(
     processLoadRun();
     break;
 
+  case IEnggDiffGSASFittingPresenter::SelectRun:
+    processSelectRun();
+    break;
+
   case IEnggDiffGSASFittingPresenter::Start:
     processStart();
     break;
@@ -44,6 +49,27 @@ void EnggDiffGSASFittingPresenter::processLoadRun() {
   } else {
     m_view->userWarning(loadSuccess);
   }
+}
+
+void EnggDiffGSASFittingPresenter::processSelectRun() {
+  const auto runLabel = m_view->getSelectedRunLabel();
+  const auto runNumber = runLabel.first;
+  const auto bank = runLabel.second;
+
+  Mantid::API::MatrixWorkspace_sptr focusedWorkspace;
+  try {
+    focusedWorkspace = m_model->getFocusedWorkspace(runNumber, bank);
+  } catch (const std::runtime_error e) {
+    m_view->userWarning("Tried to access invalid run, runNumber " +
+                        std::to_string(runNumber) + " and bank ID " +
+                        std::to_string(bank));
+    return;
+  }
+
+  const auto plottableCurve = API::QwtHelper::curveDataFromWs(focusedWorkspace);
+
+  m_view->resetCanvas();
+  m_view->plotCurve(plottableCurve);
 }
 
 void EnggDiffGSASFittingPresenter::processStart() {}
