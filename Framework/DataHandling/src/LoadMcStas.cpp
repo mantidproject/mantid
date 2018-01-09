@@ -419,7 +419,7 @@ void LoadMcStas::readEventData(
   outputGroup->addWorkspace(allEventWS[0].first);
   allEventWS.erase(allEventWS.begin());
   for (auto ws : allEventWS) {
-	  m_scaterringWS.push_back(ws.first);
+    m_scaterringWS.push_back(ws.first);
   }
 }
 
