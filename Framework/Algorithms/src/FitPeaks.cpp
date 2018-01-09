@@ -332,7 +332,8 @@ void FitPeaks::processInputs() {
   if (isEmpty(m_peakDSpacePercentage))
     m_peakDSpacePercentage = -1;
   else if (m_peakDSpacePercentage < 0)
-    throw std::invalid_argument("Peak D-spacing percentage cannot be negative!");
+    throw std::invalid_argument(
+        "Peak D-spacing percentage cannot be negative!");
   g_log.notice() << "[DB] DeltaD/D = " << m_peakDSpacePercentage << "\n";
   ProcessInputPeakTolerance();
   processInputFitRanges();
@@ -345,7 +346,7 @@ void FitPeaks::processInputs() {
   observe_peak_width_ = false;
   if (m_peakFunction->name().compare("Gaussian") == 0)
     if (!(is_d_space_ && m_peakDSpacePercentage < 0))
-        observe_peak_width_ = true;
+      observe_peak_width_ = true;
 
   g_log.notice("[DB] Process inputs [OVER]");
 
@@ -650,8 +651,7 @@ void FitPeaks::ConvertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << m_peakParamNames[i]
                       << " is not an allowed parameter of peak "
-                         "function "
-                      << m_peakFunction->name() << "\n";
+                         "function " << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
