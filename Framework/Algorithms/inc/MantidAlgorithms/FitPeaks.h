@@ -151,7 +151,8 @@ private:
   /// Observe peak width
   double ObservePeakWidth(HistogramData::HistogramX &vector_x,
                           HistogramData::HistogramY &vector_y,
-                          double peak_center);
+                          API::FunctionValues &bkgd_values, double peak_height,
+                          size_t ipeak, size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
   void ProcessSinglePeakFitResult(
@@ -170,7 +171,7 @@ private:
   size_t GetXIndex(size_t wi, double x);
 
   /// Set the workspaces and etc to output properties
-  void setOutputProperties();
+  void ProcessOutputs();
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(size_t wi, const std::vector<double> &expected_positions,
@@ -197,6 +198,9 @@ private:
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
   /// matrix workspace contained calcalated peaks+background from fitted result
+  /// it has same number of spectra of input workspace even if only part of
+  /// spectra
+  /// to have peaks to fit
   API::MatrixWorkspace_sptr m_fittedPeakWS;
 
   //-------- Functions ------------------------------------------------------
@@ -228,7 +232,7 @@ private:
   //--------- Fitting range -----------------------------------------
   /// start index
   size_t m_startWorkspaceIndex;
-  /// stop index: the last index is one less than this value
+  /// stop index (workspace index of the last spectrum included)
   size_t m_stopWorkspaceIndex;
   /// flag whether the peak center workspace has only a subset of spectra to fit
   bool m_partialSpectra;
@@ -242,6 +246,8 @@ private:
   API::MatrixWorkspace_const_sptr m_peakWindowWorkspace;
   bool m_uniformPeakWindows;
   bool m_partialWindowSpectra;
+  /// flag to calcualte peak fit window from instrument resolution
+  bool calculate_window_instrument_;
 
   /// input peak parameters' names
   std::vector<std::string> m_peakParamNames;

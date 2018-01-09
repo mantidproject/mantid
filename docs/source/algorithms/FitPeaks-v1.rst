@@ -45,7 +45,8 @@ For better results
 * Peak fit window: this is an option
 
   a. specified by user
-  b. figured out by FindPeakBackground, first moments and second moments
+  b. figured out by FindPeakBackground, first moments and second moments (NEED TO FIND OUT THE ALGORITHM)
+  c. if the workspace is in unit dSpacing and :math:`\Delta(d)/d`
 
 * Peak position tolerance: there could be three cases for how the peak position tolerance is specified.
 
