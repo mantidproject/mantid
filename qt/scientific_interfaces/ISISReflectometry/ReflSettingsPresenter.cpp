@@ -107,14 +107,14 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
 void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
                                           const QString &key,
                                           const QString &value) const {
-  if (!key.isEmpty())
+  if (!value.isEmpty())
     options[key] = value;
 }
 
 void ReflSettingsPresenter::addIfNotEmpty(OptionsQMap &options,
                                           const QString &key,
                                           const std::string &value) const {
-  if (!key.isEmpty())
+  if (!value.empty())
     options[key] = QString::fromStdString(value);
 }
 
