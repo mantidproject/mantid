@@ -5,7 +5,9 @@
 //----------------------------------
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
-#include <qobject.h>
+
+#include <QObject>
+#include <QHash>
 
 //----------------------------------
 // Forward declarations
@@ -49,15 +51,37 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeModel : public QObject,
 						public MantidQt::MantidWidgets::MantidDisplayBase {
   Q_OBJECT
+
 public:
   /// DefaultConstructor
   MantidTreeModel();
 
-// Data display and saving methods
+  // Data display and saving methods
   void updateRecentFilesList(const QString &fname) override;
+  void deleteWorkspaces(const QStringList &wsNames = QStringList()) override;
+
+  // Algorithm Display and Execution Methods
+  Mantid::API::IAlgorithm_sptr createAlgorithm(const QString &algName,
+	  int version = -1) override;
+  bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
+	  const bool wait = false) override;
+  Mantid::API::Workspace_const_sptr
+	  getWorkspace(const QString &workspaceName) override;
+  QWidget *getParent() override;
+
+  // Plotting Methods
+  MultiLayer *
+	  plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
+		  MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+		  bool errs = false, MultiLayer *plotWindow = nullptr) override;
+
+
+
+public slots:
+  // Data display and saving methods
   void enableSaveNexus(const QString &wsName) override;
   void disableSaveNexus() override;
-  void deleteWorkspaces(const QStringList &wsNames = QStringList()) override;
+
   void importWorkspace() override;
   MantidMatrix *
   importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
@@ -75,8 +99,6 @@ public:
   void importTransposed() override;
 
   // Algorithm Display and Execution Methods
-  Mantid::API::IAlgorithm_sptr createAlgorithm(const QString &algName,
-                                                       int version = -1) override;
   void showAlgorithmDialog(const QString &algName,
                                    int version = -1) override;
   void
@@ -84,13 +106,6 @@ public:
                       Mantid::API::AlgorithmObserver *obs = nullptr,
                       int version = -1) override;
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
-  bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
-                                     const bool wait = false) override;
-
-  Mantid::API::Workspace_const_sptr
-  getWorkspace(const QString &workspaceName) override;
-
-  QWidget *getParent() override;
 
   // Plotting Methods
   MultiLayer *
@@ -104,10 +119,6 @@ public:
       const QStringList &wsNames,
       GraphOptions::CurveType curveType = GraphOptions::ColorMap);
   void showMDPlot() override;
-  MultiLayer *
-  plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
-               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = nullptr) override;
   void plotSurface(bool accepted, int plotIndex,
                    const QString &axisName, const QString &logName,
                    const std::set<double> &customLogValues,
@@ -117,7 +128,8 @@ public:
 				   const std::set<double> &customLogValues,
 				   const QList<QString> &workspaceNames) override;
 
-  // Interface Methods
+  // Inteface methods
+  // ONLY REQUIRED TO STATIFY MantidDisplayBase INTERFACE
   void showVatesSimpleInterface() override;
   void showSpectrumViewer() override;
   void showSliceViewer() override;
@@ -134,6 +146,7 @@ public:
   void showCritical(const QString &) override;
 
 private:
+  //overide copy operations
   MantidTreeModel(const MantidTreeModel &);
   MantidTreeModel& operator=(const MantidTreeModel&);
 };
