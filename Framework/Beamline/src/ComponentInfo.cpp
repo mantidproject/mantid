@@ -1,13 +1,13 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_cow.h"
-#include <boost/make_shared.hpp>
-#include <numeric>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <iterator>
+#include <numeric>
+#include <sstream>
 #include <utility>
 #include <vector>
-#include <sstream>
-#include <iterator>
 
 namespace Mantid {
 namespace Beamline {
@@ -23,8 +23,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
     throw std::runtime_error(
         "ComponentInfo: cannot set scan interval with start >= end");
 }
-}
-}
+} // namespace
+} // namespace
 
 ComponentInfo::ComponentInfo()
     : m_assemblySortedDetectorIndices(
@@ -42,7 +42,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    boost::shared_ptr<std::vector<bool>> isStructuredBank,
+    boost::shared_ptr<std::vector<ComponentType>> componentType,
     boost::shared_ptr<const std::vector<std::string>> names,
     int64_t sourceIndex, int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
@@ -53,8 +53,7 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
-      m_isStructuredBank(std::move(isStructuredBank)),
-      m_names(std::move(names)),
+      m_componentType(std::move(componentType)), m_names(std::move(names)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
       m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex),
@@ -83,7 +82,7 @@ ComponentInfo::ComponentInfo(
         "ComponentInfo should have been provided same "
         "number of scale factors as number of components");
   }
-  if (m_isStructuredBank->size() != nonDetectorSize()) {
+  if (m_componentType->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of rectangular bank flags as number of "
                                 "non-detector components");
@@ -503,7 +502,7 @@ Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
   return (*m_scaleFactors)[componentIndex];
 }
 
-std::string ComponentInfo::name(const size_t componentIndex) const {
+const std::string &ComponentInfo::name(const size_t componentIndex) const {
   return (*m_names)[componentIndex];
 }
 
@@ -523,9 +522,12 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
   m_scaleFactors.access()[componentIndex] = scaleFactor;
 }
 
-bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
-  const auto rangesIndex = compOffsetIndex(componentIndex);
-  return !isDetector(componentIndex) && (*m_isStructuredBank)[rangesIndex];
+ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
+  if (m_detectorInfo && isDetector(componentIndex)) {
+    return ComponentType::Detector;
+  } else {
+    return (*m_componentType)[this->compOffsetIndex(componentIndex)];
+  }
 }
 
 /**

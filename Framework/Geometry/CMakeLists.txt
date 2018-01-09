@@ -48,6 +48,7 @@ set ( SRC_FILES
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
 	src/Instrument/ComponentInfo.cpp
+	src/Instrument/ComponentVisitorHelper.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
@@ -193,6 +194,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/ComponentInfo.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
+	inc/MantidGeometry/Instrument/ComponentVisitorHelper.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
@@ -290,11 +292,13 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
+	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
+	ComponentVisitorHelperTest.h
 	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
@@ -302,7 +306,6 @@ set ( TEST_FILES
 	ConventionalCellTest.h
 	ConvexPolygonIteratorTest.h
 	ConvexPolygonTest.h
-	CSGObjectTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h

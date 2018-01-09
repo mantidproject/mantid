@@ -1,10 +1,7 @@
 #ifndef MANTID_ALGORITHMS_UNARYOPERATION_H_
 #define MANTID_ALGORITHMS_UNARYOPERATION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,10 +44,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DLLExport UnaryOperation : public API::Algorithm {
+class DLLExport UnaryOperation : public API::DistributedAlgorithm {
 public:
-  /// Default constructor
-  UnaryOperation();
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose
@@ -93,7 +88,7 @@ protected:
 
   /// flag to use histogram representation instead of events for certain
   /// algorithms
-  bool useHistogram;
+  bool useHistogram{false};
 };
 
 } // namespace Algorithm

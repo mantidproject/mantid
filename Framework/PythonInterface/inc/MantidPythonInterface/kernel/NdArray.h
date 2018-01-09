@@ -17,11 +17,16 @@ namespace NumPy {
  */
 class PYTHON_KERNEL_DLL NdArray : public boost::python::object {
 public:
+  static bool check(const boost::python::object &obj);
+
+  NdArray(const boost::python::object &obj);
   BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(NdArray, boost::python::object);
 
   Py_intptr_t const *get_shape() const;
   int get_nd() const;
   void *get_data() const;
+
+  NdArray astype(char dtype, bool copy = true) const;
 };
 
 } // end namespace NumPy
