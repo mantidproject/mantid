@@ -4,7 +4,6 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
 
@@ -322,120 +321,6 @@ void IndirectDataAnalysisTab::updatePlotRange(
       showMessageBox(exc.what());
     }
   }
-}
-
-/*
- * Plots a guess of the fit for the specified function, in the
- * specified preview plot widget.
- *
- * @param previewPlot The preview plot widget in which to plot
- *                    the guess.
- * @param function    The function to fit.
- */
-void IndirectDataAnalysisTab::plotGuess(
-    MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-    IFunction_const_sptr function) {
-  previewPlot->removeSpectrum("Guess");
-
-  if (inputWorkspace()) {
-
-    if (!m_guessWorkspace || m_selectedSpectrum != m_guessSpectrum) {
-      m_guessWorkspace = createGuessWorkspace(function, m_selectedSpectrum);
-      m_guessSpectrum = m_selectedSpectrum;
-    }
-
-    // Check whether the guess workspace has enough data points
-    // to plot
-    if (m_guessWorkspace->x(0).size() >= 2) {
-      previewPlot->addSpectrum("Guess", m_guessWorkspace, 0, Qt::green);
-    }
-  }
-}
-
-/*
- * Creates a guess workspace, for approximating a fit with the specified
- * function on the input workspace.
- *
- * @param func    The function to fit.
- * @param wsIndex The index of the input workspace to create a guess for.
- * @return        A guess workspace containing the guess data for the fit.
- */
-MatrixWorkspace_sptr
-IndirectDataAnalysisTab::createGuessWorkspace(IFunction_const_sptr func,
-                                              size_t wsIndex) {
-  const auto inputWS = inputWorkspace();
-  const auto startX = m_dblManager->value(m_properties["StartX"]);
-  const auto endX = m_dblManager->value(m_properties["EndX"]);
-  const auto binIndexLow = inputWS->binIndexOf(startX);
-  const auto binIndexHigh = inputWS->binIndexOf(endX);
-  const auto nData = binIndexHigh - binIndexLow;
-
-  const auto &xPoints = inputWS->points(wsIndex);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
-            dataX.begin());
-  const auto dataY = computeOutput(func, dataX);
-
-  if (dataY.empty())
-    return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
-  IAlgorithm_sptr createWsAlg =
-      createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
-  createWsAlg->execute();
-  return createWsAlg->getProperty("OutputWorkspace");
-}
-
-/*
- * Computes the output vector of applying the specified function to
- * the specified input vector.
- *
- * @param func    The function to apply.
- * @param dataX   Vector of input data.
- * @return        Vector containing values calculated from applying
- *                the specified function to the input data.
- */
-std::vector<double>
-IndirectDataAnalysisTab::computeOutput(IFunction_const_sptr func,
-                                       const std::vector<double> &dataX) {
-  if (dataX.empty())
-    return std::vector<double>();
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  func->function(domain, outputData);
-
-  std::vector<double> dataY(dataX.size());
-  for (size_t i = 0; i < dataY.size(); i++) {
-    dataY[i] = outputData.getCalculated(i);
-  }
-  return dataY;
-}
-
-/*
- * Generates and returns an algorithm for creating a workspace, with
- * the specified name, number of spectra and containing the specified
- * x data and y data.
- *
- * @param workspaceName The name of the workspace to create.
- * @param numSpec       The number of spectra in the workspace to create.
- * @param dataX         The x data to add to the created workspace.
- * @param dataY         The y data to add to the created workspace.
- * @return              An algorithm for creating the workspace.
- */
-IAlgorithm_sptr IndirectDataAnalysisTab::createWorkspaceAlgorithm(
-    const std::string &workspaceName, int numSpec,
-    const std::vector<double> &dataX, const std::vector<double> &dataY) {
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", workspaceName);
-  createWsAlg->setProperty("NSpec", numSpec);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  return createWsAlg;
 }
 
 /**

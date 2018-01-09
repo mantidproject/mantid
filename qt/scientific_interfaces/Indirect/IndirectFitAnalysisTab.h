@@ -132,6 +132,20 @@ protected:
 
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm();
 
+  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                 Mantid::API::IFunction_const_sptr function);
+
+  Mantid::API::MatrixWorkspace_sptr
+  createGuessWorkspace(Mantid::API::IFunction_const_sptr func, size_t wsIndex);
+
+  std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
+                                    const std::vector<double> &dataX);
+
+  Mantid::API::IAlgorithm_sptr
+  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
+                           const std::vector<double> &dataX,
+                           const std::vector<double> &dataY);
+
 protected slots:
   void setSelectedSpectrum(int spectrum) override;
 
@@ -174,6 +188,9 @@ private:
   QHash<QString, double> m_defaultPropertyValues;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   bool m_appendResults;
+
+  Mantid::API::MatrixWorkspace_sptr m_guessWorkspace;
+  int m_guessSpectrum;
 };
 
 } // namespace IDA
