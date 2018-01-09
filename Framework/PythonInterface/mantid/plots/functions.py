@@ -183,7 +183,7 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
     else:
         if histogram2D:
             if _commonX(x):
-                x=numpy.broadcast_to(numpy.expand_dims(boundaries_from_points(x[0]),0),(z.shape[0]+1,z.shape[1]+1))
+                x=numpy.tile(boundaries_from_points(x[0]),z.shape[0]+1).reshape(z.shape[0]+1,-1)
             else:
                 x = numpy.vstack((x,x[-1]))
                 x = numpy.array([boundaries_from_points(xi) for xi in x])
@@ -192,7 +192,7 @@ def _getMatrix2DData(workspace, distribution,histogram2D=False):
         else:
             if len(y)==z.shape[0]+1:
                 y=points_from_boundaries(y)
-    y = numpy.broadcast_to(numpy.expand_dims(y,1),x.shape)
+    y = numpy.tile(y,x.shape[1]).reshape(x.shape[1],x.shape[0]).transpose()
     return (x,y,z)
 
 
