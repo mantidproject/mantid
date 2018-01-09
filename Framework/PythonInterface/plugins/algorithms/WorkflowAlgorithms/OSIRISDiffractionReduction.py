@@ -7,7 +7,7 @@ from IndirectReductionCommon import load_files
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (AddSampleLog, AlignDetectors, CloneWorkspace, CropWorkspace, DeleteWorkspace,
-                              DiffractionFocussing, MergeRuns, NormaliseByCurrent, RebinToWorkspace,
+                              Divide, DiffractionFocussing, MergeRuns, NormaliseByCurrent, RebinToWorkspace,
                               ReplaceSpecialValues)
 
 
@@ -69,7 +69,9 @@ class DRangeToWorkspaceMap(object):
             self.add_workspace(workspace)
 
         if combinator is not None:
-            self._map = {d_range: combinator(ws_list) for d_range, ws_list in self._map.items()}
+            self._map = {d_range: CloneWorkspace(InputWorkspace=combinator(ws_list), OutputWorkspace="combined",
+                                                 StoreInADS=False)
+                         for d_range, ws_list in self._map.items()}
 
     def add_workspace(self, workspace):
         """
@@ -328,11 +330,10 @@ def rebin_and_subtract(minuend_workspace, subtrahend_workspace):
     :param subtrahend_workspace:    The workspace to be subtracted.
     :return:                        The minuend workspace - the subtrahend workspace.
     """
-    rebinned = RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
-                                WorkspaceToMatch=minuend_workspace,
-                                OutputWorkspace="rebinned_container",
-                                StoreInADS=False, EnableLogging=False)
-    return minuend_workspace - rebinned
+    return minuend_workspace - RebinToWorkspace(WorkspaceToRebin=subtrahend_workspace,
+                                                WorkspaceToMatch=minuend_workspace,
+                                                OutputWorkspace="rebinned_container",
+                                                StoreInADS=False, EnableLogging=False)
 
 
 def divide_workspace(dividend_workspace, divisor_workspace):
@@ -345,7 +346,8 @@ def divide_workspace(dividend_workspace, divisor_workspace):
     :return:                   The dividend workspace / the divisor workspace.
     """
     dividend_ws, divisor_ws = rebin_to_smallest(dividend_workspace, divisor_workspace)
-    divided_ws = dividend_ws / divisor_ws
+    divided_ws = Divide(LHSWorkspace=dividend_ws, RHSWorkspace=divisor_ws,
+                        OutputWorkspace="divided", StoreInADS=False, EnableLogging=False)
     return ReplaceSpecialValues(InputWorkspace=divided_ws,
                                 NaNValue=0.0, InfinityValue=0.0,
                                 OutputWorkspace="removed_special",
@@ -504,6 +506,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                         load_opts=load_opts)
         # Add the sample workspaces to the sample d-range map
         self._sam_ws_map.add_workspaces([mtd[sample_ws_name] for sample_ws_name in sample_ws_names], rebin_and_average)
+        self._delete_workspaces(sample_ws_names)
 
         vanadium_ws_names, _ = load_files(self._vanadium_runs,
                                           ipf_file_name,
@@ -514,6 +517,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Add the vanadium workspaces to the vanadium drange map
         self._van_ws_map.add_workspaces([mtd[vanadium_ws_name] for vanadium_ws_name in vanadium_ws_names],
                                         rebin_and_average)
+        self._delete_workspaces(vanadium_ws_names)
 
         # Load the container run
         if self._container_files:
@@ -532,8 +536,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._con_ws_map.add_workspaces([mtd[container_ws_name]
                                                  for container_ws_name in container_ws_names], rebin_and_average)
 
-            result_map = self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
             self._delete_workspaces(container_ws_names)
+            result_map = self._sam_ws_map.combine(self._con_ws_map, rebin_and_subtract)
         else:
             result_map = self._sam_ws_map
 
@@ -548,26 +552,18 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Divide all sample files by the corresponding vanadium files.
         result_map = result_map.combine(self._van_ws_map, divide_workspace)
 
-        # Workspaces in vanadium map are no longer in the ADS - can safely delete
-        # vanadium workspaces in ADS.
-        self._delete_workspaces(vanadium_ws_names)
-
-        # Workspaces in sample map are no longer in the ADS - can safely delete
-        # sample workspaces in the ADS.
-        self._delete_workspaces(sample_ws_names)
-
         if len(result_map) > 1:
+            temp_ws_names = ["__run_" + str(idx) for idx in range(len(result_map))]
             # Workspaces must be added to the ADS, as there does not yet exist
             # a workspace list property (must be passed to merge runs by name).
-            for sample_ws_name, sample_ws in zip(sample_ws_names,
-                                                 result_map.values()):
-                mtd.addOrReplace(sample_ws_name, sample_ws)
+            for temp_ws_name, sample_ws in zip(temp_ws_names, result_map.values()):
+                mtd.addOrReplace(temp_ws_name, sample_ws)
 
             # Merge the sample files into one.
-            output_ws = MergeRuns(InputWorkspaces=sample_ws_names,
+            output_ws = MergeRuns(InputWorkspaces=temp_ws_names,
                                   OutputWorkspace="merged_sample_runs",
                                   StoreInADS=False, EnableLogging=False)
-            self._delete_workspaces(sample_ws_names)
+            self._delete_workspaces(temp_ws_names)
         elif len(result_map) == 1:
             output_ws = list(result_map.values())[0]
         else:
@@ -584,7 +580,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         d_ranges = result_map.keys()
         AddSampleLog(Workspace=output_ws, LogName="D-Ranges",
-                     LogText="D-Ranges used for reduction: " + ", ".join(map(str, d_ranges)))
+                     LogText=", ".join(map(str, d_ranges)))
 
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = get_intersection_of_ranges(d_ranges)
