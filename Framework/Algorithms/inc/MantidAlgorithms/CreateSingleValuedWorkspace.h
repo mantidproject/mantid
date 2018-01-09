@@ -1,13 +1,9 @@
 #ifndef ALGORITHMSCREATESINGLEVALUEDWORKSPACE_H_
 #define ALGORITHMSCREATESINGLEVALUEDWORKSPACE_H_
 
-//------------------------------
-// Includes
-//------------------------------
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-
 namespace Algorithms {
 /**
    Required properties:
@@ -59,6 +55,11 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Workspaces"; }
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// Initialisation code

@@ -190,11 +190,6 @@ typedef boost::shared_ptr<IComponent> IComponent_sptr;
 /// Typdef of a shared pointer to a const IComponent
 typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
 
-/** Prints a text representation
-*/
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
-                                             const IComponent &);
-
 } // Namespace Geometry
 
 /// An object for constructing a shared_ptr that won't ever delete its pointee

@@ -31,6 +31,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -402,44 +403,29 @@ void ReflRunsTabPresenter::notifyADSChanged(
       m_tablePresenters.at(m_view->getSelectedGroup())->isProcessing());
 }
 
-/** Requests property names associated with pre-processing values.
-* @return :: Pre-processing property names.
-*/
-QString ReflRunsTabPresenter::getPreprocessingProperties() const {
-
-  auto properties =
-      QString("Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun");
-  return properties;
-}
-
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
   * @return :: Global pre-processing options
   */
-QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
+OptionsQMap ReflRunsTabPresenter::getPreprocessingOptions() const {
 
-  auto optionsStr = QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
-                        m_view->getSelectedGroup()));
-
-  return optionsStr;
+  return m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-QString ReflRunsTabPresenter::getProcessingOptions() const {
-
-  return QString::fromStdString(
-      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
+OptionsQMap ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global post-processing options. Options are supplied by the main
+/** Requests global post-processing options as a string. Options are supplied by
+* the main
 * presenter
-* @return :: Global post-processing options
+* @return :: Global post-processing options as a string
 */
-QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+QString ReflRunsTabPresenter::getPostprocessingOptionsAsString() const {
 
   return QString::fromStdString(
       m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
