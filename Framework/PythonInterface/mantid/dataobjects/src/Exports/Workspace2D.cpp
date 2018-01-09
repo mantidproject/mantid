@@ -32,10 +32,9 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Workspace2D);
 
-
 class Workspace2DPickleSuite : public boost::python::pickle_suite {
 public:
-  static dict getstate(const Workspace2D& ws) {
+  static dict getstate(const Workspace2D &ws) {
     using namespace Mantid::PythonInterface::Converters;
 
     // Python lists that will be added to dict
@@ -46,8 +45,8 @@ public:
     list specNumList;
 
     auto spectra = ws.getNumberHistograms();
-    const auto& indexInfo = ws.indexInfo();
-    const auto& spectrumDefinitions = indexInfo.spectrumDefinitions();
+    const auto &indexInfo = ws.indexInfo();
+    const auto &spectrumDefinitions = indexInfo.spectrumDefinitions();
 
     for (decltype(spectra) i = 0; i < spectra; ++i) {
       const auto &histo = ws.histogram(i);
@@ -56,20 +55,24 @@ public:
       const auto &errorData = histo.countStandardDeviations().rawData();
       const auto &binEdges = histo.binEdges().rawData();
 
-      spectraList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
-      errorList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));
-      binEdgeList.append(object(handle<>(VectorToNDArray<double, WrapReadOnly>()(binEdges))));
+      spectraList.append(object(
+          handle<>(VectorToNDArray<double, WrapReadOnly>()(spectraData))));
+      errorList.append(
+          object(handle<>(VectorToNDArray<double, WrapReadOnly>()(errorData))));
+      binEdgeList.append(
+          object(handle<>(VectorToNDArray<double, WrapReadOnly>()(binEdges))));
 
       auto spectrumNumber = indexInfo.spectrumNumber(i);
-      const auto& spectrumDefinition = (*spectrumDefinitions)[i];
+      const auto &spectrumDefinition = (*spectrumDefinitions)[i];
       std::vector<size_t> detectorIndices;
 
-      for(size_t j = 0; j < spectrumDefinition.size(); ++j) {
+      for (size_t j = 0; j < spectrumDefinition.size(); ++j) {
         size_t detectorIndex = spectrumDefinition[j].first;
         detectorIndices.emplace_back(std::move(detectorIndex));
       }
 
-      detectorList.append(object(handle<>(VectorToNDArray<size_t, Clone>()(detectorIndices))));
+      detectorList.append(
+          object(handle<>(VectorToNDArray<size_t, Clone>()(detectorIndices))));
       specNumList.append(static_cast<int32_t>(spectrumNumber));
     }
 
@@ -87,8 +90,7 @@ public:
     return state;
   }
 
-  static void setstate(Workspace2D& ws, dict state)
-  {
+  static void setstate(Workspace2D &ws, dict state) {
     using namespace Mantid::PythonInterface::Converters;
 
     std::vector<SpectrumNumber> spectrumNumbers;
@@ -108,12 +110,16 @@ public:
     std::string unitY = extract<std::string>(state["unit_y"]);
     ws.getAxis(1)->setUnit(unitY);
 
-    for(size_t i = 0; i < static_cast<size_t>(len(spectraList)); ++i){
-      std::vector<double> spectraData = NDArrayToVector<double>(spectraList[i])();
+    for (size_t i = 0; i < static_cast<size_t>(len(spectraList)); ++i) {
+      std::vector<double> spectraData =
+          NDArrayToVector<double>(spectraList[i])();
       std::vector<double> errorData = NDArrayToVector<double>(errorList[i])();
-      std::vector<double> binEdgeData = NDArrayToVector<double>(binEdgeList[i])();
-      std::vector<size_t> detectorIndices = NDArrayToVector<size_t>(detectorList[i])();
-      SpectrumNumber specNum = static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
+      std::vector<double> binEdgeData =
+          NDArrayToVector<double>(binEdgeList[i])();
+      std::vector<size_t> detectorIndices =
+          NDArrayToVector<size_t>(detectorList[i])();
+      SpectrumNumber specNum =
+          static_cast<SpectrumNumber>(extract<int32_t>(specNumList[i]));
 
       ws.setCounts(i, std::move(spectraData));
       ws.setCountStandardDeviations(i, std::move(errorData));
@@ -128,20 +134,20 @@ public:
       spectrumNumbers.emplace_back(std::move(specNum));
     }
 
-
-
     std::string instrumentXML = extract<std::string>(state["instrument_xml"]);
     std::string instrumentName = extract<std::string>(state["instrument_name"]);
     try {
-      auto alg =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+      auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "LoadInstrument");
       // Do not put the workspace in the ADS
       alg->setChild(true);
       alg->initialize();
       alg->setPropertyValue("InstrumentName", instrumentName);
       alg->setPropertyValue("InstrumentXML", instrumentXML);
-      alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(&ws, [](Workspace2D*){}));
-      alg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+      alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(
+                                        &ws, [](Workspace2D *) {}));
+      alg->setProperty("RewriteSpectraMap",
+                       Mantid::Kernel::OptionalBool(false));
       alg->execute();
     } catch (std::exception &exc) {
       Mantid::Kernel::Logger("Workspace2DPickleSuite").warning()
@@ -158,11 +164,9 @@ boost::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
   return boost::make_shared<Workspace2D>();
 }
 
-
 void export_Workspace2D() {
-  class_<Workspace2D, bases<MatrixWorkspace>, boost::noncopyable>(
-        "Workspace2D")
-        .def_pickle(Workspace2DPickleSuite())
+  class_<Workspace2D, bases<MatrixWorkspace>, boost::noncopyable>("Workspace2D")
+      .def_pickle(Workspace2DPickleSuite())
       .def("__init__", boost::python::make_constructor(&makeWorkspace2D));
 
   // register pointers
