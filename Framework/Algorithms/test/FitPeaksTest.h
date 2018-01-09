@@ -266,7 +266,7 @@ public:
   /** Test fit Gaussian peaks with high background
    * @brief Later_test_HighBackgroundPeaks
    */
-  void Next_test_HighBackgroundPeaks() {
+  void test_HighBackgroundPeaks() {
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -293,6 +293,8 @@ public:
                        "1.5133,2.1401"));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("FitFromRight", true));
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("HighBackground", true));
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty(
+        "PeakWidthPercent", 0.016)); // typical powgen's
 
     std::string output_ws_name("PG3_733_stripped");
     std::string peak_pos_ws_name("PG3_733_peak_positions");

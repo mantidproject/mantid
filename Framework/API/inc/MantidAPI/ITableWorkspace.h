@@ -241,7 +241,8 @@ public:
       throw std::runtime_error(ostr.str());
     }
     if (row >= this->rowCount()) {
-      throw std::range_error("Table does not have row " + std::to_string(row));
+      throw std::range_error("Table " + this->getName() +
+                             " does not have row " + std::to_string(row));
     }
     return *(static_cast<T *>(c->void_pointer(row)));
   }
