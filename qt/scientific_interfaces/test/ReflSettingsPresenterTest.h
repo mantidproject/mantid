@@ -58,13 +58,6 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
-
     EXPECT_CALL(mockView, getMonitorIntegralMin())
         .Times(Exactly(1))
         .WillOnce(Return("4"));

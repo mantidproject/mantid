@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
