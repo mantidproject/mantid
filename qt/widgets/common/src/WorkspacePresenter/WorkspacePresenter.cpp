@@ -9,7 +9,7 @@ using namespace Mantid;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView& view)
+WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView &view)
     : m_view(std::move(view)), m_adapter(Kernel::make_unique<ADSAdapter>()) {}
 
 WorkspacePresenter::~WorkspacePresenter() {}
@@ -155,13 +155,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   }
 }
 
-void WorkspacePresenter::loadWorkspace() {
-  m_view.showLoadDialog();
-}
+void WorkspacePresenter::loadWorkspace() { m_view.showLoadDialog(); }
 
-void WorkspacePresenter::loadLiveData() {
-  m_view.showLiveDataDialog();
-}
+void WorkspacePresenter::loadLiveData() { m_view.showLiveDataDialog(); }
 
 void WorkspacePresenter::renameWorkspace() {
   m_view.showRenameDialog(m_view.getSelectedWorkspaceNames());
@@ -173,15 +169,15 @@ void WorkspacePresenter::groupWorkspaces() {
   std::string groupName("NewGroup");
   // get selected workspaces
   if (selected.size() < 2) {
-	m_view.showCriticalUserMessage("Cannot Group Workspaces",
-                                  "Select at least two workspaces to group ");
+    m_view.showCriticalUserMessage("Cannot Group Workspaces",
+                                   "Select at least two workspaces to group ");
     return;
   }
 
   if (m_adapter->doesWorkspaceExist(groupName)) {
     if (!m_view.askUserYesNo("",
-                            "Workspace " + groupName +
-                                " already exists. Do you want to replace it?"))
+                             "Workspace " + groupName +
+                                 " already exists. Do you want to replace it?"))
       return;
   }
 
@@ -195,12 +191,12 @@ void WorkspacePresenter::groupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-	  m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
-                                    " Error in GroupWorkspaces algorithm");
+      m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
+                                     " Error in GroupWorkspaces algorithm");
     }
   } catch (...) {
-	  m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
-                                  " Error in GroupWorkspaces algorithm");
+    m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
+                                   " Error in GroupWorkspaces algorithm");
   }
 }
 
@@ -208,8 +204,8 @@ void WorkspacePresenter::ungroupWorkspaces() {
   auto selected = m_view.getSelectedWorkspaceNames();
 
   if (selected.size() == 0) {
-	  m_view.showCriticalUserMessage("Error Ungrouping Workspaces",
-                                  "Select a group workspace to Ungroup.");
+    m_view.showCriticalUserMessage("Error Ungrouping Workspaces",
+                                   "Select a group workspace to Ungroup.");
     return;
   }
 
@@ -226,12 +222,12 @@ void WorkspacePresenter::ungroupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-	  m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
-                                    " Error in UnGroupWorkspace algorithm");
+      m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
+                                     " Error in UnGroupWorkspace algorithm");
     }
   } catch (...) {
-	  m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
-                                  " Error in UnGroupWorkspace algorithm");
+    m_view.showCriticalUserMessage("MantidPlot - Algorithm error",
+                                   " Error in UnGroupWorkspace algorithm");
   }
 }
 
@@ -248,7 +244,7 @@ void WorkspacePresenter::deleteWorkspaces() {
                    [=](const std::string &ws) {
                      return m_adapter->doesWorkspaceExist(ws);
                    })) {
-	  m_view.showCriticalUserMessage(
+    m_view.showCriticalUserMessage(
         "Delete Workspaces",
         "Unabel to delete workspaces. Invalid workspace names provided.");
     return;
@@ -258,7 +254,7 @@ void WorkspacePresenter::deleteWorkspaces() {
     deleteWs = m_view.deleteConfirmation();
 
   if (deleteWs)
-	  m_view.deleteWorkspaces(selected);
+    m_view.deleteWorkspaces(selected);
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
@@ -277,21 +273,13 @@ void WorkspacePresenter::populateAndShowWorkspaceContextMenu() {
   m_view.popupContextMenu();
 }
 
-void WorkspacePresenter::showWorkspaceData() {
-  m_view.showWorkspaceData();
-}
+void WorkspacePresenter::showWorkspaceData() { m_view.showWorkspaceData(); }
 
-void WorkspacePresenter::showInstrumentView() {
-  m_view.showInstrumentView();
-}
+void WorkspacePresenter::showInstrumentView() { m_view.showInstrumentView(); }
 
-void WorkspacePresenter::saveToProgram() {
-  m_view.saveToProgram();
-}
+void WorkspacePresenter::saveToProgram() { m_view.saveToProgram(); }
 
-void WorkspacePresenter::plotSpectrum() {
-  m_view.plotSpectrum("Simple");
-}
+void WorkspacePresenter::plotSpectrum() { m_view.plotSpectrum("Simple"); }
 
 void WorkspacePresenter::plotSpectrumWithErrors() {
   m_view.plotSpectrum("Errors");
@@ -301,41 +289,23 @@ void WorkspacePresenter::plotSpectrumAdvanced() {
   m_view.plotSpectrum("Advanced");
 }
 
-void WorkspacePresenter::showColourFillPlot() {
-  m_view.showColourFillPlot();
-}
+void WorkspacePresenter::showColourFillPlot() { m_view.showColourFillPlot(); }
 
-void WorkspacePresenter::showDetectorsTable() {
-  m_view.showDetectorsTable();
-}
+void WorkspacePresenter::showDetectorsTable() { m_view.showDetectorsTable(); }
 
-void WorkspacePresenter::showBoxDataTable() {
-  m_view.showBoxDataTable();
-}
+void WorkspacePresenter::showBoxDataTable() { m_view.showBoxDataTable(); }
 
-void WorkspacePresenter::showVatesGUI() {
-  m_view.showVatesGUI();
-}
+void WorkspacePresenter::showVatesGUI() { m_view.showVatesGUI(); }
 
-void WorkspacePresenter::showMDPlot() {
-  m_view.showMDPlot();
-}
+void WorkspacePresenter::showMDPlot() { m_view.showMDPlot(); }
 
-void WorkspacePresenter::showListData() {
-  m_view.showListData();
-}
+void WorkspacePresenter::showListData() { m_view.showListData(); }
 
-void WorkspacePresenter::showSpectrumViewer() {
-	m_view.showSpectrumViewer();
-}
+void WorkspacePresenter::showSpectrumViewer() { m_view.showSpectrumViewer(); }
 
-void WorkspacePresenter::showSliceViewer() {
-  m_view.showSliceViewer();
-}
+void WorkspacePresenter::showSliceViewer() { m_view.showSliceViewer(); }
 
-void WorkspacePresenter::showLogs() {
-  m_view.showLogs();
-}
+void WorkspacePresenter::showLogs() { m_view.showLogs(); }
 
 void WorkspacePresenter::showSampleMaterialWindow() {
   m_view.showSampleMaterialWindow();
@@ -345,12 +315,10 @@ void WorkspacePresenter::showAlgorithmHistory() {
   m_view.showAlgorithmHistory();
 }
 
-void WorkspacePresenter::showTransposed() {
-  m_view.showTransposed();
-}
+void WorkspacePresenter::showTransposed() { m_view.showTransposed(); }
 
 void WorkspacePresenter::convertToMatrixWorkspace() {
-	m_view.convertToMatrixWorkspace();
+  m_view.convertToMatrixWorkspace();
 }
 
 void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {
@@ -367,7 +335,7 @@ void WorkspacePresenter::clearUBMatrix() {
       alg->setPropertyValue("Workspace", ws);
       // Run in this manner due to Qt dependencies within this method.
       // otherwise it would have been implemented here.
-	  m_view.executeAlgorithmAsync(alg);
+      m_view.executeAlgorithmAsync(alg);
     } else
       break;
   }
@@ -378,7 +346,8 @@ void WorkspacePresenter::refreshWorkspaces() { updateView(); }
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
 void WorkspacePresenter::workspaceRenamed() {
-  m_view.recordWorkspaceRename(m_adapter->getOldName(), m_adapter->getNewName());
+  m_view.recordWorkspaceRename(m_adapter->getOldName(),
+                               m_adapter->getNewName());
   m_view.updateTree(m_adapter->topLevelItems());
 }
 
@@ -388,10 +357,7 @@ void WorkspacePresenter::workspaceGroupUpdated() { updateView(); }
 
 void WorkspacePresenter::workspacesDeleted() { updateView(); }
 
-void WorkspacePresenter::workspacesCleared() {
-
-  m_view.clearView();
-}
+void WorkspacePresenter::workspacesCleared() { m_view.clearView(); }
 
 /// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() {
