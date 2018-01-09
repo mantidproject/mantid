@@ -7,6 +7,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -27,7 +28,8 @@ using namespace Mantid::Types::Core;
 
 namespace {
 MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
-                                          std::vector<double> rotations) {
+                                          std::vector<double> rotations,
+                                          std::string name = "testWS") {
   const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
       nTubes, nPixelsPerTube, true);
   size_t nTimeIndexes = rotations.size();
@@ -49,7 +51,7 @@ MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
 
   // This has to be added to the ADS so that it can be used with the string
   // validator used in the algorithm.
-  AnalysisDataService::Instance().add("testWS", testWS);
+  AnalysisDataService::Instance().add(name, testWS);
 
   auto parameterMap = testWS->getInstrument()->getParameterMap();
   parameterMap->addString(testWS->getInstrument()->getBaseComponent(),
@@ -695,27 +697,42 @@ public:
   SumOverlappingTubesTestPerformance() {}
 
   void setUp() override {
-    std::vector<double> rotations;
-    for (size_t i = 0; i < 250; ++i)
-      rotations.push_back(double(i) * 0.1);
 
-    auto testWS = createTestScanningWS(100, 128, rotations);
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
 
-    alg.initialize();
-    alg.setProperty("InputWorkspaces", "testWS");
-    alg.setProperty("OutputWorkspace", "outWS");
-    alg.setProperty("OutputType", "2D");
-    alg.setProperty("ScatteringAngleBinning", "1.0");
+    for (size_t i = 0; i < m_numberOfWorkspaces; ++i) {
+      std::vector<double> rotations;
+      for (size_t j = 0; j < 25; ++j)
+        rotations.push_back(double(j * m_numberOfWorkspaces + i) * 0.1);
+
+      auto testWS =
+          createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));
+      group->addWorkspace(testWS);
+    }
+
+    AnalysisDataService::Instance().addOrReplace("group", group);
+
+    m_alg.initialize();
+    m_alg.setProperty("InputWorkspaces", "group");
+    m_alg.setProperty("OutputWorkspace", "outWS");
+    m_alg.setProperty("OutputType", "2D");
+    m_alg.setProperty("ScatteringAngleBinning", "1.0");
   }
 
   void test_merge_d2b_like_detector_scan_workspaces() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
   }
 
-  void tearDown() override { AnalysisDataService::Instance().remove("outWS"); }
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("group");
+    AnalysisDataService::Instance().remove("outWS");
+    for (size_t i = 0; i < m_numberOfWorkspaces; ++i)
+      AnalysisDataService::Instance().remove("a" + std::to_string(i));
+  }
 
 private:
-  SumOverlappingTubes alg;
+  SumOverlappingTubes m_alg;
+  size_t m_numberOfWorkspaces = 20;
 };
 
 #endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */
