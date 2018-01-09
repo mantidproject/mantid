@@ -55,6 +55,8 @@
 
 #include <QCheckBox>
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -65,7 +67,8 @@ namespace MantidWidgets {
  */
 IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
                                                        QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui), m_backgroundHandler(nullptr) {}
+    : FitPropertyBrowser(parent, mantidui), m_functionsInComboBox(nullptr),
+      m_backgroundHandler(nullptr) {}
 
 void IndirectFitPropertyBrowser::init() {
   QWidget *w = new QWidget(this);
@@ -76,10 +79,13 @@ void IndirectFitPropertyBrowser::init() {
   m_customFunctionGroups =
       m_groupManager->addProperty("Custom Function Groups");
 
+  m_backgroundGroup = m_groupManager->addProperty("Background");
+
   m_customSettingsGroup = m_groupManager->addProperty("Custom Settings");
 
   /* Create background selection */
-  m_backgroundSelection = m_enumManager->addProperty("Background");
+  m_backgroundSelection = m_enumManager->addProperty("Background Type");
+  m_backgroundGroup->addSubProperty(m_backgroundSelection);
 
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
@@ -166,40 +172,31 @@ void IndirectFitPropertyBrowser::init() {
   updateDecimals();
 
   m_browser->addProperty(m_customFunctionGroups);
-  m_browser->addProperty(m_backgroundSelection);
+  m_browser->addProperty(m_backgroundGroup);
   m_browser->addProperty(fittingRangeGroup);
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   initLayout(w);
+
   QStringList backgrounds = {"None"};
   backgrounds.append(registeredBackgrounds());
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
-Mantid::API::IFunction_sptr IndirectFitPropertyBrowser::background() const {
+IFunction_sptr IndirectFitPropertyBrowser::background() const {
   if (m_backgroundHandler != nullptr)
     return m_backgroundHandler->function()->clone();
   else
     return nullptr;
 }
 
-Mantid::API::IFunction_sptr IndirectFitPropertyBrowser::model() const {
-  auto model = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-      compositeFunction()->clone());
-
-  if (model) {
-    const auto backgroundFunction = background();
-
-    for (size_t i = 0u; i < model->nFunctions(); ++i) {
-
-      if (model->getFunction(i) == backgroundFunction) {
-        model->removeFunction(i);
-        return model;
-      }
-    }
+int IndirectFitPropertyBrowser::backgroundIndex() const {
+  for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
+    if (compositeFunction()->getFunction(i) == background())
+      return static_cast<int>(i);
   }
-  return model;
+  return -1;
 }
 
 size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
@@ -211,17 +208,36 @@ size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
     return 0;
 }
 
+double IndirectFitPropertyBrowser::parameterValue(
+    const std::string &functionName, const std::string &parameterName) const {
+  const auto composite = compositeFunction();
+
+  for (size_t i = 0u; i < composite->nFunctions(); ++i) {
+    const auto function = composite->getFunction(i);
+
+    if (function->name() == functionName)
+      return function->getParameter(parameterName);
+  }
+  return 0.0;
+}
+
+void IndirectFitPropertyBrowser::setParameterValue(
+    const std::string &functionName, const std::string &parameterName,
+    double value) {
+  const auto composite = compositeFunction();
+
+  for (size_t i = 0u; i < composite->nFunctions(); ++i) {
+    const auto function = composite->getFunction(i);
+
+    if (function->name() == functionName)
+      function->setParameter(parameterName, value);
+  }
+  updateParameters();
+}
+
 void IndirectFitPropertyBrowser::updateParameterValues(
     const QHash<QString, double> &parameterValues) {
   updateParameterValues(getHandler(), parameterValues);
-}
-
-void IndirectFitPropertyBrowser::updateParameterValue(
-    const QString &parameterName, const double &parameterValue) {
-  const auto &function = getHandler()->function().get();
-  function->setParameter(parameterName.toStdString(), parameterValue);
-  getHandler()->updateParameters();
-  emit parameterChanged(function);
 }
 
 void IndirectFitPropertyBrowser::updateParameterValues(
@@ -230,15 +246,15 @@ void IndirectFitPropertyBrowser::updateParameterValues(
   const auto &function = functionHandler->function().get();
 
   for (const auto &parameterName : parameterValues.keys()) {
+    const auto parameter = parameterName.toStdString();
 
-    if (parameterName.contains("."))
-      function->setParameter(parameterName.toStdString(),
-                             parameterValues[parameterName]);
-    else
-      function->setParameter("f0." + parameterName.toStdString(),
-                             parameterValues[parameterName]);
+    if (parameterName.contains(".") && function->hasParameter(parameter))
+      function->setParameter(parameter, parameterValues[parameterName]);
+    else if (function->hasParameter("f0." + parameter))
+      function->setParameter("f0." + parameter, parameterValues[parameterName]);
   }
-  functionHandler->updateParameters();
+
+  getHandler()->updateParameters();
   emit parameterChanged(function);
 }
 
@@ -303,14 +319,39 @@ void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
   m_customSettingsGroup->addSubProperty(settingProperty);
 
   if (m_customSettings.isEmpty())
-    m_browser->insertProperty(m_customSettingsGroup, m_backgroundSelection);
+    m_browser->insertProperty(m_customSettingsGroup, m_backgroundGroup);
 
   m_customSettings[settingKey] = settingProperty;
 }
 
+void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
+    const QString &settingKey, const QString &settingName,
+    const QString &optionKey, const QString &optionName, bool enabled,
+    double defaultValue) {
+  auto settingProperty = m_doubleManager->addProperty(settingName);
+  m_doubleManager->setValue(settingProperty, defaultValue);
+  addOptionalSetting(settingKey, settingProperty, optionKey, optionName,
+                     enabled);
+}
+
+void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
+                                                    QtProperty *settingProperty,
+                                                    const QString &optionKey,
+                                                    const QString &optionName,
+                                                    bool enabled) {
+  auto optionProperty = m_boolManager->addProperty(optionName);
+  m_customSettingsGroup->addSubProperty(optionProperty);
+  m_optionProperties.insert(optionProperty);
+  m_optionalProperties[optionProperty] = settingProperty;
+  m_customSettings[optionKey] = optionProperty;
+  m_customSettings[settingKey] = settingProperty;
+
+  if (enabled)
+    optionProperty->addSubProperty(settingProperty);
+}
+
 void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
-    const QString &groupName,
-    const std::vector<Mantid::API::IFunction_sptr> &functions,
+    const QString &groupName, const std::vector<IFunction_sptr> &functions,
     bool defaultValue) {
   m_functionsAsCheckBox.insert(
       createFunctionGroupProperty(groupName, m_boolManager));
@@ -318,9 +359,8 @@ void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
 }
 
 void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
-    const QString &groupName,
-    const std::vector<Mantid::API::IFunction_sptr> &functions, int minimum,
-    int maximum, int defaultValue) {
+    const QString &groupName, const std::vector<IFunction_sptr> &functions,
+    int minimum, int maximum, int defaultValue) {
   auto intProperty = createFunctionGroupProperty(groupName, m_intManager);
   m_intManager->setMinimum(intProperty, minimum);
   m_intManager->setMaximum(intProperty, maximum);
@@ -330,24 +370,22 @@ void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
 }
 
 void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
-    const QString &groupName,
-    const std::vector<Mantid::API::IFunction_sptr> &functions) {
-  if (!m_functionsInComboBox) {
+    const QString &groupName, const std::vector<IFunction_sptr> &functions) {
+  if (m_functionsInComboBox == nullptr) {
     m_functionsInComboBox =
-        createFunctionGroupProperty("Function Group", m_enumManager);
+        createFunctionGroupProperty("Fit Type", m_enumManager);
     m_groupToFunctionList["None"] = {};
+    m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
   }
 
   auto groupNames = m_enumManager->enumNames(m_functionsInComboBox)
                     << groupName;
-  groupNames.prepend("None");
   m_enumManager->setEnumNames(m_functionsInComboBox, groupNames);
   addCustomFunctionGroup(groupName, functions);
 }
 
 void IndirectFitPropertyBrowser::addCustomFunctionGroup(
-    const QString &groupName,
-    const std::vector<Mantid::API::IFunction_sptr> &functions) {
+    const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_groupToFunctionList[groupName] = functions;
 
   for (const auto &function : functions) {
@@ -377,7 +415,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
 
 void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
   for (const auto &functionHandler : m_functionHandlers[prop]) {
-    removeFunction(functionHandler);
+    FitPropertyBrowser::removeFunction(functionHandler);
     m_customFunctionCount[functionHandler->function()->name()] -= 1;
   }
   m_functionHandlers[prop].clear();
@@ -393,13 +431,17 @@ QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
 void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
 
   for (const auto &prop : m_functionHandlers.keys()) {
-    int i = m_functionHandlers[prop].indexOf(handler);
+    auto &functionHandlers = m_functionHandlers[prop];
+    int i = functionHandlers.indexOf(handler);
 
     if (i >= 0) {
-      m_functionHandlers[prop].remove(i);
+      functionHandlers.remove(i);
+      m_customFunctionCount[handler->function()->name()] -= 1;
 
       if (m_functionsAsSpinner.contains(prop))
         m_intManager->setValue(prop, m_intManager->value(prop) - 1);
+      else if (m_functionsAsCheckBox.contains(prop))
+        m_boolManager->setValue(prop, false);
     }
   }
   FitPropertyBrowser::removeFunction(handler);
@@ -419,7 +461,7 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
   } else if (prop == m_backgroundSelection) {
 
     if (m_backgroundHandler != nullptr)
-      removeFunction(m_backgroundHandler);
+      FitPropertyBrowser::removeFunction(m_backgroundHandler);
 
     const auto backgroundName = enumValue(prop).toStdString();
     if (backgroundName != "None")
@@ -433,14 +475,22 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
 }
 
 void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
+  const auto propertyName = prop->propertyName();
+
+  if (m_optionProperties.contains(prop)) {
+    if (m_boolManager->value(prop))
+      prop->addSubProperty(m_optionalProperties[prop]);
+    else
+      prop->removeSubProperty(m_optionalProperties[prop]);
+  }
 
   if (m_functionsAsCheckBox.contains(prop)) {
     if (m_boolManager->value(prop))
-      addCustomFunctions(prop, prop->propertyName());
+      addCustomFunctions(prop, propertyName);
     else
       clearCustomFunctions(prop);
   } else if (m_customSettings.values().contains(prop)) {
-    emit customBoolChanged(prop->propertyName(), m_boolManager->value(prop));
+    emit customBoolChanged(propertyName, m_boolManager->value(prop));
   }
   FitPropertyBrowser::boolChanged(prop);
 }
