@@ -109,7 +109,7 @@ void Track::removeCojoins() {
  * @param compID :: ID of the component that this link is about (Default=NULL)
  */
 void Track::addPoint(const int directionFlag, const V3D &endPoint,
-                     const CSGObject &obj, const ComponentID compID) {
+                     const IObject &obj, const ComponentID compID) {
   IntersectionPoint newPoint(directionFlag, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
   auto lowestPtr =

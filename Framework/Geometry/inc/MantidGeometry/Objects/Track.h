@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Tolerance.h"
 #include <list>
 
@@ -154,7 +154,7 @@ public:
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
   /// Adds a point of intersection to the track
   void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
-                const CSGObject &obj, const ComponentID compID = nullptr);
+                const IObject &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
               const double distanceAlongTrack, const IObject &obj,

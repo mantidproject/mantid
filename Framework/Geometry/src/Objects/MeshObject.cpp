@@ -179,9 +179,31 @@ bool MeshObject::isOnSide(const Kernel::V3D &Pt) const {
 * @return Number of segments added
 */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
-  int cnt = UT.count(); // Number of intersections original track
 
-  return (UT.count() - cnt);
+  std::vector<V3D> intesectionPoints;
+  std::vector<int> entryExitFlags;
+
+  getIntersections(UT.startPoint(), UT.direction(), intesectionPoints, entryExitFlags);
+  if (sizeof(intesectionPoints) == 0) return 0; // Quit if no intersections found
+
+  for (size_t i = 0; i < sizeof(intesectionPoints); ++i) {
+      UT.addPoint(entryExitFlags[i], intesectionPoints[i], *this);
+  }
+  UT.buildLink();
+
+  return sizeof(intesectionPoints);
+}
+
+/**
+ * Get intersection points and their in out directions on the given ray
+ * @param start :: Start point of ray
+ * @param direction :: Direction of ray
+ * @param intersectionPoints :: Intersection points
+ * @param EntryExitFlags :: +1 ray enters -1 ray exits at corresponding point
+*/
+void MeshObject::getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
+  std::vector<Kernel::V3D> &intersectionPoints, std::vector<int> &entryExitFlags) const {
+
 }
 
 /**
