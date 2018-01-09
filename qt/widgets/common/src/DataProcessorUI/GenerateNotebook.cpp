@@ -2,7 +2,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
@@ -48,8 +50,7 @@ GenerateNotebook::GenerateNotebook(
     QString name, QString instrument, WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
     ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
-    std::map<QString, QString> preprocessingOptionsMap,
-    QString processingOptions)
+    OptionsMap preprocessingOptionsMap, OptionsMap processingOptions)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
       m_whitelist(std::move(whitelist)),
       m_preprocessMap(std::move(preprocessMap)),
@@ -337,39 +338,6 @@ QString plot1DString(const QStringList &ws_names) {
   return plotString;
 }
 
-/**
- Constructs the name for the reduced workspace
- @param data : vector containing the data used in the reduction
- @param whitelist : the whitelist
- @param prefix : wheter to return the name with the prefix or not
- @return : the workspace name
-*/
-QString getReducedWorkspaceName(const RowData &data, const WhiteList &whitelist,
-                                const QString &prefix) {
-
-  int ncols = static_cast<int>(whitelist.size());
-  if (data.size() != ncols)
-    throw std::invalid_argument(
-        "Can't write output workspace name to notebook");
-
-  auto names = QStringList();
-
-  for (int col = 0; col < ncols - 1; col++) {
-    // Do we want to use this column to generate the name of the output ws?
-    if (whitelist.isShown(col)) {
-      // Get what's in the column
-      const QString &valueStr = data.at(col);
-      if (!valueStr.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = valueStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
-        names.append(whitelist.prefix(col) + value.join("_"));
-      }
-    }
-  } // Columns
-
-  return prefix + names.join("_");
-}
-
 template <typename Map>
 void addProperties(QStringList &algProperties, const Map &optionsMap) {
   for (auto &&kvp : optionsMap) {
@@ -398,8 +366,8 @@ reduceRowString(const RowData &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,
-                const std::map<QString, QString> &preprocessingOptionsMap,
-                const QString &processingOptions) {
+                const OptionsMap &preprocessingOptionsMap,
+                const OptionsMap &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -462,7 +430,7 @@ reduceRowString(const RowData &data, const QString &instrument,
     }
   }
 
-  auto options = parseKeyValueString(processingOptions.toStdString());
+  auto options = processingOptions;
 
   const auto &hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
@@ -475,7 +443,8 @@ reduceRowString(const RowData &data, const QString &instrument,
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
-  optionsMap.insert(options.begin(), options.end());
+  for (auto &kvp : options)
+    optionsMap[kvp.first.toStdString()] = kvp.second.toStdString();
   addProperties(algProperties, optionsMap);
 
   /* Now construct the names of the reduced workspaces*/
@@ -527,7 +496,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
                     const PreprocessingAlgorithm &preprocessor,
                     const QString &options) {
 
-  auto runs = runStr.split(QRegExp("[+,]"));
+  auto runs = preprocessingStringToList(runStr);
 
   QString loadStrings;
 
@@ -537,7 +506,7 @@ loadWorkspaceString(const QString &runStr, const QString &instrument,
   }
 
   const QString prefix = preprocessor.prefix();
-  const QString outputName = prefix + runs.join("_");
+  const QString outputName = preprocessingListToString(runs, prefix);
 
   boost::tuple<QString, QString> loadString;
 
