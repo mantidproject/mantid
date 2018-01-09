@@ -956,14 +956,6 @@ public:
                presenter->deletePeaksIn(cursorRegion));
     TSM_ASSERT_EQUALS("One peaks should remain", 1, peaksWS->getNumberPeaks());
   }
-
-  void test_haspeakaddmode() {
-    auto builder = createStandardBuild(5 /*N Peaks*/, 1.0 /*radius*/,
-                                       QLab /*CHOSEN FRAME*/);
-    ConcretePeaksPresenter_sptr concretePeaksPresenter = builder.create();
-    TSM_ASSERT("No peak add mode. As is not in the HKL frame",
-               !concretePeaksPresenter->hasPeakAddMode());
-  }
 };
 
 #endif
