@@ -43,6 +43,7 @@ if ( ENABLE_WORKBENCH )
     mantidqt/utils/test/test_qt_utils.py
 
     mantidqt/widgets/codeeditor/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test_executablecodeeditor.py
     mantidqt/widgets/codeeditor/test_execution.py
     mantidqt/widgets/codeeditor/test_multifileeditor.py
 

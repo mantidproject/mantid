@@ -19,8 +19,6 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 import unittest
 
-# third-party library imports
-
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.utils.qt.testing import requires_qapp
@@ -31,8 +29,9 @@ TEST_LANG = "Python"
 @requires_qapp
 class CodeEditorTest(unittest.TestCase):
 
+    # ---------------------------------------------------------------
     # Success tests
-
+    # ---------------------------------------------------------------
     def test_construction_accepts_Python_as_language(self):
         CodeEditor(TEST_LANG)
 
@@ -61,8 +60,9 @@ class CodeEditorTest(unittest.TestCase):
         widget.setReadOnly(True)
         self.assertTrue(widget.isReadOnly())
 
+    # ---------------------------------------------------------------
     # Failure tests
-
+    # ---------------------------------------------------------------
     def test_construction_raises_error_for_unknown_language(self):
         # self.assertRaises causes a segfault here for some reason...
         try:

@@ -14,19 +14,68 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import (absolute_import)
+from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
-from qtpy.QtWidgets import QTabWidget, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QStatusBar, QTabWidget, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.utils.qt import import_qtlib
 from .execution import PythonCodeExecution
 
-EDITOR_LANGUAGE = "Python"
+DEFAULT_EDITOR_LANGUAGE = "Python"
+
+EXECUTION_CLS = PythonCodeExecution
+
+IDLE_STATUS_MSG = "Status: Idle"
+
+RUNNING_STATUS_MSG = "Status: Running"
 
 # Import single-file editor from C++ wrapping
 CodeEditor = import_qtlib('_widgetscore', 'mantidqt.widgets', 'ScriptEditor')
+
+
+class ExecutableCodeEditor(QWidget):
+
+    def __init__(self, language=DEFAULT_EDITOR_LANGUAGE, parent=None):
+        """
+
+        :param language: Language for syntax highlighting
+        :param user_globals: Dictionary for global context of execution.
+        :param user_locals: Dictionary for local context of execution
+        :param parent: A parent QWidget
+        """
+        super(ExecutableCodeEditor, self).__init__(parent)
+
+        # layout
+        self.editor = CodeEditor(language, self)
+        self.status = QStatusBar(self)
+        layout = QVBoxLayout()
+        layout.addWidget(self.editor)
+        layout.addWidget(self.status)
+        self.setLayout(layout)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.presenter = ExecutableCodeEditorPresenter(self)
+
+    def execute_all_async(self):
+        self.presenter.req_execute_all_async()
+
+
+class ExecutableCodeEditorPresenter(object):
+    """Presenter part of MVP to control actions on the editor"""
+
+    def __init__(self, view, model=None):
+        self.view = view
+        self.model = model if model is not None else PythonCodeExecution()
+        self.view.status.showMessage(IDLE_STATUS_MSG)
+
+    def req_execute_all_async(self):
+        text = self.view.text()
+        if not text:
+            return
+        self.view.status.showMessage(RUNNING_STATUS_MSG)
+        self.model.execute_async(text)
 
 
 class MultiFileCodeEditor(QWidget):
@@ -41,9 +90,10 @@ class MultiFileCodeEditor(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         self.setLayout(layout)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor(EDITOR_LANGUAGE)
+        self.append_new_editor(DEFAULT_EDITOR_LANGUAGE)
 
     @property
     def editor_count(self):
@@ -51,4 +101,4 @@ class MultiFileCodeEditor(QWidget):
 
     def append_new_editor(self, language):
         title = "New"
-        self.editors.addTab(CodeEditor(language, self.editors), title)
+        self.editors.addTab(ExecutableCodeEditor(language, self.editors), title)
