@@ -648,8 +648,7 @@ private:
 
   ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
   QDockWidget *m_workspaceDockWidget;
-  boost::shared_ptr<MantidQt::MantidWidgets::WorkspaceTreeWidget>
-      m_exploreMantid; // Widget for manipulating workspaces
+  MantidQt::MantidWidgets::WorkspaceTreeWidget *m_exploreMantid; // Widget for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
   RemoteClusterDockWidget *
       m_exploreRemoteTasks; // Dock window for using remote tasks
