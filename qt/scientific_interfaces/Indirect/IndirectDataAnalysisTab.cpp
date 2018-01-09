@@ -66,9 +66,6 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
 void IndirectDataAnalysisTab::setInputWorkspace(
     MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = inputWorkspace;
-
-  if (m_guessWorkspace)
-    m_guessWorkspace.reset();
 }
 
 /**
