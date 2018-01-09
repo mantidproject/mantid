@@ -20,6 +20,7 @@ from __future__ import absolute_import
 import sys
 import threading
 import time
+import traceback
 
 
 def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
@@ -64,12 +65,15 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
 class AsyncTask(threading.Thread):
 
     def __init__(self, target, args=(), kwargs=None,
+                 stack_chop=0,
                  success_cb=None, error_cb=None,
                  finished_cb=None):
         """
 
         :param target: A Python callable object
         :param args: Arguments to pass to the callable
+        :param stack_chop: If an error is raised then chop this many entries
+        from the top of traceback stack.
         :param kwargs: Keyword arguments to pass to the callable
         :param success_cb: Optional callback called when operation was successful
         :param error_cb: Optional callback called when operation was not successful
@@ -82,6 +86,7 @@ class AsyncTask(threading.Thread):
         self.target = target
         self.args = args
         self.kwargs = kwargs if kwargs is not None else {}
+        self.stack_chop = stack_chop
 
         self.success_cb = success_cb if success_cb is not None else lambda x: None
         self.error_cb = error_cb if error_cb is not None else lambda x: None
@@ -95,7 +100,7 @@ class AsyncTask(threading.Thread):
             # and the lineno is part of the exception instance
             self.error_cb(AsyncTaskFailure(exc, None))
         except:  # noqa
-            self.error_cb(AsyncTaskFailure(*sys.exc_info()[1:]))
+            self.error_cb(AsyncTaskFailure.from_excinfo(self.stack_chop))
         else:
             self.success_cb(AsyncTaskSuccess(out))
 
@@ -118,9 +123,21 @@ class AsyncTaskFailure(object):
     """Object describing the failed execution of an asynchronous task
     """
 
-    def __init__(self, exception, traceback):
+    @staticmethod
+    def from_excinfo(chop=0):
+        """
+        Create an AsyncTaskFailure from the current exception info
+
+        :param chop: Trim this number of entries from
+        the top of the stack listing
+        :return: A new AsyncTaskFailure object
+        """
+        _, exc_value, exc_tb = sys.exc_info()
+        return AsyncTaskFailure(exc_value, traceback.extract_tb(exc_tb)[chop:])
+
+    def __init__(self, exception, stack_entries):
         self.exception = exception
-        self.traceback = traceback
+        self.stack_entries = stack_entries
 
     @property
     def success(self):

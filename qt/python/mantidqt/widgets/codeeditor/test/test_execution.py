@@ -27,7 +27,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
     class Receiver(object):
         success_cb_called, error_cb_called = False, False
-        task_exc, task_tb = None, None
+        task_exc, error_stack = None, None
 
         def on_success(self):
             self.success_cb_called = True
@@ -35,7 +35,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         def on_error(self, task_result):
             self.error_cb_called = True
             self.task_exc = task_result.exception
-            self.task_tb = task_result.traceback
+            self.error_stack = task_result.stack_entries
 
     class ReceiverWithProgress(Receiver):
 
@@ -56,6 +56,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = "_local=100"
         namespace = {}
         self._verify_serial_execution_successful(code, namespace, namespace)
+        self.assertEquals(100, namespace['_local'])
         namespace = {}
         self._verify_async_execution_successful(code, namespace, namespace)
         self.assertEquals(100, namespace['_local'])
@@ -64,6 +65,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = "_local=100"
         user_globals, user_locals = {}, {}
         self._verify_serial_execution_successful(code, user_globals, user_locals)
+        self.assertEquals(100, user_locals['_local'])
         user_globals, user_locals = {}, {}
         self._verify_async_execution_successful(code, user_globals, user_locals)
         self.assertEquals(100, user_locals['_local'])
@@ -93,15 +95,21 @@ class PythonCodeExecutionTest(unittest.TestCase):
         self.assertTrue(isinstance(recv.task_exc, SyntaxError),
                         msg="Unexpected exception found. "
                             "SyntaxError expected, found {}".format(recv.task_exc.__class__.__name__))
-        self.assertEqual(1, recv.task_tb.tb_lineno)
+        self.assertEqual(1, recv.task_exc.lineno)
 
     def test_execute_returns_failure_on_runtime_error_and_captures_exception(self):
         code = "x = _local + 1"
         self._verify_failed_serial_execute(NameError, code, {}, {})
 
-    def test_execute_async_returns_failure_on_runtime_error_and_captures_exception(self):
+    def test_execute_async_returns_failure_on_runtime_error_and_captures_expected_stack(self):
         code = """x = + 1
-y = _local + 1        
+def foo():
+    def bar():
+        # raises a NameError
+        y = _local + 1
+    # call inner
+    bar()
+foo()
 """
         recv = PythonCodeExecutionTest.Receiver()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error)
@@ -112,7 +120,12 @@ y = _local + 1
         self.assertTrue(isinstance(recv.task_exc, NameError),
                         msg="Unexpected exception found. "
                             "NameError expected, found {}".format(recv.task_exc.__class__.__name__))
-        self.assertEqual(2, recv.task_tb.tb_lineno)
+        # Test the stack has been chopped as expected
+        self.assertEqual(3, len(recv.error_stack))
+        # check line numbers
+        self.assertEqual(8, recv.error_stack[0][1])
+        self.assertEqual(7, recv.error_stack[1][1])
+        self.assertEqual(5, recv.error_stack[2][1])
 
     # ---------------------------------------------------------------------------
     # Progress tests
@@ -128,7 +141,7 @@ y = _local + 1
 
     def test_progress_cb_is_not_called_for_code_with_syntax_errors(self):
         code = """x = 1
-y = 
+y =
 """
         recv = PythonCodeExecutionTest.ReceiverWithProgress()
         executor = PythonCodeExecution(success_cb=recv.on_success, error_cb=recv.on_error,

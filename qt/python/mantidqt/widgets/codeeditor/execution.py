@@ -19,7 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # local imports
-from mantidqt.utils.async import AsyncTask, AsyncTaskFailure
+from mantidqt.utils.async import AsyncTask
 
 
 class PythonCodeExecution(object):
@@ -62,7 +62,10 @@ class PythonCodeExecution(object):
         :param user_locals: A mutable mapping type to store local variables
         :returns: The created async task
         """
+        # Stack is chopped on error to avoid the  AsyncTask.run->_do_exec->exec calls appearing
+        # as these are not useful in this context
         t = AsyncTask(self.execute, args=(code_str, user_globals, user_locals),
+                      stack_chop=3,
                       success_cb=self.on_success, error_cb=self.on_error)
         t.start()
         return t
@@ -88,7 +91,7 @@ class PythonCodeExecution(object):
                            progress_cb):
         """Execute the code in the supplied context and report the progress
         using the supplied callback"""
-        # will raise a SyntaxError if all of the code is invalid
+        # will raise a SyntaxError if any of the code is invalid
         compile(code_str, "<string>", mode='exec')
 
         for block in code_blocks(code_str):
