@@ -14,6 +14,13 @@ class MockEnggDiffGSASFittingView
 public:
   MOCK_CONST_METHOD0(getFocusedFileName, std::string());
 
+  MOCK_CONST_METHOD0(getSelectedRunLabel, std::pair<int, size_t>());
+
+  MOCK_METHOD1(plotCurve,
+               void(const std::vector<boost::shared_ptr<QwtData>> &curve));
+
+  MOCK_METHOD0(resetCanvas, void());
+
   MOCK_METHOD1(updateRunList,
                void(const std::vector<std::pair<int, size_t>> &runLabels));
 

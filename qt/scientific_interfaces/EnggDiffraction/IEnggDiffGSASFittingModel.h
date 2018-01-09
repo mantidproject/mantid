@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,6 +15,15 @@ class IEnggDiffGSASFittingModel {
 public:
   virtual ~IEnggDiffGSASFittingModel() = default;
 
+  /**
+   Get a focused run (as a MatrixWorkspace) by run label
+   @param runNumber The runNumber of the run
+   @param bank The bank ID of the run
+   @return The corresponding workspace
+   @throws If the run is not found in the model
+   */
+  virtual Mantid::API::MatrixWorkspace_sptr getFocusedWorkspace(const int runNumber, const size_t bank) const = 0;
+  
   /**
    Get run labels (ie run number and bank id) of all runs loaded into model
    @return Vector of all run labels (as pairs)

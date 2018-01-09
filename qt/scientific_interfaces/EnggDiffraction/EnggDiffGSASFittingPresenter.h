@@ -6,6 +6,8 @@
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
 #include <memory>
 
 namespace MantidQt {
@@ -25,6 +27,7 @@ public:
 
 private:
   void processLoadRun();
+  void processSelectRun();
   void processShutDown();
   void processStart();
 

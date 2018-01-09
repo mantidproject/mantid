@@ -13,6 +13,7 @@ public:
   // which need handling in implementation
   enum Notification {
     LoadRun,   ///< Load a focused run
+    SelectRun, ///< Select a run from the list
     ShutDown,  ///< Shut down the interface
     Start,     ///< Start and setup the interface
   };
