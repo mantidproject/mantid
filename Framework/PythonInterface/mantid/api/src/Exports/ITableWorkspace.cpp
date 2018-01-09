@@ -450,6 +450,34 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
 }
 }
 
+/**
+ * Get the contents of the workspace as a python dictionary
+ *
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @returns a boost python dictionary object with keys that are column names and
+ * values which are lists of the column values.
+ */
+bpl::dict toDict(ITableWorkspace &self) {
+  bpl::dict result;
+
+  for (const auto &name : self.getColumnNames()) {
+    const auto column = self.getColumn(name);
+    const auto &typeID = column->get_type_info();
+
+    bpl::list values;
+    for (size_t i = 0; i < self.rowCount(); ++i) {
+      bpl::handle<> handle(getValue(column, typeID, static_cast<int>(i)));
+      bpl::object obj(handle);
+      values.append(obj);
+    }
+
+    result[name] = values;
+  }
+
+  return result;
+}
+
 void export_ITableWorkspace() {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
 
@@ -531,11 +559,17 @@ void export_ITableWorkspace() {
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name")
 
-      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
-                                 arg("column_or_row"), arg("value")),
+      .def("setCell", &setCell,
+           (arg("self"), arg("row_or_column"), arg("column_or_row"),
+            arg("value")),
            "Sets the value of a given cell. If the first argument is a "
            "number then it is interpreted as a row otherwise it is interpreted "
-           "as a column name");
+           "as a column name")
+
+      .def("toDict", &toDict, (arg("self")),
+           "Gets the values of this workspace as a dictionary. The keys of the "
+           "dictionary will be the names of the columns of the table. The "
+           "values of the entries will be lists of values for each column.");
 
   //-------------------------------------------------------------------------------------------------
 
