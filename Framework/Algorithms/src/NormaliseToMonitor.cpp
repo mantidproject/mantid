@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -104,19 +105,24 @@ bool MonIDPropChanger::monitorIdReader(
   if (!pInstr)
     return false;
 
-  std::vector<detid_t> mon = pInstr->getMonitors();
-  if (mon.empty()) {
-    if (iExistingAllowedValues.empty()) {
-      return false;
-    } else {
-      iExistingAllowedValues.clear();
-      return true;
-    }
-  }
   // are these monitors really there?
-  // got the index of correspondent spectra.
-  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
-  if (indexList.empty()) {
+  std::vector<detid_t> monitorIDList = pInstr->getMonitors();
+  {
+    const auto &specInfo = inputWS->spectrumInfo();
+    std::set<detid_t> idsInWorkspace;
+    size_t i = 0;
+    // Loop over spectra, but finish early if we find everything
+    while (i < specInfo.size() &&
+           idsInWorkspace.size() < monitorIDList.size()) {
+      if (specInfo.isMonitor(i))
+        idsInWorkspace.insert(specInfo.detector(i).getID());
+      ++i;
+    }
+    monitorIDList =
+        std::vector<detid_t>(idsInWorkspace.begin(), idsInWorkspace.end());
+  }
+
+  if (monitorIDList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
     } else {
@@ -124,25 +130,20 @@ bool MonIDPropChanger::monitorIdReader(
       return true;
     }
   }
-  // index list can be less or equal to the mon list size (some monitors do
-  // not have spectra)
-  size_t mon_count =
-      (mon.size() < indexList.size()) ? mon.size() : indexList.size();
-  mon.resize(mon_count);
 
   // are known values the same as the values we have just identified?
-  if (iExistingAllowedValues.size() != mon.size()) {
+  if (iExistingAllowedValues.size() != monitorIDList.size()) {
     iExistingAllowedValues.clear();
-    iExistingAllowedValues.assign(mon.begin(), mon.end());
+    iExistingAllowedValues.assign(monitorIDList.begin(), monitorIDList.end());
     return true;
   }
   // the monitor list has the same size as before. Is it equivalent to the
   // existing one?
   bool values_redefined = false;
-  for (size_t i = 0; i < mon.size(); i++) {
-    if (iExistingAllowedValues[i] != mon[i]) {
+  for (size_t i = 0; i < monitorIDList.size(); i++) {
+    if (iExistingAllowedValues[i] != monitorIDList[i]) {
       values_redefined = true;
-      iExistingAllowedValues[i] = mon[i];
+      iExistingAllowedValues[i] = monitorIDList[i];
     }
   }
   return values_redefined;
@@ -194,14 +195,15 @@ void NormaliseToMonitor::init() {
                   Direction::InOut);
 
   // Or take monitor ID to identify the spectrum one wish to use or
-  declareProperty("MonitorID", -1,
-                  "The MonitorID (pixel ID), which defines the monitor's data "
-                  "within the InputWorkspace. Will be overridden by the values "
-                  "correspondent to MonitorSpectrum field if one is provided "
-                  "in the field above.\n"
-                  "If workspace do not have monitors, the MonitorID can refer "
-                  "to empty data and the field then can accepts any MonitorID "
-                  "within the InputWorkspace.");
+  declareProperty(
+      "MonitorID", -1,
+      "The MonitorID (detector ID), which defines the monitor's data "
+      "within the InputWorkspace. Will be overridden by the values "
+      "correspondent to MonitorSpectrum field if one is provided "
+      "in the field above.\n"
+      "If workspace do not have monitors, the MonitorID can refer "
+      "to empty data and the field then can accepts any MonitorID "
+      "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
   setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
                                        "InputWorkspace", "MonitorSpectrum",
@@ -379,6 +381,9 @@ void NormaliseToMonitor::checkProperties(
   m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
   // Or is it in a separate workspace
   bool sepWS{monWS};
+  if (m_syncScanInput && sepWS)
+    throw std::runtime_error("Can not currently use a separate monitor "
+                             "workspace with a detector scan input workspace.");
   // or monitor ID
   bool monIDs = !monID->isDefault();
   // something has to be set
@@ -532,12 +537,16 @@ bool NormaliseToMonitor::setIntegrationProps(
   // Yes integration is going to be used...
 
   // Now check the end X values are within the X value range of the workspace
-  if (isEmpty(m_integrationMin) || m_integrationMin < m_monitor->x(0).front()) {
+  if ((isEmpty(m_integrationMin) ||
+       m_integrationMin < m_monitor->x(0).front()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range minimum set to workspace min: "
                     << m_integrationMin << '\n';
     m_integrationMin = m_monitor->x(0).front();
   }
-  if (isEmpty(m_integrationMax) || m_integrationMax > m_monitor->x(0).back()) {
+  if ((isEmpty(m_integrationMax) ||
+       m_integrationMax > m_monitor->x(0).back()) &&
+      !isSingleCountWorkspace) {
     g_log.warning() << "Integration range maximum set to workspace max: "
                     << m_integrationMax << '\n';
     m_integrationMax = m_monitor->x(0).back();
@@ -610,11 +619,14 @@ void NormaliseToMonitor::performHistogramDivision(
 
   size_t monitorWorkspaceIndex = 0;
 
+  Progress prog(this, 0.0, 1.0, m_workspaceIndexes.size());
   const auto &specInfo = inputWorkspace->spectrumInfo();
   for (const auto workspaceIndex : m_workspaceIndexes) {
     // Errors propagated according to
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
+
+    prog.report("Performing normalisation");
 
     size_t timeIndex = 0;
     if (m_syncScanInput)
@@ -627,7 +639,10 @@ void NormaliseToMonitor::performHistogramDivision(
     const double yErrorFactor = pow(divisorError * newYFactor, 2);
     monitorWorkspaceIndex++;
 
-    for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
+    for (int64_t i = 0; i < int64_t(outputWorkspace->getNumberHistograms());
+         ++i) {
+      PARALLEL_START_INTERUPT_REGION
       const auto &specDef = specInfo.spectrumDefinition(i);
 
       if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
@@ -644,7 +659,9 @@ void NormaliseToMonitor::performHistogramDivision(
       }
 
       outputWorkspace->setHistogram(i, hist);
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 }
 

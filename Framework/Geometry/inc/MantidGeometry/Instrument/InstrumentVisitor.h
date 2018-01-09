@@ -1,21 +1,22 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 #define MANTID_GEOMETRY_INSTRUMENTVISITOR_H_
 
+#include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include <Eigen/Geometry>
+#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
-#include <boost/shared_ptr.hpp>
-#include <Eigen/Geometry>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Beamline {
 class ComponentInfo;
 class DetectorInfo;
-}
+} // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
@@ -24,9 +25,10 @@ class IComponent;
 class IDetector;
 class IObjComponent;
 class Instrument;
-class Object;
+class IObject;
 class ParameterMap;
 class RectangularDetector;
+class ObjCompAssembly;
 
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -124,17 +126,17 @@ private:
   int64_t m_sampleIndex = -1;
 
   /// Null shared (empty shape)
-  boost::shared_ptr<const Mantid::Geometry::Object> m_nullShape;
+  boost::shared_ptr<const Mantid::Geometry::IObject> m_nullShape;
 
   /// Shapes stored in fly-weight fashion
   boost::shared_ptr<
-      std::vector<boost::shared_ptr<const Mantid::Geometry::Object>>> m_shapes;
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IObject>>> m_shapes;
 
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
   /// Structured bank flag
-  boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
+  boost::shared_ptr<std::vector<Beamline::ComponentType>> m_componentType;
 
   /// Component names
   boost::shared_ptr<std::vector<std::string>> m_names;
@@ -163,7 +165,14 @@ public:
   registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
+  registerBankOfTubes(const Mantid::Geometry::ICompAssembly &bank) override;
+
+  virtual size_t registerTube(const ICompAssembly &tube) override;
+
+  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
+
+  virtual size_t registerTubeObj(const ObjCompAssembly &objTube) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
   componentIds() const;

@@ -7,11 +7,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
@@ -22,6 +23,7 @@
 #include <boost/optional.hpp>
 
 #include <QSet>
+#include <map>
 #include <queue>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -67,11 +69,11 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const QString &options) : m_options(options) {}
-  PreprocessingAttributes(const QString &options,
+  PreprocessingAttributes(const OptionsMap &options) : m_options(options) {}
+  PreprocessingAttributes(const OptionsMap &options,
                           std::map<QString, PreprocessingAlgorithm> map)
       : m_options(options), m_map(map) {}
-  QString m_options;
+  OptionsMap m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
   bool hasPreprocessing(const QString &columnName) const {
@@ -173,7 +175,7 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(QString const &options) {
+  void setPreprocessingOptions(OptionsMap const &options) {
     m_preprocessing.m_options = options;
   }
 
@@ -186,10 +188,29 @@ protected:
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
-  QString m_processingOptions;
+  OptionsMap m_processingOptions;
   void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
+  // Preprocess the given column value if applicable
+  void preprocessColumnValue(const QString &columnName, QString &columnValue);
+  // Preprocess all option values where applicable
+  void preprocessOptionValues(OptionsMap &options);
+  // Update the model with results from the algorithm
+  void updateModelFromAlgorithm(Mantid::API::IAlgorithm_sptr alg,
+                                RowData *data);
+  // Get options from the individual columns
+  void addRowOptions(OptionsMap &options, RowData *data);
+  // Get options from the Options column
+  void addUserOptions(OptionsMap &options, RowData *data);
+  // Get options from the Hidden Options column
+  void addHiddenOptions(OptionsMap &options, RowData *data);
+  // Get global options
+  void addGlobalOptions(OptionsMap &options);
+  // Get output options
+  void addOutputOptions(OptionsMap &options, RowData *data);
+  // Create and execute the algorithm with the given properties
+  Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
   void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
@@ -319,6 +340,7 @@ private:
   // pause/resume reduction
   void pause();
   void resume();
+  void updateWidgetEnabledState(const bool isProcessing) const;
 
   // Check if run has been processed
   bool isProcessed(int position) const;

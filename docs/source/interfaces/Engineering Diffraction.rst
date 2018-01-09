@@ -337,22 +337,23 @@ Fitting
 
 The Fitting tab provides a graphical interface which fits an expected
 diffraction pattern and visualises them. The pattern is specified by
-providing a list of dSpacing values where Bragg peaks are expected.
+providing a list of peak centre values where Bragg peaks are expected.
+These values can have units of either TOF of dSpacing but **not** both.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
 To use the Fitting tab, user is required to follow these steps:
 
-1. A focused file as Focus Run input by browsing or entering single/multi
-   run number, *User may click Load button to load the focused file to the
+1. Load run(s) to perform fitting on by browsing for focused nexus
+   files *User may click Load button to load the focused file to the
    canvas*
 2. List of expected peaks which can be either by browsing a (*CSV*) file,
    manually selecting peaks from the canvas using peak picker tool after
    loading the focused file or by entering the peaks list within the text-field
 3. Next click on the *Fit* button if you would like to fit single focused
    file or you can click *Fit All* button which will enable user to
-   batch-process all the runs and banks when a range of run number is given,
-   *Fit All* process may also be used when when a single run number is given
+   batch-process all the runs and banks when several files are loaded.
+   *Fit All* process may also be used when a single run number is given
    or a file is browsed
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
@@ -362,44 +363,25 @@ Parameters
 
 These parameters are required to process Fitting successfully:
 
-Focused Run #:
-  Focused workspace directory or selected using the browse button.
-  Users may also select the file/s by simply entering the file run number
-  or a range of consecutive run number separated by dash (`-`), for
-  example: "194547-194550" or "241391-241399". 
-  
-  It is  compulsory for these file/s to be located within the focused output directory.
-  Focused workspace can be generated with the help of
-  :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
-  directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
-  tab under the *Focusing settings* section.
-  
-  When a valid range of consecutive run numbers is given, the interface will
-  automatically import and add the run number/s to the list on the right side
-  of the graph, from where each run number can be selected from by click on it.
-  The interface will then automatically update the Plot Bank combo-box
-  according to the bank files found for each entered/selected run-number.
+Focused Run files:
+  .nxs files containing focused diffraction data. These should be the result
+  of focusing data with the :ref:`focus-Engineering_Diffraction-ref` tab.
 
 Peaks:
   A list of dSpacing values to be translated into TOF to find expected
   peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
-Plot Bank/Bank List:
-  These GUI widgets will only be enabled when multiple focused bank
-  files are found within the working directory or focused output directory.
-  This would enable user to select the desired bank which they would like to
-  plot with the help of Plot Bank combo-box or Bank List.
 
 Output
 ^^^^^^
 
 Once the Fit button has been clicked Mantid will process the data. Please wait
 until the Fitting process has completed. Upon completion you should be able to
-view on the Fitting tab which will contain:
+view the Fitting tab which will contain:
 
 - The focused workspace plotted in the background in gray crosses.
-- The expected peaks plotted in various colours over lapping the
+- The expected peaks plotted in various colours overlapping the
   focused workspace peaks.
 
 Within the :ref:`Preview-Engineering_Diffraction-ref` section a user is
@@ -442,6 +424,11 @@ focused workspace with listed expected peaks on the data plot, the *Select
 Peak* button should also be enabled. If the user choose to load the focus
 workspace or if fitting fails with the given peaks then the focused
 workspace will be plotted so that the user can select the peaks manually.
+
+If you've run a fit but you can't see the reconstructed peaks, make sure
+the checkbox **Plot fitted peaks** is checked - if the fit was successful,
+then clicking this should show the results. Equally, if you want to hide
+fitted peaks, just uncheck this box and they will disappear.
 
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph

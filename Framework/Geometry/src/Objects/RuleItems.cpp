@@ -20,7 +20,7 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -983,7 +983,7 @@ void CompObj::setObjN(const int Ky)
   objN = Ky;
 }
 
-void CompObj::setObj(Object *val)
+void CompObj::setObj(CSGObject *val)
 /**
   Sets the object
   @param val :: Object value

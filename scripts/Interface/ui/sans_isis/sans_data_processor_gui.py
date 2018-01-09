@@ -60,6 +60,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             pass
 
         @abstractmethod
+        def on_multi_period_selection(self):
+            pass
+
+        @abstractmethod
+        def on_data_changed(self):
+            pass
+
+        @abstractmethod
         def on_manage_directories(self):
             pass
 
@@ -145,32 +153,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings_icon = QtGui.QIcon(settings_icon_path)
         _ = QtGui.QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
+        settings_icon_path = os.path.join(path, "icons", "settings.png")
+        settings_icon = QtGui.QIcon(settings_icon_path)
+        _ = QtGui.QListWidgetItem(settings_icon, "Beam Centre", self.tab_choice_list)  # noqa
+
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
         # --------------------------------------------------------------------------------------------------------------
-        # Algorithm setup
-        # --------------------------------------------------------------------------------------------------------------
-        # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
-        for entry in self._white_list_entries:
-            # If there is a column name specified, then it is a white list entry.
-            if entry.column_name:
-                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
-                                      entry.show_value, entry.prefix)
-
-        # Setup the black list, ie the properties which should not appear in the Options column
-
-        # Processing algorithm (mandatory)
-        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
-                                                                       'unused_', self._black_list)
-
-        # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
-        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
-        self.data_processor_table.setForcedReProcessing(True)
+        self.create_data_table(show_periods=False)
+
         self._setup_main_tab()
+
+        self.multi_period_check_box.stateChanged.connect(self._on_multi_period_selection)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -222,20 +219,29 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         return True
 
-    def _setup_main_tab(self):
-        # --------------------------------------------------------------------------------------------------------------
-        # Header setup
-        # --------------------------------------------------------------------------------------------------------------
-        self.user_file_button.clicked.connect(self._on_user_file_load)
-        self.batch_button.clicked.connect(self._on_batch_file_load)
+    def create_data_table(self, show_periods):
+        # Delete an already existing table
+        if self.data_processor_table:
+            self.data_processor_table.setParent(None)
 
-        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
-        self.user_file_line_edit.setDisabled(True)
-        self.batch_line_edit.setDisabled(True)
+        # Create the white list
+        self._white_list_entries = self._main_presenter.get_white_list(show_periods=show_periods)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Table setup
-        # --------------------------------------------------------------------------------------------------------------
+        # Setup white list
+        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
+        for entry in self._white_list_entries:
+            # If there is a column name specified, then it is a white list entry.
+            if entry.column_name:
+                white_list.addElement(entry.column_name, entry.algorithm_property, entry.description,
+                                      entry.show_value, entry.prefix)
+
+        # Processing algorithm (mandatory)
+        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
+                                                                       'unused_', self._black_list)
+
+        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
+        self.data_processor_table.setForcedReProcessing(True)
+
         # Add the presenter to the data processor
         self.data_processor_table.accept(self._main_presenter)
 
@@ -245,14 +251,21 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         if instrument_name:
             self._set_mantid_instrument(instrument_name)
-
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
         self.data_processor_table.processButtonClicked.connect(self._processed_clicked)
         self.data_processor_table.processingFinished.connect(self._processing_finished)
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
-
+        self.data_processor_table.dataChanged.connect(self._data_changed)
         self.data_processor_table.instrumentHasChanged.connect(self._handle_instrument_change)
+
+    def _setup_main_tab(self):
+        self.user_file_button.clicked.connect(self._on_user_file_load)
+        self.batch_button.clicked.connect(self._on_batch_file_load)
+
+        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
+        self.user_file_line_edit.setDisabled(True)
+        self.batch_line_edit.setDisabled(True)
 
     def _processed_clicked(self):
         """
@@ -265,6 +278,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Clean up
         """
         self._call_settings_listeners(lambda listener: listener.on_processing_finished())
+
+    def _data_changed(self):
+        """
+        Clean up
+        """
+        self._call_settings_listeners(lambda listener: listener.on_data_changed())
 
     def _on_user_file_load(self):
         """
@@ -485,6 +504,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
+    def _on_multi_period_selection(self):
+        # Check if multi-period should be enabled
+        show_periods = self.multi_period_check_box.isChecked()
+        self.create_data_table(show_periods=show_periods)
+        self._call_settings_listeners(lambda listener: listener.on_multi_period_selection())
+
     def _on_manage_directories(self):
         self._call_settings_listeners(lambda listener: listener.on_manage_directories())
 
@@ -544,6 +569,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             gui_element = getattr(self, line_edit)
             gui_element.setText(str(value))
 
+    def is_multi_period_view(self):
+        return self.multi_period_check_box.isChecked()
+
+    def set_multi_period_view_mode(self, mode):
+        self.multi_period_check_box.setChecked(mode)
+
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # START ACCESSORS
@@ -602,6 +633,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @use_optimizations.setter
     def use_optimizations(self, value):
         self.use_optimizations_checkbox.setChecked(value)
+
+    @property
+    def plot_results(self):
+        return self.plot_results_checkbox.isChecked()
+
+    @plot_results.setter
+    def plot_results(self, value):
+        self.plot_results_checkbox.setChecked(value)
 
     @property
     def output_mode(self):

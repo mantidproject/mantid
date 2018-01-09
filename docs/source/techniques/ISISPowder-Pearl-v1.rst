@@ -202,6 +202,24 @@ Parameters
 The following parameters for PEARL are intended for regular use
 when using the ISIS Powder scripts.
 
+.. _absorb_out_filename_isis-powder-diffraction-ref:
+
+absorb_corrections_out_filename
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Required if :ref:`gen_absorb_pearl_isis-powder-diffraction-ref` is set to **True**.
+
+The full path to save generated absorption corrects file to.
+
+*Note: The path to the file must include the file extension*
+
+Example Input:
+
+.. code-block:: python
+
+  pearl_example.focus(generate_absorb_corrections=True,
+                      absorb_corrections_out_filename=r"C:\PEARL\pearl_absorb_sphere_17_2.nxs"...)
+
 .. _attenuation_file_path_pearl_isis-powder-diffraction-ref:
 
 attenuation_file_path
@@ -491,7 +509,7 @@ run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
 :ref:`focus_pearl_isis-powder-diffraction-ref` and
-:ref:`create_cal_isis-powder-diffraction-ref` methods.
+:ref:`create_cal_pearl_isis-powder-diffraction-ref` methods.
 
 This parameter accepts a single value or a range
 of values with the following syntax:
@@ -771,6 +789,20 @@ On PEARL this is set to the following TOF windows:
         (20300, 39990)   # Bank 14
       ]
 
+
+.. _gen_absorb_pearl_isis-powder-diffraction-ref:
+
+generate_absorb_corrections
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates whether to generate the absorption corrections, instead of
+reading them from a file. Allowed values are: **True** and
+**False**. If set to **True**,
+:ref:`absorb_out_filename_isis-powder-diffraction-ref` must also be
+set. On PEARL this is set to the following:
+
+.. code-block:: python
+
+  generate_absorb_corrections: False
 
 .. _get_det_offsets_d_ref_pearl_isis-powder-diffraction-ref:
 
