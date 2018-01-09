@@ -353,7 +353,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='A flux normalized and background subtracted workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -405,7 +405,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the elatic channel index. Overrides '
+                             doc='A single value workspace containing the elastic channel index. Overrides '
                                  + common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
@@ -442,7 +442,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=1.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Flat background scaling constant')
+                             doc='Flat background multiplication factor.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_FLAT_BKG_WINDOW,
                              defaultValue=30,
@@ -456,7 +456,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Workspace from which to get flat background data.')
+            doc='Workspace with previously determined flat background data.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
@@ -480,7 +480,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
-            doc='Output the merged runs or ' + common.PROP_INPUT_WS + ' as is.')
+            doc='Non-normalized and non-background subtracted output workspace for DirectILLDiagnostics.')
         self.setPropertyGroup(common.PROP_OUTPUT_RAW_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(

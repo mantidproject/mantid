@@ -90,11 +90,11 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             defaultValue='',
             validator=inputWorkspaceValidator,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='A workspace to which to apply the corrections.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='The corrected workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -116,19 +116,19 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Reduced empty container workspace.')
+            doc='An empty container workspace for subtraction from the input workspace.')
         self.declareProperty(name=common.PROP_EC_SCALING,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
-                             doc='Scaling factor (transmission, if no self ' +
-                                 'shielding is applied) for empty container.')
+                             doc='A multiplier (transmission, if no self ' +
+                                 'shielding is applied) for the empty container.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='A workspace containing self shielding correction factors.')
+            doc='A workspace containing the self shielding correction factors.')
 
     def _applyCorrections(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Applies self shielding corrections to a workspace, if corrections exist."""

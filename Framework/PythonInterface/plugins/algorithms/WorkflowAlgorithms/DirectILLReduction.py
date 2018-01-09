@@ -252,11 +252,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
             defaultValue='',
             validator=inputWorkspaceValidator,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='A workspace to reduce.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='The reduced S(Q, DeltaE) workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,
                              validator=StringListValidator([
@@ -278,7 +278,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             validator=inputWorkspaceValidator,
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Reduced vanadium workspace.')
+            doc='An integrated vanadium workspace.')
         self.declareProperty(name=common.PROP_ABSOLUTE_UNITS,
                              defaultValue=common.ABSOLUTE_UNITS_OFF,
                              validator=StringListValidator([
@@ -291,8 +291,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Detector diagnostics workspace obtained from another ' +
-                'reduction run.')
+            doc='Detector diagnostics workspace for masking.')
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, PROPGROUP_REBINNING)
