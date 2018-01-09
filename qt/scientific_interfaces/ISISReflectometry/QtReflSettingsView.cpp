@@ -37,8 +37,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestInstDefaults()));
   connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
           SLOT(setPolarisationOptionsEnabled(bool)));
-  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(summationTypeChanged(int)));
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(summationTypeChanged(int)));
 }
 
 void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
@@ -49,7 +49,6 @@ void QtReflSettingsView::summationTypeChanged(int reductionTypeIndex) {
 void QtReflSettingsView::setReductionTypeEnabled(bool enable) {
   m_ui.reductionTypeComboBox->setEnabled(enable);
 }
-
 
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter

@@ -59,11 +59,12 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
+
 private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
-  bool hasReductionTypes(const std::string& reductionType) const;
+  bool hasReductionTypes(const std::string &reductionType) const;
   void handleSummationTypeChange();
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
